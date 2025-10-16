@@ -81,6 +81,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
           y: 0, // Will be positioned automatically by react-grid-layout
         },
         component: React.createElement(RenderWidget, {
+          widgetData: widget?.widgetData,
           widgetId,
           // TODO: widgetData can be added here for custom props
         }),

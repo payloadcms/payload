@@ -1,56 +1,73 @@
 /* eslint-disable no-restricted-exports */
-'use server'
 
-// This component consumes search params from the URL and uses them to filter counts
-// e.g. /dashboard?status=open will count only tickets with status=open
-// e.g. /dashboard?priority=high will count only tickets with priority=high
+'use client'
 
-import { type Where, type WidgetServerProps } from 'payload'
+// Client-side version that reactively updates when search params change
+// Fetches count data from Payload's REST API
 
-export default async function SearchParamsCount(paramsPromise: Promise<WidgetServerProps>) {
-  const params = await paramsPromise
-  const { req, widgetData } = params
+import type { WidgetServerProps } from 'payload'
 
-  // console.log('(SearchParamsCount) widgetData', widgetData)
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-  let count = 0
-  let error: null | string = null
+type CountData = {
+  count: number
+  error: null | string
+}
 
-  // Widget configuration - can be customized per widget instance via widgetData
+export default function SearchParamsCountClient({ widgetData }: WidgetServerProps) {
+  const searchParams = useSearchParams()
+  const [data, setData] = useState<CountData>({ count: 0, error: null })
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Widget configuration
   const collection = (widgetData?.collection as string) || 'tickets'
-  const title = (widgetData?.title as string) || 'Filtered Count (server)'
+  const title = (widgetData?.title as string) || 'Filtered Count (clientabc)'
   const color = (widgetData?.color as 'blue' | 'green' | 'orange' | 'purple' | 'red') || 'blue'
   const icon = (widgetData?.icon as string) || '📊'
   const filterFields = (widgetData?.filterFields as string[]) || ['status', 'priority']
   const changePercent = 10
   const changeText = '10% increase'
 
-  const payload = req.payload
+  // Memoize filterFields to prevent infinite loop (array reference changes every render)
+  const filterFieldsKey = filterFields.join(',')
 
-  try {
-    // Build dynamic where query from search params
-    const where: Where = {}
-    const searchParams = req.searchParams || {}
+  useEffect(() => {
+    const fetchCount = async () => {
+      setIsLoading(true)
+      try {
+        // Build API URL with Payload's bracket notation for where clauses
+        // Format: where[field][equals]=value
+        const params = new URLSearchParams()
+        params.set('limit', '0') // We only need the count
 
-    // Apply filters from search params if they match configured filterFields
-    for (const field of filterFields) {
-      const value = searchParams.get(field)
-      if (value) {
-        where[field] = { equals: value }
+        for (const field of filterFields) {
+          const value = searchParams?.get(field)
+          if (value) {
+            params.set(`where[${field}][equals]`, value)
+          }
+        }
+
+        const response = await fetch(`/api/${collection}?${params.toString()}`)
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+        setData({ count: result.totalDocs, error: null })
+      } catch (err) {
+        setData({
+          count: 0,
+          error: err instanceof Error ? err.message : 'Failed to fetch count',
+        })
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    const result = await payload.count({
-      // @ts-expect-error - Dynamic collection counting
-      collection,
-      where: Object.keys(where).length > 0 ? where : undefined,
-    })
-    count = result.totalDocs
-  } catch (err) {
-    error = err instanceof Error ? err.message : 'Failed to fetch count'
-    // eslint-disable-next-line no-console
-    console.error(`Error fetching count for ${collection}:`, err)
-  }
+    void fetchCount()
+  }, [searchParams, collection, filterFieldsKey])
 
   const getColorStyles = (color: 'blue' | 'green' | 'orange' | 'purple' | 'red') => {
     const colors = {
@@ -71,9 +88,11 @@ export default async function SearchParamsCount(paramsPromise: Promise<WidgetSer
         flexDirection: 'column',
         gap: '12px',
         height: '100%',
+        opacity: isLoading ? 0.6 : 1,
+        transition: 'opacity 0.2s',
       }}
     >
-      {error ? (
+      {data.error ? (
         <div
           style={{
             alignItems: 'center',
@@ -91,7 +110,7 @@ export default async function SearchParamsCount(paramsPromise: Promise<WidgetSer
           </div>
           <h3 style={{ fontSize: '16px', margin: 0 }}>{title}</h3>
           <p style={{ color: '#ef4444', fontSize: '12px', margin: 0, textAlign: 'center' }}>
-            {error}
+            {data.error}
           </p>
         </div>
       ) : (
@@ -117,7 +136,7 @@ export default async function SearchParamsCount(paramsPromise: Promise<WidgetSer
           </div>
 
           <div>
-            <span style={{ fontSize: '32px', fontWeight: 700 }}>{count.toLocaleString()}</span>
+            <span style={{ fontSize: '32px', fontWeight: 700 }}>{data.count.toLocaleString()}</span>
           </div>
 
           {changePercent && changeText && (

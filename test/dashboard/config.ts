@@ -35,14 +35,45 @@ export default buildConfigWithDefaults({
             width: 12,
             height: 3,
           },
-          ...Array.from(
-            { length: 4 },
-            (): WidgetInstance => ({
-              widgetSlug: 'count',
-              width: 3,
-              height: 1,
-            }),
-          ),
+          // Filter widget - allows users to set status/priority filters
+          {
+            widgetSlug: 'search-params-filter',
+            width: 3,
+            height: 2,
+          },
+          // Filtered count widgets - reactively updates with search params
+          {
+            widgetSlug: 'search-params-count-client',
+            width: 3,
+            height: 1,
+          },
+          {
+            widgetSlug: 'search-params-count-client',
+            width: 3,
+            height: 1,
+          },
+          {
+            widgetSlug: 'search-params-count',
+            width: 3,
+            height: 1,
+            // NOTE - widget data does nothing here - need to set in the widget config itself)
+            // widgetData: {
+            //   collection: 'tickets',
+            //   title: 'Filtered Count (server)',
+            //   icon: '🎫',
+            //   color: 'blue',
+            //   filterFields: ['status', 'priority'],
+            // },
+          },
+          // Regular count widgets (unfiltered)
+          // ...Array.from(
+          //   { length: 2 },
+          //   (): WidgetInstance => ({
+          //     widgetSlug: 'count',
+          //     width: 3,
+          //     height: 1,
+          //   }),
+          // ),
           {
             widgetSlug: 'revenue',
             width: 12,
@@ -65,6 +96,45 @@ export default buildConfigWithDefaults({
           ComponentPath: './components/Count.tsx#default',
           maxWidth: 6,
           // fields: []
+        },
+        {
+          slug: 'search-params-count',
+          ComponentPath: './components/SearchParamsCount.tsx#default',
+          maxWidth: 6,
+          widgetData: {
+            collection: 'tickets',
+            title: 'Filtered Count  (server)',
+            icon: '🎫',
+            color: 'blue',
+            filterFields: ['status', 'priority'],
+          },
+          // Dynamic count widget that filters based on URL search params (server component)
+          // Configure via widgetData: { collection, title, icon, color, filterFields }
+        },
+        {
+          slug: 'search-params-count-client',
+          ComponentPath: './components/SearchParamsCountClientWrapper.tsx#default',
+          maxWidth: 6,
+          widgetData: {
+            collection: 'tickets',
+            title: 'Filtered Count (client)',
+            icon: '🎫',
+            color: 'blue',
+            filterFields: ['status', 'priority'],
+          },
+          // Client-side version - reactively updates when search params change
+          // Configure via widgetData: { collection, title, icon, color, filterFields }
+        },
+        {
+          slug: 'search-params-filter',
+          ComponentPath: './components/SearchParamsFilter.tsx#default',
+          widgetData: {
+            title: 'Ticket Filters',
+          },
+          maxWidth: 4,
+          minWidth: 3,
+          // Filter widget for manipulating URL search params
+          // Configure via widgetData: { title, filters: [{ field, label, options }], showClearAll }
         },
         {
           slug: 'private',

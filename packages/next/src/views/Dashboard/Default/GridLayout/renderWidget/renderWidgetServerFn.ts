@@ -30,6 +30,10 @@ export const renderWidgetHandler: ServerFunction<
     throw new Error('Unauthorized')
   }
 
+  // req.payload.logger.info(
+  //   `(renderWidgetServerFn) Rendering widget: ${widgetSlug} with data: ${JSON.stringify(widgetData)}`,
+  // )
+
   const { widgets } = req.payload.config.admin.dashboard
   const { importMap } = req.payload
 

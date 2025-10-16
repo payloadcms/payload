@@ -18,8 +18,6 @@ import { createTestHooks } from './testHooks.js'
 
 // @todo remove in 4.0 - will behave like this by default in 4.0
 process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
-process.env.NODE_ENV = 'test'
-process.env.PAYLOAD_TEST_MONGO_URL = 'mongodb://100.99.246.29/payload-dashboards-test'
 
 const prod = process.argv.includes('--prod')
 if (prod) {

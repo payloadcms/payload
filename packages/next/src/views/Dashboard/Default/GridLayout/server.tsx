@@ -38,8 +38,8 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
         importMap,
         serverProps: {
           req,
+          widgetData: widgets.find((w) => w.slug === widgetSlug)?.widgetData,
           widgetSlug,
-          // widgetData: layoutItem.data,
         } satisfies WidgetServerProps,
       }),
     }
