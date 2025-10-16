@@ -231,6 +231,46 @@ describe('Field Validations', () => {
       const result = point(val, pointOptions)
       expect(result).not.toBe(true)
     })
+    it('should validate longitude within bounds', () => {
+      const val: PointFieldValue = ['180', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate longitude at lower bound', () => {
+      const val: PointFieldValue = ['-180', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should prevent longitude below lower bound', () => {
+      const val: PointFieldValue = ['-181', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:longitudeOutOfBounds')
+    })
+    it('should prevent longitude above upper bound', () => {
+      const val: PointFieldValue = ['181', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:longitudeOutOfBounds')
+    })
+    it('should validate latitude within bounds', () => {
+      const val: PointFieldValue = ['0', '90']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate latitude at lower bound', () => {
+      const val: PointFieldValue = ['0', '-90']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should prevent latitude below lower bound', () => {
+      const val: PointFieldValue = ['0', '-91']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:latitudeOutOfBounds')
+    })
+    it('should prevent latitude above upper bound', () => {
+      const val: PointFieldValue = ['0', '91']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:latitudeOutOfBounds')
+    })
   })
 
   describe('relationship', () => {

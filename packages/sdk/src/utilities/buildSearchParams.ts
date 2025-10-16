@@ -10,6 +10,7 @@ export type OperationArgs = {
   limit?: number
   locale?: string
   page?: number
+  pagination?: boolean
   populate?: Record<string, unknown>
   select?: SelectType
   sort?: Sort
@@ -33,6 +34,10 @@ export const buildSearchParams = (args: OperationArgs): string => {
 
   if (typeof args.draft === 'boolean') {
     search.draft = String(args.draft)
+  }
+
+  if (typeof args.pagination === 'boolean') {
+    search.pagination = String(args.pagination)
   }
 
   if (args.fallbackLocale) {

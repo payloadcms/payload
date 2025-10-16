@@ -1,17 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
-
-export function buildEditorState(args: {
-  nodes?: DefaultTypedEditorState['root']['children']
-  text?: string
-}): DefaultTypedEditorState
-
-export function buildEditorState<T extends SerializedLexicalNode>(args: {
-  // If you pass children typed for a specific schema T, the return is TypedEditorState<T>
-  nodes?: TypedEditorState<T>['root']['children']
-  text?: string
-}): TypedEditorState<T>
+import type { DefaultNodeTypes, DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
 
 /**
  * Helper to build lexical editor state JSON from text and/or nodes.
@@ -25,7 +14,7 @@ export function buildEditorState<T extends SerializedLexicalNode>(args: {
  * just passing text:
  *
  * ```ts
- * const editorState = buildEditorState({ text: 'Hello world' }) // result typed as DefaultTypedEditorState
+ * const editorState = buildEditorState<DefaultNodeTypes>({ text: 'Hello world' }) // result typed as DefaultTypedEditorState
  * ```
  *
  * @example
@@ -54,9 +43,9 @@ export function buildEditorState<T extends SerializedLexicalNode>({
   nodes,
   text,
 }: {
-  nodes?: DefaultTypedEditorState['root']['children'] | TypedEditorState<T>['root']['children']
+  nodes?: TypedEditorState<T>['root']['children']
   text?: string
-}): DefaultTypedEditorState | TypedEditorState<T> {
+}): TypedEditorState<T> {
   const editorJSON: DefaultTypedEditorState = {
     root: {
       type: 'root',
@@ -92,8 +81,19 @@ export function buildEditorState<T extends SerializedLexicalNode>({
   }
 
   if (nodes?.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     editorJSON.root.children.push(...(nodes as any))
   }
 
-  return editorJSON
+  return editorJSON as TypedEditorState<T>
 }
+
+/**
+ *
+ * Alias for `buildEditorState<DefaultNodeTypes>`
+ *
+ * @experimental this API may change or be removed in a minor release
+ * @internal
+ */
+export const buildDefaultEditorState: typeof buildEditorState<DefaultNodeTypes> =
+  buildEditorState<DefaultNodeTypes>

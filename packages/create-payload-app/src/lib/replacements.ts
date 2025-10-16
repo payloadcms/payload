@@ -89,6 +89,18 @@ const vercelBlobStorageReplacement: StorageAdapterReplacement = {
   packageName: '@payloadcms/storage-vercel-blob',
 }
 
+const r2StorageReplacement: StorageAdapterReplacement = {
+  // Replacement of `// storage-adapter-placeholder`
+  configReplacement: [
+    '    r2Storage({',
+    '      bucket: cloudflare.env.R2,',
+    '      collections: { media: true },',
+    '    }),',
+  ],
+  importReplacement: "import { r2Storage } from '@payloadcms/storage-r2'",
+  packageName: '@payloadcms/storage-r2',
+}
+
 // Removes placeholders
 const diskReplacement: StorageAdapterReplacement = {
   configReplacement: [],
@@ -97,6 +109,7 @@ const diskReplacement: StorageAdapterReplacement = {
 
 export const storageReplacements: Record<StorageAdapterType, StorageAdapterReplacement> = {
   localDisk: diskReplacement,
+  r2Storage: r2StorageReplacement,
   vercelBlobStorage: vercelBlobStorageReplacement,
 }
 

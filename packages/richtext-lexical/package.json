@@ -365,6 +365,7 @@
     ]
   },
   "dependencies": {
+    "@lexical/clipboard": "0.35.0",
     "@lexical/headless": "0.35.0",
     "@lexical/html": "0.35.0",
     "@lexical/link": "0.35.0",

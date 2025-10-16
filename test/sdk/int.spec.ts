@@ -44,6 +44,17 @@ describe('@payloadcms/sdk', () => {
     const result = await sdk.find({ collection: 'posts', where: { id: { equals: post.id } } })
 
     expect(result.docs[0].id).toBe(post.id)
+
+    const ids = []
+    for (let i = 0; i < 40; i++) {
+      const post = await payload.create({ collection: 'posts', data: {} })
+      ids.push(post.id)
+    }
+
+    const resultPaginationFalse = await sdk.find({ collection: 'posts', pagination: false })
+    expect(resultPaginationFalse.docs).toHaveLength(41)
+    expect(resultPaginationFalse.totalDocs).toBe(41)
+    await payload.delete({ collection: 'posts', where: { id: { in: ids } } })
   })
 
   it('should execute findVersions', async () => {

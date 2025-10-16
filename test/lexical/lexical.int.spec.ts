@@ -7,6 +7,7 @@ import type { PaginatedDocs, Payload } from 'payload'
 /* eslint-disable jest/no-conditional-in-test */
 import {
   buildEditorState,
+  type DefaultNodeTypes,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedRelationshipNode,
@@ -655,7 +656,7 @@ describe('Lexical', () => {
         locale: 'en',
         data: {
           title: 'Localized Lexical hooks',
-          lexicalBlocksLocalized: buildEditorState({ text: 'some text' }),
+          lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',

@@ -1,5 +1,6 @@
 'use client'
 
+import type { DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import type { JSONFieldClientComponent } from 'payload'
 
 import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/client'
@@ -12,7 +13,7 @@ export const Component: JSONFieldClientComponent = () => {
       Fully-Featured Component:
       <RenderLexical
         field={{ name: 'json' }}
-        initialValue={buildEditorState({ text: 'defaultValue' })}
+        initialValue={buildEditorState<DefaultNodeTypes>({ text: 'defaultValue' })}
         schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
       />
     </div>

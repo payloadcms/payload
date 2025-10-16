@@ -23,7 +23,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */

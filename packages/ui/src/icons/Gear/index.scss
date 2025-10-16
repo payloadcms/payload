@@ -1,0 +1,15 @@
+@layer payload-default {
+  .gear {
+    // Additional styling can be added here if needed
+  }
+
+  .icon--gear {
+    height: var(--base);
+    width: var(--base);
+
+    path {
+      stroke: currentColor;
+      stroke-width: 1px;
+    }
+  }
+}

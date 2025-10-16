@@ -97,6 +97,31 @@ describe('Collections - Uploads', () => {
         expect(sizes).toHaveProperty('icon')
       })
 
+      it('should URL encode filenames with spaces in both main url and size urls', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file!.name = 'my test image.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc.url).toBeDefined()
+        expect(mediaDoc.url).toContain('%20')
+        expect(mediaDoc.url).not.toContain(' ')
+
+        // Check that size URLs are also properly encoded
+        expect(mediaDoc.sizes?.tablet?.url).toBeDefined()
+        expect(mediaDoc.sizes?.tablet?.url).toContain('%20')
+        expect(mediaDoc.sizes?.tablet?.url).not.toContain(' ')
+
+        expect(mediaDoc.sizes?.icon?.url).toBeDefined()
+        expect(mediaDoc.sizes?.icon?.url).toContain('%20')
+        expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
+      })
+
       it('creates from form data given an svg', async () => {
         const filePath = path.join(dirname, './image.svg')
         const formData = new FormData()

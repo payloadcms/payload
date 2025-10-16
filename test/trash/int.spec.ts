@@ -683,6 +683,90 @@ describe('trash', () => {
           trash: true,
         })
       })
+
+      it('should allow restoring trashed drafts with empty required fields as draft', async () => {
+        // Create a draft document with empty required field
+        const draftDoc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: '', // Empty required field
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Trash it
+        await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        // Should be able to restore as draft without validation errors
+        const restoredDoc = await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: null,
+            _status: 'draft',
+          },
+          trash: true,
+        })
+
+        expect(restoredDoc.deletedAt).toBeNull()
+        expect(restoredDoc.title).toBe('')
+        expect(restoredDoc._status).toBe('draft')
+
+        // Clean up
+        await payload.delete({
+          collection: postsSlug,
+          id: draftDoc.id,
+          trash: true,
+        })
+      })
+
+      it('should NOT allow restoring trashed drafts with empty required fields as published', async () => {
+        // Create a draft document with empty required field
+        const draftDoc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: '', // Empty required field
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Trash it
+        await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        // Should NOT be able to restore as published - should fail validation
+        await expect(
+          payload.update({
+            collection: postsSlug,
+            id: draftDoc.id,
+            data: {
+              deletedAt: null,
+              _status: 'published',
+            },
+            trash: true,
+          }),
+        ).rejects.toThrow(/invalid/i)
+
+        // Clean up
+        await payload.delete({
+          collection: postsSlug,
+          id: draftDoc.id,
+          trash: true,
+        })
+      })
     })
 
     describe('deleteByID operation', () => {

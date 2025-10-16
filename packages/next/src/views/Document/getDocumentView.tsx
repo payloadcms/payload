@@ -15,7 +15,7 @@ import { EditView as DefaultEditView } from '../Edit/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
-import { getCustomViewByKey } from './getCustomViewByKey.js'
+import { getCustomDocumentViewByKey } from './getCustomDocumentViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 export type ViewFromConfig<TProps extends object> = {
@@ -67,7 +67,7 @@ export const getDocumentView = ({
           // --> /collections/:collectionSlug/create
           case 'create': {
             if ('create' in docPermissions && docPermissions.create) {
-              View = getCustomViewByKey(views, 'default') || DefaultEditView
+              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
             } else {
               View = UnauthorizedViewWithGutter
             }
@@ -101,7 +101,7 @@ export const getDocumentView = ({
               viewKey = customViewKey
               View = CustomViewComponent
             } else {
-              View = getCustomViewByKey(views, 'default') || DefaultEditView
+              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
             }
 
             break
@@ -117,14 +117,14 @@ export const getDocumentView = ({
       case 4: {
         // --> /collections/:collectionSlug/trash/:id
         if (segment3 === 'trash' && segment4) {
-          View = getCustomViewByKey(views, 'default') || DefaultEditView
+          View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
           break
         }
         switch (segment4) {
           // --> /collections/:collectionSlug/:id/api
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
-              View = getCustomViewByKey(views, 'api') || DefaultAPIView
+              View = getCustomDocumentViewByKey(views, 'api') || DefaultAPIView
             }
             break
           }
@@ -132,7 +132,7 @@ export const getDocumentView = ({
           case 'versions': {
             // --> /collections/:collectionSlug/:id/versions
             if (docPermissions?.readVersions) {
-              View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
+              View = getCustomDocumentViewByKey(views, 'versions') || DefaultVersionsView
             } else {
               View = UnauthorizedViewWithGutter
             }
@@ -183,14 +183,14 @@ export const getDocumentView = ({
           switch (segment5) {
             case 'api': {
               if (collectionConfig?.admin?.hideAPIURL !== true) {
-                View = getCustomViewByKey(views, 'api') || DefaultAPIView
+                View = getCustomDocumentViewByKey(views, 'api') || DefaultAPIView
               }
               break
             }
             // --> /collections/:slug/trash/:id/versions
             case 'versions': {
               if (docPermissions?.readVersions) {
-                View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
+                View = getCustomDocumentViewByKey(views, 'versions') || DefaultVersionsView
               } else {
                 View = UnauthorizedViewWithGutter
               }
@@ -198,14 +198,14 @@ export const getDocumentView = ({
             }
 
             default: {
-              View = getCustomViewByKey(views, 'default') || DefaultEditView
+              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
               break
             }
           }
           // --> /collections/:collectionSlug/:id/versions/:version
         } else if (segment4 === 'versions') {
           if (docPermissions?.readVersions) {
-            View = getCustomViewByKey(views, 'version') || DefaultVersionView
+            View = getCustomDocumentViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedViewWithGutter
           }
@@ -247,7 +247,7 @@ export const getDocumentView = ({
 
         if (isTrashedVersionView) {
           if (docPermissions?.readVersions) {
-            View = getCustomViewByKey(views, 'version') || DefaultVersionView
+            View = getCustomDocumentViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedViewWithGutter
           }
@@ -289,7 +289,7 @@ export const getDocumentView = ({
     switch (routeSegments.length) {
       // --> /globals/:globalSlug
       case 2: {
-        View = getCustomViewByKey(views, 'default') || DefaultEditView
+        View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
         break
       }
 
@@ -301,7 +301,7 @@ export const getDocumentView = ({
           // --> /globals/:globalSlug/api
           case 'api': {
             if (globalConfig?.admin?.hideAPIURL !== true) {
-              View = getCustomViewByKey(views, 'api') || DefaultAPIView
+              View = getCustomDocumentViewByKey(views, 'api') || DefaultAPIView
             }
 
             break
@@ -310,7 +310,7 @@ export const getDocumentView = ({
           case 'versions': {
             // --> /globals/:globalSlug/versions
             if (docPermissions?.readVersions) {
-              View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
+              View = getCustomDocumentViewByKey(views, 'versions') || DefaultVersionsView
             } else {
               View = UnauthorizedViewWithGutter
             }
@@ -357,7 +357,7 @@ export const getDocumentView = ({
         // --> /globals/:globalSlug/versions/:version
         if (segment3 === 'versions') {
           if (docPermissions?.readVersions) {
-            View = getCustomViewByKey(views, 'version') || DefaultVersionView
+            View = getCustomDocumentViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedViewWithGutter
           }

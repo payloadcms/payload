@@ -303,8 +303,11 @@ export interface Product {
     description?: string | null;
   };
   categories?: (string | Category)[] | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
-  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -485,8 +488,11 @@ export interface Page {
     image?: (string | null) | Media;
     description?: string | null;
   };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
-  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -587,8 +593,11 @@ export interface ArchiveBlock {
 export interface Category {
   id: string;
   title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
-  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1201,8 +1210,8 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
+  generateSlug?: T;
   slug?: T;
-  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1331,8 +1340,8 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  generateSlug?: T;
   slug?: T;
-  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1601,8 +1610,8 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
       };
   categories?: T;
+  generateSlug?: T;
   slug?: T;
-  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;

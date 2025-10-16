@@ -83,7 +83,7 @@ function r2StorageInternal({ bucket }: R2StorageOptions): Adapter {
         collection,
         prefix,
       }),
-      staticHandler: getHandler({ bucket, collection }),
+      staticHandler: getHandler({ bucket, collection, prefix }),
     }
   }
 }

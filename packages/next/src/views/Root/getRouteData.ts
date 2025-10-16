@@ -31,6 +31,7 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
+import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getDocumentViewInfo } from './getDocumentViewInfo.js'
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
@@ -168,7 +169,33 @@ export const getRouteData = ({
         }
       }
 
-      if (oneSegmentViews[viewKey]) {
+      // Check if a custom view is configured for this viewKey
+      // First try to get custom view by the known viewKey, then fallback to route matching
+      const customView =
+        (viewKey && getCustomViewByKey({ config, viewKey })) ||
+        getCustomViewByRoute({ config, currentRoute })
+
+      if (customView?.view?.payloadComponent || customView?.view?.Component) {
+        // User has configured a custom view (either overriding a built-in or a new custom view)
+        ViewToRender = customView.view
+
+        // If this custom view is overriding a built-in view (viewKey matches a built-in),
+        // use the built-in's template settings and viewType
+        if (viewKey && oneSegmentViews[viewKey]) {
+          viewType = viewKey as ViewTypes
+          templateClassName = baseClasses[viewKey] || viewKey
+          templateType = 'minimal'
+
+          if (viewKey === 'account') {
+            templateType = 'default'
+          }
+
+          if (isBrowseByFolderEnabled && viewKey === 'browseByFolder') {
+            templateType = 'default'
+            viewType = 'folders'
+          }
+        }
+      } else if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
         // --> /browse-by-folder

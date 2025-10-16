@@ -37,7 +37,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: false | TypedLocale | TypedLocale[]
   /**
    * Include info about the lock status to the result with fields: `_isLocked` and `_userEditing`
    */

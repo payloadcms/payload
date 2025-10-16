@@ -516,10 +516,12 @@ export const bgTranslations: DefaultTranslationsObject = {
     invalidInput: 'Това поле има невалиден вход.',
     invalidSelection: 'Това поле има невалидна селекция.',
     invalidSelections: 'Това поле има следните невалидни селекции:',
+    latitudeOutOfBounds: 'Ширината трябва да е между -90 и 90.',
     lessThanMin: '{{value}} е по-малко от минимално допустимото {{label}} от {{min}}.',
     limitReached: 'Достигнат е лимитът, могат да бъдат добавени само {{max}} елемента.',
     longerThanMin:
       'Тази стойност трябва да е по-голяма от минималната стойност от {{minLength}} символа.',
+    longitudeOutOfBounds: 'Дължината трябва да бъде между -180 и 180.',
     notValidDate: '"{{value}}" не е валидна дата.',
     required: 'Това поле е задължително.',
     requiresAtLeast: 'Това поле изисква поне {{count}} {{label}}.',

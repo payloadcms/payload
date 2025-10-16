@@ -4,6 +4,7 @@ import type {
   DefaultServerCellComponentProps,
   LabelFunction,
   RichTextAdapter,
+  RichTextField,
   RichTextFieldClient,
   RichTextFieldClientProps,
   SanitizedConfig,
@@ -140,3 +141,5 @@ export type GeneratedFeatureProviderComponent = {
   clientFeature: FeatureProviderProviderClient<any, any>
   clientFeatureProps: BaseClientFeatureProps<object>
 }
+
+export type LexicalRichTextField = RichTextField<SerializedEditorState, AdapterProps>

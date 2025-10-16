@@ -524,11 +524,13 @@ export const myTranslations: DefaultTranslationsObject = {
     invalidInput: 'ဤအကွက်တွင် မမှန်ကန်သော ထည့်သွင်းမှုတစ်ခုရှိသည်။',
     invalidSelection: 'ဤအကွက်တွင် မမှန်ကန်သော ရွေးချယ်မှုတစ်ခုရှိသည်။',
     invalidSelections: 'ဤအကွက်တွင် အောက်ပါ မမှန်ကန်သော ရွေးချယ်မှုများ ရှိသည်',
+    latitudeOutOfBounds: 'Lintang mesti berada di antara -90 dan 90.',
     lessThanMin:
       '{{value}} သည် {{min}} ထက် ပိုမိုနိမ့်သည်။ ဤသည်ဖြင့် {{label}} အနည်းဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် နိမ့်သည်။',
     limitReached:
       'Had yang dibenarkan telah dicapai, hanya {{max}} item sahaja yang boleh ditambah.',
     longerThanMin: 'ဤတန်ဖိုးသည် အနိမ့်ဆုံးအရှည် {{minLength}} စာလုံးထက် ပိုရှည်ရမည်။',
+    longitudeOutOfBounds: 'Longitude mesti berada di antara -180 dan 180.',
     notValidDate: '"{{value}}" သည် တရားဝင်ရက်စွဲမဟုတ်ပါ။',
     required: 'ဤအကွက်ကို လိုအပ်သည်။',
     requiresAtLeast: 'ဤအကွက်သည် အနည်းဆုံး {{count}} {{label}} လိုအပ်သည်',

@@ -26,7 +26,7 @@ import type {
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
-import type { AdapterProps } from '../types.js'
+import type { LexicalRichTextField } from '../types.js'
 import type { HTMLConverter } from './converters/lexicalToHtml_deprecated/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
@@ -39,7 +39,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
    * This maps all population promises to the node type
    */
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
-  field: RichTextField<SerializedEditorState, AdapterProps>
+  field: LexicalRichTextField
   /**
    * fieldPromises are used for things like field hooks. They will be awaited before awaiting populationPromises
    */
@@ -121,7 +121,7 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    */
   depth: number
   draft: boolean
-  fallbackLocale: string
+  fallbackLocale: string | string[]
   /**
    *  Only available in `afterRead` field hooks.
    */
@@ -305,7 +305,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
        * Current schema which will be modified by this function.
        */
       currentSchema: JSONSchema4
-      field: RichTextField<SerializedEditorState, AdapterProps>
+      field: LexicalRichTextField
       i18n?: I18n
       /**
        * Allows you to define new top-level interfaces that can be re-used in the output schema.
@@ -382,7 +382,7 @@ export type SanitizedServerFeatures = {
          * Current schema which will be modified by this function.
          */
         currentSchema: JSONSchema4
-        field: RichTextField<SerializedEditorState, AdapterProps>
+        field: LexicalRichTextField
         i18n?: I18n
         /**
          * Allows you to define new top-level interfaces that can be re-used in the output schema.

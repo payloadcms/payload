@@ -14,6 +14,7 @@ import {
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import type { DefaultTypedEditorState } from '../../nodeTypes.js'
+import type { LexicalRichTextField } from '../../types.js'
 
 /**
  * Utility to render a lexical editor on the client.
@@ -34,7 +35,7 @@ export const RenderLexical: React.FC<
 
     setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
     value?: FieldType<DefaultTypedEditorState | undefined>['value']
-  } & RenderFieldServerFnArgs
+  } & RenderFieldServerFnArgs<LexicalRichTextField>
 > = (args) => {
   const { field, initialValue, Loading, path, schemaPath, setValue, value } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)

@@ -516,10 +516,12 @@ export const taTranslations: DefaultTranslationsObject = {
     invalidInput: 'இந்த புலத்தில் தவறான உள்ளீடு உள்ளது.',
     invalidSelection: 'இந்த புலத்தில் தவறான தேர்வு உள்ளது.',
     invalidSelections: 'இந்த புலத்தில் பின்வரும் தவறான தேர்வுகள் உள்ளன:',
+    latitudeOutOfBounds: 'அகலாங்கம் -90 மற்றும் 90 இடையே இருக்க வேண்டும்.',
     lessThanMin: '{{value}} குறைந்தபட்சமாக அனுமதிக்கப்பட்ட {{label}} {{min}}-ஐ விட குறைவாக உள்ளது.',
     limitReached: 'வரம்பு எட்டப்பட்டுள்ளது, {{max}} உருப்படிகள் மட்டுமே சேர்க்கப்படலாம்.',
     longerThanMin:
       'இந்த மதிப்பு குறைந்தபட்ச நீளமான {{minLength}} எழுத்துக்களை விட நீளமாக இருக்க வேண்டும்.',
+    longitudeOutOfBounds: 'தீர்க்கக் கூறு -180 மற்றும் 180 இடையே இருக்க வேண்டும்.',
     notValidDate: '"{{value}}" ஒரு சரியான தேதி அல்ல.',
     required: 'இந்த புலம் அவசியம்.',
     requiresAtLeast: 'இந்த புலம் குறைந்தது {{count}} {{label}} தேவைப்படுகிறது.',

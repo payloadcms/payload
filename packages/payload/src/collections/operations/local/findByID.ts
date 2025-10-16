@@ -64,7 +64,7 @@ export type Options<
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: false | TypedLocale | TypedLocale[]
   /**
    * The ID of the document to find.
    */

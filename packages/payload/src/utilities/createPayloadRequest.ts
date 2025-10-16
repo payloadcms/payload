@@ -50,10 +50,7 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  const fallbackFromRequest =
-    searchParams.get('fallback-locale') || searchParams.get('fallbackLocale')
   let locale = searchParams.get('locale')
-  let fallbackLocale = fallbackFromRequest
 
   const { search: queryToParse } = urlProperties
 
@@ -64,6 +61,13 @@ export const createPayloadRequest = async ({
         ignoreQueryPrefix: true,
       })
     : {}
+
+  const fallbackFromRequest =
+    (query.fallbackLocale as string | string[]) ||
+    searchParams.get('fallback-locale') ||
+    searchParams.get('fallbackLocale')
+
+  let fallbackLocale = fallbackFromRequest
 
   if (localization) {
     const locales = sanitizeLocales({
