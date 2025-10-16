@@ -1085,13 +1085,13 @@ describe('Versions', () => {
     })
 
     test('should publish specific locale', async () => {
-      await page.goto(url.create)
       await changeLocale(page, 'es')
+      await page.goto(url.create)
       const textField = page.locator('#field-text')
       const status = page.locator('.status__value')
 
       await textField.fill('spanish published')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save')
       await expect(status).toContainText('Published')
 
       await textField.fill('spanish draft')
