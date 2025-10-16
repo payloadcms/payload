@@ -3,7 +3,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import { type ClientFieldSchemaMap, type FieldSchemaMap, type Payload } from 'payload'
 import { getFromImportMap } from 'payload/shared'
 
-import type { FeatureProviderProviderClient } from '../features/typesClient.js'
+import type {
+  BaseClientFeatureProps,
+  FeatureProviderProviderClient,
+} from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
 type Args = {
@@ -55,7 +58,8 @@ export function initLexicalFeatures(args: Args): {
         continue
       }
 
-      const clientFeatureProps = resolvedFeature.clientFeatureProps ?? {}
+      const clientFeatureProps: BaseClientFeatureProps<Record<string, any>> =
+        resolvedFeature.clientFeatureProps ?? {}
       clientFeatureProps.featureKey = resolvedFeature.key
       clientFeatureProps.order = resolvedFeature.order
       if (

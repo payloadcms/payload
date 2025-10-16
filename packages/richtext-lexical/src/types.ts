@@ -152,7 +152,7 @@ export type LexicalRichTextFieldProps = {
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
-      clientFeatureProps?: object
+      clientFeatureProps?: BaseClientFeatureProps<Record<string, any>>
       clientFeatureProvider?: FeatureProviderProviderClient<any, any>
     }
   }
