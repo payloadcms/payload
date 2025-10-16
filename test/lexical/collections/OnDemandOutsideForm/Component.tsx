@@ -1,6 +1,6 @@
 'use client'
 
-import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import type { DefaultNodeTypes, DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import type { JSONFieldClientComponent } from 'payload'
 
 import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/client'
@@ -8,11 +8,11 @@ import React, { useState } from 'react'
 
 export const Component: JSONFieldClientComponent = () => {
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
-    buildEditorState({ text: 'state default' }),
+    buildEditorState<DefaultNodeTypes>({ text: 'state default' }),
   )
 
   const handleReset = React.useCallback(() => {
-    setValue(buildEditorState({ text: 'state default' }))
+    setValue(buildEditorState<DefaultNodeTypes>({ text: 'state default' }))
   }, [])
 
   return (
@@ -20,7 +20,7 @@ export const Component: JSONFieldClientComponent = () => {
       Default Component:
       <RenderLexical
         field={{ name: 'myField', label: 'My Label' }}
-        initialValue={buildEditorState({ text: 'defaultValue' })}
+        initialValue={buildEditorState<DefaultNodeTypes>({ text: 'defaultValue' })}
         schemaPath={`collection.OnDemandOutsideForm.hiddenAnchor`}
         setValue={setValue as any}
         value={value}

@@ -470,7 +470,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -833,6 +833,11 @@ export type Config = {
        * Wrap the admin dashboard in custom context providers
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
+      /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      settingsMenu?: CustomComponent[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`

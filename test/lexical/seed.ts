@@ -23,7 +23,7 @@ import {
 
 // import type { Payload } from 'payload'
 
-import { buildEditorState } from '@payloadcms/richtext-lexical'
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
 
 import { devUser } from '../credentials.js'
@@ -223,7 +223,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en',
-      lexicalBlocksLocalized: buildEditorState({ text: 'English text' }),
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'English text in block',
@@ -237,7 +237,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: lexicalRelationshipFieldsSlug,
     data: {
-      richText: buildEditorState({ text: 'English text' }),
+      richText: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
     },
     depth: 0,
     overrideAccess: true,
@@ -248,7 +248,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc1.id,
     data: {
       title: 'Localized Lexical es',
-      lexicalBlocksLocalized: buildEditorState({ text: 'Spanish text' }),
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'Spanish text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
@@ -265,7 +265,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       title: 'Localized Lexical en 2',
 
-      lexicalBlocksLocalized: buildEditorState({
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
         text: 'English text 2',
         nodes: [
           {
@@ -277,7 +277,7 @@ export const seed = async (_payload: Payload) => {
           },
         ],
       }),
-      lexicalBlocksSubLocalized: buildEditorState({
+      lexicalBlocksSubLocalized: buildEditorState<DefaultNodeTypes>({
         text: 'English text 2',
         nodes: [
           {
@@ -301,7 +301,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       title: 'Localized Lexical es 2',
 
-      lexicalBlocksLocalized: buildEditorState({
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
         text: 'Spanish text 2',
         nodes: [
           {
@@ -349,7 +349,7 @@ export const seed = async (_payload: Payload) => {
               version: 2,
               fields: {
                 id: '6773773284be8978db7a498d',
-                lexicalInBlock: buildEditorState({ text: 'text' }),
+                lexicalInBlock: buildEditorState<DefaultNodeTypes>({ text: 'text' }),
                 blockName: '',
                 blockType: 'blockInLexical',
               },
@@ -366,12 +366,12 @@ export const seed = async (_payload: Payload) => {
         {
           blockType: 'lexicalInBlock2',
           blockName: '1',
-          lexical: buildEditorState({ text: '1' }),
+          lexical: buildEditorState<DefaultNodeTypes>({ text: '1' }),
         },
         {
           blockType: 'lexicalInBlock2',
           blockName: '2',
-          lexical: buildEditorState({ text: '2' }),
+          lexical: buildEditorState<DefaultNodeTypes>({ text: '2' }),
         },
         {
           blockType: 'lexicalInBlock2',

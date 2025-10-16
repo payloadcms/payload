@@ -18,7 +18,7 @@ export const virtualFieldPopulationPromise = async ({
   siblingDoc,
 }: {
   draft: boolean
-  fallbackLocale: string
+  fallbackLocale: string | string[]
   fields: FlattenedField[]
   hasMany?: boolean
   locale: string

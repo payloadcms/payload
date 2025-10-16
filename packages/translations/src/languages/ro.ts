@@ -177,6 +177,7 @@ export const roTranslations: DefaultTranslationsObject = {
     removeUpload: 'Eliminați încărcarea',
     saveChanges: 'Salvați modificările',
     searchForBlock: 'Căutați un bloc',
+    searchForLanguage: 'Căutați o limbă',
     selectExistingLabel: 'Selectați existent {{label}}',
     selectFieldsToEdit: 'Selectați câmpurile de editat',
     showAll: 'Afișați toate',
@@ -524,11 +525,13 @@ export const roTranslations: DefaultTranslationsObject = {
     invalidInput: 'Acest câmp are o intrare invalidă.',
     invalidSelection: 'Acest câmp are o selecție invalidă.',
     invalidSelections: 'Acest câmp are următoarele selecții invalide:',
+    latitudeOutOfBounds: 'Latitudinea trebuie să fie între -90 și 90.',
     lessThanMin:
       '{{value}} este mai mic decât valoarea minimă permisă pentru {{label}} de {{min}}.',
     limitReached: 'Limita atinsă, doar {{max}} elemente pot fi adăugate.',
     longerThanMin:
       'Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.',
+    longitudeOutOfBounds: 'Longitudinea trebuie să fie între -180 și 180.',
     notValidDate: '"{{value}}" nu este o dată valabilă.',
     required: 'Acest câmp este obligatoriu.',
     requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',

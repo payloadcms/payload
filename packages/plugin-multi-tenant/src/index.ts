@@ -99,6 +99,7 @@ export const multiTenantPlugin =
     }
 
     addCollectionAccess({
+      accessResultCallback: pluginConfig.usersAccessResultOverride,
       adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
       fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
@@ -168,7 +169,7 @@ export const multiTenantPlugin =
         /**
          * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
@@ -226,6 +227,7 @@ export const multiTenantPlugin =
            * Add access control constraint to tenant enabled folders collection
            */
           addCollectionAccess({
+            accessResultCallback: pluginConfig.collections[foldersSlug]?.accessResultOverride,
             adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: tenantFieldName,
@@ -353,7 +355,7 @@ export const multiTenantPlugin =
         /**
          * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
@@ -411,6 +413,7 @@ export const multiTenantPlugin =
            * Add access control constraint to tenant enabled collection
            */
           addCollectionAccess({
+            accessResultCallback: pluginConfig.collections[collection.slug]?.accessResultOverride,
             adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: tenantFieldName,
