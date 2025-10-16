@@ -203,7 +203,17 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /**
+   * Provide a function that can be used to add items to the import map. This is useful for
+   * making modules available to the client.
+   */
   generateImportMap?: ImportMapGenerators[0]
+  /**
+   * Provide a function that can be used to add items to the schema map. This is useful for
+   * richtext sub-fields the server needs to "know" about in order to do things like calculate form state.
+   *
+   * This function is run within `buildFieldSchemaMap`.
+   */
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
