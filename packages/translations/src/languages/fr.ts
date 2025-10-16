@@ -426,7 +426,7 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} créé(e) avec succès.',
     successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
     successfullyReindexed:
-      '{{count}} des {{total}} documents des collections {{collections}} ont été réindexés avec succès.',
+      '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
     takeOver: 'Prendre en charge',
     thisLanguage: 'Français',
     time: 'Temps',

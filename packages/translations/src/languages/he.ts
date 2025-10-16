@@ -404,7 +404,7 @@ export const heTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} נוצר בהצלחה.',
     successfullyDuplicated: '{{label}} שוכפל בהצלחה.',
     successfullyReindexed:
-      'הוחזרו בהצלחה אינדקס {{count}} מתוך {{total}} מסמכים מ{{collections}} אוספים.',
+      'ביצוע מחדש של אינדקס בוצע בהצלחה על {{count}} מתוך {{total}} מסמכים מתוך {{collections}}, ו-{{skips}} טיוטות הושמטו.',
     takeOver: 'קח פיקוד',
     thisLanguage: 'עברית',
     time: 'זמן',

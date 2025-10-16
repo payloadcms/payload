@@ -421,7 +421,7 @@ export const roTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creat(ă) cu succes.',
     successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     successfullyReindexed:
-      'Reindexare realizată cu succes pentru {{count}} din {{total}} documente din colecțiile {{collections}}.',
+      'Au fost reindexate cu succes {{count}} din {{total}} documente din {{collections}}, iar {{skips}} proiecte au fost omise.',
     takeOver: 'Preia controlul',
     thisLanguage: 'Română',
     time: 'Timp',
