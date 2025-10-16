@@ -108,128 +108,6 @@ export default config
 | `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                             |
 | `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                                       |
 
-```ts
-pluginMCP({
-  collections: {
-    posts: {
-      enabled: {
-        find: false,
-        create: true,
-      },
-      description: 'This is a Payload collection with Post documents.',
-      override: (original, req) => {
-        req.payload.logger.info('[Override MCP resource call for Posts]:', original)
-        return { ...original, myCustomOverrideProp: true }
-      },
-    },
-    media: {
-      enabled: {
-        find: true,
-        create: false,
-        update: true,
-        delete: false,
-      },
-      description: 'This is a Payload collection with Media documents.',
-    },
-  },
-  mcp: {
-    handlerOptions: {
-      verboseLogs: true,
-      maxDuration: 60,
-    },
-    serverOptions: {
-      serverInfo: {
-        name: 'My Custom MCP Server',
-        version: '1.0.0',
-      },
-    },
-    tools: [
-      {
-        name: 'diceRoll',
-        description: 'Rolls a virtual dice with a specified number of sides',
-        handler: (args: Record<string, unknown>) => {
-          const sides = (args.sides as number) || 6
-          const result = Math.floor(Math.random() * sides) + 1
-          return Promise.resolve({
-            content: [
-              {
-                type: 'text' as const,
-                text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
-              },
-            ],
-          })
-        },
-        parameters: z.object({
-          sides: z
-            .number()
-            .int()
-            .min(2)
-            .max(1000)
-            .optional()
-            .default(6)
-            .describe('Number of sides on the dice (default: 6)'),
-        }).shape,
-      },
-    ],
-    prompts: [
-      {
-        name: 'echo',
-        title: 'Echo Prompt',
-        description: 'Creates a prompt to process a message',
-        argsSchema: {
-          message: z.string().describe('The message to process')
-        },
-        handler: ({ message }: { message: string }) => ({
-          messages: [
-            {
-              content: {
-                type: 'text',
-                text: `Please process this message: ${message}`,
-              },
-              role: 'user',
-            },
-          ],
-        }),
-      },
-    ],
-    resources: [
-      // Static resource
-      {
-        name: 'data',
-        title: 'Data',
-        description: 'Data is a resource that contains special data.',
-        uri: 'data://app',
-        mimeType: 'text/plain',
-        handler: (uri) => ({
-          contents: [
-            {
-              uri: uri.href,
-              text: 'My special data.',
-            },
-          ],
-        }),
-      },
-      // Dynamic resource with template
-      {
-        name: 'dataByID',
-        title: 'Data By ID',
-        description: 'Data resource with dynamic ID parameter.',
-        uri: new ResourceTemplate('data://app/{id}', { list: undefined }),
-        mimeType: 'text/plain',
-        handler: (uri, { id }) => ({
-          contents: [
-            {
-              uri: uri.href,
-              text: `My special data for ID: ${id}`,
-            },
-          ],
-        }),
-      },
-    ],
-  },
-}),
-```
-
 ## Override API Keys Collection
 
 The plugin automatically creates an **API Keys** collection that provides high-resolution control over MCP capabilities. This collection allows admins to:
@@ -407,4 +285,46 @@ tools: [
     }).shape,
   },
 ]
+```
+
+## Performance
+
+The description you choose to use for your collection greatly impacts the way a model will decide to use it.
+
+This description is more difficult for a model to understand it's purpose.
+
+```ts
+// Weak
+const config = buildConfig({
+  // ...
+  plugins: [
+    pluginMCP({
+      collections: {
+        posts: {
+          enabled: true,
+          description: 'My posts',
+        },
+      },
+    }),
+  ],
+})
+```
+
+This description gives a model a much stronger ability to know when to use this collection.
+
+```ts
+// Strong
+const config = buildConfig({
+  // ...
+  plugins: [
+    pluginMCP({
+      collections: {
+        posts: {
+          enabled: true,
+          description: 'My posts',
+        },
+      },
+    }),
+  ],
+})
 ```
