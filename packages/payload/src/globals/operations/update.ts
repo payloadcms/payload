@@ -224,8 +224,6 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
-    let publishedDocWithLocales = globalJSON
-    let versionSnapshotResult
 
     const beforeChangeArgs = {
       collection: null,
@@ -240,8 +238,21 @@ export const updateOperation = async <
         shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    if (publishSpecificLocale || unpublishSpecificLocale) {
-      const latestVersion = await getLatestGlobalVersion({
+    let snapshotDocWithLocales
+    let docWithLocales = globalJSON
+
+    /**
+     * Locale-Specific Snapshot Logic
+     *
+     * Both `publishSpecificLocale` and `unpublishSpecificLocale` require snapshots
+     */
+    if (globalConfig.versions && (publishSpecificLocale || unpublishSpecificLocale)) {
+      snapshotDocWithLocales = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales: globalJSON,
+      })
+
+      const lastPublished = await getLatestGlobalVersion({
         slug,
         config: globalConfig,
         payload,
@@ -250,23 +261,19 @@ export const updateOperation = async <
         where: query,
       })
 
-      publishedDocWithLocales = latestVersion?.global || {}
-
-      versionSnapshotResult = await beforeChange({
-        ...beforeChangeArgs,
-        docWithLocales: globalJSON,
-      })
+      docWithLocales = lastPublished ? lastPublished : {}
     }
 
     let result = await beforeChange({
       ...beforeChangeArgs,
       data: unpublishSpecificLocale ? {} : data,
-      docWithLocales: publishedDocWithLocales,
+      docWithLocales,
+      skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
     })
 
-    if (unpublishSpecificLocale && versionSnapshotResult) {
+    if (unpublishSpecificLocale && snapshotDocWithLocales) {
       if (Object.keys(result).length === 0) {
-        result = versionSnapshotResult
+        result = snapshotDocWithLocales
       }
     }
 
@@ -320,7 +327,7 @@ export const updateOperation = async <
         publishSpecificLocale,
         req,
         select,
-        snapshot: versionSnapshotResult,
+        snapshot: snapshotDocWithLocales,
         unpublishSpecificLocale,
       })
 

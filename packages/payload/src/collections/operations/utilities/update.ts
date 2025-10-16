@@ -82,7 +82,7 @@ export const updateDocument = async <
   config,
   data,
   depth,
-  docWithLocales,
+  docWithLocales: originalDocWithLocales,
   draftArg,
   fallbackLocale,
   filesToUpload,
@@ -121,11 +121,16 @@ export const updateDocument = async <
     req,
   })
 
+  // /////////////////////////////////////
+  // AfterRead runs on original doc
+  // to transform doc into 1 locale
+  // /////////////////////////////////////
+
   const originalDoc = await afterRead({
     collection: collectionConfig,
     context: req.context,
     depth: 0,
-    doc: deepCopyObjectSimple(docWithLocales),
+    doc: deepCopyObjectSimple(originalDocWithLocales),
     draft: draftArg,
     fallbackLocale: id ? null : fallbackLocale,
     global: null,
@@ -153,7 +158,7 @@ export const updateDocument = async <
   await deleteAssociatedFiles({
     collectionConfig,
     config,
-    doc: docWithLocales,
+    doc: originalDocWithLocales,
     files: filesToUpload,
     overrideDelete: false,
     req,
@@ -223,17 +228,12 @@ export const updateDocument = async <
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let publishedDocWithLocales = docWithLocales
-  let versionSnapshotResult
-
-  const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
+  const beforeChangeArgs: Omit<Args<DataFromCollectionSlug<TSlug>>, 'docWithLocales'> = {
     id,
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    docWithLocales: undefined,
     global: null,
     operation: 'update',
     overrideAccess,
@@ -246,10 +246,18 @@ export const updateDocument = async <
       Boolean(data?.deletedAt),
   }
 
-  if (publishSpecificLocale || unpublishSpecificLocale) {
-    versionSnapshotResult = await beforeChange({
+  let snapshotDocWithLocales
+  let docWithLocales = originalDocWithLocales
+
+  /**
+   * Locale-Specific Snapshot Logic
+   *
+   * Both `publishSpecificLocale` and `unpublishSpecificLocale` require snapshots
+   */
+  if (collectionConfig.versions && (publishSpecificLocale || unpublishSpecificLocale)) {
+    snapshotDocWithLocales = await beforeChange({
       ...beforeChangeArgs,
-      docWithLocales,
+      docWithLocales: originalDocWithLocales,
     })
 
     const lastPublished = await getLatestCollectionVersion({
@@ -266,18 +274,19 @@ export const updateDocument = async <
       req,
     })
 
-    publishedDocWithLocales = lastPublished ? lastPublished : {}
+    docWithLocales = lastPublished ? lastPublished : {}
   }
 
   let result = await beforeChange({
     ...beforeChangeArgs,
     data: unpublishSpecificLocale ? { id } : { ...data, id },
-    docWithLocales: publishedDocWithLocales,
+    docWithLocales,
+    skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
   })
 
-  if (unpublishSpecificLocale && versionSnapshotResult) {
+  if (unpublishSpecificLocale && snapshotDocWithLocales) {
     if (Object.keys(result).length <= 1 && result.id) {
-      result = versionSnapshotResult
+      result = snapshotDocWithLocales
     }
   }
 
@@ -330,7 +339,7 @@ export const updateDocument = async <
       payload,
       publishSpecificLocale,
       req,
-      snapshot: versionSnapshotResult,
+      snapshot: snapshotDocWithLocales,
       unpublishSpecificLocale,
     })
   }

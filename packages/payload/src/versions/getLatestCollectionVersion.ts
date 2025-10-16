@@ -25,10 +25,6 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
 }: Args): Promise<T> => {
   let latestVersion!: TypeWithVersion<T>
 
-  const whereQuery = published
-    ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
-    : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
-
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
@@ -36,7 +32,12 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery as unknown as Where),
+      where: combineQueries(
+        appendVersionToQueryKey(query.where),
+        published
+          ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
+          : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] },
+      ),
     })
     latestVersion = docs[0]!
   }
