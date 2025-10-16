@@ -132,6 +132,11 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'category',
         },
         {
+          type: 'json',
+          name: 'categoryID',
+          virtual: 'category.id',
+        },
+        {
           type: 'text',
           name: 'categoryTitle',
           virtual: 'category.title',

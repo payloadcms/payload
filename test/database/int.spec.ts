@@ -1298,6 +1298,29 @@ describe('database', () => {
     ])
   })
 
+  it('should find distinct values when the virtual field is linked to ID', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category' },
+    })
+    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    const distinct = await payload.findDistinct({ collection: 'posts', field: 'categoryID' })
+    expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
+  })
+
+  it('should find distinct values by the explicit ID field path', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category' },
+    })
+    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    const distinct = await payload.findDistinct({ collection: 'posts', field: 'category.id' })
+    expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
+  })
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
