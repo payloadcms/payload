@@ -43,7 +43,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
-    await lexical.slashCommand('block')
+    await lexical.slashCommand('myblock')
     await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
     await lexical.slashCommand('relationship', true, 'Relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
@@ -70,7 +70,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.editor.first().focus()
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
-    await lexical.slashCommand('block')
+    await lexical.slashCommand('myblock')
     await page.locator('#field-someText').first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
@@ -150,5 +150,61 @@ describe('Lexical Fully Featured', () => {
 
     await lexical.drawer.getByText('Save changes').click()
     await expect(lexical.drawer).toBeHidden()
+  })
+
+  test('ensure code block can be created using slash commands', async ({ page }) => {
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'abap')
+
+    // Does not contain payload types. However, since this is JavaScript and not TypeScript, there should be no errors.
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+  })
+
+  test('ensure code block can be created using client-side markdown shortcuts', async ({
+    page,
+  }) => {
+    await page.keyboard.type('```ts ')
+    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'ts')
+
+    // Ensure it does not contain payload types
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+  })
+
+  test('ensure payload code block can be created using slash commands and it contains payload types', async ({
+    page,
+  }) => {
+    await lexical.slashCommand('payloadcode')
+    const codeBlock = lexical.editor.locator('.lexical-block-PayloadCode')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'ts')
+
+    // Ensure it contains payload types
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
 })

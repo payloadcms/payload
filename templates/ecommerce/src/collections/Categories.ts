@@ -1,4 +1,4 @@
-import { slugField } from '@/fields/slug'
+import { slugField } from 'payload'
 import type { CollectionConfig } from 'payload'
 
 export const Categories: CollectionConfig = {
@@ -16,13 +16,8 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    ...slugField('title', {
-      slugOverrides: {
-        required: true,
-        admin: {
-          position: undefined,
-        },
-      },
+    slugField({
+      position: undefined,
     }),
   ],
 }

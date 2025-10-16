@@ -120,7 +120,7 @@ export type Submit = <T extends Response, C extends Record<string, unknown>>(
 ) => Promise</**
  * Returns the form state and the response from the server.
  *
- * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
+ * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own risk.
  */
 { formState?: FormState; res: T } | void>
 

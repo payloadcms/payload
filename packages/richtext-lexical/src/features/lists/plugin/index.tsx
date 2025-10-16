@@ -3,28 +3,21 @@ import type {
   SerializedListItemNode as _SerializedListItemNode,
   SerializedListNode as _SerializedListNode,
 } from '@lexical/list'
-import type { Spread } from 'lexical'
+import type { SerializedLexicalNode } from 'lexical'
 
 import { ListPlugin } from '@lexical/react/LexicalListPlugin.js'
 import React from 'react'
 
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 import type { PluginComponent } from '../../typesClient.js'
 
-export type SerializedListItemNode = Spread<
-  {
-    checked?: boolean
-    type: 'listitem'
-  },
-  _SerializedListItemNode
->
+export type SerializedListItemNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  checked?: boolean
+} & StronglyTypedElementNode<_SerializedListItemNode, 'listitem', T>
 
-export type SerializedListNode = Spread<
-  {
-    checked?: boolean
-    type: 'list'
-  },
-  _SerializedListNode
->
+export type SerializedListNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  checked?: boolean
+} & StronglyTypedElementNode<_SerializedListNode, 'list', T>
 
 export const LexicalListPlugin: PluginComponent<undefined> = () => {
   return <ListPlugin />

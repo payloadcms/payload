@@ -55,6 +55,11 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'title',
         },
         {
+          name: 'simple',
+          type: 'relationship',
+          relationTo: 'simple',
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -130,6 +135,11 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
           name: 'categoryTitle',
           virtual: 'category.title',
+        },
+        {
+          type: 'text',
+          name: 'categorySimpleText',
+          virtual: 'category.simple.text',
         },
         {
           type: 'relationship',

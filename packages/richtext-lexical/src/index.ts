@@ -873,7 +873,9 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
 export { AlignFeature } from './features/align/server/index.js'
 export { BlockquoteFeature } from './features/blockquote/server/index.js'
+export { CodeBlock } from './features/blocks/premade/CodeBlock/index.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/server/index.js'
+
 export {
   $createServerBlockNode,
   $isServerBlockNode,
@@ -1056,7 +1058,7 @@ export { populate } from './populateGraphQL/populate.js'
 
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
-export { buildEditorState } from './utilities/buildEditorState.js'
+export { buildDefaultEditorState, buildEditorState } from './utilities/buildEditorState.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 
 export { editorConfigFactory } from './utilities/editorConfigFactory.js'
