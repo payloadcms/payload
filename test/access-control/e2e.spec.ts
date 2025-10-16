@@ -27,6 +27,7 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
   authSlug,
+  blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   disabledSlug,
   docLevelAccessSlug,
@@ -73,6 +74,7 @@ describe('Access Control', () => {
   let serverURL: string
   let context: BrowserContext
   let authFields: AdminUrlUtil
+  let blocksFieldAccessUrl: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -90,6 +92,7 @@ describe('Access Control', () => {
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
     authFields = new AdminUrlUtil(serverURL, authSlug)
+    blocksFieldAccessUrl = new AdminUrlUtil(serverURL, blocksFieldAccessSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -1354,6 +1357,124 @@ describe('Access Control', () => {
         // Should not show restrictedSetting column header (inside settings tab)
         await expect(thead.locator('th', { hasText: 'Settings > Restricted Setting' })).toBeHidden()
       })
+    })
+  })
+
+  describe('blocks field access control', () => {
+    test('should respect field-level access control for blocks fields', async () => {
+      await page.goto(blocksFieldAccessUrl.create)
+      await expect(page.locator('.doc-header__title')).toContainText('[Untitled]')
+
+      // Editable blocks field should allow adding blocks
+      const editableBlocksField = page.locator('#field-editableBlocks')
+      await expect(editableBlocksField.locator('.blocks-field__drawer-toggler')).toBeEnabled()
+
+      // Read-only blocks field should not allow adding blocks
+      const readOnlyBlocksField = page.locator('#field-readOnlyBlocks')
+      await expect(readOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+
+      // Editable block references field should allow adding blocks
+      const editableBlockRefsField = page.locator('#field-editableBlockRefs')
+      await expect(editableBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeEnabled()
+
+      // Read-only block references field should not allow adding blocks
+      const readOnlyBlockRefsField = page.locator('#field-readOnlyBlockRefs')
+      await expect(readOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+
+      // Tab read-only blocks field should not allow adding blocks
+      const tabReadOnlyBlocksField = page.locator(
+        '.field-type.tabs-field #field-tabReadOnlyTest__tabReadOnlyBlocks',
+      )
+      await expect(tabReadOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+
+      // Tab read-only block references field should not allow adding blocks
+      const tabReadOnlyBlockRefsField = page.locator(
+        '.field-type.tabs-field #field-tabReadOnlyTest__tabReadOnlyBlockRefs',
+      )
+      await expect(
+        tabReadOnlyBlockRefsField.locator('.blocks-field__drawer-toggler'),
+      ).toBeDisabled()
+    })
+
+    test('should respect field-level access control for individual fields within blocks', async () => {
+      // First create a document with blocks so we can test field editability
+      const doc = await payload.create({
+        collection: blocksFieldAccessSlug,
+        data: {
+          title: 'Test Document',
+          editableBlocks: [
+            {
+              blockType: 'testBlock',
+              title: 'Editable Block Title',
+              content: 'Editable block content',
+            },
+          ],
+          readOnlyBlocks: [
+            {
+              blockType: 'testBlock2',
+              title: 'Read-Only Block Title',
+              content: 'Read-only block content',
+            },
+          ],
+          editableBlockRefs: [
+            {
+              blockType: 'titleblock',
+              title: 'Editable Block Reference Title',
+            },
+          ],
+          readOnlyBlockRefs: [
+            {
+              blockType: 'titleblock',
+              title: 'Read-Only Block Reference Title',
+            },
+          ],
+          tabReadOnlyTest: {
+            tabReadOnlyBlocks: [
+              {
+                blockType: 'testBlock3',
+                title: 'Tab Read-Only Block Title',
+                content: 'Tab read-only block content',
+              },
+            ],
+            tabReadOnlyBlockRefs: [
+              {
+                blockType: 'titleblock',
+                title: 'Tab Read-Only Block Reference Title',
+              },
+            ],
+          },
+        },
+      })
+
+      await page.goto(blocksFieldAccessUrl.edit(doc.id))
+      await expect(page.locator('.doc-header__title')).toContainText('ID: ')
+
+      // Editable blocks - fields should be editable
+      await expect(page.locator('#field-editableBlocks__0__title')).toBeEnabled()
+      await expect(page.locator('#field-editableBlocks__0__content')).toBeEnabled()
+
+      // Read-only blocks - fields should not be editable
+      await expect(page.locator('#field-readOnlyBlocks__0__title')).toBeDisabled()
+      await expect(page.locator('#field-readOnlyBlocks__0__content')).toBeDisabled()
+
+      // Editable block references - fields should be editable
+      await expect(page.locator('#field-editableBlockRefs__0__title')).toBeEnabled()
+
+      // Read-only block references - fields should not be editable
+      await expect(page.locator('#field-readOnlyBlockRefs__0__title')).toBeDisabled()
+
+      // Tab read-only blocks - fields should not be editable
+      await expect(
+        page.locator('#field-tabReadOnlyTest__tabReadOnlyBlocks__0__title'),
+      ).toBeDisabled()
+      await expect(
+        page.locator('#field-tabReadOnlyTest__tabReadOnlyBlocks__0__content'),
+      ).toBeDisabled()
+
+      // Tab read-only block references - fields should not be editable
+      await expect(
+        page.locator('#field-tabReadOnlyTest__tabReadOnlyBlockRefs__0__title'),
+      ).toBeDisabled()
     })
   })
 })
