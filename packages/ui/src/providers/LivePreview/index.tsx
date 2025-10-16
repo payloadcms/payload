@@ -1,5 +1,5 @@
 'use client'
-import type { CollectionPreferences, LivePreviewConfig } from 'payload'
+import type { CollectionPreferences, LivePreviewConfig, LivePreviewURLType } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -92,7 +92,15 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
    */
   const setLivePreviewURL = useCallback<LivePreviewContextType['setURL']>(
     (_incomingURL) => {
-      const incomingURL = formatAbsoluteURL(_incomingURL)
+      let incomingURL: LivePreviewURLType
+
+      if (typeof _incomingURL === 'string') {
+        incomingURL = formatAbsoluteURL(_incomingURL)
+      }
+
+      if (!incomingURL) {
+        setIsLivePreviewing(false)
+      }
 
       if (incomingURL !== url) {
         setAppIsReady(false)
@@ -106,7 +114,9 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
    * `url` needs to be relative to the window, which cannot be done on initial render.
    */
   useEffect(() => {
-    setURL(formatAbsoluteURL(urlFromProps))
+    if (typeof urlFromProps === 'string') {
+      setURL(formatAbsoluteURL(urlFromProps))
+    }
   }, [urlFromProps])
 
   // The toolbar needs to freely drag and drop around the page

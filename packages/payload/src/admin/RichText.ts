@@ -31,7 +31,7 @@ export type AfterReadRichTextHookArgs<
 
   draft?: boolean
 
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */

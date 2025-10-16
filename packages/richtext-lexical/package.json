@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.58.0",
+  "version": "3.59.1",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -350,7 +350,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm build:esbuild:postproces && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -365,6 +365,7 @@
     ]
   },
   "dependencies": {
+    "@lexical/clipboard": "0.35.0",
     "@lexical/headless": "0.35.0",
     "@lexical/html": "0.35.0",
     "@lexical/link": "0.35.0",
