@@ -73,16 +73,16 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const modalSlug = `delete-${deleteCurrentLocale ? 'current-locale-' : ''}${id}`
 
-  const activeLocale =
-    localization &&
-    localization?.locales.find((locale) =>
+  const activeLocaleLabel = (() => {
+    if (!localization) {return undefined}
+    const activeLocale = localization.locales.find((locale) =>
       typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
     )
-  const activeLocaleLabel =
-    activeLocale &&
-    (typeof activeLocale.label === 'string'
+    if (!activeLocale || typeof activeLocale === 'string') {return undefined}
+    return typeof activeLocale.label === 'string'
       ? activeLocale.label
-      : (activeLocale.label?.[localeCode] ?? undefined))
+      : activeLocale.label?.[localeCode]
+  })()
 
   const [deletePermanently, setDeletePermanently] = useState(false)
 
