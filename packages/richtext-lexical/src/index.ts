@@ -14,13 +14,13 @@ import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider } from './types.js'
 
-import { getDefaultSanitizedEditorConfig } from './getDefaultSanitizedEditorConfig.js'
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
+import { getDefaultSanitizedEditorConfig } from './utilities/getDefaultSanitizedEditorConfig.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
