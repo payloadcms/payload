@@ -92,11 +92,10 @@ export function initLexicalFeatures(args: Args): {
       }
       if (
         resolvedFeature.componentImports &&
-        typeof resolvedFeature.componentImports === 'object'
+        typeof resolvedFeature.componentImports === 'object' &&
+        !Array.isArray(resolvedFeature.componentImports)
       ) {
-        for (const key in resolvedFeature.componentImports) {
-          const payloadComponent = resolvedFeature.componentImports[key]
-
+        for (const [key, payloadComponent] of Object.entries(resolvedFeature.componentImports)) {
           const resolvedComponent = getFromImportMap({
             importMap: args.payload.importMap,
             PayloadComponent: payloadComponent,
