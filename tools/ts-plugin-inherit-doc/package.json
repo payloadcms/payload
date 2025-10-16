@@ -1,0 +1,19 @@
+{
+  "name": "@payloadcms/ts-plugin-inherit-doc",
+  "version": "1.0.0",
+  "description": "TypeScript Language Service Plugin for JSDoc documentation inheritance",
+  "keywords": [
+    "typescript",
+    "plugin",
+    "jsdoc"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "typescript": "^5.7.2"
+  }
+}
