@@ -68,7 +68,6 @@ export function initLexicalFeatures(args: Args): {
       ) {
         clientFeatureProps.clientProps = ClientFeaturePayloadComponent.clientProps
       }
-
       // As clientFeatureProvider is a client function, we cannot execute it on the server here. Thus, the client will have to execute clientFeatureProvider with its props
       clientFeatures[featureKey] = { clientFeatureProps, clientFeatureProvider }
     }
@@ -90,21 +89,22 @@ export function initLexicalFeatures(args: Args): {
           featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
         }
       }
-      if (
-        resolvedFeature.componentImports &&
-        typeof resolvedFeature.componentImports === 'object' &&
-        !Array.isArray(resolvedFeature.componentImports)
-      ) {
-        for (const [key, payloadComponent] of Object.entries(resolvedFeature.componentImports)) {
-          const resolvedComponent = getFromImportMap({
-            importMap: args.payload.importMap,
-            PayloadComponent: payloadComponent,
-            schemaPath: 'lexical-clientComponent',
-            silent: true,
-          })
+    }
 
-          featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
-        }
+    if (
+      resolvedFeature.componentImports &&
+      typeof resolvedFeature.componentImports === 'object' &&
+      !Array.isArray(resolvedFeature.componentImports)
+    ) {
+      for (const [key, payloadComponent] of Object.entries(resolvedFeature.componentImports)) {
+        const resolvedComponent = getFromImportMap({
+          importMap: args.payload.importMap,
+          PayloadComponent: payloadComponent,
+          schemaPath: 'lexical-clientComponent',
+          silent: true,
+        })
+
+        featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
       }
     }
   }
