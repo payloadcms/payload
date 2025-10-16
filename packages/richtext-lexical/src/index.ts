@@ -1,3 +1,4 @@
+import type { GenericTranslationsObject } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
@@ -7,6 +8,7 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   checkDependencies,
+  type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -82,15 +84,14 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
       resolvedFeatureMap = result.resolvedFeatureMap
     }
 
-    const featureI18n = finalSanitizedEditorConfig.features.i18n
-    for (const lang in i18n) {
-      if (!featureI18n[lang as keyof typeof featureI18n]) {
-        featureI18n[lang as keyof typeof featureI18n] = {
-          lexical: {},
-        }
-      }
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      featureI18n[lang].lexical.general = i18n[lang]
+    const featureI18n: NonNullable<RichTextAdapter['i18n']> =
+      finalSanitizedEditorConfig.features.i18n
+    for (const _lang in i18n) {
+      const lang = _lang as keyof typeof i18n
+      const lexicalI18nForLang = ((featureI18n[lang] ??= {}).lexical ??=
+        {}) as GenericTranslationsObject
+
+      lexicalI18nForLang.general = i18n[lang] ?? {}
     }
 
     return {
