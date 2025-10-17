@@ -42,5 +42,6 @@ export const handleAuthRedirect = ({ config, route, searchParams, user }: Args):
     },
     { addQueryPrefix: true },
   )}`
+
   return `${redirectTo.split('?', 1)[0]}${searchParamsWithRedirect}`
 }

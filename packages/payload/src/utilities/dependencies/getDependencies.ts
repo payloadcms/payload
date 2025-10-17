@@ -25,6 +25,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
+
 const resolvedCwd = path.resolve(process.cwd())
 
 export type NecessaryDependencies = {
