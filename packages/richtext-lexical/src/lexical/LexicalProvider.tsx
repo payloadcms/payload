@@ -85,7 +85,10 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       editable: readOnly !== true,
       editorState: value != null ? JSON.stringify(value) : undefined,
       namespace: editorConfig.lexical.namespace,
-      nodes: getEnabledNodes({ debug: views && Boolean(Object.keys(views).length), editorConfig }),
+      nodes: getEnabledNodes({
+        editorConfig,
+        nodeType: views && Object.keys(views).length ? 'block' : undefined,
+      }),
       onError: (error: Error) => {
         throw error
       },
