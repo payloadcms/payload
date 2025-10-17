@@ -472,11 +472,13 @@ describe('@payloadcms/plugin-search', () => {
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
-        collections: [postsSlug, pagesSlug],
+        collections: [postsSlug],
       }),
     })
 
     expect(endpointRes.status).toBe(200)
+
+    await wait(200)
 
     const { docs: results } = await payload.find({
       collection: 'search',
@@ -533,6 +535,58 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
+  })
+
+  it('should exclude drafts from reindexing by default', async () => {
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page published',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page draft',
+          _status: 'draft',
+        },
+      }),
+    ])
+
+    await wait(200)
+
+    const { totalDocs: totalBeforeReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalBeforeReindex).toBe(1)
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [pagesSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { totalDocs: totalAfterReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalAfterReindex).toBe(totalBeforeReindex)
+
+    const data = await endpointRes.json()
+
+    const totalDocs = 2
+    const nonDrafts = 1
+    expect(data.message).toBe(
+      `Successfully reindexed ${nonDrafts} of ${totalDocs} documents from ${pagesSlug} and skipped ${totalDocs - nonDrafts} drafts.`,
+    )
   })
 
   it('should sync trashed documents correctly with search plugin', async () => {

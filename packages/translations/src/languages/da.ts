@@ -415,7 +415,7 @@ export const daTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} oprettet.',
     successfullyDuplicated: '{{label}} duplikeret.',
     successfullyReindexed:
-      '{{count}} ud af {{total}} dokumenter fra {{collections}} samlinger blev genindekseret med succes.',
+      '{{count}} ud af {{total}} dokumenter fra {{collections}} blev succesfuldt genindekseret, og {{skips}} kladder blev sprunget over.',
     takeOver: 'Overtag',
     thisLanguage: 'Dansk',
     time: 'Tid',

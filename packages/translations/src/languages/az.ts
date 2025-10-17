@@ -418,7 +418,7 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} uğurla yaradıldı.',
     successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
     successfullyReindexed:
-      '{{collections}} kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi.',
+      '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
     takeOver: 'Əvvəl',
     thisLanguage: 'Azərbaycan dili',
     time: 'Vaxt',
