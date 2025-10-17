@@ -97,7 +97,6 @@ export const RscEntryLexicalField: React.FC<
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
-    featureClientImportMap,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,
@@ -111,6 +110,9 @@ export const RscEntryLexicalField: React.FC<
   }
   if (Object.keys(admin).length) {
     props.admin = admin
+  }
+  if (Object.keys(featureClientImportMap).length) {
+    props.featureClientImportMap = featureClientImportMap
   }
 
   for (const key in props) {

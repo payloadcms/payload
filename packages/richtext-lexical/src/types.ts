@@ -156,7 +156,11 @@ export type LexicalRichTextFieldProps = {
       clientFeatureProvider?: FeatureProviderProviderClient<any, any>
     }
   }
-  featureClientImportMap: Record<string, any>
+  /**
+   * Part of the import map that contains client components for all lexical features of this field that
+   * have been added through `feature.componentImports`.
+   */
+  featureClientImportMap?: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
   lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used

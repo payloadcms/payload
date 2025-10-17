@@ -36,7 +36,7 @@ export function initLexicalFeatures(args: Args): {
   /**
    * All modules added to the import map, keyed by the provided key, if feature.componentImports with type object is used
    */
-  const featureClientImportMap: Record<string, any> = {}
+  const featureClientImportMap: Record<string, any> | undefined = {}
 
   for (const [featureKey, resolvedFeature] of resolvedFeatureMapArray) {
     clientFeatures[featureKey] = {}
