@@ -119,7 +119,7 @@ Another error you might see is the following or similarly related to hooks, in p
 useUploadHandlers must be used within UploadHandlersProvider
 ```
 
-This is a common pitfall when using a monorepo setup with multiple packages. In this case, ensure that all packages in the monorepo use the same version of `payload`, `@payloadcms/*`, `next`, `react`, and `react-dom`. You can use pnpm with workspaces to manage dependencies across packages in a monorepo effectively. Unfortunately this error becomes harder to debug inside a monnorepo due to how package managers hoist dependencies as well as resolve them.
+This is a common pitfall when using a monorepo setup with multiple packages. In this case, ensure that all packages in the monorepo use the same version of `payload`, `@payloadcms/*`, `next`, `react`, and `react-dom`. You can use pnpm with workspaces to manage dependencies across packages in a monorepo effectively. Unfortunately this error becomes harder to debug inside a monorepo due to how package managers hoist dependencies as well as resolve them.
 
 If you've pinned the versions and the error persists we recommend removing `.next/`, `node_modules/` and if possible deleting the lockfile and re-generating it to ensure that all packages in the monorepo are using the same version of the dependencies mentioned above.
 
