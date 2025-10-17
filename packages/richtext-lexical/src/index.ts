@@ -7,6 +7,7 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   checkDependencies,
+  deepMergeSimple,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -92,6 +93,8 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       featureI18n[lang].lexical.general = i18n[lang]
     }
+
+    config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
     return {
       CellComponent: {
@@ -783,7 +786,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
           },
         ],
       },
-      i18n: featureI18n,
       outputSchema: ({
         collectionIDFieldTypes,
         config,
