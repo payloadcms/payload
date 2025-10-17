@@ -63,6 +63,7 @@
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
+      "@payloadcms/plugin-mcp": ["./packages/plugin-mcp/src/index.ts"],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"
