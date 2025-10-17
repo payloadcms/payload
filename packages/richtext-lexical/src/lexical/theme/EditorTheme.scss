@@ -2,11 +2,11 @@
 
 @layer payload-default {
   .LexicalEditorTheme {
-    &__ltr {
+    &[dir='ltr'] {
       text-align: left;
     }
 
-    &__rtl {
+    &[dir='rtl'] {
       text-align: right;
     }
 
@@ -296,7 +296,7 @@
       font-size: var(--listitem-marker-font-size);
     }
 
-    &__listItem[dir='rtl'] {
+    [dir='rtl'] &__listItem {
       margin: 0 40px 0.4em 0;
     }
 
@@ -313,8 +313,8 @@
     }
 
     // See comment above for why we need this
-    &__listItemUnchecked[dir='rtl'],
-    &__listItemChecked[dir='rtl'] {
+    [dir='rtl'] &__listItemUnchecked,
+    [dir='rtl'] &__listItemChecked {
       margin-left: 0;
       padding-left: 0;
       padding-right: 25px;
@@ -338,8 +338,8 @@
       position: absolute;
     }
 
-    &__listItemUnchecked[dir='rtl']:before,
-    &__listItemChecked[dir='rtl']:before {
+    [dir='rtl'] &__listItemUnchecked:before,
+    [dir='rtl'] &__listItemChecked:before {
       left: auto;
       right: 0;
     }
