@@ -235,6 +235,10 @@ type RichTextAdapterBase<
     siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
+  /**
+   * @deprecated - manually merge i18n translations into the config.i18n.translations object within the adapter provider instead.
+   * This property will be removed in v4.
+   */
   i18n?: Partial<GenericLanguages>
   outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
