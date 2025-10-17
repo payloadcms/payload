@@ -3407,6 +3407,86 @@ describe('Localization', () => {
       })
     })
   })
+
+  describe('create / update with locale: all', () => {
+    it('should create and with locale all', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      expect(result.title).toEqual({
+        en: 'EN title',
+        ar: 'AR title',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+
+      const resultFromFind = await payload.findByID({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+      })
+
+      expect(resultFromFind.title).toEqual({
+        en: 'EN title',
+        ar: 'AR title',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+    })
+
+    it('should update with locale all', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      global.d = true
+      // Update all locales
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'xx',
+        data: {
+          title: 'XX',
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title updated',
+        hu: 'HU title updated',
+        pt: 'PT title updated',
+        xx: 'XX title updated',
+      })
+    })
+  })
 })
 
 async function createLocalizedPost(data: {
