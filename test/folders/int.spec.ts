@@ -87,7 +87,7 @@ describe('folders', () => {
       })
       const childDocument = await payload.create({
         collection: 'posts',
-        data: { title: 'Child Document', folder: parentFolder.id, folderType: ['posts'] },
+        data: { title: 'Child Document', folder: parentFolder.id },
       })
       const parentFolderQuery = await payload.findByID({
         collection: 'payload-folders',
@@ -151,6 +151,75 @@ describe('folders', () => {
       })
 
       expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
+    })
+
+    it('should populate non-trashed documents when collection has both folders and trash enabled', async () => {
+      const parentFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          folderType: ['posts'],
+          name: 'Posts Folder',
+        },
+      })
+
+      await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+          folder: parentFolder.id,
+        },
+      })
+
+      await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 2',
+          folder: parentFolder.id,
+        },
+      })
+
+      // Create a post that will be trashed
+      const post3 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 3 (to be trashed)',
+          folder: parentFolder.id,
+        },
+      })
+
+      // Trash post3
+      await payload.delete({
+        collection: 'posts',
+        id: post3.id,
+      })
+
+      const parentFolderQuery = await payload.findByID({
+        collection: 'payload-folders',
+        id: parentFolder.id,
+        joins: {
+          documentsAndFolders: {
+            where: {
+              or: [
+                {
+                  deletedAt: {
+                    exists: false,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })
+
+      // Should only see 2 non-trashed posts, not the trashed one
+      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
+
+      // Verify the correct posts are returned
+      const returnedDocs = parentFolderQuery.documentsAndFolders?.docs
+      expect(returnedDocs).toHaveLength(2)
+
+      expect(returnedDocs?.some((doc) => (doc.value as any).title === 'Post 1')).toBe(true)
+      expect(returnedDocs?.some((doc) => (doc.value as any).title === 'Post 2')).toBe(true)
     })
   })
 
