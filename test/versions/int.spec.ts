@@ -929,6 +929,89 @@ describe('Versions', () => {
         expect(updated2.id).toBe(id)
         expect(updated2.title).toBe('new-title-2')
       })
+
+      it('should update main collection when updating draft-only document', async () => {
+        // Create a draft-only document (never been published)
+        const draft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Draft Document',
+            description: 'Initial description',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Update the draft with new field values
+        await payload.update({
+          collection: draftCollectionSlug,
+          id: draft.id,
+          data: {
+            title: 'Updated Draft',
+            description: 'Updated description',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Query the main collection (not versions table) to verify the update
+        const mainDoc = await payload.findByID({
+          collection: draftCollectionSlug,
+          id: draft.id,
+          draft: false, // Explicitly query main collection
+        })
+
+        // Main collection should have the updated data since doc has never been published
+        expect(mainDoc.title).toBe('Updated Draft')
+        expect(mainDoc.description).toBe('Updated description')
+      })
+
+      it('should NOT update main collection when updating draft of previously published document', async () => {
+        // Create and publish a document
+        const published = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Published Document',
+            description: 'Published description',
+            _status: 'published',
+          },
+        })
+
+        // Update it as a draft (creating a draft version)
+        await payload.update({
+          collection: draftCollectionSlug,
+          id: published.id,
+          data: {
+            title: 'Draft Changes',
+            description: 'Draft description',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Query the main collection (not versions table)
+        const mainDoc = await payload.findByID({
+          collection: draftCollectionSlug,
+          id: published.id,
+          draft: false,
+        })
+
+        // Main collection should still have the published data
+        expect(mainDoc.title).toBe('Published Document')
+        expect(mainDoc.description).toBe('Published description')
+        expect(mainDoc._status).toBe('published')
+
+        // But the draft should have the new data
+        const draftDoc = await payload.findByID({
+          collection: draftCollectionSlug,
+          id: published.id,
+          draft: true,
+        })
+
+        expect(draftDoc.title).toBe('Draft Changes')
+        expect(draftDoc.description).toBe('Draft description')
+        expect(draftDoc._status).toBe('draft')
+      })
     })
 
     describe('Update Many', () => {
