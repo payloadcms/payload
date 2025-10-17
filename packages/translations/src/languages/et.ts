@@ -451,7 +451,9 @@ export const etTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopeeri keelde',
     copyToLocale: 'Kopeeri keelde',
     localeToPublish: 'Lokaal avaldamiseks',
+    selectedLocales: 'Valitud lokaadid',
     selectLocaleToCopy: 'Vali keel kopeerimiseks',
+    selectLocaleToDuplicate: 'Valige kohad, mida dubleerida',
   },
   operators: {
     contains: 'sisaldab',

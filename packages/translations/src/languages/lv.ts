@@ -456,7 +456,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopēt uz',
     copyToLocale: 'Kopēt uz lokalizāciju',
     localeToPublish: 'Lokalizācija publicēšanai',
+    selectedLocales: 'Izvēlētās lokalizācijas',
     selectLocaleToCopy: 'Izvēlieties lokalizāciju, no kuras kopēt',
+    selectLocaleToDuplicate: 'Izvēlieties lokalizācijas, kuras dublēt',
   },
   operators: {
     contains: 'satur',

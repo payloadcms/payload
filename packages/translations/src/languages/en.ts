@@ -457,7 +457,9 @@ export const enTranslations = {
     copyTo: 'Copy to',
     copyToLocale: 'Copy to locale',
     localeToPublish: 'Locale to publish',
+    selectedLocales: 'Selected Locales',
     selectLocaleToCopy: 'Select locale to copy',
+    selectLocaleToDuplicate: 'Select locales to duplicate',
   },
   operators: {
     contains: 'contains',

@@ -455,7 +455,9 @@ export const taTranslations: DefaultTranslationsObject = {
     copyTo: 'இதற்கு நகலெடு',
     copyToLocale: 'மொழி அமைவுக்கு நகலெடு',
     localeToPublish: 'வெளியிட வேண்டிய மொழி அமைவு',
+    selectedLocales: 'தேர்வு செய்யப்பட்ட மொழிபெயர்ப்புகள்',
     selectLocaleToCopy: 'நகலெடுக்க வேண்டிய மொழி அமைவைத் தேர்ந்தெடுக்கவும்',
+    selectLocaleToDuplicate: 'மறுநகலெடுக்க உள்ளடக்க வடவிட்டஈ',
   },
   operators: {
     contains: 'உள்ளடக்குகிறது',
