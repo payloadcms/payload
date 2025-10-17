@@ -1,4 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
+import type { TypeWithID, TypeWithVersion } from '../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -16,12 +17,12 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
-export type GlobalFindOneArgs = {
+export type GlobalFindOneArgs<T = JsonObject> = {
   /**
    * You may pass the document data directly which will skip the `db.findOne` database query.
    * This is useful if you want to use this endpoint solely for running hooks and populating data.
    */
-  data?: Record<string, unknown>
+  data?: T
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
@@ -34,8 +35,8 @@ export type GlobalFindOneArgs = {
   slug: string
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
 
-export const findOneOperation = async <T extends Record<string, unknown>>(
-  args: GlobalFindOneArgs,
+export const findOneOperation = async <T extends JsonObject>(
+  args: GlobalFindOneArgs<T>,
 ): Promise<T> => {
   const {
     slug,
@@ -90,9 +91,9 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc =
-      (args.data as any) ??
-      (await req.payload.db.findGlobal({
+    let doc: T =
+      args.data ??
+      (await req.payload.db.findGlobal<T>({
         slug,
         locale: locale!,
         req,
@@ -100,14 +101,14 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         where: overrideAccess ? undefined : (accessResult as Where),
       }))
     if (!doc) {
-      doc = {}
+      doc = {} as T
     }
 
     // /////////////////////////////////////
     // Include Lock Status if required
     // /////////////////////////////////////
     if (includeLockStatus && slug) {
-      let lockStatus: JsonObject | null = null
+      let lockStatus: (JsonObject & TypeWithID) | undefined
 
       try {
         const lockDocumentsProp = globalConfig?.lockDocuments
@@ -141,14 +142,16 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         })
 
         if (lockedDocument && lockedDocument.docs.length > 0) {
-          lockStatus = lockedDocument.docs[0]!
+          lockStatus = lockedDocument.docs[0]
         }
       } catch {
         // swallow error
       }
 
-      doc._isLocked = !!lockStatus
-      doc._userEditing = lockStatus?.user?.value ?? null
+      // These are not stored in the database
+      // they are optional added properties to the returned document
+      ;(doc as Record<string, unknown>)._isLocked = Boolean(lockStatus)
+      ;(doc as Record<string, unknown>)._userEditing = lockStatus?.user?.value ?? null
     }
 
     // /////////////////////////////////////
@@ -156,9 +159,9 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // /////////////////////////////////////
 
     if (globalConfig.versions?.drafts && draftEnabled) {
-      doc = await replaceWithDraftIfAvailable({
+      doc = await replaceWithDraftIfAvailable<T>({
         accessResult,
-        doc,
+        doc: doc as TypeWithVersion<T>['version'],
         entity: globalConfig,
         entityType: 'global',
         overrideAccess,

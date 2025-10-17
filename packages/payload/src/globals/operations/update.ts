@@ -26,6 +26,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { populateLocalizedMeta } from '../../utilities/populateLocalizedMeta.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -165,6 +166,24 @@ export const updateOperation = async <
       overrideLock,
       req,
     })
+
+    // /////////////////////////////////////
+    // Handle localized meta
+    // /////////////////////////////////////
+
+    if (
+      req.payload.config.experimental?.localizeMeta &&
+      req.payload.config.localization &&
+      data._status &&
+      req.payload.config.localization.locales.length > 0
+    ) {
+      data.localizedMeta = populateLocalizedMeta({
+        config: req.payload.config,
+        previousMeta: originalDoc.localizedMeta,
+        publishSpecificLocale,
+        status: data._status,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields

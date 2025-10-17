@@ -1,0 +1,45 @@
+---
+title: Experimental Features
+label: Overview
+order: 10
+desc: Enable and configure experimental functionality within Payload. These featuresmay be unstable and may change or be removed without notice.
+keywords: experimental, unstable, beta, preview, features, configuration, Payload, cms, headless, javascript, node, react, nextjs
+---
+
+Experimental features allow you to try out new functionality before it becomes a stable part of Payload. These features may still be in active development, may have incomplete functionality, and can change or be removed in future releases without warning.
+
+## How It Works
+
+Experimental features are configured via the root-level `experimental` property in your [Payload Config](../configuration/overview). This property contains individual feature flags, each flag can be configured independently, allowing you to selectively opt into specific functionality.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  experimental: {
+    localizeMeta: true, // highlight-line
+  },
+})
+```
+
+## Experimental Options
+
+The following options are available:
+
+| Option             | Description                                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`localizeMeta`** | **Boolean.** When `true`, shows document metadata (e.g., status, updatedAt) per locale in the admin panel instead of showing the latest overall metadata. Defaults to `false`. |
+
+This list may change without notice.
+
+## When to Use Experimental Features
+
+You might enable an experimental feature when:
+
+- You want early access to new capabilities before their stable release.
+- You can accept the risks of using potentially unstable functionality.
+- You are testing new features in a development or staging environment.
+- You wish to provide feedback to the Payload team on new functionality.
+
+If you are working on a production application, carefully evaluate whether the benefits outweigh the risks. For most stable applications, it is recommended to wait until the feature is officially released.
