@@ -52,6 +52,7 @@ const NestProviders = ({
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
     props
+  const { views } = fieldProps
 
   const parentContext = useEditorConfigContext()
 
@@ -80,11 +81,17 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       )
     }
 
+    // Use the 'default' view if available, otherwise undefined
+    const nodeViews = views?.default
+
     return {
       editable: readOnly !== true,
       editorState: value != null ? JSON.stringify(value) : undefined,
       namespace: editorConfig.lexical.namespace,
-      nodes: getEnabledNodes({ editorConfig }),
+      nodes: getEnabledNodes({
+        editorConfig,
+        nodeViews,
+      }),
       onError: (error: Error) => {
         throw error
       },
@@ -92,7 +99,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     }
     // Important: do not add readOnly and value to the dependencies array. This will cause the entire lexical editor to re-render if the document is saved, which will
     // cause the editor to lose focus.
-  }, [editorConfig])
+  }, [editorConfig, views])
 
   if (!initialConfig) {
     return <p>Loading...</p>
@@ -116,6 +123,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
             isSmallWidthViewport={isSmallWidthViewport}
+            nodeViews={views?.default}
             onChange={onChange}
           />
         </NestProviders>

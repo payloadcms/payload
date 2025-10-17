@@ -1,7 +1,11 @@
 'use client'
-import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
-
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type EditorConfig,
+  type LexicalEditor,
+  type LexicalNode,
+} from 'lexical'
 import React, { type JSX } from 'react'
 
 import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
@@ -50,12 +54,14 @@ export class BlockNode extends ServerBlockNode {
 }
 
 export function $createBlockNode(fields: BlockFieldsOptionalID): BlockNode {
-  return new BlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new BlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isBlockNode(node: BlockNode | LexicalNode | null | undefined): node is BlockNode {

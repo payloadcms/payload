@@ -6,8 +6,7 @@ import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminProps, LexicalRichTextCellProps } from '../types.js'
+import type { LexicalRichTextCellProps } from '../types.js'
 
 function recurseEditorState(
   editorState: SerializedLexicalNode[],
@@ -32,10 +31,8 @@ function recurseEditorState(
 
 export const RscEntryLexicalCell: React.FC<
   {
-    admin: LexicalFieldAdminProps
     i18n: I18nClient
     payload: Payload
-    sanitizedEditorConfig: SanitizedServerEditorConfig
   } & LexicalRichTextCellProps
 > = (props) => {
   const {
@@ -49,7 +46,6 @@ export const RscEntryLexicalCell: React.FC<
     onClick: onClickFromProps,
     payload,
     rowData,
-    sanitizedEditorConfig,
   } = props
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined

@@ -3,6 +3,7 @@ import type {
   ClientField,
   DefaultServerCellComponentProps,
   LabelFunction,
+  PayloadComponent,
   RichTextAdapter,
   RichTextField,
   RichTextFieldClient,
@@ -11,6 +12,7 @@ import type {
   ServerFieldBase,
   StaticLabel,
 } from 'payload'
+import type { JSX } from 'react'
 
 import type {
   BaseClientFeatureProps,
@@ -80,10 +82,60 @@ export type FeaturesInput =
     }) => FeatureProviderServer<any, any, any>[])
   | FeatureProviderServer<any, any, any>[]
 
+/**
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
+export type LexicalEditorNodeMap = {
+  [node: string]: {
+    /**
+     * Provide a react component to render the node. This will only work in the following cases:
+     * - If used in a JSX converter: will always work
+     * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
+     */
+    Component?: (args: {}) => JSX.Element
+    /**
+     * Provide a function to create the DOM element for the node. This will only work in the following cases:
+     * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
+     */
+    createDOM?: (args: {}) => HTMLElement
+    /**
+     * Provide a string to use as the HTML element for the node. This will only work in the following cases:
+     * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
+     * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
+     */
+    html?: ((args: {}) => string) | string
+  }
+}
+
+/**
+ * A map of views, which can be used to render the editor in different ways.
+ *
+ * In order to override the default view, you can add a `default` key to the map.
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
+export type LexicalEditorViewMap = {
+  [viewKey: string]: LexicalEditorNodeMap
+}
+
+/**
+ * @todo rename to LexicalEditorArgs in 4.0, since these are arguments for the lexicalEditor function
+ */
 export type LexicalEditorProps = {
   admin?: LexicalFieldAdminProps
   features?: FeaturesInput
   lexical?: LexicalEditorConfig
+  /**
+   * A path to a LexicalEditorViewMap, which can be used to render the editor in different ways.
+   *
+   * In order to override the default view, you can add a `default` key to the map.
+   *
+   * @experimental - This API is experimental and may change in a minor release.
+   * @internal
+   */
+  views?: PayloadComponent
 }
 
 export type LexicalRichTextAdapter = {
@@ -117,14 +169,19 @@ export type LexicalRichTextFieldProps = {
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
-      clientFeatureProps?: object
+      clientFeatureProps?: BaseClientFeatureProps<Record<string, any>>
       clientFeatureProvider?: FeatureProviderProviderClient<any, any>
     }
   }
-  featureClientImportMap: Record<string, any>
+  /**
+   * Part of the import map that contains client components for all lexical features of this field that
+   * have been added through `feature.componentImports`.
+   */
+  featureClientImportMap?: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
   lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
+  views?: LexicalEditorViewMap
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 

@@ -9,6 +9,7 @@ import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
+import type { LexicalEditorNodeMap } from '../types.js'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
@@ -20,6 +21,7 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { NodeViewOverridePlugin } from './plugins/NodeViewOverridePlugin/index.js'
 import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
 import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
@@ -30,9 +32,10 @@ export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
+    nodeViews?: LexicalEditorNodeMap
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, nodeViews, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -117,6 +120,7 @@ export const LexicalEditor: React.FC<
         <ClipboardPlugin />
         <TextPlugin features={editorConfig.features} />
         <SelectAllPlugin />
+        <NodeViewOverridePlugin nodeViews={nodeViews} />
         {isEditable && (
           <OnChangePlugin
             // Selection changes can be ignored here, reducing the
