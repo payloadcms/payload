@@ -158,13 +158,18 @@ export async function validateSearchParam({
         const entitySlug = collectionSlug || globalConfig!.slug
         const segments = fieldPath.split('.')
 
-        if (
-          versionFields &&
-          (segments[0] === 'parent' ||
-            segments[0] === 'version' ||
-            segments[0] === 'snapshot' ||
-            segments[0] === 'latest')
-        ) {
+        if (versionFields && segments.length === 0 && segments[0]) {
+          if (['latest', 'parent'].includes(segments[0])) {
+            return
+          }
+          if (req.payload.config.localization) {
+            if (segments[0] === 'snapshot') {
+              return
+            }
+          }
+        }
+
+        if (versionFields && segments[0] === 'version') {
           segments.shift()
         }
 
