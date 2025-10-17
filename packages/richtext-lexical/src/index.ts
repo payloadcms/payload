@@ -1047,7 +1047,12 @@ export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.j
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 
-export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
+export type {
+  LexicalEditorProps,
+  LexicalEditorViewMap,
+  LexicalFieldAdminProps,
+  LexicalRichTextAdapter,
+} from './types.js'
 
 export { buildDefaultEditorState, buildEditorState } from './utilities/buildEditorState.js'
 export { createServerFeature } from './utilities/createServerFeature.js'

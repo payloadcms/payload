@@ -81,6 +81,10 @@ export type FeaturesInput =
     }) => FeatureProviderServer<any, any, any>[])
   | FeatureProviderServer<any, any, any>[]
 
+/**
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
 export type LexicalEditorNodeMap = {
   [node: string]: {
     /**
@@ -101,6 +105,9 @@ export type LexicalEditorNodeMap = {
  * A map of views, which can be used to render the editor in different ways.
  *
  * In order to override the default view, you can add a `default` key to the map.
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
  */
 export type LexicalEditorViewMap = {
   [viewKey: string]: LexicalEditorNodeMap
@@ -117,6 +124,9 @@ export type LexicalEditorProps = {
    * A path to a LexicalEditorViewMap, which can be used to render the editor in different ways.
    *
    * In order to override the default view, you can add a `default` key to the map.
+   *
+   * @experimental - This API is experimental and may change in a minor release.
+   * @internal
    */
   views?: PayloadComponent
 }
