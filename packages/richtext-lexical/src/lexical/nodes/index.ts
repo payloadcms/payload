@@ -9,38 +9,69 @@ export function getEnabledNodes({
   debug,
   editorConfig,
 }: {
-  debugeditorConfig: SanitizedClientEditorConfig | SanitizedServerEditorConfig
+  debug?: boolean
+  editorConfig: SanitizedClientEditorConfig | SanitizedServerEditorConfig
 }): Array<Klass<LexicalNode> | LexicalNodeReplacement> {
   const nodes = getEnabledNodesFromServerNodes({
     nodes: editorConfig.features.nodes,
   })
 
-  // Apply view overrides to node prototypes
-  nodes.forEach((node) => {
-    if ('getType' in node && node.getType() === 'block') {
-      // Store the original decorate method
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const originalDecorate = (node as any).prototype.decorate
-
-      // Override the decorate method on the prototype
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(node as any).prototype.decorate = function (editor: any, config: any): any {
-        // Your custom view logic here
-        // You can check editorConfig.views to see if there's a custom view for 'block'
-        // and render that instead
-        if (debug) {
-          console.log('DEBUG')
-          return React.createElement('div', { children: 'DEBUG' })
-        }
-        console.log('DEBUG', debug)
-
-        // For now, just call the original
-        return originalDecorate.call(this, editor, config)
-      }
-    }
-  })
-
+  // Use Node Replacement to override nodes
   return nodes
+    .map((node) => {
+      if ('getType' in node && node.getType() === 'block' && debug) {
+        // Create a custom node class that extends the original
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const OriginalNode = node as any
+
+        class CustomBlockNode extends OriginalNode {
+          // Override static methods that create instances to return CustomBlockNode
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          static clone(node: any): any {
+            const cloned = super.clone(node)
+            // Change prototype to CustomBlockNode
+            Object.setPrototypeOf(cloned, CustomBlockNode.prototype)
+            return cloned
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          static importJSON(serializedNode: any): any {
+            const node = super.importJSON(serializedNode)
+            // Change prototype to CustomBlockNode
+            Object.setPrototypeOf(node, CustomBlockNode.prototype)
+            return node
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          decorate(_editor: any, _config: any): any {
+            // Your custom view logic here
+            return React.createElement('div', { children: 'DEBUG' })
+          }
+        }
+
+        // Return a node replacement object
+        return {
+          replace: OriginalNode,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          with: (node: any) => {
+            // Use the parent constructor via the prototype
+            const newNode = new OriginalNode({
+              cacheBuster: node.__cacheBuster,
+              fields: node.__fields,
+              format: node.__format,
+              // Don't pass key - let Lexical generate a new one
+            })
+            // Change its prototype to CustomBlockNode
+            Object.setPrototypeOf(newNode, CustomBlockNode.prototype)
+            return newNode
+          },
+          withKlass: CustomBlockNode,
+        } as unknown as LexicalNodeReplacement
+      }
+
+      return node
+    })
+    .filter(Boolean)
 }
 
 export function getEnabledNodesFromServerNodes({
