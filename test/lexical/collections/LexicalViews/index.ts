@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { lexicalViewsSlug } from '../../slugs.js'
 
@@ -16,7 +16,44 @@ export const LexicalViews: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor({
         views: './collections/LexicalViews/views.js#lexicalViews',
-        features: ({ defaultFeatures }) => [...defaultFeatures],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                slug: 'customViewsTestBlock',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
+    },
+    {
+      name: 'vanillaViews',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                slug: 'vanillaViewsTestBlock',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
       }),
     },
   ],

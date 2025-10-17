@@ -374,6 +374,21 @@ export interface LexicalView {
     };
     [k: string]: unknown;
   } | null;
+  vanillaViews?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1226,6 +1241,7 @@ export interface LexicalFieldsSelect<T extends boolean = true> {
  */
 export interface LexicalViewsSelect<T extends boolean = true> {
   customViews?: T;
+  vanillaViews?: T;
   updatedAt?: T;
   createdAt?: T;
 }
