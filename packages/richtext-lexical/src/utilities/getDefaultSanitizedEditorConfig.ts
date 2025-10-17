@@ -1,8 +1,8 @@
 import type { SanitizedConfig } from 'payload'
 
-import { type SanitizedServerEditorConfig } from './index.js'
-import { defaultEditorConfig } from './lexical/config/server/default.js'
-import { sanitizeServerEditorConfig } from './lexical/config/server/sanitize.js'
+import { type SanitizedServerEditorConfig } from '../index.js'
+import { defaultEditorConfig } from '../lexical/config/server/default.js'
+import { sanitizeServerEditorConfig } from '../lexical/config/server/sanitize.js'
 
 let cachedDefaultSanitizedServerEditorConfig:
   | null
