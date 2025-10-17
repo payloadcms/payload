@@ -8,9 +8,9 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
-  Config,
   Field,
   FieldSchemaMap,
+  ImportMapGenerators,
   JsonObject,
   PayloadComponent,
   PayloadRequest,
@@ -294,8 +294,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     | {
         [key: string]: PayloadComponent
       }
-    // @ts-expect-error - TODO: fix this
-    | Config['admin']['importMap']['generators'][0]
+    | ImportMapGenerators[0]
     | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: (args: {
