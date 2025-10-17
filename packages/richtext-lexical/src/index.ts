@@ -103,8 +103,9 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
           admin: args?.admin,
-          sanitizedEditorConfig: finalSanitizedEditorConfig,
           views: args?.views,
+          // SanitizedEditorConfig is manually passed by `renderField` in `fieldSchemasToFormState/renderField.tsx`
+          // in order to reduce the size of the field schema
         },
       },
       generateImportMap: getGenerateImportMap({
