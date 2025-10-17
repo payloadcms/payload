@@ -117,7 +117,7 @@ export const RscEntryLexicalField: React.FC<
       schemaPath: 'lexical-viewMap',
       silent: true,
     })
-    if (viewMap && Object.keys(viewMap).length) {
+    if (viewMap) {
       props.views = viewMap
     }
   }
