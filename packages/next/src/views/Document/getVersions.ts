@@ -143,11 +143,6 @@ export const getVersions = async ({
                     equals: id,
                   },
                 },
-                {
-                  snapshot: {
-                    not_equals: true,
-                  },
-                },
               ],
             },
             extractAccessFromPermission(docPermissions.readVersions),
@@ -251,11 +246,6 @@ export const getVersions = async ({
             autosave: true,
           },
           user,
-          where: {
-            snapshot: {
-              not_equals: true,
-            },
-          },
         })
 
         if (
