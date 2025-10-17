@@ -8,6 +8,7 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   checkDependencies,
+  deepMergeSimple,
   type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
@@ -93,6 +94,8 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
       lexicalI18nForLang.general = i18n[lang] ?? {}
     }
+
+    config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
     return {
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
@@ -775,7 +778,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
           },
         ],
       },
-      i18n: featureI18n,
       outputSchema: ({
         collectionIDFieldTypes,
         config,

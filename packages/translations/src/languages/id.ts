@@ -417,7 +417,7 @@ export const idTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} berhasil dibuat.',
     successfullyDuplicated: '{{label}} berhasil diduplikasi.',
     successfullyReindexed:
-      'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}',
+      'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     takeOver: 'Ambil alih',
     thisLanguage: 'Bahasa Indonesia',
     time: 'Waktu',

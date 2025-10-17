@@ -1,3 +1,6 @@
+import { en } from '@payloadcms/translations/languages/en'
+import { es } from '@payloadcms/translations/languages/es'
+import { he } from '@payloadcms/translations/languages/he'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { type Config } from 'payload'
@@ -87,7 +90,14 @@ export const baseConfig: Partial<Config> = {
   localization: {
     defaultLocale: 'en',
     fallback: true,
-    locales: ['en', 'es'],
+    locales: ['en', 'es', 'he'],
+  },
+  i18n: {
+    supportedLanguages: {
+      en,
+      es,
+      he,
+    },
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
