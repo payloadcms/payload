@@ -102,6 +102,8 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     return <p>Loading...</p>
   }
 
+  const nodeTypeToOverride = views && Object.keys(views).length ? 'block' : undefined
+
   // We need to add initialConfig.editable to the key to force a re-render when the readOnly prop changes.
   // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
   return (
@@ -120,6 +122,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
             isSmallWidthViewport={isSmallWidthViewport}
+            nodeType={nodeTypeToOverride}
             onChange={onChange}
           />
         </NestProviders>

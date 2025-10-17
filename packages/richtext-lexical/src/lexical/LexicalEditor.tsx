@@ -20,6 +20,7 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { NodeViewOverridePlugin } from './plugins/NodeViewOverridePlugin/index.js'
 import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
 import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
@@ -30,9 +31,10 @@ export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
+    nodeType?: string
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, nodeType, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -117,6 +119,7 @@ export const LexicalEditor: React.FC<
         <ClipboardPlugin />
         <TextPlugin features={editorConfig.features} />
         <SelectAllPlugin />
+        <NodeViewOverridePlugin nodeType={nodeType} />
         {isEditable && (
           <OnChangePlugin
             // Selection changes can be ignored here, reducing the

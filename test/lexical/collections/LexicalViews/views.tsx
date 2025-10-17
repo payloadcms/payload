@@ -5,7 +5,6 @@ export const lexicalViews: LexicalEditorViewMap = {
   default: {
     heading: {
       createDOM() {
-        // Should return <h2>This custom heading is always an h2</h2>
         const h2 = document.createElement('h2')
         h2.textContent = 'This custom heading is always an h2'
         return h2
