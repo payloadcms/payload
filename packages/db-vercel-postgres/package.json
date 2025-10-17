@@ -90,7 +90,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.25.5",
+    "esbuild": "0.25.10",
     "payload": "workspace:*"
   },
   "peerDependencies": {
