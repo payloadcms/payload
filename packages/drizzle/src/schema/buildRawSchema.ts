@@ -22,6 +22,7 @@ export const buildRawSchema = ({
   setColumnID: SetColumnID
 }) => {
   adapter.indexes = new Set()
+  adapter.foreignKeys = new Set()
 
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({

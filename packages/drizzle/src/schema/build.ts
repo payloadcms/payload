@@ -188,6 +188,8 @@ export const buildTable = ({
 
   if (hasLocalizedField || localizedRelations.size) {
     const localeTableName = `${tableName}${adapter.localesSuffix}`
+    adapter.rawTables[localeTableName] = localesTable
+
     localesColumns.id = {
       name: 'id',
       type: 'serial',
@@ -337,6 +339,7 @@ export const buildTable = ({
   if (isRoot) {
     if (hasManyTextField) {
       const textsTableName = `${rootTableName}_texts`
+      adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
         id: {
@@ -442,6 +445,7 @@ export const buildTable = ({
 
     if (hasManyNumberField) {
       const numbersTableName = `${rootTableName}_numbers`
+      adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
           name: 'id',

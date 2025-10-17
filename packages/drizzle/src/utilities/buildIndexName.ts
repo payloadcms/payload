@@ -18,7 +18,7 @@ export const buildIndexName = ({
     indexName = `${name.slice(0, 60 - suffix.length)}${suffix}`
   }
 
-  if (!adapter.indexes.has(indexName)) {
+  if (!adapter.indexes.has(indexName) && !(indexName in adapter.rawTables)) {
     adapter.indexes.add(indexName)
     return indexName
   }
