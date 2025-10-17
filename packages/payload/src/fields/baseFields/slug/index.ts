@@ -95,7 +95,7 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug(fieldToUse)],
+          beforeChange: [generateSlug({ fieldName, fieldToUse })],
         },
         localized,
       },
