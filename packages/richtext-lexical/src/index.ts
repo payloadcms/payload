@@ -109,6 +109,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         },
       },
       generateImportMap: getGenerateImportMap({
+        lexicalEditorArgs: args,
         resolvedFeatureMap,
       }),
       generateSchemaMap: getGenerateSchemaMap({

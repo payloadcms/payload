@@ -46,6 +46,7 @@ const RichTextComponent: React.FC<
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
+    views,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin

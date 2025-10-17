@@ -174,6 +174,7 @@ export type LexicalRichTextFieldProps = {
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
   lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
+  views?: LexicalEditorViewMap
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
