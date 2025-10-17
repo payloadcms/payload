@@ -95,20 +95,8 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     }
 
     return {
-      CellComponent: {
-        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
-        serverProps: {
-          admin: args?.admin,
-          sanitizedEditorConfig: finalSanitizedEditorConfig,
-        },
-      },
-      DiffComponent: {
-        path: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
-        serverProps: {
-          admin: args?.admin,
-          sanitizedEditorConfig: finalSanitizedEditorConfig,
-        },
-      },
+      CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+      DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
@@ -116,6 +104,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         serverProps: {
           admin: args?.admin,
           sanitizedEditorConfig: finalSanitizedEditorConfig,
+          views: args?.views,
         },
       },
       generateImportMap: getGenerateImportMap({

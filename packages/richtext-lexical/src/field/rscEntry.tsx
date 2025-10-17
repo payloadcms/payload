@@ -12,11 +12,7 @@ import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type {
-  LexicalFieldAdminClientProps,
-  LexicalFieldAdminProps,
-  LexicalRichTextFieldProps,
-} from '../types.js'
+import type { LexicalEditorProps, LexicalRichTextFieldProps } from '../types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'
@@ -25,10 +21,10 @@ import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
   {
-    admin: LexicalFieldAdminProps
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
     Pick<FieldPaths, 'path'> &
+    Pick<LexicalEditorProps, 'admin' | 'views'> &
     ServerComponentProps
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
