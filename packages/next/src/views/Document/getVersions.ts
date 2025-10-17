@@ -170,11 +170,15 @@ export const getVersions = async ({
                     equals: id,
                   },
                 },
-                {
-                  snapshot: {
-                    not_equals: true,
-                  },
-                },
+                ...(payload.config.localization
+                  ? [
+                      {
+                        snapshot: {
+                          not_equals: true,
+                        },
+                      },
+                    ]
+                  : []),
                 {
                   'version._status': {
                     equals: 'draft',
@@ -265,11 +269,15 @@ export const getVersions = async ({
                     equals: 'draft',
                   },
                 },
-                {
-                  snapshot: {
-                    not_equals: true,
-                  },
-                },
+                ...(payload.config.localization
+                  ? [
+                      {
+                        snapshot: {
+                          not_equals: true,
+                        },
+                      },
+                    ]
+                  : []),
                 {
                   updatedAt: {
                     greater_than: publishedDoc.updatedAt,
