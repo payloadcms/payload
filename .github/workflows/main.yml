@@ -40,6 +40,7 @@ jobs:
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
+              - '.tool-versions'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -47,6 +48,7 @@ jobs:
               - 'templates/**'
             needs_tests:
               - '.github/workflows/main.yml'
+              - '.tool-versions'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
