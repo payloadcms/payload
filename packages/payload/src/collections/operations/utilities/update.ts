@@ -298,8 +298,34 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
-  if (!shouldSaveDraft) {
-    // Ensure updatedAt date is always updated
+  // Determine if we should update the main document
+  // - Always update if not saving as draft
+  // - When saving as draft, only update if the document has never been published
+  //   (this ensures join queries work correctly for draft-only documents)
+  let shouldUpdateMainDocument = !shouldSaveDraft
+
+  if (shouldSaveDraft && collectionConfig.versions?.drafts) {
+    // Check if there's ever been a published version
+    const publishedVersion = await getLatestCollectionVersion({
+      id,
+      config: collectionConfig,
+      payload,
+      published: true,
+      query: {
+        collection: collectionConfig.slug,
+        locale,
+        req,
+        where: combineQueries({ id: { equals: id } }, accessResults),
+      },
+      req,
+    })
+
+    // Only update main document if there's no published version (draft-only document)
+    shouldUpdateMainDocument = !publishedVersion
+  }
+
+  if (shouldUpdateMainDocument) {
+    // Ensure updatedAt date is always updated when updating the main document
     dataToUpdate.updatedAt = new Date().toISOString()
     result = await req.payload.db.updateOne({
       id,
