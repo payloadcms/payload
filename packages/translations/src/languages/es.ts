@@ -291,6 +291,8 @@ export const esTranslations: DefaultTranslationsObject = {
     deleted: 'Eliminado',
     deletedAt: 'Eliminado En',
     deletedCountSuccessfully: 'Se eliminaron {{count}} {{label}} correctamente.',
+    deletedInLocale:
+      'Se ha eliminado con éxito todos los datos de {{locale}}. El documento en sí no fue eliminado.',
     deletedSuccessfully: 'Eliminado correctamente.',
     deleteLabel: 'Eliminar {{label}}',
     deletePermanently: 'Omitir la papelera y eliminar permanentemente',
@@ -331,6 +333,7 @@ export const esTranslations: DefaultTranslationsObject = {
     goBack: 'Volver',
     groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
+    in: 'en',
     isEditing: 'está editando',
     item: 'Artículo',
     items: 'artículos',

@@ -287,6 +287,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     deleted: 'Obrisano',
     deletedAt: 'Obrisano u',
     deletedCountSuccessfully: 'Успешно избрисано {{count}} {{label}}.',
+    deletedInLocale:
+      'Uspješno uklonjeni svi podaci {{locale}}. Dokument sam po sebi nije bio izbrisan.',
     deletedSuccessfully: 'Успешно избрисано.',
     deleteLabel: 'Izbriši {{label}}',
     deletePermanently: 'Preskoči otpad i trajno izbriši',
@@ -327,6 +329,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     goBack: 'Врати се',
     groupByLabel: 'Grupiši po {{label}}',
     import: 'Uvoz',
+    in: 'U',
     isEditing: 'уређује',
     item: 'Artikal',
     items: 'artikli',

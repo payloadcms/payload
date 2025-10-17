@@ -295,6 +295,8 @@ export const deTranslations: DefaultTranslationsObject = {
     deleted: 'Gelöscht',
     deletedAt: 'Gelöscht am',
     deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
+    deletedInLocale:
+      'Alle {{locale}} Daten wurden erfolgreich entfernt. Das Dokument selbst wurde nicht gelöscht.',
     deletedSuccessfully: 'Erfolgreich gelöscht.',
     deleteLabel: '{{label}} löschen',
     deletePermanently: 'Überspringen Sie den Papierkorb und löschen Sie dauerhaft.',
@@ -335,6 +337,7 @@ export const deTranslations: DefaultTranslationsObject = {
     goBack: 'Zurück',
     groupByLabel: 'Gruppieren nach {{label}}',
     import: 'Importieren',
+    in: 'in',
     isEditing: 'bearbeitet gerade',
     item: 'Artikel',
     items: 'Artikel',
