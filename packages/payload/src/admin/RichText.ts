@@ -250,6 +250,11 @@ type RichTextAdapterBase<
    * This property will be removed in v4.
    */
   i18n?: Partial<GenericLanguages>
+  /**
+   * Return the JSON schema for the field value. The JSON schema is read by
+   * `json-schema-to-typescript` which is used to generate types for this richtext field
+   * payload-types.ts)
+   */
   outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
@@ -261,6 +266,10 @@ type RichTextAdapterBase<
     interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
+  /**
+   * Provide validation function for the richText field. This function is run the same way
+   * as other field validation functions.
+   */
   validate: Validate<
     Value,
     Value,
@@ -274,6 +283,10 @@ export type RichTextAdapter<
   AdapterProps = any,
   ExtraFieldProperties = any,
 > = {
+  /**
+   * Component that will be displayed in the list view. Can be typed as
+   * `DefaultCellComponentProps` or `DefaultServerCellComponentProps`.
+   */
   CellComponent: PayloadComponent<never>
   /**
    * Component that will be displayed in the version diff view.
@@ -283,6 +296,9 @@ export type RichTextAdapter<
     FieldDiffServerProps<RichTextField, RichTextFieldClient>,
     FieldDiffClientProps<RichTextFieldClient>
   >
+  /**
+   * Component that will be displayed in the edit view.
+   */
   FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
@@ -297,7 +313,8 @@ export type RichTextAdapterProvider<
 }: {
   config: SanitizedConfig
   /**
-   * Whether or not this is the root richText editor, defined in the payload.config.ts.
+   * Whether or not this is the root richText editor, defined in the top-level `editor` property
+   * of the Payload Config.
    *
    * @default false
    */
