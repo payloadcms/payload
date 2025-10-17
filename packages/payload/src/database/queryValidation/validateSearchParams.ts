@@ -1,3 +1,4 @@
+import type { FieldsPermissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -157,36 +158,29 @@ export async function validateSearchParam({
         const entitySlug = collectionSlug || globalConfig!.slug
         const segments = fieldPath.split('.')
 
-        let fieldAccess: any
-
-        if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
-
-          if (
-            segments[0] === 'parent' ||
+        if (
+          versionFields &&
+          (segments[0] === 'parent' ||
             segments[0] === 'version' ||
             segments[0] === 'snapshot' ||
-            segments[0] === 'latest'
-          ) {
-            segments.shift()
-          }
-        } else {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
+            segments[0] === 'latest')
+        ) {
+          segments.shift()
         }
 
+        let fieldAccess: FieldsPermissions = policies[entityType]![entitySlug]!.fields
         if (segments.length) {
-          segments.forEach((segment) => {
+          for (const segment of segments) {
             if (fieldAccess[segment]) {
+              if (fieldAccess[segment].read.permission === false) {
+                errors.push({ path: fieldPath })
+                break
+              }
+
               if ('fields' in fieldAccess[segment]) {
-                fieldAccess = fieldAccess[segment].fields
-              } else {
-                fieldAccess = fieldAccess[segment]
+                fieldAccess = fieldAccess[segment].fields!
               }
             }
-          })
-
-          if (!fieldAccess?.read?.permission) {
-            errors.push({ path: fieldPath })
           }
         }
       }
