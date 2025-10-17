@@ -12,6 +12,7 @@ import type {
   ServerFieldBase,
   StaticLabel,
 } from 'payload'
+import type { JSX } from 'react'
 
 import type {
   BaseClientFeatureProps,
@@ -89,15 +90,21 @@ export type LexicalEditorNodeMap = {
   [node: string]: {
     /**
      * Provide a react component to render the node. This will only work in the following cases:
-     * - If uses in a JSX converter: will always work
+     * - If used in a JSX converter: will always work
      * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
      */
-    Component?: React.ReactNode
+    Component?: (args: {}) => JSX.Element
     /**
      * Provide a function to create the DOM element for the node. This will only work in the following cases:
      * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
      */
     createDOM?: (args: {}) => HTMLElement
+    /**
+     * Provide a string to use as the HTML element for the node. This will only work in the following cases:
+     * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
+     * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
+     */
+    html?: ((args: {}) => string) | string
   }
 }
 
