@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
-import type { Payload, PayloadRequest, Where } from '../types/index.js'
+import type { Payload, PayloadRequest } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
 import { combineQueries } from '../database/combineQueries.js'
@@ -15,6 +15,12 @@ type Args = {
   req?: PayloadRequest
 }
 
+/**
+ * Returns document with localized fields
+ *
+ * - If versions are enabled: from the versions collection
+ * - If versions are disabled: from the main collection
+ */
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   config,

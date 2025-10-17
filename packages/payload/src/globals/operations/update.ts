@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, JsonObject } from '../../index.js'
+import type { GlobalSlug, JsonObject, TypeWithID } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
@@ -224,6 +224,8 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
+    let result: JsonObject
+    let snapshotResult: JsonObject | undefined
 
     const beforeChangeArgs = {
       collection: null,
@@ -238,43 +240,42 @@ export const updateOperation = async <
         shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    let snapshotDocWithLocales
-    let docWithLocales = globalJSON
+    // ///////////////////////////////////////////
+    // Handle locale specific publish / unpublish
+    // ///////////////////////////////////////////
 
-    /**
-     * Locale-Specific Snapshot Logic
-     *
-     * Both `publishSpecificLocale` and `unpublishSpecificLocale` require snapshots
-     */
     if (globalConfig.versions && (publishSpecificLocale || unpublishSpecificLocale)) {
-      snapshotDocWithLocales = await beforeChange({
+      // snapshotResult will contain all localized data (draft and published)
+      snapshotResult = await beforeChange({
         ...beforeChangeArgs,
         docWithLocales: globalJSON,
       })
 
-      const lastPublished = await getLatestGlobalVersion({
-        slug,
-        config: globalConfig,
-        payload,
-        published: true,
-        req,
-        where: query,
+      // result will contain only published localized data
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        data: unpublishSpecificLocale ? {} : beforeChangeArgs.data,
+        docWithLocales:
+          (await getLatestGlobalVersion({
+            slug,
+            config: globalConfig,
+            payload,
+            published: true,
+            req,
+            where: query,
+          })) || {},
+        skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
       })
 
-      docWithLocales = lastPublished ? lastPublished : {}
-    }
-
-    let result = await beforeChange({
-      ...beforeChangeArgs,
-      data: unpublishSpecificLocale ? {} : data,
-      docWithLocales,
-      skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
-    })
-
-    if (unpublishSpecificLocale && snapshotDocWithLocales) {
-      if (Object.keys(result).length === 0) {
-        result = snapshotDocWithLocales
+      if (unpublishSpecificLocale && snapshotResult && Object.keys(result).length === 0) {
+        result = snapshotResult
       }
+    } else {
+      // result will contain all localized data (draft and published)
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales: globalJSON,
+      })
     }
 
     // /////////////////////////////////////
@@ -327,7 +328,7 @@ export const updateOperation = async <
         publishSpecificLocale,
         req,
         select,
-        snapshot: snapshotDocWithLocales,
+        snapshot: snapshotResult,
         unpublishSpecificLocale,
       })
 

@@ -22,8 +22,8 @@ type Args = {
   req?: PayloadRequest
   select?: SelectType
   /**
-   * If present, this is the document state before the update operation was applied.
-   * The data should be in localized format for localized fields.
+   * If present, this is the latest document which should have
+   * all **draft and published** data.
    */
   snapshot?: any
   unpublishSpecificLocale?: string
@@ -41,7 +41,7 @@ export const saveVersion = async ({
   publishSpecificLocale,
   req,
   select,
-  snapshot: snapshotDocWithLocales,
+  snapshot,
   unpublishSpecificLocale,
 }: Args): Promise<TypeWithID> => {
   let result: TypeWithID | undefined
@@ -158,8 +158,10 @@ export const saveVersion = async ({
       // /////////////////////////////////////
       // Locale-Specific Snapshot Logic
       // /////////////////////////////////////
-      if (snapshotDocWithLocales) {
-        const snapshotData = deepCopyObjectSimple(snapshotDocWithLocales)
+      if (snapshot) {
+        // inserts a snapshot version after the published version is created above
+        // this contains all localized data (draft and published)
+        const snapshotData = deepCopyObjectSimple(snapshot)
         if (snapshotData._id) {
           delete snapshotData._id
         }
