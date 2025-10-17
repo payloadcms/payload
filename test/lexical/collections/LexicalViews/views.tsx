@@ -10,7 +10,7 @@ export const lexicalViews: LexicalEditorViewMap = {
         return h2
       },
     },
-    horizontalRule: {
+    horizontalrule: {
       Component: () => {
         return <div>This custom horizontal rule is always a div</div>
       },

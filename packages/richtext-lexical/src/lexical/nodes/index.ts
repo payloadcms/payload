@@ -3,27 +3,39 @@ import type { Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement } from '
 import React from 'react'
 
 import type { NodeWithHooks } from '../../features/typesServer.js'
+import type { LexicalEditorNodeMap } from '../../types.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
-// Store which editors have view overrides enabled for which node types
-const editorNodeOverrides = new WeakMap<LexicalEditor, Set<string>>()
+// Store view definitions for each editor and node type
+const editorNodeViews = new WeakMap<LexicalEditor, Map<string, LexicalEditorNodeMap[string]>>()
 
 /**
- * Register that an editor should use view overrides for a specific node type
+ * Register view definitions for an editor
  */
-export function registerEditorNodeOverride(editor: LexicalEditor, nodeType: string): void {
-  if (!editorNodeOverrides.has(editor)) {
-    editorNodeOverrides.set(editor, new Set())
+export function registerEditorNodeViews(
+  editor: LexicalEditor,
+  nodeViews: LexicalEditorNodeMap,
+): void {
+  if (!editorNodeViews.has(editor)) {
+    editorNodeViews.set(editor, new Map())
   }
-  editorNodeOverrides.get(editor)!.add(nodeType)
+  const editorViews = editorNodeViews.get(editor)!
+
+  // Register each node type's view
+  for (const [nodeType, viewDef] of Object.entries(nodeViews)) {
+    editorViews.set(nodeType, viewDef)
+  }
 }
 
 /**
- * Check if an editor has view overrides enabled for a node type
+ * Get the view definition for a specific editor and node type
  */
-function hasEditorNodeOverride(editor: LexicalEditor, nodeType: string): boolean {
-  const overrides = editorNodeOverrides.get(editor)
-  return overrides ? overrides.has(nodeType) : false
+function getEditorNodeView(
+  editor: LexicalEditor,
+  nodeType: string,
+): LexicalEditorNodeMap[string] | undefined {
+  const editorViews = editorNodeViews.get(editor)
+  return editorViews?.get(nodeType)
 }
 
 /**
@@ -57,11 +69,27 @@ function applyNodeOverride({
     NodeClass.prototype._decorateOverridden = true
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     NodeClass.prototype.decorate = function (editor: any, config: any): any {
-      // Check if THIS editor has overrides enabled
-      if (hasEditorNodeOverride(editor, nodeType)) {
-        // Your custom view logic here
-        return React.createElement('div', { children: `DEBUG: ${nodeType}` })
+      const viewDef = getEditorNodeView(editor, nodeType)
+
+      if (viewDef) {
+        // If Component is provided, use it
+        if (viewDef.Component) {
+          // Call the component function with available context
+          return viewDef.Component({ config, editor, node: this })
+        }
+
+        // If html is provided (as a function or string), use it
+        if (viewDef.html) {
+          const htmlContent =
+            typeof viewDef.html === 'function'
+              ? viewDef.html({ config, editor, node: this })
+              : viewDef.html
+          return React.createElement('div', {
+            dangerouslySetInnerHTML: { __html: htmlContent },
+          })
+        }
       }
+
       // Otherwise use original
       return NodeClass.prototype._originalDecorate.call(this, editor, config)
     }
@@ -72,34 +100,55 @@ function applyNodeOverride({
     NodeClass.prototype._createDOMOverridden = true
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     NodeClass.prototype.createDOM = function (config: any, editor: any): HTMLElement {
-      const el = NodeClass.prototype._originalCreateDOM.call(this, config, editor)
-      // Check if THIS editor has overrides enabled
-      if (editor && hasEditorNodeOverride(editor, nodeType)) {
-        // Your custom view logic here
-        el.style.border = '2px solid red'
+      const viewDef = getEditorNodeView(editor, nodeType)
+
+      if (viewDef) {
+        // If createDOM is provided, use it
+        if (viewDef.createDOM) {
+          return viewDef.createDOM({ config, editor, node: this })
+        }
+
+        // If html is provided (as a function or string), create element from it
+        if (viewDef.html) {
+          const htmlContent =
+            typeof viewDef.html === 'function'
+              ? viewDef.html({ config, editor, node: this })
+              : viewDef.html
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = htmlContent
+          return (tempDiv.firstElementChild as HTMLElement) || tempDiv
+        }
       }
-      return el
+
+      // Otherwise use original
+      return NodeClass.prototype._originalCreateDOM.call(this, config, editor)
     }
   }
 }
 
 export function getEnabledNodes({
   editorConfig,
-  nodeType,
+  nodeViews,
 }: {
   editorConfig: SanitizedClientEditorConfig | SanitizedServerEditorConfig
-  nodeType?: string
+  nodeViews?: LexicalEditorNodeMap
 }): Array<Klass<LexicalNode> | LexicalNodeReplacement> {
   const nodes = getEnabledNodesFromServerNodes({
     nodes: editorConfig.features.nodes,
   })
 
-  if (nodeType) {
+  if (nodeViews) {
     // Apply node overrides by modifying prototypes (once globally)
     // The overrides check per-editor at runtime using WeakMap
+    const nodeTypesToOverride = Object.keys(nodeViews)
+
     for (const node of nodes) {
       if ('getType' in node) {
-        applyNodeOverride({ node, nodeType })
+        const nodeType = node.getType()
+
+        if (nodeTypesToOverride.includes(nodeType)) {
+          applyNodeOverride({ node, nodeType })
+        }
       }
     }
   }

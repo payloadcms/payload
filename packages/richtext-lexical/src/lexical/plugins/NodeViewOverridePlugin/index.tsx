@@ -2,16 +2,18 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useEffect } from 'react'
 
-import { registerEditorNodeOverride } from '../../nodes/index.js'
+import type { LexicalEditorNodeMap } from '../../../types.js'
 
-export function NodeViewOverridePlugin({ nodeType }: { nodeType?: string }): null {
+import { registerEditorNodeViews } from '../../nodes/index.js'
+
+export function NodeViewOverridePlugin({ nodeViews }: { nodeViews?: LexicalEditorNodeMap }): null {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
-    if (nodeType) {
-      registerEditorNodeOverride(editor, nodeType)
+    if (nodeViews) {
+      registerEditorNodeViews(editor, nodeViews)
     }
-  }, [editor, nodeType])
+  }, [editor, nodeViews])
 
   return null
 }
