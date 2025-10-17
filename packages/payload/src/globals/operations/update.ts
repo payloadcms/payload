@@ -245,6 +245,16 @@ export const updateOperation = async <
     // ///////////////////////////////////////////
 
     if (globalConfig.versions && (publishSpecificLocale || unpublishSpecificLocale)) {
+      /**
+       *  1. take snapshot of full localized data
+       *  2. run beforeChange twice
+       *    a. once with all data (for snapshot)
+       *    b. once with only published data (for result)
+       *  3. saveVersions is called later in this file
+       *    a. normal version is created with published data
+       *    b. snapshot is created with full localized data
+       */
+
       // snapshotResult will contain all localized data (draft and published)
       snapshotResult = await beforeChange({
         ...beforeChangeArgs,

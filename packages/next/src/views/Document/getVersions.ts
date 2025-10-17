@@ -205,11 +205,6 @@ export const getVersions = async ({
                 equals: id,
               },
             },
-            {
-              snapshot: {
-                not_equals: true,
-              },
-            },
           ],
         },
         extractAccessFromPermission(docPermissions.readVersions),
