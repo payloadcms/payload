@@ -254,16 +254,18 @@ export const updateOperation = async <
       // result will contain only published localized data
       result = await beforeChange({
         ...beforeChangeArgs,
-        data: unpublishSpecificLocale ? {} : beforeChangeArgs.data,
+        data: unpublishSpecificLocale ? {} : data,
         docWithLocales:
-          (await getLatestGlobalVersion({
-            slug,
-            config: globalConfig,
-            payload,
-            published: true,
-            req,
-            where: query,
-          })) || {},
+          (
+            await getLatestGlobalVersion({
+              slug,
+              config: globalConfig,
+              payload,
+              published: true,
+              req,
+              where: query,
+            })
+          )?.global || {},
         skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
       })
 
