@@ -67,7 +67,9 @@ export interface Config {
     'public-users': PublicUserAuthOperations;
     'auth-collection': AuthCollectionAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    titleblock: Titleblock;
+  };
   collections: {
     users: User;
     'public-users': PublicUser;
@@ -87,6 +89,7 @@ export interface Config {
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
     'fields-and-top-access': FieldsAndTopAccess;
+    'blocks-field-access': BlocksFieldAccess;
     disabled: Disabled;
     'rich-text': RichText;
     regression1: Regression1;
@@ -118,6 +121,7 @@ export interface Config {
     'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
     'fields-and-top-access': FieldsAndTopAccessSelect<false> | FieldsAndTopAccessSelect<true>;
+    'blocks-field-access': BlocksFieldAccessSelect<false> | BlocksFieldAccessSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
     regression1: Regression1Select<false> | Regression1Select<true>;
@@ -215,6 +219,16 @@ export interface AuthCollectionAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "titleblock".
+ */
+export interface Titleblock {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'titleblock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -458,6 +472,48 @@ export interface FieldsAndTopAccess {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-field-access".
+ */
+export interface BlocksFieldAccess {
+  id: string;
+  title: string;
+  editableBlocks?:
+    | {
+        title?: string | null;
+        content?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testBlock';
+      }[]
+    | null;
+  readOnlyBlocks?:
+    | {
+        title?: string | null;
+        content?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testBlock2';
+      }[]
+    | null;
+  editableBlockRefs?: Titleblock[] | null;
+  readOnlyBlockRefs?: Titleblock[] | null;
+  tabReadOnlyTest?: {
+    tabReadOnlyBlocks?:
+      | {
+          title?: string | null;
+          content?: string | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'testBlock3';
+        }[]
+      | null;
+    tabReadOnlyBlockRefs?: Titleblock[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -892,6 +948,10 @@ export interface PayloadLockedDocument {
         value: string | FieldsAndTopAccess;
       } | null)
     | ({
+        relationTo: 'blocks-field-access';
+        value: string | BlocksFieldAccess;
+      } | null)
+    | ({
         relationTo: 'disabled';
         value: string | Disabled;
       } | null)
@@ -1205,6 +1265,58 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-field-access_select".
+ */
+export interface BlocksFieldAccessSelect<T extends boolean = true> {
+  title?: T;
+  editableBlocks?:
+    | T
+    | {
+        testBlock?:
+          | T
+          | {
+              title?: T;
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  readOnlyBlocks?:
+    | T
+    | {
+        testBlock2?:
+          | T
+          | {
+              title?: T;
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  editableBlockRefs?: T | {};
+  readOnlyBlockRefs?: T | {};
+  tabReadOnlyTest?:
+    | T
+    | {
+        tabReadOnlyBlocks?:
+          | T
+          | {
+              testBlock3?:
+                | T
+                | {
+                    title?: T;
+                    content?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        tabReadOnlyBlockRefs?: T | {};
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

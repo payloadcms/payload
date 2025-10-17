@@ -247,7 +247,12 @@ const executeFieldPolicies = async ({
 
           await Promise.all(
             (field.blockReferences ?? field.blocks).map(async (_block) => {
-              const block = typeof _block === 'string' ? payload.blocks[_block]! : _block
+              const block = typeof _block === 'string' ? payload.blocks[_block] : _block
+
+              // Skip if block doesn't exist (invalid block reference)
+              if (!block) {
+                return
+              }
 
               if (typeof _block === 'string') {
                 if (blockPolicies[_block]) {
@@ -264,22 +269,32 @@ const executeFieldPolicies = async ({
                   // so that any parallel calls will just await this same promise
                   // instead of re-running executeFieldPolicies.
                   blockPolicies[_block] = (async () => {
-                    // If the block doesn’t exist yet in our mutablePolicies, initialize it
+                    // If the block doesn't exist yet in our mutablePolicies, initialize it
                     if (!mutablePolicies[field.name].blocks?.[block.slug]) {
+                      // Use field-level permission instead of entityPermission for blocks
+                      // This ensures that if the field has access control, it applies to all blocks in the field
+                      const fieldPermission =
+                        mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                       mutablePolicies[field.name].blocks[block.slug] = {
                         fields: {},
-                        [operation]: { permission: entityPermission },
+                        [operation]: { permission: fieldPermission },
                       }
                     } else if (!mutablePolicies[field.name].blocks[block.slug][operation]) {
+                      // Use field-level permission for consistency
+                      const fieldPermission =
+                        mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                       mutablePolicies[field.name].blocks[block.slug][operation] = {
-                        permission: entityPermission,
+                        permission: fieldPermission,
                       }
                     }
 
                     await executeFieldPolicies({
                       blockPolicies,
                       createAccessPromise,
-                      entityPermission,
+                      entityPermission:
+                        mutablePolicies[field.name][operation]?.permission ?? entityPermission,
                       fields: block.fields,
                       operation,
                       payload,
@@ -296,20 +311,29 @@ const executeFieldPolicies = async ({
               }
 
               if (!mutablePolicies[field.name].blocks?.[block.slug]) {
+                // Use field-level permission instead of entityPermission for blocks
+                const fieldPermission =
+                  mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                 mutablePolicies[field.name].blocks[block.slug] = {
                   fields: {},
-                  [operation]: { permission: entityPermission },
+                  [operation]: { permission: fieldPermission },
                 }
               } else if (!mutablePolicies[field.name].blocks[block.slug][operation]) {
+                // Use field-level permission for consistency
+                const fieldPermission =
+                  mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                 mutablePolicies[field.name].blocks[block.slug][operation] = {
-                  permission: entityPermission,
+                  permission: fieldPermission,
                 }
               }
 
               await executeFieldPolicies({
                 blockPolicies,
                 createAccessPromise,
-                entityPermission,
+                entityPermission:
+                  mutablePolicies[field.name][operation]?.permission ?? entityPermission,
                 fields: block.fields,
                 operation,
                 payload,
