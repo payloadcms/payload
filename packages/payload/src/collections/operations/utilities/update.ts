@@ -255,7 +255,11 @@ export const updateDocument = async <
   // Handle locale specific publish / unpublish
   // ///////////////////////////////////////////
 
-  if (collectionConfig.versions && (publishSpecificLocale || unpublishSpecificLocale)) {
+  if (
+    config.localization &&
+    collectionConfig.versions &&
+    (publishSpecificLocale || unpublishSpecificLocale)
+  ) {
     // snapshotResult will contain all localized data (draft and published)
     snapshotResult = await beforeChange({
       ...beforeChangeArgs,

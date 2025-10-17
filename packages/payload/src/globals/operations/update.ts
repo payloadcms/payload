@@ -244,7 +244,11 @@ export const updateOperation = async <
     // Handle locale specific publish / unpublish
     // ///////////////////////////////////////////
 
-    if (globalConfig.versions && (publishSpecificLocale || unpublishSpecificLocale)) {
+    if (
+      payload.config.localization &&
+      globalConfig.versions &&
+      (publishSpecificLocale || unpublishSpecificLocale)
+    ) {
       /**
        *  1. take snapshot of full localized data
        *  2. run beforeChange twice
