@@ -220,6 +220,7 @@ The slug field exposes a few top-level config options for easy customization:
 | `fieldToUse`   | The name of the field to use when generating the slug. This field must exist in the same collection. Defaults to `title`.                 |
 | `position`     | The position of the slug field. [More details](./overview#admin-options).                                                                 |
 | `required`     | Require the slug field. Defaults to `true`.                                                                                               |
+| `slugify`      | Override the default slugify function. Receives the value of the `fieldToUse` field and must return a string.                             |
 
 ### Slug Overrides
 
