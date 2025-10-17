@@ -39,7 +39,10 @@
       border-radius: inherit;
       input {
         height: 100%;
-        padding: calc(var(--base) * 0.5) var(--base) calc(var(--base) * 0.5) var(--icon-width);
+        padding-bottom: calc(var(--base) * 0.5);
+        padding-top: calc(var(--base) * 0.5);
+        padding-inline-start: var(--icon-width);
+        padding-inline-end: var(--base);
         background-color: transparent;
       }
     }
