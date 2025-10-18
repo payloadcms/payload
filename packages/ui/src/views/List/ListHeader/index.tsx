@@ -1,5 +1,5 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ViewTypes } from 'payload'
+import type { ClientCollectionConfig, ListViewTypes, ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -47,7 +47,7 @@ export type ListHeaderProps = {
   /** @deprecated This prop will be removed in the next major version. */
   t?: TFunction
   TitleActions?: React.ReactNode[]
-  viewType?: ViewTypes
+  viewType?: ListViewTypes
 }
 
 export const CollectionListHeader: React.FC<ListHeaderProps> = ({

@@ -179,5 +179,14 @@ export const addDefaultsToConfig = (config: Config): Config => {
     config.folders = false
   }
 
+  if (
+    config.treeView !== false &&
+    config.collections.some((collection) => Boolean(collection.treeView))
+  ) {
+    config.treeView = true
+  } else {
+    config.treeView = false
+  }
+
   return config
 }

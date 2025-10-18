@@ -159,7 +159,15 @@ export const RootPage = async ({
   let collectionPreferences: CollectionPreferences = undefined
 
   if (collectionConfig && segments.length === 2) {
-    if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
+    const isFolderViewEnabled =
+      config.folders && collectionConfig.folders && segments[1] !== config.folders.slug
+    const isTreeViewEnabled = collectionConfig.treeView && config.treeView
+
+    /**
+     * Fetch collection level preferences, used for:
+     * - getting default list view tab (list | folder | tree-view)
+     */
+    if (isFolderViewEnabled || isTreeViewEnabled) {
       await getPreferences<CollectionPreferences>(
         `collection-${collectionConfig.slug}`,
         req.payload,
