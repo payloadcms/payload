@@ -19,12 +19,26 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     const turbopackWarningText =
       'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running'
 
+    const turbopackWarningWebpackConfigured_1 =
+      'Webpack is configured while Turbopack is not, which may cause problems.'
+    const turbopackWarningWebpackConfigured_2 =
+      'See instructions if you need to configure Turbopack:'
+
     const consoleWarn = console.warn
     console.warn = (...args) => {
       // Force to disable serverExternalPackages warnings: https://github.com/vercel/next.js/issues/68805
       if (
         (typeof args[1] === 'string' && args[1].includes(turbopackWarningText)) ||
         (typeof args[0] === 'string' && args[0].includes(turbopackWarningText))
+      ) {
+        return
+      }
+
+      // Force to disable Webpack is configured while Turbopack is not, which may cause problems.
+      if (
+        typeof args[0] === 'string' &&
+        (args[0].includes(turbopackWarningWebpackConfigured_1) ||
+          args[0].includes(turbopackWarningWebpackConfigured_2))
       ) {
         return
       }
