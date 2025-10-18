@@ -1,13 +1,14 @@
 'use client'
-import type {
-  DOMConversionMap,
-  DOMConversionOutput,
-  EditorConfig,
-  LexicalEditor,
-  LexicalNode,
-} from 'lexical'
 import type { JSX } from 'react'
 
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMConversionOutput,
+  type EditorConfig,
+  type LexicalEditor,
+  type LexicalNode,
+} from 'lexical'
 import * as React from 'react'
 
 import type {
@@ -94,9 +95,11 @@ export class RelationshipNode extends RelationshipServerNode {
 }
 
 export function $createRelationshipNode(data: RelationshipData): RelationshipNode {
-  return new RelationshipNode({
-    data,
-  })
+  return $applyNodeReplacement(
+    new RelationshipNode({
+      data,
+    }),
+  )
 }
 
 export function $isRelationshipNode(

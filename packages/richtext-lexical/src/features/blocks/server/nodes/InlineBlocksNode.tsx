@@ -12,7 +12,7 @@ import type React from 'react'
 import type { JSX } from 'react'
 
 import ObjectID from 'bson-objectid'
-import { DecoratorNode } from 'lexical'
+import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
 import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
@@ -131,12 +131,14 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
 export function $createServerInlineBlockNode(
   fields: Exclude<InlineBlockFields, 'id'>,
 ): ServerInlineBlockNode {
-  return new ServerInlineBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new ServerInlineBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isServerInlineBlockNode(

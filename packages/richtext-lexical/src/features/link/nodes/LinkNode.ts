@@ -51,7 +51,7 @@ export class LinkNode extends ElementNode {
   }
 
   static override clone(node: LinkNode): LinkNode {
-    return new LinkNode({
+    return new this({
       id: node.__id,
       fields: node.__fields,
       key: node.__key,
