@@ -28,7 +28,21 @@ export type Args<T extends JsonObject> = {
  * - Execute field hooks
  * - Validate data
  * - Transform data for storage
- * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
+ * - Unflatten locales
+ *
+ * The input `data` is the normal document for one locale.
+ *
+ * The returned data will be localized.
+ *
+ * E.g. a localized `title` field returned as:
+ * ```ts
+ * {
+ *   title: {
+ *      en: 'new title from data',
+ *      fr: 'previous title from docWithLocales',
+ *    }
+ * }
+ * ```
  */
 
 export const beforeChange = async <T extends JsonObject>({

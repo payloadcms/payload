@@ -2,6 +2,7 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
 import type {
+  JsonObject,
   Payload,
   PayloadRequest,
   PopulateType,
@@ -12,6 +13,7 @@ import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
@@ -55,6 +57,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
+  unpublishSpecificLocale?: string
 }
 
 /**
@@ -94,6 +97,7 @@ export const updateDocument = async <
   req,
   select,
   showHiddenFields,
+  unpublishSpecificLocale,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const shouldSaveDraft =
@@ -118,6 +122,11 @@ export const updateDocument = async <
     overrideLock,
     req,
   })
+
+  // /////////////////////////////////////
+  // AfterRead runs on original doc
+  // to transform doc into 1 locale
+  // /////////////////////////////////////
 
   const originalDoc = await afterRead({
     collection: collectionConfig,
@@ -221,17 +230,15 @@ export const updateDocument = async <
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let publishedDocWithLocales = docWithLocales
-  let versionSnapshotResult
+  let result: JsonObject & TypeWithID
+  let snapshotResult: (JsonObject & TypeWithID) | undefined
 
-  const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
+  const beforeChangeArgs: Omit<Args<DataFromCollectionSlug<TSlug>>, 'docWithLocales'> = {
     id,
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    docWithLocales: undefined,
     global: null,
     operation: 'update',
     overrideAccess,
@@ -248,33 +255,52 @@ export const updateDocument = async <
           (Boolean(originalDoc?.deletedAt) && data?._status !== 'published'))),
   }
 
-  if (publishSpecificLocale) {
-    versionSnapshotResult = await beforeChange({
+  // ///////////////////////////////////////////
+  // Handle locale specific publish / unpublish
+  // ///////////////////////////////////////////
+
+  if (
+    config.localization &&
+    collectionConfig.versions &&
+    (publishSpecificLocale || unpublishSpecificLocale)
+  ) {
+    // snapshotResult will contain all localized data (draft and published)
+    snapshotResult = await beforeChange({
       ...beforeChangeArgs,
       docWithLocales,
     })
 
-    const lastPublished = await getLatestCollectionVersion({
-      id,
-      config: collectionConfig,
-      payload,
-      published: true,
-      query: {
-        collection: collectionConfig.slug,
-        locale,
-        req,
-        where: combineQueries({ id: { equals: id } }, accessResults),
-      },
-      req,
+    // result will contain only published localized data
+    result = await beforeChange({
+      ...beforeChangeArgs,
+      data: unpublishSpecificLocale ? { id } : beforeChangeArgs.data,
+      docWithLocales:
+        (await getLatestCollectionVersion<DataFromCollectionSlug<TSlug>>({
+          id,
+          config: collectionConfig,
+          payload,
+          published: true,
+          query: {
+            collection: collectionConfig.slug,
+            locale,
+            req,
+            where: combineQueries({ id: { equals: id } }, accessResults),
+          },
+          req,
+        })) || {},
+      skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
     })
 
-    publishedDocWithLocales = lastPublished ? lastPublished : {}
+    if (unpublishSpecificLocale && snapshotResult && Object.keys(result).length <= 1 && result.id) {
+      result = snapshotResult
+    }
+  } else {
+    // result will contain all localized data (draft and published)
+    result = await beforeChange({
+      ...beforeChangeArgs,
+      docWithLocales,
+    })
   }
-
-  let result = await beforeChange({
-    ...beforeChangeArgs,
-    docWithLocales: publishedDocWithLocales,
-  })
 
   // /////////////////////////////////////
   // Handle potential password update
@@ -301,6 +327,8 @@ export const updateDocument = async <
   if (!shouldSaveDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
+
+    // Publishing - save main collection document
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
@@ -325,7 +353,8 @@ export const updateDocument = async <
       payload,
       publishSpecificLocale,
       req,
-      snapshot: versionSnapshotResult,
+      snapshot: snapshotResult!,
+      unpublishSpecificLocale,
     })
   }
 

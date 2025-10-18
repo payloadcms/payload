@@ -21,14 +21,19 @@ type Args = {
   publishSpecificLocale?: string
   req?: PayloadRequest
   select?: SelectType
+  /**
+   * If present, this is the latest document which should have
+   * all **draft and published** data.
+   */
   snapshot?: any
+  unpublishSpecificLocale?: string
 }
 
 export const saveVersion = async ({
   id,
   autosave,
   collection,
-  docWithLocales: doc,
+  docWithLocales,
   draft,
   global,
   operation,
@@ -37,11 +42,12 @@ export const saveVersion = async ({
   req,
   select,
   snapshot,
+  unpublishSpecificLocale,
 }: Args): Promise<TypeWithID> => {
   let result: TypeWithID | undefined
   let createNewVersion = true
   const now = new Date().toISOString()
-  const versionData = deepCopyObjectSimple(doc)
+  const versionData = deepCopyObjectSimple(docWithLocales)
   if (draft) {
     versionData._status = 'draft'
   }
@@ -134,6 +140,7 @@ export const saveVersion = async ({
         publishedLocale: publishSpecificLocale || undefined,
         req,
         select: getQueryDraftsSelect({ select }),
+        unpublishedLocale: unpublishSpecificLocale || undefined,
         updatedAt: now,
         versionData,
       }
@@ -148,7 +155,12 @@ export const saveVersion = async ({
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
-      if (publishSpecificLocale && snapshot) {
+      // /////////////////////////////////////
+      // Locale-Specific Snapshot Logic
+      // /////////////////////////////////////
+      if (snapshot) {
+        // inserts a snapshot version after the published version is created above
+        // this contains all localized data (draft and published)
         const snapshotData = deepCopyObjectSimple(snapshot)
         if (snapshotData._id) {
           delete snapshotData._id

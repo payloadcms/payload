@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, JsonObject } from '../../index.js'
+import type { GlobalSlug, JsonObject, TypeWithID } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
@@ -45,6 +45,7 @@ type Args<TSlug extends GlobalSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: string
+  unpublishSpecificLocale?: string
 }
 
 export const updateOperation = async <
@@ -55,6 +56,10 @@ export const updateOperation = async <
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
   if (args.publishSpecificLocale) {
     args.req.locale = args.publishSpecificLocale
+  }
+
+  if (args.unpublishSpecificLocale) {
+    args.req.locale = args.unpublishSpecificLocale
   }
 
   const {
@@ -72,6 +77,7 @@ export const updateOperation = async <
     req,
     select: incomingSelect,
     showHiddenFields,
+    unpublishSpecificLocale,
   } = args
 
   try {
@@ -218,8 +224,8 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
-    let publishedDocWithLocales = globalJSON
-    let versionSnapshotResult
+    let result: JsonObject
+    let snapshotResult: JsonObject | undefined
 
     const beforeChangeArgs = {
       collection: null,
@@ -234,28 +240,59 @@ export const updateOperation = async <
         shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    if (publishSpecificLocale) {
-      const latestVersion = await getLatestGlobalVersion({
-        slug,
-        config: globalConfig,
-        payload,
-        published: true,
-        req,
-        where: query,
+    // ///////////////////////////////////////////
+    // Handle locale specific publish / unpublish
+    // ///////////////////////////////////////////
+
+    if (
+      payload.config.localization &&
+      globalConfig.versions &&
+      (publishSpecificLocale || unpublishSpecificLocale)
+    ) {
+      /**
+       *  1. take snapshot of full localized data
+       *  2. run beforeChange twice
+       *    a. once with all data (for snapshot)
+       *    b. once with only published data (for result)
+       *  3. saveVersions is called later in this file
+       *    a. normal version is created with published data
+       *    b. snapshot is created with full localized data
+       */
+
+      // snapshotResult will contain all localized data (draft and published)
+      snapshotResult = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales: globalJSON,
       })
 
-      publishedDocWithLocales = latestVersion?.global || {}
+      // result will contain only published localized data
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        data: unpublishSpecificLocale ? {} : data,
+        docWithLocales:
+          (
+            await getLatestGlobalVersion({
+              slug,
+              config: globalConfig,
+              payload,
+              published: true,
+              req,
+              where: query,
+            })
+          )?.global || {},
+        skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
+      })
 
-      versionSnapshotResult = await beforeChange({
+      if (unpublishSpecificLocale && snapshotResult && Object.keys(result).length === 0) {
+        result = snapshotResult
+      }
+    } else {
+      // result will contain all localized data (draft and published)
+      result = await beforeChange({
         ...beforeChangeArgs,
         docWithLocales: globalJSON,
       })
     }
-
-    let result = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales: publishedDocWithLocales,
-    })
 
     // /////////////////////////////////////
     // Update
@@ -307,7 +344,8 @@ export const updateOperation = async <
         publishSpecificLocale,
         req,
         select,
-        snapshot: versionSnapshotResult,
+        snapshot: snapshotResult,
+        unpublishSpecificLocale,
       })
 
       result = {

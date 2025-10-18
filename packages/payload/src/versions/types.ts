@@ -125,6 +125,7 @@ export type TypeWithVersion<T> = {
   parent: number | string
   publishedLocale?: string
   snapshot?: boolean
+  unpublishedLocale?: string
   updatedAt: string
   version: T
 }
