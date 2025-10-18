@@ -1,18 +1,19 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type {
-  DOMConversionMap,
-  DOMConversionOutput,
-  DOMExportOutput,
-  EditorConfig,
-  ElementFormatType,
-  LexicalEditor,
-  LexicalNode,
-  NodeKey,
-} from 'lexical'
 import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMConversionOutput,
+  type DOMExportOutput,
+  type EditorConfig,
+  type ElementFormatType,
+  type LexicalEditor,
+  type LexicalNode,
+  type NodeKey,
+} from 'lexical'
 
 import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
@@ -144,9 +145,11 @@ export class RelationshipServerNode extends DecoratorBlockNode {
 }
 
 export function $createServerRelationshipNode(data: RelationshipData): RelationshipServerNode {
-  return new RelationshipServerNode({
-    data,
-  })
+  return $applyNodeReplacement(
+    new RelationshipServerNode({
+      data,
+    }),
+  )
 }
 
 export function $isServerRelationshipNode(

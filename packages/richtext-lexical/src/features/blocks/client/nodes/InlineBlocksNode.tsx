@@ -1,7 +1,11 @@
 'use client'
-import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
-
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type EditorConfig,
+  type LexicalEditor,
+  type LexicalNode,
+} from 'lexical'
 import React, { type JSX } from 'react'
 
 import type {
@@ -47,12 +51,14 @@ export class InlineBlockNode extends ServerInlineBlockNode {
 }
 
 export function $createInlineBlockNode(fields: Exclude<InlineBlockFields, 'id'>): InlineBlockNode {
-  return new InlineBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new InlineBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isInlineBlockNode(
