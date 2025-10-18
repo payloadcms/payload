@@ -127,26 +127,28 @@ export const virtualFieldPopulationPromise = async ({
       }
 
       const collectionSlug = currentField.relationTo
-
-      const populatedDocs = await Promise.all(
-        docIDs.map((docID) => {
-          return req.payloadDataLoader.load(
-            createDataloaderCacheKey({
-              collectionSlug,
-              currentDepth: 0,
-              depth: 0,
-              docID,
-              draft,
-              fallbackLocale,
-              locale,
-              overrideAccess,
-              select,
-              showHiddenFields,
-              transactionID: req.transactionID as number,
+      const inline = currentField.inline && typeof currentValue[0] === 'object'
+      const populatedDocs = inline
+        ? currentValue
+        : await Promise.all(
+            docIDs.map((docID) => {
+              return req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess,
+                  select,
+                  showHiddenFields,
+                  transactionID: req.transactionID as number,
+                }),
+              )
             }),
           )
-        }),
-      )
 
       for (const doc of populatedDocs) {
         if (!doc) {
@@ -189,21 +191,24 @@ export const virtualFieldPopulationPromise = async ({
       return
     }
 
-    const populatedDoc = await req.payloadDataLoader.load(
-      createDataloaderCacheKey({
-        collectionSlug: currentField.relationTo,
-        currentDepth: 0,
-        depth: 0,
-        docID,
-        draft,
-        fallbackLocale,
-        locale,
-        overrideAccess,
-        select,
-        showHiddenFields,
-        transactionID: req.transactionID as number,
-      }),
-    )
+    const inline = currentField.inline && typeof currentValue === 'object'
+    const populatedDoc = inline
+      ? currentValue
+      : await req.payloadDataLoader.load(
+          createDataloaderCacheKey({
+            collectionSlug: currentField.relationTo,
+            currentDepth: 0,
+            depth: 0,
+            docID,
+            draft,
+            fallbackLocale,
+            locale,
+            overrideAccess,
+            select,
+            showHiddenFields,
+            transactionID: req.transactionID as number,
+          }),
+        )
 
     if (!populatedDoc) {
       return

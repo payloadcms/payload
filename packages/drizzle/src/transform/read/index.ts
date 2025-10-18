@@ -6,7 +6,7 @@ import { createBlocksMap } from '../../utilities/createBlocksMap.js'
 import { createPathMap } from '../../utilities/createRelationshipMap.js'
 import { traverseFields } from './traverseFields.js'
 
-type TransformArgs = {
+export type TransformArgs = {
   adapter: DrizzleAdapter
   config: SanitizedConfig
   data: Record<string, unknown>
