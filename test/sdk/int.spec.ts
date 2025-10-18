@@ -24,7 +24,7 @@ const testUserCredentials = {
 
 describe('@payloadcms/sdk', () => {
   beforeAll(async () => {
-    ;({ payload, sdk } = await initPayloadInt(dirname))
+    ; ({ payload, sdk } = await initPayloadInt(dirname))
 
     post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
     await payload.create({
@@ -317,4 +317,29 @@ describe('@payloadcms/sdk', () => {
 
     expect(email).toBe(user.email)
   })
+
+  it('should execute logout', async () => {
+    const loginRes = await sdk.login({
+      collection: 'users',
+      data: { email: testUserCredentials.email, password: testUserCredentials.password },
+    })
+
+    expect(loginRes.user.email).toBe(testUserCredentials.email)
+
+    const logoutRes = await sdk.logout({
+      collection: 'users',
+      allSessions: false,
+    })
+
+    expect(logoutRes.headers).toBeDefined()
+
+    const { token } = await sdk.me({ collection: "users" },
+      { headers: logoutRes.headers },
+    )
+
+    expect(
+      token
+    ).toBeUndefined()
+  })
+
 })
