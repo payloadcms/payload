@@ -64,7 +64,7 @@ describe('ts-plugin-inherit-doc', () => {
     return plugin.create(pluginInfo)
   }
 
-  test('plugin adds debug marker to all hovers', () => {
+  it('plugin adds debug marker to all hovers', () => {
     const content = `
 type MyType = {
   prop: string
@@ -78,7 +78,7 @@ type MyType = {
     expect(quickInfo!.documentation).toBeDefined()
   })
 
-  test('inherits documentation from referenced type', () => {
+  it('inherits documentation from referenced type', () => {
     const content = `
 /**
  * Base type with documentation
@@ -107,7 +107,7 @@ type DerivedType = {
     expect(docText).toContain('prop: A property')
   })
 
-  test('shows debug message when type not found', () => {
+  it('shows debug message when type not found', () => {
     const content = `
 type MyType = {
   /**
@@ -126,7 +126,7 @@ type MyType = {
     expect(docText).toContain('not found')
   })
 
-  test('works with interface declarations', () => {
+  it('works with interface declarations', () => {
     const content = `
 /**
  * Interface documentation
