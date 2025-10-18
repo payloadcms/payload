@@ -40,9 +40,11 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
 
       if (foundSize) {
         data.sizes[foundSize]._key = res.data?.key
+        data.sizes[foundSize].url = res.data?.url
       } else {
         data._key = res.data?.key
         data.filename = res.data?.name
+        data.url = res.data?.url
       }
 
       return data
