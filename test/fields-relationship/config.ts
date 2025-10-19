@@ -42,6 +42,41 @@ export default buildConfigWithDefaults({
     MixedMedia,
     Versions,
   ],
+  globals: [
+    {
+      slug: 'global-relationship',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'relations',
+          type: 'relationship',
+          relationTo: 'relation-one',
+          hasMany: true,
+        },
+        {
+          name: 'polymorphicRelations',
+          type: 'relationship',
+          relationTo: ['relation-one', 'relation-two'],
+          hasMany: true,
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'groupRelations',
+              type: 'relationship',
+              relationTo: 'relation-one',
+              hasMany: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
   localization: {
     locales: ['en'],
     defaultLocale: 'en',
