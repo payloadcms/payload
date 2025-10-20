@@ -762,6 +762,9 @@ export const traverseFields = ({
         if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
           // let the db handle this. If formattedValue is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
           formattedValue = new Date().toISOString()
+        } else if (fieldName === 'updatedAt' && formattedValue === null) {
+          // If updatedAt is explicitly set to null, skip it entirely (don't add to row)
+          formattedValue = undefined
         } else {
           if (typeof value === 'number' && !Number.isNaN(value)) {
             formattedValue = new Date(value).toISOString()
