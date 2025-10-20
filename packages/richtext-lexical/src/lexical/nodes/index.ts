@@ -1,4 +1,10 @@
-import type { Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement } from 'lexical'
+import type {
+  EditorConfig,
+  Klass,
+  LexicalEditor,
+  LexicalNode,
+  LexicalNodeReplacement,
+} from 'lexical'
 
 import React from 'react'
 
@@ -53,8 +59,7 @@ function applyNodeOverride({
     return
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const NodeClass = node as any
+  const NodeClass = node
 
   // Store original methods if not already stored
   if (!NodeClass.prototype._originalDecorate) {
@@ -67,8 +72,7 @@ function applyNodeOverride({
   // Override decorate method (for DecoratorNodes)
   if (NodeClass.prototype.decorate && !NodeClass.prototype._decorateOverridden) {
     NodeClass.prototype._decorateOverridden = true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    NodeClass.prototype.decorate = function (editor: any, config: any): any {
+    NodeClass.prototype.decorate = function (config: EditorConfig, editor: LexicalEditor): any {
       const viewDef = getEditorNodeView(editor, nodeType)
 
       if (viewDef) {
@@ -98,8 +102,10 @@ function applyNodeOverride({
   // Override createDOM method (for ElementNodes)
   if (NodeClass.prototype.createDOM && !NodeClass.prototype._createDOMOverridden) {
     NodeClass.prototype._createDOMOverridden = true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    NodeClass.prototype.createDOM = function (config: any, editor: any): HTMLElement {
+    NodeClass.prototype.createDOM = function (
+      config: EditorConfig,
+      editor: LexicalEditor,
+    ): HTMLElement {
       const viewDef = getEditorNodeView(editor, nodeType)
 
       if (viewDef) {

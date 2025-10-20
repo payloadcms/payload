@@ -1,4 +1,10 @@
-import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
+import type {
+  EditorConfig,
+  LexicalEditor,
+  EditorConfig as LexicalEditorConfig,
+  LexicalNode,
+  SerializedEditorState,
+} from 'lexical'
 import type {
   ClientField,
   DefaultServerCellComponentProps,
@@ -93,18 +99,38 @@ export type LexicalEditorNodeMap = {
      * - If used in a JSX converter: will always work
      * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
      */
-    Component?: (args: {}) => JSX.Element
+    Component?: (args: {
+      config: EditorConfig
+      /**
+       * The editor instance is null when used in a JSX converter.
+       */
+      editor?: LexicalEditor
+      node: LexicalNode
+    }) => JSX.Element
     /**
      * Provide a function to create the DOM element for the node. This will only work in the following cases:
      * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
      */
-    createDOM?: (args: {}) => HTMLElement
+    createDOM?: (args: {
+      config: EditorConfig
+      editor: LexicalEditor
+      node: LexicalNode
+    }) => HTMLElement
     /**
      * Provide a string to use as the HTML element for the node. This will only work in the following cases:
      * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
      * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
      */
-    html?: ((args: {}) => string) | string
+    html?:
+      | ((args: {
+          config: EditorConfig
+          /**
+           * The editor instance is null when used in a JSX converter.
+           */
+          editor?: LexicalEditor
+          node: LexicalNode
+        }) => string)
+      | string
   }
 }
 
