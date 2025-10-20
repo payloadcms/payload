@@ -20,6 +20,7 @@ import type {
 } from 'payload'
 import type { JSX } from 'react'
 
+import type { JSXConverterArgs } from './features/converters/lexicalToJSX/converter/types.js'
 import type {
   BaseClientFeatureProps,
   FeatureProviderProviderClient,
@@ -88,6 +89,12 @@ export type FeaturesInput =
     }) => FeatureProviderServer<any, any, any>[])
   | FeatureProviderServer<any, any, any>[]
 
+type WithinEditorArgs = {
+  config: EditorConfig
+  editor: LexicalEditor
+  node: LexicalNode
+}
+
 /**
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
@@ -99,38 +106,38 @@ export type LexicalEditorNodeMap = {
      * - If used in a JSX converter: will always work
      * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
      */
-    Component?: (args: {
-      config: EditorConfig
-      /**
-       * The editor instance is null when used in a JSX converter.
-       */
-      editor?: LexicalEditor
-      node: LexicalNode
-    }) => JSX.Element
+    Component?: (
+      args:
+        | ({
+            isEditor: false
+            isJSXConverter: true
+          } & JSXConverterArgs)
+        | ({
+            isEditor: true
+            isJSXConverter: false
+          } & WithinEditorArgs),
+    ) => JSX.Element
     /**
      * Provide a function to create the DOM element for the node. This will only work in the following cases:
      * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
      */
-    createDOM?: (args: {
-      config: EditorConfig
-      editor: LexicalEditor
-      node: LexicalNode
-    }) => HTMLElement
+    createDOM?: (args: WithinEditorArgs) => HTMLElement
     /**
      * Provide a string to use as the HTML element for the node. This will only work in the following cases:
      * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
      * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
      */
-    html?:
-      | ((args: {
-          config: EditorConfig
-          /**
-           * The editor instance is null when used in a JSX converter.
-           */
-          editor?: LexicalEditor
-          node: LexicalNode
-        }) => string)
-      | string
+    html?: (
+      args:
+        | ({
+            isEditor: false
+            isJSXConverter: true
+          } & JSXConverterArgs)
+        | ({
+            isEditor: true
+            isJSXConverter: false
+          } & WithinEditorArgs),
+    ) => string
   }
 }
 

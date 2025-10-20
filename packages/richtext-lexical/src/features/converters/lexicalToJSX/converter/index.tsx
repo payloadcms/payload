@@ -4,15 +4,28 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import React from 'react'
 
 import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
+import type { LexicalEditorNodeMap } from '../../../../types.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
 
 export type ConvertLexicalToJSXArgs = {
   converters: JSXConverters
-  data: SerializedEditorState
+  /**
+   * Serialized editor state to render.
+   */
+  data: SerializedEditorState /**
+   * If true, disables indentation globally. If an array, disables for specific node `type` values.
+   */
   disableIndent?: boolean | string[]
+  /**
+   * If true, disables text alignment globally. If an array, disables for specific node `type` values.
+   */
   disableTextAlign?: boolean | string[]
+  /**
+   * You can use the lexical editor node map as converters.
+   */
+  nodeMap?: LexicalEditorNodeMap
 }
 
 export function convertLexicalToJSX({
@@ -20,6 +33,7 @@ export function convertLexicalToJSX({
   data,
   disableIndent,
   disableTextAlign,
+  nodeMap,
 }: ConvertLexicalToJSXArgs): React.ReactNode {
   if (hasText(data)) {
     return convertLexicalNodesToJSX({

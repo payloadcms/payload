@@ -2,10 +2,10 @@
 
 import { useLexicalComposerContext } from '@payloadcms/richtext-lexical/lexical/react/LexicalComposerContext'
 import { defaultJSXConverters, RichText } from '@payloadcms/richtext-lexical/react'
+import { useEffect, useState } from 'react'
 
 import './style.scss'
-
-import { useEffect, useState } from 'react'
+import { lexicalViews } from '../../../views.js'
 
 export function RichTextPlugin() {
   const [editor] = useLexicalComposerContext()
@@ -19,7 +19,7 @@ export function RichTextPlugin() {
 
   return (
     <div className="debug-jsx-converter">
-      <RichText converters={defaultJSXConverters} data={editorState} />
+      <RichText converters={defaultJSXConverters} data={editorState} nodeMap={lexicalViews} />
     </div>
   )
 }

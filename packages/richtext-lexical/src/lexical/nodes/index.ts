@@ -80,14 +80,20 @@ function applyNodeOverride({
         // If Component is provided, use it
         if (viewDef.Component) {
           // Call the component function with available context
-          return viewDef.Component({ config, editor, node: this })
+          return viewDef.Component({
+            config,
+            editor,
+            isEditor: true,
+            isJSXConverter: false,
+            node: this,
+          })
         }
 
         // If html is provided (as a function or string), use it
         if (viewDef.html) {
           const htmlContent =
             typeof viewDef.html === 'function'
-              ? viewDef.html({ config, editor, node: this })
+              ? viewDef.html({ config, editor, isEditor: true, isJSXConverter: false, node: this })
               : viewDef.html
           return React.createElement('div', {
             dangerouslySetInnerHTML: { __html: htmlContent },
@@ -119,7 +125,7 @@ function applyNodeOverride({
         if (viewDef.html) {
           const htmlContent =
             typeof viewDef.html === 'function'
-              ? viewDef.html({ config, editor, node: this })
+              ? viewDef.html({ config, editor, isEditor: true, isJSXConverter: false, node: this })
               : viewDef.html
           const tempDiv = document.createElement('div')
           tempDiv.innerHTML = htmlContent
