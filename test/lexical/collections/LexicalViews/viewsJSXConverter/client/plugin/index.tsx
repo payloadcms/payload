@@ -9,7 +9,7 @@ import { lexicalViews } from '../../../views.js'
 
 export function RichTextPlugin() {
   const [editor] = useLexicalComposerContext()
-  const [editorState, setEditorState] = useState(editor.getEditorState().toJSON())
+  const [editorState, setEditorState] = useState(() => editor.getEditorState().toJSON())
 
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
@@ -19,7 +19,11 @@ export function RichTextPlugin() {
 
   return (
     <div className="debug-jsx-converter">
-      <RichText converters={defaultJSXConverters} data={editorState} nodeMap={lexicalViews} />
+      <RichText
+        converters={defaultJSXConverters}
+        data={editorState}
+        nodeMap={lexicalViews['default']}
+      />
     </div>
   )
 }
