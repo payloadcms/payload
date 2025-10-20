@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { lexicalViewsSlug } from '../../slugs.js'
+import { DebugViewsJSXConverterFeature } from './viewsJSXConverter/server/index.js'
 
 export const LexicalViews: CollectionConfig = {
   slug: lexicalViewsSlug,
@@ -31,6 +32,7 @@ export const LexicalViews: CollectionConfig = {
               },
             ],
           }),
+          DebugViewsJSXConverterFeature(),
         ],
       }),
     },
