@@ -1097,7 +1097,8 @@ describe('Versions', () => {
         })
 
         expect(draft.title).toBe('Draft without description')
-        expect(draft.description).toBeUndefined()
+        // Different databases return null vs undefined for missing fields
+        expect(draft.description).toBeFalsy()
         expect(draft._status).toBe('draft')
       })
 
@@ -1139,8 +1140,9 @@ describe('Versions', () => {
         })
 
         expect(draft._status).toBe('draft')
-        expect(draft.title).toBeUndefined()
-        expect(draft.description).toBeUndefined()
+        // Different databases return null vs undefined for missing fields
+        expect(draft.title).toBeFalsy()
+        expect(draft.description).toBeFalsy()
       })
     })
 
