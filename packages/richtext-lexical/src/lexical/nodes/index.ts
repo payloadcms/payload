@@ -59,7 +59,8 @@ function applyNodeOverride({
     return
   }
 
-  const NodeClass = node
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const NodeClass = node as any
 
   // Store original methods if not already stored
   if (!NodeClass.prototype._originalDecorate) {
@@ -72,7 +73,7 @@ function applyNodeOverride({
   // Override decorate method (for DecoratorNodes)
   if (NodeClass.prototype.decorate && !NodeClass.prototype._decorateOverridden) {
     NodeClass.prototype._decorateOverridden = true
-    NodeClass.prototype.decorate = function (config: EditorConfig, editor: LexicalEditor): any {
+    NodeClass.prototype.decorate = function (editor: LexicalEditor, config: EditorConfig): any {
       const viewDef = getEditorNodeView(editor, nodeType)
 
       if (viewDef) {
