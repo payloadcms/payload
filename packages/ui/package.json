@@ -157,7 +157,6 @@
     "scheduler": "0.25.0",
     "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
-    "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
   "devDependencies": {

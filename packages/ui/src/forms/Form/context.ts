@@ -1,12 +1,7 @@
 'use client'
 import type { RenderedField } from 'payload'
 
-import { createContext, use } from 'react'
-import {
-  createContext as createSelectorContext,
-  useContextSelector,
-  useContext as useFullContext,
-} from 'use-context-selector'
+import { createContext, use, useSyncExternalStore } from 'react'
 
 import type { Context, FormFieldsContext as FormFieldsContextType } from './types.js'
 
@@ -22,7 +17,14 @@ const ProcessingContext = createContext(false)
 const BackgroundProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
-const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
+
+// Create a store for FormFields that supports selective subscriptions
+type Store<Snapshot = FormFieldsContextType> = {
+  getState: () => Snapshot
+  subscribe: (listener: () => void) => () => void
+}
+
+const FormFieldsStoreContext = createContext<null | Store>(null)
 
 export type RenderedFieldSlots = Map<string, RenderedField>
 
@@ -56,20 +58,35 @@ const useFormInitializing = (): boolean => use(InitializingContext)
  */
 const useFormFields = <Value = unknown>(
   selector: (context: FormFieldsContextType) => Value,
-): Value => useContextSelector(FormFieldsContext, selector)
+): Value => {
+  const store = use(FormFieldsStoreContext)
+  if (!store) {
+    throw new Error('useFormFields must be used within a Form component')
+  }
+
+  const getSnapshot = () => selector(store.getState())
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot)
+}
 
 /**
  * Get the state of all form fields.
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#useallformfields
  */
-const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
+const useAllFormFields = (): FormFieldsContextType => {
+  const store = use(FormFieldsStoreContext)
+  if (!store) {
+    throw new Error('useAllFormFields must be used within a Form component')
+  }
+
+  return store.getState()
+}
 
 export {
   BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
-  FormFieldsContext,
+  FormFieldsStoreContext,
   FormWatchContext,
   InitializingContext,
   ModifiedContext,
@@ -86,3 +103,4 @@ export {
   useFormSubmitted,
   useWatchForm,
 }
+export type { Store as FormFieldsStore }

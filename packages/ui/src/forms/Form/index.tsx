@@ -13,6 +13,7 @@ import {
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { FormFieldsStore } from './context.js'
 import type {
   CreateFormData,
   Context as FormContextType,
@@ -42,7 +43,7 @@ import {
   BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
-  FormFieldsContext,
+  FormFieldsStoreContext,
   FormWatchContext,
   InitializingContext,
   ModifiedContext,
@@ -126,13 +127,42 @@ export const Form: React.FC<FormProps> = (props) => {
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
 
-  const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
-
-  const [formState, dispatchFields] = fieldsReducer
-
+  const [formState, dispatchFields] = useReducer(fieldReducer, initialState)
   contextRef.current.fields = formState
 
   const prevFormState = useRef(formState)
+
+  // Create refs to hold the current state and dispatch
+  const formStateRef = useRef(formState)
+  const dispatchFieldsRef = useRef(dispatchFields)
+
+  // Update refs when state changes
+  formStateRef.current = formState
+  dispatchFieldsRef.current = dispatchFields
+
+  // Create a stable store for selective subscriptions using useSyncExternalStore
+  const listenersRef = useRef(new Set<() => void>())
+  const formFieldsStore = React.useMemo<FormFieldsStore>(() => {
+    return {
+      getState: () => [formStateRef.current, dispatchFieldsRef.current],
+      subscribe: (listener) => {
+        listenersRef.current.add(listener)
+        return () => {
+          listenersRef.current.delete(listener)
+        }
+      },
+    }
+  }, [])
+
+  // Notify subscribers when formState changes
+  const prevFormStateForStore = useRef(formState)
+  React.useEffect(() => {
+    if (prevFormStateForStore.current !== formState) {
+      prevFormStateForStore.current = formState
+      // Notify all subscribers
+      listenersRef.current.forEach((listener) => listener())
+    }
+  }, [formState])
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -836,10 +866,9 @@ export const Form: React.FC<FormProps> = (props) => {
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={modified}>
-                      {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={fieldsReducer}>
+                      <FormFieldsStoreContext value={formFieldsStore}>
                         {children}
-                      </FormFieldsContext.Provider>
+                      </FormFieldsStoreContext>
                     </ModifiedContext>
                   </BackgroundProcessingContext>
                 </ProcessingContext>
@@ -855,7 +884,7 @@ export const Form: React.FC<FormProps> = (props) => {
 export {
   DocumentFormContext,
   FormContext,
-  FormFieldsContext,
+  FormFieldsStoreContext,
   FormWatchContext,
   ModifiedContext,
   ProcessingContext,
