@@ -3,6 +3,11 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
 export const lexicalViews: LexicalEditorViewMap = {
   default: {
+    block: {
+      Component: () => {
+        return <div>This block is always a div</div>
+      },
+    },
     heading: {
       createDOM() {
         const h2 = document.createElement('h2')
