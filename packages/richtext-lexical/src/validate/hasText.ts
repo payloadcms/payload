@@ -9,6 +9,9 @@ export function hasText(
   value: null | SerializedEditorState<SerializedLexicalNode> | undefined,
 ): boolean {
   const hasChildren = !!value?.root?.children?.length
+  if (!hasChildren) {
+    return false
+  }
 
   let hasOnlyEmptyParagraph = false
   if (value?.root?.children?.length === 1) {
@@ -28,9 +31,9 @@ export function hasText(
     }
   }
 
-  if (!hasChildren || hasOnlyEmptyParagraph) {
+  if (hasOnlyEmptyParagraph) {
     return false
-  } else {
-    return true
   }
+
+  return true
 }
