@@ -9,12 +9,53 @@ import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } fro
 
 import { hasText } from '../../../../validate/hasText.js'
 
+/**
+ * Converts a LexicalEditorNodeMap into JSXConverters
+ */
+function nodeMapToConverters(nodeMap: LexicalEditorNodeMap): JSXConverters {
+  const converters: JSXConverters = {}
+
+  for (const [nodeType, viewDef] of Object.entries(nodeMap)) {
+    // Only create a converter if Component or html is provided
+    if (!viewDef.Component && !viewDef.html) {
+      continue
+    }
+
+    // Create a converter function for this node type
+    converters[nodeType] = (args) => {
+      const converterArgs = {
+        ...args,
+        isEditor: false as const,
+        isJSXConverter: true as const,
+      }
+
+      // If Component is provided, use it
+      if (viewDef.Component) {
+        return viewDef.Component(converterArgs)
+      }
+
+      // If html is provided (as a function or string), use it
+      if (viewDef.html) {
+        const htmlContent =
+          typeof viewDef.html === 'function' ? viewDef.html(converterArgs) : viewDef.html
+
+        return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      }
+
+      return null
+    }
+  }
+
+  return converters
+}
+
 export type ConvertLexicalToJSXArgs = {
   converters: JSXConverters
   /**
    * Serialized editor state to render.
    */
-  data: SerializedEditorState /**
+  data: SerializedEditorState
+  /**
    * If true, disables indentation globally. If an array, disables for specific node `type` values.
    */
   disableIndent?: boolean | string[]
@@ -23,7 +64,8 @@ export type ConvertLexicalToJSXArgs = {
    */
   disableTextAlign?: boolean | string[]
   /**
-   * You can use the lexical editor node map as converters.
+   * You can use the lexical editor node map or view map as converters. NodeMap converters will override converters passed
+   * in the `converters` prop. If a LexicalEditorViewMap is provided, the `default` view will be used.
    */
   nodeMap?: LexicalEditorNodeMap
 }
@@ -36,12 +78,21 @@ export function convertLexicalToJSX({
   nodeMap,
 }: ConvertLexicalToJSXArgs): React.ReactNode {
   if (hasText(data)) {
+    // Merge nodeMap converters with existing converters
+    // NodeMap converters override existing converters
+    const mergedConverters = nodeMap
+      ? {
+          ...converters,
+          ...nodeMapToConverters(nodeMap),
+        }
+      : converters
+
     return convertLexicalNodesToJSX({
-      converters,
+      converters: mergedConverters,
       disableIndent,
       disableTextAlign,
-      nodes: data?.root?.children,
-      parent: data?.root,
+      nodes: data.root.children,
+      parent: data.root,
     })
   }
   return <></>
