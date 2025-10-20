@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "3.55.1",
+  "version": "3.60.0",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {

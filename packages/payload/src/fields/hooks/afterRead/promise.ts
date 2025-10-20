@@ -9,6 +9,7 @@ import type {
   SelectType,
 } from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
+import type { AfterReadArgs } from './index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext } from '../../../index.js'
@@ -32,7 +33,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   field: Field | TabAsField
   fieldIndex: number
   /**
@@ -40,7 +41,6 @@ type Args = {
    */
   fieldPromises: Promise<void>[]
   findMany: boolean
-  flattenLocales: boolean
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
@@ -61,7 +61,7 @@ type Args = {
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-}
+} & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
@@ -158,8 +158,20 @@ export const promise = async ({
     let hoistedValue = value
 
     if (fallbackLocale && fallbackLocale !== locale) {
-      const fallbackValue = siblingDoc[field.name!][fallbackLocale]
+      let fallbackValue
       const isNullOrUndefined = typeof value === 'undefined' || value === null
+
+      if (Array.isArray(fallbackLocale)) {
+        for (const locale of fallbackLocale) {
+          const val = siblingDoc[field.name!]?.[locale]
+          if (val !== undefined && val !== null && val !== '') {
+            fallbackValue = val
+            break
+          }
+        }
+      } else {
+        fallbackValue = siblingDoc[field.name!][fallbackLocale]
+      }
 
       if (fallbackValue) {
         switch (field.type) {
@@ -236,15 +248,23 @@ export const promise = async ({
     }
   }
 
+  // If locale is `all`, siblingDoc[field.name] will be an object mapping locales to values - locales won't be flattened.
+  // In this case, run the hook for each locale and value pair
+  const shouldRunHookOnAllLocales =
+    locale === 'all' &&
+    'name' in field &&
+    typeof field.name === 'string' &&
+    // If localized values were hoisted, siblingDoc[field.name] will not be an object mapping locales to values
+    // => Object.entries(siblingDoc[field.name]) will be the value of a single locale, not all locales
+    // => do not run the hook for each locale
+    !shouldHoistLocalizedValue &&
+    fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
+    typeof siblingDoc[field.name] === 'object'
+
   if (fieldAffectsDataResult) {
     // Execute hooks
     if (triggerHooks && 'hooks' in field && field.hooks?.afterRead) {
       for (const hook of field.hooks.afterRead) {
-        const shouldRunHookOnAllLocales =
-          fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
-          (locale === 'all' || !flattenLocales) &&
-          typeof siblingDoc[field.name] === 'object'
-
         if (shouldRunHookOnAllLocales) {
           const localesAndValues = Object.entries(siblingDoc[field.name])
           await Promise.all(
@@ -711,11 +731,6 @@ export const promise = async ({
 
       if (editor?.hooks?.afterRead?.length) {
         for (const hook of editor.hooks.afterRead) {
-          const shouldRunHookOnAllLocales =
-            fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
-            (locale === 'all' || !flattenLocales) &&
-            typeof siblingDoc[field.name] === 'object'
-
           if (shouldRunHookOnAllLocales) {
             const localesAndValues = Object.entries(siblingDoc[field.name])
 

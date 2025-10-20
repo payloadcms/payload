@@ -180,10 +180,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      updateJobs,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,
@@ -199,6 +198,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,

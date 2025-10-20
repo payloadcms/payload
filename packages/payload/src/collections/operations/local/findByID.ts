@@ -18,7 +18,7 @@ import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { findByIDOperation } from '../findByID.js'
+import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
 export type Options<
   TSlug extends CollectionSlug,
@@ -62,7 +62,7 @@ export type Options<
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: false | TypedLocale | TypedLocale[]
   /**
    * The ID of the document to find.
    */
@@ -117,7 +117,7 @@ export type Options<
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindByIDArgs, 'flattenLocales'>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,
@@ -135,6 +135,7 @@ export async function findByIDLocal<
     depth,
     disableErrors = false,
     draft = false,
+    flattenLocales,
     includeLockStatus,
     joins,
     overrideAccess = true,
@@ -160,6 +161,7 @@ export async function findByIDLocal<
     depth,
     disableErrors,
     draft,
+    flattenLocales,
     includeLockStatus,
     joins,
     overrideAccess,

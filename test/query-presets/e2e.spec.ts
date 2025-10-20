@@ -3,6 +3,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -15,7 +16,6 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -407,5 +407,128 @@ describe('Query Presets', () => {
     await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(3)
     await drawer.locator('.collection-list__no-results').isHidden()
+  })
+
+  test('should display single relationship value in query preset modal', async () => {
+    await page.goto(pagesUrl.list)
+
+    // Get a post to use for filtering
+    const posts = await payload.find({
+      collection: 'posts',
+      limit: 1,
+    })
+    const testPost = posts.docs[0]
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Posts Relationship',
+      operatorLabel: 'is in',
+      value: testPost?.text ?? '',
+    })
+
+    // Create a new preset with this filter
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'Single Relationship Filter Test'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    // Wait for URL to update with the new preset
+    await page.waitForURL((url) => url.searchParams.has('preset'))
+
+    // Open the edit preset modal to check the filter display
+    await page.locator('#edit-preset').click()
+    const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(editModal).toBeVisible()
+
+    // Check that the Where field properly displays the relationship filter
+    const whereFieldContent = editModal.locator('.query-preset-where-field .value-wrapper')
+    await expect(whereFieldContent).toBeVisible()
+
+    // Verify that the filter shows the relationship field, operator, and post value
+    await expect(whereFieldContent).toContainText('Posts Relationship')
+    await expect(whereFieldContent).toContainText('in')
+
+    // Check that the post ID is displayed
+    await expect(whereFieldContent).toContainText(testPost?.id ?? '')
+  })
+
+  test('should display multiple relationship values in query preset modal', async () => {
+    await page.goto(pagesUrl.list)
+
+    // Get posts to use for filtering
+    const posts = await payload.find({
+      collection: 'posts',
+      limit: 2,
+    })
+    const [testPost1, testPost2] = posts.docs
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+    const addFirst = whereBuilder.locator('.where-builder__add-first-filter')
+
+    await addFirst.click()
+
+    const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+
+    // Select field
+    await condition.locator('.condition__field .rs__control').click()
+    await page.locator('.rs__option:has-text("Posts Relationship")').click()
+
+    // Select operator
+    await condition.locator('.condition__operator .rs__control').click()
+    await page.locator('.rs__option:has-text("is in")').click()
+
+    // Select multiple values
+    const valueSelect = condition.locator('.condition__value')
+
+    // Select first post
+    await valueSelect.locator('.rs__control').click()
+    await page.locator(`.rs__option:has-text("${testPost1?.text}")`).click()
+
+    // Reopen dropdown and select second post
+    await valueSelect.locator('.rs__control').click()
+    await page.locator(`.rs__option:has-text("${testPost2?.text}")`).click()
+
+    // Wait for network response
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes(encodeURIComponent('where[or')) && response.status() === 200,
+    )
+
+    // Create a new preset with this filter
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'Multiple Relationship Filter Test'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    // Wait for URL to update with the new preset
+    await page.waitForURL((url) => url.searchParams.has('preset'))
+
+    // Open the edit preset modal to check the filter display
+    await page.locator('#edit-preset').click()
+    const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(editModal).toBeVisible()
+
+    const whereFieldContent = editModal.locator('.query-preset-where-field .value-wrapper')
+    await expect(whereFieldContent).toBeVisible()
+
+    await expect(whereFieldContent).toContainText('Posts Relationship')
+    await expect(whereFieldContent).toContainText('in')
+
+    // Check that both post IDs are displayed (comma-separated)
+    await expect(whereFieldContent).toContainText(testPost1?.id ?? '')
+    await expect(whereFieldContent).toContainText(testPost2?.id ?? '')
+    await expect(whereFieldContent).toContainText(',')
   })
 })

@@ -6,7 +6,6 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
-  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -18,6 +17,7 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { handleLivePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
@@ -341,6 +341,9 @@ export const renderDocument = async ({
     req,
   })
 
+  // Extract Description from documentSlots to pass to DocumentHeader
+  const { Description } = documentSlots
+
   const clientProps: DocumentViewClientProps = {
     formState,
     ...documentSlots,
@@ -348,36 +351,14 @@ export const renderDocument = async ({
     viewType,
   }
 
-  const isLivePreviewEnabled = Boolean(
-    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
-      config.admin?.livePreview?.globals?.includes(globalSlug) ||
-      collectionConfig?.admin?.livePreview ||
-      globalConfig?.admin?.livePreview,
-  )
-
-  const livePreviewConfig: LivePreviewConfig = {
-    ...(isLivePreviewEnabled ? config.admin.livePreview : {}),
-    ...(collectionConfig?.admin?.livePreview || {}),
-    ...(globalConfig?.admin?.livePreview || {}),
-  }
-
-  const livePreviewURL =
-    operation !== 'create'
-      ? typeof livePreviewConfig?.url === 'function'
-        ? await livePreviewConfig.url({
-            collectionConfig,
-            data: doc,
-            globalConfig,
-            locale,
-            req,
-            /**
-             * @deprecated
-             * Use `req.payload` instead. This will be removed in the next major version.
-             */
-            payload: initPageResult.req.payload,
-          })
-        : livePreviewConfig?.url
-      : ''
+  const { isLivePreviewEnabled, livePreviewConfig, livePreviewURL } = await handleLivePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
 
   return {
     data: doc,
@@ -411,11 +392,15 @@ export const renderDocument = async ({
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
-          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          isLivePreviewing={Boolean(
+            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+          )}
+          typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
+              AfterHeader={Description}
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
               permissions={permissions}
@@ -437,7 +422,7 @@ export const renderDocument = async ({
   }
 }
 
-export async function Document(props: AdminViewServerProps) {
+export async function DocumentView(props: AdminViewServerProps) {
   try {
     const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument

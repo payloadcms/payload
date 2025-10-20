@@ -78,6 +78,8 @@ export interface Config {
     categories: Category;
     media: Media;
     'collection-level-config': CollectionLevelConfig;
+    'static-url': StaticUrl;
+    'custom-live-preview': CustomLivePreview;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -93,12 +95,14 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
+    'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     header: Header;
@@ -142,7 +146,7 @@ export interface UserAuthOperations {
 export interface MediaBlock {
   invertBackground?: boolean | null;
   position?: ('default' | 'fullscreen') | null;
-  media: number | Media;
+  media: string | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -152,7 +156,7 @@ export interface MediaBlock {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -171,7 +175,7 @@ export interface Media {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -195,9 +199,9 @@ export interface User {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
+  id: string;
   slug: string;
-  tenant?: (number | null) | Tenant;
+  tenant?: (string | null) | Tenant;
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
@@ -206,7 +210,7 @@ export interface Page {
           [k: string]: unknown;
         }[]
       | null;
-    media?: (number | null) | Media;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -225,11 +229,11 @@ export interface Page {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -262,11 +266,11 @@ export interface Page {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -285,7 +289,7 @@ export interface Page {
         | {
             invertBackground?: boolean | null;
             position?: ('default' | 'fullscreen') | null;
-            media: number | Media;
+            media: string | Media;
             id?: string | null;
             blockName?: string | null;
             blockType: 'mediaBlock';
@@ -298,12 +302,12 @@ export interface Page {
               | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
-            categories?: (number | Category)[] | null;
+            categories?: (string | Category)[] | null;
             limit?: number | null;
             selectedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -312,7 +316,7 @@ export interface Page {
             populatedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -326,7 +330,7 @@ export interface Page {
       )[]
     | null;
   localizedTitle?: string | null;
-  relationToLocalized?: (number | null) | Post;
+  relationToLocalized?: (string | null) | Post;
   richTextSlate?:
     | {
         [k: string]: unknown;
@@ -336,7 +340,7 @@ export interface Page {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -347,27 +351,42 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
-  relationshipAsUpload?: (number | null) | Media;
-  relationshipMonoHasOne?: (number | null) | Post;
-  relationshipMonoHasMany?: (number | Post)[] | null;
+  richTextLexicalLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  relationshipAsUpload?: (string | null) | Media;
+  relationshipMonoHasOne?: (string | null) | Post;
+  relationshipMonoHasMany?: (string | Post)[] | null;
   relationshipPolyHasOne?: {
     relationTo: 'posts';
-    value: number | Post;
+    value: string | Post;
   } | null;
   relationshipPolyHasMany?:
     | {
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       }[]
     | null;
   arrayOfRelationships?:
     | {
-        uploadInArray?: (number | null) | Media;
+        uploadInArray?: (string | null) | Media;
         richTextInArray?: {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -378,28 +397,28 @@ export interface Page {
           };
           [k: string]: unknown;
         } | null;
-        relationshipInArrayMonoHasOne?: (number | null) | Post;
-        relationshipInArrayMonoHasMany?: (number | Post)[] | null;
+        relationshipInArrayMonoHasOne?: (string | null) | Post;
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
           relationTo: 'posts';
-          value: number | Post;
+          value: string | Post;
         } | null;
         relationshipInArrayPolyHasMany?:
           | {
               relationTo: 'posts';
-              value: number | Post;
+              value: string | Post;
             }[]
           | null;
         id?: string | null;
       }[]
     | null;
   tab?: {
-    relationshipInTab?: (number | null) | Post;
+    relationshipInTab?: (string | null) | Post;
   };
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: (number | null) | Media;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -409,7 +428,7 @@ export interface Page {
  * via the `definition` "tenants".
  */
 export interface Tenant {
-  id: number;
+  id: string;
   title: string;
   clientURL: string;
   updatedAt: string;
@@ -420,9 +439,9 @@ export interface Tenant {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   slug: string;
-  tenant?: (number | null) | Tenant;
+  tenant?: (string | null) | Tenant;
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
@@ -431,7 +450,7 @@ export interface Post {
           [k: string]: unknown;
         }[]
       | null;
-    media?: (number | null) | Media;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -450,11 +469,11 @@ export interface Post {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -487,11 +506,11 @@ export interface Post {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -510,7 +529,7 @@ export interface Post {
         | {
             invertBackground?: boolean | null;
             position?: ('default' | 'fullscreen') | null;
-            media: number | Media;
+            media: string | Media;
             id?: string | null;
             blockName?: string | null;
             blockType: 'mediaBlock';
@@ -523,12 +542,12 @@ export interface Post {
               | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
-            categories?: (number | Category)[] | null;
+            categories?: (string | Category)[] | null;
             limit?: number | null;
             selectedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -537,7 +556,7 @@ export interface Post {
             populatedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -550,12 +569,12 @@ export interface Post {
           }
       )[]
     | null;
-  relatedPosts?: (number | Post)[] | null;
+  relatedPosts?: (string | Post)[] | null;
   localizedTitle?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: (number | null) | Media;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -566,7 +585,7 @@ export interface Post {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -576,9 +595,9 @@ export interface Category {
  * via the `definition` "ssr".
  */
 export interface Ssr {
-  id: number;
+  id: string;
   slug: string;
-  tenant?: (number | null) | Tenant;
+  tenant?: (string | null) | Tenant;
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
@@ -587,7 +606,7 @@ export interface Ssr {
           [k: string]: unknown;
         }[]
       | null;
-    media?: (number | null) | Media;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -606,11 +625,11 @@ export interface Ssr {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -643,11 +662,11 @@ export interface Ssr {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -666,7 +685,7 @@ export interface Ssr {
         | {
             invertBackground?: boolean | null;
             position?: ('default' | 'fullscreen') | null;
-            media: number | Media;
+            media: string | Media;
             id?: string | null;
             blockName?: string | null;
             blockType: 'mediaBlock';
@@ -679,12 +698,12 @@ export interface Ssr {
               | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
-            categories?: (number | Category)[] | null;
+            categories?: (string | Category)[] | null;
             limit?: number | null;
             selectedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -693,7 +712,7 @@ export interface Ssr {
             populatedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -709,7 +728,7 @@ export interface Ssr {
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: (number | null) | Media;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -719,9 +738,9 @@ export interface Ssr {
  * via the `definition` "ssr-autosave".
  */
 export interface SsrAutosave {
-  id: number;
+  id: string;
   slug: string;
-  tenant?: (number | null) | Tenant;
+  tenant?: (string | null) | Tenant;
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
@@ -730,7 +749,7 @@ export interface SsrAutosave {
           [k: string]: unknown;
         }[]
       | null;
-    media?: (number | null) | Media;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -749,11 +768,11 @@ export interface SsrAutosave {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -786,11 +805,11 @@ export interface SsrAutosave {
                     reference?:
                       | ({
                           relationTo: 'posts';
-                          value: number | Post;
+                          value: string | Post;
                         } | null)
                       | ({
                           relationTo: 'pages';
-                          value: number | Page;
+                          value: string | Page;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -809,7 +828,7 @@ export interface SsrAutosave {
         | {
             invertBackground?: boolean | null;
             position?: ('default' | 'fullscreen') | null;
-            media: number | Media;
+            media: string | Media;
             id?: string | null;
             blockName?: string | null;
             blockType: 'mediaBlock';
@@ -822,12 +841,12 @@ export interface SsrAutosave {
               | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
-            categories?: (number | Category)[] | null;
+            categories?: (string | Category)[] | null;
             limit?: number | null;
             selectedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -836,7 +855,7 @@ export interface SsrAutosave {
             populatedDocs?:
               | {
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 }[]
               | null;
             /**
@@ -852,7 +871,7 @@ export interface SsrAutosave {
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: (number | null) | Media;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -865,8 +884,161 @@ export interface SsrAutosave {
  * via the `definition` "collection-level-config".
  */
 export interface CollectionLevelConfig {
-  id: number;
+  id: string;
   title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-url".
+ */
+export interface StaticUrl {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-live-preview".
+ */
+export interface CustomLivePreview {
+  id: string;
+  slug: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact';
+    richText?:
+      | {
+          [k: string]: unknown;
+        }[]
+      | null;
+    media?: (string | null) | Media;
+  };
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null;
+            richText?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
+                    appearance?: ('primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            invertBackground?: boolean | null;
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
+                  enableLink?: boolean | null;
+                  link?: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
+                    appearance?: ('default' | 'primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            invertBackground?: boolean | null;
+            position?: ('default' | 'fullscreen') | null;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | {
+            introContent?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            populateBy?: ('collection' | 'selection') | null;
+            relationTo?: 'posts' | null;
+            categories?: (string | Category)[] | null;
+            limit?: number | null;
+            selectedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            /**
+             * This field is auto-populated after-read
+             */
+            populatedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            /**
+             * This field is auto-populated after-read
+             */
+            populatedDocsTotal?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'archive';
+          }
+      )[]
+    | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -875,48 +1047,56 @@ export interface CollectionLevelConfig {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'ssr';
-        value: number | Ssr;
+        value: string | Ssr;
       } | null)
     | ({
         relationTo: 'ssr-autosave';
-        value: number | SsrAutosave;
+        value: string | SsrAutosave;
       } | null)
     | ({
         relationTo: 'tenants';
-        value: number | Tenant;
+        value: string | Tenant;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'collection-level-config';
-        value: number | CollectionLevelConfig;
+        value: string | CollectionLevelConfig;
+      } | null)
+    | ({
+        relationTo: 'static-url';
+        value: string | StaticUrl;
+      } | null)
+    | ({
+        relationTo: 'custom-live-preview';
+        value: string | CustomLivePreview;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -926,10 +1106,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -949,7 +1129,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1071,6 +1251,7 @@ export interface PagesSelect<T extends boolean = true> {
   relationToLocalized?: T;
   richTextSlate?: T;
   richTextLexical?: T;
+  richTextLexicalLocalized?: T;
   relationshipAsUpload?: T;
   relationshipMonoHasOne?: T;
   relationshipMonoHasMany?: T;
@@ -1454,6 +1635,115 @@ export interface CollectionLevelConfigSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-url_select".
+ */
+export interface StaticUrlSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-live-preview_select".
+ */
+export interface CustomLivePreviewSelect<T extends boolean = true> {
+  slug?: T;
+  tenant?: T;
+  title?: T;
+  hero?:
+    | T
+    | {
+        type?: T;
+        richText?: T;
+        media?: T;
+      };
+  layout?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              invertBackground?: T;
+              richText?: T;
+              links?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              invertBackground?: T;
+              columns?:
+                | T
+                | {
+                    size?: T;
+                    richText?: T;
+                    enableLink?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        mediaBlock?:
+          | T
+          | {
+              invertBackground?: T;
+              position?: T;
+              media?: T;
+              id?: T;
+              blockName?: T;
+            };
+        archive?:
+          | T
+          | {
+              introContent?: T;
+              populateBy?: T;
+              relationTo?: T;
+              categories?: T;
+              limit?: T;
+              selectedDocs?: T;
+              populatedDocs?: T;
+              populatedDocsTotal?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1489,7 +1779,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: number;
+  id: string;
   navItems?:
     | {
         link: {
@@ -1498,11 +1788,11 @@ export interface Header {
           reference?:
             | ({
                 relationTo: 'posts';
-                value: number | Post;
+                value: string | Post;
               } | null)
             | ({
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               } | null);
           url?: string | null;
           label: string;
@@ -1522,7 +1812,7 @@ export interface Header {
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: number;
+  id: string;
   navItems?:
     | {
         link: {
@@ -1531,11 +1821,11 @@ export interface Footer {
           reference?:
             | ({
                 relationTo: 'posts';
-                value: number | Post;
+                value: string | Post;
               } | null)
             | ({
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               } | null);
           url?: string | null;
           label: string;

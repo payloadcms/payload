@@ -2,9 +2,11 @@ import type {
   SerializedHeadingNode as _SerializedHeadingNode,
   HeadingTagType,
 } from '@lexical/rich-text'
-import type { Spread } from 'lexical'
+import type { SerializedLexicalNode } from 'lexical'
 
 import { HeadingNode } from '@lexical/rich-text'
+
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
@@ -12,12 +14,8 @@ import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
-export type SerializedHeadingNode = Spread<
-  {
-    type: 'heading'
-  },
-  _SerializedHeadingNode
->
+export type SerializedHeadingNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedHeadingNode, 'heading', T>
 
 export type HeadingFeatureProps = {
   enabledHeadingSizes?: HeadingTagType[]
@@ -34,6 +32,8 @@ export const HeadingFeature = createServerFeature<
     }
 
     const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
+
+    enabledHeadingSizes.sort()
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#HeadingFeatureClient',

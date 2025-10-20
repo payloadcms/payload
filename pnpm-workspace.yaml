@@ -4,5 +4,6 @@ packages:
   - 'test'
   - 'templates/blank'
   - 'templates/website'
+  - 'templates/ecommerce'
 
 updateNotifier: false

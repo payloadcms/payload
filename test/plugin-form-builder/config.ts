@@ -54,16 +54,17 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
       },
     })
 
     await seed(payload)
   },
-  //email: nodemailerAdapter(),
+  // email: nodemailerAdapter(),
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
-      //defaultToEmail: 'devs@payloadcms.com',
+      // defaultToEmail: 'devs@payloadcms.com',
       fields: {
         colorField,
         payment: true,
@@ -123,6 +124,9 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
+        access: {
+          update: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+        },
         fields: ({ defaultFields }) => {
           const modifiedFields: Field[] = defaultFields.map((field) => {
             if ('name' in field && field.type === 'group' && field.name === 'payment') {

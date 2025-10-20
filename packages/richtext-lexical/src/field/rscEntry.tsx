@@ -35,6 +35,8 @@ export const RscEntryLexicalField: React.FC<
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
 
+  const disabled = args?.readOnly || field?.admin?.readOnly
+
   if (!(args?.clientField as RichTextFieldClient)?.name) {
     throw new Error('Initialized lexical RSC field without a field name')
   }
@@ -56,6 +58,7 @@ export const RscEntryLexicalField: React.FC<
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        disabled,
         documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,

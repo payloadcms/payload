@@ -14,6 +14,7 @@ import type {
 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
+import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
@@ -44,6 +45,7 @@ import {
 } from './shared.js'
 
 const collection = localizedPostsSlug
+const global = 'global-text'
 let payload: Payload
 let restClient: NextRESTClient
 
@@ -85,6 +87,22 @@ describe('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+      })
+
+      await payload.updateGlobal({
+        slug: global,
+        data: {
+          text: spanishTitle,
+        },
+        locale: spanishLocale,
+      })
+
+      await payload.updateGlobal({
+        slug: global,
+        data: {
+          text: englishTitle,
+        },
+        locale: englishLocale,
       })
     })
 
@@ -398,7 +416,7 @@ describe('Localization', () => {
           expect(docs[2].id).toBe(doc_3.id)
         })
 
-        if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
+        if (mongooseList.includes(process.env.PAYLOAD_DATABASE)) {
           describe('Localized sorting', () => {
             let localizedAccentPostOne: LocalizedPost
             let localizedAccentPostTwo: LocalizedPost
@@ -1249,7 +1267,7 @@ describe('Localization', () => {
         })
 
         // eslint-disable-next-line jest/no-conditional-in-test
-        if (['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE!)) {
+        if (isMongoose(payload)) {
           expect(docWithoutFallback.items).toStrictEqual(null)
         } else {
           // TODO: build out compatability with SQL databases
@@ -2903,7 +2921,7 @@ describe('Localization', () => {
         })
 
         const req = await createLocalReq({ user }, payload)
-        global.d = true
+
         const res = (await copyDataFromLocaleHandler({
           fromLocale: 'en',
           req,
@@ -2933,7 +2951,6 @@ describe('Localization', () => {
         })
 
         const req = await createLocalReq({ user }, payload)
-        global.d = true
         const res = (await copyDataFromLocaleHandler({
           fromLocale: 'en',
           req,
@@ -3015,6 +3032,268 @@ describe('Localization', () => {
 
         // The source data should remain unchanged
         expect(refreshedDoc.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
+      })
+    })
+
+    describe('Multiple fallback locales', () => {
+      describe('Local API', () => {
+        describe('Collections', () => {
+          it('should allow fallback locale to be an array', async () => {
+            const result = await payload.findByID({
+              id: postWithLocalizedData.id,
+              collection,
+              locale: portugueseLocale,
+              fallbackLocale: [spanishLocale, englishLocale],
+            })
+
+            expect(result).toBeDefined()
+            expect((result as any).title).toBe(spanishTitle)
+          })
+
+          it('should pass over fallback locales until it finds one that exists', async () => {
+            const result = await payload.findByID({
+              id: postWithLocalizedData.id,
+              collection,
+              locale: portugueseLocale,
+              fallbackLocale: ['hu', 'ar', spanishLocale],
+            })
+
+            expect(result).toBeDefined()
+            expect((result as any).title).toBe(spanishTitle)
+          })
+
+          it('should return undefined if no fallback locales exist', async () => {
+            const result = await payload.findByID({
+              id: postWithLocalizedData.id,
+              collection,
+              locale: portugueseLocale,
+              fallbackLocale: ['hu', 'ar'],
+            })
+
+            expect(result).toBeDefined()
+            expect((result as any).title).not.toBeDefined()
+          })
+        })
+
+        describe('Globals', () => {
+          it('should allow fallback locale to be an array', async () => {
+            const result = await payload.findGlobal({
+              slug: global,
+              locale: portugueseLocale,
+              fallbackLocale: [spanishLocale, englishLocale],
+            })
+
+            expect(result).toBeDefined()
+            expect(result.text).toBe(spanishTitle)
+          })
+
+          it('should pass over fallback locales until it finds one that exists', async () => {
+            const result = await payload.findGlobal({
+              slug: global,
+              locale: portugueseLocale,
+              fallbackLocale: ['hu', spanishLocale],
+            })
+            expect(result).toBeDefined()
+            expect(result.text).toBe(spanishTitle)
+          })
+
+          it('should return undefined if no fallback locales exist', async () => {
+            const result = await payload.findGlobal({
+              slug: global,
+              locale: portugueseLocale,
+              fallbackLocale: ['hu', 'ar'],
+            })
+
+            expect(result).toBeDefined()
+            expect(result.text).not.toBeDefined()
+          })
+        })
+      })
+
+      describe('REST API', () => {
+        describe('Collections', () => {
+          it('should allow fallback locale to be an array', async () => {
+            const response = await restClient.GET(
+              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
+            )
+
+            expect(response.status).toBe(200)
+            const result = await response.json()
+
+            expect(result.title).toEqual(spanishTitle)
+          })
+
+          it('should pass over fallback locales until it finds one that exists', async () => {
+            const response = await restClient.GET(
+              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
+            )
+
+            expect(response.status).toBe(200)
+            const result = await response.json()
+
+            expect(result.title).toEqual(spanishTitle)
+          })
+
+          it('should return undefined if no fallback locales exist', async () => {
+            const response = await restClient.GET(
+              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
+            )
+
+            expect(response.status).toBe(200)
+            const result = await response.json()
+
+            expect(result.title).not.toBeDefined()
+          })
+        })
+
+        describe('Globals', () => {
+          it('should allow fallback locale to be an array', async () => {
+            const response = await restClient.GET(
+              `/globals/${global}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
+            )
+
+            expect(response.status).toBe(200)
+            const result = await response.json()
+            expect(result.text).toBe(spanishTitle)
+          })
+
+          it('should pass over fallback locales until it finds one that exists', async () => {
+            const response = await restClient.GET(
+              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
+            )
+
+            expect(response.status).toBe(200)
+            const result = await response.json()
+
+            expect(result.text).toBe(spanishTitle)
+          })
+
+          it('should return undefined if no fallback locales exist', async () => {
+            const response = await restClient.GET(
+              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
+            )
+
+            expect(response.status).toBe(200)
+            const result = await response.json()
+
+            expect(result.title).not.toBeDefined()
+          })
+        })
+      })
+
+      describe('GraphQL', () => {
+        describe('Collections', () => {
+          it('should allow fallback locale to be an array', async () => {
+            const query = `
+      {
+        LocalizedPost(id: ${idToString(postWithLocalizedData.id, payload)}, locale: pt) {
+          title
+        }
+      }
+      `
+
+            const { data } = await restClient
+              .GRAPHQL_POST({
+                body: JSON.stringify({ query }),
+                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
+              })
+              .then((res) => res.json())
+            console.log(data)
+
+            expect(data.LocalizedPost.title).toStrictEqual(spanishTitle)
+          })
+
+          it('should pass over fallback locales until it finds one that exists', async () => {
+            const query = `
+      {
+        LocalizedPost(id: ${idToString(postWithLocalizedData.id, payload)}, locale: pt) {
+          title
+        }
+      }
+      `
+
+            const { data: queryResult } = await restClient
+              .GRAPHQL_POST({
+                body: JSON.stringify({ query }),
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
+              })
+              .then((res) => res.json())
+
+            expect(queryResult.LocalizedPost.title).toBe(spanishTitle)
+          })
+
+          it('should return null if no fallback locales exist', async () => {
+            const query = `
+      {
+        LocalizedPost(id: ${idToString(postWithLocalizedData.id, payload)}, locale: pt) {
+          title
+        }
+      }
+      `
+
+            const { data: queryResult } = await restClient
+              .GRAPHQL_POST({
+                body: JSON.stringify({ query }),
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
+              })
+              .then((res) => res.json())
+
+            expect(queryResult.LocalizedPost.title).toBeNull()
+          })
+        })
+
+        describe('Globals', () => {
+          it('should allow fallback locale to be an array', async () => {
+            const query = `query {
+              GlobalText {
+                text
+              }
+            }`
+
+            const { data: queryResult } = await restClient
+              .GRAPHQL_POST({
+                body: JSON.stringify({ query }),
+                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
+              })
+              .then((res) => res.json())
+
+            expect(queryResult.GlobalText.text).toBe(spanishTitle)
+          })
+
+          it('should pass over fallback locales until it finds one that exists', async () => {
+            const query = `query {
+              GlobalText {
+                text
+              }
+            }`
+
+            const { data: queryResult } = await restClient
+              .GRAPHQL_POST({
+                body: JSON.stringify({ query }),
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
+              })
+              .then((res) => res.json())
+
+            expect(queryResult.GlobalText.text).toBe(spanishTitle)
+          })
+
+          it('should return null if no fallback locales exist', async () => {
+            const query = `query {
+              GlobalText {
+                text
+              }
+            }`
+
+            const { data: queryResult } = await restClient
+              .GRAPHQL_POST({
+                body: JSON.stringify({ query }),
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
+              })
+              .then((res) => res.json())
+
+            expect(queryResult.GlobalText.text).toBeNull()
+          })
+        })
       })
     })
   })

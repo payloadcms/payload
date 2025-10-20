@@ -2,7 +2,7 @@ import type { CollectionPreferences, ListQuery, ServerFunction, VisibleEntities 
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
-import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
 import { renderListView } from './index.js'
 
@@ -53,38 +53,7 @@ export const renderListHandler: ServerFunction<
 
   const cookies = parseCookies(headers)
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const clientConfig = getClientConfig({
     config,

@@ -1,10 +1,15 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ClientConfig, ColumnPreference } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ColumnPreference,
+  SanitizedPermissions,
+} from 'payload'
 
 import { flattenTopLevelFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const getColumns = ({
@@ -13,12 +18,14 @@ export const getColumns = ({
   collectionSlug,
   columns,
   i18n,
+  permissions,
 }: {
   clientConfig: ClientConfig
   collectionConfig?: ClientCollectionConfig
   collectionSlug: string | string[]
   columns: ColumnPreference[]
   i18n: I18nClient
+  permissions?: SanitizedPermissions
 }) => {
   const isPolymorphic = Array.isArray(collectionSlug)
 
@@ -30,7 +37,10 @@ export const getColumns = ({
         (each) => each.slug === collection,
       )
 
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+      for (const field of filterFieldsWithPermissions({
+        fieldPermissions: permissions?.collections?.[collection]?.fields || true,
+        fields: clientCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (fields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -55,8 +65,17 @@ export const getColumns = ({
         }),
       )
     : getInitialColumns(
-        isPolymorphic ? fields : filterFields(fields),
-        collectionConfig.admin?.useAsTitle,
+        isPolymorphic
+          ? fields
+          : filterFieldsWithPermissions({
+              fieldPermissions:
+                typeof collectionSlug === 'string' &&
+                permissions?.collections?.[collectionSlug]?.fields
+                  ? permissions.collections[collectionSlug].fields
+                  : true,
+              fields,
+            }),
+        collectionConfig?.admin?.useAsTitle,
         isPolymorphic ? [] : collectionConfig?.admin?.defaultColumns,
       )
 }

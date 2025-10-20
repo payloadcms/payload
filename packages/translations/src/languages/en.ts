@@ -1,5 +1,3 @@
-import { title } from 'process'
-
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -175,6 +173,7 @@ export const enTranslations = {
     removeUpload: 'Remove Upload',
     saveChanges: 'Save changes',
     searchForBlock: 'Search for a block',
+    searchForLanguage: 'Search for a language',
     selectExistingLabel: 'Select existing {{label}}',
     selectFieldsToEdit: 'Select fields to edit',
     showAll: 'Show All',
@@ -418,7 +417,7 @@ export const enTranslations = {
     successfullyCreated: '{{label}} successfully created.',
     successfullyDuplicated: '{{label}} successfully duplicated.',
     successfullyReindexed:
-      'Successfully reindexed {{count}} of {{total}} documents from {{collections}}',
+      'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     takeOver: 'Take over',
     thisLanguage: 'English',
     time: 'Time',
@@ -514,12 +513,16 @@ export const enTranslations = {
     enterNumber: 'Please enter a valid number.',
     fieldHasNo: 'This field has no {{label}}',
     greaterThanMax: '{{value}} is greater than the max allowed {{label}} of {{max}}.',
+    invalidBlock: 'The block "{{block}}" is not allowed.',
+    invalidBlocks: 'This field contains blocks that are no longer allowed: {{blocks}}.',
     invalidInput: 'This field has an invalid input.',
     invalidSelection: 'This field has an invalid selection.',
     invalidSelections: 'This field has the following invalid selections:',
+    latitudeOutOfBounds: 'Latitude must be between -90 and 90.',
     lessThanMin: '{{value}} is less than the min allowed {{label}} of {{min}}.',
     limitReached: 'Limit reached, only {{max}} items can be added.',
     longerThanMin: 'This value must be longer than the minimum length of {{minLength}} characters.',
+    longitudeOutOfBounds: 'Longitude must be between -180 and 180.',
     notValidDate: '"{{value}}" is not a valid date.',
     required: 'This field is required.',
     requiresAtLeast: 'This field requires at least {{count}} {{label}}.',
@@ -569,6 +572,7 @@ export const enTranslations = {
     modifiedOnly: 'Modified only',
     moreVersions: 'More versions...',
     noFurtherVersionsFound: 'No further versions found',
+    noLabelGroup: 'Unnamed Group',
     noRowsFound: 'No {{label}} found',
     noRowsSelected: 'No {{label}} selected',
     preview: 'Preview',

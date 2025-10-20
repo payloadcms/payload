@@ -97,6 +97,31 @@ describe('Collections - Uploads', () => {
         expect(sizes).toHaveProperty('icon')
       })
 
+      it('should URL encode filenames with spaces in both main url and size urls', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file!.name = 'my test image.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc.url).toBeDefined()
+        expect(mediaDoc.url).toContain('%20')
+        expect(mediaDoc.url).not.toContain(' ')
+
+        // Check that size URLs are also properly encoded
+        expect(mediaDoc.sizes?.tablet?.url).toBeDefined()
+        expect(mediaDoc.sizes?.tablet?.url).toContain('%20')
+        expect(mediaDoc.sizes?.tablet?.url).not.toContain(' ')
+
+        expect(mediaDoc.sizes?.icon?.url).toBeDefined()
+        expect(mediaDoc.sizes?.icon?.url).toContain('%20')
+        expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
+      })
+
       it('creates from form data given an svg', async () => {
         const filePath = path.join(dirname, './image.svg')
         const formData = new FormData()
@@ -602,6 +627,59 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+
+      it('should allow a localized upload relationship in a block', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+
+        const { id } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const { id: id_2 } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const res = await payload.create({
+          collection: 'relation',
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                blockType: 'localizedMediaBlock',
+                media: id,
+                relatedMedia: [id],
+              },
+            ],
+          },
+        })
+
+        expect(res.blocks[0]?.media).toBe(id)
+        expect(res.blocks[0]?.relatedMedia).toEqual([id])
+
+        const res_2 = await payload.update({
+          collection: 'relation',
+          id: res.id,
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                id: res.blocks[0]?.id,
+                blockType: 'localizedMediaBlock',
+                media: id_2,
+                relatedMedia: [id_2],
+              },
+            ],
+          },
+        })
+
+        expect(res_2.blocks[0]?.media).toBe(id_2)
+        expect(res_2.blocks[0]?.relatedMedia).toEqual([id_2])
       })
     })
 

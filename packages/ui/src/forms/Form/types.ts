@@ -18,13 +18,13 @@ export type Preferences = {
 
 export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
   json: T,
-  options?: {
+  ctx?: {
     /**
      * Arbitrary context passed to the onSuccess callback.
      */
     context?: C
     /**
-     * Form state at the time of the request used to retrieve the JSON response.
+     * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
   },
@@ -120,7 +120,7 @@ export type Submit = <T extends Response, C extends Record<string, unknown>>(
 ) => Promise</**
  * Returns the form state and the response from the server.
  *
- * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
+ * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own risk.
  */
 { formState?: FormState; res: T } | void>
 

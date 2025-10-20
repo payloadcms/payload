@@ -8,7 +8,7 @@ import type {
   TextField,
 } from 'payload'
 
-import { and, eq, like, sql } from 'drizzle-orm'
+import { and, eq, getTableName, like, or, sql, Table } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
@@ -19,6 +19,8 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { jsonBuildObject } from '../utilities/json.js'
+import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
 import { addJoinTable } from './addJoinTable.js'
 import { getTableAlias } from './getTableAlias.js'
@@ -497,27 +499,37 @@ export const getTableColumnFromPath = ({
             columnName = 'number'
           }
           newTableName = `${rootTableName}_${tableType}`
+
+          const existingTable = joins.find((e) => e.queryPath === `${constraintPath}${field.name}`)
+
+          const table = (existingTable?.table ??
+            getTableAlias({ adapter, tableName: newTableName })
+              .newAliasTable) as PgTableWithColumns<any>
+
           const joinConstraints = [
-            eq(adapter.tables[rootTableName].id, adapter.tables[newTableName].parent),
-            like(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
+            eq(adapter.tables[rootTableName].id, table.parent),
+            like(table.path, `${constraintPath}${field.name}`),
           ]
 
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [...joinConstraints]
 
             if (locale !== 'all') {
-              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+              conditions.push(eq(table._locale, locale))
             }
+
             addJoinTable({
               condition: and(...conditions),
               joins,
-              table: adapter.tables[newTableName],
+              queryPath: `${constraintPath}${field.name}`,
+              table,
             })
           } else {
             addJoinTable({
               condition: and(...joinConstraints),
               joins,
-              table: adapter.tables[newTableName],
+              queryPath: `${constraintPath}${field.name}`,
+              table,
             })
           }
 
@@ -525,7 +537,7 @@ export const getTableColumnFromPath = ({
             columnName,
             constraints,
             field,
-            table: adapter.tables[newTableName],
+            table,
           }
         }
         break
@@ -537,13 +549,22 @@ export const getTableColumnFromPath = ({
         if (Array.isArray(field.relationTo) || field.hasMany) {
           let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
-          const {
-            newAliasTable: aliasRelationshipTable,
-            newAliasTableName: aliasRelationshipTableName,
-          } = getTableAlias({
-            adapter,
-            tableName: relationTableName,
-          })
+
+          const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
+
+          let aliasRelationshipTable: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+          let aliasRelationshipTableName: string
+          if (existingJoin) {
+            aliasRelationshipTable = existingJoin.table
+            aliasRelationshipTableName = getTableName(existingJoin.table)
+          } else {
+            const res = getTableAlias({
+              adapter,
+              tableName: relationTableName,
+            })
+            aliasRelationshipTable = res.newAliasTable
+            aliasRelationshipTableName = res.newAliasTableName
+          }
 
           if (selectLocale && isFieldLocalized && adapter.payload.config.localization) {
             selectFields._locale = aliasRelationshipTable.locale
@@ -711,6 +732,28 @@ export const getTableColumnFromPath = ({
               constraints,
               field,
               rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
+              table: aliasRelationshipTable,
+            }
+          } else if (value === DistinctSymbol) {
+            const obj: Record<string, SQL> = {}
+
+            field.relationTo.forEach((relationTo) => {
+              const relationTableName = adapter.tableNameMap.get(
+                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+              )
+
+              obj[relationTo] = sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`)
+            })
+
+            let rawColumn = jsonBuildObject(adapter, obj)
+            if (adapter.name === 'postgres') {
+              rawColumn = sql`${rawColumn}::text`
+            }
+
+            return {
+              constraints,
+              field,
+              rawColumn,
               table: aliasRelationshipTable,
             }
           } else {

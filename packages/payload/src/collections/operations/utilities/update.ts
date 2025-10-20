@@ -43,7 +43,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   depth: number
   docWithLocales: any
   draftArg: boolean
-  fallbackLocale: string
+  fallbackLocale: string | string[]
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
@@ -237,9 +237,15 @@ export const updateDocument = async <
     overrideAccess,
     req,
     skipValidation:
-      shouldSaveDraft &&
-      collectionConfig.versions.drafts &&
-      !collectionConfig.versions.drafts.validate,
+      (shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate) ||
+      // Skip validation for trash operations since they're just metadata updates
+      (collectionConfig.trash &&
+        (Boolean(data?.deletedAt) ||
+          // Skip validation when restoring from trash, but only if not publishing
+          // (if publishing, we need full validation)
+          (Boolean(originalDoc?.deletedAt) && data?._status !== 'published'))),
   }
 
   if (publishSpecificLocale) {
@@ -301,7 +307,6 @@ export const updateDocument = async <
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -316,12 +321,10 @@ export const updateDocument = async <
       collection: collectionConfig,
       docWithLocales: result,
       draft: shouldSaveDraft,
-      locale,
       operation: 'update',
       payload,
       publishSpecificLocale,
       req,
-      select,
       snapshot: versionSnapshotResult,
     })
   }

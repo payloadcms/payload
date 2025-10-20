@@ -3,10 +3,12 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -28,6 +30,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
+import { blocksCollectionSlug } from './collections/Blocks/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
@@ -63,6 +66,7 @@ let urlPostsWithDrafts: AdminUrlUtil
 let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
 let noLocalizedFieldsURL: AdminUrlUtil
+let urlBlocks: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -90,6 +94,7 @@ describe('Localization', () => {
     urlArray = new AdminUrlUtil(serverURL, arrayCollectionSlug)
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
     noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
+    urlBlocks = new AdminUrlUtil(serverURL, blocksCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -651,6 +656,41 @@ describe('Localization', () => {
         })
         .toBeTruthy()
     })
+
+    test('blocks - should show fallback checkbox for non-default locale', async () => {
+      await page.goto(urlBlocks.create)
+      await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
+      const rowTextInput = page.locator(`#field-content__0__text`)
+      await rowTextInput.fill('text')
+      await saveDocAndAssert(page)
+      await changeLocale(page, 'pt')
+      const fallbackCheckbox = page.locator('#field-content', {
+        hasText: 'Fallback to default locale',
+      })
+
+      await expect(fallbackCheckbox).toBeVisible()
+    })
+
+    test('blocks - should successfully save with the fallback', async () => {
+      await page.goto(urlBlocks.create)
+      await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
+      const rowTextInput = page.locator(`#field-content__0__text`)
+      await rowTextInput.fill('text')
+      await saveDocAndAssert(page)
+      await changeLocale(page, 'pt')
+      await rowTextInput.fill('changed')
+      await waitForAutoSaveToRunAndComplete(page)
+      await saveDocAndAssert(page)
+      const docID = page.url().split('/').pop()?.split('?').shift()
+
+      const doc = await payload.find({
+        collection: 'blocks-fields',
+        where: { id: { equals: docID } },
+        locale: 'all',
+      })
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(doc.docs).toHaveLength(1)
+    })
   })
 
   test('should use label in search filter when string or object', async () => {
@@ -672,33 +712,6 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
-    })
-
-    test('should show localized status in collection list', async () => {
-      await page.goto(urlPostsWithDrafts.create)
-      const engTitle = 'Eng published'
-      const spanTitle = 'Spanish draft'
-
-      await changeLocale(page, defaultLocale)
-      await fillValues({ title: engTitle })
-      await saveDocAndAssert(page)
-
-      await changeLocale(page, spanishLocale)
-      await fillValues({ title: spanTitle })
-      await saveDocAndAssert(page, '#action-save-draft')
-
-      await page.goto(urlPostsWithDrafts.list)
-
-      const columns = page.getByRole('button', { name: 'Columns' })
-      await columns.click()
-      await page.locator('#_status').click()
-
-      await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
-
-      await changeLocale(page, defaultLocale)
-      await expect(page.locator('.row-1 .cell-title')).toContainText(engTitle)
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
     })
   })
 
