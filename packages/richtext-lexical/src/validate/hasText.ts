@@ -12,7 +12,7 @@ import type {
  */
 export function hasText(
   value: null | SerializedEditorState<SerializedLexicalNode> | undefined,
-): boolean {
+): value is SerializedEditorState<SerializedLexicalNode> {
   const hasChildren = !!value?.root?.children?.length
   if (!hasChildren) {
     return false
