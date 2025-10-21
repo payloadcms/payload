@@ -290,7 +290,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
 
               if ($isRangeSelection(selection)) {
                 for (const file of files) {
-                  const pendingUploadNode = new UploadNode({
+                  const pendingUploadNode = $createUploadNode({
                     data: {
                       pending: {
                         formID: file.formID,
@@ -363,7 +363,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
                 $setSelection(selection)
 
                 for (const file of files) {
-                  const pendingUploadNode = new UploadNode({
+                  const pendingUploadNode = $createUploadNode({
                     data: {
                       pending: {
                         formID: file.formID,
