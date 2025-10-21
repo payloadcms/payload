@@ -23,7 +23,11 @@ import {
 
 // import type { Payload } from 'payload'
 
-import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
+import {
+  buildEditorState,
+  type DefaultNodeTypes,
+  type SerializedBlockNode,
+} from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
 
 import { devUser } from '../credentials.js'
@@ -216,6 +220,74 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalFieldsSlug,
     data: lexicalDocWithRelId,
     depth: 0,
+    overrideAccess: true,
+  })
+
+  const editorState = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({
+    nodes: [
+      {
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'English text',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        textStyle: '',
+        textFormat: 0,
+      },
+      {
+        type: 'horizontalrule',
+        version: 1,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d92d965ad2082111b96d',
+          blockName: '',
+          blockType: 'viewsTestBlock',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        tag: 'h2',
+        type: 'heading',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'My Heading',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 0,
+            version: 1,
+          },
+        ],
+        direction: null,
+      },
+    ],
+  })
+
+  await _payload.create({
+    collection: 'lexical-views',
+    depth: 0,
+    data: {
+      customViews: editorState,
+      vanillaViews: editorState,
+    },
     overrideAccess: true,
   })
 

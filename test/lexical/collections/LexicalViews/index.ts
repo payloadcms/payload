@@ -26,7 +26,7 @@ export const LexicalViews: CollectionConfig = {
           BlocksFeature({
             blocks: [
               {
-                slug: 'customViewsTestBlock',
+                slug: 'viewsTestBlock',
                 fields: [
                   {
                     name: 'text',
@@ -49,7 +49,7 @@ export const LexicalViews: CollectionConfig = {
           BlocksFeature({
             blocks: [
               {
-                slug: 'vanillaViewsTestBlock',
+                slug: 'viewsTestBlock',
                 fields: [
                   {
                     name: 'text',

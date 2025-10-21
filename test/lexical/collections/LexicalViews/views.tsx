@@ -4,7 +4,7 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 export const lexicalViews: LexicalEditorViewMap = {
   default: {
     blocks: {
-      customViewsTestBlock: {
+      viewsTestBlock: {
         Component: () => {
           return <div>This block is always a div</div>
         },
@@ -15,6 +15,9 @@ export const lexicalViews: LexicalEditorViewMap = {
         const h2 = document.createElement('h2')
         h2.textContent = 'This custom heading is always an h2'
         return h2
+      },
+      html() {
+        return '<span>This will <b>only</b> be used in the JSX converter, due to presence of createDOM</span>'
       },
     },
     horizontalrule: {
