@@ -120,9 +120,6 @@ export function convertLexicalToJSX({
         }
       : converters
 
-    console.log('Merged converters', mergedConverters)
-    console.log('nodeMap', nodeMap)
-
     return convertLexicalNodesToJSX({
       converters: mergedConverters,
       disableIndent,
