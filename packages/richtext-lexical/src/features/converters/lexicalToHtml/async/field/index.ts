@@ -47,7 +47,7 @@ type Args = {
  */
 export const lexicalHTMLField: (args: Args) => Field = (args) => {
   const {
-    admin = {},
+    admin,
     converters,
     hidden = true, // TODO: remove deprecated `hidden` property in 4.0
     htmlFieldName,
@@ -62,7 +62,7 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
       ...{
         disableListColumn: true, // Disable list column by default for HTML field
         hidden: hidden ? hidden : false, // TODO: remove deprecated `hidden` property in 4.0
-        ...admin,
+        ...(admin || {}),
       },
       editorOptions: {
         language: 'html',
