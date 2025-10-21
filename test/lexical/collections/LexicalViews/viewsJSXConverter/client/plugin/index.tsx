@@ -1,13 +1,21 @@
 'use client'
 
+import type { PluginComponent } from '@payloadcms/richtext-lexical'
+
 import { useLexicalComposerContext } from '@payloadcms/richtext-lexical/lexical/react/LexicalComposerContext'
 import { defaultJSXConverters, RichText } from '@payloadcms/richtext-lexical/react'
-import { useEffect, useState } from 'react'
 
 import './style.scss'
+
+import { useEffect, useState } from 'react'
+
+import type { DebugViewsJSXConverterFeatureProps } from '../../server/index.js'
+
 import { lexicalFrontendViews, lexicalViews } from '../../../views.js'
 
-export function RichTextPlugin(props: any) {
+export const RichTextPlugin: PluginComponent<DebugViewsJSXConverterFeatureProps> = ({
+  clientProps,
+}) => {
   const [editor] = useLexicalComposerContext()
   const [editorState, setEditorState] = useState(() => editor.getEditorState().toJSON())
 
@@ -23,7 +31,9 @@ export function RichTextPlugin(props: any) {
         converters={defaultJSXConverters}
         data={editorState}
         nodeMap={
-          props.type === 'default' ? lexicalViews['default'] : lexicalFrontendViews['frontend']
+          clientProps?.type === 'default'
+            ? lexicalViews['default']
+            : lexicalFrontendViews['frontend']
         }
       />
     </div>
