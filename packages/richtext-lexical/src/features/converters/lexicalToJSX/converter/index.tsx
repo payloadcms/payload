@@ -4,10 +4,38 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import React from 'react'
 
 import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
-import type { LexicalEditorNodeMap } from '../../../../types.js'
+import type { LexicalEditorNodeMap, NodeMapValue } from '../../../../types.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
+
+/**
+ * Creates a JSX converter from a NodeMapValue
+ */
+function createConverterFromNodeMapValue(viewDef: NodeMapValue): JSXConverter {
+  return (args) => {
+    const converterArgs = {
+      ...args,
+      isEditor: false as const,
+      isJSXConverter: true as const,
+    }
+
+    // If Component is provided, use it
+    if (viewDef.Component) {
+      return viewDef.Component(converterArgs)
+    }
+
+    // If html is provided (as a function or string), use it
+    if (viewDef.html) {
+      const htmlContent =
+        typeof viewDef.html === 'function' ? viewDef.html(converterArgs) : viewDef.html
+
+      return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+    }
+
+    return null
+  }
+}
 
 /**
  * Converts a LexicalEditorNodeMap into JSXConverters
@@ -15,34 +43,39 @@ import { hasText } from '../../../../validate/hasText.js'
 function nodeMapToConverters(nodeMap: LexicalEditorNodeMap): JSXConverters {
   const converters: JSXConverters = {}
 
-  for (const [nodeType, viewDef] of Object.entries(nodeMap)) {
-    // Only create a converter if Component or html is provided
-    if (!viewDef.Component && !viewDef.html) {
+  for (const [nodeType, value] of Object.entries(nodeMap)) {
+    if (!value || typeof value !== 'object') {
       continue
     }
 
-    // Create a converter function for this node type
-    converters[nodeType] = (args) => {
-      const converterArgs = {
-        ...args,
-        isEditor: false as const,
-        isJSXConverter: true as const,
+    // Handle special keys: blocks, inlineBlocks
+    if (nodeType === 'blocks') {
+      converters.blocks = {}
+      for (const [blockType, _viewDef] of Object.entries(value)) {
+        const viewDef = _viewDef as NodeMapValue
+        if (viewDef.Component || viewDef.html) {
+          converters.blocks[blockType] = createConverterFromNodeMapValue(viewDef)
+        }
       }
+      continue
+    }
 
-      // If Component is provided, use it
-      if (viewDef.Component) {
-        return viewDef.Component(converterArgs)
+    if (nodeType === 'inlineBlocks') {
+      converters.inlineBlocks = {}
+      for (const [blockType, _viewDef] of Object.entries(value)) {
+        const viewDef = _viewDef as NodeMapValue
+        if (viewDef.Component || viewDef.html) {
+          converters.inlineBlocks[blockType] = createConverterFromNodeMapValue(viewDef)
+        }
       }
+      continue
+    }
 
-      // If html is provided (as a function or string), use it
-      if (viewDef.html) {
-        const htmlContent =
-          typeof viewDef.html === 'function' ? viewDef.html(converterArgs) : viewDef.html
+    // Handle regular node types
+    const viewDef = value as NodeMapValue
 
-        return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-      }
-
-      return null
+    if (viewDef.Component || viewDef.html) {
+      converters[nodeType] = createConverterFromNodeMapValue(viewDef)
     }
   }
 
@@ -86,6 +119,9 @@ export function convertLexicalToJSX({
           ...nodeMapToConverters(nodeMap),
         }
       : converters
+
+    console.log('Merged converters', mergedConverters)
+    console.log('nodeMap', nodeMap)
 
     return convertLexicalNodesToJSX({
       converters: mergedConverters,
