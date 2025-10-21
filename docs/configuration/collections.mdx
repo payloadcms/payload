@@ -145,6 +145,7 @@ The following options are available:
 | `enableListViewSelectAPI`    | Performance opt-in. When `true`, uses the Select API in the List View to query only the active columns as opposed to entire documents. [More details](#enable-list-view-select-api).                                         |
 | `pagination`                 | Set pagination-specific options for this Collection in the List View. [More details](#pagination).                                                                                                                           |
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
+| `formUpdateDebounceTimeout`  | Performance opt-in. Set custom debounce timeout (ms) for form updates to be sent to server. Defaults to 250ms.                                                                                                               |
 
 <Banner type="warning">
   **Note:** If you set `useAsTitle` to a relationship or join field, it will use
