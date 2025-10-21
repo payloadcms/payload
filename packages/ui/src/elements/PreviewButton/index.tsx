@@ -19,17 +19,15 @@ export function PreviewButton(props: PreviewButtonClientProps) {
   }
 
   return (
-    <button
+    <a
       aria-label={t('version:preview')}
       className={baseClass}
+      href={previewURL}
       id="preview-button"
-      onClick={() => {
-        window.open(previewURL, '_blank')
-      }}
+      target="_blank"
       title={t('version:preview')}
-      type="button"
     >
       <ExternalLinkIcon />
-    </button>
+    </a>
   )
 }
