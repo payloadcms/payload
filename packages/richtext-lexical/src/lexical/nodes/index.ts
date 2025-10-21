@@ -9,11 +9,12 @@ import type {
 import React from 'react'
 
 import type { NodeWithHooks } from '../../features/typesServer.js'
-import type { LexicalEditorNodeMap } from '../../types.js'
+import type { LexicalEditorNodeMap, NodeMapValue } from '../../types.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
 // Store view definitions for each editor and node type
-const editorNodeViews = new WeakMap<LexicalEditor, Map<string, LexicalEditorNodeMap[string]>>()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const editorNodeViews = new WeakMap<LexicalEditor, Map<string, NodeMapValue<any>>>()
 
 /**
  * Register view definitions for an editor
@@ -28,19 +29,62 @@ export function registerEditorNodeViews(
   const editorViews = editorNodeViews.get(editor)!
 
   // Register each node type's view
-  for (const [nodeType, viewDef] of Object.entries(nodeViews)) {
-    editorViews.set(nodeType, viewDef)
+  for (const [nodeType, value] of Object.entries(nodeViews)) {
+    if (!value || typeof value !== 'object') {
+      continue
+    }
+
+    // Handle blocks specially - store each block type with key 'block:blockType'
+    if (nodeType === 'blocks') {
+      for (const [blockType, viewDef] of Object.entries(
+        value as Record<string, NodeMapValue<any>>,
+      )) {
+        editorViews.set(`block:${blockType}`, viewDef)
+      }
+      continue
+    }
+
+    // Handle inlineBlocks specially - store each block type with key 'inlineBlock:blockType'
+    if (nodeType === 'inlineBlocks') {
+      for (const [blockType, viewDef] of Object.entries(
+        value as Record<string, NodeMapValue<any>>,
+      )) {
+        editorViews.set(`inlineBlock:${blockType}`, viewDef)
+      }
+      continue
+    }
+
+    // Regular node types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    editorViews.set(nodeType, value as NodeMapValue<any>)
   }
 }
 
 /**
- * Get the view definition for a specific editor and node type
+ * Get the view definition for a specific editor and node
  */
 function getEditorNodeView(
   editor: LexicalEditor,
   nodeType: string,
-): LexicalEditorNodeMap[string] | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  node?: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): NodeMapValue<any> | undefined {
   const editorViews = editorNodeViews.get(editor)
+
+  // For block nodes, look up by blockType
+  if (nodeType === 'block' && node?.['__fields']?.blockType) {
+    const blockType = node['__fields'].blockType
+    return editorViews?.get(`block:${blockType}`)
+  }
+
+  // For inlineBlock nodes, look up by blockType
+  if (nodeType === 'inlineBlock' && node?.['__fields']?.blockType) {
+    const blockType = node['__fields'].blockType
+    return editorViews?.get(`inlineBlock:${blockType}`)
+  }
+
+  // Regular node types
   return editorViews?.get(nodeType)
 }
 
@@ -73,8 +117,9 @@ function applyNodeOverride({
   // Override decorate method (for DecoratorNodes)
   if (NodeClass.prototype.decorate && !NodeClass.prototype._decorateOverridden) {
     NodeClass.prototype._decorateOverridden = true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     NodeClass.prototype.decorate = function (editor: LexicalEditor, config: EditorConfig): any {
-      const viewDef = getEditorNodeView(editor, nodeType)
+      const viewDef = getEditorNodeView(editor, nodeType, this)
 
       if (viewDef) {
         // If Component is provided, use it
@@ -113,7 +158,7 @@ function applyNodeOverride({
       config: EditorConfig,
       editor: LexicalEditor,
     ): HTMLElement {
-      const viewDef = getEditorNodeView(editor, nodeType)
+      const viewDef = getEditorNodeView(editor, nodeType, this)
 
       if (viewDef) {
         // If createDOM is provided, use it
@@ -153,13 +198,32 @@ export function getEnabledNodes({
   if (nodeViews) {
     // Apply node overrides by modifying prototypes (once globally)
     // The overrides check per-editor at runtime using WeakMap
-    const nodeTypesToOverride = Object.keys(nodeViews)
+    const nodeTypesToOverride = new Set<string>()
+
+    for (const [key, value] of Object.entries(nodeViews)) {
+      if (!value || typeof value !== 'object') {
+        continue
+      }
+
+      // If 'blocks' key exists with content, we need to override 'block' nodes
+      if (key === 'blocks' && Object.keys(value).length > 0) {
+        nodeTypesToOverride.add('block')
+      }
+      // If 'inlineBlocks' key exists with content, we need to override 'inlineBlock' nodes
+      else if (key === 'inlineBlocks' && Object.keys(value).length > 0) {
+        nodeTypesToOverride.add('inlineBlock')
+      }
+      // Regular node types
+      else {
+        nodeTypesToOverride.add(key)
+      }
+    }
 
     for (const node of nodes) {
       if ('getType' in node) {
         const nodeType = node.getType()
 
-        if (nodeTypesToOverride.includes(nodeType)) {
+        if (nodeTypesToOverride.has(nodeType)) {
           applyNodeOverride({ node, nodeType })
         }
       }
