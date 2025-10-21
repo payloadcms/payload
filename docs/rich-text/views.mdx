@@ -1,0 +1,386 @@
+---
+title: Views
+label: Views
+order: 90
+desc: Customize how Lexical nodes render in the admin panel and frontend using view overrides.
+keywords: lexical, rich text, views, rendering, custom components, admin panel, frontend
+---
+
+Views allow you to customize how Lexical nodes render in both the admin panel editor and frontend applications. This powerful feature enables you to create different rendering modes for the same content, perfect for scenarios like:
+
+- Preview modes that match your frontend design
+- Debug views showing additional metadata
+- Simplified editing experiences
+- A/B testing different designs
+
+## Overview
+
+The view system works by overriding how individual node types render, without changing the underlying data structure. You can define multiple named views and switch between them using the built-in view selector.
+
+### Key Concepts
+
+- **View Map**: A collection of named views (e.g., `default`, `frontend`, `debug`)
+- **Node Map**: Overrides for specific node types within a view
+- **Dual Usage**: The same view definitions work in both the admin panel editor and JSX converters for frontend rendering
+
+## Defining Views
+
+Views are defined using the `views` property on your rich text field configuration. The value is an import path string that points to your views file and specifies the named export using a `#` separator.
+
+### Step 1: Create Your Views File
+
+Create a client component file that exports your view maps:
+
+```tsx
+// collections/Posts/views.tsx
+'use client'
+import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
+
+export const postViews: LexicalEditorViewMap = {
+  // The 'default' view is used when the field is first loaded
+  default: {
+    heading: {
+      createDOM(args) {
+        const { node } = args
+        const heading = document.createElement(node.getTag())
+        heading.style.color = '#333'
+        return heading
+      },
+    },
+  },
+  // Additional custom views
+  frontend: {
+    heading: {
+      createDOM(args) {
+        const { node } = args
+        const heading = document.createElement(node.getTag())
+        heading.style.color = '#3b82f6'
+        heading.style.borderBottom = '2px solid #60a5fa'
+        return heading
+      },
+    },
+    blocks: {
+      myBlock: {
+        Component: ({ node, isEditor, isJSXConverter }) => {
+          const text = isEditor ? node.__fields?.text : node.fields?.text
+
+          return (
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                padding: '24px',
+                borderRadius: '12px',
+              }}
+            >
+              {text}
+            </div>
+          )
+        },
+      },
+    },
+  },
+}
+```
+
+### Step 2: Reference Views in Your Collection
+
+In your collection config, reference the views using an import path with the `#exportName` syntax:
+
+```ts
+// collections/Posts/index.ts
+import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      editor: lexicalEditor({
+        // Path relative to the config file, with #exportName to specify which export to use
+        views: './views#postViews',
+      }),
+    },
+  ],
+}
+```
+
+## Node Override Options
+
+Each node type can be customized using three different approaches:
+
+### Component
+
+Use a React component for full control over rendering. Works in both admin panel and JSX converters.
+
+```tsx
+{
+  myNode: {
+    Component: ({ node, editor, config, isEditor, isJSXConverter }) => {
+      // isEditor: true when rendering in admin panel, false in JSX converter
+      // isJSXConverter: true when rendering for frontend, false in admin panel
+
+      const nodeData = isEditor
+        ? node.__fields // Access Lexical node fields in editor
+        : node.fields    // Access serialized fields in JSX converter
+
+      return <div>{nodeData.text}</div>
+    },
+  },
+}
+```
+
+### createDOM
+
+Use native DOM manipulation for ElementNodes. Only works in the admin panel editor.
+
+```tsx
+{
+  heading: {
+    createDOM(args) {
+      const { node, editor, config, isEditor, isJSXConverter } = args
+      const heading = document.createElement(node.getTag())
+      heading.style.color = '#3b82f6'
+      return heading
+    },
+  },
+}
+```
+
+### html
+
+Provide raw HTML as a string or function. Works in both admin panel and JSX converters.
+
+```tsx
+{
+  link: {
+    html: ({ node, isEditor, isJSXConverter }) => {
+      const url = isEditor ? node.__url : node.url
+      return `<a href="${url}">Click here</a>`
+    },
+  },
+}
+```
+
+**Note**: If both `createDOM` and `html` are provided for a DecoratorNode, `html` will only be used in JSX converters, not in the admin panel editor where `createDOM` takes precedence.
+
+## Node Type Reference
+
+### Built-in Nodes
+
+Override built-in Lexical nodes:
+
+```tsx
+{
+  heading: { /* overrides */ },
+  paragraph: { /* overrides */ },
+  link: { /* overrides */ },
+  list: { /* overrides */ },
+  listitem: { /* overrides */ },
+  quote: { /* overrides */ },
+  horizontalrule: { /* overrides */ },
+  // ... other built-in nodes
+}
+```
+
+### Blocks
+
+Override specific block types:
+
+```tsx
+{
+  blocks: {
+    myBlockType: {
+      Component: ({ node }) => {
+        // node.__fields in editor, node.fields in JSX converter
+        return <div>Custom block</div>
+      },
+    },
+  },
+}
+```
+
+### Inline Blocks
+
+Override specific inline block types:
+
+```tsx
+{
+  inlineBlocks: {
+    myInlineBlockType: {
+      Component: ({ node }) => <span>Custom inline block</span>,
+    },
+  },
+}
+```
+
+## Using Views in the Admin Panel
+
+When views are defined, a view selector automatically appears next to the field label in the admin panel. Users can switch between views to see how content renders in different modes.
+
+### Accessing Current View
+
+Use the `useRichTextView` hook to access the current view:
+
+```tsx
+'use client'
+import { useRichTextView } from '@payloadcms/richtext-lexical'
+
+function MyCustomComponent() {
+  const { currentView, views, currentViewMap } = useRichTextView()
+
+  return (
+    <div>
+      <p>Current view: {currentView}</p>
+      {/* currentViewMap contains the active node overrides */}
+      {currentViewMap?.heading && <p>Custom heading rendering is active</p>}
+    </div>
+  )
+}
+```
+
+## Using Views in Frontend (JSX Converters)
+
+Pass the view map to JSX converters to render content with the same customizations:
+
+```tsx
+import { convertLexicalToJSX } from '@payloadcms/richtext-lexical'
+import { myViews } from './views'
+
+export function BlogPost({ post }) {
+  return (
+    <div>
+      {convertLexicalToJSX({
+        editorState: post.content,
+        nodeMap: myViews.frontend, // Use the frontend view
+      })}
+    </div>
+  )
+}
+```
+
+## Advanced Example
+
+Here's a complete example showing different rendering modes:
+
+```tsx
+'use client'
+import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
+
+export const articleViews: LexicalEditorViewMap = {
+  default: {
+    heading: {
+      createDOM({ node }) {
+        const heading = document.createElement(node.getTag())
+        heading.className = 'editor-heading'
+        return heading
+      },
+    },
+  },
+
+  frontend: {
+    heading: {
+      createDOM({ node }) {
+        const heading = document.createElement(node.getTag())
+        heading.className = 'article-heading'
+        heading.style.color = '#1a202c'
+        heading.style.marginBottom = '1rem'
+        return heading
+      },
+    },
+
+    blocks: {
+      imageBlock: {
+        Component: ({ node, isEditor, isJSXConverter }) => {
+          const fields = isEditor ? node.__fields : node.fields
+
+          return (
+            <figure className="article-image">
+              <img src={fields.image?.url} alt={fields.caption || ''} />
+              {fields.caption && <figcaption>{fields.caption}</figcaption>}
+            </figure>
+          )
+        },
+      },
+
+      quoteBlock: {
+        Component: ({ node, isEditor }) => {
+          const fields = isEditor ? node.__fields : node.fields
+
+          return (
+            <blockquote className="article-quote">
+              <p>{fields.quote}</p>
+              {fields.author && <cite>— {fields.author}</cite>}
+            </blockquote>
+          )
+        },
+      },
+    },
+
+    link: {
+      html: ({ node, isEditor }) => {
+        const fields = isEditor ? node.fields : node.fields
+        const url = fields.url
+        const text = fields.text
+
+        return `<a href="${url}" class="article-link">${text}</a>`
+      },
+    },
+  },
+
+  debug: {
+    blocks: {
+      imageBlock: {
+        Component: ({ node, isEditor }) => {
+          const fields = isEditor ? node.__fields : node.fields
+
+          return (
+            <div style={{ border: '2px dashed red', padding: '1rem' }}>
+              <pre>{JSON.stringify(fields, null, 2)}</pre>
+            </div>
+          )
+        },
+      },
+    },
+  },
+}
+```
+
+## TypeScript Types
+
+Key types for working with views:
+
+```ts
+import type {
+  LexicalEditorViewMap,
+  LexicalEditorNodeMap,
+  NodeMapValue,
+  WithinEditorArgs,
+  JSXConverterArgs,
+} from '@payloadcms/richtext-lexical'
+
+// Full view map
+type LexicalEditorViewMap = {
+  [viewKey: string]: LexicalEditorNodeMap
+}
+
+// Node overrides for a single view
+type LexicalEditorNodeMap = {
+  [nodeType: string]:
+    | NodeMapValue
+    | {
+        [blockType: string]: NodeMapValue
+      }
+}
+
+// Single node override
+type NodeMapValue<T = any> = {
+  Component?: (
+    args: WithinEditorArgs | JSXConverterArgs<T>,
+  ) => React.ReactElement | null
+  createDOM?: (args: WithinEditorArgs | JSXConverterArgs<T>) => HTMLElement
+  html?: string | ((args: WithinEditorArgs | JSXConverterArgs<T>) => string)
+}
+```
