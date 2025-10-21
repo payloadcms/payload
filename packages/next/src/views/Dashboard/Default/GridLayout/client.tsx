@@ -1,7 +1,6 @@
 'use client'
 
 import type { Widget } from 'payload'
-import type { Layout } from 'react-grid-layout'
 
 import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { Button } from '@payloadcms/ui/elements/Button'
@@ -9,16 +8,11 @@ import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import React, { useId } from 'react'
-import { Responsive, WidthProvider } from 'react-grid-layout'
 
 import { useDashboardLayout } from './useDashboardLayout.js'
 
-const ResponsiveGridLayout = WidthProvider(Responsive)
-
-const BREAKPOINT = 640 //768
-
 export type WidgetInstanceClient = {
-  clientLayout: Layout
+  clientLayout: any
   component: React.ReactNode
 }
 
@@ -62,19 +56,7 @@ export function GridLayoutDashboardClient({
           },
         ]}
       />
-      <ResponsiveGridLayout
-        breakpoints={{ lg: BREAKPOINT, xxs: 0 }}
-        className={`grid-layout ${isEditing ? 'editing' : ''}`}
-        cols={{ lg: 12, xxs: 3 }} // xxs: 6?
-        isDraggable={isEditing}
-        isResizable={isEditing}
-        layouts={{
-          lg: currentLayout.map((item) => item.clientLayout),
-        }}
-        onLayoutChange={handleLayoutChange}
-        rowHeight={(BREAKPOINT / 12) * 3}
-        useCSSTransforms={false}
-      >
+      <div className={`grid-layout ${isEditing ? 'editing' : ''}`}>
         {currentLayout &&
           currentLayout.map((widget) => (
             <div
@@ -100,7 +82,7 @@ export function GridLayoutDashboardClient({
               </div>
             </div>
           ))}
-      </ResponsiveGridLayout>
+      </div>
       {isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}
