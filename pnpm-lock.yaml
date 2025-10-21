@@ -1741,9 +1741,6 @@ importers:
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
-      use-context-selector:
-        specifier: 2.0.0
-        version: 2.0.0(react@19.1.1)(scheduler@0.25.0)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -14393,12 +14390,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  use-context-selector@2.0.0:
-    resolution: {integrity: sha512-owfuSmUNd3eNp3J9CdDl0kMgfidV+MkDvHPpvthN5ThqM+ibMccNE0k+Iq7TWC6JPFvGZqanqiGCuQx6DyV24g==}
-    peerDependencies:
-      react: 19.1.1
-      scheduler: '>=0.19.0'
 
   use-isomorphic-layout-effect@1.2.0:
     resolution: {integrity: sha512-q6ayo8DWoPZT0VdG4u3D3uxcgONP3Mevx2i2b0434cwWBoL+aelL1DzkXI6w3PhTZzUeR2kaVlZn70iCiseP6w==}
@@ -29735,11 +29726,6 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.1.8
-
-  use-context-selector@2.0.0(react@19.1.1)(scheduler@0.25.0):
-    dependencies:
-      react: 19.1.1
-      scheduler: 0.25.0
 
   use-isomorphic-layout-effect@1.2.0(@types/react@19.1.12)(react@19.1.1):
     dependencies:

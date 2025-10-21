@@ -67,4 +67,35 @@ describe('Radio', () => {
     await expect(uiField).toBeVisible()
     await expect(uiField).toContainText('client-side-configuration')
   })
+
+  test('The entire Form should not re-render when a field changes', async () => {
+    await page.goto(url.create)
+
+    const logs: string[] = []
+
+    await page.waitForLoadState()
+    // We don't want to save the logs from the initial render
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(1000)
+
+    page.on('console', (msg) => {
+      logs.push(msg.text())
+    })
+
+    await page.locator('#field-text').fill('test')
+
+    await expect(() => {
+      expect(logs).toHaveLength(0)
+    }).toPass({ timeout: 500 })
+
+    await page.locator('#field-uiCustomField').fill('test')
+
+    await expect(() => {
+      expect(logs).toContain('UICustomField changed')
+      expect(logs).toContain('UICustomField rendered')
+      // It should be 3, but I leave a margin of error for contingencies
+      // like React strict mode, to make the test less flaky.
+      expect(logs.length).toBeLessThanOrEqual(4)
+    }).toPass({ timeout: 500 })
+  })
 })

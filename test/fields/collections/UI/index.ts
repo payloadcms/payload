@@ -21,6 +21,15 @@ const UIFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'uiCustomField',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/UI/UICustomClient.js#UICustomField',
+        },
+      },
+    },
+    {
       type: 'ui',
       name: 'uiCustomClient',
       admin: {
