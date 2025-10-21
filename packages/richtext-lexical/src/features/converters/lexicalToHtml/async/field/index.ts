@@ -60,8 +60,8 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
     type: 'code',
     admin: {
       ...{
+        hidden: hidden ? hidden : false, // TODO: remove deprecated `hidden` property in 4.0
         ...admin,
-        hidden, // TODO: remove deprecated `hidden` property in 4.0
       },
       editorOptions: {
         language: 'html',
