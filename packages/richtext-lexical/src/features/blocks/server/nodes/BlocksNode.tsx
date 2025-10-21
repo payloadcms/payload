@@ -1,18 +1,19 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type {
-  DOMConversionMap,
-  DOMExportOutput,
-  EditorConfig,
-  ElementFormatType,
-  LexicalEditor,
-  LexicalNode,
-  NodeKey,
-} from 'lexical'
 import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMExportOutput,
+  type EditorConfig,
+  type ElementFormatType,
+  type LexicalEditor,
+  type LexicalNode,
+  type NodeKey,
+} from 'lexical'
 
 import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
@@ -134,12 +135,14 @@ export class ServerBlockNode extends DecoratorBlockNode {
 }
 
 export function $createServerBlockNode(fields: BlockFieldsOptionalID): ServerBlockNode {
-  return new ServerBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new ServerBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isServerBlockNode(
