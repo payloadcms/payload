@@ -19,11 +19,6 @@
       color: var(--theme-text);
     }
 
-    // No bottom margin for last paragraph in editor. This also created nice animations when adding a new line at the end
-    .ContentEditable__root {
-      font-size: base(0.8);
-    }
-
     &__quote {
       color: var(--theme-text);
       font-size: base(0.8);
@@ -171,14 +166,11 @@
       -webkit-box-decoration-break: clone;
     }
 
-    .ContentEditable__root &__link {
-      pointer-events: none;
-    }
-
     &__link {
       color: var(--theme-success-750);
       text-decoration: none;
       border-bottom: 1px dotted;
+      pointer-events: none;
     }
 
     // Renders cursor when native browser does not. See https://github.com/facebook/lexical/issues/3417
@@ -186,16 +178,18 @@
       display: block;
       pointer-events: none;
       position: absolute;
+
+      &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: -2px;
+        width: 20px;
+        border-top: 1px solid var(--theme-text);
+        animation: CursorBlink 1.1s steps(2, start) infinite;
+      }
     }
-    &__blockCursor:after {
-      content: '';
-      display: block;
-      position: absolute;
-      top: -2px;
-      width: 20px;
-      border-top: 1px solid var(--theme-text);
-      animation: CursorBlink 1.1s steps(2, start) infinite;
-    }
+
     @keyframes CursorBlink {
       to {
         visibility: hidden;
@@ -352,12 +346,6 @@
     &__nestedListItem:before,
     &__nestedListItem:after {
       display: none;
-    }
-
-    .ContentEditable__root {
-      &:first-child {
-        margin-top: 0;
-      }
     }
   }
 
