@@ -229,7 +229,7 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
 
     // No button should render
-    const previewButton = page.locator('button#preview-button')
+    const previewButton = page.locator('#preview-button')
     await expect(previewButton).toBeHidden()
 
     // Check the `enabled` field
