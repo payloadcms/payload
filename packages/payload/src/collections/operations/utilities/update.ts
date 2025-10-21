@@ -336,32 +336,33 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
-  result =
-    (await req.payload.db.updateOne({
+  if (!isSavingDraft) {
+    // update the main document
+    result = await req.payload.db.updateOne({
+      id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
       locale,
       req,
-      ...(isSavingDraft && versionResult?.version && '_status' in versionResult.version
-        ? {
-            // potentially update the main document if
-            // the status matches the latest version's status
-            where: {
-              and: [
-                {
-                  _status: { equals: versionResult.version._status },
-                },
-                { id: { equals: id } },
-              ],
-            },
-          }
-        : {
-            // version was not created, update main document by ID
-            id,
-          }),
-    })) ||
-    snapshotToSave ||
-    result
+    })
+  } else if (isSavingDraft && versionResult?.version && '_status' in versionResult.version) {
+    // potentially update the main document if
+    // the status matches the latest version's status
+    result = await req.payload.db.updateOne({
+      collection: collectionConfig.slug,
+      data: dataToUpdate,
+      locale,
+      req,
+      where: {
+        and: [
+          {
+            _status: { equals: versionResult.version._status },
+          },
+          { id: { equals: id } },
+        ],
+      },
+    })
+  }
 
   // /////////////////////////////////////
   // afterRead - Fields
