@@ -36,8 +36,10 @@ export type S3StorageOptions = {
   bucket: string
 
   /**
-   * Optional cache key to identify the Azure Blob storage client instance.
-   * If not provided, a default key of `azure:containerName` will be used.
+   * Optional cache key to identify the S3 storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @defaultValue `s3:containerName`
    */
   clientCacheKey?: string
 
