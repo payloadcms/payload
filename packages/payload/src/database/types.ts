@@ -203,6 +203,7 @@ export type QueryDraftsArgs = {
   page?: number
   pagination?: boolean
   req?: Partial<PayloadRequest>
+  returnAsDocuments?: boolean
   select?: SelectType
   sort?: Sort
   where?: Where
@@ -295,7 +296,7 @@ export type FindGlobalArgs = {
   where?: Where
 }
 
-export type UpdateGlobalVersionArgs<T = TypeWithID> = {
+export type UpdateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   global: GlobalSlug
   locale?: string
   /**
@@ -394,7 +395,7 @@ export type DeleteVersionsArgs = {
   where: Where
 }
 
-export type CreateVersionArgs<T = TypeWithID> = {
+export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string

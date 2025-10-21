@@ -9,7 +9,19 @@ import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: DrizzleAdapter,
-  { collection, joins, limit, locale, page = 1, pagination, req, select, sort, where },
+  {
+    collection,
+    joins,
+    limit,
+    locale,
+    page = 1,
+    pagination,
+    req,
+    returnAsDocuments = true,
+    select,
+    sort,
+    where,
+  },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = this.tableNameMap.get(
@@ -39,9 +51,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   return {
     ...result,
     docs: result.docs.map((doc) => {
-      doc = {
-        id: doc.parent,
-        ...doc.version,
+      if (returnAsDocuments !== false) {
+        doc = {
+          id: doc.parent,
+          ...doc.version,
+        }
       }
 
       return doc
