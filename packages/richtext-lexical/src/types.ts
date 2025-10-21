@@ -4,6 +4,7 @@ import type {
   EditorConfig as LexicalEditorConfig,
   LexicalNode,
   SerializedEditorState,
+  SerializedLexicalNode,
 } from 'lexical'
 import type {
   ClientField,
@@ -27,6 +28,11 @@ import type {
 } from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from './nodeTypes.js'
 import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
 export type LexicalFieldAdminProps = {
@@ -95,50 +101,98 @@ type WithinEditorArgs = {
   node: LexicalNode
 }
 
+export type NodeMapValue<
+  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> = {
+  /**
+   * Provide a react component to render the node. This will only work in the following cases:
+   * - If used in a JSX converter: will always work
+   * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
+   */
+  Component?: (
+    args:
+      | ({
+          isEditor: false
+          isJSXConverter: true
+        } & JSXConverterArgs<TNode>)
+      | ({
+          isEditor: true
+          isJSXConverter: false
+        } & WithinEditorArgs),
+  ) => JSX.Element
+  /**
+   * Provide a function to create the DOM element for the node. This will only work in the following cases:
+   * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
+   */
+  createDOM?: (args: WithinEditorArgs) => HTMLElement
+  /**
+   * Provide a string to use as the HTML element for the node. This will only work in the following cases:
+   * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
+   * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
+   */
+  html?: (
+    args:
+      | ({
+          isEditor: false
+          isJSXConverter: true
+        } & JSXConverterArgs<TNode>)
+      | ({
+          isEditor: true
+          isJSXConverter: false
+        } & WithinEditorArgs),
+  ) => string
+}
+
 /**
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
-export type LexicalEditorNodeMap = {
-  [node: string]: {
-    /**
-     * Provide a react component to render the node. This will only work in the following cases:
-     * - If used in a JSX converter: will always work
-     * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
-     */
-    Component?: (
-      args:
-        | ({
-            isEditor: false
-            isJSXConverter: true
-          } & JSXConverterArgs)
-        | ({
-            isEditor: true
-            isJSXConverter: false
-          } & WithinEditorArgs),
-    ) => JSX.Element
-    /**
-     * Provide a function to create the DOM element for the node. This will only work in the following cases:
-     * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
-     */
-    createDOM?: (args: WithinEditorArgs) => HTMLElement
-    /**
-     * Provide a string to use as the HTML element for the node. This will only work in the following cases:
-     * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
-     * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
-     */
-    html?: (
-      args:
-        | ({
-            isEditor: false
-            isJSXConverter: true
-          } & JSXConverterArgs)
-        | ({
-            isEditor: true
-            isJSXConverter: false
-          } & WithinEditorArgs),
-    ) => string
+export type LexicalEditorNodeMap<
+  TNodes extends { [key: string]: any; type?: string } =
+    | DefaultNodeTypes
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+> = {
+  [key: string]:
+    | {
+        [blockSlug: string]: NodeMapValue<any>
+      }
+    | NodeMapValue<any>
+    | undefined
+} & {
+  [nodeType in Exclude<NonNullable<TNodes['type']>, 'block' | 'inlineBlock'>]?: NodeMapValue<
+    Extract<TNodes, { type: nodeType }>
+  >
+} & {
+  blocks?: {
+    [K in Extract<
+      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
+        ? B extends { blockType: string }
+          ? B['blockType']
+          : never
+        : never,
+      string
+    >]?: NodeMapValue<
+      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
+        ? SerializedBlockNode<Extract<B, { blockType: K }>>
+        : SerializedBlockNode
+    >
   }
+  inlineBlocks?: {
+    [K in Extract<
+      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
+        ? B extends { blockType: string }
+          ? B['blockType']
+          : never
+        : never,
+      string
+    >]?: NodeMapValue<
+      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
+        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
+        : SerializedInlineBlockNode
+    >
+  }
+  unknown?: NodeMapValue<SerializedLexicalNode>
 }
 
 /**
