@@ -269,7 +269,7 @@ export const updateOperation = async <
     })
 
     if (!isSavingDraft) {
-      const now = Date.now().toString()
+      const now = new Date().toISOString()
       // Ensure global has createdAt
       if (!result.createdAt) {
         result.createdAt = now

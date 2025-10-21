@@ -37,7 +37,7 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
     delete docData._id
   }
 
-  const snapshotDate = Date.now().toString()
+  const snapshotDate = new Date().toISOString()
 
   const sharedCreateVersionArgs = {
     autosave: Boolean(autosave),
