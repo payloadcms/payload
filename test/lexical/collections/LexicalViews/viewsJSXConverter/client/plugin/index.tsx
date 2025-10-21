@@ -5,9 +5,9 @@ import { defaultJSXConverters, RichText } from '@payloadcms/richtext-lexical/rea
 import { useEffect, useState } from 'react'
 
 import './style.scss'
-import { lexicalViews } from '../../../views.js'
+import { lexicalFrontendViews, lexicalViews } from '../../../views.js'
 
-export function RichTextPlugin() {
+export function RichTextPlugin(props: any) {
   const [editor] = useLexicalComposerContext()
   const [editorState, setEditorState] = useState(() => editor.getEditorState().toJSON())
 
@@ -22,7 +22,9 @@ export function RichTextPlugin() {
       <RichText
         converters={defaultJSXConverters}
         data={editorState}
-        nodeMap={lexicalViews['default']}
+        nodeMap={
+          props.type === 'default' ? lexicalViews['default'] : lexicalFrontendViews['frontend']
+        }
       />
     </div>
   )

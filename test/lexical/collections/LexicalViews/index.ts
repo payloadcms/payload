@@ -17,7 +17,7 @@ export const LexicalViews: CollectionConfig = {
   },
   fields: [
     {
-      name: 'customViews',
+      name: 'customDefaultView',
       type: 'richText',
       editor: lexicalEditor({
         views: './collections/LexicalViews/views.js#lexicalViews',
@@ -36,12 +36,36 @@ export const LexicalViews: CollectionConfig = {
               },
             ],
           }),
-          DebugViewsJSXConverterFeature(),
+          DebugViewsJSXConverterFeature({ type: 'default' }),
         ],
       }),
     },
     {
-      name: 'vanillaViews',
+      name: 'customFrontendViews',
+      type: 'richText',
+      editor: lexicalEditor({
+        views: './collections/LexicalViews/views.js#lexicalFrontendViews',
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                slug: 'viewsTestBlock',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          }),
+          DebugViewsJSXConverterFeature({ type: 'frontend' }),
+        ],
+      }),
+    },
+    {
+      name: 'vanillaView',
       type: 'richText',
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [

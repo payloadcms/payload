@@ -285,8 +285,9 @@ export const seed = async (_payload: Payload) => {
     collection: 'lexical-views',
     depth: 0,
     data: {
-      customViews: editorState,
-      vanillaViews: editorState,
+      customDefaultView: editorState,
+      customFrontendViews: editorState,
+      vanillaView: editorState,
     },
     overrideAccess: true,
   })
