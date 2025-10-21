@@ -32,6 +32,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -164,20 +165,48 @@ export const createOperation = async <
 
     data = newFileData
 
+    let unwrappedLocalesData: null | Record<string, any> = null
+    if (config.localization && args.req.locale === 'all') {
+      unwrappedLocalesData = {}
+      for (const locale of config.localization.localeCodes) {
+        unwrappedLocalesData[locale] = unwrapLocalizedDoc({
+          config,
+          doc: data,
+          fields: collectionConfig.flattenedFields,
+          locale,
+        })
+      }
+    }
+
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate({
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: duplicatedFromDoc,
-      global: null,
-      operation: 'create',
-      overrideAccess: overrideAccess!,
-      req,
-    })
+    if (unwrappedLocalesData) {
+      for (const locale of Object.keys(unwrappedLocalesData)) {
+        unwrappedLocalesData[locale] = await beforeValidate({
+          collection: collectionConfig,
+          context: req.context,
+          data: unwrappedLocalesData[locale],
+          doc: duplicatedFromDoc,
+          global: null,
+          operation: 'create',
+          overrideAccess: overrideAccess!,
+          req,
+        })
+      }
+    } else {
+      data = await beforeValidate({
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: duplicatedFromDoc,
+        global: null,
+        operation: 'create',
+        overrideAccess: overrideAccess!,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Collections
@@ -219,21 +248,45 @@ export const createOperation = async <
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const resultWithLocales = await beforeChange<JsonObject>({
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: duplicatedFromDoc,
-      docWithLocales: duplicatedFromDocWithLocales,
-      global: null,
-      operation: 'create',
-      overrideAccess,
-      req,
-      skipValidation:
-        shouldSaveDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
-    })
+    let resultWithLocales: JsonObject | null = null
+    if (unwrappedLocalesData) {
+      const originalLocale = req.locale
+      for (const locale of Object.keys(unwrappedLocalesData)) {
+        req.locale = locale
+        resultWithLocales = await beforeChange<JsonObject>({
+          collection: collectionConfig,
+          context: req.context,
+          data: unwrappedLocalesData[locale],
+          doc: duplicatedFromDoc,
+          docWithLocales: resultWithLocales || duplicatedFromDocWithLocales,
+          global: null,
+          operation: 'create',
+          overrideAccess,
+          req,
+          skipValidation:
+            shouldSaveDraft &&
+            collectionConfig.versions.drafts &&
+            !collectionConfig.versions.drafts.validate,
+        })
+      }
+      req.locale = originalLocale
+    } else {
+      resultWithLocales = await beforeChange<JsonObject>({
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: duplicatedFromDoc,
+        docWithLocales: duplicatedFromDocWithLocales,
+        global: null,
+        operation: 'create',
+        overrideAccess,
+        req,
+        skipValidation:
+          shouldSaveDraft &&
+          collectionConfig.versions.drafts &&
+          !collectionConfig.versions.drafts.validate,
+      })
+    }
 
     // /////////////////////////////////////
     // Write files to local storage
@@ -257,13 +310,13 @@ export const createOperation = async <
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
-        resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
-        resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+        resultWithLocales!._verified = Boolean(resultWithLocales!._verified) || false
+        resultWithLocales!._verificationToken = crypto.randomBytes(20).toString('hex')
       }
 
       doc = await registerLocalStrategy({
         collection: collectionConfig,
-        doc: resultWithLocales,
+        doc: resultWithLocales!,
         password: data.password as string,
         payload: req.payload,
         req,
@@ -271,7 +324,7 @@ export const createOperation = async <
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
-        data: resultWithLocales,
+        data: resultWithLocales!,
         req,
       })
     }

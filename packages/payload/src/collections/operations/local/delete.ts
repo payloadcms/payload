@@ -24,7 +24,7 @@ import { deleteByIDOperation } from '../deleteByID.js'
 export type BaseOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 > = {
   /**
    * the Collection slug to operate against.
@@ -100,7 +100,7 @@ export type BaseOptions<
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 > = {
   /**
    * The ID of the document to delete.
@@ -115,7 +115,7 @@ export type ByIDOptions<
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 > = {
   /**
    * The ID of the document to delete.
@@ -130,13 +130,13 @@ export type ManyOptions<
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 > = ByIDOptions<TSlug, TSelect, TLocale> | ManyOptions<TSlug, TSelect, TLocale>
 
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 >(
   payload: Payload,
   options: ByIDOptions<TSlug, TSelect, TLocale>,
@@ -144,7 +144,7 @@ async function deleteLocal<
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 >(
   payload: Payload,
   options: ManyOptions<TSlug, TSelect, TLocale>,
@@ -152,7 +152,7 @@ async function deleteLocal<
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,
@@ -162,7 +162,7 @@ async function deleteLocal<
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,

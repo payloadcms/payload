@@ -31,6 +31,7 @@ import {
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { unwrapLocalizedDoc } from '../../../utilities/unwrapLocalizedDoc.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../../versions/saveVersion.js'
 
@@ -157,21 +158,55 @@ export const updateDocument = async <
     req,
   })
 
+  let unwrappedLocalesData: null | Record<string, any> = null
+
+  if (config.localization && locale === 'all') {
+    unwrappedLocalesData = {}
+    for (const locale of config.localization.localeCodes) {
+      unwrappedLocalesData[locale] = unwrapLocalizedDoc({
+        config,
+        doc: data,
+        fields: collectionConfig.flattenedFields,
+        locale,
+      })
+    }
+  }
+
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
-
-  data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
-    id,
-    collection: collectionConfig,
-    context: req.context,
-    data,
-    doc: originalDoc,
-    global: null,
-    operation: 'update',
-    overrideAccess,
-    req,
-  })
+  if (unwrappedLocalesData) {
+    for (const locale of Object.keys(unwrappedLocalesData)) {
+      unwrappedLocalesData[locale] = await beforeValidate({
+        id,
+        collection: collectionConfig,
+        context: req.context,
+        data: unwrappedLocalesData[locale],
+        doc: unwrapLocalizedDoc({
+          config,
+          doc: originalDoc,
+          fields: collectionConfig.flattenedFields,
+          locale,
+        }),
+        global: null,
+        operation: 'update',
+        overrideAccess,
+        req,
+      })
+    }
+  } else {
+    data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      global: null,
+      operation: 'update',
+      overrideAccess,
+      req,
+    })
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Collection
@@ -271,10 +306,35 @@ export const updateDocument = async <
     publishedDocWithLocales = lastPublished ? lastPublished : {}
   }
 
-  let result = await beforeChange({
-    ...beforeChangeArgs,
-    docWithLocales: publishedDocWithLocales,
-  })
+  let result: any = undefined
+  if (unwrappedLocalesData) {
+    const originalLocale = locale
+    for (const locale of Object.keys(unwrappedLocalesData)) {
+      req.locale = locale
+      const doc = unwrapLocalizedDoc({
+        config,
+        doc: originalDoc,
+        fields: collectionConfig.flattenedFields,
+        locale,
+      })
+
+      const docWithLocales = result || publishedDocWithLocales
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        collection: collectionConfig,
+        context: req.context,
+        data: unwrappedLocalesData[locale],
+        doc,
+        docWithLocales,
+      })
+    }
+    req.locale = originalLocale
+  } else {
+    result = await beforeChange({
+      ...beforeChangeArgs,
+      docWithLocales: publishedDocWithLocales,
+    })
+  }
 
   // /////////////////////////////////////
   // Handle potential password update

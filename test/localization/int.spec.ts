@@ -3407,6 +3407,191 @@ describe('Localization', () => {
       })
     })
   })
+
+  describe('create / update with locale: all', () => {
+    it('should create and with locale all', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      expect(result.title).toEqual({
+        en: 'EN title',
+        ar: 'AR title',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+
+      const resultFromFind = await payload.findByID({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+      })
+
+      expect(resultFromFind.title).toEqual({
+        en: 'EN title',
+        ar: 'AR title',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+    })
+
+    it('should update a field with locale all (all locales)', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title updated',
+            ar: 'AR title updated',
+            es: 'ES title updated',
+            hu: 'HU title updated',
+            pt: 'PT title updated',
+            xx: 'XX title updated',
+          },
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title updated',
+        hu: 'HU title updated',
+        pt: 'PT title updated',
+        xx: 'XX title updated',
+      })
+    })
+
+    it('should update a field with locale all (2 locales)', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title updated',
+            ar: 'AR title updated',
+          },
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+    })
+
+    it('should update 2 fields with locale all (1 - all locales, 2 - 2 locales)', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          localizedDescription: {
+            en: 'EN description',
+            ar: 'AR description',
+            es: 'ES description',
+            hu: 'HU description',
+            pt: 'PT description',
+            xx: 'XX description',
+          },
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+        data: {
+          localizedDescription: {
+            en: 'EN description updated',
+            ar: 'AR description updated',
+            es: 'ES description updated',
+            hu: 'HU description updated',
+            pt: 'PT description updated',
+            xx: 'XX description updated',
+          },
+          title: {
+            en: 'EN title updated',
+            ar: 'AR title updated',
+          },
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+      expect(resUpdate.localizedDescription).toEqual({
+        en: 'EN description updated',
+        ar: 'AR description updated',
+        es: 'ES description updated',
+        hu: 'HU description updated',
+        pt: 'PT description updated',
+        xx: 'XX description updated',
+      })
+    })
+  })
 })
 
 async function createLocalizedPost(data: {

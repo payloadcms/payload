@@ -26,7 +26,7 @@ import { findOperation } from '../find.js'
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 > = {
   /**
    * the Collection slug to operate against.
@@ -141,7 +141,7 @@ export type Options<
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,

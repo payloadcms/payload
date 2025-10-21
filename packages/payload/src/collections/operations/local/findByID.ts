@@ -25,7 +25,7 @@ export type Options<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 > = {
   /**
    * the Collection slug to operate against.
@@ -125,7 +125,7 @@ export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = string,
 >(
   payload: Payload,
   options: Options<TSlug, TDisableErrors, TSelect, TLocale>,

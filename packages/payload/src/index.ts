@@ -431,7 +431,7 @@ export class BasePayload {
   create = async <
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: CreateOptions<TSlug, TSelect, TLocale>,
   ): Promise<TransformCollection<TSlug, TSelect, TLocale>> => {
@@ -482,7 +482,7 @@ export class BasePayload {
   find = async <
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: FindOptions<TSlug, TSelect, TLocale>,
   ): Promise<PaginatedDocs<TransformCollection<TSlug, TSelect, TLocale>>> => {
@@ -498,7 +498,7 @@ export class BasePayload {
     TSlug extends CollectionSlug,
     TDisableErrors extends boolean,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: FindByIDOptions<TSlug, TDisableErrors, TSelect, TLocale>,
   ): Promise<ApplyDisableErrors<TransformCollection<TSlug, TSelect, TLocale>, TDisableErrors>> => {
@@ -752,7 +752,7 @@ export class BasePayload {
   delete<
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: DeleteByIDOptions<TSlug, TSelect, TLocale>,
   ): Promise<TransformCollection<TSlug, TSelect, TLocale>>
@@ -760,7 +760,7 @@ export class BasePayload {
   delete<
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: DeleteManyOptions<TSlug, TSelect, TLocale>,
   ): Promise<BulkOperationResult<TSlug, TSelect, TLocale>>
@@ -768,7 +768,7 @@ export class BasePayload {
   delete<
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: DeleteOptions<TSlug, TSelect, TLocale>,
   ): Promise<
@@ -973,7 +973,7 @@ export class BasePayload {
   update<
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: UpdateManyOptions<TSlug, TSelect, TLocale>,
   ): Promise<BulkOperationResult<TSlug, TSelect, TLocale>>
@@ -986,7 +986,7 @@ export class BasePayload {
   update<
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: UpdateByIDOptions<TSlug, TSelect, TLocale>,
   ): Promise<TransformCollection<TSlug, TSelect, TLocale>>
@@ -994,7 +994,7 @@ export class BasePayload {
   update<
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue,
+    TLocale extends LocaleValue = string,
   >(
     options: UpdateOptions<TSlug, TSelect, TLocale>,
   ): Promise<
