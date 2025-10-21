@@ -11,6 +11,7 @@ import type { JsonObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
@@ -71,10 +72,10 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   canIndent() {
     return true
   }
-  override createDOM() {
-    const element = document.createElement('span')
-    element.classList.add('inline-block-container')
 
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('span')
+    addClassNamesToElement(element, config?.theme?.inlineBlock)
     return element
   }
 

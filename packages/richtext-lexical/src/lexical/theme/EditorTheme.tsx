@@ -5,6 +5,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   blockCursor: 'LexicalEditorTheme__blockCursor',
   characterLimit: 'LexicalEditorTheme__characterLimit',
   code: 'LexicalEditorTheme__code',
+  inlineBlock: 'LexicalEditorTheme__inlineBlock',
 
   heading: {
     h1: 'LexicalEditorTheme__h1',
