@@ -225,7 +225,7 @@ export const updateOperation = async <
       context: req.context,
       data,
       doc: originalDoc,
-      docWithLocales: {},
+      docWithLocales: globalJSON,
       global: globalConfig,
       operation: 'update' as Operation,
       req,
