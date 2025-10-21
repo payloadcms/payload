@@ -50,6 +50,7 @@ jobs:
             graphql
             live-preview
             live-preview-react
+            live-preview-vue
             next
             payload-cloud
             plugin-cloud
