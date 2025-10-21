@@ -12,6 +12,7 @@
 
   .LexicalEditorTheme__block {
     @extend %body;
+    margin-block: base(0.4);
 
     &__container {
       display: flex;
@@ -19,13 +20,12 @@
       gap: calc(var(--base) / 2);
       @extend %body;
     }
+
     &__row {
       .collapsible__toggle-wrap {
         padding-inline-start: base(0.4);
       }
     }
-
-    margin-block: base(0.4);
 
     &__header {
       h3 {
