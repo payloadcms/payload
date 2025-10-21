@@ -26,11 +26,12 @@ function createConverterFromNodeMapValue(viewDef: NodeMapValue): JSXConverter {
     }
 
     // If html is provided (as a function or string), use it
+    // Note: Using span instead of div to avoid forcing block-level semantics
     if (viewDef.html) {
       const htmlContent =
         typeof viewDef.html === 'function' ? viewDef.html(converterArgs) : viewDef.html
 
-      return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      return <span dangerouslySetInnerHTML={{ __html: htmlContent }} />
     }
 
     return null
