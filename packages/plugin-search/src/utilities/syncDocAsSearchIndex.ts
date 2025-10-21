@@ -24,7 +24,8 @@ export const syncDocAsSearchIndex = async ({
     },
     title,
   }
-  const docKey = `${collection}:${id}`
+  const docKeyPrefix = `${collection}:${id}`
+  const docKey = pluginConfig.locales?.length ? `${docKeyPrefix}:${syncLocale}` : docKeyPrefix
   const syncedDocsSet = (req.context?.syncedDocsSet as Set<string>) || new Set<string>()
 
   if (syncedDocsSet.has(docKey)) {
