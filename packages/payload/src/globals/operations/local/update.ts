@@ -125,8 +125,9 @@ export async function updateGlobalLocal<
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  return updateOperation<TSlug, TSelect>({
+  return updateOperation<TSlug, TSelect, TLocale>({
     slug: globalSlug as string,
+    // @ts-expect-error
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     draft,
