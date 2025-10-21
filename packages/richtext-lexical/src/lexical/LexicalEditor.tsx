@@ -9,7 +9,6 @@ import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
-import type { LexicalEditorViewMap } from '../types.js'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
@@ -30,14 +29,11 @@ import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
   {
-    currentView?: string
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
-    views?: LexicalEditorViewMap
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
-  const { currentView, editorConfig, editorContainerRef, isSmallWidthViewport, onChange, views } =
-    props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -122,7 +118,7 @@ export const LexicalEditor: React.FC<
         <ClipboardPlugin />
         <TextPlugin features={editorConfig.features} />
         <SelectAllPlugin />
-        <NodeViewOverridePlugin currentView={currentView} views={views} />
+        <NodeViewOverridePlugin />
         {isEditable && (
           <OnChangePlugin
             // Selection changes can be ignored here, reducing the

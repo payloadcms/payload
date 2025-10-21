@@ -26,6 +26,7 @@ import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
+import { RichTextViewProvider } from './RichTextViewProvider.js'
 import { ViewSelector } from './ViewSelector.js'
 
 const baseClass = 'rich-text-lexical'
@@ -170,39 +171,44 @@ const RichTextComponent: React.FC<
   }, [initialValue])
 
   return (
-    <div className={classes} key={pathWithEditDepth} style={styles}>
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
-      />
-      <div className={`${baseClass}__label-row`}>
-        {Label || (
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
-        )}
-        <ViewSelector currentView={currentView} onViewChange={setCurrentView} views={props.views} />
-      </div>
-      <div className={`${baseClass}__wrap`}>
-        <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
-          {BeforeInput}
-          <LexicalProvider
-            composerKey={pathWithEditDepth}
-            currentView={currentView}
-            editorConfig={editorConfig}
-            fieldProps={props}
-            isSmallWidthViewport={isSmallWidthViewport}
-            key={JSON.stringify({ currentView, path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes or view changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-            onChange={handleChange}
-            readOnly={disabled}
-            value={value}
-          />
-          {AfterInput}
-        </ErrorBoundary>
+    <RichTextViewProvider
+      currentView={currentView}
+      setCurrentView={setCurrentView}
+      views={props.views}
+    >
+      <div className={classes} key={pathWithEditDepth} style={styles}>
         <RenderCustomComponent
-          CustomComponent={Description}
-          Fallback={<FieldDescription description={description} path={path} />}
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
+        <div className={`${baseClass}__label-row`}>
+          {Label || (
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          )}
+          <ViewSelector />
+        </div>
+        <div className={`${baseClass}__wrap`}>
+          <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
+            {BeforeInput}
+            <LexicalProvider
+              composerKey={pathWithEditDepth}
+              editorConfig={editorConfig}
+              fieldProps={props}
+              isSmallWidthViewport={isSmallWidthViewport}
+              key={JSON.stringify({ currentView, path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes or view changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+              onChange={handleChange}
+              readOnly={disabled}
+              value={value}
+            />
+            {AfterInput}
+          </ErrorBoundary>
+          <RenderCustomComponent
+            CustomComponent={Description}
+            Fallback={<FieldDescription description={description} path={path} />}
+          />
+        </div>
       </div>
-    </div>
+    </RichTextViewProvider>
   )
 }
 

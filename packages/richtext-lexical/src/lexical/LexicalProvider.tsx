@@ -10,6 +10,7 @@ import { useMemo } from 'react'
 import type { LexicalRichTextFieldProps } from '../types.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
+import { useRichTextView } from '../field/RichTextViewProvider.js'
 import {
   EditorConfigProvider,
   useEditorConfigContext,
@@ -19,7 +20,6 @@ import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   composerKey: string
-  currentView?: string
   editorConfig: SanitizedClientEditorConfig
   fieldProps: LexicalRichTextFieldProps
   isSmallWidthViewport: boolean
@@ -51,17 +51,10 @@ const NestProviders = ({
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const {
-    composerKey,
-    currentView = 'default',
-    editorConfig,
-    fieldProps,
-    isSmallWidthViewport,
-    onChange,
-    readOnly,
-    value,
-  } = props
-  const { views } = fieldProps
+  const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
+    props
+
+  const { currentView, views } = useRichTextView()
 
   const parentContext = useEditorConfigContext()
 
@@ -133,12 +126,10 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       >
         <NestProviders providers={editorConfig.features.providers}>
           <LexicalEditorComponent
-            currentView={currentView}
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
             isSmallWidthViewport={isSmallWidthViewport}
             onChange={onChange}
-            views={views}
           />
         </NestProviders>
       </EditorConfigProvider>

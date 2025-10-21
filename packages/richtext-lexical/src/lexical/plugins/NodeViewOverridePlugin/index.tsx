@@ -2,36 +2,29 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useEffect } from 'react'
 
-import type { LexicalEditorViewMap } from '../../../types.js'
-
+import { useRichTextView } from '../../../field/RichTextViewProvider.js'
 import { clearEditorNodeViews, registerEditorNodeViews } from '../../nodes/index.js'
 
-export function NodeViewOverridePlugin({
-  currentView,
-  views,
-}: {
-  currentView?: string
-  views?: LexicalEditorViewMap
-}): null {
+export function NodeViewOverridePlugin(): null {
   const [editor] = useLexicalComposerContext()
-  const selectedView = currentView || 'default'
+  const { currentView, views } = useRichTextView()
 
   useEffect(() => {
     if (!views) {
       return
     }
 
-    if (selectedView === 'default') {
+    if (currentView === 'default') {
       if (views.default) {
         registerEditorNodeViews(editor, views.default)
       } else {
         clearEditorNodeViews(editor)
       }
-    } else if (views[selectedView]) {
+    } else if (views[currentView]) {
       clearEditorNodeViews(editor)
-      registerEditorNodeViews(editor, views[selectedView])
+      registerEditorNodeViews(editor, views[currentView])
     }
-  }, [editor, views, selectedView])
+  }, [editor, views, currentView])
 
   return null
 }

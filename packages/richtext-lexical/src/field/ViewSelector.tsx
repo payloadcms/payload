@@ -2,19 +2,12 @@
 import { ChevronIcon, Popup, PopupList } from '@payloadcms/ui'
 import React from 'react'
 
-import type { LexicalEditorViewMap } from '../types.js'
-
+import { useRichTextView } from './RichTextViewProvider.js'
 import './ViewSelector.scss'
 
-export function ViewSelector({
-  currentView,
-  onViewChange,
-  views,
-}: {
-  currentView: string
-  onViewChange: (view: string) => void
-  views?: LexicalEditorViewMap
-}): null | React.ReactElement {
+export function ViewSelector(): null | React.ReactElement {
+  const { currentView, setCurrentView, views } = useRichTextView()
+
   // Don't show if no views or only default exists
   if (!views || Object.keys(views).length === 0) {
     return null
@@ -55,7 +48,7 @@ export function ViewSelector({
                   disabled={viewName === currentView}
                   key={viewName}
                   onClick={() => {
-                    onViewChange(viewName)
+                    setCurrentView?.(viewName)
                     close()
                   }}
                 >
