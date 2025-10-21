@@ -105,9 +105,11 @@ export type NodeMapValue<
   TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
 > = {
   /**
-   * Provide a react component to render the node. This will only work in the following cases:
-   * - If used in a JSX converter: will always work
-   * - If used in a Lexical Editor: will only work if the node is a DecoratorNode
+   * Provide a react component to render the node.
+   *
+   * **JSX Converter:** Always works. Takes priority over `html`.
+   *
+   * **Lexical Editor:** Only works for DecoratorNodes (renders in `decorate` method). Takes priority over `html` and `createDOM`.
    */
   Component?: (
     args:
@@ -121,14 +123,29 @@ export type NodeMapValue<
         } & WithinEditorArgs),
   ) => JSX.Element
   /**
-   * Provide a function to create the DOM element for the node. This will only work in the following cases:
-   * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both createDOM and `Component` will be used.
+   * Provide a function to create the DOM element for the node.
+   *
+   * **JSX Converter:** Not used (only `Component` and `html` work).
+   *
+   * **Lexical Editor:** Always works (renders in `createDOM` method).
+   * - For ElementNodes: This is the standard way to customize rendering.
+   * - For DecoratorNodes: When combined with `html`, the DOM gets custom structure while `decorate` renders the `html` content.
    */
   createDOM?: (args: WithinEditorArgs) => HTMLElement
   /**
-   * Provide a string to use as the HTML element for the node. This will only work in the following cases:
-   * - If used in a JSX converter: will always work. This will be ignored if a `Component` is provided.
-   * - If used in Lexical Editor: will always work. If the node is a DecoratorNode, both `html` and `Component` will be used. If `createDOM` is provided, this will be ignored.
+   * Provide HTML string or function to render the node.
+   *
+   * **JSX Converter:** Always works (ignored if `Component` is provided).
+   *
+   * **Lexical Editor behavior depends on node type:**
+   *
+   * - **ElementNodes:** `html` is used in `createDOM` to generate the DOM structure.
+   *
+   * - **DecoratorNodes (have both `createDOM` and `decorate`):**
+   *   - If only `html` is provided: `createDOM` uses `html` to create DOM, `decorate` returns `null`
+   *   - If `html` + `Component`: `createDOM` uses `html`, `decorate` uses `Component`
+   *   - If `html` + `createDOM`: Custom `createDOM` creates structure, `decorate` renders `html` content
+   *   - If `html` + `Component` + `createDOM`: Custom `createDOM` creates structure, `decorate` uses `Component` (html ignored in editor)
    */
   html?: (
     args:

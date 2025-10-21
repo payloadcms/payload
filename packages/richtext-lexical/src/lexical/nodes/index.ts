@@ -37,6 +37,7 @@ export function registerEditorNodeViews(
     // Handle blocks specially - store each block type with key 'block:blockType'
     if (nodeType === 'blocks') {
       for (const [blockType, viewDef] of Object.entries(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         value as Record<string, NodeMapValue<any>>,
       )) {
         editorViews.set(`block:${blockType}`, viewDef)
@@ -47,6 +48,7 @@ export function registerEditorNodeViews(
     // Handle inlineBlocks specially - store each block type with key 'inlineBlock:blockType'
     if (nodeType === 'inlineBlocks') {
       for (const [blockType, viewDef] of Object.entries(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         value as Record<string, NodeMapValue<any>>,
       )) {
         editorViews.set(`inlineBlock:${blockType}`, viewDef)
@@ -117,14 +119,14 @@ function applyNodeOverride({
   // Override decorate method (for DecoratorNodes)
   if (NodeClass.prototype.decorate && !NodeClass.prototype._decorateOverridden) {
     NodeClass.prototype._decorateOverridden = true
+    const hasCreateDOM = !!NodeClass.prototype.createDOM
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     NodeClass.prototype.decorate = function (editor: LexicalEditor, config: EditorConfig): any {
       const viewDef = getEditorNodeView(editor, nodeType, this)
 
       if (viewDef) {
-        // If Component is provided, use it
+        // Priority 1: If Component is provided, use it
         if (viewDef.Component) {
-          // Call the component function with available context
           return viewDef.Component({
             config,
             editor,
@@ -134,15 +136,21 @@ function applyNodeOverride({
           })
         }
 
-        // If html is provided (as a function or string), use it
-        if (viewDef.html) {
+        // Priority 2: If custom createDOM is provided, use html in decorate
+        if (viewDef.createDOM && viewDef.html) {
           const htmlContent =
             typeof viewDef.html === 'function'
               ? viewDef.html({ config, editor, isEditor: true, isJSXConverter: false, node: this })
               : viewDef.html
-          return React.createElement('div', {
+          return React.createElement('span', {
             dangerouslySetInnerHTML: { __html: htmlContent },
           })
+        }
+
+        // Priority 3: If only html is provided (no custom createDOM),
+        // createDOM will handle it, so decorate returns empty fragment
+        if (viewDef.html && hasCreateDOM && !viewDef.createDOM) {
+          return React.createElement(React.Fragment)
         }
       }
 
