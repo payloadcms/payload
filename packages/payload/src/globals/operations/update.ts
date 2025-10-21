@@ -28,7 +28,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
-import { saveVersion } from '../../versions/saveVersion.js'
+import { saveVersionV4 } from '../../versions/saveVersionV4.js'
 
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
@@ -96,7 +96,8 @@ export const updateOperation = async <
 
     let { data } = args
 
-    const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts)
+    const isSavingDraft =
+      Boolean(draftArg && globalConfig.versions?.drafts) && data._status !== 'published'
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -121,7 +122,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const globalVersion = await getLatestGlobalVersion({
+    const latestVersionGlobal = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
       locale: locale!,
@@ -129,11 +130,11 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = globalVersion || {}
+    const { global, globalExists } = latestVersionGlobal || {}
 
     let globalJSON: JsonObject = {}
 
-    if (globalVersion && globalVersion.global) {
+    if (latestVersionGlobal && latestVersionGlobal.global) {
       globalJSON = deepCopyObjectSimple(global)
 
       if (globalJSON._id) {
@@ -218,44 +219,44 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
-    let publishedDocWithLocales = globalJSON
-    let versionSnapshotResult
 
     const beforeChangeArgs = {
       collection: null,
       context: req.context,
       data,
       doc: originalDoc,
-      docWithLocales: undefined,
+      docWithLocales: {},
       global: globalConfig,
       operation: 'update' as Operation,
       req,
       skipValidation:
-        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
+        isSavingDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    if (publishSpecificLocale) {
-      const latestVersion = await getLatestGlobalVersion({
-        slug,
-        config: globalConfig,
-        payload,
-        published: true,
-        req,
-        where: query,
-      })
+    let result: JsonObject = await beforeChange(beforeChangeArgs)
+    let snapshotToSave: JsonObject | undefined
 
-      publishedDocWithLocales = latestVersion?.global || {}
+    if (payload.config.localization && globalConfig.versions) {
+      if (publishSpecificLocale) {
+        snapshotToSave = deepCopyObjectSimple(result)
 
-      versionSnapshotResult = await beforeChange({
-        ...beforeChangeArgs,
-        docWithLocales: globalJSON,
-      })
+        // the published data to save to the main document
+        result = await beforeChange({
+          ...beforeChangeArgs,
+          docWithLocales:
+            (
+              await getLatestGlobalVersion({
+                slug,
+                config: globalConfig,
+                payload,
+                published: true,
+                req,
+                where: query,
+              })
+            )?.global || {},
+        })
+      }
     }
-
-    let result = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales: publishedDocWithLocales,
-    })
 
     // /////////////////////////////////////
     // Update
@@ -267,14 +268,15 @@ export const updateOperation = async <
       select: incomingSelect,
     })
 
-    if (!shouldSaveDraft) {
+    if (!isSavingDraft) {
+      const now = Date.now().toString()
       // Ensure global has createdAt
       if (!result.createdAt) {
-        result.createdAt = new Date().toISOString()
+        result.createdAt = now
       }
 
       // Ensure updatedAt date is always updated
-      result.updatedAt = new Date().toISOString()
+      result.updatedAt = now
 
       if (globalExists) {
         result = await payload.db.updateGlobal({
@@ -297,21 +299,24 @@ export const updateOperation = async <
     // /////////////////////////////////////
     if (globalConfig.versions) {
       const { globalType } = result
-      result = await saveVersion({
+      const versionResult = await saveVersionV4({
         autosave,
-        docWithLocales: result,
-        draft: shouldSaveDraft,
         global: globalConfig,
+        isSavingDraft,
+        latestVersion: {
+          ...latestVersionGlobal.global,
+          version: result,
+        },
         operation: 'update',
         payload,
         publishSpecificLocale,
         req,
         select,
-        snapshot: versionSnapshotResult,
+        snapshotToSave,
       })
 
       result = {
-        ...result,
+        ...(versionResult!.snapshotVersionDoc?.version || versionResult!.versionDoc.version),
         globalType,
       }
     }

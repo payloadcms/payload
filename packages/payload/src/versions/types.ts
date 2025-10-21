@@ -128,3 +128,11 @@ export type TypeWithVersion<T> = {
   updatedAt: string
   version: T
 }
+
+export type TypeWithVersionCreate<T> = {
+  parent?: number | string
+  publishedLocale?: string
+  snapshot?: boolean
+  updatedAt?: string
+  version: T
+}

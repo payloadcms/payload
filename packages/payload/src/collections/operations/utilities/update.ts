@@ -2,16 +2,26 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
 import type {
+  AccessResult,
+  CollectionSlug,
+  FileToSave,
+  SanitizedConfig,
+  TypeWithVersion,
+} from '../../../index.js'
+import type {
+  JsonObject,
   Payload,
   PayloadRequest,
   PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { VersionDocType } from '../../../versions/saveVersionV4.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
@@ -21,18 +31,12 @@ import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
-import {
-  type AccessResult,
-  type CollectionSlug,
-  deepCopyObjectSimple,
-  type FileToSave,
-  type SanitizedConfig,
-} from '../../../index.js'
+import { deepCopyObjectSimple } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
-import { saveVersion } from '../../../versions/saveVersion.js'
+import { saveVersionV4 } from '../../../versions/saveVersionV4.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   accessResults: AccessResult
@@ -41,20 +45,22 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
   depth: number
-  docWithLocales: any
   draftArg: boolean
   fallbackLocale: string | string[]
   filesToUpload: FileToSave[]
   id: number | string
+  latestVersionDoc: (JsonObject & TypeWithID) | TypeWithVersion<TSlug>
   locale: string
   overrideAccess: boolean
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
   publishSpecificLocale?: string
+  publishSpecificLocales?: string[]
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
+  unpublishSpecificLocales?: string[]
 }
 
 /**
@@ -81,22 +87,24 @@ export const updateDocument = async <
   config,
   data,
   depth,
-  docWithLocales,
   draftArg,
   fallbackLocale,
   filesToUpload,
+  latestVersionDoc,
   locale,
   overrideAccess,
   overrideLock,
   payload,
   populate,
   publishSpecificLocale,
+  publishSpecificLocales,
   req,
   select,
   showHiddenFields,
+  unpublishSpecificLocales,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
-  const shouldSaveDraft =
+  const isSavingDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
   const shouldSavePassword = Boolean(
     password &&
@@ -104,7 +112,7 @@ export const updateDocument = async <
       (!collectionConfig.auth.disableLocalStrategy ||
         (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
           collectionConfig.auth.disableLocalStrategy.enableFields)) &&
-      !shouldSaveDraft,
+      !isSavingDraft,
   )
 
   // /////////////////////////////////////
@@ -118,6 +126,11 @@ export const updateDocument = async <
     overrideLock,
     req,
   })
+
+  const docWithLocales =
+    collectionConfig.versions && latestVersionDoc?.version
+      ? latestVersionDoc.version
+      : latestVersionDoc
 
   const originalDoc = await afterRead({
     collection: collectionConfig,
@@ -221,23 +234,19 @@ export const updateDocument = async <
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let publishedDocWithLocales = docWithLocales
-  let versionSnapshotResult
-
   const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
     id,
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    docWithLocales: undefined,
+    docWithLocales,
     global: null,
     operation: 'update',
     overrideAccess,
     req,
     skipValidation:
-      (shouldSaveDraft &&
+      (isSavingDraft &&
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate) ||
       // Skip validation for trash operations since they're just metadata updates
@@ -248,39 +257,40 @@ export const updateDocument = async <
           (Boolean(originalDoc?.deletedAt) && data?._status !== 'published'))),
   }
 
-  if (publishSpecificLocale) {
-    versionSnapshotResult = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales,
-    })
+  let result: JsonObject & TypeWithID = await beforeChange(beforeChangeArgs)
+  let snapshotToSave: (JsonObject & TypeWithID) | undefined
 
-    const lastPublished = await getLatestCollectionVersion({
-      id,
-      config: collectionConfig,
-      payload,
-      published: true,
-      query: {
-        collection: collectionConfig.slug,
-        locale,
-        req,
-        where: combineQueries({ id: { equals: id } }, accessResults),
-      },
-      req,
-    })
+  if (config.localization && collectionConfig.versions) {
+    if (publishSpecificLocale) {
+      snapshotToSave = deepCopyObjectSimple(result)
 
-    publishedDocWithLocales = lastPublished ? lastPublished : {}
+      // the published data to save to the main document
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales:
+          (await getLatestCollectionVersion({
+            id,
+            config: collectionConfig,
+            payload,
+            published: true,
+            query: {
+              collection: collectionConfig.slug,
+              locale,
+              req,
+              where: combineQueries({ id: { equals: id } }, accessResults),
+            },
+            req,
+            returnAsDocument: true,
+          })) || {},
+      })
+    }
   }
-
-  let result = await beforeChange({
-    ...beforeChangeArgs,
-    docWithLocales: publishedDocWithLocales,
-  })
 
   // /////////////////////////////////////
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: Record<string, unknown> & TypeWithID = { ...result }
 
   if (shouldSavePassword && typeof password === 'string') {
     const { hash, salt } = await generatePasswordSaltHash({
@@ -295,39 +305,65 @@ export const updateDocument = async <
   }
 
   // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  let versionResult: undefined | VersionDocType<DataFromCollectionSlug<TSlug>>
+
+  if (collectionConfig.versions) {
+    const versionResultDocs = await saveVersionV4<DataFromCollectionSlug<TSlug>>({
+      id,
+      autosave,
+      collection: collectionConfig,
+      isSavingDraft,
+      latestVersion: {
+        ...(latestVersionDoc as TypeWithVersion<TypeWithID>),
+        version: dataToUpdate,
+      },
+      operation: 'update',
+      payload,
+      publishSpecificLocale,
+      publishSpecificLocales,
+      req,
+      snapshotToSave,
+      unpublishSpecificLocales,
+    })
+
+    if (versionResultDocs) {
+      versionResult = versionResultDocs.versionDoc
+    }
+  }
+
+  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (!shouldSaveDraft) {
-    // Ensure updatedAt date is always updated
-    dataToUpdate.updatedAt = new Date().toISOString()
-    result = await req.payload.db.updateOne({
-      id,
+  result =
+    (await req.payload.db.updateOne({
       collection: collectionConfig.slug,
       data: dataToUpdate,
       locale,
       req,
-    })
-  }
-
-  // /////////////////////////////////////
-  // Create version
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions) {
-    result = await saveVersion({
-      id,
-      autosave,
-      collection: collectionConfig,
-      docWithLocales: result,
-      draft: shouldSaveDraft,
-      operation: 'update',
-      payload,
-      publishSpecificLocale,
-      req,
-      snapshot: versionSnapshotResult,
-    })
-  }
+      ...(versionResult?.version && '_status' in versionResult.version
+        ? {
+            // potentially update the main document if
+            // the status matches the latest version's status
+            where: {
+              and: [
+                {
+                  _status: { equals: versionResult.version._status },
+                },
+                { id: { equals: id } },
+              ],
+            },
+          }
+        : {
+            // version was not created, update main document by ID
+            id,
+          }),
+    })) ||
+    snapshotToSave ||
+    result
 
   // /////////////////////////////////////
   // afterRead - Fields

@@ -8,6 +8,7 @@ import { deepCopyObjectSimple } from '../index.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
+import { saveSnapshot } from './saveSnapshot.js'
 
 type Args = {
   autosave?: boolean
@@ -92,20 +93,18 @@ export const saveVersion = async ({
       if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
         createNewVersion = false
 
-        const data: Record<string, unknown> = {
-          createdAt: new Date(latestVersion.createdAt).toISOString(),
-          latest: true,
-          parent: id,
-          updatedAt: now,
-          version: {
-            ...versionData,
-          },
-        }
-
         const updateVersionArgs = {
           id: latestVersion.id,
           req,
-          versionData: data as TypeWithID,
+          versionData: {
+            createdAt: new Date(latestVersion.createdAt).toISOString(),
+            latest: true,
+            parent: id,
+            updatedAt: now,
+            version: {
+              ...versionData,
+            },
+          },
         }
 
         if (collection) {
@@ -148,31 +147,17 @@ export const saveVersion = async ({
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
-      if (publishSpecificLocale && snapshot) {
-        const snapshotData = deepCopyObjectSimple(snapshot)
-        if (snapshotData._id) {
-          delete snapshotData._id
-        }
-
-        snapshotData._status = 'draft'
-
-        const snapshotDate = new Date().toISOString()
-
-        const updatedArgs = {
-          ...createVersionArgs,
-          createdAt: snapshotDate,
-          returning: false,
-          snapshot: true,
-          updatedAt: snapshotDate,
-          versionData: snapshotData,
-        } as CreateGlobalVersionArgs & CreateVersionArgs
-
-        if (collection) {
-          await payload.db.createVersion(updatedArgs)
-        }
-        if (global) {
-          await payload.db.createGlobalVersion(updatedArgs)
-        }
+      if (snapshot) {
+        await saveSnapshot({
+          id,
+          autosave,
+          collection,
+          data: snapshot,
+          payload,
+          publishSpecificLocale,
+          req,
+          select,
+        })
       }
     }
   } catch (err) {

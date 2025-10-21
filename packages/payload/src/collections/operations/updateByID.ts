@@ -13,6 +13,7 @@ import type {
   Collection,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -156,19 +157,25 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    const docWithLocales = await getLatestCollectionVersion({
+    const latestVersionDoc = await getLatestCollectionVersion<
+      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+    >({
       id,
       config: collectionConfig,
       payload,
       query: findOneArgs,
       req,
+      returnAsDocument: false,
     })
 
-    if (!docWithLocales && !hasWherePolicy) {
+    if (!latestVersionDoc && !hasWherePolicy) {
       throw new NotFound(req.t)
     }
-    if (!docWithLocales && hasWherePolicy) {
+    if (!latestVersionDoc && hasWherePolicy) {
       throw new Forbidden(req.t)
+    }
+    if (!latestVersionDoc) {
+      throw new NotFound(req.t)
     }
 
     // /////////////////////////////////////
@@ -203,10 +210,10 @@ export const updateByIDOperation = async <
       config,
       data: deepCopyObjectSimple(newFileData),
       depth: depth!,
-      docWithLocales,
       draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
+      latestVersionDoc,
       locale: locale!,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
