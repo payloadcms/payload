@@ -5,10 +5,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   blockCursor: 'LexicalEditorTheme__blockCursor',
   characterLimit: 'LexicalEditorTheme__characterLimit',
   code: 'LexicalEditorTheme__code',
-  embedBlock: {
-    base: 'LexicalEditorTheme__embedBlock',
-    focus: 'LexicalEditorTheme__embedBlockFocus',
-  },
+
   heading: {
     h1: 'LexicalEditorTheme__h1',
     h2: 'LexicalEditorTheme__h2',
@@ -20,7 +17,6 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   hr: 'LexicalEditorTheme__hr',
   hrSelected: 'LexicalEditorTheme__hrSelected',
   indent: 'LexicalEditorTheme__indent',
-  inlineImage: 'LexicalEditor__inline-image',
   link: 'LexicalEditorTheme__link',
   list: {
     checklist: 'LexicalEditorTheme__checklist',
@@ -76,5 +72,5 @@ export const LexicalEditorTheme: EditorThemeClasses = {
     underline: 'LexicalEditorTheme__textUnderline',
     underlineStrikethrough: 'LexicalEditorTheme__textUnderlineStrikethrough',
   },
-  upload: 'editor-upload',
+  upload: 'LexicalEditorTheme__upload',
 }
