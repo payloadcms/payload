@@ -146,6 +146,8 @@ export const updateDocument = async <
     showHiddenFields: true,
   })
 
+  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
+
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
       authOptions: collectionConfig.auth,
@@ -250,11 +252,7 @@ export const updateDocument = async <
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate) ||
       // Skip validation for trash operations since they're just metadata updates
-      (collectionConfig.trash &&
-        (Boolean(data?.deletedAt) ||
-          // Skip validation when restoring from trash, but only if not publishing
-          // (if publishing, we need full validation)
-          (Boolean(originalDoc?.deletedAt) && data?._status !== 'published'))),
+      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }
 
   let result: JsonObject & TypeWithID = await beforeChange(beforeChangeArgs)
@@ -344,7 +342,7 @@ export const updateDocument = async <
       data: dataToUpdate,
       locale,
       req,
-      ...(versionResult?.version && '_status' in versionResult.version
+      ...(isSavingDraft && versionResult?.version && '_status' in versionResult.version
         ? {
             // potentially update the main document if
             // the status matches the latest version's status
