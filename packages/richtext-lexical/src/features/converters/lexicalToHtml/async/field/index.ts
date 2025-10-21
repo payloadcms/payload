@@ -61,7 +61,7 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
     admin: {
       ...{
         disableListColumn: true, // Disable list column by default for HTML field
-        hidden: hidden ? hidden : false, // TODO: remove deprecated `hidden` property in 4.0
+        hidden, // TODO: remove deprecated `hidden` property in 4.0
         ...(admin || {}),
       },
       editorOptions: {
