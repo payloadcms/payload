@@ -19,6 +19,7 @@ import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   composerKey: string
+  currentView?: string
   editorConfig: SanitizedClientEditorConfig
   fieldProps: LexicalRichTextFieldProps
   isSmallWidthViewport: boolean
@@ -50,8 +51,16 @@ const NestProviders = ({
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
-    props
+  const {
+    composerKey,
+    currentView = 'default',
+    editorConfig,
+    fieldProps,
+    isSmallWidthViewport,
+    onChange,
+    readOnly,
+    value,
+  } = props
   const { views } = fieldProps
 
   const parentContext = useEditorConfigContext()
@@ -107,8 +116,12 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
   // We need to add initialConfig.editable to the key to force a re-render when the readOnly prop changes.
   // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
+  // We also add currentView to force re-render when the view changes.
   return (
-    <LexicalComposer initialConfig={initialConfig} key={composerKey + initialConfig.editable}>
+    <LexicalComposer
+      initialConfig={initialConfig}
+      key={composerKey + initialConfig.editable + currentView}
+    >
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
@@ -120,11 +133,12 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       >
         <NestProviders providers={editorConfig.features.providers}>
           <LexicalEditorComponent
+            currentView={currentView}
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
             isSmallWidthViewport={isSmallWidthViewport}
-            nodeViews={views?.default}
             onChange={onChange}
+            views={views}
           />
         </NestProviders>
       </EditorConfigProvider>

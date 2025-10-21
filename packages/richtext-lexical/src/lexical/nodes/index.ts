@@ -63,6 +63,13 @@ export function registerEditorNodeViews(
 }
 
 /**
+ * Clear all view overrides for an editor (restores default rendering)
+ */
+export function clearEditorNodeViews(editor: LexicalEditor): void {
+  editorNodeViews.delete(editor)
+}
+
+/**
  * Get the view definition for a specific editor and node
  */
 function getEditorNodeView(

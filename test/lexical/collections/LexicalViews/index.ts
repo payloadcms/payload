@@ -83,7 +83,6 @@ export const LexicalViews: CollectionConfig = {
               },
             ],
           }),
-          DebugJsxConverterFeature(),
         ],
       }),
     },
