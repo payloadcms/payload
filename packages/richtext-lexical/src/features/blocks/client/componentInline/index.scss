@@ -2,11 +2,11 @@
 
 @layer payload-default {
   .LexicalEditorTheme__inlineBlock {
+    @extend %body;
+    @include shadow-sm;
     display: inline-block;
     margin-right: base(0.2);
     margin-left: base(0.2);
-    @extend %body;
-    @include shadow-sm;
     padding: base(0.1);
     padding-inline-start: base(0.4);
     background: var(--theme-input-bg);
