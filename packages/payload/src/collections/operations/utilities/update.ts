@@ -348,20 +348,24 @@ export const updateDocument = async <
   } else if (isSavingDraft && versionResult?.version && '_status' in versionResult.version) {
     // potentially update the main document if
     // the status matches the latest version's status
-    result = await req.payload.db.updateOne({
-      collection: collectionConfig.slug,
-      data: dataToUpdate,
-      locale,
-      req,
-      where: {
-        and: [
-          {
-            _status: { equals: versionResult.version._status },
-          },
-          { id: { equals: id } },
-        ],
-      },
-    })
+    result =
+      (await req.payload.db.updateOne({
+        collection: collectionConfig.slug,
+        data: dataToUpdate,
+        locale,
+        req,
+        where: {
+          and: [
+            {
+              _status: { equals: versionResult.version._status },
+            },
+            { id: { equals: id } },
+          ],
+        },
+      })) ||
+      versionResult?.snapshot ||
+      versionResult?.version ||
+      result
   }
 
   // /////////////////////////////////////
