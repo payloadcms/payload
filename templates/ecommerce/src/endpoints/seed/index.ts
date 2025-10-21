@@ -27,6 +27,8 @@ const collections: CollectionSlug[] = [
   'orders',
 ]
 
+const categories = ['Accessories', 'T-Shirts', 'Hats']
+
 const sizeVariantOptions = [
   { label: 'Small', value: 'small' },
   { label: 'Medium', value: 'medium' },
@@ -177,30 +179,15 @@ export const seed = async ({
       data: imageHero1Data,
       file: heroBuffer,
     }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Accessories',
-        slug: 'accessories',
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'T-Shirts',
-        slug: 'tshirts',
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Hats',
-        slug: 'hats',
-      },
-    }),
+    ...categories.map((category) =>
+      payload.create({
+        collection: 'categories',
+        data: {
+          title: category,
+          slug: category,
+        },
+      }),
+    ),
   ])
 
   payload.logger.info(`— Seeding variant types and options...`)

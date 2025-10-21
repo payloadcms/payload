@@ -59,11 +59,20 @@ const buildSQLWhere = (where: Where, alias: string) => {
         return op(...accumulated)
       }
     } else {
-      const payloadOperator = Object.keys(where[k])[0]
+      let payloadOperator = Object.keys(where[k])[0]
 
       const value = where[k][payloadOperator]
       if (payloadOperator === '$raw') {
         return sql.raw(value)
+      }
+
+      // Handle exists: false -> use isNull instead of isNotNull
+
+      // This logic is duplicated from sanitizeQueryValue.ts because buildSQLWhere
+      // is a simplified WHERE builder for polymorphic joins that doesn't have access
+      // to field definitions needed by sanitizeQueryValue
+      if (payloadOperator === 'exists' && value === false) {
+        payloadOperator = 'isNull'
       }
 
       return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
@@ -544,7 +553,13 @@ export const traverseFields = ({
                 selectFields[path] = sql`${adapter.tables[joinCollectionTableName][path]}`.as(path)
                 // Allow to filter by collectionSlug
               } else if (path !== 'relationTo') {
-                selectFields[path] = sql`null`.as(path)
+                // For timestamp fields like deletedAt, we need to cast to timestamp in Postgres
+                // SQLite doesn't require explicit type casting for UNION queries
+                if (path === 'deletedAt' && adapter.name === 'postgres') {
+                  selectFields[path] = sql`null::timestamp with time zone`.as(path)
+                } else {
+                  selectFields[path] = sql`null`.as(path)
+                }
               }
             }
 

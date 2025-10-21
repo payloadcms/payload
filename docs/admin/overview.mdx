@@ -301,6 +301,35 @@ We validate the supported timezones array by checking the value against the list
   information.
 </Banner>
 
+For example:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: "Europe/Dublin",
+          value: "Europe/Dublin",
+        },
+        {
+          label: "Europe/Amsterdam",
+          value: "Europe/Amsterdam",
+        },
+        {
+          label: "Europe/Bucharest",
+          value: "Europe/Bucharest",
+        },
+      ],
+      defaultTimezone: "Europe/Amsterdam",
+    },
+  },
+})
+```
+
 ## Toast
 
 The `admin.toast` configuration allows you to customize the handling of toast messages within the Admin Panel, such as increasing the duration they are displayed and limiting the number of visible toasts at once.

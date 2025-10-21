@@ -25,7 +25,8 @@ const sanitizeEnv = ({
   if (
     !contents.includes('DATABASE_URI') &&
     !contents.includes('POSTGRES_URL') &&
-    !contents.includes('MONGODB_URI')
+    !contents.includes('MONGODB_URI') &&
+    databaseType !== 'd1-sqlite'
   ) {
     withDefaults += '\nDATABASE_URI=your-connection-string-here'
   }

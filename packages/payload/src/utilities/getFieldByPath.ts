@@ -62,6 +62,10 @@ export const getFieldByPath = ({
       if (flattenedFields) {
         currentFields = flattenedFields
       }
+
+      if (segments.length === 1 && segments[0] === 'id') {
+        return { field, localizedPath, pathHasLocalized }
+      }
     }
 
     if ('blocks' in field) {

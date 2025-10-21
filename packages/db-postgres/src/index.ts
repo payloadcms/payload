@@ -182,6 +182,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       findGlobalVersions,
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,

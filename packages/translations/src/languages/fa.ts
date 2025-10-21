@@ -37,8 +37,7 @@ export const faTranslations: DefaultTranslationsObject = {
     lockUntil: 'قفل تا تاریخ',
     logBackIn: 'دوباره وارد شوید',
     loggedIn: 'برای ورود با یک حساب دیگر، ابتدا باید <0>خارج</0> شوید.',
-    loggedInChangePassword:
-      'برای تغییر رمز عبور، به صفحه <0>حساب کاربری</0> خود مراجعه کنید.',
+    loggedInChangePassword: 'برای تغییر رمز عبور، به صفحه <0>حساب کاربری</0> خود مراجعه کنید.',
     loggedOutInactivity: 'به دلیل عدم فعالیت، از حساب خود خارج شدید.',
     loggedOutSuccessfully: 'شما با موفقیت خارج شدید.',
     loggingOut: 'در حال خروج...',
@@ -144,8 +143,7 @@ export const faTranslations: DefaultTranslationsObject = {
     block: 'بلاک',
     blocks: 'بلاک‌ها',
     blockType: 'نوع بلاک',
-    chooseBetweenCustomTextOrDocument:
-      'یک URL سفارشی وارد کنید یا به یک صفحه دیگر لینک دهید.',
+    chooseBetweenCustomTextOrDocument: 'یک URL سفارشی وارد کنید یا به یک صفحه دیگر لینک دهید.',
     chooseDocumentToLink: 'یک صفحه را برای لینک دادن انتخاب کنید',
     chooseFromExisting: 'انتخاب از موارد موجود',
     chooseLabel: 'انتخاب {{label}}',
@@ -171,6 +169,7 @@ export const faTranslations: DefaultTranslationsObject = {
     removeUpload: 'حذف فایل',
     saveChanges: 'ذخیره تغییرات',
     searchForBlock: 'جستجو برای بلاک',
+    searchForLanguage: 'جستجو برای یک زبان',
     selectExistingLabel: 'انتخاب {{label}} موجود',
     selectFieldsToEdit: 'فیلدهای مورد نظر برای ویرایش را انتخاب کنید',
     showAll: 'نمایش همه',
@@ -198,8 +197,7 @@ export const faTranslations: DefaultTranslationsObject = {
       'آیا از انتقال <1>{{count}} {{label}}</1> به پوشه اصلی مطمئن هستید؟',
     moveItemToFolderConfirmation:
       'آیا از انتقال <1>{{title}}</1> به پوشه <2>{{toFolder}}</2> مطمئن هستید؟',
-    moveItemToRootConfirmation:
-      'آیا از انتقال <1>{{title}}</1> به پوشه اصلی مطمئن هستید؟',
+    moveItemToRootConfirmation: 'آیا از انتقال <1>{{title}}</1> به پوشه اصلی مطمئن هستید؟',
     movingFromFolder: 'انتقال "{{title}}" از پوشه {{fromFolder}}',
     newFolder: 'پوشه جدید',
     noFolder: 'بدون پوشه',
@@ -213,12 +211,12 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'آیا از حذف {{count}} {{label}} مطمئن هستید؟',
     aboutToDeleteCount_one: 'آیا از حذف {{count}} {{label}} مطمئن هستید؟',
     aboutToDeleteCount_other: 'آیا از حذف {{count}} {{label}} مطمئن هستید؟',
-    aboutToPermanentlyDelete: 'شما در حال حذف دائمی {{label}} "{{title}}" هستید. این عمل قابل بازگشت نیست. آیا مطمئن هستید؟',
+    aboutToPermanentlyDelete:
+      'شما در حال حذف دائمی {{label}} "{{title}}" هستید. این عمل قابل بازگشت نیست. آیا مطمئن هستید؟',
     aboutToPermanentlyDeleteTrash:
       'آیا از حذف دائمی <0>{{count}}</0> <1>{{label}}</1> از سطل زباله مطمئن هستید؟ این عمل قابل بازگشت نیست.',
     aboutToRestore: 'آیا از بازیابی {{label}} "{{title}}" مطمئن هستید؟',
-    aboutToRestoreAsDraft:
-      'آیا می‌خواهید {{label}} "{{title}}" به عنوان پیش‌نویس بازیابی شود؟',
+    aboutToRestoreAsDraft: 'آیا می‌خواهید {{label}} "{{title}}" به عنوان پیش‌نویس بازیابی شود؟',
     aboutToRestoreAsDraftCount: 'آیا می‌خواهید {{count}} {{label}} به عنوان پیش‌نویس بازیابی شوند؟',
     aboutToRestoreCount: 'آیا از بازیابی {{count}} {{label}} مطمئن هستید؟',
     aboutToTrash: 'آیا می‌خواهید {{label}} "{{title}}" به سطل زباله منتقل شود؟',
@@ -336,8 +334,7 @@ export const faTranslations: DefaultTranslationsObject = {
     menu: 'منو',
     moreOptions: 'گزینه‌های بیشتر',
     move: 'انتقال',
-    moveConfirm:
-      'آیا از انتقال {{count}} {{label}} به <1>{{destination}}</1> مطمئن هستید؟',
+    moveConfirm: 'آیا از انتقال {{count}} {{label}} به <1>{{destination}}</1> مطمئن هستید؟',
     moveCount: 'انتقال {{count}} {{label}}',
     moveDown: 'انتقال به پایین',
     moveUp: 'انتقال به بالا',
@@ -410,7 +407,7 @@ export const faTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} با موفقیت ایجاد شد.',
     successfullyDuplicated: 'کپی از {{label}} با موفقیت ایجاد شد.',
     successfullyReindexed:
-      '{{count}} از {{total}} صفحه در مجموعه {{collections}} با موفقیت ایندکس مجدد شدند.',
+      'با موفقیت {{count}} از {{total}} سند از {{collections}} بازشاخص‌گذاری شد و {{skips}} پیش‌نویس رد شد.',
     takeOver: 'ادامه ویرایش',
     thisLanguage: 'فارسی',
     time: 'زمان',
@@ -423,7 +420,8 @@ export const faTranslations: DefaultTranslationsObject = {
     true: 'بله',
     unauthorized: 'غیرمجاز',
     unsavedChanges: 'تغییرات ذخیره نشده‌ای دارید. قبل از ادامه، آن‌ها را ذخیره یا لغو کنید.',
-    unsavedChangesDuplicate: 'شما تغییرات ذخیره نشده‌ای دارید. آیا می‌خواهید بدون ذخیره، کپی ایجاد کنید؟',
+    unsavedChangesDuplicate:
+      'شما تغییرات ذخیره نشده‌ای دارید. آیا می‌خواهید بدون ذخیره، کپی ایجاد کنید؟',
     untitled: 'بدون عنوان',
     upcomingEvents: 'رویدادهای آینده',
     updatedAt: 'تاریخ به‌روزرسانی',
@@ -485,8 +483,7 @@ export const faTranslations: DefaultTranslationsObject = {
     filesToUpload: 'فایل‌ها برای آپلود',
     fileToUpload: 'فایل برای آپلود',
     focalPoint: 'نقطه کانونی',
-    focalPointDescription:
-      'نقطه کانونی را مستقیماً روی تصویر بکشید یا مقادیر زیر را تنظیم کنید.',
+    focalPointDescription: 'نقطه کانونی را مستقیماً روی تصویر بکشید یا مقادیر زیر را تنظیم کنید.',
     height: 'ارتفاع',
     lessInfo: 'اطلاعات کمتر',
     moreInfo: 'اطلاعات بیشتر',
@@ -511,9 +508,11 @@ export const faTranslations: DefaultTranslationsObject = {
     invalidInput: 'مقدار وارد شده نامعتبر است.',
     invalidSelection: 'گزینه انتخاب شده نامعتبر است.',
     invalidSelections: 'این فیلد حاوی گزینه‌های نامعتبر است:',
+    latitudeOutOfBounds: 'عرض جغرافیایی باید بین -90 تا 90 باشد.',
     lessThanMin: 'مقدار وارد شده ({{value}}) نباید کمتر از {{min}} باشد.',
     limitReached: 'حداکثر تعداد مجاز {{max}} مورد است و شما نمی‌توانید موارد بیشتری اضافه کنید.',
     longerThanMin: 'طول متن باید بیشتر از {{minLength}} کاراکتر باشد.',
+    longitudeOutOfBounds: 'عرض جغرافیایی باید بین -180 و 180 باشد.',
     notValidDate: '"{{value}}" یک تاریخ معتبر نیست.',
     required: 'این فیلد الزامی است.',
     requiresAtLeast: 'این فیلد به حداقل {{count}} {{label}} نیاز دارد.',
@@ -528,11 +527,11 @@ export const faTranslations: DefaultTranslationsObject = {
   },
   version: {
     type: 'نوع',
-    aboutToPublishSelection:
-      'آیا از انتشار تمام {{label}} انتخاب شده مطمئن هستید؟',
+    aboutToPublishSelection: 'آیا از انتشار تمام {{label}} انتخاب شده مطمئن هستید؟',
     aboutToRestore:
       'شما در حال بازگردانی این {{label}} به نسخه‌ای هستید که در تاریخ {{versionDate}} ذخیره شده است. آیا ادامه می‌دهید؟',
-    aboutToRestoreGlobal: 'شما در حال بازگردانی {{label}} به نسخه مربوط به تاریخ {{versionDate}} هستید. آیا ادامه می‌دهید؟',
+    aboutToRestoreGlobal:
+      'شما در حال بازگردانی {{label}} به نسخه مربوط به تاریخ {{versionDate}} هستید. آیا ادامه می‌دهید؟',
     aboutToRevertToPublished:
       'شما در حال بازگرداندن این صفحه به آخرین نسخه منتشر شده آن هستید. آیا مطمئن هستید؟',
     aboutToUnpublish: 'آیا از لغو انتشار این صفحه مطمئن هستید؟',

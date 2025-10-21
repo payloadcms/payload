@@ -249,10 +249,13 @@ export async function changeLocale(page: Page, newLocale: string) {
     const localeToSelect = page
       .locator('.localizer .popup.popup--active .popup-button-list__button')
       .locator('.localizer__locale-code', {
-        hasText: `(${newLocale})`,
+        hasText: `${newLocale}`,
       })
 
-    await expect(localeToSelect).toBeEnabled()
+    await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
     await localeToSelect.click()
 
     const regexPattern = new RegExp(`locale=${newLocale}`)

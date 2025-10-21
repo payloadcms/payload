@@ -55,7 +55,7 @@ export const generateSubmissionCollection = (
         },
         {
           name: 'value',
-          type: 'text',
+          type: 'textarea',
           required: true,
           validate: (value: unknown) => {
             // TODO:

@@ -470,7 +470,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -869,6 +869,11 @@ export type Config = {
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
       /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      settingsMenu?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -1002,7 +1007,7 @@ export type Config = {
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
      *
-     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+     * @experimental This property is experimental and may change in future releases. Use at your own risk.
      */
     toast?: {
       /**
@@ -1045,7 +1050,7 @@ export type Config = {
    * For example, you may want to increase the `limits` imposed by the parser.
    * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
    *
-   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
   /**

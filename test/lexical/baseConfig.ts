@@ -1,3 +1,6 @@
+import { en } from '@payloadcms/translations/languages/en'
+import { es } from '@payloadcms/translations/languages/es'
+import { he } from '@payloadcms/translations/languages/he'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { type Config } from 'payload'
@@ -14,6 +17,7 @@ import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
 import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
+import { LexicalListsFeature } from './collections/LexicalListsFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
@@ -34,6 +38,7 @@ export const baseConfig: Partial<Config> = {
   collections: [
     LexicalFullyFeatured,
     LexicalLinkFeature,
+    LexicalListsFeature,
     LexicalHeadingFeature,
     LexicalJSXConverter,
     getLexicalFieldsCollection({
@@ -83,7 +88,14 @@ export const baseConfig: Partial<Config> = {
   localization: {
     defaultLocale: 'en',
     fallback: true,
-    locales: ['en', 'es'],
+    locales: ['en', 'es', 'he'],
+  },
+  i18n: {
+    supportedLanguages: {
+      en,
+      es,
+      he,
+    },
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

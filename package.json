@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.58.0",
+  "version": "3.60.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -159,8 +159,8 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.2",
+    "drizzle-kit": "0.31.5",
+    "drizzle-orm": "0.44.6",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",
@@ -190,7 +190,8 @@
     "tstyche": "3.5.0",
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {

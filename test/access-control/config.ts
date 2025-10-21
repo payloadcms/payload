@@ -4,19 +4,23 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { FieldAccess } from 'payload'
 
-import { buildEditorState } from '@payloadcms/richtext-lexical'
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 
 import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Auth } from './collections/Auth/index.js'
+import { BlocksFieldAccess } from './collections/BlocksFieldAccess/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
+import { ReadRestricted } from './collections/ReadRestricted/index.js'
+import { seedReadRestricted } from './collections/ReadRestricted/seed.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
@@ -64,9 +68,12 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
 
-function isUser(user: Config['user']): user is {
+function isUser(user?: Config['user']): user is {
   collection: 'users'
 } & User {
+  if (!user) {
+    return false
+  }
   return user?.collection === 'users'
 }
 
@@ -79,6 +86,17 @@ export default buildConfigWithDefaults(
         baseDir: path.resolve(dirname),
       },
     },
+    blocks: [
+      {
+        slug: 'titleblock',
+        fields: [
+          {
+            type: 'text',
+            name: 'title',
+          },
+        ],
+      },
+    ],
     collections: [
       {
         slug: 'users',
@@ -572,12 +590,14 @@ export default buildConfigWithDefaults(
           },
         ],
       },
+      BlocksFieldAccess,
       Disabled,
       RichText,
       Regression1,
       Regression2,
       Hooks,
       Auth,
+      ReadRestricted,
     ],
     globals: [
       {
@@ -687,6 +707,54 @@ export default buildConfigWithDefaults(
       })
 
       await payload.create({
+        collection: blocksFieldAccessSlug,
+        data: {
+          title: 'Blocks Field Access Test Document',
+          editableBlocks: [
+            {
+              blockType: 'testBlock',
+              title: 'Editable Block',
+              content: 'This block should be fully editable',
+            },
+          ],
+          readOnlyBlocks: [
+            {
+              blockType: 'testBlock2',
+              title: 'Read-Only Block',
+              content: 'This block should be read-only due to field access control',
+            },
+          ],
+          editableBlockRefs: [
+            {
+              blockType: 'titleblock',
+              title: 'Editable Block Reference',
+            },
+          ],
+          readOnlyBlockRefs: [
+            {
+              blockType: 'titleblock',
+              title: 'Read-Only Block Reference',
+            },
+          ],
+          tabReadOnlyTest: {
+            tabReadOnlyBlocks: [
+              {
+                blockType: 'testBlock3',
+                title: 'Tab Read-Only Block',
+                content: 'This block is read-only and inside a tab',
+              },
+            ],
+            tabReadOnlyBlockRefs: [
+              {
+                blockType: 'titleblock',
+                title: 'Tab Read-Only Block Reference',
+              },
+            ],
+          },
+        },
+      })
+
+      await payload.create({
         collection: restrictedVersionsSlug,
         data: {
           name: 'versioned',
@@ -719,33 +787,35 @@ export default buildConfigWithDefaults(
       await payload.create({
         collection: 'regression1',
         data: {
-          richText4: buildEditorState({ text: 'Text1' }),
-          array: [{ art: buildEditorState({ text: 'Text2' }) }],
-          arrayWithAccessFalse: [{ richText6: buildEditorState({ text: 'Text3' }) }],
+          richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
+          array: [{ art: buildEditorState<DefaultNodeTypes>({ text: 'Text2' }) }],
+          arrayWithAccessFalse: [
+            { richText6: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }) },
+          ],
           group1: {
             text: 'Text4',
-            richText1: buildEditorState({ text: 'Text5' }),
+            richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text5' }),
           },
           blocks: [
             {
               blockType: 'myBlock3',
-              richText7: buildEditorState({ text: 'Text6' }),
+              richText7: buildEditorState<DefaultNodeTypes>({ text: 'Text6' }),
               blockName: 'My Block 1',
             },
           ],
           blocks3: [
             {
               blockType: 'myBlock2',
-              richText5: buildEditorState({ text: 'Text7' }),
+              richText5: buildEditorState<DefaultNodeTypes>({ text: 'Text7' }),
               blockName: 'My Block 2',
             },
           ],
           tab1: {
-            richText2: buildEditorState({ text: 'Text8' }),
+            richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
             blocks2: [
               {
                 blockType: 'myBlock',
-                richText3: buildEditorState({ text: 'Text9' }),
+                richText3: buildEditorState<DefaultNodeTypes>({ text: 'Text9' }),
                 blockName: 'My Block 3',
               },
             ],
@@ -758,15 +828,18 @@ export default buildConfigWithDefaults(
         data: {
           array: [
             {
-              richText2: buildEditorState({ text: 'Text1' }),
+              richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
             },
           ],
           group: {
             text: 'Text2',
-            richText1: buildEditorState({ text: 'Text3' }),
+            richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }),
           },
         },
       })
+
+      // Seed read-restricted collection
+      await seedReadRestricted(payload)
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
