@@ -4,6 +4,11 @@
     "composite": false,
     "noEmit": true,
     "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "@payloadcms/ts-plugin-inherit-doc"
+      }
+    ]
   },
   "references": [
     {

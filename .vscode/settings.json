@@ -15,6 +15,7 @@
     { "rule": "object-shorthand", "severity": "off", "fixable": true }
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsserver.pluginPaths": ["${workspaceFolder}/tools/ts-plugin-inherit-doc"],
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
   "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
