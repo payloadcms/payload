@@ -8,6 +8,11 @@ keywords: plugins, mcp, ai, model context protocol, plugin, payload, cms
 
 ![https://www.npmjs.com/package/@payloadcms/plugin-mcp](https://img.shields.io/npm/v/@payloadcms/plugin-mcp)
 
+<Banner type="warning">
+  This plugin is currently in Beta and may have breaking changes in future
+  releases.
+</Banner>
+
 This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) capabilities.
 
 <Banner type="info">
@@ -293,7 +298,7 @@ tools: [
 
 The description you choose to use for your collection greatly impacts the way a model will decide to use it.
 
-This description is more difficult for a model to understand it's purpose.
+The description in this example is more difficult for a model to understand it's purpose.
 
 ```ts
 // Weak
@@ -312,7 +317,7 @@ const config = buildConfig({
 })
 ```
 
-This description gives a model a much stronger ability to know when to use this collection.
+The description in this example gives a model a stronger ability to know when to use this collection.
 
 ```ts
 // Strong
