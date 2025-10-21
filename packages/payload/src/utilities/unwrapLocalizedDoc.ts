@@ -14,9 +14,15 @@ export const unwrapLocalizedDoc = ({
 }): any => {
   const result: any = {}
 
+  if ('id' in doc) {
+    result.id = doc.id
+  }
+
   for (const field of fields) {
     if (field.localized && doc[field.name] && typeof doc[field.name] === 'object') {
-      result[field.name] = doc[field.name][locale]
+      if (locale in doc[field.name]) {
+        result[field.name] = doc[field.name][locale]
+      }
       continue
     }
 

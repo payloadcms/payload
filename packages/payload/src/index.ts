@@ -49,6 +49,7 @@ import type {
   SelectType,
   TransformCollection,
   TransformCollectionWithSelect,
+  TransformGlobal,
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
@@ -643,9 +644,13 @@ export class BasePayload {
     return unlockLocal<TSlug>(this, options)
   }
 
-  updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: UpdateGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  updateGlobal = async <
+    TSlug extends GlobalSlug,
+    TSelect extends SelectFromGlobalSlug<TSlug>,
+    TLocale extends LocaleValue = string,
+  >(
+    options: UpdateGlobalOptions<TSlug, TSelect, TLocale>,
+  ): Promise<TransformGlobal<TSlug, TSelect, TLocale>> => {
     return updateGlobalLocal<TSlug, TSelect>(this, options)
   }
 

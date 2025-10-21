@@ -45,7 +45,7 @@ import {
 } from './shared.js'
 
 const collection = localizedPostsSlug
-const global = 'global-text'
+const globalSlug = 'global-text'
 let payload: Payload
 let restClient: NextRESTClient
 
@@ -90,7 +90,7 @@ describe('Localization', () => {
       })
 
       await payload.updateGlobal({
-        slug: global,
+        slug: globalSlug,
         data: {
           text: spanishTitle,
         },
@@ -98,7 +98,7 @@ describe('Localization', () => {
       })
 
       await payload.updateGlobal({
-        slug: global,
+        slug: globalSlug,
         data: {
           text: englishTitle,
         },
@@ -3078,7 +3078,7 @@ describe('Localization', () => {
         describe('Globals', () => {
           it('should allow fallback locale to be an array', async () => {
             const result = await payload.findGlobal({
-              slug: global,
+              slug: globalSlug,
               locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
             })
@@ -3089,7 +3089,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const result = await payload.findGlobal({
-              slug: global,
+              slug: globalSlug,
               locale: portugueseLocale,
               fallbackLocale: ['hu', spanishLocale],
             })
@@ -3099,7 +3099,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const result = await payload.findGlobal({
-              slug: global,
+              slug: globalSlug,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
             })
@@ -3149,7 +3149,7 @@ describe('Localization', () => {
         describe('Globals', () => {
           it('should allow fallback locale to be an array', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
+              `/globals/${globalSlug}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
             )
 
             expect(response.status).toBe(200)
@@ -3159,7 +3159,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
+              `/globals/${globalSlug}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
             )
 
             expect(response.status).toBe(200)
@@ -3170,7 +3170,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
+              `/globals/${globalSlug}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
             )
 
             expect(response.status).toBe(200)
@@ -3589,6 +3589,69 @@ describe('Localization', () => {
         hu: 'HU description updated',
         pt: 'PT description updated',
         xx: 'XX description updated',
+      })
+    })
+
+    it('should update a field global with locale all (all locales)', async () => {
+      const res = await payload.updateGlobal({
+        slug: 'global-text',
+        data: {
+          text: {
+            ar: 'AR updated',
+            en: 'EN updated',
+            es: 'ES updated',
+            hu: 'HU updated',
+            pt: 'PT updated',
+            xx: 'XX updated',
+          },
+        },
+        locale: 'all',
+      })
+
+      expect(res.text).toStrictEqual({
+        ar: 'AR updated',
+        en: 'EN updated',
+        es: 'ES updated',
+        hu: 'HU updated',
+        pt: 'PT updated',
+        xx: 'XX updated',
+      })
+    })
+
+    it('should update a field global with locale all (2 locales)', async () => {
+      await payload.updateGlobal({
+        slug: 'global-text',
+        data: {
+          text: {
+            ar: 'AR',
+            en: 'EN',
+            es: 'ES',
+            hu: 'HU',
+            pt: 'PT',
+            xx: 'XX',
+          },
+        },
+        locale: 'all',
+      })
+
+      const res = await payload.updateGlobal({
+        slug: 'global-text',
+        data: {
+          text: {
+            ar: 'AR updated',
+            en: 'EN updated',
+          },
+        },
+        locale: 'all',
+      })
+
+      expect(res.text).toStrictEqual({
+        ar: 'AR updated',
+        en: 'EN updated',
+        es: 'ES',
+        hu: 'HU',
+        pt: 'PT',
+        xx: 'XX',
       })
     })
   })

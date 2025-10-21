@@ -308,7 +308,6 @@ export const updateDocument = async <
 
   let result: any = undefined
   if (unwrappedLocalesData) {
-    const originalLocale = locale
     for (const locale of Object.keys(unwrappedLocalesData)) {
       req.locale = locale
       const doc = unwrapLocalizedDoc({
@@ -328,7 +327,7 @@ export const updateDocument = async <
         docWithLocales,
       })
     }
-    req.locale = originalLocale
+    req.locale = 'all'
   } else {
     result = await beforeChange({
       ...beforeChangeArgs,

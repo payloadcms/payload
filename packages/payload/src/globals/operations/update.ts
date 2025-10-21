@@ -27,6 +27,7 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
@@ -129,12 +130,12 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = globalVersion || {}
+    const { global: globalData, globalExists } = globalVersion || {}
 
     let globalJSON: JsonObject = {}
 
     if (globalVersion && globalVersion.global) {
-      globalJSON = deepCopyObjectSimple(global)
+      globalJSON = deepCopyObjectSimple(globalData)
 
       if (globalJSON._id) {
         delete globalJSON._id
@@ -170,16 +171,50 @@ export const updateOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate({
-      collection: null,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      global: globalConfig,
-      operation: 'update',
-      overrideAccess: overrideAccess!,
-      req,
-    })
+    let unwrappedLocalesData: null | Record<string, any> = null
+
+    if (payload.config.localization && locale === 'all') {
+      unwrappedLocalesData = {}
+      for (const locale of payload.config.localization.localeCodes) {
+        unwrappedLocalesData[locale] = unwrapLocalizedDoc({
+          config: payload.config,
+          doc: data,
+          fields: globalConfig.flattenedFields,
+          locale,
+        })
+      }
+    }
+
+    if (unwrappedLocalesData) {
+      for (const locale of Object.keys(unwrappedLocalesData)) {
+        unwrappedLocalesData[locale] = await beforeValidate({
+          collection: null,
+          context: req.context,
+          data: unwrappedLocalesData[locale],
+          doc: unwrapLocalizedDoc({
+            config: payload.config,
+            doc: originalDoc,
+            fields: globalConfig.flattenedFields,
+            locale,
+          }),
+          global: globalConfig,
+          operation: 'update',
+          overrideAccess: overrideAccess!,
+          req,
+        })
+      }
+    } else {
+      data = await beforeValidate({
+        collection: null,
+        context: req.context,
+        data,
+        doc: originalDoc,
+        global: globalConfig,
+        operation: 'update',
+        overrideAccess: overrideAccess!,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Global
@@ -252,10 +287,37 @@ export const updateOperation = async <
       })
     }
 
-    let result = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales: publishedDocWithLocales,
-    })
+    let result: any = null
+
+    if (unwrappedLocalesData) {
+      const originalLocale = locale
+
+      for (const locale of Object.keys(unwrappedLocalesData)) {
+        req.locale = locale
+        const doc = unwrapLocalizedDoc({
+          config: payload.config,
+          doc: originalDoc,
+          fields: globalConfig.flattenedFields,
+          locale,
+        })
+
+        const docWithLocales = result || publishedDocWithLocales
+
+        result = await beforeChange({
+          ...beforeChangeArgs,
+          context: req.context,
+          data: deepCopyObjectSimple(unwrappedLocalesData[locale]),
+          doc,
+          docWithLocales,
+        })
+      }
+      req.locale = originalLocale
+    } else {
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales: publishedDocWithLocales,
+      })
+    }
 
     // /////////////////////////////////////
     // Update
