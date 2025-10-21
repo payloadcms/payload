@@ -651,7 +651,7 @@ export class BasePayload {
   >(
     options: UpdateGlobalOptions<TSlug, TSelect, TLocale>,
   ): Promise<TransformGlobal<TSlug, TSelect, TLocale>> => {
-    return updateGlobalLocal<TSlug, TSelect>(this, options)
+    return updateGlobalLocal<TSlug, TSelect, TLocale>(this, options)
   }
 
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
