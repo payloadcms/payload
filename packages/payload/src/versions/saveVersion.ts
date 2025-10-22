@@ -153,6 +153,7 @@ export const saveVersion = async ({
           autosave,
           collection,
           data: snapshot,
+          global,
           payload,
           publishSpecificLocale,
           req,
