@@ -1,7 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { Payload } from 'payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
@@ -29,12 +28,7 @@ function recurseEditorState(
   return textContent
 }
 
-export const RscEntryLexicalCell: React.FC<
-  {
-    i18n: I18nClient
-    payload: Payload
-  } & LexicalRichTextCellProps
-> = (props) => {
+export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
