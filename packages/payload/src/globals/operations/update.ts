@@ -470,7 +470,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
-    return result as TransformGlobalWithSelect<TSlug, TSelect>
+    return result
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

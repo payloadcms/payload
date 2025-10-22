@@ -77,12 +77,11 @@ export type Options<
    * The [Join Field Query](https://payloadcms.com/docs/fields/join#query-options).
    * Pass `false` to disable all join fields from the result.
    */
-  joins?:
-    | 'all'
-    /**
-     * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-     */
-    | JoinQuery<TSlug>
+  joins?: JoinQuery<TSlug>
+  /**
+   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
+   */
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.

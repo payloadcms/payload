@@ -10,6 +10,7 @@ import type {
   PayloadRequest,
   PopulateType,
   SelectType,
+  TransformCollection,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
@@ -147,7 +148,7 @@ export async function createLocal<
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+): Promise<TransformCollection<TSlug, TSelect, TLocale>> {
   const {
     collection: collectionSlug,
     data,
@@ -177,6 +178,7 @@ export async function createLocal<
 
   req.file = file ?? (await getFileByPath(filePath!))
 
+  // @ts-expect-error
   return createOperation<TSlug, TSelect>({
     collection,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
