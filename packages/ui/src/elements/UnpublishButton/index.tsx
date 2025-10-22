@@ -1,15 +1,14 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
+import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
-import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -20,7 +19,6 @@ export function UnpublishButton() {
     id,
     collectionSlug,
     data: dataFromProps,
-    docConfig,
     globalSlug,
     hasLocalizedFields,
     hasPublishedDoc,
@@ -33,7 +31,6 @@ export function UnpublishButton() {
 
   const { config } = useConfig()
   const { reset: resetForm } = useForm()
-  const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
   const [unpublishSpecificLocale, setUnpublishSpecificLocale] = useState(false)
 
@@ -53,23 +50,31 @@ export function UnpublishButton() {
         let url
         let method
 
-        const body = unpublishSpecificLocale ? {} : { _status: 'draft' }
-        const params =
-          unpublishSpecificLocale && localeCode ? `&unpublishSpecificLocale=${localeCode}` : ''
+        const queryString = qs.stringify(
+          {
+            depth: '0',
+            'fallback-locale': 'null',
+            locale: localeCode,
+            ...(unpublishSpecificLocale && localeCode
+              ? { unpublishSpecificLocale: localeCode }
+              : {}),
+          },
+          { addQueryPrefix: true },
+        )
 
         if (collectionSlug) {
-          url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}&fallback-locale=null&depth=0${params}`
+          url = `${serverURL}${api}/${collectionSlug}/${id}${queryString}`
           method = 'patch'
         }
 
         if (globalSlug) {
-          url = `${serverURL}${api}/globals/${globalSlug}?locale=${localeCode}&fallback-locale=null&depth=0${params}`
+          url = `${serverURL}${api}/globals/${globalSlug}${queryString}`
           method = 'post'
         }
 
         try {
           const res = await requests[method](url, {
-            body: JSON.stringify(body),
+            body: JSON.stringify(unpublishSpecificLocale ? {} : { _status: 'draft' }),
             headers: {
               'Accept-Language': i18n.language,
               'Content-Type': 'application/json',
@@ -125,15 +130,6 @@ export function UnpublishButton() {
       t,
     ],
   )
-
-  useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (unpublish && docConfig.versions?.drafts && docConfig.versions?.drafts?.autosave) {
-      unpublish(false)
-    }
-  })
 
   const canUnpublish = hasPublishedDoc
 
