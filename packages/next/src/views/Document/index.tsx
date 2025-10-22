@@ -138,7 +138,7 @@ export const renderDocument = async ({
     }
   }
 
-  const isTrashedDoc = doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string'
+  const isTrashedDoc = Boolean(doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string')
 
   const [
     docPreferences,
