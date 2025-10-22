@@ -7,7 +7,6 @@ import type {
   PopulateType,
   SelectType,
   TransformGlobal,
-  TransformGlobalWithSelect,
   Where,
 } from '../../types/index.js'
 import type {

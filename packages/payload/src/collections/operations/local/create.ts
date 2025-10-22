@@ -11,7 +11,6 @@ import type {
   PopulateType,
   SelectType,
   TransformCollection,
-  TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'

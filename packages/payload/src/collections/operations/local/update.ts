@@ -14,7 +14,6 @@ import type {
   SelectType,
   Sort,
   TransformCollection,
-  TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'

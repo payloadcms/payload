@@ -11,7 +11,6 @@ import type {
   PopulateType,
   SelectType,
   TransformGlobal,
-  TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromGlobalSlug } from '../../config/types.js'
