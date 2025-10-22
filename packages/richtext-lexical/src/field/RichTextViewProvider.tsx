@@ -1,38 +1,37 @@
 'use client'
-import type { EditorThemeClasses } from 'lexical'
-
 import React, { createContext, use, useMemo } from 'react'
 
-import type { LexicalEditorViewMap } from '../types.js'
+import type { LexicalEditorNodeMap, LexicalEditorViewMap } from '../types.js'
 
 /**
  * Context type for rich text view management.
  */
 type RichTextViewContextType = {
   /**
-   * The currently active view containing name, nodes, and theme.
+   * The name of the currently active view (e.g., 'default', 'frontend', 'debug')
    */
-  currentView: {
-    /**
-     * The name of the currently active view (e.g., 'default', 'frontend', 'debug')
-     */
-    name: string
-    /**
-     * The editor theme for the currently active view. Defaults to the editor's configured theme.
-     */
-    theme: EditorThemeClasses
-  } & Pick<LexicalEditorViewMap[string], 'nodes'>
+  currentView: string
   /**
-   * Optional function to change the current view by name. Only available in contexts where view switching is enabled (e.g., admin panel).
+   * The node map for the currently active view, containing rendering overrides for each node type.
+   * This is the resolved view from the views map based on currentView.
    */
-  setCurrentView?: (viewName: string) => void
+  currentViewMap?: LexicalEditorNodeMap
+  /**
+   * Optional function to change the current view. Only available in contexts where view switching is enabled (e.g., admin panel).
+   */
+  setCurrentView?: (view: string) => void
   /**
    * The complete map of all available views for this field.
    */
   views?: LexicalEditorViewMap
 }
 
-const RichTextViewContext = createContext<null | RichTextViewContextType>(null)
+const RichTextViewContext = createContext<RichTextViewContextType>({
+  currentView: 'default',
+  currentViewMap: undefined,
+  setCurrentView: undefined,
+  views: undefined,
+})
 
 /**
  * Provider component for rich text view context.
@@ -44,8 +43,7 @@ const RichTextViewContext = createContext<null | RichTextViewContextType>(null)
  * @example
  * ```tsx
  * <RichTextViewProvider
- *   currentViewName="frontend"
- *   defaultTheme={editorConfig.lexical.theme}
+ *   currentView="frontend"
  *   setCurrentView={setView}
  *   views={myViews}
  * >
@@ -55,28 +53,25 @@ const RichTextViewContext = createContext<null | RichTextViewContextType>(null)
  */
 export const RichTextViewProvider: React.FC<{
   children: React.ReactNode
-  currentViewName?: string
-  defaultTheme: EditorThemeClasses
-  setCurrentView?: (viewName: string) => void
+  currentView?: string
+  setCurrentView?: (view: string) => void
   views?: LexicalEditorViewMap
-}> = ({ children, currentViewName = 'default', defaultTheme, setCurrentView, views }) => {
-  const currentView = useMemo(() => {
-    const viewDefinition = views?.[currentViewName] || views?.default
-
-    return {
-      name: currentViewName,
-      nodes: viewDefinition?.nodes,
-      theme: viewDefinition?.theme || defaultTheme,
-    } as RichTextViewContextType['currentView']
-  }, [views, currentViewName, defaultTheme])
+}> = ({ children, currentView = 'default', setCurrentView, views }) => {
+  const currentViewMap = useMemo(() => {
+    if (!views) {
+      return undefined
+    }
+    return views[currentView] || views.default
+  }, [views, currentView])
 
   const value = useMemo(
     () => ({
       currentView,
+      currentViewMap,
       setCurrentView,
       views,
     }),
-    [currentView, setCurrentView, views],
+    [currentView, setCurrentView, currentViewMap, views],
   )
 
   return <RichTextViewContext value={value}>{children}</RichTextViewContext>
@@ -89,8 +84,9 @@ export const RichTextViewProvider: React.FC<{
  * or to programmatically switch between views.
  *
  * @returns An object containing:
- * - `currentView`: Object with `name`, `nodes`, and `theme` properties
- * - `setCurrentView`: Function to change views by name (if available)
+ * - `currentView`: The name of the active view
+ * - `currentViewMap`: The node overrides for the current view
+ * - `setCurrentView`: Function to change views (if available)
  * - `views`: All available views
  *
  * @throws Error if used outside of a RichTextViewProvider
@@ -98,12 +94,12 @@ export const RichTextViewProvider: React.FC<{
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { currentView, setCurrentView } = useRichTextView()
+ *   const { currentView, currentViewMap, setCurrentView } = useRichTextView()
  *
  *   return (
  *     <div>
- *       <p>Current view: {currentView.name}</p>
- *       {currentView.nodes?.heading && <p>Heading overrides are active</p>}
+ *       <p>Current view: {currentView}</p>
+ *       {currentViewMap?.heading && <p>Heading overrides are active</p>}
  *       {setCurrentView && (
  *         <button onClick={() => setCurrentView('frontend')}>
  *           Switch to frontend view

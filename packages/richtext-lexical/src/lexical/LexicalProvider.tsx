@@ -54,7 +54,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
     props
 
-  const { currentView } = useRichTextView()
+  const { currentView, views } = useRichTextView()
 
   const parentContext = useEditorConfigContext()
 
@@ -84,7 +84,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     }
 
     // Use the 'default' view if available, otherwise undefined
-    const nodeViews = currentView.nodes
+    const nodeViews = views?.default
 
     return {
       editable: readOnly !== true,
@@ -97,11 +97,11 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       onError: (error: Error) => {
         throw error
       },
-      theme: currentView.theme,
+      theme: editorConfig.lexical.theme,
     }
     // Important: do not add readOnly and value to the dependencies array. This will cause the entire lexical editor to re-render if the document is saved, which will
     // cause the editor to lose focus.
-  }, [editorConfig, currentView.theme, currentView.nodes])
+  }, [editorConfig, views])
 
   if (!initialConfig) {
     return <p>Loading...</p>
@@ -113,7 +113,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   return (
     <LexicalComposer
       initialConfig={initialConfig}
-      key={composerKey + initialConfig.editable + currentView.name}
+      key={composerKey + initialConfig.editable + currentView}
     >
       <EditorConfigProvider
         editorConfig={editorConfig}

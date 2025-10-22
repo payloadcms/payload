@@ -172,8 +172,7 @@ const RichTextComponent: React.FC<
 
   return (
     <RichTextViewProvider
-      currentViewName={currentView}
-      defaultTheme={editorConfig.lexical.theme}
+      currentView={currentView}
       setCurrentView={setCurrentView}
       views={props.views}
     >

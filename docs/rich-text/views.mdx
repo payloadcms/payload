@@ -39,57 +39,44 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 export const postViews: LexicalEditorViewMap = {
   // The 'default' view is used when the field is first loaded
   default: {
-    nodes: {
-      heading: {
-        createDOM(args) {
-          const { node } = args
-          const heading = document.createElement(node.getTag())
-          heading.style.color = '#333'
-          return heading
-        },
+    heading: {
+      createDOM(args) {
+        const { node } = args
+        const heading = document.createElement(node.getTag())
+        heading.style.color = '#333'
+        return heading
       },
     },
   },
   // Additional custom views
   frontend: {
-    nodes: {
-      heading: {
-        createDOM(args) {
-          const { node } = args
-          const heading = document.createElement(node.getTag())
-          heading.style.color = '#3b82f6'
-          heading.style.borderBottom = '2px solid #60a5fa'
-          return heading
-        },
-      },
-      blocks: {
-        myBlock: {
-          Component: ({ node, isEditor, isJSXConverter }) => {
-            const text = isEditor ? node.__fields?.text : node.fields?.text
-
-            return (
-              <div
-                style={{
-                  background:
-                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  padding: '24px',
-                  borderRadius: '12px',
-                }}
-              >
-                {text}
-              </div>
-            )
-          },
-        },
+    heading: {
+      createDOM(args) {
+        const { node } = args
+        const heading = document.createElement(node.getTag())
+        heading.style.color = '#3b82f6'
+        heading.style.borderBottom = '2px solid #60a5fa'
+        return heading
       },
     },
-    // Optional: Provide a custom editor theme for this view
-    theme: {
-      paragraph: 'custom-paragraph',
-      heading: {
-        h1: 'custom-h1',
-        h2: 'custom-h2',
+    blocks: {
+      myBlock: {
+        Component: ({ node, isEditor, isJSXConverter }) => {
+          const text = isEditor ? node.__fields?.text : node.fields?.text
+
+          return (
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                padding: '24px',
+                borderRadius: '12px',
+              }}
+            >
+              {text}
+            </div>
+          )
+        },
       },
     },
   },
@@ -119,38 +106,6 @@ export const Posts: CollectionConfig = {
   ],
 }
 ```
-
-## View Structure
-
-Each view in your view map has two properties:
-
-### nodes
-
-The `nodes` property contains your node type overrides. This is where you define how different node types should render.
-
-### theme (optional)
-
-The `theme` property allows you to provide a custom Lexical editor theme for this view. This only applies in the admin panel editor, not in JSX converters. If not provided, the default editor theme is used.
-
-```tsx
-{
-  myView: {
-    nodes: {
-      // Your node overrides
-    },
-    theme: {
-      paragraph: 'my-custom-paragraph-class',
-      heading: {
-        h1: 'my-h1-class',
-        h2: 'my-h2-class',
-      },
-      // ... other theme properties
-    },
-  },
-}
-```
-
-The theme structure follows Lexical's `EditorThemeClasses` type. Refer to [Lexical's theming documentation](https://lexical.dev/docs/api/classes/lexical.LexicalEditor#theme) for all available theme properties.
 
 ## Node Override Options
 
@@ -288,7 +243,7 @@ function MyCustomComponent() {
 
 ## Using Views in Frontend (JSX Converters)
 
-Pass the view's node map to JSX converters to render content with the same customizations:
+Pass the view map to JSX converters to render content with the same customizations:
 
 ```tsx
 import { convertLexicalToJSX } from '@payloadcms/richtext-lexical'
@@ -299,14 +254,12 @@ export function BlogPost({ post }) {
     <div>
       {convertLexicalToJSX({
         editorState: post.content,
-        nodeMap: myViews.frontend.nodes, // Use the nodes from the frontend view
+        nodeMap: myViews.frontend, // Use the frontend view
       })}
     </div>
   )
 }
 ```
-
-Note: The `theme` property from your view is only used in the admin panel editor, not in JSX converters.
 
 ## Advanced Example
 
@@ -318,82 +271,76 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
 export const articleViews: LexicalEditorViewMap = {
   default: {
-    nodes: {
-      heading: {
-        createDOM({ node }) {
-          const heading = document.createElement(node.getTag())
-          heading.className = 'editor-heading'
-          return heading
-        },
+    heading: {
+      createDOM({ node }) {
+        const heading = document.createElement(node.getTag())
+        heading.className = 'editor-heading'
+        return heading
       },
     },
   },
 
   frontend: {
-    nodes: {
-      heading: {
-        createDOM({ node }) {
-          const heading = document.createElement(node.getTag())
-          heading.className = 'article-heading'
-          heading.style.color = '#1a202c'
-          heading.style.marginBottom = '1rem'
-          return heading
+    heading: {
+      createDOM({ node }) {
+        const heading = document.createElement(node.getTag())
+        heading.className = 'article-heading'
+        heading.style.color = '#1a202c'
+        heading.style.marginBottom = '1rem'
+        return heading
+      },
+    },
+
+    blocks: {
+      imageBlock: {
+        Component: ({ node, isEditor, isJSXConverter }) => {
+          const fields = isEditor ? node.__fields : node.fields
+
+          return (
+            <figure className="article-image">
+              <img src={fields.image?.url} alt={fields.caption || ''} />
+              {fields.caption && <figcaption>{fields.caption}</figcaption>}
+            </figure>
+          )
         },
       },
 
-      blocks: {
-        imageBlock: {
-          Component: ({ node, isEditor, isJSXConverter }) => {
-            const fields = isEditor ? node.__fields : node.fields
+      quoteBlock: {
+        Component: ({ node, isEditor }) => {
+          const fields = isEditor ? node.__fields : node.fields
 
-            return (
-              <figure className="article-image">
-                <img src={fields.image?.url} alt={fields.caption || ''} />
-                {fields.caption && <figcaption>{fields.caption}</figcaption>}
-              </figure>
-            )
-          },
-        },
-
-        quoteBlock: {
-          Component: ({ node, isEditor }) => {
-            const fields = isEditor ? node.__fields : node.fields
-
-            return (
-              <blockquote className="article-quote">
-                <p>{fields.quote}</p>
-                {fields.author && <cite>— {fields.author}</cite>}
-              </blockquote>
-            )
-          },
+          return (
+            <blockquote className="article-quote">
+              <p>{fields.quote}</p>
+              {fields.author && <cite>— {fields.author}</cite>}
+            </blockquote>
+          )
         },
       },
+    },
 
-      link: {
-        html: ({ node, isEditor }) => {
-          const fields = isEditor ? node.fields : node.fields
-          const url = fields.url
-          const text = fields.text
+    link: {
+      html: ({ node, isEditor }) => {
+        const fields = isEditor ? node.fields : node.fields
+        const url = fields.url
+        const text = fields.text
 
-          return `<a href="${url}" class="article-link">${text}</a>`
-        },
+        return `<a href="${url}" class="article-link">${text}</a>`
       },
     },
   },
 
   debug: {
-    nodes: {
-      blocks: {
-        imageBlock: {
-          Component: ({ node, isEditor }) => {
-            const fields = isEditor ? node.__fields : node.fields
+    blocks: {
+      imageBlock: {
+        Component: ({ node, isEditor }) => {
+          const fields = isEditor ? node.__fields : node.fields
 
-            return (
-              <div style={{ border: '2px dashed red', padding: '1rem' }}>
-                <pre>{JSON.stringify(fields, null, 2)}</pre>
-              </div>
-            )
-          },
+          return (
+            <div style={{ border: '2px dashed red', padding: '1rem' }}>
+              <pre>{JSON.stringify(fields, null, 2)}</pre>
+            </div>
+          )
         },
       },
     },

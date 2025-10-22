@@ -24,7 +24,7 @@ export function ViewSelector(): null | React.ReactElement {
   // Build list of available views
   const allViews = ['default', ...viewKeys.filter((key) => key !== 'default')]
 
-  const currentViewLabel = currentView.name.charAt(0).toUpperCase() + currentView.name.slice(1)
+  const currentViewLabel = currentView.charAt(0).toUpperCase() + currentView.slice(1)
 
   return (
     <div className="lexical-view-selector">
@@ -44,8 +44,8 @@ export function ViewSelector(): null | React.ReactElement {
 
               return (
                 <PopupList.Button
-                  active={viewName === currentView.name}
-                  disabled={viewName === currentView.name}
+                  active={viewName === currentView}
+                  disabled={viewName === currentView}
                   key={viewName}
                   onClick={() => {
                     setCurrentView?.(viewName)
