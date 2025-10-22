@@ -1,7 +1,7 @@
 import { toast, useConfig, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
-import type { Layout, WidgetInstanceClient, WidgetItem } from './client.js'
+import type { WidgetInstanceClient, WidgetItem } from './client.js'
 
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 
@@ -9,27 +9,11 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const setLayoutPreference = useSetLayoutPreference()
   const [isEditing, setIsEditing] = useState(false)
   const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
-  const [currentLayout, setCurrentLayout] = useState<Layout>(() => {
-    const layout: Layout = [[]]
-    const columns = 12
-    let currentX = 0
-    initialLayout.forEach((item) => {
-      currentX += item.item.w
-      if (currentX > columns) {
-        currentX = 0
-        layout.push([item])
-      } else {
-        layout.at(-1).push(item)
-      }
-    })
-    return layout
-  })
+  const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
 
   const saveLayout = useCallback(async () => {
     try {
-      const layoutData: WidgetItem[] = currentLayout.flatMap((item) =>
-        item.map((item) => item.item),
-      )
+      const layoutData: WidgetItem[] = currentLayout.map((item) => item.item)
       setIsEditing(false)
       await setLayoutPreference(layoutData)
     } catch {
@@ -87,15 +71,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         },
       }
 
-      const spaceLastRow = currentLayout.at(-1).reduce((acc, item) => acc + item.item.w, 0)
-      if (spaceLastRow + (widget?.minWidth ?? 3) > 12) {
-        setCurrentLayout((prev) => [...prev, [newWidgetInstance]])
-      } else {
-        setCurrentLayout((prev) => {
-          prev.at(-1).push(newWidgetInstance)
-          return prev
-        })
-      }
+      setCurrentLayout((prev) => [...prev, newWidgetInstance])
     },
     [isEditing, currentLayout],
   )
@@ -105,20 +81,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       if (!isEditing) {
         return
       }
-      const rowIndex = currentLayout.findIndex((row) =>
-        row.some((item) => item.item.i === widgetId),
-      )
-      if (rowIndex === -1) {
-        return
-      }
-      const itemIndex = currentLayout.at(rowIndex).findIndex((item) => item.item.i === widgetId)
-      if (itemIndex === -1) {
-        return
-      }
-      setCurrentLayout((prev) => {
-        prev.at(rowIndex).splice(itemIndex, 1)
-        return prev
-      })
+      setCurrentLayout((prev) => prev.filter((item) => item.item.i !== widgetId))
     },
     [isEditing],
   )

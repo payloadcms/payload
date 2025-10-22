@@ -23,19 +23,8 @@ export type WidgetItem = {
 
 export type WidgetInstanceClient = {
   component: React.ReactNode
-  item: {
-    i: string
-    maxW: number
-    minW: number
-    resizeHandles: string[]
-    w: number
-    x: number
-    y: number
-  }
+  item: WidgetItem
 }
-
-export type Row = WidgetInstanceClient[]
-export type Layout = Row[]
 
 export function GridLayoutDashboardClient({
   clientLayout: initialLayout,
@@ -49,7 +38,6 @@ export function GridLayoutDashboardClient({
     cancel,
     currentLayout,
     deleteWidget,
-    handleLayoutChange,
     isEditing,
     resetLayout,
     saveLayout,
@@ -86,7 +74,7 @@ export function GridLayoutDashboardClient({
         }}
       >
         {currentLayout &&
-          currentLayout.flat().map((widget) => (
+          currentLayout.map((widget) => (
             <div
               className="widget"
               data-columns={widget.item.w}
