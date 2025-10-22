@@ -372,7 +372,10 @@ export const renderDocument = async ({
         globalSlug={globalConfig?.slug}
         hasLocalizedFields={
           config.localization &&
-          traverseForLocalizedFields({ config, fields: collectionConfig.fields })
+          traverseForLocalizedFields({
+            config,
+            fields: globalConfig?.fields || collectionConfig?.fields,
+          })
         }
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
