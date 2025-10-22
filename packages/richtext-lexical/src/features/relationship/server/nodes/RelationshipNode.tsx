@@ -3,6 +3,7 @@ import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import {
   $applyNodeReplacement,
   type DOMConversionMap,
@@ -102,6 +103,12 @@ export class RelationshipServerNode extends DecoratorBlockNode {
 
   static isInline(): false {
     return false
+  }
+
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.relationship)
+    return element
   }
 
   override decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
