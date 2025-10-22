@@ -129,7 +129,7 @@ describe('Lexical Fully Featured - database', () => {
       page,
     }) => {
       await lexical.slashCommand('myblock')
-      await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
+      await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
 
       /**
        * Test on create
