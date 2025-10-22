@@ -740,6 +740,28 @@ describe('Localization', () => {
     await changeLocale(page, spanishLocale)
     await expect(page.locator('#field-title')).toHaveValue('Spanish Title')
   })
+
+  test('should only delete localized field data', async () => {
+    await page.goto(urlPostsWithDrafts.create)
+
+    await changeLocale(page, defaultLocale)
+
+    await page.locator('#field-title').fill('english title')
+    await page.locator('#field-sharedField').fill('keep')
+    await saveDocAndAssert(page)
+
+    await changeLocale(page, spanishLocale)
+    await page.locator('#field-title').fill('spanish title')
+    await saveDocAndAssert(page)
+
+    await openDocControls(page)
+    await page.locator('#action-delete-current-locale').click()
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+    await expect(page.locator('#field-title')).toBeEmpty()
+    await expect(page.locator('#field-sharedField')).toHaveValue('keep')
+  })
 })
 
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
