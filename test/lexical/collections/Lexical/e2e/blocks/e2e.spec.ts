@@ -1282,7 +1282,7 @@ describe('lexicalBlocks', () => {
           await page.waitForURL(`**/collections/LexicalInBlock/**`)
 
           await expect(
-            page.locator('.inline-block:has-text("Inline Block In Lexical")'),
+            page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
           ).toHaveCount(20)
         },
         { allowedNumberOfRequests: 1 },
@@ -1444,14 +1444,17 @@ describe('lexicalBlocks', () => {
       await expect(row2).toBeVisible()
 
       // Get initial count and ensure it's stable
-      const inlineBlocks = page.locator('#blocks-row-2 .inline-block-container')
+      const inlineBlocks = page.locator('#blocks-row-2 .LexicalEditorTheme__inlineBlock-container')
       const inlineBlockCount = await inlineBlocks.count()
       await expect(() => {
         expect(inlineBlockCount).toBeGreaterThan(0)
       }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
-      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+      await inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__editButton')
+        .first()
+        .click()
 
       await page.locator('.drawer--is-open #field-text').fill('value1')
       await page.locator('.drawer--is-open button[type="submit"]').first().click()
@@ -1474,7 +1477,10 @@ describe('lexicalBlocks', () => {
       await expect(inlineBlocks).toHaveCount(inlineBlockCount)
 
       // Open the drawer again
-      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+      await inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__editButton')
+        .first()
+        .click()
 
       // Check if the text field still contains 'value1'
       await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
@@ -1571,8 +1577,8 @@ async function createInlineBlock({
       await inlineBlockDrawer.locator('button').getByText('Save changes').click()
       await expect(inlineBlockDrawer).toBeHidden()
 
-      const inlineBlock = richTextField.locator('.inline-block').nth(0)
-      const editButton = inlineBlock.locator('.inline-block__editButton').first()
+      const inlineBlock = richTextField.locator('.LexicalEditorTheme__inlineBlock').nth(0)
+      const editButton = inlineBlock.locator('.LexicalEditorTheme__inlineBlock__editButton').first()
 
       return {
         inlineBlock,
