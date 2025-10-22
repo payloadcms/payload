@@ -1670,7 +1670,7 @@ describe('lexicalMain', () => {
     // test
     await navigateToLexicalFields()
     const uploadNode = page
-      .locator('.LexicalEditorTheme__upload[data-filename="payload.jpg"]')
+      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload.jpg"]')
       .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
