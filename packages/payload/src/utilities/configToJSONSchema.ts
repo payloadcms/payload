@@ -14,9 +14,9 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
-import { fieldsHaveLocalized } from './fieldsHaveLocalized.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
+import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -1207,7 +1207,7 @@ export function configToJSONSchema(
         interfaceNameDefinitions,
       })
 
-      if (config.localization && fieldsHaveLocalized({ config, fields: entity.flattenedFields })) {
+      if (config.localization && traverseForLocalizedFields({ config, fields: entity.fields })) {
         acc[`${entity.slug}_localized`] = entityToJSONSchema(
           config,
           entity,
