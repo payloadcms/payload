@@ -418,7 +418,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} sėkmingai sukurtas.',
     successfullyDuplicated: '{{label}} sėkmingai dubliuotas.',
     successfullyReindexed:
-      'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}',
+      'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
     takeOver: 'Perimti',
     thisLanguage: 'Lietuvių',
     time: 'Laikas',
@@ -520,11 +520,13 @@ export const ltTranslations: DefaultTranslationsObject = {
     invalidInput: 'Šis laukas turi netinkamą įvestį.',
     invalidSelection: 'Šiame lauke yra netinkamas pasirinkimas.',
     invalidSelections: 'Šiame lauke yra šios netinkamos parinktys:',
+    latitudeOutOfBounds: 'Platumas turi būti tarp -90 ir 90.',
     lessThanMin:
       '{{value}} yra mažesnė nei leidžiama minimali {{label}} reikšmė, kuri yra {{min}}.',
     limitReached: 'Pasiektas limitas, galima pridėti tik {{max}} daiktus.',
     longerThanMin:
       'Ši reikšmė turi būti ilgesnė nei minimalus simbolių skaičius, kuris yra {{minLength}} simboliai.',
+    longitudeOutOfBounds: 'Ilguma turi būti tarp -180 ir 180.',
     notValidDate: '"{{value}}" nėra galiojanti data.',
     required: 'Šis laukas yra privalomas.',
     requiresAtLeast: 'Šis laukas reikalauja bent {{count}} {{label}}.',

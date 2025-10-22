@@ -418,7 +418,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} հաջողությամբ ստեղծվել է։',
     successfullyDuplicated: '{{label}} հաջողությամբ կրկնօրինակվել է։',
     successfullyReindexed:
-      'Հաջողությամբ վերաինդեքսավորվել են {{count}}-ը {{total}} փաստաթղթերից {{collections}}-ում',
+      '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
     takeOver: 'Վերցնել վերահսկողությունը',
     thisLanguage: 'Հայերեն',
     time: 'Ժամ',
@@ -521,11 +521,13 @@ export const hyTranslations: DefaultTranslationsObject = {
     invalidInput: 'Ներմուծված արժեքն անվավեր է',
     invalidSelection: 'Այս դաշտն ունի անվավեր ընտրություն։',
     invalidSelections: 'Այս դաշտն ունի հետևյալ անվավեր ընտրությունները։',
+    latitudeOutOfBounds: 'Լաթիտուդը պետք է լինի -90-ից 90 միջակայքում:',
     lessThanMin: '{{value}}-ը փոքր է {{min}} {{label}}-ի թույլատրելի նվազագույն արժեքից։',
     limitReached:
       'Դու հասել եք առավելագույն սահմանին, կարող են ավելացվել միայն {{max}} քանակի տարրեր։',
     longerThanMin:
       'Այս արժեքը պետք է ավելի երկար լինի, քան {{minLength}} նիշերի նվազագույն երկարությունը։',
+    longitudeOutOfBounds: 'Լոնգիտուդը պետք է լինի -180-ի և 180-ի միջակայքում:',
     notValidDate: '"{{value}}"-ը վավեր ամսաթիվ չէ։',
     required: 'Այս դաշտը պարտադիր է։',
     requiresAtLeast: 'Այս դաշտը պահանջում է առնվազն {{count}} {{label}}։',

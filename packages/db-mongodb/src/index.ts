@@ -11,9 +11,9 @@ import type {
   BaseDatabaseAdapter,
   CollectionSlug,
   DatabaseAdapterObj,
+  JsonObject,
   Migration,
   Payload,
-  TypeWithID,
   TypeWithVersion,
   UpdateGlobalArgs,
   UpdateGlobalVersionArgs,
@@ -214,12 +214,12 @@ declare module 'payload' {
     updateGlobal: <T extends Record<string, unknown>>(
       args: { options?: QueryOptions } & UpdateGlobalArgs<T>,
     ) => Promise<T>
-    updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
+    updateGlobalVersion: <T extends JsonObject = JsonObject>(
       args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
     ) => Promise<TypeWithVersion<T>>
 
     updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
-    updateVersion: <T extends TypeWithID = TypeWithID>(
+    updateVersion: <T extends JsonObject = JsonObject>(
       args: { options?: QueryOptions } & UpdateVersionArgs<T>,
     ) => Promise<TypeWithVersion<T>>
     useAlternativeDropDatabase: boolean

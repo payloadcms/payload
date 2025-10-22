@@ -1,5 +1,3 @@
-import { title } from 'process'
-
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -419,7 +417,7 @@ export const enTranslations = {
     successfullyCreated: '{{label}} successfully created.',
     successfullyDuplicated: '{{label}} successfully duplicated.',
     successfullyReindexed:
-      'Successfully reindexed {{count}} of {{total}} documents from {{collections}}',
+      'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     takeOver: 'Take over',
     thisLanguage: 'English',
     time: 'Time',
@@ -520,9 +518,11 @@ export const enTranslations = {
     invalidInput: 'This field has an invalid input.',
     invalidSelection: 'This field has an invalid selection.',
     invalidSelections: 'This field has the following invalid selections:',
+    latitudeOutOfBounds: 'Latitude must be between -90 and 90.',
     lessThanMin: '{{value}} is less than the min allowed {{label}} of {{min}}.',
     limitReached: 'Limit reached, only {{max}} items can be added.',
     longerThanMin: 'This value must be longer than the minimum length of {{minLength}} characters.',
+    longitudeOutOfBounds: 'Longitude must be between -180 and 180.',
     notValidDate: '"{{value}}" is not a valid date.',
     required: 'This field is required.',
     requiresAtLeast: 'This field requires at least {{count}} {{label}}.',

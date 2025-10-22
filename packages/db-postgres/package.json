@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.59.1",
+  "version": "3.60.0",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -78,8 +78,8 @@
     "@payloadcms/drizzle": "workspace:*",
     "@types/pg": "8.10.2",
     "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.2",
+    "drizzle-kit": "0.31.5",
+    "drizzle-orm": "0.44.6",
     "pg": "8.16.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",

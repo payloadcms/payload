@@ -11,7 +11,7 @@ import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
-import type { DestinationStream, Level, pino } from 'pino'
+import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -470,7 +470,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -834,6 +834,11 @@ export type Config = {
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
       /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      settingsMenu?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -1172,7 +1177,7 @@ export type Config = {
    *
    * ```
    */
-  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+  logger?: 'sync' | { destination?: DestinationStream; options: LoggerOptions } | PayloadLogger
 
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.

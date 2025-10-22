@@ -1,4 +1,4 @@
-import type { CreateGlobalVersionArgs, TypeWithID, TypeWithVersion } from 'payload'
+import type { CreateGlobalVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionGlobalFields } from 'payload'
@@ -9,7 +9,7 @@ import type { DrizzleAdapter } from './types.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function createGlobalVersion<T extends TypeWithID>(
+export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     autosave,
