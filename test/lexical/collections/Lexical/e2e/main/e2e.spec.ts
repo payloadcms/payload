@@ -537,14 +537,18 @@ describe('lexicalMain', () => {
     ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     // second one should be the newly created one
-    const secondUploadNode = richTextField.locator('.lexical-upload').nth(1)
+    const secondUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
     await secondUploadNode.scrollIntoViewIfNeeded()
     await expect(secondUploadNode).toBeVisible()
     // Focus the upload node
     await secondUploadNode.click()
 
-    await expect(secondUploadNode.locator('.lexical-upload__filename')).toHaveText('payload-1.jpg')
-    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toHaveText('Upload')
+    await expect(secondUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+      'payload-1.jpg',
+    )
+    await expect(
+      secondUploadNode.locator('.LexicalEditorTheme__upload__collectionLabel'),
+    ).toHaveText('Upload')
   })
 
   // This reproduces https://github.com/payloadcms/payload/issues/7128
@@ -588,16 +592,21 @@ describe('lexicalMain', () => {
     await uploadListDrawer.locator('button').getByText('payload.jpg').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
-    const newUploadNode = richTextField.locator('.lexical-upload').nth(1)
+    const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
     await newUploadNode.click() // Focus the upload node
     await newUploadNode.hover()
 
-    await expect(newUploadNode.locator('.lexical-upload__filename')).toContainText('payload.jpg')
+    await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toContainText(
+      'payload.jpg',
+    )
 
     // Click on button with class lexical-upload__upload-drawer-toggler
-    await newUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
+    await newUploadNode
+      .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
+      .first()
+      .click()
 
     const uploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
@@ -629,14 +638,17 @@ describe('lexicalMain', () => {
     const reloadedUploadNode = page
       .locator('.rich-text-lexical')
       .nth(2)
-      .locator('.lexical-upload')
+      .locator('.LexicalEditorTheme__upload')
       .nth(1)
     await reloadedUploadNode.scrollIntoViewIfNeeded()
     await expect(reloadedUploadNode).toBeVisible()
     await reloadedUploadNode.click() // Focus the upload node
     await reloadedUploadNode.hover()
 
-    await reloadedUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
+    await reloadedUploadNode
+      .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
+      .first()
+      .click()
     const reloadedUploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
       .first()
@@ -1293,7 +1305,7 @@ describe('lexicalMain', () => {
     await uploadListDrawer.locator('button').getByText('payload.png').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
-    const newUploadNode = richTextField.locator('.lexical-upload').first()
+    const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').first()
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
 
@@ -1301,7 +1313,9 @@ describe('lexicalMain', () => {
 
     await newUploadNode.hover()
 
-    await expect(newUploadNode.locator('.lexical-upload__filename')).toHaveText('payload.png')
+    await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+      'payload.png',
+    )
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
     await page.keyboard.press('Enter')
@@ -1312,7 +1326,9 @@ describe('lexicalMain', () => {
       await page.keyboard.press('Shift+ArrowLeft')
     }
 
-    const swapDrawerButton = newUploadNode.locator('.lexical-upload__swap-drawer-toggler').first()
+    const swapDrawerButton = newUploadNode
+      .locator('.LexicalEditorTheme__upload__swap-drawer-toggler')
+      .first()
 
     await expect(swapDrawerButton).toBeVisible()
 
@@ -1653,7 +1669,9 @@ describe('lexicalMain', () => {
 
     // test
     await navigateToLexicalFields()
-    const uploadNode = page.locator('.lexical-upload[data-filename="payload.jpg"]').first()
+    const uploadNode = page
+      .locator('.LexicalEditorTheme__upload[data-filename="payload.jpg"]')
+      .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
 
