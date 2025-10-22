@@ -1444,7 +1444,7 @@ describe('lexicalBlocks', () => {
       await expect(row2).toBeVisible()
 
       // Get initial count and ensure it's stable
-      const inlineBlocks = page.locator('#blocks-row-2 .LexicalEditorTheme__inlineBlock-container')
+      const inlineBlocks = page.locator('#blocks-row-2 .LexicalEditorTheme__inlineBlock__container')
       const inlineBlockCount = await inlineBlocks.count()
       await expect(() => {
         expect(inlineBlockCount).toBeGreaterThan(0)
