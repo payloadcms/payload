@@ -13,6 +13,7 @@ import type {
   Collection,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -162,7 +163,9 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    const docWithLocales = await getLatestCollectionVersion({
+    const docWithLocales = await getLatestCollectionVersion<
+      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+    >({
       id,
       config: collectionConfig,
       payload,
@@ -175,6 +178,9 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales && hasWherePolicy) {
       throw new Forbidden(req.t)
+    }
+    if (!docWithLocales) {
+      throw new NotFound(req.t)
     }
 
     // /////////////////////////////////////

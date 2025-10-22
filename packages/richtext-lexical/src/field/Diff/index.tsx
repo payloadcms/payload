@@ -27,6 +27,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
     i18n,
     locale,
     nestingLevel,
+    req,
     versionValue: valueTo,
   } = args
 
@@ -34,15 +35,15 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
     ...defaultConverters,
     ...LinkDiffHTMLConverterAsync({}),
     ...ListItemDiffHTMLConverterAsync,
-    ...UploadDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
-    ...RelationshipDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
-    ...UnknownDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
+    ...UploadDiffHTMLConverterAsync({ i18n, req }),
+    ...RelationshipDiffHTMLConverterAsync({ i18n, req }),
+    ...UnknownDiffHTMLConverterAsync({ i18n, req }),
   })
 
   const payloadPopulateFn = await getPayloadPopulateFn({
     currentDepth: 0,
     depth: 1,
-    req: args.req,
+    req,
   })
   const fromHTML = await convertLexicalToHTMLAsync({
     converters,

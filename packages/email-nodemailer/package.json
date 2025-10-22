@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "3.59.0",
+  "version": "3.60.0",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,10 +42,10 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "nodemailer": "6.9.16"
+    "nodemailer": "7.0.9"
   },
   "devDependencies": {
-    "@types/nodemailer": "6.4.17",
+    "@types/nodemailer": "7.0.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {

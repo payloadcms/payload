@@ -102,7 +102,8 @@ export const updateOperation = async <
 
     let { data } = args
 
-    const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts)
+    const isSavingDraft =
+      Boolean(draftArg && globalConfig.versions?.drafts) && data._status !== 'published'
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -127,7 +128,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const globalVersion = await getLatestGlobalVersion({
+    const globalVersionResult = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
       locale: locale!,
@@ -135,11 +136,11 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = globalVersion || {}
+    const { global, globalExists } = globalVersionResult || {}
 
     let globalJSON: JsonObject = {}
 
-    if (globalVersion && globalVersion.global) {
+    if (globalVersionResult && globalVersionResult.global) {
       globalJSON = deepCopyObjectSimple(global)
 
       if (globalJSON._id) {
@@ -224,74 +225,50 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
-    let result: JsonObject
-    let snapshotResult: JsonObject | undefined
 
     const beforeChangeArgs = {
       collection: null,
       context: req.context,
       data,
       doc: originalDoc,
-      docWithLocales: undefined,
+      docWithLocales: globalJSON,
       global: globalConfig,
       operation: 'update' as Operation,
       req,
       skipValidation:
-        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
+        isSavingDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    // ///////////////////////////////////////////
-    // Handle locale specific publish / unpublish
-    // ///////////////////////////////////////////
+    let result: JsonObject = await beforeChange(beforeChangeArgs)
+    let snapshotToSave: JsonObject | undefined
 
-    if (
-      payload.config.localization &&
-      globalConfig.versions &&
-      (publishSpecificLocale || unpublishSpecificLocale)
-    ) {
-      /**
-       *  1. take snapshot of full localized data
-       *  2. run beforeChange twice
-       *    a. once with all data (for snapshot)
-       *    b. once with only published data (for result)
-       *  3. saveVersions is called later in this file
-       *    a. normal version is created with published data
-       *    b. snapshot is created with full localized data
-       */
+    if (payload.config.localization && globalConfig.versions) {
+      if (publishSpecificLocale || unpublishSpecificLocale) {
+        // snapshot will have full data before publishing/unpublishing
+        snapshotToSave = deepCopyObjectSimple(result)
 
-      // snapshotResult will contain all localized data (draft and published)
-      snapshotResult = await beforeChange({
-        ...beforeChangeArgs,
-        docWithLocales: globalJSON,
-      })
+        // result will contain only published localized data
+        result = await beforeChange({
+          ...beforeChangeArgs,
+          data: unpublishSpecificLocale ? {} : beforeChangeArgs.data,
+          docWithLocales:
+            (
+              await getLatestGlobalVersion({
+                slug,
+                config: globalConfig,
+                payload,
+                published: true,
+                req,
+                where: query,
+              })
+            )?.global || {},
+          skipValidation: unpublishSpecificLocale ? true : false,
+        })
 
-      // result will contain only published localized data
-      result = await beforeChange({
-        ...beforeChangeArgs,
-        data: unpublishSpecificLocale ? {} : data,
-        docWithLocales:
-          (
-            await getLatestGlobalVersion({
-              slug,
-              config: globalConfig,
-              payload,
-              published: true,
-              req,
-              where: query,
-            })
-          )?.global || {},
-        skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
-      })
-
-      if (unpublishSpecificLocale && snapshotResult && Object.keys(result).length === 0) {
-        result = snapshotResult
+        if (unpublishSpecificLocale && snapshotToSave && Object.keys(result).length === 0) {
+          result = snapshotToSave
+        }
       }
-    } else {
-      // result will contain all localized data (draft and published)
-      result = await beforeChange({
-        ...beforeChangeArgs,
-        docWithLocales: globalJSON,
-      })
     }
 
     // /////////////////////////////////////
@@ -304,14 +281,15 @@ export const updateOperation = async <
       select: incomingSelect,
     })
 
-    if (!shouldSaveDraft) {
+    if (!isSavingDraft) {
+      const now = new Date().toISOString()
       // Ensure global has createdAt
       if (!result.createdAt) {
-        result.createdAt = new Date().toISOString()
+        result.createdAt = now
       }
 
       // Ensure updatedAt date is always updated
-      result.updatedAt = new Date().toISOString()
+      result.updatedAt = now
 
       if (globalExists) {
         result = await payload.db.updateGlobal({
@@ -337,14 +315,14 @@ export const updateOperation = async <
       result = await saveVersion({
         autosave,
         docWithLocales: result,
-        draft: shouldSaveDraft,
+        draft: isSavingDraft,
         global: globalConfig,
         operation: 'update',
         payload,
         publishSpecificLocale,
         req,
         select,
-        snapshot: snapshotResult,
+        snapshot: snapshotToSave,
         unpublishSpecificLocale,
       })
 

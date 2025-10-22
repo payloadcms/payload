@@ -1083,6 +1083,69 @@ describe('Versions', () => {
       })
     })
 
+    describe('Draft Types', () => {
+      it('should allow creating drafts without required fields', async () => {
+        // This test validates that when draft: true is set, required fields become optional
+        // TypeScript should not complain about missing 'description' field even though it's required
+        const draft = await payload.create({
+          collection: 'draft-posts',
+          data: {
+            title: 'Draft without description',
+            // description is required but omitted - should work with draft: true
+          },
+          draft: true,
+        })
+
+        expect(draft.title).toBe('Draft without description')
+        // Different databases return null vs undefined for missing fields
+        expect(draft.description).toBeFalsy()
+        expect(draft._status).toBe('draft')
+      })
+
+      it('should require all required fields when draft is false', async () => {
+        // This validates that required fields are still enforced when draft is false
+        await expect(
+          // @ts-expect-error - description is required when not creating a draft
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Published without description',
+            },
+            draft: false,
+          }),
+        ).rejects.toThrow(ValidationError)
+      })
+
+      it('should require all required fields when draft is not specified', async () => {
+        // This validates that required fields are still enforced when draft option is omitted
+        await expect(
+          // @ts-expect-error - description is required when draft option is not specified
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Post without description',
+            },
+          }),
+        ).rejects.toThrow(ValidationError)
+      })
+
+      it('should allow all fields to be optional with draft: true', async () => {
+        // Test that even fields nested in groups can be omitted
+        const draft = await payload.create({
+          collection: 'draft-posts',
+          data: {
+            // Both title and description are required but omitted
+          },
+          draft: true,
+        })
+
+        expect(draft._status).toBe('draft')
+        // Different databases return null vs undefined for missing fields
+        expect(draft.title).toBeFalsy()
+        expect(draft.description).toBeFalsy()
+      })
+    })
+
     describe('Max Versions', () => {
       // create 2 documents with 3 versions each
       // expect 2 documents with 2 versions each

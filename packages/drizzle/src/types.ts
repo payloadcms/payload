@@ -354,6 +354,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  foreignKeys: Set<string>
   idType: 'serial' | 'uuid'
   indexes: Set<string>
   initializing: Promise<void>

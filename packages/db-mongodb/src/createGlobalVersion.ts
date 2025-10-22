@@ -12,7 +12,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     autosave,
     createdAt,
     globalSlug,
-    parent,
     publishedLocale,
     req,
     returning,
@@ -34,7 +33,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     autosave,
     createdAt,
     latest: true,
-    parent,
     publishedLocale,
     snapshot,
     unpublishedLocale,
@@ -62,11 +60,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
         {
           _id: {
             $ne: doc._id,
-          },
-        },
-        {
-          parent: {
-            $eq: parent,
           },
         },
         {

@@ -1061,6 +1061,7 @@ export type CodeField = {
       Label?: CustomComponent<CodeFieldLabelClientComponent | CodeFieldLabelServerComponent>
     } & FieldAdmin['components']
     editorOptions?: EditorProps['options']
+    editorProps?: Partial<EditorProps>
     language?: string
   } & FieldAdmin
   maxLength?: number
@@ -1070,8 +1071,9 @@ export type CodeField = {
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type CodeFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<CodeField['admin'], 'editorOptions' | 'language'>
+  admin?: AdminClient &
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    Partial<Pick<CodeField['admin'], 'editorOptions' | 'editorProps' | 'language'>>
 } & Omit<FieldBaseClient, 'admin'> &
   Pick<CodeField, 'maxLength' | 'minLength' | 'type'>
 

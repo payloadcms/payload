@@ -1,6 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
+import type { AccessResult, CollectionSlug, FileToSave, SanitizedConfig } from '../../../index.js'
 import type {
   JsonObject,
   Payload,
@@ -23,18 +24,11 @@ import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
-import {
-  type AccessResult,
-  type CollectionSlug,
-  deepCopyObjectSimple,
-  type FileToSave,
-  type SanitizedConfig,
-} from '../../../index.js'
+import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
-import { saveVersion } from '../../../versions/saveVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   accessResults: AccessResult
@@ -43,9 +37,9 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
   depth: number
-  docWithLocales: any
+  docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
-  fallbackLocale: string
+  fallbackLocale: string | string[]
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
@@ -100,7 +94,7 @@ export const updateDocument = async <
   unpublishSpecificLocale,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
-  const shouldSaveDraft =
+  const isSavingDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
   const shouldSavePassword = Boolean(
     password &&
@@ -108,7 +102,7 @@ export const updateDocument = async <
       (!collectionConfig.auth.disableLocalStrategy ||
         (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
           collectionConfig.auth.disableLocalStrategy.enableFields)) &&
-      !shouldSaveDraft,
+      !isSavingDraft,
   )
 
   // /////////////////////////////////////
@@ -141,6 +135,8 @@ export const updateDocument = async <
     req,
     showHiddenFields: true,
   })
+
+  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
@@ -230,79 +226,70 @@ export const updateDocument = async <
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result: JsonObject & TypeWithID
-  let snapshotResult: (JsonObject & TypeWithID) | undefined
-
-  const beforeChangeArgs: Omit<Args<DataFromCollectionSlug<TSlug>>, 'docWithLocales'> = {
+  const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
     id,
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
+    docWithLocales,
     global: null,
     operation: 'update',
     overrideAccess,
     req,
     skipValidation:
-      (shouldSaveDraft &&
+      (isSavingDraft &&
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate) ||
       // Skip validation for trash operations since they're just metadata updates
-      Boolean(data?.deletedAt),
+      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }
 
-  // ///////////////////////////////////////////
-  // Handle locale specific publish / unpublish
-  // ///////////////////////////////////////////
+  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let snapshotToSave: JsonObject | undefined
 
-  if (
-    config.localization &&
-    collectionConfig.versions &&
-    (publishSpecificLocale || unpublishSpecificLocale)
-  ) {
-    // snapshotResult will contain all localized data (draft and published)
-    snapshotResult = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales,
-    })
+  if (payload.config.localization && collectionConfig.versions) {
+    if (publishSpecificLocale || unpublishSpecificLocale) {
+      // snapshot will have full data before publishing/unpublishing
+      snapshotToSave = deepCopyObjectSimple(result)
 
-    // result will contain only published localized data
-    result = await beforeChange({
-      ...beforeChangeArgs,
-      data: unpublishSpecificLocale ? { id } : beforeChangeArgs.data,
-      docWithLocales:
-        (await getLatestCollectionVersion<DataFromCollectionSlug<TSlug>>({
-          id,
-          config: collectionConfig,
-          payload,
-          published: true,
-          query: {
-            collection: collectionConfig.slug,
-            locale,
+      // result will contain only published localized data
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        data: unpublishSpecificLocale ? { id } : beforeChangeArgs.data,
+        docWithLocales:
+          (await getLatestCollectionVersion({
+            id,
+            config: collectionConfig,
+            payload,
+            published: true,
+            query: {
+              collection: collectionConfig.slug,
+              locale,
+              req,
+              where: combineQueries({ id: { equals: id } }, accessResults),
+            },
             req,
-            where: combineQueries({ id: { equals: id } }, accessResults),
-          },
-          req,
-        })) || {},
-      skipValidation: unpublishSpecificLocale ? true : beforeChangeArgs.skipValidation,
-    })
+          })) || {},
+        skipValidation: unpublishSpecificLocale ? true : false,
+      })
 
-    if (unpublishSpecificLocale && snapshotResult && Object.keys(result).length <= 1 && result.id) {
-      result = snapshotResult
+      if (
+        unpublishSpecificLocale &&
+        snapshotToSave &&
+        Object.keys(result).length <= 1 &&
+        result.id
+      ) {
+        result = snapshotToSave
+      }
     }
-  } else {
-    // result will contain all localized data (draft and published)
-    result = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales,
-    })
   }
 
   // /////////////////////////////////////
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: JsonObject = { ...result }
 
   if (shouldSavePassword && typeof password === 'string') {
     const { hash, salt } = await generatePasswordSaltHash({
@@ -320,7 +307,7 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
-  if (!shouldSaveDraft) {
+  if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
 
@@ -344,12 +331,12 @@ export const updateDocument = async <
       autosave,
       collection: collectionConfig,
       docWithLocales: result,
-      draft: shouldSaveDraft,
+      draft: isSavingDraft,
       operation: 'update',
       payload,
       publishSpecificLocale,
       req,
-      snapshot: snapshotResult!,
+      snapshot: snapshotToSave,
       unpublishSpecificLocale,
     })
   }

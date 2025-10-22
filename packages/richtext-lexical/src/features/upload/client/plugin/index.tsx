@@ -3,7 +3,7 @@ import type { LexicalCommand } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $dfsIterator, $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import { useBulkUpload, useConfig, useEffectEvent, useModal } from '@payloadcms/ui'
+import { useBulkUpload, useEffectEvent, useModal } from '@payloadcms/ui'
 import ObjectID from 'bson-objectid'
 import {
   $createRangeSelection,
@@ -26,6 +26,7 @@ import type { PluginComponent } from '../../../typesClient.js'
 import type { Internal_UploadData, UploadData } from '../../server/nodes/UploadNode.js'
 import type { UploadFeaturePropsClient } from '../index.js'
 
+import { useEnabledRelationships } from '../../../relationship/client/utils/useEnabledRelationships.js'
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, $isUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
@@ -77,11 +78,14 @@ type FileToUpload = {
   formID: string
 }
 
-export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
+export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
-  const {
-    config: { collections },
-  } = useConfig()
+
+  const { enabledCollectionSlugs } = useEnabledRelationships({
+    collectionSlugsBlacklist: clientProps?.disabledCollections,
+    collectionSlugsWhitelist: clientProps?.enabledCollections,
+    uploads: true,
+  })
 
   const {
     drawerSlug: bulkUploadDrawerSlug,
@@ -108,13 +112,12 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
     ])
 
     if (!isModalOpen(bulkUploadDrawerSlug)) {
-      const uploadCollections = collections.filter(({ upload }) => !!upload).map(({ slug }) => slug)
-      if (!uploadCollections.length || !uploadCollections[0]) {
+      if (!enabledCollectionSlugs.length || !enabledCollectionSlugs[0]) {
         return
       }
 
-      setCollectionSlug(uploadCollections[0])
-      setSelectableCollections(uploadCollections)
+      setCollectionSlug(enabledCollectionSlugs[0])
+      setSelectableCollections(enabledCollectionSlugs)
 
       setOnCancel(() => {
         // Remove all the pending upload nodes that were added but not uploaded
@@ -196,7 +199,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
               byteNumbers[i] = byteCharacters.charCodeAt(i)
             }
             const byteArray = new Uint8Array(byteNumbers)
-            const file = new File([byteArray], 'pasted-image.' + mimeType?.split('/')[1], {
+            const file = new File([byteArray], 'pasted-image.' + mimeType?.split('/', 2)[1], {
               type: mimeType,
             })
             transformedImage = { alt: undefined, file, formID }
@@ -205,7 +208,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
             const res = await fetch(src)
             const blob = await res.blob()
             const inferredFileName =
-              src.split('/').pop() || 'pasted-image' + blob.type.split('/')[1]
+              src.split('/').pop() || 'pasted-image' + blob.type.split('/', 2)[1]
             const file = new File([blob], inferredFileName, {
               type: blob.type,
             })
@@ -287,7 +290,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
 
               if ($isRangeSelection(selection)) {
                 for (const file of files) {
-                  const pendingUploadNode = new UploadNode({
+                  const pendingUploadNode = $createUploadNode({
                     data: {
                       pending: {
                         formID: file.formID,
@@ -360,7 +363,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
                 $setSelection(selection)
 
                 for (const file of files) {
-                  const pendingUploadNode = new UploadNode({
+                  const pendingUploadNode = $createUploadNode({
                     data: {
                       pending: {
                         formID: file.formID,
@@ -395,5 +398,5 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
     )
   }, [editor])
 
-  return <UploadDrawer enabledCollectionSlugs={collections.map(({ slug }) => slug)} />
+  return <UploadDrawer enabledCollectionSlugs={enabledCollectionSlugs} />
 }

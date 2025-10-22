@@ -44,6 +44,11 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
       break
     }
 
+    case 'numeric': {
+      columnBuilderArgsArray.push("mode: 'number'")
+      break
+    }
+
     case 'serial': {
       columnBuilderFn = 'integer'
       break

@@ -28,6 +28,7 @@
     "@miniflare/d1": "2.14.4",
     "@miniflare/shared": "2.14.4",
     "@next/env": "15.4.4",
+    "@opennextjs/cloudflare": "1.9.2",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
@@ -60,6 +61,7 @@
     "@payloadcms/sdk": "workspace:*",
     "@payloadcms/storage-azure": "workspace:*",
     "@payloadcms/storage-gcs": "workspace:*",
+    "@payloadcms/storage-r2": "workspace:*",
     "@payloadcms/storage-s3": "workspace:*",
     "@payloadcms/storage-uploadthing": "workspace:*",
     "@payloadcms/storage-vercel-blob": "workspace:*",
@@ -79,8 +81,8 @@
     "csv-parse": "^5.6.0",
     "dequal": "2.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.2",
+    "drizzle-kit": "0.31.5",
+    "drizzle-orm": "0.44.6",
     "escape-html": "1.0.3",
     "eslint-plugin-playwright": "2.2.0",
     "execa": "5.1.1",
@@ -90,7 +92,7 @@
     "jwt-decode": "4.0.0",
     "mongoose": "8.15.1",
     "next": "15.4.4",
-    "nodemailer": "6.9.16",
+    "nodemailer": "7.0.9",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
     "pg": "8.16.3",
@@ -104,7 +106,8 @@
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
-    "uuid": "10.0.0"
+    "uuid": "10.0.0",
+    "wrangler": "~4.42.0"
   },
   "pnpm": {
     "neverBuiltDependencies": []
