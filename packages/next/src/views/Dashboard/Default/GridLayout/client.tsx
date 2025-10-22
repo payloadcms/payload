@@ -4,6 +4,8 @@ import type { Widget } from 'payload'
 
 import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { Button } from '@payloadcms/ui/elements/Button'
+import { DraggableSortable } from '@payloadcms/ui/elements/DraggableSortable'
+import { DraggableSortableItem } from '@payloadcms/ui/elements/DraggableSortable/DraggableSortableItem'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
@@ -38,6 +40,7 @@ export function GridLayoutDashboardClient({
     cancel,
     currentLayout,
     deleteWidget,
+    handleDragEnd,
     isEditing,
     resetLayout,
     saveLayout,
@@ -65,42 +68,59 @@ export function GridLayoutDashboardClient({
           },
         ]}
       />
-      <div
+      <DraggableSortable
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
+        ids={currentLayout.map((w) => w.item.i)}
+        onDragEnd={handleDragEnd}
       >
-        {currentLayout &&
-          currentLayout.map((widget) => (
-            <div
-              className="widget"
-              data-columns={widget.item.w}
-              data-slug={widget.item.i}
-              key={widget.item.i}
-              style={{
-                width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
-              }}
-            >
-              <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                <div className="widget-content">{widget.component}</div>
-                {isEditing && (
-                  <button
-                    className="widget-wrapper__delete-btn"
-                    onClick={() => deleteWidget(widget.item.i)}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    title={`Delete widget ${widget.item.i}`}
-                    type="button"
-                  >
-                    <XIcon />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-      </div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
+          {currentLayout &&
+            currentLayout.map((widget) => (
+              <DraggableSortableItem disabled={!isEditing} id={widget.item.i} key={widget.item.i}>
+                {({ attributes, isDragging, listeners, setNodeRef, transform, transition }) => {
+                  return (
+                    <div
+                      className="widget"
+                      data-columns={widget.item.w}
+                      data-slug={widget.item.i}
+                      ref={setNodeRef}
+                      style={{
+                        opacity: isDragging ? 0.5 : 1,
+                        transform,
+                        transition,
+                        width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
+                      }}
+                    >
+                      <div
+                        {...(isEditing ? { ...attributes, ...listeners } : {})}
+                        className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}
+                      >
+                        <div className="widget-content">{widget.component}</div>
+                        {isEditing && (
+                          <button
+                            className="widget-wrapper__delete-btn"
+                            onClick={() => deleteWidget(widget.item.i)}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            title={`Delete widget ${widget.item.i}`}
+                            type="button"
+                          >
+                            <XIcon />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                }}
+              </DraggableSortableItem>
+            ))}
+        </div>
+      </DraggableSortable>
       {isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}

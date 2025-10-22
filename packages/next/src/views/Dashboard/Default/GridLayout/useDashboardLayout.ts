@@ -40,10 +40,21 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     setIsEditing(false)
   }, [initialLayout])
 
-  // Handle layout changes from react-grid-layout while preserving components
-  const handleLayoutChange = useCallback(() => {
-    // TODO
-  }, [isEditing, currentLayout])
+  const handleDragEnd = useCallback(
+    ({ moveFromIndex, moveToIndex }: { moveFromIndex: number; moveToIndex: number }) => {
+      if (!isEditing || moveFromIndex === moveToIndex) {
+        return
+      }
+
+      setCurrentLayout((prev) => {
+        const newLayout = [...prev]
+        const [movedItem] = newLayout.splice(moveFromIndex, 1)
+        newLayout.splice(moveToIndex, 0, movedItem)
+        return newLayout
+      })
+    },
+    [isEditing],
+  )
 
   const addWidget = useCallback(
     (widgetSlug: string) => {
@@ -91,7 +102,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     cancel,
     currentLayout,
     deleteWidget,
-    handleLayoutChange,
+    handleDragEnd,
     isEditing,
     resetLayout,
     saveLayout,
