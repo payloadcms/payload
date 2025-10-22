@@ -483,7 +483,7 @@ export class BasePayload {
   find = async <
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TLocale extends LocaleValue = Exclude<LocaleValue, 'all'>,
+    TLocale extends LocaleValue = TypedLocale,
   >(
     options: FindOptions<TSlug, TSelect, TLocale>,
   ): Promise<PaginatedDocs<TransformCollection<TSlug, TSelect, TLocale>>> => {
