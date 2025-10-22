@@ -291,6 +291,8 @@ export interface User {
   sessions?:
     | {
         id: string;
+        ip?: string | null;
+        userAgent?: string | null;
         createdAt?: string | null;
         expiresAt: string;
       }[]
@@ -315,6 +317,8 @@ export interface PartialDisableLocalStrategy {
   sessions?:
     | {
         id: string;
+        ip?: string | null;
+        userAgent?: string | null;
         createdAt?: string | null;
         expiresAt: string;
       }[]
@@ -363,6 +367,8 @@ export interface PublicUser {
   sessions?:
     | {
         id: string;
+        ip?: string | null;
+        userAgent?: string | null;
         createdAt?: string | null;
         expiresAt: string;
       }[]
@@ -562,6 +568,8 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         id?: T;
+        ip?: T;
+        userAgent?: T;
         createdAt?: T;
         expiresAt?: T;
       };
@@ -584,6 +592,8 @@ export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
     | T
     | {
         id?: T;
+        ip?: T;
+        userAgent?: T;
         createdAt?: T;
         expiresAt?: T;
       };
@@ -628,6 +638,8 @@ export interface PublicUsersSelect<T extends boolean = true> {
     | T
     | {
         id?: T;
+        ip?: T;
+        userAgent?: T;
         createdAt?: T;
         expiresAt?: T;
       };
@@ -695,6 +707,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
