@@ -32,8 +32,8 @@ export const RichTextPlugin: PluginComponent<DebugViewsJSXConverterFeatureProps>
         data={editorState}
         nodeMap={
           clientProps?.type === 'default'
-            ? lexicalViews['default']
-            : lexicalFrontendViews['frontend']
+            ? lexicalViews['default']?.nodes
+            : lexicalFrontendViews['frontend']?.nodes
         }
       />
     </div>

@@ -7,24 +7,15 @@ import { clearEditorNodeViews, registerEditorNodeViews } from '../../nodes/index
 
 export function NodeViewOverridePlugin(): null {
   const [editor] = useLexicalComposerContext()
-  const { currentView, views } = useRichTextView()
+  const { currentView } = useRichTextView()
 
   useEffect(() => {
-    if (!views) {
-      return
-    }
-
-    if (currentView === 'default') {
-      if (views.default) {
-        registerEditorNodeViews(editor, views.default)
-      } else {
-        clearEditorNodeViews(editor)
-      }
-    } else if (views[currentView]) {
+    if (currentView.nodes) {
+      registerEditorNodeViews(editor, currentView.nodes)
+    } else {
       clearEditorNodeViews(editor)
-      registerEditorNodeViews(editor, views[currentView])
     }
-  }, [editor, views, currentView])
+  }, [editor, currentView])
 
   return null
 }

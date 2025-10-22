@@ -1,5 +1,6 @@
 import type {
   EditorConfig,
+  EditorThemeClasses,
   LexicalEditor,
   EditorConfig as LexicalEditorConfig,
   LexicalNode,
@@ -221,7 +222,17 @@ export type LexicalEditorNodeMap<
  * @internal
  */
 export type LexicalEditorViewMap = {
-  [viewKey: string]: LexicalEditorNodeMap
+  [viewKey: string]: {
+    /**
+     * Node overrides for this view. Defines how each node type should be rendered.
+     */
+    nodes: LexicalEditorNodeMap
+    /**
+     * Optional custom editor theme for this view. Only applies in the Lexical editor (not JSX converter).
+     * If not provided, the default editor theme will be used.
+     */
+    theme?: EditorThemeClasses
+  }
 }
 
 /**
