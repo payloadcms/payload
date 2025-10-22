@@ -1,4 +1,4 @@
-import type { CreateVersionArgs, JsonObject, TypeWithVersion } from 'payload'
+import type { CreateVersionArgs, Data, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
@@ -9,7 +9,7 @@ import type { DrizzleAdapter } from './types.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function createVersion<T extends JsonObject = JsonObject>(
+export async function createVersion<T extends Data = Data>(
   this: DrizzleAdapter,
   {
     autosave,

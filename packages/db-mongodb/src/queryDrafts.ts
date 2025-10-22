@@ -25,7 +25,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     req,
-    returnAsDocuments = true,
     select,
     sort: sortArg,
     where = {},
@@ -178,12 +177,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     operation: 'read',
   })
 
-  if (returnAsDocuments !== false) {
-    for (let i = 0; i < result.docs.length; i++) {
-      const id = result.docs[i].parent
-      result.docs[i] = result.docs[i].version ?? {}
-      result.docs[i].id = id
-    }
+  for (let i = 0; i < result.docs.length; i++) {
+    const id = result.docs[i].parent
+    result.docs[i] = result.docs[i].version ?? {}
+    result.docs[i].id = id
   }
 
   return result

@@ -13,24 +13,16 @@ type Args = {
   published?: boolean
   query: FindOneArgs
   req?: PayloadRequest
-  returnAsDocument?: boolean
 }
 
-export async function getLatestCollectionVersion<T extends TypeWithID = any>(
-  args: { returnAsDocument: false } & Args,
-): Promise<T | TypeWithVersion<T> | undefined>
-export async function getLatestCollectionVersion<T extends TypeWithID = any>(
-  args: { returnAsDocument?: true } & Args,
-): Promise<T | undefined>
-export async function getLatestCollectionVersion<T extends TypeWithID = any>({
+export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   config,
   payload,
   published,
   query,
   req,
-  returnAsDocument = true,
-}: Args): Promise<T | TypeWithVersion<T> | undefined> {
+}: Args): Promise<T | undefined> => {
   let latestVersion!: TypeWithVersion<T>
 
   const whereQuery = published
@@ -59,10 +51,7 @@ export async function getLatestCollectionVersion<T extends TypeWithID = any>({
     return undefined
   }
 
-  if (returnAsDocument) {
-    latestVersion.version.id = id
-    return latestVersion.version
-  }
+  latestVersion.version.id = id
 
-  return latestVersion
+  return latestVersion.version
 }

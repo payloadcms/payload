@@ -28,7 +28,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
-import { saveVersionV4 } from '../../versions/saveVersionV4.js'
+import { saveVersion } from '../../versions/saveVersion.js'
 
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
@@ -122,7 +122,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const latestVersionGlobal = await getLatestGlobalVersion({
+    const globalVersionResult = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
       locale: locale!,
@@ -130,11 +130,11 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = latestVersionGlobal || {}
+    const { global, globalExists } = globalVersionResult || {}
 
     let globalJSON: JsonObject = {}
 
-    if (latestVersionGlobal && latestVersionGlobal.global) {
+    if (globalVersionResult && globalVersionResult.global) {
       globalJSON = deepCopyObjectSimple(global)
 
       if (globalJSON._id) {
@@ -299,24 +299,21 @@ export const updateOperation = async <
     // /////////////////////////////////////
     if (globalConfig.versions) {
       const { globalType } = result
-      const versionResult = await saveVersionV4({
+      result = await saveVersion({
         autosave,
+        docWithLocales: result,
+        draft: isSavingDraft,
         global: globalConfig,
-        isSavingDraft,
-        latestVersion: {
-          ...latestVersionGlobal.global,
-          version: result,
-        },
         operation: 'update',
         payload,
         publishSpecificLocale,
         req,
         select,
-        snapshotToSave,
+        snapshot: snapshotToSave,
       })
 
       result = {
-        ...(versionResult!.snapshotVersionDoc?.version || versionResult!.versionDoc.version),
+        ...result,
         globalType,
       }
     }

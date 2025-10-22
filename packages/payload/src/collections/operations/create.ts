@@ -1,6 +1,5 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -24,6 +23,7 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { type CollectionSlug, type JsonObject, saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
@@ -32,7 +32,6 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { saveVersionV4 } from '../../versions/saveVersionV4.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -284,20 +283,15 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
-      await saveVersionV4<DataFromCollectionSlug<TSlug>>({
+      await saveVersion({
         id: result.id,
         autosave,
         collection: collectionConfig,
-        isSavingDraft,
-        latestVersion: {
-          version: result,
-        },
+        docWithLocales: result,
         operation: 'create',
         payload,
         publishSpecificLocale,
         req,
-        // publishSpecificLocales,
-        // unpublishSpecificLocales,
       })
     }
 

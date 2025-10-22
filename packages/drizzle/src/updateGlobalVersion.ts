@@ -1,9 +1,4 @@
-import type {
-  JsonObject,
-  SanitizedGlobalConfig,
-  TypeWithVersion,
-  UpdateGlobalVersionArgs,
-} from 'payload'
+import type { Data, SanitizedGlobalConfig, TypeWithVersion, UpdateGlobalVersionArgs } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -14,7 +9,7 @@ import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
+export async function updateGlobalVersion<T extends Data = Data>(
   this: DrizzleAdapter,
   {
     id,

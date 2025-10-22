@@ -18,7 +18,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
-import { saveVersionV4 } from '../../versions/saveVersionV4.js'
+import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -97,7 +97,7 @@ export const restoreVersionOperation = async <
       throw new NotFound(req.t)
     }
 
-    const { parent: parentDocID } = rawVersionToRestore
+    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersionToRestore
 
     // /////////////////////////////////////
     // Access
@@ -137,9 +137,9 @@ export const restoreVersionOperation = async <
     }
 
     // /////////////////////////////////////
-    // get latestVersion
+    // fetch previousDoc
     // /////////////////////////////////////
-    const latestVersion = await getLatestCollectionVersion({
+    const prevDocWithLocales = await getLatestCollectionVersion({
       id: parentDocID,
       config: collectionConfig,
       payload,
@@ -152,7 +152,7 @@ export const restoreVersionOperation = async <
       collection: collectionConfig,
       context: req.context,
       depth: 0,
-      doc: deepCopyObjectSimple(latestVersion),
+      doc: deepCopyObjectSimple(prevDocWithLocales),
       draft: draftArg,
       fallbackLocale: null,
       global: null,
@@ -163,7 +163,7 @@ export const restoreVersionOperation = async <
     })
 
     // version data with hoisted localized data
-    const versionToRestore = await afterRead({
+    const prevVersionDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: 0,
@@ -185,7 +185,7 @@ export const restoreVersionOperation = async <
       id: parentDocID,
       collection: collectionConfig,
       context: req.context,
-      data: deepCopyObjectSimple(versionToRestore),
+      data: deepCopyObjectSimple(prevVersionDoc),
       doc: originalDoc,
       global: null,
       operation: 'update',
@@ -239,7 +239,7 @@ export const restoreVersionOperation = async <
       context: req.context,
       data: { ...data, id: parentDocID },
       doc: originalDoc,
-      docWithLocales: rawVersionToRestore.version,
+      docWithLocales: versionToRestoreWithLocales,
       global: null,
       operation: 'update',
       overrideAccess,
@@ -274,20 +274,17 @@ export const restoreVersionOperation = async <
     // Save restored doc as a new version
     // /////////////////////////////////////
 
-    const versionResult = await saveVersionV4({
+    result = await saveVersion({
       id: parentDocID,
       autosave: false,
       collection: collectionConfig,
-      isSavingDraft: draftArg,
-      latestVersion: {
-        version: result,
-      },
+      docWithLocales: result,
+      draft: draftArg,
       operation: 'restoreVersion',
       payload,
       req,
+      select,
     })
-
-    result = versionResult!.versionDoc.version || result
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -337,7 +334,7 @@ export const restoreVersionOperation = async <
       doc: result,
       global: null,
       operation: 'update',
-      previousDoc: latestVersion,
+      previousDoc: prevDocWithLocales,
       req,
     })
 
@@ -354,7 +351,7 @@ export const restoreVersionOperation = async <
             data: result,
             doc: result,
             operation: 'update',
-            previousDoc: latestVersion,
+            previousDoc: prevDocWithLocales,
             req,
           })) || result
       }

@@ -157,7 +157,7 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    const latestVersionDoc = await getLatestCollectionVersion<
+    const docWithLocales = await getLatestCollectionVersion<
       RequiredDataFromCollectionSlug<TSlug> & TypeWithID
     >({
       id,
@@ -165,16 +165,15 @@ export const updateByIDOperation = async <
       payload,
       query: findOneArgs,
       req,
-      returnAsDocument: false,
     })
 
-    if (!latestVersionDoc && !hasWherePolicy) {
+    if (!docWithLocales && !hasWherePolicy) {
       throw new NotFound(req.t)
     }
-    if (!latestVersionDoc && hasWherePolicy) {
+    if (!docWithLocales && hasWherePolicy) {
       throw new Forbidden(req.t)
     }
-    if (!latestVersionDoc) {
+    if (!docWithLocales) {
       throw new NotFound(req.t)
     }
 
@@ -210,10 +209,10 @@ export const updateByIDOperation = async <
       config,
       data: deepCopyObjectSimple(newFileData),
       depth: depth!,
+      docWithLocales,
       draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
-      latestVersionDoc,
       locale: locale!,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,

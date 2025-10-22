@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, GlobalSlug, Job } from '../index.js'
+import type { CollectionSlug, Data, GlobalSlug, Job } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -203,7 +203,6 @@ export type QueryDraftsArgs = {
   page?: number
   pagination?: boolean
   req?: Partial<PayloadRequest>
-  returnAsDocuments?: boolean
   select?: SelectType
   sort?: Sort
   where?: Where
@@ -296,7 +295,7 @@ export type FindGlobalArgs = {
   where?: Where
 }
 
-export type UpdateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
+export type UpdateGlobalVersionArgs<T extends Data = Data> = {
   global: GlobalSlug
   locale?: string
   /**
@@ -395,14 +394,13 @@ export type DeleteVersionsArgs = {
   where: Where
 }
 
-export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
+export type CreateVersionArgs<T extends Data = Data> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
-  // publishedLocales?: string[]
   req?: Partial<PayloadRequest>
   /**
    * If true, returns the updated documents
@@ -411,22 +409,24 @@ export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
    */
   returning?: boolean
   select?: SelectType
+  /**
+   * If provided, the snapshot will be created
+   * after a version is created (not during autosave)
+   */
   snapshot?: true
-  // unpublishedLocales?: string[]
   updatedAt: string
   versionData: T
 }
 
-export type CreateVersion = <T extends JsonObject = JsonObject>(
+export type CreateVersion = <T extends Data = Data>(
   args: CreateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
+export type CreateGlobalVersionArgs<T extends Data = Data> = {
   autosave: boolean
   createdAt: string
   globalSlug: GlobalSlug
   publishedLocale?: string
-  // publishedLocales?: string[]
   req?: Partial<PayloadRequest>
   /**
    * If true, returns the updated documents
@@ -435,19 +435,22 @@ export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
    */
   returning?: boolean
   select?: SelectType
+  /**
+   * If provided, the snapshot will be created
+   * after a version is created (not during autosave)
+   */
   snapshot?: true
-  // unpublishedLocales?: string[]
   updatedAt: string
   versionData: T
 }
 
-export type CreateGlobalVersion = <T extends JsonObject = JsonObject>(
+export type CreateGlobalVersion = <T extends Data = Data>(
   args: CreateGlobalVersionArgs<T>,
 ) => Promise<Omit<TypeWithVersion<T>, 'parent'>>
 
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
-export type UpdateVersionArgs<T extends JsonObject = JsonObject> = {
+export type UpdateVersionArgs<T extends Data = Data> = {
   collection: CollectionSlug
   locale?: string
   /**
@@ -484,7 +487,7 @@ export type UpdateVersionArgs<T extends JsonObject = JsonObject> = {
 /**
  * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
  */
-export type UpdateVersion = <T extends JsonObject = JsonObject>(
+export type UpdateVersion = <T extends Data = Data>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
