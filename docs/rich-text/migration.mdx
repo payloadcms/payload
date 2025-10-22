@@ -10,28 +10,11 @@ keywords: lexical, rich text, editor, headless cms, migrate, migration
 
 While both Slate and Lexical save the editor state in JSON, the structure of the JSON is different.
 
-### Migration via Migration Script (Recommended)
+First, make sure you add the `SlateToLexicalFeature` to every richText field you want to migrate. By default, every time the data is accessed, this feature will convert your data from the slate to lexical format on-the-fly through an `afterRead` hook. If the data is already in lexical format, it will just pass it through.
 
-Just import the `migrateSlateToLexical` function we provide, pass it the `payload` object and run it. Depending on the amount of collections, this might take a while.
+This means you can use this feature to "preview" the migration result in the Admin Panel, without having to run the migration script. Keep in mind that saving the document from the Admin Panel will override the slate data with the lexical data in the database, so don't do that if you did not verify the migration result.
 
-IMPORTANT: This will overwrite all slate data. We recommend doing the following first:
-
-1. Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
-2. Make every richText field a lexical editor. This script will only convert lexical richText fields with old Slate data.
-3. Add the SlateToLexicalFeature (as seen below) first, and test it out by loading up the Admin Panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The SlateToLexicalFeature is where the converters are stored. Only fields with this feature added will be migrated.
-4. If this works as expected, add the `disableHooks: true` prop everywhere you're initializing `SlateToLexicalFeature`. Example: `SlateToLexicalFeature({ disableHooks: true })`. Once you did that, you're ready to run the migration script.
-
-```ts
-import { migrateSlateToLexical } from '@payloadcms/richtext-lexical/migrate'
-
-await migrateSlateToLexical({ payload })
-```
-
-### Migration via SlateToLexicalFeature
-
-One way to handle this is to just give your lexical editor the ability to read the slate JSON.
-
-Simply add the `SlateToLexicalFeature` to your editor:
+**Example:**
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -56,14 +39,31 @@ const Pages: CollectionConfig = {
 }
 ```
 
-and done! Now, every time this lexical editor is initialized, it converts the slate date to lexical on-the-fly. If the data is already in lexical format, it will just pass it through.
+Each richText editor will have their own `SlateToLexicalFeature` instance, because each richText field may need different converters. For example, you might have a richText field that contains a custom Slate node, and you need to create a custom converter for it.
 
-This is by far the easiest way to migrate from Slate to Lexical, although it does come with a few caveats:
+### Running the Migration Script
 
-- There is a performance hit when initializing the lexical editor
-- The editor will still output the Slate data in the output JSON, as the on-the-fly converter only runs for the Admin Panel
+Once you've added the `SlateToLexicalFeature` to every richText field you want to migrate and are happy with the result, you can run the migration script.
 
-The easy way to solve this: Edit the richText field and save the document! This overrides the slate data with the lexical data, and the next time the document is loaded, the lexical data will be used. This solves both the performance and the output issue for that specific document. This, however, is a slow and gradual migration process, thus you will have to support both API formats. Especially for a large number of documents, we recommend running the migration script, as explained above.
+It's recommended to run the migration script instead of just using the `SlateToLexicalFeature` for the following reasons:
+
+- There is a performance hit when using the `SlateToLexicalFeature` as it has to convert the data on-the-fly every time the data is accessed.
+- You will still receive Slate data when using direct DB operations (e.g. `payload.db.find` instead of `payload.find`).
+
+Just import the `migrateSlateToLexical` function we provide, pass it the `payload` object and run it. Depending on the amount of collections, this might take a while.
+
+**IMPORTANT: This will overwrite all slate data. We recommend doing the following first:**
+
+1. Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
+2. Convert every richText field to a lexical editor. This script will only convert lexical richText fields with old Slate data.
+3. Add the `SlateToLexicalFeature` (as explained aboce) first, and test it out by loading up the Admin Panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The `SlateToLexicalFeature` is where the converters are stored - the migration script will access those converters through that feature. Thus, only fields with this feature added will be migrated.
+4. If this works as expected, add the `disableHooks: true` prop everywhere you're initializing `SlateToLexicalFeature`. Example: `SlateToLexicalFeature({ disableHooks: true })`. Once you did that, you're ready to run the migration script.
+
+```ts
+import { migrateSlateToLexical } from '@payloadcms/richtext-lexical/migrate'
+
+await migrateSlateToLexical({ payload })
+```
 
 ### Converting custom Slate nodes
 
@@ -94,9 +94,7 @@ export const SlateUploadConverter: SlateNodeConverter = {
 
 It's pretty simple: You get a Slate node as input, and you return the lexical node. The `nodeTypes` array is used to determine which Slate nodes this converter can handle.
 
-When using a migration script, you can add your custom converters to the `converters` property of the `convertSlateToLexical` props, as seen in the example above.
-
-When using the `SlateToLexicalFeature`, you can add your custom converters to the `converters` property of the `SlateToLexicalFeature` props:
+You can add your custom converters to the `converters` property of the `SlateToLexicalFeature` props:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -128,11 +126,12 @@ const Pages: CollectionConfig = {
 }
 ```
 
-## Migrating from payload-plugin-lexical
+<Bannner type="info">
+  The migration script automatically traverses all collections and fields, pulls in the converters from the `SlateToLexicalFeature` and converts the data by calling `convertSlateToLexical`.
 
-Migrating from [payload-plugin-lexical](https://github.com/AlessioGr/payload-plugin-lexical) works similar to migrating from Slate.
+If you're manually calling `convertSlateToLexical`, you can pass in the converters to the `converters` property.
 
-Instead of a `SlateToLexicalFeature` there is a `LexicalPluginToLexicalFeature` you can use. And instead of `convertSlateToLexical` you can use `convertLexicalPluginToLexical`.
+</Banner>
 
 ## Migrating lexical data from old version to new version
 
@@ -149,3 +148,9 @@ import { upgradeLexicalData } from '@payloadcms/richtext-lexical'
 
 await upgradeLexicalData({ payload })
 ```
+
+## Migrating from payload-plugin-lexical
+
+Migrating from [payload-plugin-lexical](https://github.com/AlessioGr/payload-plugin-lexical) works similar to migrating from Slate.
+
+Instead of a `SlateToLexicalFeature` there is a `LexicalPluginToLexicalFeature` you can use. And instead of `convertSlateToLexical` you can use `convertLexicalPluginToLexical`.
