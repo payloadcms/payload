@@ -8,8 +8,8 @@ import { DraggableSortable } from '@payloadcms/ui/elements/DraggableSortable'
 import { DraggableSortableItem } from '@payloadcms/ui/elements/DraggableSortable/DraggableSortableItem'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
-import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
-import React, { useId } from 'react'
+import { useStepNav } from '@payloadcms/ui/elements/StepNav'
+import React, { useEffect, useId } from 'react'
 
 import { useDashboardLayout } from './useDashboardLayout.js'
 
@@ -49,25 +49,32 @@ export function GridLayoutDashboardClient({
 
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
+  const { setStepNav } = useStepNav()
+
+  // Set step nav directly with minimal dependencies to avoid infinite loops
+  useEffect(() => {
+    setStepNav([
+      {
+        label: (
+          <DashboardBreadcrumbDropdown
+            isEditing={isEditing}
+            onCancel={cancel}
+            onEditClick={() => setIsEditing(true)}
+            onResetLayout={resetLayout}
+            onSaveChanges={saveLayout}
+            widgetsDrawerSlug={drawerSlug}
+          />
+        ),
+      },
+    ])
+    // TODO: useEffectEvent
+    // Only depend on isEditing and drawerSlug - the functions are stable enough
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, drawerSlug])
 
   return (
     <div>
-      <SetStepNav
-        nav={[
-          {
-            label: (
-              <DashboardBreadcrumbDropdown
-                isEditing={isEditing}
-                onCancel={cancel}
-                onEditClick={() => setIsEditing(true)}
-                onResetLayout={resetLayout}
-                onSaveChanges={saveLayout}
-                widgetsDrawerSlug={drawerSlug}
-              />
-            ),
-          },
-        ]}
-      />
       <DraggableSortable
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         ids={currentLayout.map((w) => w.item.i)}

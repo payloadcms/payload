@@ -94,6 +94,13 @@ export const DraggableSortable: React.FC<Props> = (props) => {
 
   return (
     <DndContext
+      autoScroll={{
+        enabled: true,
+        threshold: {
+          x: 0, // No horizontal scroll
+          y: 0.2, // Allow vertical scroll at 20% from edge
+        },
+      }}
       collisionDetection={closestCenter}
       id={id}
       onDragEnd={handleDragEnd}
