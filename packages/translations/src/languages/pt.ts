@@ -418,7 +418,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} criado com sucesso.',
     successfullyDuplicated: '{{label}} duplicado com sucesso.',
     successfullyReindexed:
-      'Reindexação concluída com sucesso de {{count}} de {{total}} documentos das coleções {{collections}}.',
+      'Reindexação bem‑sucedida de {{count}} de {{total}} documentos de {{collections}}, e {{skips}} rascunhos foram ignorados.',
     takeOver: 'Assumir',
     thisLanguage: 'Português',
     time: 'Tempo',

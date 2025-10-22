@@ -414,7 +414,7 @@ export const csTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} úspěšně vytvořeno.',
     successfullyDuplicated: '{{label}} úspěšně duplikováno.',
     successfullyReindexed:
-      'Úspěšně přeindexováno {{count}} z {{total}} dokumentů z {{collections}} kolekcí.',
+      'Úspěšně reindexováno {{count}} z {{total}} dokumentů z {{collections}} a přeskočeno {{skips}} konceptů.',
     takeOver: 'Převzít',
     thisLanguage: 'Čeština',
     time: 'Čas',

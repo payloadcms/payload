@@ -408,7 +408,7 @@ export const thTranslations: DefaultTranslationsObject = {
     successfullyCreated: 'สร้าง {{label}} สำเร็จ',
     successfullyDuplicated: 'สำเนา {{label}} สำเร็จ',
     successfullyReindexed:
-      'จัดทำดัชนีใหม่สำเร็จ {{count}} จาก {{total}} เอกสารจากคอลเลกชัน {{collections}}',
+      'ทำการรีอินเด็กซ์เอกสารจำนวน {{count}} จาก {{total}} เอกสารจาก {{collections}} สำเร็จ และข้ามร่างเอกสาร {{skips}} รายการ',
     takeOver: 'เข้ายึด',
     thisLanguage: 'ไทย',
     time: 'เวลา',

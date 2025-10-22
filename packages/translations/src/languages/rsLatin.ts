@@ -417,7 +417,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} uspešno kreirano.',
     successfullyDuplicated: '{{label}} uspešno duplicirano.',
     successfullyReindexed:
-      'Uspešno je reindeksirano {{count}} od {{total}} dokumenata iz {{collections}} kolekcija.',
+      'Uspešno je reindeksirano {{count}} od ukupno {{total}} dokumenata iz {{collections}}, i {{skips}} nacrta je preskočeno.',
     takeOver: 'Preuzeti',
     thisLanguage: 'Srpski (latinica)',
     time: 'Vreme',

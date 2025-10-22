@@ -420,7 +420,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} sikeresen létrehozva.',
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     successfullyReindexed:
-      'Sikeresen újraindexelve {{total}} dokumentumból {{count}} a(z) {{collections}} gyűjteményekből.',
+      'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
     takeOver: 'Átvétel',
     thisLanguage: 'Magyar',
     time: 'Idő',

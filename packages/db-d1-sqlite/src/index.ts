@@ -102,6 +102,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
         json: true,
       },
       fieldConstraints: {},
+      foreignKeys: new Set(),
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',

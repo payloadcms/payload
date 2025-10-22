@@ -73,6 +73,18 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
   RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
+/**
+ * Helper type for draft data - makes all fields optional except auto-generated ones
+ * When creating a draft, required fields don't need to be provided as validation is skipped
+ */
+export type DraftDataFromCollection<TData extends JsonObject> = Partial<
+  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+>
+
+export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
+  DataFromCollectionSlug<TSlug>
+>
+
 export type HookOperationType =
   | 'autosave'
   | 'count'

@@ -74,6 +74,11 @@ export const buildDrizzleTable = ({
         break
       }
 
+      case 'numeric': {
+        columns[key] = numeric(column.name, { mode: 'number' })
+        break
+      }
+
       case 'sparsevec': {
         const builder = sparsevec(column.name, { dimensions: column.dimensions })
 

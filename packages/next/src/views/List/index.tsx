@@ -236,6 +236,7 @@ export const renderListView = async (
       collectionSlug,
       columns: collectionPreferences?.columns,
       i18n,
+      permissions,
     })
 
     const select = collectionConfig.admin.enableListViewSelectAPI
@@ -259,6 +260,7 @@ export const renderListView = async (
           customCellProps,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
           query,
           req,
           select,
@@ -293,6 +295,7 @@ export const renderListView = async (
           data,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
           i18n: req.i18n,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
