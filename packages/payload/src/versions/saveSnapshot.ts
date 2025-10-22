@@ -6,10 +6,10 @@ import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 import { deepCopyObjectSimple } from '../index.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 
-type Args = {
+type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
   collection?: SanitizedCollectionConfig
-  data?: JsonObject
+  data?: T
   global?: SanitizedGlobalConfig
   id?: number | string
   payload: Payload
@@ -28,8 +28,10 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
   publishSpecificLocale,
   req,
   select,
-}: Args): Promise<Omit<TypeWithVersion<T>, 'parent'> | TypeWithVersion<T> | undefined> => {
-  const docData: JsonObject = deepCopyObjectSimple(data || {})
+}: Args<T>): Promise<Omit<TypeWithVersion<T>, 'parent'> | TypeWithVersion<T> | undefined> => {
+  const docData: {
+    _status?: 'draft'
+  } & T = deepCopyObjectSimple<T>(data || ({} as T))
   docData._status = 'draft'
 
   if (docData._id) {
@@ -46,7 +48,7 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
     returning: false,
     select: getQueryDraftsSelect({ select }),
     updatedAt: snapshotDate,
-    versionData: docData as T,
+    versionData: docData,
   }
 
   if (collection && id) {
