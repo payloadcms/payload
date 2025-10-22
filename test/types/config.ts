@@ -9,6 +9,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
+  localization: { defaultLocale: 'en', locales: ['en', 'es'] },
   collections: [
     {
       slug: 'posts',
@@ -92,6 +93,36 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'pages-categories',
           name: 'category',
+        },
+      ],
+    },
+    {
+      slug: 'pages-localized',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          localized: true,
+        },
+        {
+          type: 'number',
+          name: 'number',
+          localized: true,
+        },
+        {
+          type: 'text',
+          name: 'textNonLocalized',
+        },
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+              localized: true,
+            },
+          ],
         },
       ],
     },

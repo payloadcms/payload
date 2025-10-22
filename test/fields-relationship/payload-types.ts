@@ -87,6 +87,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {};
   collectionsSelect: {
     'fields-relationship': FieldsRelationshipSelect<false> | FieldsRelationshipSelect<true>;
     'relation-filter-false': RelationFilterFalseSelect<false> | RelationFilterFalseSelect<true>;
@@ -111,6 +112,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en';
   user: User & {
@@ -181,7 +183,16 @@ export interface FieldsRelationship {
   /**
    * This will filter the relationship options if the filter field in this document is set to "Include me"
    */
-  nestedRelationshipFilteredByField?: (string | null) | FieldsRelationship;
+  filteredByFieldInCollapsible?: (string | null) | FieldsRelationship;
+  array?:
+    | {
+        /**
+         * This will filter the relationship options if the filter field in this document is set to "Include me"
+         */
+        filteredByFieldInArray?: (string | null) | FieldsRelationship;
+        id?: string | null;
+      }[]
+    | null;
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (
@@ -518,7 +529,13 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipWithTitle?: T;
   relationshipFilteredByID?: T;
   relationshipFilteredByField?: T;
-  nestedRelationshipFilteredByField?: T;
+  filteredByFieldInCollapsible?: T;
+  array?:
+    | T
+    | {
+        filteredByFieldInArray?: T;
+        id?: T;
+      };
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
   filter?: T;

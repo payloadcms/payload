@@ -78,6 +78,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    pages: PageLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -93,6 +96,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -499,6 +503,106 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_localized".
+ */
+export interface PageLocalized {
+  id: string;
+  title: string;
+  localized?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  custom?: string | null;
+  customRelationship?: (string | null) | User;
+  group?: {
+    value?: string | null;
+    ignore?: string | null;
+    array?:
+      | {
+          field1?: string | null;
+          field2?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    custom?: string | null;
+  };
+  tabToCSV?: string | null;
+  namedTab?: {
+    tabToCSV?: string | null;
+  };
+  array?:
+    | {
+        field1?: string | null;
+        field2?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | (
+        | {
+            title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+      )[]
+    | null;
+  author?: (string | null) | User;
+  virtualRelationship?: string | null;
+  virtual?: string | null;
+  hasManyNumber?: number[] | null;
+  relationship?: (string | null) | User;
+  excerpt?: string | null;
+  hasOnePolymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null);
+  hasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
+  textFieldInCollapsible?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

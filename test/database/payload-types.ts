@@ -95,31 +95,10 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsLocalized: {
-    noTimeStamps: NoTimeStampLocalized;
-    categories: CategoryLocalized;
-    simple: SimpleLocalized;
-    'categories-custom-id': CategoriesCustomIdLocalized;
     posts: PostLocalized;
-    'error-on-unnamed-fields': ErrorOnUnnamedFieldLocalized;
-    'default-values': DefaultValueLocalized;
-    'relation-a': RelationALocalized;
-    'relation-b': RelationBLocalized;
     'pg-migrations': PgMigrationLocalized;
     'custom-schema': CustomSchemaLocalized;
-    places: PlaceLocalized;
-    'virtual-relations': VirtualRelationLocalized;
-    'fields-persistance': FieldsPersistanceLocalized;
-    'custom-ids': CustomIdLocalized;
-    'fake-custom-ids': FakeCustomIdLocalized;
-    'relationships-migration': RelationshipsMigrationLocalized;
-    'compound-indexes': CompoundIndexLocalized;
-    aliases: AliasLocalized;
     'blocks-docs': BlocksDocLocalized;
-    'unique-fields': UniqueFieldLocalized;
-    users: UserLocalized;
-    'payload-locked-documents': PayloadLockedDocumentLocalized;
-    'payload-preferences': PayloadPreferenceLocalized;
-    'payload-migrations': PayloadMigrationLocalized;
   };
   collectionsSelect: {
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
@@ -158,13 +137,7 @@ export interface Config {
     'global-3': Global3;
     'virtual-relation-global': VirtualRelationGlobal;
   };
-  globalsLocalized: {
-    header: HeaderLocalized;
-    global: GlobalLocalized;
-    'global-2': Global2Localized;
-    'global-3': Global3Localized;
-    'virtual-relation-global': VirtualRelationGlobalLocalized;
-  };
+  globalsLocalized: {};
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
@@ -873,59 +846,25 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "noTimeStamps_localized".
- */
-export interface NoTimeStampLocalized {
-  id: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_localized".
- */
-export interface CategoryLocalized {
-  id: string;
-  title?: string | null;
-  hideout?: {
-    camera1?: {
-      time1Image?: (string | null) | Post;
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple_localized".
- */
-export interface SimpleLocalized {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories-custom-id_localized".
- */
-export interface CategoriesCustomIdLocalized {
-  id: number;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_localized".
  */
 export interface PostLocalized {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categoryID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   categoryTitle?: string | null;
+  categorySimpleText?: string | null;
   categories?: (string | Category)[] | null;
+  categoriesCustomID?: (number | CategoriesCustomId)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
     value: string | Category;
@@ -1082,96 +1021,6 @@ export interface PostLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "error-on-unnamed-fields_localized".
- */
-export interface ErrorOnUnnamedFieldLocalized {
-  id: string;
-  groupWithinUnnamedTab: {
-    text: string;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-values_localized".
- */
-export interface DefaultValueLocalized {
-  id: string;
-  title?: string | null;
-  defaultValue?: string | null;
-  array?:
-    | {
-        defaultValue?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  group?: {
-    defaultValue?: string | null;
-  };
-  select?: ('option0' | 'option1' | 'default') | null;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  point?: [number, number] | null;
-  escape?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-a_localized".
- */
-export interface RelationALocalized {
-  id: string;
-  title?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-b_localized".
- */
-export interface RelationBLocalized {
-  id: string;
-  title?: string | null;
-  relationship?: (string | null) | RelationA;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pg-migrations_localized".
  */
 export interface PgMigrationLocalized {
@@ -1255,151 +1104,6 @@ export interface CustomSchemaLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "places_localized".
- */
-export interface PlaceLocalized {
-  id: string;
-  country?: string | null;
-  city?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-relations_localized".
- */
-export interface VirtualRelationLocalized {
-  id: string;
-  postTitle?: string | null;
-  postsTitles?: string[] | null;
-  postCategoriesTitles?: string[] | null;
-  postTitleHidden?: string | null;
-  postCategoryTitle?: string | null;
-  postCategoryID?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  postCategoryCustomID?: number | null;
-  postID?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  postLocalized?: string | null;
-  post?: (string | null) | Post;
-  posts?: (string | Post)[] | null;
-  customID?: (string | null) | CustomId;
-  customIDValue?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fields-persistance_localized".
- */
-export interface FieldsPersistanceLocalized {
-  id: string;
-  text?: string | null;
-  textHooked?: string | null;
-  array?:
-    | {
-        id?: string | null;
-      }[]
-    | null;
-  textWithinRow?: string | null;
-  textWithinCollapsible?: string | null;
-  textWithinTabs?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ids_localized".
- */
-export interface CustomIdLocalized {
-  id: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fake-custom-ids_localized".
- */
-export interface FakeCustomIdLocalized {
-  id: string;
-  title?: string | null;
-  group?: {
-    id?: string | null;
-  };
-  myTab?: {
-    id?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships-migration_localized".
- */
-export interface RelationshipsMigrationLocalized {
-  id: string;
-  relationship?: (string | null) | DefaultValue;
-  relationship_2?: {
-    relationTo: 'default-values';
-    value: string | DefaultValue;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "compound-indexes_localized".
- */
-export interface CompoundIndexLocalized {
-  id: string;
-  one?: string | null;
-  two?: string | null;
-  three?: string | null;
-  group?: {
-    four?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "aliases_localized".
- */
-export interface AliasLocalized {
-  id: string;
-  thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
-    | {
-        nestedArray?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-docs_localized".
  */
 export interface BlocksDocLocalized {
@@ -1430,177 +1134,6 @@ export interface BlocksDocLocalized {
         blockType: 'cta';
       }[]
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "unique-fields_localized".
- */
-export interface UniqueFieldLocalized {
-  id: string;
-  slugField?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_localized".
- */
-export interface UserLocalized {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_localized".
- */
-export interface PayloadLockedDocumentLocalized {
-  id: string;
-  document?:
-    | ({
-        relationTo: 'noTimeStamps';
-        value: string | NoTimeStamp;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | null)
-    | ({
-        relationTo: 'simple';
-        value: string | Simple;
-      } | null)
-    | ({
-        relationTo: 'categories-custom-id';
-        value: number | CategoriesCustomId;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'error-on-unnamed-fields';
-        value: string | ErrorOnUnnamedField;
-      } | null)
-    | ({
-        relationTo: 'default-values';
-        value: string | DefaultValue;
-      } | null)
-    | ({
-        relationTo: 'relation-a';
-        value: string | RelationA;
-      } | null)
-    | ({
-        relationTo: 'relation-b';
-        value: string | RelationB;
-      } | null)
-    | ({
-        relationTo: 'pg-migrations';
-        value: string | PgMigration;
-      } | null)
-    | ({
-        relationTo: 'custom-schema';
-        value: string | CustomSchema;
-      } | null)
-    | ({
-        relationTo: 'places';
-        value: string | Place;
-      } | null)
-    | ({
-        relationTo: 'virtual-relations';
-        value: string | VirtualRelation;
-      } | null)
-    | ({
-        relationTo: 'fields-persistance';
-        value: string | FieldsPersistance;
-      } | null)
-    | ({
-        relationTo: 'custom-ids';
-        value: string | CustomId;
-      } | null)
-    | ({
-        relationTo: 'fake-custom-ids';
-        value: string | FakeCustomId;
-      } | null)
-    | ({
-        relationTo: 'relationships-migration';
-        value: string | RelationshipsMigration;
-      } | null)
-    | ({
-        relationTo: 'compound-indexes';
-        value: string | CompoundIndex;
-      } | null)
-    | ({
-        relationTo: 'aliases';
-        value: string | Alias;
-      } | null)
-    | ({
-        relationTo: 'blocks-docs';
-        value: string | BlocksDoc;
-      } | null)
-    | ({
-        relationTo: 'unique-fields';
-        value: string | UniqueField;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_localized".
- */
-export interface PayloadPreferenceLocalized {
-  id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_localized".
- */
-export interface PayloadMigrationLocalized {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2167,80 +1700,6 @@ export interface Global3 {
  * via the `definition` "virtual-relation-global".
  */
 export interface VirtualRelationGlobal {
-  id: string;
-  postTitle?: string | null;
-  post?: (string | null) | Post;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_localized".
- */
-export interface HeaderLocalized {
-  id: string;
-  itemsLvl1?:
-    | {
-        label?: string | null;
-        itemsLvl2?:
-          | {
-              label?: string | null;
-              itemsLvl3?:
-                | {
-                    label?: string | null;
-                    itemsLvl4?:
-                      | {
-                          label?: string | null;
-                          id?: string | null;
-                        }[]
-                      | null;
-                    id?: string | null;
-                  }[]
-                | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global_localized".
- */
-export interface GlobalLocalized {
-  id: string;
-  text?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-2_localized".
- */
-export interface Global2Localized {
-  id: string;
-  text?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-3_localized".
- */
-export interface Global3Localized {
-  id: string;
-  text?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-relation-global_localized".
- */
-export interface VirtualRelationGlobalLocalized {
   id: string;
   postTitle?: string | null;
   post?: (string | null) | Post;

@@ -64,7 +64,9 @@ import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.j
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
 export type LocalizedDataFromCollectionSlug<TSlug extends CollectionSlug> =
-  TypedLocalizedCollection[TSlug]
+  TSlug extends keyof TypedLocalizedCollection
+    ? TypedLocalizedCollection[TSlug]
+    : DataFromCollectionSlug<TSlug>
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
@@ -78,7 +80,7 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
 
 export type RequiredDataFromCollectionSlug<
   TSlug extends CollectionSlug,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = RequiredDataFromCollection<
   TLocale extends 'all' ? LocalizedDataFromCollectionSlug<TSlug> : DataFromCollectionSlug<TSlug>
 >
@@ -758,7 +760,7 @@ export type Collection = {
 export type BulkOperationResult<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   docs: TransformCollection<TSlug, TSelect, TLocale>[]
   errors: {

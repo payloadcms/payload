@@ -25,7 +25,7 @@ import { updateOperation } from '../update.js'
 export type Options<
   TSlug extends GlobalSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
@@ -101,7 +101,7 @@ export type Options<
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,

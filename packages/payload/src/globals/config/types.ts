@@ -29,6 +29,7 @@ import type {
   RequestContext,
   TypedGlobal,
   TypedGlobalSelect,
+  TypedLocale,
   TypedLocalizedGlobal,
 } from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
@@ -36,10 +37,11 @@ import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../vers
 
 export type DataFromGlobalSlug<
   TSlug extends GlobalSlug,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = TLocale extends 'all' ? LocalizedDataFromGlobalSlug<TSlug> : TypedGlobal[TSlug]
 
-export type LocalizedDataFromGlobalSlug<TSlug extends GlobalSlug> = TypedLocalizedGlobal[TSlug]
+export type LocalizedDataFromGlobalSlug<TSlug extends GlobalSlug> =
+  TSlug extends keyof TypedLocalizedGlobal ? TypedLocalizedGlobal[TSlug] : TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 

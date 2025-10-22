@@ -128,6 +128,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    relation: RelationLocalized;
+    media: MediaLocalized;
+  };
   collectionsSelect: {
     relation: RelationSelect<false> | RelationSelect<true>;
     audio: AudioSelect<false> | AudioSelect<true>;
@@ -190,9 +194,10 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
   user: User & {
@@ -226,14 +231,14 @@ export interface UserAuthOperations {
  * via the `definition` "relation".
  */
 export interface Relation {
-  id: number;
-  image?: (number | null) | Media;
-  versionedImage?: (number | null) | Version;
-  hideFileInputOnCreate?: (number | null) | HideFileInputOnCreate;
+  id: string;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
+  hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
   blocks?:
     | {
-        media: number | Media;
-        relatedMedia?: (number | Media)[] | null;
+        media: string | Media;
+        relatedMedia?: (string | Media)[] | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'localizedMediaBlock';
@@ -248,7 +253,7 @@ export interface Relation {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt?: string | null;
   localized?: string | null;
   updatedAt: string;
@@ -398,7 +403,7 @@ export interface Media {
  * via the `definition` "versions".
  */
 export interface Version {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -418,7 +423,7 @@ export interface Version {
  * via the `definition` "hide-file-input-on-create".
  */
 export interface HideFileInputOnCreate {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -437,8 +442,8 @@ export interface HideFileInputOnCreate {
  * via the `definition` "audio".
  */
 export interface Audio {
-  id: number;
-  audio?: (number | null) | Media;
+  id: string;
+  audio?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -447,7 +452,7 @@ export interface Audio {
  * via the `definition` "gif-resize".
  */
 export interface GifResize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -483,7 +488,7 @@ export interface GifResize {
  * via the `definition` "filename-compound-index".
  */
 export interface FilenameCompoundIndex {
-  id: number;
+  id: string;
   /**
    * Alt text to be used for compound index
    */
@@ -523,7 +528,7 @@ export interface FilenameCompoundIndex {
  * via the `definition` "no-image-sizes".
  */
 export interface NoImageSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -541,7 +546,7 @@ export interface NoImageSize {
  * via the `definition` "object-fit".
  */
 export interface ObjectFit {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -593,7 +598,7 @@ export interface ObjectFit {
  * via the `definition` "with-meta-data".
  */
 export interface WithMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -621,7 +626,7 @@ export interface WithMetaDatum {
  * via the `definition` "without-meta-data".
  */
 export interface WithoutMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -649,7 +654,7 @@ export interface WithoutMetaDatum {
  * via the `definition` "with-only-jpeg-meta-data".
  */
 export interface WithOnlyJpegMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -677,7 +682,7 @@ export interface WithOnlyJpegMetaDatum {
  * via the `definition` "crop-only".
  */
 export interface CropOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -721,7 +726,7 @@ export interface CropOnly {
  * via the `definition` "focal-only".
  */
 export interface FocalOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -765,7 +770,7 @@ export interface FocalOnly {
  * via the `definition` "image-sizes-only".
  */
 export interface ImageSizesOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -801,7 +806,7 @@ export interface ImageSizesOnly {
  * via the `definition` "focal-no-sizes".
  */
 export interface FocalNoSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -819,7 +824,7 @@ export interface FocalNoSize {
  * via the `definition` "allow-list-media".
  */
 export interface AllowListMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -837,7 +842,7 @@ export interface AllowListMedia {
  * via the `definition` "skip-safe-fetch-media".
  */
 export interface SkipSafeFetchMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -855,7 +860,7 @@ export interface SkipSafeFetchMedia {
  * via the `definition` "skip-safe-fetch-header-filter".
  */
 export interface SkipSafeFetchHeaderFilter {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -873,7 +878,7 @@ export interface SkipSafeFetchHeaderFilter {
  * via the `definition` "skip-allow-list-safe-fetch-media".
  */
 export interface SkipAllowListSafeFetchMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -891,7 +896,7 @@ export interface SkipAllowListSafeFetchMedia {
  * via the `definition` "restrict-file-types".
  */
 export interface RestrictFileType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -909,7 +914,7 @@ export interface RestrictFileType {
  * via the `definition` "no-restrict-file-types".
  */
 export interface NoRestrictFileType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -927,7 +932,7 @@ export interface NoRestrictFileType {
  * via the `definition` "no-restrict-file-mime-types".
  */
 export interface NoRestrictFileMimeType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -945,7 +950,7 @@ export interface NoRestrictFileMimeType {
  * via the `definition` "animated-type-media".
  */
 export interface AnimatedTypeMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -997,7 +1002,7 @@ export interface AnimatedTypeMedia {
  * via the `definition` "enlarge".
  */
 export interface Enlarge {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1065,7 +1070,7 @@ export interface Enlarge {
  * via the `definition` "without-enlarge".
  */
 export interface WithoutEnlarge {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1083,7 +1088,7 @@ export interface WithoutEnlarge {
  * via the `definition` "reduce".
  */
 export interface Reduce {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1135,7 +1140,7 @@ export interface Reduce {
  * via the `definition` "media-trim".
  */
 export interface MediaTrim {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1179,7 +1184,7 @@ export interface MediaTrim {
  * via the `definition` "custom-file-name-media".
  */
 export interface CustomFileNameMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1207,7 +1212,7 @@ export interface CustomFileNameMedia {
  * via the `definition` "unstored-media".
  */
 export interface UnstoredMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1225,7 +1230,7 @@ export interface UnstoredMedia {
  * via the `definition` "externally-served-media".
  */
 export interface ExternallyServedMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1243,16 +1248,16 @@ export interface ExternallyServedMedia {
  * via the `definition` "uploads-1".
  */
 export interface Uploads1 {
-  id: number;
-  hasManyUpload?: (number | Uploads2)[] | null;
-  singleUpload?: (number | null) | Uploads2;
-  hasManyThumbnailUpload?: (number | AdminThumbnailSize)[] | null;
-  singleThumbnailUpload?: (number | null) | AdminThumbnailSize;
+  id: string;
+  hasManyUpload?: (string | Uploads2)[] | null;
+  singleUpload?: (string | null) | Uploads2;
+  hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
+  singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
   richText?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -1280,7 +1285,7 @@ export interface Uploads1 {
  * via the `definition` "uploads-2".
  */
 export interface Uploads2 {
-  id: number;
+  id: string;
   prefix: string;
   title?: string | null;
   updatedAt: string;
@@ -1300,7 +1305,7 @@ export interface Uploads2 {
  * via the `definition` "admin-thumbnail-size".
  */
 export interface AdminThumbnailSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1336,7 +1341,7 @@ export interface AdminThumbnailSize {
  * via the `definition` "any-images".
  */
 export interface AnyImage {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1354,7 +1359,7 @@ export interface AnyImage {
  * via the `definition` "admin-thumbnail-function".
  */
 export interface AdminThumbnailFunction {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1372,7 +1377,7 @@ export interface AdminThumbnailFunction {
  * via the `definition` "admin-thumbnail-with-search-queries".
  */
 export interface AdminThumbnailWithSearchQuery {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1390,7 +1395,7 @@ export interface AdminThumbnailWithSearchQuery {
  * via the `definition` "admin-upload-control".
  */
 export interface AdminUploadControl {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1408,7 +1413,7 @@ export interface AdminUploadControl {
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1426,7 +1431,7 @@ export interface OptionalFile {
  * via the `definition` "required-file".
  */
 export interface RequiredFile {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1444,7 +1449,7 @@ export interface RequiredFile {
  * via the `definition` "custom-upload-field".
  */
 export interface CustomUploadField {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1463,7 +1468,7 @@ export interface CustomUploadField {
  * via the `definition` "media-with-relation-preview".
  */
 export interface MediaWithRelationPreview {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1482,7 +1487,7 @@ export interface MediaWithRelationPreview {
  * via the `definition` "media-without-cache-tags".
  */
 export interface MediaWithoutCacheTag {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1501,7 +1506,7 @@ export interface MediaWithoutCacheTag {
  * via the `definition` "media-without-relation-preview".
  */
 export interface MediaWithoutRelationPreview {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1520,13 +1525,13 @@ export interface MediaWithoutRelationPreview {
  * via the `definition` "relation-preview".
  */
 export interface RelationPreview {
-  id: number;
-  imageWithPreview1?: (number | null) | MediaWithRelationPreview;
-  imageWithPreview2?: (number | null) | MediaWithRelationPreview;
-  imageWithoutPreview1?: (number | null) | MediaWithRelationPreview;
-  imageWithoutPreview2?: (number | null) | MediaWithoutRelationPreview;
-  imageWithPreview3?: (number | null) | MediaWithoutRelationPreview;
-  imageWithoutPreview3?: (number | null) | MediaWithoutRelationPreview;
+  id: string;
+  imageWithPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithPreview2?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
+  imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
+  imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
   updatedAt: string;
   createdAt: string;
 }
@@ -1535,11 +1540,11 @@ export interface RelationPreview {
  * via the `definition` "best-fit".
  */
 export interface BestFit {
-  id: number;
-  withAdminThumbnail?: (number | null) | AdminThumbnailFunction;
-  withinRange?: (number | null) | Enlarge;
-  nextSmallestOutOfRange?: (number | null) | FocalOnly;
-  original?: (number | null) | FocalOnly;
+  id: string;
+  withAdminThumbnail?: (string | null) | AdminThumbnailFunction;
+  withinRange?: (string | null) | Enlarge;
+  nextSmallestOutOfRange?: (string | null) | FocalOnly;
+  original?: (string | null) | FocalOnly;
   updatedAt: string;
   createdAt: string;
 }
@@ -1548,10 +1553,10 @@ export interface BestFit {
  * via the `definition` "list-view-preview".
  */
 export interface ListViewPreview {
-  id: number;
+  id: string;
   title?: string | null;
-  imageUpload?: (number | null) | MediaWithRelationPreview;
-  imageRelationship?: (number | null) | MediaWithRelationPreview;
+  imageUpload?: (string | null) | MediaWithRelationPreview;
+  imageRelationship?: (string | null) | MediaWithRelationPreview;
   updatedAt: string;
   createdAt: string;
 }
@@ -1560,7 +1565,7 @@ export interface ListViewPreview {
  * via the `definition` "three-dimensional".
  */
 export interface ThreeDimensional {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1576,7 +1581,7 @@ export interface ThreeDimensional {
  * via the `definition` "constructor-options".
  */
 export interface ConstructorOption {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1594,11 +1599,11 @@ export interface ConstructorOption {
  * via the `definition` "bulk-uploads".
  */
 export interface BulkUpload {
-  id: number;
+  id: string;
   title: string;
   relationship?: {
     relationTo: 'simple-relationship';
-    value: number | SimpleRelationship;
+    value: string | SimpleRelationship;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -1617,7 +1622,7 @@ export interface BulkUpload {
  * via the `definition` "simple-relationship".
  */
 export interface SimpleRelationship {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1627,7 +1632,7 @@ export interface SimpleRelationship {
  * via the `definition` "file-mime-type".
  */
 export interface FileMimeType {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1646,7 +1651,7 @@ export interface FileMimeType {
  * via the `definition` "svg-only".
  */
 export interface SvgOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1664,7 +1669,7 @@ export interface SvgOnly {
  * via the `definition` "media-without-delete-access".
  */
 export interface MediaWithoutDeleteAccess {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1682,7 +1687,7 @@ export interface MediaWithoutDeleteAccess {
  * via the `definition` "media-with-image-size-admin-props".
  */
 export interface MediaWithImageSizeAdminProp {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1734,7 +1739,7 @@ export interface MediaWithImageSizeAdminProp {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1758,236 +1763,236 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'relation';
-        value: number | Relation;
+        value: string | Relation;
       } | null)
     | ({
         relationTo: 'audio';
-        value: number | Audio;
+        value: string | Audio;
       } | null)
     | ({
         relationTo: 'gif-resize';
-        value: number | GifResize;
+        value: string | GifResize;
       } | null)
     | ({
         relationTo: 'filename-compound-index';
-        value: number | FilenameCompoundIndex;
+        value: string | FilenameCompoundIndex;
       } | null)
     | ({
         relationTo: 'no-image-sizes';
-        value: number | NoImageSize;
+        value: string | NoImageSize;
       } | null)
     | ({
         relationTo: 'object-fit';
-        value: number | ObjectFit;
+        value: string | ObjectFit;
       } | null)
     | ({
         relationTo: 'with-meta-data';
-        value: number | WithMetaDatum;
+        value: string | WithMetaDatum;
       } | null)
     | ({
         relationTo: 'without-meta-data';
-        value: number | WithoutMetaDatum;
+        value: string | WithoutMetaDatum;
       } | null)
     | ({
         relationTo: 'with-only-jpeg-meta-data';
-        value: number | WithOnlyJpegMetaDatum;
+        value: string | WithOnlyJpegMetaDatum;
       } | null)
     | ({
         relationTo: 'crop-only';
-        value: number | CropOnly;
+        value: string | CropOnly;
       } | null)
     | ({
         relationTo: 'focal-only';
-        value: number | FocalOnly;
+        value: string | FocalOnly;
       } | null)
     | ({
         relationTo: 'image-sizes-only';
-        value: number | ImageSizesOnly;
+        value: string | ImageSizesOnly;
       } | null)
     | ({
         relationTo: 'focal-no-sizes';
-        value: number | FocalNoSize;
+        value: string | FocalNoSize;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'allow-list-media';
-        value: number | AllowListMedia;
+        value: string | AllowListMedia;
       } | null)
     | ({
         relationTo: 'skip-safe-fetch-media';
-        value: number | SkipSafeFetchMedia;
+        value: string | SkipSafeFetchMedia;
       } | null)
     | ({
         relationTo: 'skip-safe-fetch-header-filter';
-        value: number | SkipSafeFetchHeaderFilter;
+        value: string | SkipSafeFetchHeaderFilter;
       } | null)
     | ({
         relationTo: 'skip-allow-list-safe-fetch-media';
-        value: number | SkipAllowListSafeFetchMedia;
+        value: string | SkipAllowListSafeFetchMedia;
       } | null)
     | ({
         relationTo: 'restrict-file-types';
-        value: number | RestrictFileType;
+        value: string | RestrictFileType;
       } | null)
     | ({
         relationTo: 'no-restrict-file-types';
-        value: number | NoRestrictFileType;
+        value: string | NoRestrictFileType;
       } | null)
     | ({
         relationTo: 'no-restrict-file-mime-types';
-        value: number | NoRestrictFileMimeType;
+        value: string | NoRestrictFileMimeType;
       } | null)
     | ({
         relationTo: 'animated-type-media';
-        value: number | AnimatedTypeMedia;
+        value: string | AnimatedTypeMedia;
       } | null)
     | ({
         relationTo: 'enlarge';
-        value: number | Enlarge;
+        value: string | Enlarge;
       } | null)
     | ({
         relationTo: 'without-enlarge';
-        value: number | WithoutEnlarge;
+        value: string | WithoutEnlarge;
       } | null)
     | ({
         relationTo: 'reduce';
-        value: number | Reduce;
+        value: string | Reduce;
       } | null)
     | ({
         relationTo: 'media-trim';
-        value: number | MediaTrim;
+        value: string | MediaTrim;
       } | null)
     | ({
         relationTo: 'custom-file-name-media';
-        value: number | CustomFileNameMedia;
+        value: string | CustomFileNameMedia;
       } | null)
     | ({
         relationTo: 'unstored-media';
-        value: number | UnstoredMedia;
+        value: string | UnstoredMedia;
       } | null)
     | ({
         relationTo: 'externally-served-media';
-        value: number | ExternallyServedMedia;
+        value: string | ExternallyServedMedia;
       } | null)
     | ({
         relationTo: 'uploads-1';
-        value: number | Uploads1;
+        value: string | Uploads1;
       } | null)
     | ({
         relationTo: 'uploads-2';
-        value: number | Uploads2;
+        value: string | Uploads2;
       } | null)
     | ({
         relationTo: 'any-images';
-        value: number | AnyImage;
+        value: string | AnyImage;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-function';
-        value: number | AdminThumbnailFunction;
+        value: string | AdminThumbnailFunction;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-with-search-queries';
-        value: number | AdminThumbnailWithSearchQuery;
+        value: string | AdminThumbnailWithSearchQuery;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-size';
-        value: number | AdminThumbnailSize;
+        value: string | AdminThumbnailSize;
       } | null)
     | ({
         relationTo: 'admin-upload-control';
-        value: number | AdminUploadControl;
+        value: string | AdminUploadControl;
       } | null)
     | ({
         relationTo: 'optional-file';
-        value: number | OptionalFile;
+        value: string | OptionalFile;
       } | null)
     | ({
         relationTo: 'required-file';
-        value: number | RequiredFile;
+        value: string | RequiredFile;
       } | null)
     | ({
         relationTo: 'versions';
-        value: number | Version;
+        value: string | Version;
       } | null)
     | ({
         relationTo: 'custom-upload-field';
-        value: number | CustomUploadField;
+        value: string | CustomUploadField;
       } | null)
     | ({
         relationTo: 'media-with-relation-preview';
-        value: number | MediaWithRelationPreview;
+        value: string | MediaWithRelationPreview;
       } | null)
     | ({
         relationTo: 'media-without-cache-tags';
-        value: number | MediaWithoutCacheTag;
+        value: string | MediaWithoutCacheTag;
       } | null)
     | ({
         relationTo: 'media-without-relation-preview';
-        value: number | MediaWithoutRelationPreview;
+        value: string | MediaWithoutRelationPreview;
       } | null)
     | ({
         relationTo: 'relation-preview';
-        value: number | RelationPreview;
+        value: string | RelationPreview;
       } | null)
     | ({
         relationTo: 'hide-file-input-on-create';
-        value: number | HideFileInputOnCreate;
+        value: string | HideFileInputOnCreate;
       } | null)
     | ({
         relationTo: 'best-fit';
-        value: number | BestFit;
+        value: string | BestFit;
       } | null)
     | ({
         relationTo: 'list-view-preview';
-        value: number | ListViewPreview;
+        value: string | ListViewPreview;
       } | null)
     | ({
         relationTo: 'three-dimensional';
-        value: number | ThreeDimensional;
+        value: string | ThreeDimensional;
       } | null)
     | ({
         relationTo: 'constructor-options';
-        value: number | ConstructorOption;
+        value: string | ConstructorOption;
       } | null)
     | ({
         relationTo: 'bulk-uploads';
-        value: number | BulkUpload;
+        value: string | BulkUpload;
       } | null)
     | ({
         relationTo: 'simple-relationship';
-        value: number | SimpleRelationship;
+        value: string | SimpleRelationship;
       } | null)
     | ({
         relationTo: 'file-mime-type';
-        value: number | FileMimeType;
+        value: string | FileMimeType;
       } | null)
     | ({
         relationTo: 'svg-only';
-        value: number | SvgOnly;
+        value: string | SvgOnly;
       } | null)
     | ({
         relationTo: 'media-without-delete-access';
-        value: number | MediaWithoutDeleteAccess;
+        value: string | MediaWithoutDeleteAccess;
       } | null)
     | ({
         relationTo: 'media-with-image-size-admin-props';
-        value: number | MediaWithImageSizeAdminProp;
+        value: string | MediaWithImageSizeAdminProp;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1997,10 +2002,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -2020,11 +2025,195 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_localized".
+ */
+export interface RelationLocalized {
+  id: string;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
+  hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
+  blocks?:
+    | {
+        media: {
+          en?: string | Media;
+          es?: string | Media;
+          fr?: string | Media;
+        };
+        relatedMedia?: {
+          en?: (string | Media)[] | null;
+          es?: (string | Media)[] | null;
+          fr?: (string | Media)[] | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedMediaBlock';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_localized".
+ */
+export interface MediaLocalized {
+  id: string;
+  alt?: string | null;
+  localized?: {
+    en?: string | null;
+    es?: string | null;
+    fr?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    maintainedAspectRatio?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    differentFormatFromMainImage?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    maintainedImageSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    maintainedImageSizeWithNewFormat?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    accidentalSameSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tablet?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    mobile?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    icon?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest2?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest3?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest4?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest5?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest6?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest7?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, JsonObject, LocaleValue } from '../../index.js'
+import type { GlobalSlug, JsonObject, LocaleValue, TypedLocale } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
@@ -32,7 +32,7 @@ import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
-type Args<TSlug extends GlobalSlug, TLocale extends LocaleValue = string> = {
+type Args<TSlug extends GlobalSlug, TLocale extends LocaleValue = TypedLocale> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug, TLocale>, 'id'>>
   depth?: number
@@ -52,7 +52,7 @@ type Args<TSlug extends GlobalSlug, TLocale extends LocaleValue = string> = {
 export const updateOperation = async <
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobal<TSlug, TSelect, TLocale>> => {

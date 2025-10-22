@@ -34,7 +34,7 @@ import { updateByIDOperation } from '../updateByID.js'
 export type BaseOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * Whether the current update should be marked as from autosave.
@@ -140,7 +140,7 @@ export type BaseOptions<
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * The ID of the document to update.
@@ -165,7 +165,7 @@ export type ByIDOptions<
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * The ID of the document to update.
@@ -190,13 +190,13 @@ export type ManyOptions<
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = ByIDOptions<TSlug, TSelect, TLocale> | ManyOptions<TSlug, TSelect, TLocale>
 
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: ByIDOptions<TSlug, TSelect, TLocale>,
@@ -204,7 +204,7 @@ async function updateLocal<
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: ManyOptions<TSlug, TSelect, TLocale>,
@@ -212,7 +212,7 @@ async function updateLocal<
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,
@@ -222,7 +222,7 @@ async function updateLocal<
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,

@@ -30,7 +30,7 @@ import { createOperation } from '../create.js'
 type BaseOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * the Collection slug to operate against.
@@ -143,7 +143,7 @@ export type Options<
 export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TLocale>,

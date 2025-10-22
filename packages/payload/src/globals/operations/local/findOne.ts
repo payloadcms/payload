@@ -1,9 +1,16 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  GlobalSlug,
+  LocaleValue,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
   PopulateType,
   SelectType,
+  TransformGlobal,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -83,10 +90,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+): Promise<TransformGlobal<TSlug, TSelect, TLocale>> {
   const {
     slug: globalSlug,
     data,

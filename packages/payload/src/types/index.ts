@@ -259,7 +259,7 @@ export type TransformCollectionWithSelect<
 export type TransformCollection<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue = string,
+  TLocale extends LocaleValue = TypedLocale,
   Data = TLocale extends 'all'
     ? LocalizedDataFromCollectionSlug<TSlug>
     : DataFromCollectionSlug<TSlug>,
@@ -276,7 +276,7 @@ export type TransformGlobalWithSelect<
 export type TransformGlobal<
   TSlug extends GlobalSlug,
   TSelect extends SelectType,
-  TLocale extends LocaleValue,
+  TLocale extends LocaleValue = TypedLocale,
   Data = TLocale extends 'all' ? LocalizedDataFromGlobalSlug<TSlug> : DataFromGlobalSlug<TSlug>,
   // @ts-expect-error
 > = TSelect extends SelectType ? TransformDataWithSelect<Data, TSelect> : Data

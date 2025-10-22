@@ -94,7 +94,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   globalsSelect: {};
@@ -130,11 +130,11 @@ export interface UserAuthOperations {
  * via the `definition` "tenants".
  */
 export interface Tenant {
-  id: number;
+  id: string;
   name: string;
   domain: string;
   users?: {
-    docs?: (number | User)[];
+    docs?: (string | User)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -147,11 +147,11 @@ export interface Tenant {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   roles?: ('admin' | 'user')[] | null;
   tenants?:
     | {
-        tenant: number | Tenant;
+        tenant: string | Tenant;
         id?: string | null;
       }[]
     | null;
@@ -178,8 +178,8 @@ export interface User {
  * via the `definition` "food-items".
  */
 export interface FoodItem {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
   content?: {
     root: {
@@ -204,8 +204,8 @@ export interface FoodItem {
  * via the `definition` "food-menu".
  */
 export interface FoodMenu {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   description?: string | null;
   menuItems?:
@@ -213,7 +213,7 @@ export interface FoodMenu {
         /**
          * Automatically filtered by selected tenant
          */
-        menuItem: number | FoodItem;
+        menuItem: string | FoodItem;
         active?: boolean | null;
         id?: string | null;
       }[]
@@ -226,8 +226,8 @@ export interface FoodMenu {
  * via the `definition` "autosave-global".
  */
 export interface AutosaveGlobal {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   description?: string | null;
   updatedAt: string;
@@ -239,10 +239,10 @@ export interface AutosaveGlobal {
  * via the `definition` "relationships".
  */
 export interface Relationship {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
-  relationship?: (number | null) | Relationship;
+  relationship?: (string | null) | Relationship;
   updatedAt: string;
   createdAt: string;
 }
@@ -251,36 +251,36 @@ export interface Relationship {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'tenants';
-        value: number | Tenant;
+        value: string | Tenant;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'food-items';
-        value: number | FoodItem;
+        value: string | FoodItem;
       } | null)
     | ({
         relationTo: 'food-menu';
-        value: number | FoodMenu;
+        value: string | FoodMenu;
       } | null)
     | ({
         relationTo: 'autosave-global';
-        value: number | AutosaveGlobal;
+        value: string | AutosaveGlobal;
       } | null)
     | ({
         relationTo: 'relationships';
-        value: number | Relationship;
+        value: string | Relationship;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -290,10 +290,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -313,7 +313,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

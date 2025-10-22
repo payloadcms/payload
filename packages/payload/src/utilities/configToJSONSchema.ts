@@ -14,6 +14,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
+import { fieldsHaveLocalized } from './fieldsHaveLocalized.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
@@ -48,12 +49,19 @@ function buildOptionEnums(options: Option[]): string[] {
 
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
-  { localized = false }: { localized?: boolean } = {},
+  {
+    entityDefinitions,
+    localized = false,
+  }: { entityDefinitions: { [k: string]: JSONSchema4 }; localized?: boolean },
 ): JSONSchema4 {
   const properties = [...entities].reduce(
     (acc, { slug }) => {
-      acc[`${slug}`] = {
-        $ref: `#/definitions/${slug}${localized ? `_localized` : ''}`,
+      const definition = `${slug}${localized ? `_localized` : ''}`
+
+      if (definition in entityDefinitions) {
+        acc[`${slug}`] = {
+          $ref: `#/definitions/${slug}${localized ? `_localized` : ''}`,
+        }
       }
 
       return acc
@@ -1199,7 +1207,7 @@ export function configToJSONSchema(
         interfaceNameDefinitions,
       })
 
-      if (config.localization) {
+      if (config.localization && fieldsHaveLocalized({ config, fields: entity.flattenedFields })) {
         acc[`${entity.slug}_localized`] = entityToJSONSchema(
           config,
           entity,
@@ -1301,16 +1309,22 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       blocks: blocksDefinition,
-      collections: generateEntitySchemas(config.collections || []),
+      collections: generateEntitySchemas(config.collections || [], { entityDefinitions }),
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       ...(config.localization && {
-        collectionsLocalized: generateEntitySchemas(config.collections || [], { localized: true }),
+        collectionsLocalized: generateEntitySchemas(config.collections || [], {
+          entityDefinitions,
+          localized: true,
+        }),
       }),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
-      globals: generateEntitySchemas(config.globals || []),
+      globals: generateEntitySchemas(config.globals || [], { entityDefinitions }),
       ...(config.localization && {
-        globalsLocalized: generateEntitySchemas(config.globals || [], { localized: true }),
+        globalsLocalized: generateEntitySchemas(config.globals || [], {
+          entityDefinitions,
+          localized: true,
+        }),
       }),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),

@@ -1,4 +1,4 @@
-import type { Payload, User, Where } from 'payload'
+import type { LocaleValue, Payload, User, Where } from 'payload'
 
 import path from 'path'
 import { createLocalReq } from 'payload'
@@ -967,6 +967,7 @@ describe('Localization', () => {
       it('should allow moving rows and retain existing row locale data', async () => {
         const globalArray: any = await payload.findGlobal({
           slug: 'global-array',
+          locale: 'all',
         })
 
         const reversedArrayRows = [...globalArray.array].reverse()
@@ -3354,7 +3355,7 @@ describe('Localization', () => {
 
         expect(updated.title).toEqual(spanishTitle)
 
-        const localized: any = await payload.findByID({
+        const localized = await payload.findByID({
           id: post1.id,
           collection,
           locale: 'all',

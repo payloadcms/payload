@@ -100,14 +100,10 @@ export interface Config {
     'nested-field-tables': NestedFieldTableLocalized;
     'localized-drafts': LocalizedDraftLocalized;
     'localized-date-fields': LocalizedDateFieldLocalized;
-    users: UserLocalized;
     'localized-posts': LocalizedPostLocalized;
-    'no-localized-fields': NoLocalizedFieldLocalized;
     'array-fields': ArrayFieldLocalized;
     'localized-required': LocalizedRequiredLocalized;
-    'with-localized-relationship': WithLocalizedRelationshipLocalized;
     'relationship-localized': RelationshipLocalizedLocalized;
-    'cannot-create-default-locale': CannotCreateDefaultLocaleLocalized;
     nested: NestedLocalized;
     groups: GroupLocalized;
     tabs: TabLocalized;
@@ -115,9 +111,6 @@ export interface Config {
     'blocks-same-name': BlocksSameNameLocalized;
     'localized-within-localized': LocalizedWithinLocalizedLocalized;
     'array-with-fallback-fields': ArrayWithFallbackFieldLocalized;
-    'payload-locked-documents': PayloadLockedDocumentLocalized;
-    'payload-preferences': PayloadPreferenceLocalized;
-    'payload-migrations': PayloadMigrationLocalized;
   };
   collectionsSelect: {
     richText: RichTextSelect<false> | RichTextSelect<true>;
@@ -1691,32 +1684,6 @@ export interface LocalizedDateFieldLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_localized".
- */
-export interface UserLocalized {
-  id: string;
-  name?: string | null;
-  relation?: (string | null) | LocalizedPost;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts_localized".
  */
 export interface LocalizedPostLocalized {
@@ -1760,17 +1727,6 @@ export interface LocalizedPostLocalized {
   };
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "no-localized-fields_localized".
- */
-export interface NoLocalizedFieldLocalized {
-  id: string;
-  text?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2117,38 +2073,6 @@ export interface LocalizedRequiredLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "with-localized-relationship_localized".
- */
-export interface WithLocalizedRelationshipLocalized {
-  id: string;
-  localizedRelationship?: (string | null) | LocalizedPost;
-  localizedRelationHasManyField?: (string | LocalizedPost)[] | null;
-  localizedRelationMultiRelationTo?:
-    | ({
-        relationTo: 'localized-posts';
-        value: string | LocalizedPost;
-      } | null)
-    | ({
-        relationTo: 'cannot-create-default-locale';
-        value: string | CannotCreateDefaultLocale;
-      } | null);
-  localizedRelationMultiRelationToHasMany?:
-    | (
-        | {
-            relationTo: 'localized-posts';
-            value: string | LocalizedPost;
-          }
-        | {
-            relationTo: 'cannot-create-default-locale';
-            value: string | CannotCreateDefaultLocale;
-          }
-      )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationship-localized_localized".
  */
 export interface RelationshipLocalizedLocalized {
@@ -2337,16 +2261,6 @@ export interface RelationshipLocalizedLocalized {
         }[]
       | null;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cannot-create-default-locale_localized".
- */
-export interface CannotCreateDefaultLocaleLocalized {
-  id: string;
-  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2905,139 +2819,6 @@ export interface ArrayWithFallbackFieldLocalized {
         }[]
       | null;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_localized".
- */
-export interface PayloadLockedDocumentLocalized {
-  id: string;
-  document?:
-    | ({
-        relationTo: 'richText';
-        value: string | RichText;
-      } | null)
-    | ({
-        relationTo: 'blocks-fields';
-        value: string | BlocksField;
-      } | null)
-    | ({
-        relationTo: 'nested-arrays';
-        value: string | NestedArray;
-      } | null)
-    | ({
-        relationTo: 'nested-field-tables';
-        value: string | NestedFieldTable;
-      } | null)
-    | ({
-        relationTo: 'localized-drafts';
-        value: string | LocalizedDraft;
-      } | null)
-    | ({
-        relationTo: 'localized-date-fields';
-        value: string | LocalizedDateField;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'localized-posts';
-        value: string | LocalizedPost;
-      } | null)
-    | ({
-        relationTo: 'no-localized-fields';
-        value: string | NoLocalizedField;
-      } | null)
-    | ({
-        relationTo: 'array-fields';
-        value: string | ArrayField;
-      } | null)
-    | ({
-        relationTo: 'localized-required';
-        value: string | LocalizedRequired;
-      } | null)
-    | ({
-        relationTo: 'with-localized-relationship';
-        value: string | WithLocalizedRelationship;
-      } | null)
-    | ({
-        relationTo: 'relationship-localized';
-        value: string | RelationshipLocalized;
-      } | null)
-    | ({
-        relationTo: 'cannot-create-default-locale';
-        value: string | CannotCreateDefaultLocale;
-      } | null)
-    | ({
-        relationTo: 'nested';
-        value: string | Nested;
-      } | null)
-    | ({
-        relationTo: 'groups';
-        value: string | Group;
-      } | null)
-    | ({
-        relationTo: 'tabs';
-        value: string | Tab;
-      } | null)
-    | ({
-        relationTo: 'localized-sort';
-        value: string | LocalizedSort;
-      } | null)
-    | ({
-        relationTo: 'blocks-same-name';
-        value: string | BlocksSameName;
-      } | null)
-    | ({
-        relationTo: 'localized-within-localized';
-        value: string | LocalizedWithinLocalized;
-      } | null)
-    | ({
-        relationTo: 'array-with-fallback-fields';
-        value: string | ArrayWithFallbackField;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_localized".
- */
-export interface PayloadPreferenceLocalized {
-  id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_localized".
- */
-export interface PayloadMigrationLocalized {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
   updatedAt: string;
   createdAt: string;
 }
