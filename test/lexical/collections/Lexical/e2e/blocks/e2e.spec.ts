@@ -1442,9 +1442,16 @@ describe('lexicalBlocks', () => {
       // Wait for the specific row to be visible and have its content loaded
       const row2 = page.locator('#blocks-row-2')
       await expect(row2).toBeVisible()
+      await row2.scrollIntoViewIfNeeded()
+
+      // Wait for shimmer effect to be hidden
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+      const secondRow = page.locator('#blocks-row-2')
+      await expect(secondRow).toBeVisible()
 
       // Get initial count and ensure it's stable
-      const inlineBlocks = page.locator('#blocks-row-2 .LexicalEditorTheme__inlineBlock__container')
+      const inlineBlocks = secondRow.locator('.LexicalEditorTheme__inlineBlock__container')
       const inlineBlockCount = await inlineBlocks.count()
       await expect(() => {
         expect(inlineBlockCount).toBeGreaterThan(0)
