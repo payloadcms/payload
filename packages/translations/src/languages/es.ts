@@ -422,7 +422,7 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creado con éxito.',
     successfullyDuplicated: '{{label}} duplicado con éxito.',
     successfullyReindexed:
-      '{{count}} de {{total}} documentos de {{collections}} reindexados con éxito.',
+      'Se reindexaron correctamente {{count}} de {{total}} documentos de {{collections}} y se omitieron {{skips}} borradores.',
     takeOver: 'Tomar el control',
     thisLanguage: 'Español',
     time: 'Hora',

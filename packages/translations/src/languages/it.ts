@@ -420,7 +420,7 @@ export const itTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creato con successo.',
     successfullyDuplicated: '{{label}} duplicato con successo.',
     successfullyReindexed:
-      'Reindicizzati con successo {{count}} di {{total}} documenti da {{collections}} collezioni.',
+      'Sono stati reindicizzati con successo {{count}} dei {{total}} documenti da {{collections}}, e {{skips}} bozze sono state saltate.',
     takeOver: 'Prendi il controllo',
     thisLanguage: 'Italiano',
     time: 'Tempo',

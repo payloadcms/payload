@@ -417,7 +417,7 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} skapades',
     successfullyDuplicated: '{{label}} duplicerades',
     successfullyReindexed:
-      'Lyckades omindexera {{count}} av {{total}} dokument från {{collections}} samlingar.',
+      'Lyckades med att omin­dexera {{count}} av {{total}} dokument från {{collections}}, och {{skips}} utkast hoppades över.',
     takeOver: 'Ta över',
     thisLanguage: 'Svenska',
     time: 'Tid',

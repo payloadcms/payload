@@ -1,18 +1,18 @@
-// @ts-strict-ignore
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../index.js'
-import type { PayloadRequest, SelectType } from '../types/index.js'
+import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
+import { saveSnapshot } from './saveSnapshot.js'
 
-type Args = {
+type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
   collection?: SanitizedCollectionConfig
-  docWithLocales: any
+  docWithLocales: T
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
@@ -24,11 +24,11 @@ type Args = {
   snapshot?: any
 }
 
-export const saveVersion = async ({
+export const saveVersion = async <TData extends JsonObject = JsonObject>({
   id,
   autosave,
   collection,
-  docWithLocales: doc,
+  docWithLocales,
   draft,
   global,
   operation,
@@ -37,11 +37,15 @@ export const saveVersion = async ({
   req,
   select,
   snapshot,
-}: Args): Promise<TypeWithID> => {
-  let result: TypeWithID | undefined
+}: Args<TData>): Promise<JsonObject> => {
+  let result: JsonObject | undefined
   let createNewVersion = true
   const now = new Date().toISOString()
-  const versionData = deepCopyObjectSimple(doc)
+  const versionData: {
+    _status?: 'draft'
+    updatedAt?: string
+  } & TData = deepCopyObjectSimple(docWithLocales)
+
   if (draft) {
     versionData._status = 'draft'
   }
@@ -65,7 +69,7 @@ export const saveVersion = async ({
       }
 
       if (collection) {
-        ;({ docs } = await payload.db.findVersions({
+        ;({ docs } = await payload.db.findVersions<TData>({
           ...findVersionArgs,
           collection: collection.slug,
           limit: 1,
@@ -78,7 +82,7 @@ export const saveVersion = async ({
           },
         }))
       } else {
-        ;({ docs } = await payload.db.findGlobalVersions({
+        ;({ docs } = await payload.db.findGlobalVersions<TData>({
           ...findVersionArgs,
           global: global!.slug,
           limit: 1,
@@ -92,30 +96,28 @@ export const saveVersion = async ({
       if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
         createNewVersion = false
 
-        const data: Record<string, unknown> = {
-          createdAt: new Date(latestVersion.createdAt).toISOString(),
-          latest: true,
-          parent: id,
-          updatedAt: now,
-          version: {
-            ...versionData,
-          },
-        }
-
         const updateVersionArgs = {
           id: latestVersion.id,
           req,
-          versionData: data as TypeWithID,
+          versionData: {
+            createdAt: new Date(latestVersion.createdAt).toISOString(),
+            latest: true,
+            parent: id,
+            updatedAt: now,
+            version: {
+              ...versionData,
+            },
+          },
         }
 
         if (collection) {
-          result = await payload.db.updateVersion({
+          result = await payload.db.updateVersion<TData>({
             ...updateVersionArgs,
             collection: collection.slug,
             req,
           })
         } else {
-          result = await payload.db.updateGlobalVersion({
+          result = await payload.db.updateGlobalVersion<TData>({
             ...updateVersionArgs,
             global: global!.slug,
             req,
@@ -148,31 +150,18 @@ export const saveVersion = async ({
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
-      if (publishSpecificLocale && snapshot) {
-        const snapshotData = deepCopyObjectSimple(snapshot)
-        if (snapshotData._id) {
-          delete snapshotData._id
-        }
-
-        snapshotData._status = 'draft'
-
-        const snapshotDate = new Date().toISOString()
-
-        const updatedArgs = {
-          ...createVersionArgs,
-          createdAt: snapshotDate,
-          returning: false,
-          snapshot: true,
-          updatedAt: snapshotDate,
-          versionData: snapshotData,
-        } as CreateGlobalVersionArgs & CreateVersionArgs
-
-        if (collection) {
-          await payload.db.createVersion(updatedArgs)
-        }
-        if (global) {
-          await payload.db.createGlobalVersion(updatedArgs)
-        }
+      if (snapshot) {
+        await saveSnapshot<TData>({
+          id,
+          autosave,
+          collection,
+          data: snapshot,
+          global,
+          payload,
+          publishSpecificLocale,
+          req,
+          select,
+        })
       }
     }
   } catch (err) {

@@ -414,7 +414,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} успішно створено.',
     successfullyDuplicated: '{{label}} успішно продубльовано.',
     successfullyReindexed:
-      'Успішно повторно індексовано {{count}} з {{total}} документів з колекцій {{collections}}.',
+      'Успішно переіндексовано {{count}} із {{total}} документів із {{collections}}, пропущено {{skips}} чернеток.',
     takeOver: 'Перехопити',
     thisLanguage: 'Українська',
     time: 'Час',

@@ -406,7 +406,7 @@ export const arTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} تم إنشاؤها بنجاح.',
     successfullyDuplicated: '{{label}} تم استنساخها بنجاح.',
     successfullyReindexed:
-      'تم إعادة فهرسة {{count}} من أصل {{total}} مستندات من {{collections}} مجموعات بنجاح.',
+      'تمت إعادة فهرسة {{count}} من أصل {{total}} مستند من {{collections}} وتخطي {{skips}} مسودة.',
     takeOver: 'تولي',
     thisLanguage: 'العربية',
     time: 'الوقت',

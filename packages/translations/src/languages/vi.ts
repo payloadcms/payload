@@ -415,7 +415,7 @@ export const viTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} đã được tạo thành công.',
     successfullyDuplicated: '{{label}} đã được sao chép thành công.',
     successfullyReindexed:
-      'Tái lập chỉ mục thành công {{count}} trong tổng số {{total}} tài liệu từ {{collections}} bộ sưu tập.',
+      'Đã lập chỉ mục lại thành công {{count}} trên tổng số {{total}} tài liệu từ {{collections}}, và bỏ qua {{skips}} bản nháp.',
     takeOver: 'Tiếp quản',
     thisLanguage: 'Vietnamese (Tiếng Việt)',
     time: 'Thời gian',

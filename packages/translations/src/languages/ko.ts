@@ -414,7 +414,7 @@ export const koTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}}이(가) 생성되었습니다.',
     successfullyDuplicated: '{{label}}이(가) 복제되었습니다.',
     successfullyReindexed:
-      '{{collections}} 컬렉션에서 {{total}} 문서 중 {{count}} 문서가 성공적으로 재인덱싱되었습니다.',
+      '{{collections}} 의 문서 총 **{{total}}**건 중 **{{count}}**건이 성공적으로 재인덱싱되었으며, **{{skips}}**건의 초안이 건너뛰어졌습니다.',
     takeOver: '인수하기',
     thisLanguage: '한국어',
     time: '시간',

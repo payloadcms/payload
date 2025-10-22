@@ -8,6 +8,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
+import { buildIndexName } from '../utilities/buildIndexName.js'
 import { buildTable } from './build.js'
 
 /**
@@ -21,6 +22,7 @@ export const buildRawSchema = ({
   setColumnID: SetColumnID
 }) => {
   adapter.indexes = new Set()
+  adapter.foreignKeys = new Set()
 
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({
@@ -45,7 +47,7 @@ export const buildRawSchema = ({
     const baseIndexes: Record<string, RawIndex> = {}
 
     if (collection.upload.filenameCompoundIndex) {
-      const indexName = `${tableName}_filename_compound_idx`
+      const indexName = buildIndexName({ name: `${tableName}_filename_compound_idx`, adapter })
 
       baseIndexes.filename_compound_index = {
         name: indexName,

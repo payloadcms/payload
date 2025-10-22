@@ -169,6 +169,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findGlobalVersions,
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,

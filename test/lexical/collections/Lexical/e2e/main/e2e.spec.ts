@@ -66,7 +66,7 @@ async function navigateToLexicalFields(
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
   }
 }
 
@@ -108,7 +108,7 @@ describe('lexicalMain', () => {
 
     await navigateToLexicalFields()
     await expect(
-      page.locator('.rich-text-lexical').nth(2).locator('.lexical-block').first(),
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block').first(),
     ).toBeVisible()
 
     // Navigate to some different page, away from the current document
@@ -121,11 +121,15 @@ describe('lexicalMain', () => {
   test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
     // Relevant issue: https://github.com/payloadcms/payload/issues/4115
     await navigateToLexicalFields()
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-    const thirdBlock = page.locator('.rich-text-lexical').nth(2).locator('.lexical-block').nth(2)
+    const thirdBlock = page
+      .locator('.rich-text-lexical')
+      .nth(2)
+      .locator('.LexicalEditorTheme__block')
+      .nth(2)
     await thirdBlock.scrollIntoViewIfNeeded()
     await expect(thirdBlock).toBeVisible()
 
@@ -148,9 +152,9 @@ describe('lexicalMain', () => {
 
     // Save
     await saveDocAndAssert(page)
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
 
@@ -167,7 +171,7 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
@@ -215,7 +219,7 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
@@ -305,7 +309,7 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
@@ -413,9 +417,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     // Find span in contentEditable with text "Some text below relationship node"
@@ -435,7 +439,7 @@ describe('lexicalMain', () => {
     await expect(popoverSelectButton).toBeVisible()
     await popoverSelectButton.click()
 
-    const newSelectBlock = richTextField.locator('.lexical-block').first()
+    const newSelectBlock = richTextField.locator('.LexicalEditorTheme__block').first()
     await newSelectBlock.scrollIntoViewIfNeeded()
     await expect(newSelectBlock).toBeVisible()
 
@@ -479,7 +483,7 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const lastParagraph = richTextField.locator('p').last()
@@ -528,19 +532,23 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeHidden()
     await wait(500)
     await saveDocAndAssert(page)
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     // second one should be the newly created one
-    const secondUploadNode = richTextField.locator('.lexical-upload').nth(1)
+    const secondUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
     await secondUploadNode.scrollIntoViewIfNeeded()
     await expect(secondUploadNode).toBeVisible()
     // Focus the upload node
     await secondUploadNode.click()
 
-    await expect(secondUploadNode.locator('.lexical-upload__filename')).toHaveText('payload-1.jpg')
-    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toHaveText('Upload')
+    await expect(secondUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+      'payload-1.jpg',
+    )
+    await expect(
+      secondUploadNode.locator('.LexicalEditorTheme__upload__collectionLabel'),
+    ).toHaveText('Upload')
   })
 
   // This reproduces https://github.com/payloadcms/payload/issues/7128
@@ -551,7 +559,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
 
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const lastParagraph = richTextField.locator('p').last()
@@ -584,16 +592,21 @@ describe('lexicalMain', () => {
     await uploadListDrawer.locator('button').getByText('payload.jpg').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
-    const newUploadNode = richTextField.locator('.lexical-upload').nth(1)
+    const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
     await newUploadNode.click() // Focus the upload node
     await newUploadNode.hover()
 
-    await expect(newUploadNode.locator('.lexical-upload__filename')).toContainText('payload.jpg')
+    await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toContainText(
+      'payload.jpg',
+    )
 
     // Click on button with class lexical-upload__upload-drawer-toggler
-    await newUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
+    await newUploadNode
+      .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
+      .first()
+      .click()
 
     const uploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
@@ -612,27 +625,30 @@ describe('lexicalMain', () => {
     await wait(500)
     await saveDocAndAssert(page)
     await wait(500)
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     // Reload page, open the extra fields drawer again and check if the text is still there
     await page.reload()
     await wait(300)
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const reloadedUploadNode = page
       .locator('.rich-text-lexical')
       .nth(2)
-      .locator('.lexical-upload')
+      .locator('.LexicalEditorTheme__upload')
       .nth(1)
     await reloadedUploadNode.scrollIntoViewIfNeeded()
     await expect(reloadedUploadNode).toBeVisible()
     await reloadedUploadNode.click() // Focus the upload node
     await reloadedUploadNode.hover()
 
-    await reloadedUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
+    await reloadedUploadNode
+      .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
+      .first()
+      .click()
     const reloadedUploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
       .first()
@@ -779,9 +795,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
@@ -817,7 +833,7 @@ describe('lexicalMain', () => {
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()
 
-    const newRelationshipNode = richTextField.locator('.lexical-relationship').first()
+    const newRelationshipNode = richTextField.locator('.LexicalEditorTheme__relationship').first()
     await newRelationshipNode.scrollIntoViewIfNeeded()
     await expect(newRelationshipNode).toBeVisible()
 
@@ -904,9 +920,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
@@ -947,9 +963,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
@@ -1050,9 +1066,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
@@ -1111,7 +1127,7 @@ describe('lexicalMain', () => {
     await linkDrawer.locator('.rs__option').nth(0).click()
 
     await expect(internalLinkSelect).toContainText('Rich Text')
-    await wait(200)
+    await wait(1000)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
     await expect(linkDrawer).toBeHidden()
@@ -1144,8 +1160,8 @@ describe('lexicalMain', () => {
 
       const linkNode = firstParagraph.children[0] as SerializedLinkNode
       expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
-      // Expect to be string
-      expect(typeof linkNode?.fields?.doc?.value).toBe('string')
+      expect(typeof linkNode?.fields?.doc?.value).not.toBe('object')
+      expect(linkNode?.fields?.doc?.value).toBeDefined()
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -1176,7 +1192,11 @@ describe('lexicalMain', () => {
       const linkNode = firstParagraph.children[0] as SerializedLinkNode
       expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
       expect(typeof linkNode?.fields?.doc?.value).toBe('object')
-      expect(typeof (linkNode?.fields?.doc?.value as Record<string, unknown>)?.id).toBe('string')
+
+      const id = (linkNode?.fields?.doc?.value as Record<string, unknown>)?.id
+
+      expect(typeof id).not.toBe('object')
+      expect(id).toBeDefined()
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -1250,9 +1270,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
@@ -1289,7 +1309,7 @@ describe('lexicalMain', () => {
     await uploadListDrawer.locator('button').getByText('payload.png').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
-    const newUploadNode = richTextField.locator('.lexical-upload').first()
+    const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').first()
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
 
@@ -1297,7 +1317,9 @@ describe('lexicalMain', () => {
 
     await newUploadNode.hover()
 
-    await expect(newUploadNode.locator('.lexical-upload__filename')).toHaveText('payload.png')
+    await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+      'payload.png',
+    )
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
     await page.keyboard.press('Enter')
@@ -1308,7 +1330,9 @@ describe('lexicalMain', () => {
       await page.keyboard.press('Shift+ArrowLeft')
     }
 
-    const swapDrawerButton = newUploadNode.locator('.lexical-upload__swap-drawer-toggler').first()
+    const swapDrawerButton = newUploadNode
+      .locator('.LexicalEditorTheme__upload__swap-drawer-toggler')
+      .first()
 
     await expect(swapDrawerButton).toBeVisible()
 
@@ -1434,9 +1458,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     // click contenteditable
@@ -1467,7 +1491,7 @@ describe('lexicalMain', () => {
     // click button with text "Text"
     await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
 
-    await expect(richTextField.locator('.lexical-block')).toHaveCount(1)
+    await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(1)
     await richTextField.locator('#field-someTextRequired').first().fill('test')
 
     await saveDocAndAssert(page)
@@ -1501,9 +1525,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     await richTextField.locator('.ContentEditable__root').first().click()
     const lastParagraph = richTextField.locator('p').first()
@@ -1563,9 +1587,9 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
-      10,
-    )
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     await richTextField.locator('.ContentEditable__root').first().click()
     const lastParagraph = richTextField.locator('p').first()
@@ -1645,7 +1669,9 @@ describe('lexicalMain', () => {
 
     // test
     await navigateToLexicalFields()
-    const uploadNode = page.locator('.lexical-upload[data-filename="payload.jpg"]').first()
+    const uploadNode = page
+      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload.jpg"]')
+      .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
 

@@ -413,7 +413,7 @@ export const isTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} var nýskráð.',
     successfullyDuplicated: '{{label}} tvöfaldað.',
     successfullyReindexed:
-      'Endursetti leitargrunn fyrir {{count}} af {{total}} færslur í {{collections}}',
+      'Tókst að endurvísa {{count}} af {{total}} skjölum úr {{collections}} og {{skips}} drög voru sleppt.',
     takeOver: 'Taka yfir',
     thisLanguage: 'Íslenska',
     time: 'Tími',

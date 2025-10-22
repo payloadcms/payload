@@ -1,5 +1,5 @@
 import type { TextFieldClientProps } from '../../../admin/types.js'
-import type { FieldAdmin, RowField } from '../../../fields/config/types.js'
+import type { FieldAdmin, RowField, TextField } from '../../../fields/config/types.js'
 
 import { generateSlug } from './generateSlug.js'
 
@@ -14,6 +14,10 @@ type SlugFieldArgs = {
    * @default 'title'
    */
   fieldToUse?: string
+  /**
+   * Enable localization for the slug field.
+   */
+  localized?: TextField['localized']
   /**
    * Override for the `slug` field name.
    * @default 'slug'
@@ -38,7 +42,7 @@ type SlugFieldArgs = {
    * Whether or not the `slug` field is required.
    * @default true
    */
-  required?: boolean
+  required?: TextField['required']
 }
 
 type SlugField = (args?: SlugFieldArgs) => RowField
@@ -66,6 +70,7 @@ export const slugField: SlugField = ({
   name: fieldName = 'slug',
   checkboxName = 'generateSlug',
   fieldToUse = 'title',
+  localized,
   overrides,
   position = 'sidebar',
   required = true,
@@ -90,8 +95,9 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug(fieldToUse)],
+          beforeChange: [generateSlug({ fieldName, fieldToUse })],
         },
+        localized,
       },
       {
         name: fieldName,
@@ -108,6 +114,7 @@ export const slugField: SlugField = ({
           width: '100%',
         },
         index: true,
+        localized,
         required,
         unique: true,
       },

@@ -22,6 +22,7 @@ import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
 import { radiosDoc } from './collections/Radio/shared.js'
 import { selectsDoc } from './collections/Select/shared.js'
+import { slugFieldDoc } from './collections/SlugField/shared.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
@@ -45,6 +46,7 @@ import {
   radioFieldsSlug,
   relationshipFieldsSlug,
   selectFieldsSlug,
+  slugFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
   uiSlug,
@@ -86,6 +88,13 @@ export const seed = async (_payload: Payload) => {
   const createdAnotherTextDoc = await _payload.create({
     collection: textFieldsSlug,
     data: anotherTextDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdSlugDoc = await _payload.create({
+    collection: slugFieldsSlug,
+    data: slugFieldDoc,
     depth: 0,
     overrideAccess: true,
   })

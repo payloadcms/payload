@@ -142,7 +142,7 @@ export interface Config {
   globalsSelect: {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
-  locale: 'en' | 'es';
+  locale: 'en' | 'es' | 'he';
   user: User & {
     collection: 'users';
   };
@@ -1666,6 +1666,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

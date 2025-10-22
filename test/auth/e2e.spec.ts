@@ -226,8 +226,14 @@ describe('Auth', () => {
       test('should allow change password', async () => {
         await page.goto(url.account)
         const emailBeforeSave = await page.locator('#field-email').inputValue()
+        await expect(page.locator('#force-unlock')).toBeVisible()
+
         await page.locator('#change-password').click()
         await page.locator('#field-password').fill('password')
+
+        await expect(page.locator('#change-password')).toBeHidden()
+
+        await expect(page.locator('#cancel-change-password')).toBeVisible()
         // should fail to save without confirm password
         await page.locator('#action-save').click()
         await expect(

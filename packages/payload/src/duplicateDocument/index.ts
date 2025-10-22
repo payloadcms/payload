@@ -17,19 +17,19 @@ type GetDuplicateDocumentArgs = {
   collectionConfig: SanitizedCollectionConfig
   draftArg?: boolean
   id: number | string
+  isSavingDraft?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
   selectedLocales?: string[]
-  shouldSaveDraft?: boolean
 }
 export const getDuplicateDocumentData = async ({
   id,
   collectionConfig,
   draftArg,
+  isSavingDraft,
   overrideAccess,
   req,
   selectedLocales,
-  shouldSaveDraft,
 }: GetDuplicateDocumentArgs): Promise<{
   duplicatedFromDoc: JsonObject
   duplicatedFromDocWithLocales: JsonObject
@@ -96,7 +96,7 @@ export const getDuplicateDocumentData = async ({
   })
 
   // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
-  if (shouldSaveDraft) {
+  if (isSavingDraft) {
     duplicatedFromDocWithLocales._status = 'draft'
   }
 

@@ -420,7 +420,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} အောင်မြင်စွာဖန်တီးခဲ့သည်။',
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     successfullyReindexed:
-      '{{collections}} စုစည်းမှုများမှ စာရွက်စာတမ်း {{total}} ခုအနက် {{count}} ခုကို အောင်မြင်စွာ ပြန်လည်အညွှန်းပြုလုပ်ခဲ့ပါသည်။',
+      '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
     takeOver: 'တာဝန်ယူပါ',
     thisLanguage: 'မြန်မာစာ',
     time: 'Masa',

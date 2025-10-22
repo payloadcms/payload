@@ -64,10 +64,10 @@ describe('Lexical Fully Featured - database', () => {
       await lexical.drawer.locator('.bulk-upload--actions-bar').getByText('Save').click()
       await expect(lexical.drawer).toBeHidden()
 
-      await expect(lexical.editor.locator('.lexical-upload')).toHaveCount(1)
-      await expect(lexical.editor.locator('.lexical-upload__doc-drawer-toggler')).toHaveText(
-        expectedFileName || 'payload-1.jpg',
-      )
+      await expect(lexical.editor.locator('.LexicalEditorTheme__upload')).toHaveCount(1)
+      await expect(
+        lexical.editor.locator('.LexicalEditorTheme__upload__doc-drawer-toggler'),
+      ).toHaveText(expectedFileName || 'payload-1.jpg')
 
       const uploadedImage = await payload.find({
         collection: 'uploads',
@@ -129,7 +129,7 @@ describe('Lexical Fully Featured - database', () => {
       page,
     }) => {
       await lexical.slashCommand('myblock')
-      await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
+      await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
 
       /**
        * Test on create
