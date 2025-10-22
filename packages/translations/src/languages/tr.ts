@@ -420,7 +420,7 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} başarıyla oluşturuldu.',
     successfullyDuplicated: '{{label}} başarıyla kopyalandı.',
     successfullyReindexed:
-      '{{collections}} koleksiyonlarından {{total}} belgenin {{count}} tanesi başarıyla yeniden indekslendi.',
+      '{{collections}}’den toplam {{total}} belge arasından {{count}} belge başarıyla yeniden indekslendi ve {{skips}} taslak atlandı.',
     takeOver: 'Devralmak',
     thisLanguage: 'Türkçe',
     time: 'Zaman',

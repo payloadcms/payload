@@ -9,6 +9,8 @@ dist
 # Local AI Agent files
 AGENTS.local.md
 CLAUDE.local.md
+.claude/commands/*.local.md
+.claude/artifacts
 
 # Custom actions
 !.github/actions/**/dist

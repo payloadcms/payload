@@ -414,7 +414,7 @@ export const plTranslations: DefaultTranslationsObject = {
     successfullyCreated: 'Pomyślnie utworzono {{label}}.',
     successfullyDuplicated: 'Pomyślnie zduplikowano {{label}}',
     successfullyReindexed:
-      'Pomyślnie ponownie zindeksowano {{count}} z {{total}} dokumentów z kolekcji {{collections}}.',
+      'Pomyślnie ponownie zindeksowano {{count}} z {{total}} dokumentów z {{collections}}, pomijając {{skips}} szkice.',
     takeOver: 'Przejąć',
     thisLanguage: 'Polski',
     time: 'Czas',

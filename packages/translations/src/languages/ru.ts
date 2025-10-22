@@ -417,7 +417,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} успешно создан.',
     successfullyDuplicated: '{{label}} успешно продублирован.',
     successfullyReindexed:
-      'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}} коллекций.',
+      'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}}, пропущено {{skips}} черновиков.',
     takeOver: 'Взять на себя',
     thisLanguage: 'Русский',
     time: 'Время',

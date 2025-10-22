@@ -199,7 +199,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
               byteNumbers[i] = byteCharacters.charCodeAt(i)
             }
             const byteArray = new Uint8Array(byteNumbers)
-            const file = new File([byteArray], 'pasted-image.' + mimeType?.split('/')[1], {
+            const file = new File([byteArray], 'pasted-image.' + mimeType?.split('/', 2)[1], {
               type: mimeType,
             })
             transformedImage = { alt: undefined, file, formID }
@@ -208,7 +208,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
             const res = await fetch(src)
             const blob = await res.blob()
             const inferredFileName =
-              src.split('/').pop() || 'pasted-image' + blob.type.split('/')[1]
+              src.split('/').pop() || 'pasted-image' + blob.type.split('/', 2)[1]
             const file = new File([blob], inferredFileName, {
               type: blob.type,
             })
@@ -290,7 +290,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
 
               if ($isRangeSelection(selection)) {
                 for (const file of files) {
-                  const pendingUploadNode = new UploadNode({
+                  const pendingUploadNode = $createUploadNode({
                     data: {
                       pending: {
                         formID: file.formID,
@@ -363,7 +363,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
                 $setSelection(selection)
 
                 for (const file of files) {
-                  const pendingUploadNode = new UploadNode({
+                  const pendingUploadNode = $createUploadNode({
                     data: {
                       pending: {
                         formID: file.formID,

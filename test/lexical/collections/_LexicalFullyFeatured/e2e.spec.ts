@@ -208,3 +208,92 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
 })
+
+describe('Lexical Fully Featured, admin panel in RTL', () => {
+  let lexical: LexicalHelpers
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+
+    const page = await browser.newPage()
+    await ensureCompilationIsDone({ page, serverURL })
+    await page.close()
+  })
+  beforeEach(async ({ page }) => {
+    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    lexical = new LexicalHelpers(page)
+    await page.goto(url.account)
+    await page.locator('.payload-settings__language .react-select').click()
+    const options = page.locator('.rs__option')
+    await options.locator('text=עברית').click()
+    await expect(page.getByText('משתמשים').first()).toBeVisible()
+    await page.goto(url.create)
+    await lexical.editor.first().focus()
+  })
+  test('slash menu should be positioned correctly in RTL', async ({ page }) => {
+    await page.keyboard.type('/')
+    const menu = page.locator('#slash-menu .slash-menu-popup')
+    await expect(menu).toBeVisible()
+
+    // left edge (0 indents)
+    const menuBox = (await menu.boundingBox())!
+    const slashBox = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      expect(menuBox.x).toBeGreaterThan(0)
+      expect(menuBox.x).toBeLessThan(slashBox.x)
+    }).toPass({ timeout: 100 })
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+
+    // A bit separated (3 tabs)
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Tab')
+    }
+    await page.keyboard.type('/')
+    await expect(menu).toBeVisible()
+    const menuBox2 = (await menu.boundingBox())!
+    const slashBox2 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      expect(menuBox2.x).toBe(menuBox.x)
+      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+      expect(slashBox2.x).toBe(slashBox.x + 40 * 3)
+    }).toPass({ timeout: 100 })
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+
+    // middle approx (13 tabs)
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Tab')
+    }
+    await page.keyboard.type('/')
+    await expect(menu).toBeVisible()
+    const menuBox3 = (await menu.boundingBox())!
+    const slashBox3 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      // The right edge of the menu should be approximately the same as the left edge of the slash
+      expect(menuBox3.x + menuBox3.width).toBeLessThan(slashBox3.x + 15)
+      expect(menuBox3.x + menuBox3.width).toBeGreaterThan(slashBox3.x - 15)
+      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+      expect(slashBox3.x).toBe(slashBox.x + 40 * 13)
+    }).toPass({ timeout: 100 })
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+
+    // right edge (27 tabs)
+    for (let i = 0; i < 14; i++) {
+      await page.keyboard.press('Tab')
+    }
+    await page.keyboard.type('/')
+    await expect(menu).toBeVisible()
+    const menuBox4 = (await menu.boundingBox())!
+    const slashBox4 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      // The right edge of the menu should be approximately the same as the left edge of the slash
+      expect(menuBox4.x + menuBox4.width).toBeLessThan(slashBox4.x + 15)
+      expect(menuBox4.x + menuBox4.width).toBeGreaterThan(slashBox4.x - 15)
+      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+      expect(slashBox4.x).toBe(slashBox.x + 40 * 27)
+    }).toPass({ timeout: 100 })
+  })
+})

@@ -78,7 +78,7 @@ type FieldType<T> = {
 
 ## useFormFields
 
-There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
+There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields form states.
 
 <Banner type="success">
   **This hook is great for retrieving only certain fields from form state**
@@ -111,6 +111,12 @@ const MyComponent: React.FC = () => {
   }
 }
 ```
+
+<Banner type="warning">
+  Be aware: in the example above, `MyComponent` may re-render if an ancestor
+  component re-renders or if any of its props change (standard React behavior),
+  but not because any fields other than `amount` or `feePercentage` changed.
+</Banner>
 
 ## useAllFormFields
 

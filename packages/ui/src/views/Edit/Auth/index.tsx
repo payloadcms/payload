@@ -237,6 +237,7 @@ export const Auth: React.FC<Props> = (props) => {
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
+                id="cancel-change-password"
                 onClick={() => handleChangePassword(false)}
                 size="medium"
               >
@@ -257,10 +258,11 @@ export const Auth: React.FC<Props> = (props) => {
                   {t('authentication:changePassword')}
                 </Button>
               )}
-            {operation === 'update' && hasPermissionToUnlock && (
+            {!changingPassword && operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled || !showUnlock}
+                id="force-unlock"
                 onClick={() => void unlock()}
                 size="medium"
               >
