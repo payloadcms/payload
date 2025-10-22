@@ -14,9 +14,6 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
-      eslint: {
-        ignoreDuringBuilds: true,
-      },
       typescript: {
         ignoreBuildErrors: true,
       },
@@ -42,7 +39,13 @@ const config = withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+            port: '3000',
+            protocol: 'http',
+          },
+        ],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {
