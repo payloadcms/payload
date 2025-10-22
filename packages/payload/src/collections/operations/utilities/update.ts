@@ -1,13 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
-import type {
-  AccessResult,
-  CollectionSlug,
-  Data,
-  FileToSave,
-  SanitizedConfig,
-} from '../../../index.js'
+import type { AccessResult, CollectionSlug, FileToSave, SanitizedConfig } from '../../../index.js'
 import type {
   JsonObject,
   Payload,
@@ -244,8 +238,8 @@ export const updateDocument = async <
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }
 
-  let result: Data = await beforeChange(beforeChangeArgs)
-  let snapshotToSave: Data | undefined
+  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
     if (publishSpecificLocale) {
@@ -276,7 +270,7 @@ export const updateDocument = async <
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Data = { ...result }
+  const dataToUpdate: JsonObject = { ...result }
 
   if (shouldSavePassword && typeof password === 'string') {
     const { hash, salt } = await generatePasswordSaltHash({

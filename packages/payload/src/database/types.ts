@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, Data, GlobalSlug, Job } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Job } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -295,7 +295,7 @@ export type FindGlobalArgs = {
   where?: Where
 }
 
-export type UpdateGlobalVersionArgs<T extends Data = Data> = {
+export type UpdateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   global: GlobalSlug
   locale?: string
   /**
@@ -394,7 +394,7 @@ export type DeleteVersionsArgs = {
   where: Where
 }
 
-export type CreateVersionArgs<T extends Data = Data> = {
+export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string
@@ -418,11 +418,11 @@ export type CreateVersionArgs<T extends Data = Data> = {
   versionData: T
 }
 
-export type CreateVersion = <T extends Data = Data>(
+export type CreateVersion = <T extends JsonObject = JsonObject>(
   args: CreateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type CreateGlobalVersionArgs<T extends Data = Data> = {
+export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   createdAt: string
   globalSlug: GlobalSlug
@@ -444,13 +444,13 @@ export type CreateGlobalVersionArgs<T extends Data = Data> = {
   versionData: T
 }
 
-export type CreateGlobalVersion = <T extends Data = Data>(
+export type CreateGlobalVersion = <T extends JsonObject = JsonObject>(
   args: CreateGlobalVersionArgs<T>,
 ) => Promise<Omit<TypeWithVersion<T>, 'parent'>>
 
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
-export type UpdateVersionArgs<T extends Data = Data> = {
+export type UpdateVersionArgs<T extends JsonObject = JsonObject> = {
   collection: CollectionSlug
   locale?: string
   /**
@@ -487,7 +487,7 @@ export type UpdateVersionArgs<T extends Data = Data> = {
 /**
  * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
  */
-export type UpdateVersion = <T extends Data = Data>(
+export type UpdateVersion = <T extends JsonObject = JsonObject>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
