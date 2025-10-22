@@ -33,7 +33,7 @@ export function AddingFilesView() {
     updateUploadEdits,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
   const { user } = useAuth()
   const { openModal } = useModal()
@@ -54,7 +54,10 @@ export function AddingFilesView() {
             collectionSlug={collectionSlug}
             currentEditor={user}
             docPermissions={docPermissions}
-            hasLocalizedFields={traverseForLocalizedFields(collectionConfig.fields)}
+            hasLocalizedFields={
+              config.localization &&
+              traverseForLocalizedFields({ config, fields: collectionConfig.fields })
+            }
             hasPublishedDoc={false}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}

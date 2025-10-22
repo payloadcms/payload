@@ -122,7 +122,8 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
         currentEditor={currentEditor}
         docPermissions={docPermissions}
         hasLocalizedFields={
-          config.localization && traverseForLocalizedFields(collectionConfig.fields)
+          config.localization &&
+          traverseForLocalizedFields({ config, fields: collectionConfig.fields })
         }
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
