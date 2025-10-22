@@ -1,7 +1,7 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .lexical-upload {
+  .LexicalEditorTheme__upload {
     @extend %body;
     @include shadow-sm;
 
@@ -21,18 +21,20 @@
       width: auto;
     }
 
-    &--landscape {
-      img,
-      svg {
-        max-width: 450px;
-        min-width: 450px;
+    &__contents {
+      &--landscape {
+        img,
+        svg {
+          max-width: 450px;
+          min-width: 450px;
+        }
       }
-    }
-    &--portrait {
-      img,
-      svg {
-        max-height: 450px;
-        min-height: 450px;
+      &--portrait {
+        img,
+        svg {
+          max-height: 450px;
+          min-height: 450px;
+        }
       }
     }
 
@@ -53,6 +55,7 @@
     &__floater {
       @include shadow-lg;
       position: absolute;
+      color: var(--theme-text);
 
       /* hidden by default */
       opacity: 0;
@@ -62,8 +65,8 @@
       pointer-events: none;
     }
 
-    &:hover .lexical-upload__floater,
-    &__media:focus-within .lexical-upload__floater {
+    &:hover .LexicalEditorTheme__upload__floater,
+    &__media:focus-within .LexicalEditorTheme__upload__floater {
       opacity: 1;
       pointer-events: auto;
     }
@@ -79,8 +82,8 @@
       border-radius: $style-radius-m;
       transform: translateY(-6px);
     }
-    &:hover .lexical-upload__overlay,
-    &__media:focus-within .lexical-upload__overlay {
+    &:hover .LexicalEditorTheme__upload__overlay,
+    &__media:focus-within .LexicalEditorTheme__upload__overlay {
       transform: translateY(0);
     }
 
