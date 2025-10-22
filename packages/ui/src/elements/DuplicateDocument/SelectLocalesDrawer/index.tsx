@@ -1,8 +1,11 @@
 'use client'
 
-import type { LocalizationConfig } from 'payload'
+import type { I18nClient } from '@payloadcms/translations'
+import type { ClientConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
+import { setsAreEqual } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { CheckboxInput } from '../../../fields/Checkbox/index.js'
@@ -18,26 +21,22 @@ export type LocaleOption = {
 }
 
 export type SelectLocalesDrawerProps = {
-  readonly localization: LocalizationConfig
+  readonly localization: Exclude<ClientConfig['localization'], false>
   readonly onConfirm: (args: { selectedLocales: string[] }) => Promise<void> | void
   readonly slug: string
 }
 
-const arraysEqual = (a: string[] = [], b: string[] = []): boolean => {
-  if (a.length !== b.length) {
-    return false
-  }
-  const sortedA = [...a].sort()
-  const sortedB = [...b].sort()
-  return sortedA.every((v, i) => v === sortedB[i])
-}
-
-const getLocaleOptions = (localization: LocalizationConfig): LocaleOption[] => {
-  return localization.locales.map((locale) =>
-    typeof locale === 'string'
-      ? { label: locale, value: locale }
-      : { label: locale.label, value: locale.code },
-  )
+const getLocaleOptions = ({
+  i18n,
+  localization,
+}: {
+  i18n: I18nClient
+  localization: SelectLocalesDrawerProps['localization']
+}): LocaleOption[] => {
+  return localization.locales.map((locale) => ({
+    label: getTranslation(locale.label, i18n),
+    value: locale.code,
+  }))
 }
 
 const baseClass = 'select-locales-drawer'
@@ -47,14 +46,17 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
   localization,
   onConfirm,
 }) => {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { toggleModal } = useModal()
   const [selectedLocales, setSelectedLocales] = useState<string[]>([])
 
-  const localeOptions = useMemo(() => getLocaleOptions(localization), [localization])
+  const localeOptions = useMemo(
+    () => getLocaleOptions({ i18n, localization }),
+    [localization, i18n],
+  )
   const allLocales = useMemo(() => localeOptions.map((locale) => locale.value), [localeOptions])
   const allLocalesSelected = useMemo(
-    () => arraysEqual(selectedLocales, allLocales),
+    () => setsAreEqual(new Set(selectedLocales), new Set(allLocales)),
     [selectedLocales, allLocales],
   )
 
