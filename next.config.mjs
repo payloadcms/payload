@@ -42,8 +42,6 @@ const config = withBundleAnalyzer(
         remotePatterns: [
           {
             hostname: 'localhost',
-            port: '3000',
-            protocol: 'http',
           },
         ],
       },
