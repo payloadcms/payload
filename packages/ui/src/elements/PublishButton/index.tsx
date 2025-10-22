@@ -49,7 +49,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     serverURL,
   } = config
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
   const entityConfig = React.useMemo(() => {
@@ -190,7 +190,18 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         setMostRecentVersionIsAutosaved(false)
       }
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus, setUnpublishedVersionCount, setMostRecentVersionIsAutosaved],
+    [
+      api,
+      collectionSlug,
+      globalSlug,
+      id,
+      serverURL,
+      setHasPublishedDoc,
+      submit,
+      uploadStatus,
+      setUnpublishedVersionCount,
+      setMostRecentVersionIsAutosaved,
+    ],
   )
 
   const publishAll =
@@ -206,7 +217,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     activeLocale &&
     (typeof activeLocale.label === 'string'
       ? activeLocale.label
-      : (activeLocale.label?.[localeCode] ?? undefined))
+      : (activeLocale.label?.[i18n.language] ?? undefined))
 
   const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
   const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })

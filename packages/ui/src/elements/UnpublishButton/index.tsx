@@ -167,7 +167,7 @@ export function UnpublishButton() {
     activeLocale &&
     (typeof activeLocale.label === 'string'
       ? activeLocale.label
-      : (activeLocale.label?.[localeCode] ?? undefined))
+      : (activeLocale.label?.[i18n.language] ?? undefined))
 
   return (
     <React.Fragment>
