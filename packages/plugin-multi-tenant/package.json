@@ -98,7 +98,7 @@
   },
   "peerDependencies": {
     "@payloadcms/ui": "workspace:*",
-    "next": "16.0.0-beta.0",
+    "next": "^15.2.3 || ^16.0.0",
     "payload": "workspace:*"
   },
   "publishConfig": {
