@@ -1,21 +1,35 @@
-import type { Layout } from 'react-grid-layout'
-
 import { toast, useConfig, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
-import type { WidgetInstanceClient } from './client.js'
+import type { Layout, WidgetInstanceClient, WidgetItem } from './client.js'
 
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const setLayoutPreference = useSetLayoutPreference()
   const [isEditing, setIsEditing] = useState(false)
-  const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
   const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
+  const [currentLayout, setCurrentLayout] = useState<Layout>(() => {
+    const layout: Layout = [[]]
+    const columns = 12
+    let currentX = 0
+    initialLayout.forEach((item) => {
+      currentX += item.item.w
+      if (currentX > columns) {
+        currentX = 0
+        layout.push([item])
+      } else {
+        layout.at(-1).push(item)
+      }
+    })
+    return layout
+  })
 
   const saveLayout = useCallback(async () => {
     try {
-      const layoutData: Layout[] = currentLayout.map((item) => item.clientLayout)
+      const layoutData: WidgetItem[] = currentLayout.flatMap((item) =>
+        item.map((item) => item.item),
+      )
       setIsEditing(false)
       await setLayoutPreference(layoutData)
     } catch {
@@ -43,19 +57,9 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   }, [initialLayout])
 
   // Handle layout changes from react-grid-layout while preserving components
-  const handleLayoutChange = useCallback(
-    (newLayout: Layout[]) => {
-      if (isEditing) {
-        // Merge new layout positions with existing components
-        const updatedLayout = currentLayout.map((item, index) => ({
-          ...item,
-          clientLayout: newLayout[index] || item.clientLayout, // Use new layout if available, fallback to current
-        }))
-        setCurrentLayout(updatedLayout)
-      }
-    },
-    [isEditing, currentLayout],
-  )
+  const handleLayoutChange = useCallback(() => {
+    // TODO
+  }, [isEditing, currentLayout])
 
   const addWidget = useCallback(
     (widgetSlug: string) => {
@@ -68,26 +72,30 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 
       // Create a new widget instance using RenderWidget (Lexical pattern)
       const newWidgetInstance: WidgetInstanceClient = {
-        clientLayout: {
-          h: widget?.minHeight ?? 1,
+        component: React.createElement(RenderWidget, {
+          widgetId,
+          // TODO: widgetData can be added here for custom props
+        }),
+        item: {
           i: widgetId,
-          maxH: widget?.maxHeight ?? 3,
           maxW: widget?.maxWidth ?? 12,
-          minH: widget?.minHeight ?? 1,
           minW: widget?.minWidth ?? 3,
           resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
           w: widget?.minWidth ?? 3,
           x: 0, // Will be positioned automatically by react-grid-layout
           y: 0, // Will be positioned automatically by react-grid-layout
         },
-        component: React.createElement(RenderWidget, {
-          widgetId,
-          // TODO: widgetData can be added here for custom props
-        }),
       }
 
-      // Add the new widget to the current layout
-      setCurrentLayout([...currentLayout, newWidgetInstance])
+      const spaceLastRow = currentLayout.at(-1).reduce((acc, item) => acc + item.item.w, 0)
+      if (spaceLastRow + (widget?.minWidth ?? 3) > 12) {
+        setCurrentLayout((prev) => [...prev, [newWidgetInstance]])
+      } else {
+        setCurrentLayout((prev) => {
+          prev.at(-1).push(newWidgetInstance)
+          return prev
+        })
+      }
     },
     [isEditing, currentLayout],
   )
@@ -97,9 +105,20 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       if (!isEditing) {
         return
       }
-
-      // Remove widget from current layout
-      setCurrentLayout((prev) => prev.filter((item) => item.clientLayout.i !== widgetId))
+      const rowIndex = currentLayout.findIndex((row) =>
+        row.some((item) => item.item.i === widgetId),
+      )
+      if (rowIndex === -1) {
+        return
+      }
+      const itemIndex = currentLayout.at(rowIndex).findIndex((item) => item.item.i === widgetId)
+      if (itemIndex === -1) {
+        return
+      }
+      setCurrentLayout((prev) => {
+        prev.at(rowIndex).splice(itemIndex, 1)
+        return prev
+      })
     },
     [isEditing],
   )
@@ -120,7 +139,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 function useSetLayoutPreference() {
   const { setPreference } = usePreferences()
   return useCallback(
-    async (layout: Layout[] | null) => {
+    async (layout: null | WidgetItem[]) => {
       await setPreference('dashboard-layout', { layouts: layout }, false)
     },
     [setPreference],

@@ -33,20 +33,17 @@ export default buildConfigWithDefaults({
           {
             widgetSlug: 'collection-cards',
             width: 12,
-            height: 3,
           },
           ...Array.from(
             { length: 4 },
             (): WidgetInstance => ({
               widgetSlug: 'count',
               width: 3,
-              height: 1,
             }),
           ),
           {
             widgetSlug: 'revenue',
             width: 12,
-            height: 2,
           },
         ]
 
@@ -54,7 +51,6 @@ export default buildConfigWithDefaults({
           baseWidgets.push({
             widgetSlug: 'private',
             width: 12,
-            height: 1,
           })
         }
         return baseWidgets
@@ -74,8 +70,6 @@ export default buildConfigWithDefaults({
           slug: 'revenue',
           ComponentPath: './components/Revenue.tsx#default',
           minWidth: 6,
-          maxHeight: 2,
-          minHeight: 2,
         },
       ],
     },

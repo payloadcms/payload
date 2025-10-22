@@ -736,12 +736,8 @@ export type AfterErrorHook = (
 
 export type Widget = {
   ComponentPath: string
-  /** If undefined, will be set to 3 */
-  maxHeight?: 1 | 2 | 3
   /** If undefined, will be set to 12 */
   maxWidth?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
-  /** If undefined, will be set to 1 */
-  minHeight?: 1 | 2 | 3
   /** If undefined, will be set to 3 */
   minWidth?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
   slug: string
@@ -754,7 +750,6 @@ export type Widget = {
 export type WidgetInstance = {
   // TODO: should be inferred from Widget Fields
   // data: Record<string, any>
-  height?: 1 | 2 | 3
   widgetSlug: string
   width?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 }

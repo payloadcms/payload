@@ -8,16 +8,17 @@ import type {
   WidgetInstance,
   WidgetServerProps,
 } from 'payload'
-import type { Layout } from 'react-grid-layout'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import type { WidgetInstanceClient } from './client.js'
+import type { WidgetInstanceClient, WidgetItem } from './client.js'
 
 import { getPreferences } from '../../../../utilities/getPreferences.js'
 import { GridLayoutDashboardClient } from './client.js'
 import './index.scss'
+
+type ServerLayout = WidgetInstanceClient[]
 
 export async function GridLayoutDashboard(props: DashboardViewServerProps) {
   const { defaultLayout = [], widgets } = props.payload.config.admin.dashboard || {}
@@ -26,13 +27,12 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
   const { req } = props.initPageResult
 
   const layout =
-    (await getLayoutFromPreferences(props.payload, user)) ??
-    (await getLayoutFromConfig(defaultLayout, req, widgets))
+    (await getItemsFromPreferences(props.payload, user)) ??
+    (await getItemsFromConfig(defaultLayout, req, widgets))
 
-  const clientLayout: WidgetInstanceClient[] = layout.map((layoutItem) => {
+  const serverLayout: ServerLayout = layout.map((layoutItem) => {
     const widgetSlug = layoutItem.i.slice(0, layoutItem.i.lastIndexOf('-'))
     return {
-      clientLayout: layoutItem,
       component: RenderServerComponent({
         Component: widgets.find((w) => w.slug === widgetSlug)?.ComponentPath,
         importMap,
@@ -42,17 +42,21 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
           // widgetData: layoutItem.data,
         } satisfies WidgetServerProps,
       }),
+      item: layoutItem,
     }
   })
 
   return (
     <div>
-      <GridLayoutDashboardClient clientLayout={clientLayout} widgets={widgets} />
+      <GridLayoutDashboardClient clientLayout={serverLayout} widgets={widgets} />
     </div>
   )
 }
 
-async function getLayoutFromPreferences(payload: BasePayload, user: TypedUser) {
+async function getItemsFromPreferences(
+  payload: BasePayload,
+  user: TypedUser,
+): Promise<WidgetItem[]> {
   const savedPreferences = await getPreferences(
     'dashboard-layout',
     payload,
@@ -66,14 +70,14 @@ async function getLayoutFromPreferences(payload: BasePayload, user: TypedUser) {
   ) {
     return null
   }
-  return savedPreferences.value.layouts as Layout[] | null
+  return savedPreferences.value.layouts as null | WidgetItem[]
 }
 
-async function getLayoutFromConfig(
+async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
   widgets: Widget[],
-): Promise<Layout[]> {
+): Promise<WidgetItem[]> {
   // Handle function format
   let widgetInstances: WidgetInstance[]
   if (typeof defaultLayout === 'function') {
@@ -101,11 +105,8 @@ async function getLayoutFromConfig(
     const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
 
     return {
-      h: widgetInstance.height || 1,
       i: `${widgetInstance.widgetSlug}-${index}`,
-      maxH: widget?.maxHeight ?? 3,
       maxW: widget?.maxWidth ?? 12,
-      minH: widget?.minHeight ?? 1,
       minW: widget?.minWidth ?? 3,
       resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
       w: widgetInstance.width || 3,

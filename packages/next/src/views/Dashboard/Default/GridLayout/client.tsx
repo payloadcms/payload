@@ -11,10 +11,31 @@ import React, { useId } from 'react'
 
 import { useDashboardLayout } from './useDashboardLayout.js'
 
-export type WidgetInstanceClient = {
-  clientLayout: any
-  component: React.ReactNode
+export type WidgetItem = {
+  i: string
+  maxW: number
+  minW: number
+  resizeHandles: string[]
+  w: number
+  x: number
+  y: number
 }
+
+export type WidgetInstanceClient = {
+  component: React.ReactNode
+  item: {
+    i: string
+    maxW: number
+    minW: number
+    resizeHandles: string[]
+    w: number
+    x: number
+    y: number
+  }
+}
+
+export type Row = WidgetInstanceClient[]
+export type Layout = Row[]
 
 export function GridLayoutDashboardClient({
   clientLayout: initialLayout,
@@ -56,24 +77,33 @@ export function GridLayoutDashboardClient({
           },
         ]}
       />
-      <div className={`grid-layout ${isEditing ? 'editing' : ''}`}>
+      <div
+        className={`grid-layout ${isEditing ? 'editing' : ''}`}
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
         {currentLayout &&
-          currentLayout.map((widget) => (
+          currentLayout.flat().map((widget) => (
             <div
               className="widget"
-              data-columns={widget.clientLayout.w}
-              data-rows={widget.clientLayout.h}
-              data-slug={widget.clientLayout.i}
-              key={widget.clientLayout.i}
+              data-columns={widget.item.w}
+              data-slug={widget.item.i}
+              key={widget.item.i}
+              style={{
+                width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
+              }}
             >
               <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
                 <div className="widget-content">{widget.component}</div>
                 {isEditing && (
                   <button
                     className="widget-wrapper__delete-btn"
-                    onClick={() => deleteWidget(widget.clientLayout.i)}
+                    onClick={() => deleteWidget(widget.item.i)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    title={`Delete widget ${widget.clientLayout.i}`}
+                    title={`Delete widget ${widget.item.i}`}
                     type="button"
                   >
                     <XIcon />
