@@ -5,7 +5,7 @@ import type { PluginMCPServerConfig } from './types.js'
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
 
-export const pluginMCP =
+export const mcpPlugin =
   (pluginOptions: PluginMCPServerConfig) =>
   (config: Config): Config => {
     if (!config.collections) {

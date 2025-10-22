@@ -1,5 +1,5 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { pluginMCP } from '@payloadcms/plugin-mcp'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
@@ -23,7 +23,7 @@ export default buildConfigWithDefaults({
   collections: [Users, Media, Posts, Products],
   onInit: seed,
   plugins: [
-    pluginMCP({
+    mcpPlugin({
       overrideApiKeyCollection: (collection) => {
         collection.fields.push({
           name: 'override',

@@ -46,7 +46,7 @@ In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/conf
 
 ```ts
 import { buildConfig } from 'payload'
-import { pluginMCP } from '@payloadcms/plugin-mcp'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
 const config = buildConfig({
   collections: [
@@ -56,7 +56,7 @@ const config = buildConfig({
     },
   ],
   plugins: [
-    pluginMCP({
+    mcpPlugin({
       collections: {
         posts: {
           enabled: true,
@@ -125,7 +125,7 @@ The plugin automatically creates an **API Keys** collection that provides high-r
 You can customize this collection using the `overrideApiKeyCollection` option:
 
 ```ts
-pluginMCP({
+mcpPlugin({
   overrideApiKeyCollection: (collection) => {
     // Add custom fields to the API Keys collection
     collection.fields.push({
@@ -305,7 +305,7 @@ The description in this example is more difficult for a model to understand it's
 const config = buildConfig({
   // ...
   plugins: [
-    pluginMCP({
+    mcpPlugin({
       collections: {
         posts: {
           enabled: true,
@@ -324,7 +324,7 @@ The description in this example gives a model a stronger ability to know when to
 const config = buildConfig({
   // ...
   plugins: [
-    pluginMCP({
+    mcpPlugin({
       collections: {
         posts: {
           enabled: true,
