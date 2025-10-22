@@ -78,7 +78,7 @@ export type Options<
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TLocale
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -174,6 +174,7 @@ export async function findLocal<
     )
   }
 
+  // @ts-expect-error
   return findOperation<TSlug, TSelect>({
     collection,
     currentDepth,

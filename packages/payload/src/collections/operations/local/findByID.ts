@@ -77,11 +77,12 @@ export type Options<
    * The [Join Field Query](https://payloadcms.com/docs/fields/join#query-options).
    * Pass `false` to disable all join fields from the result.
    */
-  joins?: JoinQuery<TSlug>
-  /**
-   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-   */
-  locale?: TLocale
+  joins?:
+    | 'all'
+    /**
+     * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
+     */
+    | JoinQuery<TSlug>
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -156,6 +157,7 @@ export async function findByIDLocal<
     )
   }
 
+  // @ts-expect-error
   return findByIDOperation<TSlug, TDisableErrors, TSelect>({
     id,
     collection,
