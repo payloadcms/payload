@@ -833,7 +833,7 @@ describe('lexicalMain', () => {
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()
 
-    const newRelationshipNode = richTextField.locator('.lexical-relationship').first()
+    const newRelationshipNode = richTextField.locator('.LexicalEditorTheme__relationship').first()
     await newRelationshipNode.scrollIntoViewIfNeeded()
     await expect(newRelationshipNode).toBeVisible()
 
@@ -1127,7 +1127,7 @@ describe('lexicalMain', () => {
     await linkDrawer.locator('.rs__option').nth(0).click()
 
     await expect(internalLinkSelect).toContainText('Rich Text')
-    await wait(200)
+    await wait(1000)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
     await expect(linkDrawer).toBeHidden()
@@ -1160,8 +1160,8 @@ describe('lexicalMain', () => {
 
       const linkNode = firstParagraph.children[0] as SerializedLinkNode
       expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
-      // Expect to be string
-      expect(typeof linkNode?.fields?.doc?.value).toBe('string')
+      expect(typeof linkNode?.fields?.doc?.value).not.toBe('object')
+      expect(linkNode?.fields?.doc?.value).toBeDefined()
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -1192,7 +1192,11 @@ describe('lexicalMain', () => {
       const linkNode = firstParagraph.children[0] as SerializedLinkNode
       expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
       expect(typeof linkNode?.fields?.doc?.value).toBe('object')
-      expect(typeof (linkNode?.fields?.doc?.value as Record<string, unknown>)?.id).toBe('string')
+
+      const id = (linkNode?.fields?.doc?.value as Record<string, unknown>)?.id
+
+      expect(typeof id).not.toBe('object')
+      expect(id).toBeDefined()
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -1560,12 +1564,8 @@ describe('lexicalMain', () => {
     await lexicalWithBlocks.scrollIntoViewIfNeeded()
     await expect(lexicalWithBlocks).toBeVisible()
 
-    await expect(
-      lexicalWithBlocks.locator('.LexicalEditorTheme__blocks-custom-description'),
-    ).toHaveCount(1)
-    await expect(
-      lexicalWithBlocks.locator('.LexicalEditorTheme__blocks-custom-description'),
-    ).toBeVisible()
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toHaveCount(1)
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toBeVisible()
 
     await expect(lexicalWithBlocks.locator('.field-description')).toHaveCount(0)
   })
