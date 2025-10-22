@@ -69,6 +69,8 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.beforeLogin)
   addToImportMap(config.admin?.components?.beforeNavLinks)
 
+  addToImportMap(config.admin?.components?.emptyDashboard)
+
   addToImportMap(config.admin?.components?.providers)
 
   if (config.admin?.components?.views) {
