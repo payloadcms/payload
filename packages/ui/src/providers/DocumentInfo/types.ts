@@ -29,6 +29,7 @@ export type DocumentInfoProps = {
   readonly disableLeaveWithoutSaving?: boolean
   readonly docPermissions?: SanitizedDocumentPermissions
   readonly globalSlug?: SanitizedGlobalConfig['slug']
+  readonly hasLocalizedFields: boolean
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
@@ -61,6 +62,7 @@ export type DocumentInfoContext = {
   } | null>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
+  hasLocalizedFields: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
   preferencesKey?: string

@@ -27,8 +27,8 @@
       --hover-color: var(--color);
 
       &.btn--disabled {
-        --bg-color: var(--theme-elevation-200);
-        --color: var(--theme-elevation-800);
+        --bg-color: var(--theme-elevation-100);
+        --color: var(--theme-elevation-400);
         --hover-bg: var(--bg-color);
         --hover-color: var(--color);
       }

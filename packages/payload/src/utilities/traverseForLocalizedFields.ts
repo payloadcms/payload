@@ -1,6 +1,6 @@
-import type { ClientField } from 'payload'
+import type { ClientField, Field } from '../fields/config/types.js'
 
-export const traverseForLocalizedFields = (fields: ClientField[]): boolean => {
+export const traverseForLocalizedFields = (fields: (ClientField | Field)[]): boolean => {
   for (const field of fields) {
     if ('localized' in field && field.localized) {
       return true

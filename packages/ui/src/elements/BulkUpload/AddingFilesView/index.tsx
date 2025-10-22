@@ -2,7 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { reduceFieldsToValues } from 'payload/shared'
+import { reduceFieldsToValues, traverseForLocalizedFields } from 'payload/shared'
 import React from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'
@@ -54,6 +54,7 @@ export function AddingFilesView() {
             collectionSlug={collectionSlug}
             currentEditor={user}
             docPermissions={docPermissions}
+            hasLocalizedFields={traverseForLocalizedFields(collectionConfig.fields)}
             hasPublishedDoc={false}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}

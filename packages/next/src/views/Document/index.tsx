@@ -22,7 +22,7 @@ import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
 import { logError } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, traverseForLocalizedFields } from 'payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -370,6 +370,9 @@ export const renderDocument = async ({
         disableActions={disableActions ?? false}
         docPermissions={docPermissions}
         globalSlug={globalConfig?.slug}
+        hasLocalizedFields={
+          config.localization && traverseForLocalizedFields(collectionConfig.fields)
+        }
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}

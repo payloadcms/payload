@@ -1,8 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
@@ -14,7 +13,6 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 export function UnpublishButton() {
@@ -24,6 +22,7 @@ export function UnpublishButton() {
     data: dataFromProps,
     docConfig,
     globalSlug,
+    hasLocalizedFields,
     hasPublishedDoc,
     incrementVersionCount,
     setHasPublishedDoc,
@@ -32,7 +31,7 @@ export function UnpublishButton() {
   } = useDocumentInfo()
   const { toggleModal } = useModal()
 
-  const { config, getEntityConfig } = useConfig()
+  const { config } = useConfig()
   const { reset: resetForm } = useForm()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
@@ -47,23 +46,6 @@ export function UnpublishButton() {
   } = config
 
   const { i18n, t } = useTranslation()
-
-  const entityConfig = React.useMemo(() => {
-    if (collectionSlug) {
-      return getEntityConfig({ collectionSlug })
-    }
-
-    if (globalSlug) {
-      return getEntityConfig({ globalSlug })
-    }
-  }, [collectionSlug, globalSlug, getEntityConfig])
-
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
-
-  useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
-    setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
 
   const unpublish = useCallback(
     (unpublishSpecificLocale?: boolean) => {

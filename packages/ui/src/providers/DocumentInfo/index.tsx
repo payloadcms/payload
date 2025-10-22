@@ -34,6 +34,7 @@ const DocumentInfo: React.FC<
     currentEditor: currentEditorFromProps,
     docPermissions: docPermissionsFromProps,
     globalSlug,
+    hasLocalizedFields: hasLocalizedFieldsFromProps,
     hasPublishedDoc: hasPublishedDocFromProps,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
@@ -116,6 +117,7 @@ const DocumentInfo: React.FC<
   const [uploadStatus, setUploadStatus] = useControllableState<'failed' | 'idle' | 'uploading'>(
     'idle',
   )
+  const [hasLocalizedFields, setHasLocalizedFields] = useState(hasLocalizedFieldsFromProps)
 
   const documentLockState = useRef<{
     hasShownLockedModal: boolean
@@ -363,6 +365,7 @@ const DocumentInfo: React.FC<
     documentLockState,
     getDocPermissions,
     getDocPreferences,
+    hasLocalizedFields,
     hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,

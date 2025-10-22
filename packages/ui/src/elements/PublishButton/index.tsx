@@ -4,7 +4,7 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -15,7 +15,6 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
@@ -25,6 +24,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     collectionSlug,
     docConfig,
     globalSlug,
+    hasLocalizedFields,
     hasPublishedDoc,
     hasPublishPermission,
     setHasPublishedDoc,
@@ -86,13 +86,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       (globalSlug || (collectionSlug && id)) &&
       (hasAutosave || !modified),
   )
-
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
-
-  useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
-    setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
 
   const canPublishSpecificLocale = localization && hasLocalizedFields && hasPublishPermission
 

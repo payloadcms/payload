@@ -4,6 +4,7 @@ import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@p
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
+import { traverseForLocalizedFields } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -120,6 +121,9 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
         collectionSlug={userSlug}
         currentEditor={currentEditor}
         docPermissions={docPermissions}
+        hasLocalizedFields={
+          config.localization && traverseForLocalizedFields(collectionConfig.fields)
+        }
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}

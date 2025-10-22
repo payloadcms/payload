@@ -60,32 +60,31 @@ export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
-
 export { extractID } from '../utilities/extractID.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
+
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
-
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
+
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
-
 export { getSelectMode } from '../utilities/getSelectMode.js'
 
 export { getSiblingData } from '../utilities/getSiblingData.js'
@@ -125,6 +124,8 @@ export {
 } from '../utilities/transformColumnPreferences.js'
 
 export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
+
+export { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 
 export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'
