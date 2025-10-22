@@ -1532,9 +1532,6 @@ importers:
 
   packages/sdk:
     dependencies:
-      payload:
-        specifier: workspace:*
-        version: link:../payload
       qs-esm:
         specifier: 7.0.2
         version: 7.0.2
@@ -1545,6 +1542,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      payload:
+        specifier: workspace:*
+        version: link:../payload
 
   packages/storage-azure:
     dependencies:
