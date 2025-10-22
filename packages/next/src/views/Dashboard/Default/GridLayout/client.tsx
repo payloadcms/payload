@@ -40,7 +40,7 @@ export function GridLayoutDashboardClient({
     cancel,
     currentLayout,
     deleteWidget,
-    handleDragEnd,
+    handleDragOver,
     isEditing,
     resetLayout,
     saveLayout,
@@ -71,7 +71,8 @@ export function GridLayoutDashboardClient({
       <DraggableSortable
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         ids={currentLayout.map((w) => w.item.i)}
-        onDragEnd={handleDragEnd}
+        onDragEnd={() => void 0} // noop - we use onDragOver instead
+        onDragOver={handleDragOver}
       >
         <div
           style={{

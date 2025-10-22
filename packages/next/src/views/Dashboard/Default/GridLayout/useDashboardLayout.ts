@@ -40,13 +40,23 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     setIsEditing(false)
   }, [initialLayout])
 
-  const handleDragEnd = useCallback(
+  const handleDragOver = useCallback(
     ({ moveFromIndex, moveToIndex }: { moveFromIndex: number; moveToIndex: number }) => {
-      if (!isEditing || moveFromIndex === moveToIndex) {
+      if (
+        !isEditing ||
+        moveFromIndex === moveToIndex ||
+        moveFromIndex === -1 ||
+        moveToIndex === -1
+      ) {
         return
       }
 
       setCurrentLayout((prev) => {
+        // Check if this reorder is needed (prevents unnecessary updates)
+        if (prev[moveFromIndex]?.item.i === prev[moveToIndex]?.item.i) {
+          return prev
+        }
+
         const newLayout = [...prev]
         const [movedItem] = newLayout.splice(moveFromIndex, 1)
         newLayout.splice(moveToIndex, 0, movedItem)
@@ -102,7 +112,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     cancel,
     currentLayout,
     deleteWidget,
-    handleDragEnd,
+    handleDragOver,
     isEditing,
     resetLayout,
     saveLayout,

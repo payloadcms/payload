@@ -1,4 +1,4 @@
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import type { Ref } from 'react'
 
 export type Props = {
@@ -7,5 +7,6 @@ export type Props = {
   droppableRef?: Ref<HTMLElement>
   ids: string[]
   onDragEnd: (e: { event: DragEndEvent; moveFromIndex: number; moveToIndex: number }) => void
+  onDragOver?: (e: { event: DragOverEvent; moveFromIndex: number; moveToIndex: number }) => void
   onDragStart?: (e: { event: DragStartEvent; id: number | string }) => void
 }
