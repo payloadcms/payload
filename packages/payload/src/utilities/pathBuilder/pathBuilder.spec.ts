@@ -17,6 +17,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().text('title').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'title',
         schemaPath: 'title',
       })
@@ -26,6 +27,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().group('meta').richText('description').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'meta.description',
         schemaPath: 'meta.description',
       })
@@ -41,6 +43,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'collection.pages.title',
         schemaPath: 'collection.pages.title',
       })
@@ -54,6 +57,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'collection.pages.123.title',
         schemaPath: 'collection.pages.title',
       })
@@ -67,6 +71,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'collection.pages.abc123.slug',
         schemaPath: 'collection.pages.slug',
       })
@@ -76,6 +81,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder({ withEntity: true }).globals('header').text('title').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'global.header.title',
         schemaPath: 'global.header.title',
       })
@@ -89,6 +95,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'global.settings.site.name',
         schemaPath: 'global.settings.site.name',
       })
@@ -100,6 +107,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().array('items').index(0).text('name').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'items.0.name',
         schemaPath: 'items.name',
       })
@@ -109,6 +117,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().array('items').index(5).text('name').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'items.5.name',
         schemaPath: 'items.name',
       })
@@ -118,6 +127,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().array('items').noIndex().text('name').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: null,
         schemaPath: 'items.name',
       })
@@ -133,6 +143,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'categories.0.items.2.name',
         schemaPath: 'categories.items.name',
       })
@@ -142,6 +153,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().array('items').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'items',
         schemaPath: 'items',
       })
@@ -158,6 +170,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content.0.title',
         schemaPath: 'content.heroBlock.title',
       })
@@ -172,6 +185,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: null,
         schemaPath: 'content.heroBlock.title',
       })
@@ -189,6 +203,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'layout.0.content.1.body',
         schemaPath: 'layout.section.content.textBlock.body',
       })
@@ -198,6 +213,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().blocks('content').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content',
         schemaPath: 'content',
       })
@@ -207,6 +223,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().blocks('content').block('heroBlock').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content',
         schemaPath: 'content.heroBlock',
       })
@@ -224,6 +241,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content.0.meta.description',
         schemaPath: 'content.heroBlock.meta.description',
       })
@@ -240,6 +258,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'sections.0.features.2.title',
         schemaPath: 'sections.featureList.features.title',
       })
@@ -256,6 +275,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'columns.1.content.0.text',
         schemaPath: 'columns.content.textBlock.text',
       })
@@ -270,6 +290,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'settings.appearance.colors.primary',
         schemaPath: 'settings.appearance.colors.primary',
       })
@@ -335,6 +356,7 @@ describe('PathBuilder', () => {
     it('should handle tabs field with named tab', () => {
       const result = getPathBuilder().tabs().schemaIndex(0).tab('settings').text('apiKey').build()
       expect(result).toEqual({
+        indexPath: '',
         path: 'settings.apiKey',
         schemaPath: '_index-0.settings.apiKey',
       })
@@ -343,6 +365,7 @@ describe('PathBuilder', () => {
     it('should handle collapsible field', () => {
       const result = getPathBuilder().collapsible().schemaIndex(0).checkbox('enabled').build()
       expect(result).toEqual({
+        indexPath: '',
         path: 'enabled',
         schemaPath: '_index-0.enabled',
       })
@@ -354,6 +377,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: '',
         schemaPath: '',
       })
@@ -369,6 +393,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: null,
         schemaPath: 'items.nested.value',
       })
@@ -377,6 +402,7 @@ describe('PathBuilder', () => {
     it('should handle noSchemaIndex calls', () => {
       const result = getPathBuilder().group().noSchemaIndex().text('value').build()
       expect(result).toEqual({
+        indexPath: '',
         path: 'value',
         schemaPath: null,
       })
@@ -392,6 +418,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: null,
         schemaPath: 'first.second.value',
       })
@@ -400,6 +427,7 @@ describe('PathBuilder', () => {
     it('should handle schema index path at the end of the path', () => {
       const result = getPathBuilder().group().schemaIndex(0).row().schemaIndex(1).build()
       expect(result).toEqual({
+        indexPath: '_index-0-1',
         path: '_index-0-1',
         schemaPath: '_index-0-1',
       })
@@ -408,6 +436,7 @@ describe('PathBuilder', () => {
     it('should handle schema index path at the end of the path, when schemaIndex was discarded before', () => {
       const result = getPathBuilder().group('named').row().schemaIndex(1).build()
       expect(result).toEqual({
+        indexPath: '_index-1',
         path: 'named._index-1',
         schemaPath: 'named._index-1',
       })
@@ -421,23 +450,28 @@ describe('PathBuilder', () => {
       const branch4 = basePathBuilder.group('branch3').collapsible().schemaIndex(2)
 
       expect(branch1.build()).toEqual({
+        indexPath: '',
         path: 'base.branch1',
         schemaPath: 'base.branch1',
       })
       expect(branch2.build()).toEqual({
+        indexPath: '',
         path: 'base.branch2.text',
         schemaPath: 'base.branch2.text',
       })
       expect(branch3.build()).toEqual({
+        indexPath: '',
         path: 'base.branch3.text',
         schemaPath: 'base.branch3._index-0.text',
       })
       expect(branch4.build()).toEqual({
+        indexPath: '_index-2',
         path: 'base.branch3._index-2',
         schemaPath: 'base.branch3._index-2',
       })
       // Build basePath at the end
       expect(basePathBuilder.build()).toEqual({
+        indexPath: '',
         path: 'base',
         schemaPath: 'base',
       })
@@ -450,6 +484,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(field).build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'title',
         schemaPath: 'title',
       })
@@ -460,6 +495,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(field).index(0).text('label').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'items.0.label',
         schemaPath: 'items.label',
       })
@@ -470,6 +506,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(field).text('title').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'hero.title',
         schemaPath: 'hero.title',
       })
@@ -480,6 +517,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(field).schemaIndex(0).text('content').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content',
         schemaPath: '_index-0.content',
       })
@@ -490,6 +528,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(field).schemaIndex(1).text('title').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'title',
         schemaPath: '_index-1.title',
       })
@@ -500,6 +539,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(field).schemaIndex(2).text('label').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'label',
         schemaPath: '_index-2.label',
       })
@@ -515,6 +555,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content.body',
         schemaPath: '_index-0.content.body',
       })
@@ -526,6 +567,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().field(groupField).field(textField).build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'hero.title',
         schemaPath: 'hero.title',
       })
@@ -542,6 +584,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'blocksFieldName.2.description',
         schemaPath: 'blocksFieldName.content.description',
       })
@@ -556,6 +599,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'variants.0.pricing.price',
         schemaPath: 'variants.pricing.price',
       })
@@ -572,6 +616,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content.1.images.3.image',
         schemaPath: 'content.imageGallery.images.image',
       })
@@ -586,6 +631,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'fields.0.label',
         schemaPath: 'fields.textField.label',
       })
@@ -601,6 +647,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'general.site.title',
         schemaPath: '_index-0.general.site.title',
       })
@@ -617,6 +664,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'settings.value',
         schemaPath: 'settings._index-2-1.value',
       })
@@ -626,6 +674,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().group().schemaIndex(0).text('title').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'title',
         schemaPath: '_index-0.title',
       })
@@ -635,6 +684,7 @@ describe('PathBuilder', () => {
       const result = getPathBuilder().row().schemaIndex(1).text('content').build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'content',
         schemaPath: '_index-1.content',
       })
@@ -654,6 +704,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'fieldWithinNestedUnnamedTab',
         schemaPath: '_index-3-0-1-0.fieldWithinNestedUnnamedTab',
       })
@@ -668,6 +719,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'namedTab.fieldWithinNamedTab',
         schemaPath: '_index-3.namedTab.fieldWithinNamedTab',
       })
@@ -683,6 +735,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'items.0.fieldWithinRowWithinArray',
         schemaPath: 'items._index-2.fieldWithinRowWithinArray',
       })
@@ -697,6 +750,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'settings.value',
         schemaPath: '_index-1.settings.value',
       })
@@ -712,6 +766,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'nested',
         schemaPath: '_index-0-1.nested',
       })
@@ -728,6 +783,7 @@ describe('PathBuilder', () => {
         .build()
 
       expect(result).toEqual({
+        indexPath: '',
         path: 'named.field',
         schemaPath: '_index-0.named._index-2.field',
       })
@@ -744,6 +800,7 @@ describe('PathBuilder', () => {
 
       expect(childResult).toEqual(parentResult)
       expect(childResult).toEqual({
+        indexPath: '',
         path: 'hero',
         schemaPath: 'hero',
       })
@@ -758,6 +815,7 @@ describe('PathBuilder', () => {
 
       expect(childResult).toEqual(parentResult)
       expect(childResult).toEqual({
+        indexPath: '',
         path: 'hero',
         schemaPath: 'hero',
       })
@@ -772,6 +830,7 @@ describe('PathBuilder', () => {
 
       expect(childResult).toEqual(parentResult)
       expect(childResult).toEqual({
+        indexPath: '',
         path: 'hero',
         schemaPath: 'hero',
       })
@@ -786,6 +845,7 @@ describe('PathBuilder', () => {
 
       expect(childResult).toEqual(parentResult)
       expect(childResult).toEqual({
+        indexPath: '',
         path: 'hero',
         schemaPath: 'hero',
       })
@@ -803,6 +863,7 @@ describe('PathBuilder', () => {
 
       expect(childResult).toEqual(parentResult)
       expect(childResult).toEqual({
+        indexPath: '',
         path: 'outer.inner',
         schemaPath: 'outer.inner',
       })

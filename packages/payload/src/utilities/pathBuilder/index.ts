@@ -2,6 +2,11 @@ import type { ClientField, Field } from '../../index.js'
 
 type PathResult = {
   /**
+   * The accumulated index path at the end of the path (e.g., '_index-0-1')
+   * Empty string if the path does not end with an index path
+   */
+  indexPath: string
+  /**
    * Path for accessing data (e.g., 'blocks.0.content.title')
    * Can be null when noIndex() is used
    */
@@ -483,6 +488,10 @@ const methods = {
   },
 
   build(this: PathBuilderState): PathResult {
+    // Calculate indexPath from accumulated indices before flushing
+    const indexPath =
+      this.accumulatedIndices.length > 0 ? `_index-${this.accumulatedIndices.join('-')}` : ''
+
     // Flush any remaining accumulated indices before building
     // Include in path since we're at the end (no named field follows)
     flushAccumulatedIndices(this, true)
@@ -499,6 +508,7 @@ const methods = {
     }
 
     return {
+      indexPath,
       path: this.hasNoIndex ? null : path,
       schemaPath: this.hasNoSchemaIndex ? null : schemaPath,
     }
