@@ -733,4 +733,79 @@ describe('PathBuilder', () => {
       })
     })
   })
+
+  describe('Unnamed layout fields without continuation', () => {
+    it('should handle .group() without schemaIndex or nested fields - result should match parent', () => {
+      const parent = getPathBuilder().group('hero')
+      const parentResult = parent.build()
+
+      const child = parent.group()
+      const childResult = child.build()
+
+      expect(childResult).toEqual(parentResult)
+      expect(childResult).toEqual({
+        path: 'hero',
+        schemaPath: 'hero',
+      })
+    })
+
+    it('should handle .row() without schemaIndex or nested fields - result should match parent', () => {
+      const parent = getPathBuilder().group('hero')
+      const parentResult = parent.build()
+
+      const child = parent.row()
+      const childResult = child.build()
+
+      expect(childResult).toEqual(parentResult)
+      expect(childResult).toEqual({
+        path: 'hero',
+        schemaPath: 'hero',
+      })
+    })
+
+    it('should handle .collapsible() without schemaIndex or nested fields - result should match parent', () => {
+      const parent = getPathBuilder().group('hero')
+      const parentResult = parent.build()
+
+      const child = parent.collapsible()
+      const childResult = child.build()
+
+      expect(childResult).toEqual(parentResult)
+      expect(childResult).toEqual({
+        path: 'hero',
+        schemaPath: 'hero',
+      })
+    })
+
+    it('should handle .tabs() without schemaIndex or nested fields - result should match parent', () => {
+      const parent = getPathBuilder().group('hero')
+      const parentResult = parent.build()
+
+      const child = parent.tabs()
+      const childResult = child.build()
+
+      expect(childResult).toEqual(parentResult)
+      expect(childResult).toEqual({
+        path: 'hero',
+        schemaPath: 'hero',
+      })
+    })
+
+    it('should handle nested unnamed fields without continuation - result should match parent', () => {
+      const parent = getPathBuilder().group('outer').group('inner')
+      const parentResult = parent.build()
+
+      // @ts-expect-error - TypeScript correctly prevents this from being called on a group field.
+      // This test ensures the result is expected in case type checking is circumvented, e.g. when using
+      // field({type: 'row'} as unknown as Field)
+      const child = parent.group().row().collapsible()
+      const childResult = child.build()
+
+      expect(childResult).toEqual(parentResult)
+      expect(childResult).toEqual({
+        path: 'outer.inner',
+        schemaPath: 'outer.inner',
+      })
+    })
+  })
 })
