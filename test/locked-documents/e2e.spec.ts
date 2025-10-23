@@ -793,6 +793,35 @@ describe('Locked Documents', () => {
       expect(page.url()).toContain(postsUrl.list)
     })
 
+    test('should properly close modal and allow re-opening after clicking Go Back', async () => {
+      await page.goto(postsUrl.list)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // First time: navigate to locked document
+      await page.goto(postsUrl.edit(postDoc.id))
+
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click Go Back
+      await page.locator('#document-locked-go-back').click()
+
+      // Wait for navigation to complete
+      await page.waitForURL(`**${postsUrl.list}`)
+
+      // Modal should be completely closed
+      await expect(modalContainer).toBeHidden()
+
+      // Second time: navigate to the same locked document again
+      await page.goto(postsUrl.edit(postDoc.id))
+
+      // Modal should appear again (verifies no stuck modal state)
+      await expect(modalContainer).toBeVisible()
+      await expect(page.locator('#document-locked-go-back')).toBeVisible()
+    })
+
     test('should not show Document Locked modal for incoming user when entering expired locked document', async () => {
       await page.goto(testsUrl.list)
 

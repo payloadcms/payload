@@ -22,7 +22,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   published,
   query,
   req,
-}: Args): Promise<T> => {
+}: Args): Promise<T | undefined> => {
   let latestVersion!: TypeWithVersion<T>
 
   const whereQuery = published
@@ -45,10 +45,10 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     if (!published) {
       const doc = await payload.db.findOne<T>({ ...query, req })
 
-      return doc!
+      return doc ?? undefined
     }
 
-    return undefined!
+    return undefined
   }
 
   latestVersion.version.id = id

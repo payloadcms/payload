@@ -44,7 +44,7 @@ describe('Lexical Fully Featured', () => {
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
     await lexical.slashCommand('myblock')
-    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
+    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
     await lexical.slashCommand('relationship', true, 'Relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.save('drawer')
@@ -154,7 +154,7 @@ describe('Lexical Fully Featured', () => {
 
   test('ensure code block can be created using slash commands', async ({ page }) => {
     await lexical.slashCommand('code')
-    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
 
@@ -174,7 +174,7 @@ describe('Lexical Fully Featured', () => {
     page,
   }) => {
     await page.keyboard.type('```ts ')
-    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
 
@@ -193,7 +193,7 @@ describe('Lexical Fully Featured', () => {
     page,
   }) => {
     await lexical.slashCommand('payloadcode')
-    const codeBlock = lexical.editor.locator('.lexical-block-PayloadCode')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-PayloadCode')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
 

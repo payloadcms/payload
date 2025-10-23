@@ -773,9 +773,14 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig
 }
 
+export type LocalizedMeta = {
+  [locale: string]: {
+    status: 'draft' | 'published'
+    updatedAt: string
+  }
+}
+
 export type TypeWithID = {
-  deletedAt?: null | string
-  docId?: any
   id: number | string
 }
 

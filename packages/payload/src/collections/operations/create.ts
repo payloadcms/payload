@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 
+import type { CollectionSlug, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -23,7 +24,7 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
-import { type CollectionSlug, type JsonObject } from '../../index.js'
+import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
@@ -32,8 +33,6 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
-import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -119,7 +118,7 @@ export const createOperation = async <
 
     let { data } = args
 
-    const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts)
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -128,10 +127,10 @@ export const createOperation = async <
       const duplicateResult = await getDuplicateDocumentData({
         id: duplicateFromID,
         collectionConfig,
-        draftArg: shouldSaveDraft,
+        draftArg: isSavingDraft,
+        isSavingDraft,
         overrideAccess,
         req,
-        shouldSaveDraft,
       })
 
       duplicatedFromDoc = duplicateResult.duplicatedFromDoc
@@ -160,7 +159,7 @@ export const createOperation = async <
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
-        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
+        !isSavingDraft && collection.config.upload.filesRequiredOnCreate !== false,
     })
 
     data = newFileData
@@ -248,45 +247,21 @@ export const createOperation = async <
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    let resultWithLocales: JsonObject | null = null
-    if (unwrappedLocalesData) {
-      const originalLocale = req.locale
-      for (const locale of Object.keys(unwrappedLocalesData)) {
-        req.locale = locale
-        resultWithLocales = await beforeChange<JsonObject>({
-          collection: collectionConfig,
-          context: req.context,
-          data: unwrappedLocalesData[locale],
-          doc: duplicatedFromDoc,
-          docWithLocales: resultWithLocales || duplicatedFromDocWithLocales,
-          global: null,
-          operation: 'create',
-          overrideAccess,
-          req,
-          skipValidation:
-            shouldSaveDraft &&
-            collectionConfig.versions.drafts &&
-            !collectionConfig.versions.drafts.validate,
-        })
-      }
-      req.locale = originalLocale
-    } else {
-      resultWithLocales = await beforeChange<JsonObject>({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        doc: duplicatedFromDoc,
-        docWithLocales: duplicatedFromDocWithLocales,
-        global: null,
-        operation: 'create',
-        overrideAccess,
-        req,
-        skipValidation:
-          shouldSaveDraft &&
-          collectionConfig.versions.drafts &&
-          !collectionConfig.versions.drafts.validate,
-      })
-    }
+    const resultWithLocales = await beforeChange<JsonObject>({
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      global: null,
+      operation: 'create',
+      overrideAccess,
+      req,
+      skipValidation:
+        isSavingDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
+    })
 
     // /////////////////////////////////////
     // Write files to local storage
@@ -310,13 +285,13 @@ export const createOperation = async <
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
-        resultWithLocales!._verified = Boolean(resultWithLocales!._verified) || false
-        resultWithLocales!._verificationToken = crypto.randomBytes(20).toString('hex')
+        resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
+        resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
       }
 
       doc = await registerLocalStrategy({
         collection: collectionConfig,
-        doc: resultWithLocales!,
+        doc: resultWithLocales,
         password: data.password as string,
         payload: req.payload,
         req,
@@ -324,7 +299,7 @@ export const createOperation = async <
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
-        data: resultWithLocales!,
+        data: resultWithLocales,
         req,
       })
     }

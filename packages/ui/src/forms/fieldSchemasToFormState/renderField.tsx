@@ -257,7 +257,13 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: fieldConfig.editor.FieldComponent,
             importMap: req.payload.importMap,
-            serverProps,
+            serverProps: {
+              ...serverProps,
+              // Manually inject lexical-specific `sanitizedEditorConfig` server prop, in order to reduce the size of the field schema.
+              // Otherwise, the editorConfig would be included twice - once on the top-level, and once as part of the `FieldComponent` server props.
+              sanitizedEditorConfig:
+                'editorConfig' in fieldConfig.editor ? fieldConfig.editor.editorConfig : undefined,
+            },
           })}
         </WatchCondition>
       ) : (
