@@ -1,5 +1,14 @@
 import { describe, expect, it } from '@jest/globals'
 
+import type {
+  ArrayField,
+  CollapsibleField,
+  GroupField,
+  RowField,
+  TabsField,
+  TextField,
+} from '../../fields/config/types.js'
+
 import { getPathBuilder } from './index.js'
 
 describe('PathBuilder', () => {
@@ -431,6 +440,94 @@ describe('PathBuilder', () => {
       expect(basePathBuilder.build()).toEqual({
         path: 'base',
         schemaPath: 'base',
+      })
+    })
+  })
+
+  describe('Field method', () => {
+    it('should handle named text field', () => {
+      const field: TextField = { type: 'text', name: 'title' }
+      const result = getPathBuilder().field(field).build()
+
+      expect(result).toEqual({
+        path: 'title',
+        schemaPath: 'title',
+      })
+    })
+
+    it('should handle named array field', () => {
+      const field: ArrayField = { type: 'array', name: 'items', fields: [] }
+      const result = getPathBuilder().field(field).index(0).text('label').build()
+
+      expect(result).toEqual({
+        path: 'items.0.label',
+        schemaPath: 'items.label',
+      })
+    })
+
+    it('should handle named group field', () => {
+      const field: GroupField = { type: 'group', name: 'hero', fields: [] }
+      const result = getPathBuilder().field(field).text('title').build()
+
+      expect(result).toEqual({
+        path: 'hero.title',
+        schemaPath: 'hero.title',
+      })
+    })
+
+    it('should handle unnamed collapsible field', () => {
+      const field: CollapsibleField = { type: 'collapsible', fields: [], label: 'Collapsible' }
+      const result = getPathBuilder().field(field).schemaIndex(0).text('content').build()
+
+      expect(result).toEqual({
+        path: 'content',
+        schemaPath: '_index-0.content',
+      })
+    })
+
+    it('should handle unnamed group field', () => {
+      const field: GroupField = { type: 'group', fields: [] }
+      const result = getPathBuilder().field(field).schemaIndex(1).text('title').build()
+
+      expect(result).toEqual({
+        path: 'title',
+        schemaPath: '_index-1.title',
+      })
+    })
+
+    it('should handle unnamed row field', () => {
+      const field: RowField = { type: 'row', fields: [] }
+      const result = getPathBuilder().field(field).schemaIndex(2).text('label').build()
+
+      expect(result).toEqual({
+        path: 'label',
+        schemaPath: '_index-2.label',
+      })
+    })
+
+    it('should handle tabs field', () => {
+      const field: TabsField = { type: 'tabs', tabs: [] }
+      const result = getPathBuilder()
+        .field(field)
+        .schemaIndex(0)
+        .tab('content')
+        .text('body')
+        .build()
+
+      expect(result).toEqual({
+        path: 'content.body',
+        schemaPath: '_index-0.content.body',
+      })
+    })
+
+    it('should chain field() calls', () => {
+      const groupField: GroupField = { type: 'group', name: 'hero', fields: [] }
+      const textField: TextField = { type: 'text', name: 'title' }
+      const result = getPathBuilder().field(groupField).field(textField).build()
+
+      expect(result).toEqual({
+        path: 'hero.title',
+        schemaPath: 'hero.title',
       })
     })
   })

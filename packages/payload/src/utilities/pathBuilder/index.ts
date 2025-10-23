@@ -1,3 +1,5 @@
+import type { ClientField, Field } from '../../index.js'
+
 type PathResult = {
   /**
    * Path for accessing data (e.g., 'blocks.0.content.title')
@@ -55,6 +57,41 @@ type CollectionAfterSlugBuilder<TCollection extends string> = {
   noId(): CollectionBuilder<TCollection>
 }
 
+// Type for field parameter - accepts both Field and ClientField
+type AnyField = ClientField | Field
+
+// Type to map field types to their corresponding builder return types
+type FieldTypeToBuilder<T extends AnyField> = T extends { type: 'array' }
+  ? ArrayFieldBuilder<string>
+  : T extends { type: 'blocks' }
+    ? BlocksFieldBuilder<string>
+    : T extends { type: 'collapsible' }
+      ? CollapsibleAfterCallBuilder
+      : T extends { name: string; type: 'group' }
+        ? FieldBuilder<string>
+        : T extends { type: 'group' }
+          ? GroupAfterCallBuilder
+          : T extends { type: 'row' }
+            ? RowAfterCallBuilder
+            : T extends { type: 'tabs' }
+              ? TabsAfterCallBuilder
+              : T extends
+                    | { type: 'checkbox' }
+                    | { type: 'code' }
+                    | { type: 'date' }
+                    | { type: 'json' }
+                    | { type: 'number' }
+                    | { type: 'point' }
+                    | { type: 'radio' }
+                    | { type: 'relationship' }
+                    | { type: 'richText' }
+                    | { type: 'select' }
+                    | { type: 'text' }
+                    | { type: 'textarea' }
+                    | { type: 'upload' }
+                ? TerminalFieldBuilder
+                : FieldBuilder<string>
+
 // Common field accessor methods shared across builders
 type FieldAccessors = {
   /**
@@ -90,6 +127,12 @@ type FieldAccessors = {
    * Add a date field (terminal - no nesting allowed)
    */
   date<TName extends string>(name: TName): TerminalFieldBuilder
+
+  /**
+   * Add any field based on its type (works with Field or ClientField)
+   * The return type automatically adjusts based on the field type
+   */
+  field<T extends AnyField>(field: T): FieldTypeToBuilder<T>
 
   /**
    * Add an unnamed group field (must call .schemaIndex() or .noSchemaIndex() next)
@@ -496,6 +539,69 @@ const methods = {
     return newState
   },
 
+  field<T extends AnyField>(this: PathBuilderState, field: T): FieldTypeToBuilder<T> {
+    const newState = cloneBuilder(this)
+
+    // Handle named fields
+    if ('name' in field && field.name) {
+      switch (field.type) {
+        case 'array':
+          return methods.array.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'blocks':
+          return methods.blocks.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'checkbox':
+          return methods.checkbox.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'code':
+          return methods.code.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'date':
+          return methods.date.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'group':
+          return methods.group.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'json':
+          return methods.json.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'number':
+          return methods.number.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'point':
+          return methods.point.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'radio':
+          return methods.radio.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'relationship':
+          return methods.relationship.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'richText':
+          return methods.richText.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'select':
+          return methods.select.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'text':
+          return methods.text.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'textarea':
+          return methods.textarea.call(newState, field.name) as FieldTypeToBuilder<T>
+        case 'upload':
+          return methods.upload.call(newState, field.name) as FieldTypeToBuilder<T>
+        default:
+          // For unknown field types with names, treat as generic field builder
+          addField(newState, field.name)
+          // @ts-expect-error - Prototype chain provides these methods
+          return newState as FieldTypeToBuilder<T>
+      }
+    }
+
+    // Handle unnamed layout fields (no name property)
+    switch (field.type) {
+      case 'collapsible':
+        return methods.collapsible.call(newState) as FieldTypeToBuilder<T>
+      case 'group':
+        return methods.group.call(newState) as FieldTypeToBuilder<T>
+      case 'row':
+        return methods.row.call(newState) as FieldTypeToBuilder<T>
+      case 'tabs':
+        return methods.tabs.call(newState) as FieldTypeToBuilder<T>
+      default:
+        // Unknown unnamed field type - return as-is
+        // @ts-expect-error - Prototype chain provides these methods
+        return newState as FieldTypeToBuilder<T>
+    }
+  },
+
   globals(this: PathBuilderState, slug: string): GlobalBuilder<string> {
     const newState = cloneBuilder(this)
     newState.entityType = 'global'
@@ -712,6 +818,9 @@ function createPathBuilder(): RootBuilder {
  *   .build()
  * // { path: 'title', schemaPath: 'title' }
  * ```
+ *
+ * @experimental may change in a minor release
+ * @internal
  */
 export function getPathBuilder(): RootBuilder
 export function getPathBuilder(options: { withEntity: true }): RootBuilderWithEntity
@@ -721,7 +830,10 @@ export function getPathBuilder(_options?: {
   return createPathBuilder()
 }
 
-// Export types for consumers
+/**
+ * @experimental may change in a minor release
+ * @internal
+ */
 export type {
   ArrayFieldBuilder,
   BlockBuilder,
