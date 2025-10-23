@@ -1048,9 +1048,9 @@ export type SingleUploadFieldClient = {
 } & Pick<SingleUploadField, 'displayPreview' | 'maxDepth' | 'relationTo' | 'type'> &
   SharedUploadPropertiesClient
 
-export type UploadField = /* PolymorphicUploadField | */ SingleUploadField
+export type UploadField = PolymorphicUploadField | SingleUploadField
 
-export type UploadFieldClient = /* PolymorphicUploadFieldClient | */ SingleUploadFieldClient
+export type UploadFieldClient = PolymorphicUploadFieldClient | SingleUploadFieldClient
 
 export type CodeField = {
   admin?: {
