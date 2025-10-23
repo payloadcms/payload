@@ -3,6 +3,7 @@
 import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
@@ -38,7 +39,8 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: localeCode } = useLocale()
+  const { code: localeCode, label: localeLabel } = useLocale()
+  const { i18n, t } = useTranslation()
   const { isModalOpen, toggleModal } = useModal()
 
   const drawerSlug = `schedule-publish-${id}`
@@ -49,7 +51,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     serverURL,
   } = config
 
-  const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
   const entityConfig = React.useMemo(() => {
@@ -200,24 +201,14 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const publishAll =
     !localization || (localization && localization.defaultLocalePublishOption !== 'active')
 
-  const activeLocale =
-    localization &&
-    localization?.locales.find((locale) =>
-      typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
-    )
+  const defaultPublish = publishAll ? publish : () => publishSpecificLocale(localeCode)
+  const defaultLabel = publishAll
+    ? label
+    : t('version:publishIn', { locale: getTranslation(localeLabel, i18n) })
 
-  const activeLocaleLabel =
-    activeLocale &&
-    (typeof activeLocale.label === 'string'
-      ? activeLocale.label
-      : (activeLocale.label?.[i18n.language] ?? undefined))
-
-  const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
-  const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })
-
-  const secondaryPublish = publishAll ? () => publishSpecificLocale(activeLocale.code) : publish
+  const secondaryPublish = publishAll ? () => publishSpecificLocale(localeCode) : publish
   const secondaryLabel = publishAll
-    ? t('version:publishIn', { locale: activeLocaleLabel })
+    ? t('version:publishIn', { locale: getTranslation(localeLabel, i18n) })
     : t('version:publishAllLocales')
 
   if (!hasPublishPermission) {

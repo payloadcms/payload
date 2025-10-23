@@ -1,6 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -31,13 +32,12 @@ export function UnpublishButton() {
 
   const { config } = useConfig()
   const { reset: resetForm } = useForm()
-  const { code: localeCode } = useLocale()
+  const { code: localeCode, label: localeLabel } = useLocale()
   const [unpublishSpecificLocale, setUnpublishSpecificLocale] = useState(false)
 
   const unPublishModalSlug = `confirm-un-publish-${id}`
 
   const {
-    localization,
     routes: { api },
     serverURL,
   } = config
@@ -135,18 +135,6 @@ export function UnpublishButton() {
 
   const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
 
-  const activeLocale =
-    localization &&
-    localization?.locales.find((locale) =>
-      typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
-    )
-
-  const activeLocaleLabel =
-    activeLocale &&
-    (typeof activeLocale.label === 'string'
-      ? activeLocale.label
-      : (activeLocale.label?.[i18n.language] ?? undefined))
-
   return (
     <React.Fragment>
       {canUnpublish && (
@@ -171,7 +159,7 @@ export function UnpublishButton() {
                       close()
                     }}
                   >
-                    {t('version:unpublishIn', { locale: activeLocaleLabel })}
+                    {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
                   </PopupList.Button>
                 </PopupList.ButtonGroup>
               )
@@ -183,7 +171,7 @@ export function UnpublishButton() {
           <ConfirmationModal
             body={
               unpublishSpecificLocale
-                ? t('version:aboutToUnpublishIn', { locale: activeLocaleLabel })
+                ? t('version:aboutToUnpublishIn', { locale: getTranslation(localeLabel, i18n) })
                 : t('version:aboutToUnpublish')
             }
             confirmingLabel={t('version:unpublishing')}
