@@ -20,7 +20,7 @@ export { useResize } from '../../hooks/useResize.js'
 export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
-export { useQueues } from '../../hooks/useQueues.js'
+export { useQueue } from '../../hooks/useQueue.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
