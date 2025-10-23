@@ -1,4 +1,3 @@
-/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
@@ -176,17 +175,19 @@ export function DefaultEditView({
       (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
   )
 
-  const preventLeaveWithoutSaving =
-    typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled
-
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-
   const isLockExpired = Date.now() > lockExpiryTime
+
+  const preventLeaveWithoutSaving =
+    !isReadOnlyForIncomingUser &&
+    (typeof disableLeaveWithoutSaving !== 'undefined'
+      ? !disableLeaveWithoutSaving
+      : !autosaveEnabled)
 
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
@@ -569,7 +570,7 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && !isInDrawer && (
+          {preventLeaveWithoutSaving && (
             <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
           )}
           {!isInDrawer && (
@@ -667,6 +668,7 @@ export function DefaultEditView({
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
+                          // eslint-disable-next-line react-compiler/react-compiler
                           useAPIKey={auth.useAPIKey}
                           username={data?.username}
                           verify={auth.verify}

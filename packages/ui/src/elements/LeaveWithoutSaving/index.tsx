@@ -17,21 +17,19 @@ type LeaveWithoutSavingProps = {
   onPrevent?: (nextHref: null | string) => void
 }
 
-const defaultModalSlug = 'leave-without-saving'
+const leaveWithoutSavingModalSlug = 'leave-without-saving'
 
 export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
   disablePreventLeave = false,
-  modalSlug: modalSlugFromProps = defaultModalSlug,
   onConfirm,
   onPrevent,
 }) => {
-  const modalSlug = modalSlugFromProps || defaultModalSlug
+  const modalSlug = leaveWithoutSavingModalSlug
   const { closeModal, openModal } = useModal()
   const modified = useFormModified()
   const { isValid } = useForm()
   const { user } = useAuth()
   const [hasAccepted, setHasAccepted] = React.useState(false)
-  const { t } = useTranslation()
 
   const prevent = !disablePreventLeave && Boolean((modified || !isValid) && user)
 
@@ -65,6 +63,22 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
   }, [onConfirm])
 
   return (
+    <LeaveWithoutSavingModal modalSlug={modalSlug} onCancel={onCancel} onConfirm={handleConfirm} />
+  )
+}
+
+export const LeaveWithoutSavingModal = ({
+  modalSlug,
+  onCancel,
+  onConfirm,
+}: {
+  modalSlug: string
+  onCancel?: OnCancel
+  onConfirm: () => Promise<void> | void
+}) => {
+  const { t } = useTranslation()
+
+  return (
     <ConfirmationModal
       body={t('general:changesNotSaved')}
       cancelLabel={t('general:stayOnThisPage')}
@@ -72,7 +86,7 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
       heading={t('general:leaveWithoutSaving')}
       modalSlug={modalSlug}
       onCancel={onCancel}
-      onConfirm={handleConfirm}
+      onConfirm={onConfirm}
     />
   )
 }

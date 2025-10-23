@@ -11,11 +11,11 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { IDLabel } from '../../IDLabel/index.js'
-import { LeaveWithoutSaving } from '../../LeaveWithoutSaving/index.js'
+import { LeaveWithoutSavingModal } from '../../LeaveWithoutSaving/index.js'
 import { documentDrawerBaseClass } from '../index.js'
 import './index.scss'
 
-const preventDrawerCloseSlug = 'prevent-drawer-close'
+const leaveWithoutSavingModalSlug = 'leave-without-saving-doc-drawer'
 
 export const DocumentDrawerHeader: React.FC<{
   AfterHeader?: React.ReactNode
@@ -28,7 +28,7 @@ export const DocumentDrawerHeader: React.FC<{
 
   const handleOnClose = useCallback(() => {
     if (isModified) {
-      openModal(preventDrawerCloseSlug)
+      openModal(leaveWithoutSavingModalSlug)
     } else {
       closeModal(drawerSlug)
     }
@@ -54,8 +54,8 @@ export const DocumentDrawerHeader: React.FC<{
         <div className={`${documentDrawerBaseClass}__after-header`}>{AfterHeader}</div>
       ) : null}
 
-      <LeaveWithoutSaving
-        modalSlug={preventDrawerCloseSlug}
+      <LeaveWithoutSavingModal
+        modalSlug={leaveWithoutSavingModalSlug}
         onConfirm={() => closeModal(drawerSlug)}
       />
     </Gutter>
