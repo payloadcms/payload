@@ -589,5 +589,21 @@ describe('PathBuilder', () => {
         schemaPath: '_index-0.named._index-2.field',
       })
     })
+
+    it('should handle schema index path at the end of the path', () => {
+      const result = getPathBuilder().group().schemaIndex(0).row().schemaIndex(1).build()
+      expect(result).toEqual({
+        path: '_index-0-1',
+        schemaPath: '_index-0-1',
+      })
+    })
+
+    it('should handle schema index path at the end of the path, when schemaIndex was discarded before', () => {
+      const result = getPathBuilder().group('named').row().schemaIndex(1).build()
+      expect(result).toEqual({
+        path: 'named._index-1',
+        schemaPath: 'named._index-1',
+      })
+    })
   })
 })

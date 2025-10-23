@@ -380,9 +380,12 @@ const appendSchemaPath = (state: PathBuilderState, segment: string): void => {
 /**
  * Flush accumulated indices as a single _index-X-Y-Z segment in schema path
  */
-const flushAccumulatedIndices = (state: PathBuilderState): void => {
+const flushAccumulatedIndices = (state: PathBuilderState, includeInPath = false): void => {
   if (state.accumulatedIndices.length > 0) {
     const indexMarker = `_index-${state.accumulatedIndices.join('-')}`
+    if (includeInPath) {
+      appendPath(state, indexMarker)
+    }
     appendSchemaPath(state, indexMarker)
     state.accumulatedIndices = []
   }
@@ -422,7 +425,8 @@ const methods = {
 
   build(this: PathBuilderState): PathResult {
     // Flush any remaining accumulated indices before building
-    flushAccumulatedIndices(this)
+    // Include in path since we're at the end (no named field follows)
+    flushAccumulatedIndices(this, true)
 
     // Build the base paths
     let path = this.pathSegments.join('.')
