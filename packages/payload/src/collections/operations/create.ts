@@ -269,6 +269,7 @@ export const createOperation = async <
             !collectionConfig.versions.drafts.validate,
         })
       }
+      req.locale = 'all'
     } else {
       nullableResultWithLocales = await beforeChange<JsonObject>({
         collection: collectionConfig,

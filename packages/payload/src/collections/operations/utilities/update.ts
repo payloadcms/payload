@@ -286,6 +286,7 @@ export const updateDocument = async <
       })
       nullableResult = await beforeChange({
         ...beforeChangeArgs,
+        data: localesAllDataByLocale[locale],
         doc,
         docWithLocales: nullableResult || docWithLocales,
       })

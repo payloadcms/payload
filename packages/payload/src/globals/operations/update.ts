@@ -173,12 +173,12 @@ export const updateOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    let unwrappedLocalesData: null | Record<string, any> = null
+    let localeAllDataByLocale: null | Record<string, any> = null
 
     if (payload.config.localization && locale === 'all') {
-      unwrappedLocalesData = {}
+      localeAllDataByLocale = {}
       for (const locale of payload.config.localization.localeCodes) {
-        unwrappedLocalesData[locale] = unwrapLocalizedDoc({
+        localeAllDataByLocale[locale] = unwrapLocalizedDoc({
           config: payload.config,
           doc: data,
           fields: globalConfig.flattenedFields,
@@ -187,12 +187,12 @@ export const updateOperation = async <
       }
     }
 
-    if (unwrappedLocalesData) {
-      for (const locale of Object.keys(unwrappedLocalesData)) {
-        unwrappedLocalesData[locale] = await beforeValidate({
+    if (localeAllDataByLocale) {
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        localeAllDataByLocale[locale] = await beforeValidate({
           collection: null,
           context: req.context,
-          data: unwrappedLocalesData[locale],
+          data: localeAllDataByLocale[locale],
           doc: unwrapLocalizedDoc({
             config: payload.config,
             doc: originalDoc,
@@ -269,7 +269,32 @@ export const updateOperation = async <
         isSavingDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    let result: JsonObject = await beforeChange(beforeChangeArgs)
+    let nullableResult: JsonObject | null = null
+
+    if (localeAllDataByLocale) {
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        req.locale = locale
+        const doc = unwrapLocalizedDoc({
+          config: payload.config,
+          doc: originalDoc,
+          fields: globalConfig.flattenedFields,
+          locale,
+        })
+        nullableResult = await beforeChange({
+          ...beforeChangeArgs,
+          data: localeAllDataByLocale[locale],
+          doc,
+          docWithLocales: nullableResult || globalJSON,
+        })
+      }
+
+      req.locale = 'all'
+    } else {
+      nullableResult = await beforeChange(beforeChangeArgs)
+    }
+
+    let result = nullableResult!
+
     let snapshotToSave: JsonObject | undefined
 
     if (payload.config.localization && globalConfig.versions) {
@@ -444,7 +469,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
-    return result
+    return result as TransformGlobal<TSlug, TSelect, TLocale>
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

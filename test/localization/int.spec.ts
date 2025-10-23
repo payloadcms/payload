@@ -2865,7 +2865,7 @@ describe('Localization', () => {
               },
             },
           })
-        ).docs[0] as unknown as User
+        ).docs[0] as User
 
         user['collection'] = 'users'
       })
