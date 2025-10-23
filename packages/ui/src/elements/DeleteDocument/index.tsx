@@ -67,22 +67,11 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
-  const { code: localeCode } = useLocale()
+  const { code: localeCode, label: localeLabel } = useLocale()
   const { incrementVersionCount } = useDocumentInfo()
   const initialData = getData()
 
   const modalSlug = `delete-${deleteCurrentLocale ? 'current-locale-' : ''}${id}`
-
-  const activeLocaleLabel = (() => {
-    if (!localization) {return undefined}
-    const activeLocale = localization.locales.find((locale) =>
-      typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
-    )
-    if (!activeLocale || typeof activeLocale === 'string') {return undefined}
-    return typeof activeLocale.label === 'string'
-      ? activeLocale.label
-      : activeLocale.label?.[localeCode]
-  })()
 
   const [deletePermanently, setDeletePermanently] = useState(false)
 
@@ -99,12 +88,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         'Accept-Language': i18n.language,
         'Content-Type': 'application/json',
       }
-      if (deleteCurrentLocale) {
+      if (localeLabel && deleteCurrentLocale) {
         const deletedData = Object.keys(initialData).reduce((acc, key) => {
           if (key === 'createdAt') {
             acc[key] = initialData[key]
           } else if (key === '_status') {
-            acc[key] = 'draft'
+            acc[key] = initialData[key]
           } else {
             acc[key] = null
           }
@@ -122,7 +111,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         json = await res.json()
 
         if (res.status < 400) {
-          toast.success(t('general:deletedInLocale', { locale: activeLocaleLabel }))
+          toast.success(t('general:deletedInLocale', { locale: getTranslation(localeLabel, i18n) }))
           await reset({
             _status: 'draft',
           })
@@ -210,13 +199,14 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     initialData,
     reset,
     localeCode,
-    activeLocaleLabel,
+    localeLabel,
   ])
 
   const idToRender = (children) =>
-    deleteCurrentLocale ? (
+    localization && deleteCurrentLocale ? (
       <>
-        <strong>{children}</strong> {t('general:in')} <strong>{activeLocaleLabel}</strong>
+        <strong>{children}</strong> {t('general:in')}{' '}
+        <strong>{getTranslation(localeLabel, i18n)}</strong>
       </>
     ) : (
       <strong>{children}</strong>
@@ -231,9 +221,9 @@ export const DeleteDocument: React.FC<Props> = (props) => {
             openModal(modalSlug)
           }}
         >
-          {deleteCurrentLocale ? (
+          {localeLabel && deleteCurrentLocale ? (
             <>
-              {t('general:delete')} {t('general:in')} {activeLocaleLabel}
+              {t('general:delete')} {t('general:in')} {getTranslation(localeLabel, i18n)}
             </>
           ) : (
             t('general:delete')
