@@ -33,6 +33,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -164,11 +165,11 @@ export const createOperation = async <
 
     data = newFileData
 
-    let unwrappedLocalesData: null | Record<string, any> = null
+    let localeAllDataByLocale: null | Record<string, any> = null
     if (config.localization && args.req.locale === 'all') {
-      unwrappedLocalesData = {}
+      localeAllDataByLocale = {}
       for (const locale of config.localization.localeCodes) {
-        unwrappedLocalesData[locale] = unwrapLocalizedDoc({
+        localeAllDataByLocale[locale] = unwrapLocalizedDoc({
           config,
           doc: data,
           fields: collectionConfig.flattenedFields,
@@ -181,12 +182,12 @@ export const createOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    if (unwrappedLocalesData) {
-      for (const locale of Object.keys(unwrappedLocalesData)) {
-        unwrappedLocalesData[locale] = await beforeValidate({
+    if (localeAllDataByLocale) {
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        localeAllDataByLocale[locale] = await beforeValidate({
           collection: collectionConfig,
           context: req.context,
-          data: unwrappedLocalesData[locale],
+          data: localeAllDataByLocale[locale],
           doc: duplicatedFromDoc,
           global: null,
           operation: 'create',
@@ -243,25 +244,50 @@ export const createOperation = async <
       }
     }
 
+    let nullableResultWithLocales: JsonObject | null = null
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const resultWithLocales = await beforeChange<JsonObject>({
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: duplicatedFromDoc,
-      docWithLocales: duplicatedFromDocWithLocales,
-      global: null,
-      operation: 'create',
-      overrideAccess,
-      req,
-      skipValidation:
-        isSavingDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
-    })
+    if (localeAllDataByLocale) {
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        req.locale = locale
+
+        nullableResultWithLocales = await beforeChange<JsonObject>({
+          collection: collectionConfig,
+          context: req.context,
+          data: localeAllDataByLocale[locale],
+          doc: duplicatedFromDoc,
+          docWithLocales: nullableResultWithLocales || duplicatedFromDocWithLocales,
+          global: null,
+          operation: 'create',
+          overrideAccess,
+          req,
+          skipValidation:
+            isSavingDraft &&
+            collectionConfig.versions.drafts &&
+            !collectionConfig.versions.drafts.validate,
+        })
+      }
+    } else {
+      nullableResultWithLocales = await beforeChange<JsonObject>({
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: duplicatedFromDoc,
+        docWithLocales: duplicatedFromDocWithLocales,
+        global: null,
+        operation: 'create',
+        overrideAccess,
+        req,
+        skipValidation:
+          isSavingDraft &&
+          collectionConfig.versions.drafts &&
+          !collectionConfig.versions.drafts.validate,
+      })
+    }
+
+    const resultWithLocales = nullableResultWithLocales!
 
     // /////////////////////////////////////
     // Write files to local storage
