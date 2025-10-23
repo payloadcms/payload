@@ -18,7 +18,7 @@ type PathResult = {
   schemaPath: null | string
 }
 
-// Root builder - can directly access fields (when withEntity: false)
+// Root builder - can directly access fields (when prefix: false)
 type RootBuilder = {
   /**
    * Build empty paths (rarely used)
@@ -26,7 +26,7 @@ type RootBuilder = {
   build(): PathResult
 } & FieldBuilder<''>
 
-// Root builder with entity - must start with collections or globals (when withEntity: true)
+// Root builder with entity - must start with collections or globals (when prefix is 'entity' or 'entityType.entity')
 type RootBuilderWithEntity = {
   /**
    * Build empty paths (rarely used)
@@ -408,6 +408,13 @@ type PathBuilderState = {
    */
   hasNoSchemaIndex: boolean
   pathSegments: string[]
+  /**
+   * Prefix mode for entity paths
+   * - false: no prefix
+   * - 'entity': prefix with entity slug only
+   * - 'entityType.entity': prefix with entity type and slug (e.g., 'collection.pages')
+   */
+  prefixMode: 'entity' | 'entityType.entity' | false
   schemaPathSegments: string[]
   skipNextIndex: boolean
 }
@@ -421,6 +428,7 @@ const cloneBuilder = (state: PathBuilderState): PathBuilderState => {
     hasNoIndex: { value: state.hasNoIndex, writable: true },
     hasNoSchemaIndex: { value: state.hasNoSchemaIndex, writable: true },
     pathSegments: { value: [...state.pathSegments], writable: false },
+    prefixMode: { value: state.prefixMode, writable: true },
     schemaPathSegments: { value: [...state.schemaPathSegments], writable: false },
     skipNextIndex: { value: state.skipNextIndex, writable: true },
   })
@@ -500,9 +508,15 @@ const methods = {
     let path = this.pathSegments.join('.')
     let schemaPath = this.schemaPathSegments.join('.')
 
-    // Prepend entity context if present
-    if (this.entityType && this.entitySlug) {
-      const entityPrefix = `${this.entityType}.${this.entitySlug}`
+    // Prepend entity context based on prefix mode
+    if (this.prefixMode && this.entityType && this.entitySlug) {
+      let entityPrefix: string
+      if (this.prefixMode === 'entityType.entity') {
+        entityPrefix = `${this.entityType}.${this.entitySlug}`
+      } else {
+        // prefix mode is 'entity'
+        entityPrefix = this.entitySlug
+      }
       path = path ? `${entityPrefix}.${path}` : entityPrefix
       schemaPath = schemaPath ? `${entityPrefix}.${schemaPath}` : entityPrefix
     }
@@ -771,7 +785,9 @@ const methods = {
 }
 
 // Create a new builder instance with state
-function createPathBuilder(): RootBuilder {
+function createPathBuilder(
+  prefixMode: 'entity' | 'entityType.entity' | false = false,
+): RootBuilder | RootBuilderWithEntity {
   const state: PathBuilderState = {
     accumulatedIndices: [],
     entitySlug: undefined,
@@ -779,6 +795,7 @@ function createPathBuilder(): RootBuilder {
     hasNoIndex: false,
     hasNoSchemaIndex: false,
     pathSegments: [],
+    prefixMode,
     schemaPathSegments: [],
     skipNextIndex: false,
   }
@@ -791,6 +808,7 @@ function createPathBuilder(): RootBuilder {
     hasNoIndex: { value: false, writable: true },
     hasNoSchemaIndex: { value: false, writable: true },
     pathSegments: { value: state.pathSegments, writable: false },
+    prefixMode: { value: prefixMode, writable: true },
     schemaPathSegments: { value: state.schemaPathSegments, writable: false },
     skipNextIndex: { value: false, writable: true },
   })
@@ -805,39 +823,42 @@ function createPathBuilder(): RootBuilder {
  * const result = getPathBuilder()
  *   .text('title')
  *   .build()
- * // { path: 'title', schemaPath: 'title' }
+ * // { indexPath: '', path: 'title', schemaPath: 'title' }
  * ```
  *
  * @example
  * ```ts
- * // With entity context - collection
- * const result = getPathBuilder({ withEntity: true })
+ * // With entity type and slug prefix
+ * const result = getPathBuilder({ prefix: 'entityType.entity' })
  *   .collections('pages')
  *   .id(123)
  *   .text('title')
  *   .build()
- * // { path: 'title', schemaPath: 'title' }
+ * // { indexPath: '', path: 'collection.pages.123.title', schemaPath: 'collection.pages.title' }
  * ```
  *
  * @example
  * ```ts
- * // With entity context - global
- * const result = getPathBuilder({ withEntity: true })
+ * // With entity slug only prefix
+ * const result = getPathBuilder({ prefix: 'entity' })
  *   .globals('header')
  *   .text('title')
  *   .build()
- * // { path: 'title', schemaPath: 'title' }
+ * // { indexPath: '', path: 'header.title', schemaPath: 'header.title' }
  * ```
  *
  * @experimental may change in a minor release
  * @internal
  */
 export function getPathBuilder(): RootBuilder
-export function getPathBuilder(options: { withEntity: true }): RootBuilderWithEntity
-export function getPathBuilder(_options?: {
-  withEntity?: boolean
+export function getPathBuilder(options: {
+  prefix: 'entity' | 'entityType.entity'
+}): RootBuilderWithEntity
+export function getPathBuilder(options?: {
+  prefix?: 'entity' | 'entityType.entity' | false
 }): RootBuilder | RootBuilderWithEntity {
-  return createPathBuilder()
+  const prefixMode = options?.prefix ?? false
+  return createPathBuilder(prefixMode)
 }
 
 /**

@@ -35,8 +35,8 @@ describe('PathBuilder', () => {
   })
 
   describe('Entity context paths', () => {
-    it('should build path with collection (no ID)', () => {
-      const result = getPathBuilder({ withEntity: true })
+    it('should build path with collection (no ID) - entityType.entity prefix', () => {
+      const result = getPathBuilder({ prefix: 'entityType.entity' })
         .collections('pages')
         .noId()
         .text('title')
@@ -49,8 +49,8 @@ describe('PathBuilder', () => {
       })
     })
 
-    it('should build path with collection and ID', () => {
-      const result = getPathBuilder({ withEntity: true })
+    it('should build path with collection and ID - entityType.entity prefix', () => {
+      const result = getPathBuilder({ prefix: 'entityType.entity' })
         .collections('pages')
         .id(123)
         .text('title')
@@ -63,8 +63,8 @@ describe('PathBuilder', () => {
       })
     })
 
-    it('should build path with collection and string ID', () => {
-      const result = getPathBuilder({ withEntity: true })
+    it('should build path with collection and string ID - entityType.entity prefix', () => {
+      const result = getPathBuilder({ prefix: 'entityType.entity' })
         .collections('pages')
         .id('abc123')
         .text('slug')
@@ -77,8 +77,11 @@ describe('PathBuilder', () => {
       })
     })
 
-    it('should build path with global', () => {
-      const result = getPathBuilder({ withEntity: true }).globals('header').text('title').build()
+    it('should build path with global - entityType.entity prefix', () => {
+      const result = getPathBuilder({ prefix: 'entityType.entity' })
+        .globals('header')
+        .text('title')
+        .build()
 
       expect(result).toEqual({
         indexPath: '',
@@ -87,8 +90,8 @@ describe('PathBuilder', () => {
       })
     })
 
-    it('should build path with global and nested fields', () => {
-      const result = getPathBuilder({ withEntity: true })
+    it('should build path with global and nested fields - entityType.entity prefix', () => {
+      const result = getPathBuilder({ prefix: 'entityType.entity' })
         .globals('settings')
         .group('site')
         .text('name')
@@ -98,6 +101,30 @@ describe('PathBuilder', () => {
         indexPath: '',
         path: 'global.settings.site.name',
         schemaPath: 'global.settings.site.name',
+      })
+    })
+
+    it('should build path with collection - entity prefix only', () => {
+      const result = getPathBuilder({ prefix: 'entity' })
+        .collections('pages')
+        .id(123)
+        .text('title')
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'pages.123.title',
+        schemaPath: 'pages.title',
+      })
+    })
+
+    it('should build path with global - entity prefix only', () => {
+      const result = getPathBuilder({ prefix: 'entity' }).globals('header').text('title').build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'header.title',
+        schemaPath: 'header.title',
       })
     })
   })
