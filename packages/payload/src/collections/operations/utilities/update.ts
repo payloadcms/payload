@@ -156,12 +156,12 @@ export const updateDocument = async <
     req,
   })
 
-  let unwrappedLocalesData: null | Record<string, any> = null
+  let localesAllDataByLocale: null | Record<string, JsonObject> = null
 
   if (config.localization && locale === 'all') {
-    unwrappedLocalesData = {}
+    localesAllDataByLocale = {}
     for (const locale of config.localization.localeCodes) {
-      unwrappedLocalesData[locale] = unwrapLocalizedDoc({
+      localesAllDataByLocale[locale] = unwrapLocalizedDoc({
         config,
         doc: data,
         fields: collectionConfig.flattenedFields,
@@ -173,13 +173,13 @@ export const updateDocument = async <
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
-  if (unwrappedLocalesData) {
-    for (const locale of Object.keys(unwrappedLocalesData)) {
-      unwrappedLocalesData[locale] = await beforeValidate({
+  if (localesAllDataByLocale) {
+    for (const locale of Object.keys(localesAllDataByLocale)) {
+      localesAllDataByLocale[locale] = await beforeValidate({
         id,
         collection: collectionConfig,
         context: req.context,
-        data: unwrappedLocalesData[locale],
+        data: localesAllDataByLocale[locale],
         doc: unwrapLocalizedDoc({
           config,
           doc: originalDoc,
@@ -273,7 +273,30 @@ export const updateDocument = async <
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }
 
-  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let nullableResult: JsonObject | null = null
+
+  if (localesAllDataByLocale) {
+    for (const locale of Object.keys(localesAllDataByLocale)) {
+      req.locale = locale
+      const doc = unwrapLocalizedDoc({
+        config,
+        doc: originalDoc,
+        fields: collectionConfig.flattenedFields,
+        locale,
+      })
+      nullableResult = await beforeChange({
+        ...beforeChangeArgs,
+        doc,
+        docWithLocales: nullableResult || docWithLocales,
+      })
+    }
+    req.locale = 'all'
+  } else {
+    nullableResult = await beforeChange(beforeChangeArgs)
+  }
+
+  let result = nullableResult!
+
   let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
