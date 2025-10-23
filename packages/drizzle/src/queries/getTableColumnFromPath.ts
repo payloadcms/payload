@@ -373,12 +373,11 @@ export const getTableColumnFromPath = ({
             (e) => e.queryPath === `${constraintPath}${field.name}._rels`,
           )
 
-          const aliasRelationshipTable =
-            existingTable?.table ??
+          const aliasRelationshipTable = (existingTable?.table ??
             getTableAlias({
               adapter,
               tableName: relationTableName,
-            }).newAliasTable
+            }).newAliasTable) as PgTableWithColumns<any>
 
           const relationshipField = getFieldByPath({
             fields: adapter.payload.collections[field.collection].config.flattenedFields,
@@ -429,12 +428,11 @@ export const getTableColumnFromPath = ({
             (e) => e.queryPath === `${constraintPath}${field.name}`,
           )
 
-          const relationshipTable =
-            existingMainTable?.table ??
+          const relationshipTable = (existingMainTable?.table ??
             getTableAlias({
               adapter,
               tableName: relationshipTableName,
-            }).newAliasTable
+            }).newAliasTable) as PgTableWithColumns<any>
 
           if (!existingMainTable) {
             joins.push({
