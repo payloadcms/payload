@@ -13,7 +13,7 @@ if (!cachedClientConfigs) {
 }
 
 export const getClientConfig = cache(
-  ({ config, i18n, importMap, user }: CreateClientConfigArgs): ClientConfig => {
+  async ({ config, i18n, importMap, req, user }: CreateClientConfigArgs): Promise<ClientConfig> => {
     const currentLanguage = i18n.language
 
     if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {
@@ -23,15 +23,32 @@ export const getClientConfig = cache(
         }) as unknown as ClientConfig
       }
 
-      return cachedClientConfigs[currentLanguage]
+      const clientConfig = cachedClientConfigs[currentLanguage]
+
+      const configWithFilteredLocales = await applyLocaleFiltering({ clientConfig, config, req })
+      if (configWithFilteredLocales) {
+        return configWithFilteredLocales
+      }
+
+      return clientConfig
     }
 
     const cachedClientConfig = createClientConfig({
       config,
       i18n,
       importMap,
+      req,
       user,
     })
+
+    const configWithFilteredLocales = await applyLocaleFiltering({
+      clientConfig: cachedClientConfig,
+      config,
+      req,
+    })
+    if (configWithFilteredLocales) {
+      Object.assign(cachedClientConfig, configWithFilteredLocales)
+    }
 
     cachedClientConfigs[currentLanguage] = cachedClientConfig
     global._payload_clientConfigs = cachedClientConfigs
@@ -46,3 +63,37 @@ export const getClientConfig = cache(
     return cachedClientConfig
   },
 )
+
+async function applyLocaleFiltering({
+  clientConfig,
+  config,
+  req,
+}: {
+  clientConfig: ClientConfig
+  config: CreateClientConfigArgs['config']
+  req: CreateClientConfigArgs['req']
+}): Promise<ClientConfig | null> {
+  if (
+    !clientConfig.localization ||
+    !config.localization ||
+    typeof config.localization.filterAvailableLocales !== 'function'
+  ) {
+    return null
+  }
+
+  const filteredLocales = (
+    await config.localization.filterAvailableLocales({
+      locales: config.localization.locales,
+      req,
+    })
+  ).map(({ toString, ...rest }) => rest)
+
+  return {
+    ...clientConfig,
+    localization: {
+      ...clientConfig.localization,
+      localeCodes: filteredLocales.map(({ code }) => code),
+      locales: filteredLocales,
+    },
+  }
+}

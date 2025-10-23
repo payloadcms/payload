@@ -93,10 +93,11 @@ const buildTableState = async (
 
   await canAccessAdmin({ req })
 
-  const clientConfig = getClientConfig({
+  const clientConfig = await getClientConfig({
     config,
     i18n,
     importMap: payload.importMap,
+    req,
     user,
   })
 

@@ -4,6 +4,7 @@ import type { DeepPartial } from 'ts-essentials'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
@@ -100,6 +101,7 @@ export type CreateClientConfigArgs = {
   config: SanitizedConfig
   i18n: I18nClient
   importMap: ImportMap
+  req: PayloadRequest
   /**
    * If unauthenticated, the client config will omit some sensitive properties
    * such as field schemas, etc. This is useful for login and error pages where

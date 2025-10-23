@@ -239,10 +239,11 @@ export const RootPage = async ({
     redirect(adminRoute)
   }
 
-  const clientConfig = getClientConfig({
+  const clientConfig = await getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
+    req,
     user: viewType === 'createFirstUser' ? true : req.user,
   })
 

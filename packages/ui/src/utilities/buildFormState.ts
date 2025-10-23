@@ -122,10 +122,11 @@ export const buildFormState = async (
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({
+    config: await getClientConfig({
       config,
       i18n,
       importMap: req.payload.importMap,
+      req,
       user: skipClientConfigAuth ? true : req.user,
     }),
     globalSlug,

@@ -37,10 +37,11 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
 
   await canAccessAdmin({ req })
 
-  const clientConfig = getClientConfig({
+  const clientConfig = await getClientConfig({
     config,
     i18n,
     importMap: req.payload.importMap,
+    req,
     user,
   })
 

@@ -41,7 +41,6 @@ export type RenderFieldServerFnReturnType = {} & FieldState['customComponents']
 export const _internal_renderFieldHandler: ServerFunction<
   RenderFieldServerFnArgs,
   Promise<RenderFieldServerFnReturnType>
-  // eslint-disable-next-line @typescript-eslint/require-await
 > = async ({ field: fieldArg, initialValue, path, req, schemaPath }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
@@ -60,10 +59,11 @@ export const _internal_renderFieldHandler: ServerFunction<
   // For lexical, only then will it contain all the lexical-internal entries
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug: entityType === 'collection' ? entitySlug : undefined,
-    config: getClientConfig({
+    config: await getClientConfig({
       config: req.payload.config,
       i18n: req.i18n,
       importMap: req.payload.importMap,
+      req,
       user: req.user,
     }),
     globalSlug: entityType === 'global' ? entitySlug : undefined,

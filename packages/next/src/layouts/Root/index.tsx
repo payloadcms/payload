@@ -81,26 +81,13 @@ export const RootLayout = async ({
 
   const navPrefs = await getNavPrefs(req)
 
-  const clientConfig = getClientConfig({
+  const clientConfig = await getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
+    req,
     user: req.user,
   })
-
-  if (
-    clientConfig.localization &&
-    config.localization &&
-    typeof config.localization.filterAvailableLocales === 'function'
-  ) {
-    clientConfig.localization.locales = (
-      await config.localization.filterAvailableLocales({
-        locales: config.localization.locales,
-        req,
-      })
-    ).map(({ toString, ...rest }) => rest)
-    clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
-  }
 
   return (
     <html
