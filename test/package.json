@@ -27,6 +27,7 @@
     "@date-fns/tz": "1.2.0",
     "@miniflare/d1": "2.14.4",
     "@miniflare/shared": "2.14.4",
+    "@modelcontextprotocol/sdk": "^1.17.2",
     "@next/env": "15.4.4",
     "@opennextjs/cloudflare": "1.9.2",
     "@payloadcms/admin-bar": "workspace:*",
@@ -49,6 +50,7 @@
     "@payloadcms/plugin-ecommerce": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
@@ -107,7 +109,8 @@
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
     "uuid": "10.0.0",
-    "wrangler": "~4.42.0"
+    "wrangler": "~4.42.0",
+    "zod": "^3.25.5"
   },
   "pnpm": {
     "neverBuiltDependencies": []
