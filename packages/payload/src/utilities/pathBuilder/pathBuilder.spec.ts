@@ -387,6 +387,52 @@ describe('PathBuilder', () => {
         schemaPath: 'first.second.value',
       })
     })
+
+    it('should handle schema index path at the end of the path', () => {
+      const result = getPathBuilder().group().schemaIndex(0).row().schemaIndex(1).build()
+      expect(result).toEqual({
+        path: '_index-0-1',
+        schemaPath: '_index-0-1',
+      })
+    })
+
+    it('should handle schema index path at the end of the path, when schemaIndex was discarded before', () => {
+      const result = getPathBuilder().group('named').row().schemaIndex(1).build()
+      expect(result).toEqual({
+        path: 'named._index-1',
+        schemaPath: 'named._index-1',
+      })
+    })
+
+    it('should handle immutability when branching of the path builder', () => {
+      const basePathBuilder = getPathBuilder().group('base')
+      const branch1 = basePathBuilder.group('branch1')
+      const branch2 = basePathBuilder.group('branch2').text('text')
+      const branch3 = basePathBuilder.group('branch3').collapsible().schemaIndex(0).text('text')
+      const branch4 = basePathBuilder.group('branch3').collapsible().schemaIndex(2)
+
+      expect(branch1.build()).toEqual({
+        path: 'base.branch1',
+        schemaPath: 'base.branch1',
+      })
+      expect(branch2.build()).toEqual({
+        path: 'base.branch2.text',
+        schemaPath: 'base.branch2.text',
+      })
+      expect(branch3.build()).toEqual({
+        path: 'base.branch3.text',
+        schemaPath: 'base.branch3._index-0.text',
+      })
+      expect(branch4.build()).toEqual({
+        path: 'base.branch3._index-2',
+        schemaPath: 'base.branch3._index-2',
+      })
+      // Build basePath at the end
+      expect(basePathBuilder.build()).toEqual({
+        path: 'base',
+        schemaPath: 'base',
+      })
+    })
   })
 
   describe('Real-world examples', () => {
@@ -587,22 +633,6 @@ describe('PathBuilder', () => {
       expect(result).toEqual({
         path: 'named.field',
         schemaPath: '_index-0.named._index-2.field',
-      })
-    })
-
-    it('should handle schema index path at the end of the path', () => {
-      const result = getPathBuilder().group().schemaIndex(0).row().schemaIndex(1).build()
-      expect(result).toEqual({
-        path: '_index-0-1',
-        schemaPath: '_index-0-1',
-      })
-    })
-
-    it('should handle schema index path at the end of the path, when schemaIndex was discarded before', () => {
-      const result = getPathBuilder().group('named').row().schemaIndex(1).build()
-      expect(result).toEqual({
-        path: 'named._index-1',
-        schemaPath: 'named._index-1',
       })
     })
   })

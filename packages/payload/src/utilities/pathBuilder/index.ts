@@ -364,6 +364,20 @@ type PathBuilderState = {
   skipNextIndex: boolean
 }
 
+// Helper function to create a new builder with copied state
+const cloneBuilder = (state: PathBuilderState): PathBuilderState => {
+  return Object.create(methods, {
+    accumulatedIndices: { value: [...state.accumulatedIndices], writable: true },
+    entitySlug: { value: state.entitySlug, writable: true },
+    entityType: { value: state.entityType, writable: true },
+    hasNoIndex: { value: state.hasNoIndex, writable: true },
+    hasNoSchemaIndex: { value: state.hasNoSchemaIndex, writable: true },
+    pathSegments: { value: [...state.pathSegments], writable: false },
+    schemaPathSegments: { value: [...state.schemaPathSegments], writable: false },
+    skipNextIndex: { value: state.skipNextIndex, writable: true },
+  })
+}
+
 // Helper functions that operate on state
 const appendPath = (state: PathBuilderState, segment: string): void => {
   if (segment) {
@@ -403,24 +417,26 @@ const addField = (state: PathBuilderState, name: string): void => {
 // Shared builder methods object (created once, reused for all builders)
 const methods = {
   array(this: PathBuilderState, name: string): ArrayFieldBuilder<string> {
-    this.skipNextIndex = false // Reset flag when entering a new array
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    newState.skipNextIndex = false // Reset flag when entering a new array
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   block(this: PathBuilderState, blockSlug: string): BlockBuilder<string> {
-    // Block slug is only added to schema path, not data path
-    appendSchemaPath(this, blockSlug)
+    const newState = cloneBuilder(this)
+    appendSchemaPath(newState, blockSlug)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   blocks(this: PathBuilderState, name: string): BlocksFieldBuilder<string> {
-    this.skipNextIndex = false // Reset flag when entering a new blocks field
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    newState.skipNextIndex = false // Reset flag when entering a new blocks field
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   build(this: PathBuilderState): PathResult {
@@ -446,183 +462,195 @@ const methods = {
   },
 
   checkbox(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   code(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   collapsible(this: PathBuilderState): CollapsibleAfterCallBuilder {
-    // Collapsibles are unnamed layout fields, no args needed
+    const newState = cloneBuilder(this)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   collections(this: PathBuilderState, slug: string): CollectionAfterSlugBuilder<string> {
-    // Set entity context
-    this.entityType = 'collection'
-    this.entitySlug = slug
+    const newState = cloneBuilder(this)
+    newState.entityType = 'collection'
+    newState.entitySlug = slug
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   date(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   globals(this: PathBuilderState, slug: string): GlobalBuilder<string> {
-    // Set entity context
-    this.entityType = 'global'
-    this.entitySlug = slug
+    const newState = cloneBuilder(this)
+    newState.entityType = 'global'
+    newState.entitySlug = slug
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   group(this: PathBuilderState, name?: string): FieldBuilder<string> | GroupAfterCallBuilder {
+    const newState = cloneBuilder(this)
     if (name !== undefined) {
-      // Named group: add to both paths
-      addField(this, name)
+      addField(newState, name)
     }
-    // Unnamed group or named group both return the same object
-    // but with different type constraints enforced by TypeScript
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   id(this: PathBuilderState, id: number | string): CollectionBuilder<string> {
-    // ID is added to data path but not schema path
-    appendPath(this, String(id))
+    const newState = cloneBuilder(this)
+    appendPath(newState, String(id))
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   noId(this: PathBuilderState): CollectionBuilder<string> {
-    // Explicitly state no ID context
+    const newState = cloneBuilder(this)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   index(this: PathBuilderState, i: number): FieldBuilder<string> {
-    if (!this.skipNextIndex) {
-      appendPath(this, String(i))
+    const newState = cloneBuilder(this)
+    if (!newState.skipNextIndex) {
+      appendPath(newState, String(i))
     }
-    this.skipNextIndex = false
+    newState.skipNextIndex = false
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   json(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   noIndex(this: PathBuilderState): FieldBuilder<string> {
-    this.skipNextIndex = true
-    this.hasNoIndex = true
+    const newState = cloneBuilder(this)
+    newState.skipNextIndex = true
+    newState.hasNoIndex = true
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   number(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   point(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   radio(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   relationship(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   richText(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   row(this: PathBuilderState): RowAfterCallBuilder {
-    // Rows are unnamed layout fields, no args needed
+    const newState = cloneBuilder(this)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   select(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   tab(this: PathBuilderState, name?: string): FieldBuilder<string> | TabAfterCallBuilder {
+    const newState = cloneBuilder(this)
     if (name !== undefined) {
-      // Named tab: flush accumulated indices, then add tab name as a named field
-      flushAccumulatedIndices(this)
-      appendPath(this, name)
-      appendSchemaPath(this, name)
+      flushAccumulatedIndices(newState)
+      appendPath(newState, name)
+      appendSchemaPath(newState, name)
     }
-    // Unnamed tab or named tab both return the same object
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   tabs(this: PathBuilderState): TabsAfterCallBuilder {
-    // Tabs are unnamed layout fields, no args needed
+    const newState = cloneBuilder(this)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   text(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   textarea(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   upload(this: PathBuilderState, name: string): TerminalFieldBuilder {
-    addField(this, name)
+    const newState = cloneBuilder(this)
+    addField(newState, name)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   schemaIndex(this: PathBuilderState, index: number): FieldBuilder<string> | TabsFieldBuilder {
-    // Add schema index to accumulator for unnamed layout fields
-    this.accumulatedIndices.push(index)
+    const newState = cloneBuilder(this)
+    newState.accumulatedIndices.push(index)
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 
   noSchemaIndex(
     this: PathBuilderState,
   ): FieldBuilder<string> | TabAfterCallBuilder | TabsFieldBuilder {
-    // Mark that schema path should be null
-    this.hasNoSchemaIndex = true
+    const newState = cloneBuilder(this)
+    newState.hasNoSchemaIndex = true
     // @ts-expect-error - Prototype chain provides these methods
-    return this
+    return newState
   },
 }
 
