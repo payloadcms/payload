@@ -10,14 +10,22 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useModal } from '../Modal/index.js'
 import { usePreventLeave } from './usePreventLeave.js'
 
-const modalSlug = 'leave-without-saving'
-
 type LeaveWithoutSavingProps = {
+  disablePreventLeave?: boolean
+  modalSlug?: string
   onConfirm?: () => Promise<void> | void
   onPrevent?: (nextHref: null | string) => void
 }
 
-export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({ onConfirm, onPrevent }) => {
+const defaultModalSlug = 'leave-without-saving'
+
+export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
+  disablePreventLeave = false,
+  modalSlug: modalSlugFromProps = defaultModalSlug,
+  onConfirm,
+  onPrevent,
+}) => {
+  const modalSlug = modalSlugFromProps || defaultModalSlug
   const { closeModal, openModal } = useModal()
   const modified = useFormModified()
   const { isValid } = useForm()
@@ -25,7 +33,7 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({ onConfir
   const [hasAccepted, setHasAccepted] = React.useState(false)
   const { t } = useTranslation()
 
-  const prevent = Boolean((modified || !isValid) && user)
+  const prevent = !disablePreventLeave && Boolean((modified || !isValid) && user)
 
   const handlePrevent = useCallback(() => {
     const activeHref = (document.activeElement as HTMLAnchorElement)?.href || null
@@ -33,17 +41,17 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({ onConfir
       onPrevent(activeHref)
     }
     openModal(modalSlug)
-  }, [openModal, onPrevent])
+  }, [openModal, onPrevent, modalSlug])
 
   const handleAccept = useCallback(() => {
     closeModal(modalSlug)
-  }, [closeModal])
+  }, [closeModal, modalSlug])
 
   usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent: handlePrevent, prevent })
 
   const onCancel: OnCancel = useCallback(() => {
     closeModal(modalSlug)
-  }, [closeModal])
+  }, [closeModal, modalSlug])
 
   const handleConfirm = useCallback(async () => {
     if (onConfirm) {

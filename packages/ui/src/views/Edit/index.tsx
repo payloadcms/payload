@@ -3,6 +3,7 @@
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -112,6 +113,7 @@ export function DefaultEditView({
     onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
+  const { closeModal } = useModal()
 
   const isInDrawer = Boolean(drawerSlug)
 
@@ -252,16 +254,14 @@ export function DefaultEditView({
         nextPath.includes(path),
       )
 
-      // Only retain the lock if the user is still viewing the document
-      if (!isInternalView) {
-        if (isLockOwnedByCurrentUser) {
-          try {
-            await unlockDocument(id, collectionSlug ?? globalSlug)
-            setDocumentIsLocked(false)
-            setCurrentEditor(null)
-          } catch (err) {
-            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
-          }
+      // Remove the lock if the user is navigating away from the document view they have locked
+      if (isLockOwnedByCurrentUser && !isInternalView) {
+        try {
+          await unlockDocument(id, collectionSlug ?? globalSlug)
+          setDocumentIsLocked(false)
+          setCurrentEditor(null)
+        } catch (err) {
+          console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
         }
       }
     }
@@ -569,7 +569,7 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && (
+          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && !isInDrawer && (
             <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
           )}
           {!isInDrawer && (
