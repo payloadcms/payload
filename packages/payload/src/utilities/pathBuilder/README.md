@@ -49,29 +49,45 @@ getPathBuilder().text('hero').text('title') // TypeScript error!
 
 ## Entity Context (Optional)
 
-Use `withEntity: true` to include collection/global context:
+Use the `prefix` option to include collection/global context:
+
+### `prefix: 'entityType.entity'` - Full prefix with type
 
 ```ts
-const { path, schemaPath } = getPathBuilder({ withEntity: true })
+const { indexPath, path, schemaPath } = getPathBuilder({ prefix: 'entityType.entity' })
   .collections('pages')
   .id(123) // or .noId()
   .text('title')
   .build()
-// Result: { path: 'title', schemaPath: 'title' }
+// Result: { indexPath: '', path: 'collection.pages.123.title', schemaPath: 'collection.pages.title' }
 ```
 
 ```ts
-const { path, schemaPath } = getPathBuilder({ withEntity: true })
+const { indexPath, path, schemaPath } = getPathBuilder({ prefix: 'entityType.entity' })
   .globals('settings')
   .text('siteName')
   .build()
-// Result: { path: 'siteName', schemaPath: 'siteName' }
+// Result: { indexPath: '', path: 'global.settings.siteName', schemaPath: 'global.settings.siteName' }
 ```
 
-Without `withEntity`, start directly with fields:
+### `prefix: 'entity'` - Entity slug only
 
 ```ts
-const { path, schemaPath } = getPathBuilder().group('hero').text('title').build()
+const { indexPath, path, schemaPath } = getPathBuilder({ prefix: 'entity' })
+  .collections('pages')
+  .id(123)
+  .text('title')
+  .build()
+// Result: { indexPath: '', path: 'pages.123.title', schemaPath: 'pages.title' }
+```
+
+### `prefix: false` (default) - No prefix
+
+Without prefix, start directly with fields:
+
+```ts
+const { indexPath, path, schemaPath } = getPathBuilder().group('hero').text('title').build()
+// Result: { indexPath: '', path: 'hero.title', schemaPath: 'hero.title' }
 ```
 
 ## Array Fields
@@ -301,11 +317,18 @@ Create a new path builder instance.
 
 **Options:**
 
-- `withEntity?: boolean` - Enable `.collections()` and `.globals()` methods
+- `prefix?: false | 'entity' | 'entityType.entity'` - Control entity context prefix
+  - `false` (default): No prefix, direct field access
+  - `'entity'`: Prefix with entity slug only (e.g., `'pages.title'`)
+  - `'entityType.entity'`: Prefix with entity type and slug (e.g., `'collection.pages.title'`)
 
 #### `.build()`
 
-Returns `{ path: string, schemaPath: string }`
+Returns `{ indexPath: string, path: string | null, schemaPath: string | null }`
+
+- `indexPath`: The accumulated index path at the end (e.g., `'_index-0-1'`), or empty string
+- `path`: The data access path, or `null` when `noIndex()` is used
+- `schemaPath`: The schema definition path, or `null` when `noSchemaIndex()` is used
 
 ### Array/Blocks Methods
 
@@ -329,7 +352,7 @@ Add array/block index to data path only.
 
 Skip array/block index (useful for schema-only paths).
 
-### Entity Methods (with `withEntity: true`)
+### Entity Methods (with `prefix: 'entity'` or `prefix: 'entityType.entity'`)
 
 #### `.collections(slug: string)`
 

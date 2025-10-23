@@ -1722,6 +1722,7 @@ export {
   type FieldBuilder,
   getPathBuilder,
   narrowBuilder,
+  type PathResult,
   type RootBuilder,
 } from './utilities/pathBuilder/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'

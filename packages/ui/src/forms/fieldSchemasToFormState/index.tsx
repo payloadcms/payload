@@ -1,16 +1,17 @@
-import type {
-  BuildFormStateArgs,
-  ClientFieldSchemaMap,
-  Data,
-  DocumentPreferences,
-  Field,
-  FieldSchemaMap,
-  FormState,
-  FormStateWithoutComponents,
-  PayloadRequest,
-  SanitizedFieldsPermissions,
-  SelectMode,
-  SelectType,
+import {
+  type BuildFormStateArgs,
+  type ClientFieldSchemaMap,
+  type Data,
+  type DocumentPreferences,
+  type Field,
+  type FieldSchemaMap,
+  type FormState,
+  type FormStateWithoutComponents,
+  getPathBuilder,
+  type PayloadRequest,
+  type SanitizedFieldsPermissions,
+  type SelectMode,
+  type SelectType,
 } from 'payload'
 
 import type { RenderFieldMethod } from './types.js'
@@ -135,6 +136,7 @@ export const fieldSchemasToFormState = async ({
       fullData = documentData
     }
 
+    const parentPath = getPathBuilder({ prefix: 'entity' }).collections(collectionSlug).noId()
     await iterateFields({
       id,
       addErrorPathToParent: null,
@@ -147,10 +149,8 @@ export const fieldSchemasToFormState = async ({
       fullData,
       mockRSCs,
       operation,
-      parentIndexPath: '',
       parentPassesCondition: true,
-      parentPath: '',
-      parentSchemaPath: schemaPath,
+      parentPath,
       permissions,
       preferences,
       previousFormState,
