@@ -1,17 +1,86 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
+import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 
-import { sql } from 'drizzle-orm'
-import { fieldIsVirtual } from 'payload/shared'
+import { and, asc, count, desc, eq, getTableName, or, sql } from 'drizzle-orm'
+import {
+  appendVersionToQueryKey,
+  buildVersionCollectionFields,
+  combineQueries,
+  type FlattenedField,
+  getFieldByPath,
+  getQueryDraftsSort,
+  type JoinQuery,
+  type SelectMode,
+  type SelectType,
+  type Where,
+} from 'payload'
+import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
+import { getTableAlias } from '../queries/getTableAlias.js'
+import { operatorMap } from '../queries/operatorMap.js'
+import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
-import { chainMethods } from './chainMethods.js'
+import {
+  InternalBlockTableNameIndex,
+  resolveBlockTableName,
+} from '../utilities/validateExistingBlockIsIdentical.js'
+
+const flattenAllWherePaths = (where: Where, paths: { path: string; ref: any }[]) => {
+  for (const k in where) {
+    if (['AND', 'OR'].includes(k.toUpperCase())) {
+      if (Array.isArray(where[k])) {
+        for (const whereField of where[k]) {
+          flattenAllWherePaths(whereField, paths)
+        }
+      }
+    } else {
+      // TODO: explore how to support arrays/relationship querying.
+      paths.push({ path: k.split('.').join('_'), ref: where })
+    }
+  }
+}
+
+const buildSQLWhere = (where: Where, alias: string) => {
+  for (const k in where) {
+    if (['AND', 'OR'].includes(k.toUpperCase())) {
+      if (Array.isArray(where[k])) {
+        const op = 'AND' === k.toUpperCase() ? and : or
+        const accumulated = []
+        for (const whereField of where[k]) {
+          accumulated.push(buildSQLWhere(whereField, alias))
+        }
+        return op(...accumulated)
+      }
+    } else {
+      let payloadOperator = Object.keys(where[k])[0]
+
+      const value = where[k][payloadOperator]
+      if (payloadOperator === '$raw') {
+        return sql.raw(value)
+      }
+
+      // Handle exists: false -> use isNull instead of isNotNull
+
+      // This logic is duplicated from sanitizeQueryValue.ts because buildSQLWhere
+      // is a simplified WHERE builder for polymorphic joins that doesn't have access
+      // to field definitions needed by sanitizeQueryValue
+      if (payloadOperator === 'exists' && value === false) {
+        payloadOperator = 'isNull'
+      }
+
+      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
+    }
+  }
+}
+
+type SQLSelect = SQLiteSelectBase<any, any, any, any>
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -20,10 +89,12 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
+  draftsEnabled?: boolean
   fields: FlattenedField[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized?: boolean
   path: string
   select?: SelectType
   selectAllOnCurrentLevel?: boolean
@@ -32,7 +103,6 @@ type TraverseFieldArgs = {
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
   versions?: boolean
-  withinLocalizedField?: boolean
   withTabledFields: {
     numbers?: boolean
     rels?: boolean
@@ -47,10 +117,12 @@ export const traverseFields = ({
   currentArgs,
   currentTableName,
   depth,
+  draftsEnabled,
   fields,
   joinQuery = {},
   joins,
   locale,
+  parentIsLocalized = false,
   path,
   select,
   selectAllOnCurrentLevel = false,
@@ -59,13 +131,17 @@ export const traverseFields = ({
   topLevelArgs,
   topLevelTableName,
   versions,
-  withinLocalizedField = false,
   withTabledFields,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldIsVirtual(field)) {
       return
     }
+
+    const isFieldLocalized = fieldShouldBeLocalized({
+      field,
+      parentIsLocalized,
+    })
 
     // handle simple relationship
     if (
@@ -74,7 +150,7 @@ export const traverseFields = ({
       !field.hasMany &&
       typeof field.relationTo === 'string'
     ) {
-      if (field.localized) {
+      if (isFieldLocalized) {
         _locales.with[`${path}${field.name}`] = true
       } else {
         currentArgs.with[`${path}${field.name}`] = true
@@ -139,7 +215,13 @@ export const traverseFields = ({
           }
         }
 
-        currentArgs.with[`${path}${field.name}`] = withArray
+        const relationName = getArrayRelationName({
+          field,
+          path: `${path}${field.name}`,
+          tableName: arrayTableName,
+        })
+
+        currentArgs.with[relationName] = withArray
 
         traverseFields({
           _locales: withArray.with._locales,
@@ -147,16 +229,17 @@ export const traverseFields = ({
           currentArgs: withArray,
           currentTableName: arrayTableName,
           depth,
+          draftsEnabled,
           fields: field.flattenedFields,
           joinQuery,
           locale,
+          parentIsLocalized: parentIsLocalized || field.localized,
           path: '',
           select: typeof arraySelect === 'object' ? arraySelect : undefined,
           selectMode,
           tablePath: '',
           topLevelArgs,
           topLevelTableName,
-          withinLocalizedField: withinLocalizedField || field.localized,
           withTabledFields,
         })
 
@@ -183,8 +266,23 @@ export const traverseFields = ({
           }
         }
 
-        field.blocks.forEach((block) => {
-          const blockKey = `_blocks_${block.slug}`
+        if (adapter.blocksAsJSON) {
+          if (select || selectAllOnCurrentLevel) {
+            const fieldPath = `${path}${field.name}`
+
+            if ((isFieldLocalized || parentIsLocalized) && _locales) {
+              _locales.columns[fieldPath] = true
+            } else if (adapter.tables[currentTableName]?.[fieldPath]) {
+              currentArgs.columns[fieldPath] = true
+            }
+          }
+
+          break
+        }
+
+        ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+          const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
+          const blockKey = `_blocks_${block.slug}${!block[InternalBlockTableNameIndex] ? '' : `_${block[InternalBlockTableNameIndex]}`}`
 
           let blockSelect: boolean | SelectType | undefined
 
@@ -203,7 +301,7 @@ export const traverseFields = ({
             ) {
               blockSelect = {}
               blockSelectMode = 'include'
-            } else if (selectMode === 'include' && blocksSelect[block.slug] === true) {
+            } else if (selectMode === 'include' && Boolean(blocksSelect[block.slug])) {
               blockSelect = true
             }
           }
@@ -224,8 +322,9 @@ export const traverseFields = ({
               with: {},
             }
 
-            const tableName = adapter.tableNameMap.get(
-              `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+            const tableName = resolveBlockTableName(
+              block,
+              adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
             )
 
             if (typeof blockSelect === 'object') {
@@ -257,16 +356,17 @@ export const traverseFields = ({
               currentArgs: withBlock,
               currentTableName: tableName,
               depth,
+              draftsEnabled,
               fields: block.flattenedFields,
               joinQuery,
               locale,
+              parentIsLocalized: parentIsLocalized || field.localized,
               path: '',
               select: typeof blockSelect === 'object' ? blockSelect : undefined,
               selectMode: blockSelectMode,
               tablePath: '',
               topLevelArgs,
               topLevelTableName,
-              withinLocalizedField: withinLocalizedField || field.localized,
               withTabledFields,
             })
 
@@ -298,10 +398,12 @@ export const traverseFields = ({
           currentArgs,
           currentTableName,
           depth,
+          draftsEnabled,
           fields: field.flattenedFields,
           joinQuery,
           joins,
           locale,
+          parentIsLocalized: parentIsLocalized || field.localized,
           path: `${path}${field.name}_`,
           select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
           selectAllOnCurrentLevel:
@@ -313,7 +415,6 @@ export const traverseFields = ({
           topLevelArgs,
           topLevelTableName,
           versions,
-          withinLocalizedField: withinLocalizedField || field.localized,
           withTabledFields,
         })
 
@@ -339,7 +440,9 @@ export const traverseFields = ({
         }
 
         const {
+          count: shouldCount = false,
           limit: limitArg = field.defaultLimit ?? 10,
+          page,
           sort = field.defaultSort,
           where,
         } = joinQuery[joinSchemaPath] || {}
@@ -350,97 +453,328 @@ export const traverseFields = ({
           limit += 1
         }
 
-        const fields = adapter.payload.collections[field.collection].config.flattenedFields
-
-        const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
-
-        const joins: BuildQueryJoinAliases = []
-
-        const currentIDColumn = versions
-          ? adapter.tables[currentTableName].parent
-          : adapter.tables[currentTableName].id
-
-        let joinQueryWhere: Where
-
-        if (Array.isArray(field.targetField.relationTo)) {
-          joinQueryWhere = {
-            [field.on]: {
-              equals: {
-                relationTo: collectionSlug,
-                value: rawConstraint(currentIDColumn),
-              },
-            },
-          }
-        } else {
-          joinQueryWhere = {
-            [field.on]: {
-              equals: rawConstraint(currentIDColumn),
-            },
-          }
-        }
-
-        if (where && Object.keys(where).length) {
-          joinQueryWhere = {
-            and: [joinQueryWhere, where],
-          }
-        }
-
-        const {
-          orderBy,
-          selectFields,
-          where: subQueryWhere,
-        } = buildQuery({
-          adapter,
-          fields,
-          joins,
-          locale,
-          selectLocale: true,
-          sort,
-          tableName: joinCollectionTableName,
-          where: joinQueryWhere,
-        })
-
-        const chainedMethods: ChainedMethods = []
-
-        joins.forEach(({ type, condition, table }) => {
-          chainedMethods.push({
-            args: [table, condition],
-            method: type ?? 'leftJoin',
-          })
-        })
-
-        if (limit !== 0) {
-          chainedMethods.push({
-            args: [limit],
-            method: 'limit',
-          })
-        }
+        const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
         const db = adapter.drizzle as LibSQLDatabase
 
-        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+        if (Array.isArray(field.collection)) {
+          let currentQuery: null | SQLSelect = null
+          const onPath = field.on.split('.').join('_')
 
-        const subQueryAlias = `${columnName}_alias`
+          if (Array.isArray(sort)) {
+            throw new Error('Not implemented')
+          }
 
-        const subQuery = chainMethods({
-          methods: chainedMethods,
-          query: db
-            .select(selectFields as any)
-            .from(adapter.tables[joinCollectionTableName])
-            .where(subQueryWhere)
-            .orderBy(() => orderBy.map(({ column, order }) => order(column))),
-        }).as(subQueryAlias)
+          let sanitizedSort = sort
 
-        currentArgs.extras[columnName] = sql`${db
-          .select({
-            result: jsonAggBuildObject(adapter, {
-              id: sql.raw(`"${subQueryAlias}".id`),
-              ...(selectFields._locale && {
-                locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
+          if (!sanitizedSort) {
+            if (
+              field.collection.some((collection) =>
+                adapter.payload.collections[collection].config.fields.some(
+                  (f) => f.type === 'date' && f.name === 'createdAt',
+                ),
+              )
+            ) {
+              sanitizedSort = '-createdAt'
+            } else {
+              sanitizedSort = 'id'
+            }
+          }
+
+          const sortOrder = sanitizedSort.startsWith('-') ? desc : asc
+          sanitizedSort = sanitizedSort.replace('-', '')
+
+          const sortPath = sanitizedSort.split('.').join('_')
+
+          const wherePaths: { path: string; ref: any }[] = []
+
+          if (where) {
+            flattenAllWherePaths(where, wherePaths)
+          }
+
+          for (const collection of field.collection) {
+            const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(collection))
+
+            const table = adapter.tables[joinCollectionTableName]
+
+            const sortColumn = table[sortPath]
+
+            const selectFields = {
+              id: adapter.tables[joinCollectionTableName].id,
+              parent: sql`${adapter.tables[joinCollectionTableName][onPath]}`.as(onPath),
+              relationTo: sql`${collection}`.as('relationTo'),
+              sortPath: sql`${sortColumn ? sortColumn : null}`.as('sortPath'),
+            }
+
+            const collectionQueryWhere: any[] = []
+            // Select for WHERE and Fallback NULL
+            for (const { path, ref } of wherePaths) {
+              const collectioConfig = adapter.payload.collections[collection].config
+              const field = getFieldByPath({ fields: collectioConfig.flattenedFields, path })
+
+              if (field && field.field.type === 'select' && field.field.hasMany) {
+                let tableName = adapter.tableNameMap.get(
+                  `${toSnakeCase(collection)}_${toSnakeCase(path)}`,
+                )
+                let parentTable = getTableName(table)
+
+                if (adapter.schemaName) {
+                  tableName = `"${adapter.schemaName}"."${tableName}"`
+                  parentTable = `"${adapter.schemaName}"."${parentTable}"`
+                }
+
+                if (adapter.name === 'postgres') {
+                  selectFields[path] = sql
+                    .raw(
+                      `(select jsonb_agg(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
+                    )
+                    .as(path)
+                } else {
+                  selectFields[path] = sql
+                    .raw(
+                      `(select json_group_array(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
+                    )
+                    .as(path)
+                }
+
+                const constraint = ref[path]
+                const operator = Object.keys(constraint)[0]
+                const value: any = Object.values(constraint)[0]
+
+                const query = adapter.createJSONQuery({
+                  column: `"${path}"`,
+                  operator,
+                  pathSegments: [field.field.name],
+                  table: parentTable,
+                  value,
+                })
+                ref[path] = { $raw: query }
+              } else if (adapter.tables[joinCollectionTableName][path]) {
+                selectFields[path] = sql`${adapter.tables[joinCollectionTableName][path]}`.as(path)
+                // Allow to filter by collectionSlug
+              } else if (path !== 'relationTo') {
+                // For timestamp fields like deletedAt, we need to cast to timestamp in Postgres
+                // SQLite doesn't require explicit type casting for UNION queries
+                if (path === 'deletedAt' && adapter.name === 'postgres') {
+                  selectFields[path] = sql`null::timestamp with time zone`.as(path)
+                } else {
+                  selectFields[path] = sql`null`.as(path)
+                }
+              }
+            }
+
+            let query: any = db.select(selectFields).from(adapter.tables[joinCollectionTableName])
+            if (collectionQueryWhere.length) {
+              query = query.where(and(...collectionQueryWhere))
+            }
+            if (currentQuery === null) {
+              currentQuery = query as unknown as SQLSelect
+            } else {
+              currentQuery = currentQuery.unionAll(query) as SQLSelect
+            }
+          }
+
+          const subQueryAlias = `${columnName}_subquery`
+
+          let sqlWhere = eq(
+            sql.raw(`"${currentTableName}"."id"`),
+            sql.raw(`"${subQueryAlias}"."${onPath}"`),
+          )
+
+          if (where && Object.keys(where).length > 0) {
+            sqlWhere = and(sqlWhere, buildSQLWhere(where, subQueryAlias))
+          }
+
+          if (shouldCount) {
+            currentArgs.extras[`${columnName}_count`] = sql`${db
+              .select({ count: count() })
+              .from(sql`${currentQuery.as(subQueryAlias)}`)
+              .where(sqlWhere)}`.as(`${columnName}_count`)
+          }
+
+          currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
+
+          if (page && limit !== 0) {
+            const offset = (page - 1) * limit
+            if (offset > 0) {
+              currentQuery = currentQuery.offset(offset) as SQLSelect
+            }
+          }
+
+          if (limit) {
+            currentQuery = currentQuery.limit(limit) as SQLSelect
+          }
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              id: jsonAggBuildObject(adapter, {
+                id: sql.raw(`"${subQueryAlias}"."id"`),
+                relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
               }),
-            }),
+            })
+            .from(sql`${currentQuery.as(subQueryAlias)}`)
+            .where(sqlWhere)}`.as(columnName)
+        } else {
+          const useDrafts =
+            (versions || draftsEnabled) &&
+            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
+
+          const fields = useDrafts
+            ? buildVersionCollectionFields(
+                adapter.payload.config,
+                adapter.payload.collections[field.collection].config,
+                true,
+              )
+            : adapter.payload.collections[field.collection].config.flattenedFields
+
+          const joinCollectionTableName = adapter.tableNameMap.get(
+            useDrafts
+              ? `_${toSnakeCase(field.collection)}${adapter.versionsSuffix}`
+              : toSnakeCase(field.collection),
+          )
+
+          const joins: BuildQueryJoinAliases = []
+
+          const currentIDColumn = versions
+            ? adapter.tables[currentTableName].parent
+            : adapter.tables[currentTableName].id
+
+          let joinQueryWhere: Where
+
+          const currentIDRaw = sql.raw(
+            `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
+          )
+
+          if (Array.isArray(field.targetField.relationTo)) {
+            joinQueryWhere = {
+              [field.on]: {
+                equals: {
+                  relationTo: collectionSlug,
+                  value: rawConstraint(currentIDRaw),
+                },
+              },
+            }
+          } else {
+            joinQueryWhere = {
+              [field.on]: {
+                equals: rawConstraint(currentIDRaw),
+              },
+            }
+          }
+
+          if (where && Object.keys(where).length) {
+            joinQueryWhere = {
+              and: [joinQueryWhere, where],
+            }
+          }
+
+          if (useDrafts) {
+            joinQueryWhere = combineQueries(appendVersionToQueryKey(joinQueryWhere), {
+              latest: { equals: true },
+            })
+          }
+
+          const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+          const subQueryAlias = `${columnName}_alias`
+
+          const { newAliasTable } = getTableAlias({
+            adapter,
+            tableName: joinCollectionTableName,
           })
-          .from(sql`${subQuery}`)}`.as(columnName)
+
+          const {
+            orderBy,
+            selectFields,
+            where: subQueryWhere,
+          } = buildQuery({
+            adapter,
+            aliasTable: newAliasTable,
+            fields,
+            joins,
+            locale,
+            parentIsLocalized,
+            selectLocale: true,
+            sort: useDrafts
+              ? getQueryDraftsSort({
+                  collectionConfig: adapter.payload.collections[field.collection].config,
+                  sort,
+                })
+              : sort,
+            tableName: joinCollectionTableName,
+            where: joinQueryWhere,
+          })
+
+          for (let key in selectFields) {
+            const val = selectFields[key]
+
+            if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
+              delete selectFields[key]
+              key = key.split('.').pop()
+              selectFields[key] = newAliasTable[key]
+            }
+          }
+
+          if (useDrafts) {
+            selectFields.parent = newAliasTable.parent
+          }
+
+          let query: SQLiteSelect = db
+            .select(selectFields as any)
+            .from(newAliasTable)
+            .where(subQueryWhere)
+            .orderBy(() => orderBy.map(({ column, order }) => order(column)))
+            .$dynamic()
+
+          joins.forEach(({ type, condition, table }) => {
+            query = query[type ?? 'leftJoin'](table, condition)
+          })
+
+          if (page && limit !== 0) {
+            const offset = (page - 1) * limit - 1
+            if (offset > 0) {
+              query = query.offset(offset)
+            }
+          }
+
+          if (limit !== 0) {
+            query = query.limit(limit)
+          }
+
+          const subQuery = query.as(subQueryAlias)
+
+          if (shouldCount) {
+            let countSubquery: SQLiteSelect = db
+              .select(selectFields as any)
+
+              .from(newAliasTable)
+              .where(subQueryWhere)
+              .$dynamic()
+
+            joins.forEach(({ type, condition, table }) => {
+              countSubquery = countSubquery[type ?? 'leftJoin'](table, condition)
+            })
+
+            currentArgs.extras[`${columnName}_count`] = sql`${db
+              .select({
+                count: count(),
+              })
+              .from(sql`${countSubquery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
+              `${subQueryAlias}_count`,
+            )
+          }
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              result: jsonAggBuildObject(adapter, {
+                id: sql.raw(`"${subQueryAlias}".${useDrafts ? 'parent_id' : 'id'}`),
+                ...(selectFields._locale && {
+                  locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
+                }),
+              }),
+            })
+            .from(sql`${subQuery}`)}`.as(subQueryAlias)
+        }
 
         break
       }
@@ -450,7 +784,7 @@ export const traverseFields = ({
           break
         }
 
-        const args = field.localized ? _locales : currentArgs
+        const args = isFieldLocalized ? _locales : currentArgs
         if (!args.columns) {
           args.columns = {}
         }
@@ -470,7 +804,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           if (
             selectAllOnCurrentLevel ||
-            (selectMode === 'include' && select[field.name] === true) ||
+            (selectMode === 'include' && Boolean(select[field.name])) ||
             (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
           ) {
             shouldSelect = true
@@ -478,9 +812,14 @@ export const traverseFields = ({
         } else {
           shouldSelect = true
         }
+        const tableName = fieldShouldBeLocalized({ field, parentIsLocalized })
+          ? `${currentTableName}${adapter.localesSuffix}`
+          : currentTableName
 
         if (shouldSelect) {
-          args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          args.extras[name] = sql
+            .raw(`ST_AsGeoJSON("${adapter.tables[tableName][name].name}")::jsonb`)
+            .as(name)
         }
         break
       }
@@ -512,7 +851,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           const fieldPath = `${path}${field.name}`
 
-          if ((field.localized || withinLocalizedField) && _locales) {
+          if ((isFieldLocalized || parentIsLocalized) && _locales) {
             _locales.columns[fieldPath] = true
           } else if (adapter.tables[currentTableName]?.[fieldPath]) {
             currentArgs.columns[fieldPath] = true
@@ -529,12 +868,12 @@ export const traverseFields = ({
 
         if (
           selectAllOnCurrentLevel ||
-          (selectMode === 'include' && select[field.name] === true) ||
+          (selectMode === 'include' && Boolean(select[field.name])) ||
           (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
         ) {
           const fieldPath = `${path}${field.name}`
 
-          if ((field.localized || withinLocalizedField) && _locales) {
+          if ((isFieldLocalized || parentIsLocalized) && _locales) {
             _locales.columns[fieldPath] = true
           } else if (adapter.tables[currentTableName]?.[fieldPath]) {
             currentArgs.columns[fieldPath] = true

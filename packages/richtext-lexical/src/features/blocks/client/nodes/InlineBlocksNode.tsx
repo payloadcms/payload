@@ -1,7 +1,11 @@
 'use client'
-import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
-
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type EditorConfig,
+  type LexicalEditor,
+  type LexicalNode,
+} from 'lexical'
 import React, { type JSX } from 'react'
 
 import type {
@@ -18,35 +22,44 @@ const InlineBlockComponent = React.lazy(() =>
 )
 
 export class InlineBlockNode extends ServerInlineBlockNode {
-  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+  static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importJSON(serializedNode: SerializedInlineBlockNode): InlineBlockNode {
+  static override importJSON(serializedNode: SerializedInlineBlockNode): InlineBlockNode {
     const node = $createInlineBlockNode(serializedNode.fields)
     return node
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    return <InlineBlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+  override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return (
+      <InlineBlockComponent
+        cacheBuster={this.getCacheBuster()}
+        className={config.theme.inlineBlock ?? 'LexicalEditorTheme__inlineBlock'}
+        formData={this.getFields()}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
-  exportJSON(): SerializedInlineBlockNode {
+  override exportJSON(): SerializedInlineBlockNode {
     return super.exportJSON()
   }
 }
 
 export function $createInlineBlockNode(fields: Exclude<InlineBlockFields, 'id'>): InlineBlockNode {
-  return new InlineBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new InlineBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isInlineBlockNode(

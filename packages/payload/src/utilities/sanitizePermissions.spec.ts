@@ -1,4 +1,5 @@
 import type { CollectionPermission, Permissions } from '../auth/types.js'
+import { preferencesCollectionSlug } from '../preferences/config.js'
 
 import { sanitizePermissions } from './sanitizePermissions.js'
 
@@ -1561,7 +1562,7 @@ describe('sanitizePermissions', () => {
     const permissions: Permissions = {
       canAccessAdmin: false,
       collections: {
-        'payload-preferences': {
+        preferencesCollectionSlug: {
           fields: {
             user: {
               create: {

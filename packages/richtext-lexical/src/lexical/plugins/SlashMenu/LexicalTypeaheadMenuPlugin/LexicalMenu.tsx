@@ -1,5 +1,5 @@
 'use client'
-import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
+import type { BaseSelection, LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { JSX, ReactPortal, RefObject } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -7,7 +7,9 @@ import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
   $isRangeSelection,
+  $setSelection,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_NORMAL,
   createCommand,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
@@ -81,18 +83,18 @@ function getFullMatchOffset(documentText: string, entryText: string, offset: num
  * Split Lexical TextNode and return a new TextNode only containing matched text.
  * Common use cases include: removing the node, replacing with a new node.
  */
-function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
+function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | undefined {
   const selection = $getSelection()
   if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-    return null
+    return
   }
   const anchor = selection.anchor
   if (anchor.type !== 'text') {
-    return null
+    return
   }
   const anchorNode = anchor.getNode()
   if (!anchorNode.isSimpleText()) {
-    return null
+    return
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
@@ -100,7 +102,7 @@ function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
-    return null
+    return
   }
   let newNode
   if (startOffset === 0) {
@@ -240,7 +242,7 @@ export function LexicalMenu({
       const allItems = groups.flatMap((group) => group.items)
 
       if (allItems.length) {
-        const firstMatchingItem = allItems[0]
+        const firstMatchingItem = allItems[0]!
         updateSelectedItem(firstMatchingItem)
       }
     }
@@ -266,6 +268,17 @@ export function LexicalMenu({
       })
 
       setTimeout(() => {
+        // Needed in Firefox. See https://github.com/payloadcms/payload/issues/10724
+        let selection: BaseSelection | undefined
+        editor.read(() => {
+          selection = $getSelection()?.clone()
+        })
+        editor.update(() => {
+          if (selection) {
+            $setSelection(selection)
+          }
+        })
+
         selectedItem.onSelect({
           editor,
           queryString: resolution.match ? resolution.match.matchingString : '',
@@ -322,6 +335,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== allItems.length - 1 ? selectedIndex + 1 : 0
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -335,7 +351,7 @@ export function LexicalMenu({
           }
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_ARROW_UP_COMMAND,
@@ -348,6 +364,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== 0 ? selectedIndex - 1 : allItems.length - 1
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -358,7 +377,7 @@ export function LexicalMenu({
           }
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_ESCAPE_COMMAND,
@@ -390,7 +409,7 @@ export function LexicalMenu({
           selectItemAndCleanUp(selectedItem)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand(
         KEY_ENTER_COMMAND,
@@ -411,7 +430,7 @@ export function LexicalMenu({
           selectItemAndCleanUp(selectedItem)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
     )
   }, [selectItemAndCleanUp, close, editor, groups, selectedItemKey, updateSelectedItem])
@@ -431,6 +450,16 @@ export function LexicalMenu({
     listItemProps,
     resolution.match ? resolution.match.matchingString : '',
   )
+}
+
+function setContainerDivAttributes(containerDiv: HTMLElement, className?: string) {
+  if (className != null) {
+    containerDiv.className = className
+  }
+  containerDiv.setAttribute('aria-label', 'Slash menu')
+  containerDiv.setAttribute('role', 'listbox')
+  containerDiv.style.display = 'block'
+  containerDiv.style.position = 'absolute'
 }
 
 export function useMenuAnchorRef(
@@ -470,8 +499,15 @@ export function useMenuAnchorRef(
 
         const rootElementRect = rootElement.getBoundingClientRect()
 
-        if (left + menuWidth > rootElementRect.right) {
+        const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl'
+        const anchorRect = anchorElem.getBoundingClientRect()
+        const leftBoundary = Math.max(0, rootElementRect.left)
+
+        if (!isRTL && left + menuWidth > rootElementRect.right) {
           containerDiv.style.left = `${rootElementRect.right - menuWidth + window.scrollX}px`
+        } else if (isRTL && menuRect.left < leftBoundary) {
+          const newLeft = leftBoundary + menuWidth - anchorRect.left
+          containerDiv.style.left = `${newLeft + window.scrollX}px`
         }
 
         const wouldGoOffBottomOfScreen = rawTop + menuHeight + VERTICAL_OFFSET > window.innerHeight
@@ -490,16 +526,10 @@ export function useMenuAnchorRef(
       }
 
       if (!containerDiv.isConnected) {
-        if (className != null) {
-          containerDiv.className = className
-        }
-        containerDiv.setAttribute('aria-label', 'Slash menu')
-        containerDiv.setAttribute('id', 'slash-menu')
-        containerDiv.setAttribute('role', 'listbox')
-        containerDiv.style.display = 'block'
-        containerDiv.style.position = 'absolute'
+        setContainerDivAttributes(containerDiv, className)
         anchorElem.append(containerDiv)
       }
+      containerDiv.setAttribute('id', 'slash-menu')
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'slash-menu')
     }
@@ -517,6 +547,7 @@ export function useMenuAnchorRef(
         const containerDiv = anchorElementRef.current
         if (containerDiv !== null && containerDiv.isConnected) {
           containerDiv.remove()
+          containerDiv.removeAttribute('id')
         }
       }
     }

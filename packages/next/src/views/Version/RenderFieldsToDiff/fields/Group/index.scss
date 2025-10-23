@@ -1,0 +1,9 @@
+@layer payload-default {
+  .group-diff {
+    &__locale-label {
+      &--no-label {
+        color: var(--theme-elevation-600);
+      }
+    }
+  }
+}

@@ -8,7 +8,6 @@ const baseClass = 'thumbnail'
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { File } from '../../graphics/File/index.js'
-import { useIntersect } from '../../hooks/useIntersect.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {
@@ -16,13 +15,23 @@ export type ThumbnailProps = {
   collectionSlug?: string
   doc?: Record<string, unknown>
   fileSrc?: string
+  height?: number
   imageCacheTag?: string
-  size?: 'expand' | 'large' | 'medium' | 'small'
+  size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
+  width?: number
 }
 
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename } = {}, fileSrc, imageCacheTag, size } = props
+  const {
+    className = '',
+    doc: { filename } = {},
+    fileSrc,
+    height,
+    imageCacheTag,
+    size,
+    width,
+  } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
@@ -32,6 +41,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -43,15 +53,21 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc])
 
+  let src: null | string = null
+
+  /**
+   * If an imageCacheTag is provided, append it to the fileSrc
+   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+   */
+  if (fileSrc) {
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  }
+
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img
-          alt={filename as string}
-          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
-        />
-      )}
+      {fileExists && <img alt={filename as string} height={height} src={src} width={width} />}
       {fileExists === false && <File />}
     </div>
   )
@@ -63,7 +79,7 @@ type ThumbnailComponentProps = {
   readonly filename: string
   readonly fileSrc: string
   readonly imageCacheTag?: string
-  readonly size?: 'expand' | 'large' | 'medium' | 'small'
+  readonly size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
   const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props
@@ -76,6 +92,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -87,12 +104,21 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     }
   }, [fileSrc])
 
+  let src: string = ''
+
+  /**
+   * If an imageCacheTag is provided, append it to the fileSrc
+   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+   */
+  if (fileSrc) {
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  }
+
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img alt={alt || filename} src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`} />
-      )}
+      {fileExists && <img alt={alt || filename} src={src} />}
       {fileExists === false && <File />}
     </div>
   )

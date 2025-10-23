@@ -7,6 +7,7 @@ import type { JsonObject, Operation, PayloadRequest } from '../../../types/index
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
+
 export type Args<T extends JsonObject> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
@@ -16,6 +17,7 @@ export type Args<T extends JsonObject> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
+  overrideAccess?: boolean
   req: PayloadRequest
   skipValidation?: boolean
 }
@@ -28,6 +30,7 @@ export type Args<T extends JsonObject> = {
  * - Transform data for storage
  * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
+
 export const beforeChange = async <T extends JsonObject>({
   id,
   collection,
@@ -37,11 +40,12 @@ export const beforeChange = async <T extends JsonObject>({
   docWithLocales,
   global,
   operation,
+  overrideAccess,
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
-  const mergeLocaleActions = []
+  const mergeLocaleActions: (() => Promise<void> | void)[] = []
   const errors: ValidationFieldError[] = []
 
   await traverseFields({
@@ -52,13 +56,17 @@ export const beforeChange = async <T extends JsonObject>({
     doc,
     docWithLocales,
     errors,
-    fields: collection?.fields || global?.fields,
+    fieldLabelPath: '',
+    fields: (collection?.fields || global?.fields)!,
     global,
     mergeLocaleActions,
     operation,
-    path: [],
+    overrideAccess: overrideAccess!,
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
     req,
-    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
@@ -72,15 +80,15 @@ export const beforeChange = async <T extends JsonObject>({
         collection: collection?.slug,
         errors,
         global: global?.slug,
+        req,
       },
       req.t,
     )
   }
 
-  await mergeLocaleActions.reduce(async (priorAction, action) => {
-    await priorAction
+  for (const action of mergeLocaleActions) {
     await action()
-  }, Promise.resolve())
+  }
 
   return data
 }

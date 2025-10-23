@@ -1,32 +1,47 @@
-import type { I18nClient } from '@payloadcms/translations'
-import type { ClientConfig, ImportMap, SanitizedConfig } from 'payload'
+import type { SupportedLanguages } from '@payloadcms/translations'
+import type { ClientConfig, CreateClientConfigArgs } from 'payload'
 
-import { createClientConfig } from 'payload'
+import { createClientConfig, createUnauthenticatedClientConfig } from 'payload'
 import { cache } from 'react'
 
-let cachedClientConfig = global._payload_clientConfig
+type CachedClientConfigs = Record<keyof SupportedLanguages, ClientConfig>
 
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
+let cachedClientConfigs = global._payload_clientConfigs as CachedClientConfigs
+
+if (!cachedClientConfigs) {
+  cachedClientConfigs = global._payload_clientConfigs = {} as CachedClientConfigs
 }
 
 export const getClientConfig = cache(
-  (args: { config: SanitizedConfig; i18n: I18nClient; importMap: ImportMap }): ClientConfig => {
-    if (cachedClientConfig && !global._payload_doNotCacheClientConfig) {
-      return cachedClientConfig
+  ({ config, i18n, importMap, user }: CreateClientConfigArgs): ClientConfig => {
+    const currentLanguage = i18n.language
+
+    if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {
+      if (!user) {
+        return createUnauthenticatedClientConfig({
+          clientConfig: cachedClientConfigs[currentLanguage],
+        }) as unknown as ClientConfig
+      }
+
+      return cachedClientConfigs[currentLanguage]
     }
 
-    const { config, i18n, importMap } = args
-
-    cachedClientConfig = createClientConfig({
+    const cachedClientConfig = createClientConfig({
       config,
       i18n,
       importMap,
+      user,
     })
 
-    global._payload_clientConfig = cachedClientConfig
-
+    cachedClientConfigs[currentLanguage] = cachedClientConfig
+    global._payload_clientConfigs = cachedClientConfigs
     global._payload_doNotCacheClientConfig = false
+
+    if (!user) {
+      return createUnauthenticatedClientConfig({
+        clientConfig: cachedClientConfig,
+      }) as unknown as ClientConfig
+    }
 
     return cachedClientConfig
   },

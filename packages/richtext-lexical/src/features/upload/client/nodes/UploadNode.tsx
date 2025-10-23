@@ -1,72 +1,44 @@
 'use client'
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type { DOMConversionMap, DOMConversionOutput, LexicalNode, Spread } from 'lexical'
+import type { DOMConversionMap, EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import type { JSX } from 'react'
 
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-import type { UploadData } from '../../server/nodes/UploadNode.js'
+import type {
+  Internal_UploadData,
+  SerializedUploadNode,
+  UploadData,
+} from '../../server/nodes/UploadNode.js'
 
-import { isGoogleDocCheckboxImg, UploadServerNode } from '../../server/nodes/UploadNode.js'
+import { $convertUploadElement } from '../../server/nodes/conversions.js'
+import { UploadServerNode } from '../../server/nodes/UploadNode.js'
+import { PendingUploadComponent } from '../component/pending/index.js'
 
 const RawUploadComponent = React.lazy(() =>
   import('../../client/component/index.js').then((module) => ({ default: module.UploadComponent })),
 )
 
-function $convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput | null {
-  if (
-    domNode.hasAttribute('data-lexical-upload-relation-to') &&
-    domNode.hasAttribute('data-lexical-upload-id')
-  ) {
-    const id = domNode.getAttribute('data-lexical-upload-id')
-    const relationTo = domNode.getAttribute('data-lexical-upload-relation-to')
-
-    if (id != null && relationTo != null) {
-      const node = $createUploadNode({
-        data: {
-          fields: {},
-          relationTo,
-          value: id,
-        },
-      })
-      return { node }
-    }
-  }
-  const img = domNode
-  if (img.src.startsWith('file:///') || isGoogleDocCheckboxImg(img)) {
-    return null
-  }
-  // TODO: Auto-upload functionality here!
-  //}
-  return null
-}
-
-export type SerializedUploadNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'upload'
-} & Spread<UploadData, SerializedDecoratorBlockNode>
-
 export class UploadNode extends UploadServerNode {
-  static clone(node: UploadServerNode): UploadServerNode {
+  static override clone(node: UploadServerNode): UploadServerNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importDOM(): DOMConversionMap<HTMLImageElement> {
+  static override importDOM(): DOMConversionMap<HTMLImageElement> {
     return {
       img: (node) => ({
-        conversion: $convertUploadElement,
+        conversion: (domNode) => $convertUploadElement(domNode, $createUploadNode),
         priority: 0,
       }),
     }
   }
 
-  static importJSON(serializedNode: SerializedUploadNode): UploadNode {
+  static override importJSON(serializedNode: SerializedUploadNode): UploadNode {
     if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
@@ -75,9 +47,10 @@ export class UploadNode extends UploadServerNode {
       serializedNode.version = 3
     }
 
-    const importedData: UploadData = {
+    const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,
+      pending: (serializedNode as Internal_UploadData).pending,
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
     }
@@ -88,11 +61,21 @@ export class UploadNode extends UploadServerNode {
     return node
   }
 
-  decorate(): JSX.Element {
-    return <RawUploadComponent data={this.__data} nodeKey={this.getKey()} />
+  override decorate(editor?: LexicalEditor, config?: EditorConfig): JSX.Element {
+    if ((this.__data as Internal_UploadData).pending) {
+      return <PendingUploadComponent />
+    }
+    return (
+      <RawUploadComponent
+        className={config?.theme?.upload ?? 'LexicalEditorTheme__upload'}
+        data={this.__data}
+        format={this.__format}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
-  exportJSON(): SerializedUploadNode {
+  override exportJSON(): SerializedUploadNode {
     return super.exportJSON()
   }
 }
@@ -105,6 +88,7 @@ export function $createUploadNode({
   if (!data?.id) {
     data.id = new ObjectID.default().toHexString()
   }
+
   return $applyNodeReplacement(new UploadNode({ data: data as UploadData }))
 }
 

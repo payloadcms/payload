@@ -1,17 +1,17 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Document, PayloadRequest } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
 export const getParents = async (
-  req: any,
-  pluginConfig: NestedDocsPluginConfig,
+  req: PayloadRequest,
+  pluginConfig: Pick<NestedDocsPluginConfig, 'generateLabel' | 'generateURL' | 'parentFieldSlug'>,
   collection: CollectionConfig,
   doc: Record<string, unknown>,
   docs: Array<Record<string, unknown>> = [],
-): Promise<Array<Record<string, unknown>>> => {
+): Promise<Document[]> => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
   const parent = doc[parentSlug]
-  let retrievedParent
+  let retrievedParent: null | Record<string, unknown> = null
 
   if (parent) {
     // If not auto-populated, and we have an ID
@@ -27,7 +27,7 @@ export const getParents = async (
 
     // If auto-populated
     if (typeof parent === 'object') {
-      retrievedParent = parent
+      retrievedParent = parent as Record<string, unknown>
     }
 
     if (retrievedParent) {

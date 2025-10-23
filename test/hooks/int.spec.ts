@@ -21,9 +21,10 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
-import { beforeValidateSlug } from './collectionSlugs.js'
+import { valueHooksSlug } from './collections/Value/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
+import { beforeValidateSlug, fieldPathsSlug } from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -37,9 +38,7 @@ describe('Hooks', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
   if (isMongoose(payload)) {
     describe('transform actions', () => {
@@ -278,7 +277,7 @@ describe('Hooks', () => {
       const document = await payload.create({
         collection: contextHooksSlug,
         context: {
-          secretValue: 'data from local API',
+          secretValue: 'data from Local API',
         },
         data: {
           value: 'wrongvalue',
@@ -290,28 +289,28 @@ describe('Hooks', () => {
         collection: contextHooksSlug,
       })
 
-      expect(retrievedDoc.value).toEqual('data from local API')
+      expect(retrievedDoc.value).toEqual('data from Local API')
     })
 
-    it('should pass context from local API to global hooks', async () => {
+    it('should pass context from Local API to global hooks', async () => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
       })
 
-      expect(globalDocument.field_globalAndField).not.toEqual('data from local API context')
+      expect(globalDocument.field_globalAndField).not.toEqual('data from Local API context')
 
       const globalDocumentWithContext = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
         context: {
-          field_beforeChange_GlobalAndField_override: 'data from local API context',
+          field_beforeChange_GlobalAndField_override: 'data from Local API context',
         },
       })
-      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from local API context')
+      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
 
-    it('should pass context from rest API to hooks', async () => {
+    it('should pass context from REST API to hooks', async () => {
       const params = new URLSearchParams({
-        context_secretValue: 'data from rest API',
+        context_secretValue: 'data from REST API',
       })
       // send context as query params. It will be parsed by the beforeOperation hook
       const { doc } = await restClient
@@ -327,7 +326,7 @@ describe('Hooks', () => {
         id: doc.id,
       })
 
-      expect(retrievedDoc.value).toEqual('data from rest API')
+      expect(retrievedDoc.value).toEqual('data from REST API')
     })
   })
 
@@ -427,15 +426,19 @@ describe('Hooks', () => {
       expect(JSON.parse(doc.collection_beforeOperation_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_beforeChange_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterChange_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterRead_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterOperation_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
@@ -516,6 +519,119 @@ describe('Hooks', () => {
       const globalAndFieldString = globalString + fieldString
 
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
+    })
+
+    it('should pass correct field paths through field hooks', async () => {
+      const formatExpectedFieldPaths = (
+        fieldIdentifier: string,
+        {
+          path,
+          schemaPath,
+        }: {
+          path: string[]
+          schemaPath: string[]
+        },
+      ) => ({
+        [`${fieldIdentifier}_beforeValidate_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+        [`${fieldIdentifier}_beforeChange_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+        [`${fieldIdentifier}_afterRead_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+        [`${fieldIdentifier}_beforeDuplicate_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+      })
+
+      const originalDoc = await payload.create({
+        collection: fieldPathsSlug,
+        data: {
+          topLevelNamedField: 'Test',
+          array: [
+            {
+              fieldWithinArray: 'Test',
+              nestedArray: [
+                {
+                  fieldWithinNestedArray: 'Test',
+                  fieldWithinNestedRow: 'Test',
+                },
+              ],
+            },
+          ],
+          fieldWithinRow: 'Test',
+          fieldWithinUnnamedTab: 'Test',
+          namedTab: {
+            fieldWithinNamedTab: 'Test',
+          },
+          fieldWithinNestedUnnamedTab: 'Test',
+        },
+      })
+
+      // duplicate the doc to ensure that the beforeDuplicate hook is run
+      const doc = await payload.duplicate({
+        id: originalDoc.id,
+        collection: fieldPathsSlug,
+      })
+
+      expect(doc).toMatchObject({
+        ...formatExpectedFieldPaths('topLevelNamedField', {
+          path: ['topLevelNamedField'],
+          schemaPath: ['topLevelNamedField'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinArray', {
+          path: ['array', '0', 'fieldWithinArray'],
+          schemaPath: ['array', 'fieldWithinArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNestedArray', {
+          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedArray'],
+          schemaPath: ['array', 'nestedArray', 'fieldWithinNestedArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinRowWithinArray', {
+          path: ['array', '0', 'fieldWithinRowWithinArray'],
+          schemaPath: ['array', '_index-2', 'fieldWithinRowWithinArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinRow', {
+          path: ['fieldWithinRow'],
+          schemaPath: ['_index-2', 'fieldWithinRow'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinUnnamedTab', {
+          path: ['fieldWithinUnnamedTab'],
+          schemaPath: ['_index-3-0', 'fieldWithinUnnamedTab'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNestedUnnamedTab', {
+          path: ['fieldWithinNestedUnnamedTab'],
+          schemaPath: ['_index-3-0-1-0', 'fieldWithinNestedUnnamedTab'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNamedTab', {
+          path: ['namedTab', 'fieldWithinNamedTab'],
+          schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
+        }),
+      })
+    })
+
+    it('should assign value properly when missing in data', async () => {
+      const doc = await payload.create({
+        collection: valueHooksSlug,
+        data: {
+          slug: 'test',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: valueHooksSlug,
+        data: {},
+      })
+
+      expect(updatedDoc.beforeValidate_value).toEqual('test')
+      expect(updatedDoc.beforeChange_value).toEqual('test')
     })
   })
 

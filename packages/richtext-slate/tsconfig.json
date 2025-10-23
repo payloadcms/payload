@@ -6,7 +6,10 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+
+    /* TODO: remove the following lines */
+    "strict": false,
   },
   "exclude": [
     "dist",

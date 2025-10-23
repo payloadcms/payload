@@ -2,12 +2,14 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
   $isRangeSelection,
   $isTextNode,
   COMMAND_PRIORITY_LOW,
+  getDOMSelection,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -21,8 +23,8 @@ import { useEditorConfigContext } from '../../../../../lexical/config/client/Edi
 import { getDOMRangeRect } from '../../../../../lexical/utils/getDOMRangeRect.js'
 import { setFloatingElemPosition } from '../../../../../lexical/utils/setFloatingElemPosition.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
-import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import './index.scss'
+import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 
 function ButtonGroupItem({
   anchorElem,
@@ -85,7 +87,7 @@ function ToolbarGroupComponent({
         return
       }
       const item = activeItems[0]
-      setDropdownIcon(() => item.ChildComponent)
+      setDropdownIcon(() => item?.ChildComponent)
     },
     [group],
   )
@@ -93,6 +95,7 @@ function ToolbarGroupComponent({
   return (
     <div
       className={`inline-toolbar-popup__group inline-toolbar-popup__group-${group.key}`}
+      data-toolbar-group-key={group.key}
       key={group.key}
     >
       {group.type === 'dropdown' && group.items.length ? (
@@ -199,7 +202,7 @@ function InlineToolbar({
   const $updateTextFormatFloatingToolbar = useCallback(() => {
     const selection = $getSelection()
 
-    const nativeSelection = window.getSelection()
+    const nativeSelection = getDOMSelection(editor._window)
 
     if (floatingToolbarRef.current === null) {
       return
@@ -316,6 +319,7 @@ function useInlineToolbar(
   anchorElem: HTMLElement,
 ): null | React.ReactElement {
   const [isText, setIsText] = useState(false)
+  const isEditable = useLexicalEditable()
 
   const updatePopup = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -324,7 +328,7 @@ function useInlineToolbar(
         return
       }
       const selection = $getSelection()
-      const nativeSelection = window.getSelection()
+      const nativeSelection = getDOMSelection(editor._window)
       const rootElement = editor.getRootElement()
 
       if (
@@ -388,7 +392,7 @@ function useInlineToolbar(
     )
   }, [editor, updatePopup])
 
-  if (!isText || !editor.isEditable()) {
+  if (!isText || !isEditable) {
     return null
   }
 

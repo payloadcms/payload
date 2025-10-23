@@ -78,6 +78,7 @@ function mapPayloadEmailToResendEmail(
     // Other To fields
     bcc: mapAddresses(message.bcc),
     cc: mapAddresses(message.cc),
+    reply_to: mapAddresses(message.replyTo),
 
     // Optional
     attachments: mapAttachments(message.attachments),

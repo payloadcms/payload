@@ -1,5 +1,5 @@
 import type { PopulationPromise } from '../../typesServer.js'
-import type { UploadFeatureProps } from './feature.server.js'
+import type { UploadFeatureProps } from './index.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
@@ -14,11 +14,13 @@ export const uploadPopulationPromiseHOC = (
     depth,
     draft,
     editorPopulationPromises,
+    field,
     fieldPromises,
     findMany,
     flattenLocales,
     node,
     overrideAccess,
+    parentIsLocalized,
     populationPromises,
     req,
     showHiddenFields,
@@ -59,6 +61,8 @@ export const uploadPopulationPromiseHOC = (
             currentDepth,
             data: node.fields || {},
             depth,
+            parentIsLocalized: parentIsLocalized || field.localized || false,
+
             draft,
             editorPopulationPromises,
             fieldPromises,

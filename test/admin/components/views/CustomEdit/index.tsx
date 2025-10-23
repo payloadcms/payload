@@ -1,12 +1,10 @@
-import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
+import type { DocumentViewServerProps } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-export const CustomEditView: PayloadServerReactComponent<EditViewComponent> = ({
-  initPageResult,
-}) => {
+export function CustomEditView({ initPageResult }: DocumentViewServerProps) {
   if (!initPageResult) {
     notFound()
   }

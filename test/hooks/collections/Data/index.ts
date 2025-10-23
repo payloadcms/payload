@@ -18,7 +18,6 @@ export const DataHooks: CollectionConfig = {
         return args
       },
     ],
-
     beforeChange: [
       ({ context, data, collection }) => {
         context['collection_beforeChange_collection'] = JSON.stringify(collection)
@@ -45,11 +44,15 @@ export const DataHooks: CollectionConfig = {
     ],
     afterOperation: [
       ({ args, result, collection }) => {
-        args.req.context['collection_afterOperation_collection'] = JSON.stringify(collection)
+        if (args.req && args.req.context) {
+          args.req.context['collection_afterOperation_collection'] = JSON.stringify(collection)
+        }
 
-        for (const contextKey in args.req.context) {
-          if (contextKey.startsWith('collection_')) {
-            result[contextKey] = args.req.context[contextKey]
+        if (args.req && args.req.context) {
+          for (const contextKey in args.req.context) {
+            if (contextKey.startsWith('collection_')) {
+              result[contextKey] = args.req.context[contextKey]
+            }
           }
         }
         return result
@@ -69,7 +72,6 @@ export const DataHooks: CollectionConfig = {
             return value
           },
         ],
-
         afterRead: [
           ({ collection, field, context }) => {
             return (

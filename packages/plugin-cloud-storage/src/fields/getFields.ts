@@ -108,7 +108,7 @@ export const getFields = ({
           fields: [
             ...(adapter.fields || []),
             {
-              ...(existingSizeURLField || ({} as any)),
+              ...(existingSizeURLField || {}),
               ...baseURLField,
               hooks: {
                 afterRead: [
@@ -119,12 +119,15 @@ export const getFields = ({
                     generateFileURL,
                     size,
                   }),
-                  ...(existingSizeURLField?.hooks?.afterRead || []),
+                  ...((typeof existingSizeURLField === 'object' &&
+                    'hooks' in existingSizeURLField &&
+                    existingSizeURLField?.hooks?.afterRead) ||
+                    []),
                 ],
               },
             },
           ],
-        }
+        } as Field
       }),
     }
 

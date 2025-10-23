@@ -4,6 +4,6 @@ import type { BlocksFieldLabelClientComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = (props) => {
-  return <FieldLabel label={props?.label} />
+export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({ field, path }) => {
+  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
 }

@@ -2,6 +2,7 @@ import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
+  JsonObject,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -11,21 +12,31 @@ import type {
   Collection,
   DataFromCollectionSlug,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { NotFound } from '../../errors/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments = {
+export type FindByIDArgs = {
   collection: Collection
   currentDepth?: number
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
   draft?: boolean
@@ -37,14 +48,15 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-}
+  trash?: boolean
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(
-  incomingArgs: Arguments,
+  incomingArgs: FindByIDArgs,
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
@@ -53,18 +65,18 @@ export const findByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'read',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       id,
@@ -73,15 +85,23 @@ export const findByIDOperation = async <
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      flattenLocales,
       includeLockStatus,
       joins,
       overrideAccess = false,
       populate,
       req: { fallbackLocale, locale, t },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
+      trash = false,
     } = args
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -93,12 +113,25 @@ export const findByIDOperation = async <
 
     // If errors are disabled, and access returns false, return null
     if (accessResult === false) {
-      return null
+      return null!
     }
 
     const where = { id: { equals: id } }
 
-    const fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where, accessResult)
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
+    sanitizeWhereQuery({
+      fields: collectionConfig.flattenedFields,
+      payload: args.req.payload,
+      where: fullWhere,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
@@ -109,8 +142,9 @@ export const findByIDOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      draftsEnabled: draftEnabled,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-      locale,
+      locale: locale!,
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
@@ -119,7 +153,7 @@ export const findByIDOperation = async <
     }
 
     // execute only if there's a custom ID and potentially overwriten access on id
-    if (req.payload.collections[collectionConfig.slug].customIDType) {
+    if (req.payload.collections[collectionConfig.slug]!.customIDType) {
       await validateQueryPaths({
         collectionConfig,
         overrideAccess,
@@ -131,18 +165,19 @@ export const findByIDOperation = async <
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) {
+    if (!findOneArgs.where?.and?.[0]?.id) {
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
+    let result: DataFromCollectionSlug<TSlug> =
+      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
 
     if (!result) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
 
-      return null
+      return null!
     }
 
     // /////////////////////////////////////
@@ -150,7 +185,7 @@ export const findByIDOperation = async <
     // /////////////////////////////////////
 
     if (includeLockStatus && id) {
-      let lockStatus = null
+      let lockStatus: (JsonObject & TypeWithID) | null = null
 
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
@@ -161,7 +196,7 @@ export const findByIDOperation = async <
         const lockDurationInMilliseconds = lockDuration * 1000
 
         const lockedDocument = await req.payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: 1,
           overrideAccess: false,
@@ -190,7 +225,7 @@ export const findByIDOperation = async <
         })
 
         if (lockedDocument && lockedDocument.docs.length > 0) {
-          lockStatus = lockedDocument.docs[0]
+          lockStatus = lockedDocument.docs[0]!
         }
       } catch {
         // swallow error
@@ -220,18 +255,18 @@ export const findByIDOperation = async <
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          query: findOneArgs.where,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeRead?.length) {
+      for (const hook of collectionConfig.hooks.beforeRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            query: findOneArgs.where,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -241,35 +276,36 @@ export const findByIDOperation = async <
       collection: collectionConfig,
       context: req.context,
       currentDepth,
-      depth,
+      depth: depth!,
       doc: result,
       draft: draftEnabled,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
+      flattenLocales,
       global: null,
-      locale,
+      locale: locale!,
       overrideAccess,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          query: findOneArgs.where,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            query: findOneArgs.where,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

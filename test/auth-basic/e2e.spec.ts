@@ -68,16 +68,14 @@ const createFirstUser = async ({
     .not.toContain('create-first-user')
 }
 
-describe('auth-basic', () => {
+describe('Auth (Basic)', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
-  let apiURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, 'users')
 
     const context = await browser.newContext()

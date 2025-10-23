@@ -10,6 +10,7 @@ export const PackageInstallOptions: Block = {
         someNestedObject: props?.someNestedObject,
         uniqueId: props?.uniqueId,
         update: props?.update,
+        someObject: props?.someObject,
       }
     },
     export: ({ fields, lexicalToMarkdown }) => {
@@ -20,6 +21,7 @@ export const PackageInstallOptions: Block = {
           someNestedObject: fields?.someNestedObject,
           uniqueId: fields?.uniqueId,
           update: fields?.update,
+          someObject: fields?.someObject,
         },
       }
     },
@@ -27,11 +29,15 @@ export const PackageInstallOptions: Block = {
   fields: [
     {
       name: 'packageId',
-      type: 'text',
+      type: 'textarea',
     },
     {
       name: 'global',
       type: 'checkbox',
+    },
+    {
+      name: 'someObject',
+      type: 'json',
     },
     {
       name: 'update',

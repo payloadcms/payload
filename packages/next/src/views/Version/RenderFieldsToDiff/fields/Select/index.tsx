@@ -1,15 +1,11 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { OptionObject, SelectField, SelectFieldClient } from 'payload'
+import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
-import Label from '../../Label/index.js'
-import { diffStyles } from '../styles.js'
-import { DiffViewer } from './DiffViewer/index.js'
 import './index.scss'
 
 const baseClass = 'select-diff'
@@ -18,7 +14,7 @@ const getOptionsToRender = (
   value: string,
   options: SelectField['options'],
   hasMany: boolean,
-): (OptionObject | string)[] | OptionObject | string => {
+): Option | Option[] => {
   if (hasMany && Array.isArray(value)) {
     return value.map(
       (val) =>
@@ -32,60 +28,88 @@ const getOptionsToRender = (
   )
 }
 
-const getTranslatedOptions = (
-  options: (OptionObject | string)[] | OptionObject | string,
-  i18n: I18nClient,
-): string => {
+/**
+ * Translates option labels while ensuring they are strings.
+ * If `options.label` is a JSX element, it falls back to `options.value` because `DiffViewer`
+ * expects all values to be strings.
+ */
+const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): string => {
   if (Array.isArray(options)) {
     return options
-      .map((option) => (typeof option === 'string' ? option : getTranslation(option.label, i18n)))
+      .map((option) => {
+        if (typeof option === 'string') {
+          return option
+        }
+        const translatedLabel = getTranslation(option.label, i18n)
+
+        // Ensure the result is a string, otherwise use option.value
+        return typeof translatedLabel === 'string' ? translatedLabel : option.value
+      })
       .join(', ')
   }
 
-  return typeof options === 'string' ? options : getTranslation(options.label, i18n)
+  if (typeof options === 'string') {
+    return options
+  }
+
+  const translatedLabel = getTranslation(options.label, i18n)
+
+  return typeof translatedLabel === 'string' ? translatedLabel : options.value
 }
 
-const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
-  comparison,
+export const Select: SelectFieldDiffClientComponent = ({
+  comparisonValue: valueFrom,
   diffMethod,
   field,
-  i18n,
   locale,
-  version,
+  nestingLevel,
+  versionValue: valueTo,
 }) => {
-  let placeholder = ''
-
-  if (version === comparison) {
-    placeholder = `[${i18n.t('general:noValue')}]`
-  }
+  const { i18n } = useTranslation()
 
   const options = 'options' in field && field.options
 
-  const comparisonToRender =
-    typeof comparison !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(comparison, options, field.hasMany), i18n)
-      : placeholder
+  const renderedValueFrom =
+    typeof valueFrom !== 'undefined'
+      ? getTranslatedOptions(
+          getOptionsToRender(
+            typeof valueFrom === 'string' ? valueFrom : JSON.stringify(valueFrom),
+            options,
+            field.hasMany,
+          ),
+          i18n,
+        )
+      : ''
 
-  const versionToRender =
-    typeof version !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(version, options, field.hasMany), i18n)
-      : placeholder
+  const renderedValueTo =
+    typeof valueTo !== 'undefined'
+      ? getTranslatedOptions(
+          getOptionsToRender(
+            typeof valueTo === 'string' ? valueTo : JSON.stringify(valueTo),
+            options,
+            field.hasMany,
+          ),
+          i18n,
+        )
+      : ''
+
+  const { From, To } = getHTMLDiffComponents({
+    fromHTML: '<p>' + renderedValueFrom + '</p>',
+    toHTML: '<p>' + renderedValueTo + '</p>',
+    tokenizeByCharacter: true,
+  })
 
   return (
-    <div className={baseClass}>
-      <Label>
-        {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {'label' in field && getTranslation(field.label || '', i18n)}
-      </Label>
-      <DiffViewer
-        comparisonToRender={comparisonToRender}
-        diffMethod={diffMethod}
-        diffStyles={diffStyles}
-        placeholder={placeholder}
-        versionToRender={versionToRender}
-      />
-    </div>
+    <FieldDiffContainer
+      className={baseClass}
+      From={From}
+      i18n={i18n}
+      label={{
+        label: field.label,
+        locale,
+      }}
+      nestingLevel={nestingLevel}
+      To={To}
+    />
   )
 }
-
-export default Select

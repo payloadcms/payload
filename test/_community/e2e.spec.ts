@@ -12,7 +12,7 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('Admin Panel', () => {
+test.describe('Community', () => {
   let page: Page
   let url: AdminUrlUtil
 

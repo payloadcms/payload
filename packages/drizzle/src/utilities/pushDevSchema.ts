@@ -1,7 +1,16 @@
+import { dequal } from 'dequal'
 import prompts from 'prompts'
 
 import type { BasePostgresAdapter } from '../postgres/types.js'
-import type { DrizzleAdapter, PostgresDB } from '../types.js'
+import type { DrizzleAdapter, PostgresDB, RawTable } from '../types.js'
+
+const previousSchema: {
+  localeCodes: null | string[]
+  rawTables: null | Record<string, RawTable>
+} = {
+  localeCodes: null,
+  rawTables: null,
+}
 
 /**
  * Pushes the development schema to the database using Drizzle.
@@ -10,6 +19,27 @@ import type { DrizzleAdapter, PostgresDB } from '../types.js'
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
+  if (process.env.PAYLOAD_FORCE_DRIZZLE_PUSH !== 'true') {
+    const localeCodes =
+      adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
+
+    const equal = dequal(previousSchema, {
+      localeCodes,
+      rawTables: adapter.rawTables,
+    })
+
+    if (equal) {
+      if (adapter.logger) {
+        adapter.payload.logger.info('No changes detected in schema, skipping schema push.')
+      }
+
+      return
+    } else {
+      previousSchema.localeCodes = localeCodes
+      previousSchema.rawTables = adapter.rawTables
+    }
+  }
+
   const { pushSchema } = adapter.requireDrizzleKit()
 
   const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter

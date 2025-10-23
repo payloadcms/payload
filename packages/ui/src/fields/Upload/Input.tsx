@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { PopulateDocs, ReloadDoc } from './types.js'
 
-import { useBulkUpload } from '../../elements/BulkUpload/index.js'
+import { type BulkUploadContext, useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
@@ -55,9 +55,11 @@ export type UploadInputProps = {
   readonly customUploadActions?: React.ReactNode[]
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
+  readonly displayPreview?: boolean
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
+  readonly hideRemoveFile?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -84,6 +86,7 @@ export function UploadInput(props: UploadInputProps) {
     className,
     Description,
     description,
+    displayPreview,
     Error,
     filterOptions: filterOptionsFromProps,
     hasMany,
@@ -180,6 +183,10 @@ export function UploadInput(props: UploadInputProps) {
 
   const populateDocs = React.useCallback<PopulateDocs>(
     async (ids, relatedCollectionSlug) => {
+      if (!ids.length) {
+        return
+      }
+
       const query: {
         [key: string]: unknown
         where: Where
@@ -205,53 +212,65 @@ export function UploadInput(props: UploadInputProps) {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-HTTP-Method-Override': 'GET',
+          'X-Payload-HTTP-Method-Override': 'GET',
         },
         method: 'POST',
       })
       if (response.ok) {
         const json = await response.json()
-        const sortedDocs = ids.map((id) =>
+        let sortedDocs = ids.map((id) =>
           json.docs.find((doc) => {
             return String(doc.id) === String(id)
           }),
         )
+
+        if (sortedDocs.includes(undefined) && hasMany) {
+          sortedDocs = sortedDocs.map((doc, index) =>
+            doc
+              ? doc
+              : {
+                  id: ids[index],
+                  filename: `${t('general:untitled')} - ID: ${ids[index]}`,
+                  isPlaceholder: true,
+                },
+          )
+        }
 
         return { ...json, docs: sortedDocs }
       }
 
       return null
     },
-    [code, serverURL, api, i18n.language],
+    [code, serverURL, api, i18n.language, t, hasMany],
   )
 
-  const onUploadSuccess = useCallback(
-    (newDocs: JsonObject[]) => {
+  const onUploadSuccess: BulkUploadContext['onSuccess'] = useCallback(
+    (uploadedForms) => {
       if (hasMany) {
         const mergedValue = [
           ...(Array.isArray(value) ? value : []),
-          ...newDocs.map((doc) => doc.id),
+          ...uploadedForms.map((form) => form.doc.id),
         ]
         onChange(mergedValue)
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
-          ...newDocs.map((doc) => ({
-            relationTo: activeRelationTo,
-            value: doc,
+          ...uploadedForms.map((form) => ({
+            relationTo: form.collectionSlug,
+            value: form.doc,
           })),
         ])
       } else {
-        const firstDoc = newDocs[0]
+        const firstDoc = uploadedForms[0].doc
         onChange(firstDoc.id)
         setPopulatedDocs([
           {
-            relationTo: activeRelationTo,
+            relationTo: firstDoc.collectionSlug,
             value: firstDoc,
           },
         ])
       }
     },
-    [value, onChange, activeRelationTo, hasMany],
+    [value, onChange, hasMany],
   )
 
   const onLocalFileSelection = React.useCallback(
@@ -328,9 +347,9 @@ export function UploadInput(props: UploadInputProps) {
     [closeCreateDocDrawer, activeRelationTo, onChange],
   )
 
-  const onListSelect = React.useCallback<NonNullable<ListDrawerProps['onSelect']>>(
-    async ({ collectionSlug, docID }) => {
-      const loadedDocs = await populateDocs([docID], collectionSlug)
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    async ({ collectionSlug, doc }) => {
+      const loadedDocs = await populateDocs([doc.id], collectionSlug)
       const selectedDoc = loadedDocs ? loadedDocs.docs?.[0] : null
       setPopulatedDocs((currentDocs) => {
         if (selectedDoc) {
@@ -353,9 +372,9 @@ export function UploadInput(props: UploadInputProps) {
         return currentDocs
       })
       if (hasMany) {
-        onChange([...(Array.isArray(value) ? value : []), docID])
+        onChange([...(Array.isArray(value) ? value : []), doc.id])
       } else {
-        onChange(docID)
+        onChange(doc.id)
       }
       closeListDrawer()
     },
@@ -367,9 +386,11 @@ export function UploadInput(props: UploadInputProps) {
       const { docs } = await populateDocs([docID], collectionSlug)
 
       if (docs[0]) {
+        let updatedDocsToPropogate = []
         setPopulatedDocs((currentDocs) => {
           const existingDocIndex = currentDocs?.findIndex((doc) => {
-            return doc.value.id === docs[0].id && doc.relationTo === collectionSlug
+            const hasExisting = doc.value?.id === docs[0].id || doc.value?.isPlaceholder
+            return hasExisting && doc.relationTo === collectionSlug
           })
           if (existingDocIndex > -1) {
             const updatedDocs = [...currentDocs]
@@ -377,12 +398,17 @@ export function UploadInput(props: UploadInputProps) {
               relationTo: collectionSlug,
               value: docs[0],
             }
+            updatedDocsToPropogate = updatedDocs
             return updatedDocs
           }
         })
+
+        if (updatedDocsToPropogate.length && hasMany) {
+          onChange(updatedDocsToPropogate.map((doc) => doc.value?.id))
+        }
       }
     },
-    [populateDocs],
+    [populateDocs, onChange, hasMany],
   )
 
   // only hasMany can reorder
@@ -427,7 +453,7 @@ export function UploadInput(props: UploadInputProps) {
 
   useEffect(() => {
     setOnSuccess(onUploadSuccess)
-  }, [value, onUploadSuccess, setOnSuccess])
+  }, [value, path, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
     !value ||
@@ -466,6 +492,7 @@ export function UploadInput(props: UploadInputProps) {
           <>
             {populatedDocs && populatedDocs?.length > 0 ? (
               <UploadComponentHasMany
+                displayPreview={displayPreview}
                 fileDocs={populatedDocs}
                 isSortable={isSortable && !readOnly}
                 onRemove={onRemove}
@@ -487,6 +514,7 @@ export function UploadInput(props: UploadInputProps) {
           <>
             {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
               <UploadComponentHasOne
+                displayPreview={displayPreview}
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}

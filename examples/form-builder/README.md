@@ -6,17 +6,16 @@ The [Payload Form Builder Example](https://github.com/payloadcms/payload/tree/ma
 
 ## Quick Start
 
-1. Clone this repo
-2. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+1. Run the following command to create a project from the example:
 
-   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+- `npx create-payload-app --example form-builder`
 
-3. `cp .env.example .env` to copy the example environment variables
+2. `cp .env.example .env` to copy the example environment variables
 
-4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-5. `open http://localhost:3000` to access the home page
-6. `open http://localhost:3000/admin` to access the admin panel
+4. `open http://localhost:3000` to access the home page
+5. `open http://localhost:3000/admin` to access the admin panel
    - Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be

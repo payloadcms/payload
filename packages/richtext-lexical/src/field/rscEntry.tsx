@@ -7,11 +7,16 @@ import type {
   ServerComponentProps,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminProps, LexicalRichTextFieldProps } from '../types.js'
+import type {
+  LexicalEditorProps,
+  LexicalFieldAdminClientProps,
+  LexicalRichTextFieldProps,
+} from '../types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'
@@ -20,17 +25,23 @@ import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
   {
-    admin: LexicalFieldAdminProps
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
     Pick<FieldPaths, 'path'> &
+    Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
 
-  const { clientFeatures, featureClientSchemaMap } = initLexicalFeatures({
+  const disabled = args?.readOnly || field?.admin?.readOnly
+
+  if (!(args?.clientField as RichTextFieldClient)?.name) {
+    throw new Error('Initialized lexical RSC field without a field name')
+  }
+
+  const { clientFeatures, featureClientImportMap, featureClientSchemaMap } = initLexicalFeatures({
     clientFieldSchemaMap: args.clientFieldSchemaMap,
     fieldSchemaMap: args.fieldSchemaMap,
     i18n: args.i18n,
@@ -41,12 +52,14 @@ export const RscEntryLexicalField: React.FC<
   })
 
   let initialLexicalFormState = {}
-  if (args.data?.[field.name]?.root?.children?.length) {
+  if (args.siblingData?.[field.name]?.root?.children?.length) {
     initialLexicalFormState = await buildInitialState({
       context: {
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        disabled,
+        documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
         lexicalFieldSchemaPath: schemaPath,
@@ -56,12 +69,33 @@ export const RscEntryLexicalField: React.FC<
         renderFieldFn: renderField,
         req: args.req,
       },
-      nodeData: args.data?.[field.name]?.root?.children as SerializedLexicalNode[],
+      nodeData: args.siblingData?.[field.name]?.root?.children as SerializedLexicalNode[],
     })
   }
 
+  const placeholderFromArgs = args.admin?.placeholder
+  const placeholder = placeholderFromArgs
+    ? getTranslation(placeholderFromArgs, args.i18n)
+    : undefined
+
+  const admin: LexicalFieldAdminClientProps = {}
+  if (placeholder) {
+    admin.placeholder = placeholder
+  }
+  if (args.admin?.hideGutter) {
+    admin.hideGutter = true
+  }
+  if (args.admin?.hideInsertParagraphAtEnd) {
+    admin.hideInsertParagraphAtEnd = true
+  }
+  if (args.admin?.hideAddBlockButton) {
+    admin.hideAddBlockButton = true
+  }
+  if (args.admin?.hideDraggableBlockElement) {
+    admin.hideDraggableBlockElement = true
+  }
+
   const props: LexicalRichTextFieldProps = {
-    admin: args.admin,
     clientFeatures,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
@@ -73,6 +107,12 @@ export const RscEntryLexicalField: React.FC<
     readOnly: args.readOnly,
     renderedBlocks: args.renderedBlocks,
     schemaPath,
+  }
+  if (Object.keys(admin).length) {
+    props.admin = admin
+  }
+  if (Object.keys(featureClientImportMap).length) {
+    props.featureClientImportMap = featureClientImportMap
   }
 
   for (const key in props) {

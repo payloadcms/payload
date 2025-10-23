@@ -1,23 +1,18 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, TypedUser } from 'payload'
 
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
+
+import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
 
-export { generateDashboardMetadata } from './meta.js'
+const globalLockDurationDefault = 300
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
-
-export const Dashboard: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function DashboardView(props: AdminViewServerProps) {
   const {
     locale,
     permissions,
@@ -29,8 +24,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     },
     req,
     visibleEntities,
-  } = initPageResult
-
+  } = props.initPageResult
   const collections = config.collections.filter(
     (collection) =>
       permissions?.collections?.[collection.slug]?.read &&
@@ -43,7 +37,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
   )
 
   // Query locked global documents only if there are globals in the config
-  let globalData = []
+  let globalData: DashboardViewServerPropsOnly['globalData'] = []
 
   if (config.globals.length > 0) {
     const lockedDocuments = await payload.find({
@@ -52,6 +46,11 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
       overrideAccess: false,
       pagination: false,
       req,
+      select: {
+        globalSlug: true,
+        updatedAt: true,
+        user: true,
+      },
       where: {
         globalSlug: {
           exists: true,
@@ -61,11 +60,10 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
 
     // Map over globals to include `lockDuration` and lock data for each global slug
     globalData = config.globals.map((global) => {
-      const lockDurationDefault = 300
       const lockDuration =
         typeof global.lockDocuments === 'object'
           ? global.lockDocuments.duration
-          : lockDurationDefault
+          : globalLockDurationDefault
 
       const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
 
@@ -73,8 +71,8 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
         slug: global.slug,
         data: {
           _isLocked: !!lockedDoc,
-          _lastEditedAt: lockedDoc?.updatedAt ?? null,
-          _userEditing: lockedDoc?.user?.value ?? null,
+          _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
+          _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null,
         },
         lockDuration,
       }
@@ -110,25 +108,22 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
       <SetStepNav nav={[]} />
       {RenderServerComponent({
         clientProps: {
-          Link,
           locale,
-        },
+        } satisfies DashboardViewClientProps,
         Component: config.admin?.components?.views?.dashboard?.Component,
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
+          ...props,
           globalData,
           i18n,
-          Link,
           locale,
           navGroups,
-          params,
           payload,
           permissions,
-          searchParams,
           user,
           visibleEntities,
-        },
+        } satisfies DashboardViewServerPropsOnly,
       })}
     </Fragment>
   )

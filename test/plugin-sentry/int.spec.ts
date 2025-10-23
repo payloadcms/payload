@@ -16,9 +16,7 @@ describe('@payloadcms/plugin-sentry', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('tests', () => {

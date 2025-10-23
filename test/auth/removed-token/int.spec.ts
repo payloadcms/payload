@@ -26,9 +26,7 @@ describe('Remove token from auth responses', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should not include token in response from /login', async () => {

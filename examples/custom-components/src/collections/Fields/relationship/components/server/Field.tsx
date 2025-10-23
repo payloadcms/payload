@@ -3,7 +3,18 @@ import type React from 'react'
 
 import { RelationshipField } from '@payloadcms/ui'
 
-export const CustomRelationshipFieldServer: RelationshipFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <RelationshipField field={props?.clientField} path={path} />
+export const CustomRelationshipFieldServer: RelationshipFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <RelationshipField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
 }

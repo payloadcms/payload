@@ -59,57 +59,55 @@ export const stripePlugin =
       })
     }
 
-    return {
-      ...config,
-      collections: collections?.map((collection) => {
-        const { hooks: existingHooks } = collection
+    for (const collection of collections!) {
+      const { hooks: existingHooks } = collection
 
-        const syncConfig = pluginConfig.sync?.find((sync) => sync.collection === collection.slug)
+      const syncConfig = pluginConfig.sync?.find((sync) => sync.collection === collection.slug)
 
-        if (syncConfig) {
-          const fields = getFields({
+      if (!syncConfig) {
+        continue
+      }
+      const fields = getFields({
+        collection,
+        pluginConfig,
+        syncConfig,
+      })
+      collection.fields = fields
+
+      if (!collection.hooks) {
+        collection.hooks = {}
+      }
+
+      collection.hooks.afterDelete = [
+        ...(existingHooks?.afterDelete || []),
+        (args) =>
+          deleteFromStripe({
+            ...args,
             collection,
             pluginConfig,
-            syncConfig,
-          })
-          return {
-            ...collection,
-            fields,
-            hooks: {
-              ...collection.hooks,
-              afterDelete: [
-                ...(existingHooks?.afterDelete || []),
-                (args) =>
-                  deleteFromStripe({
-                    ...args,
-                    collection,
-                    pluginConfig,
-                  }),
-              ],
-              beforeChange: [
-                ...(existingHooks?.beforeChange || []),
-                (args) =>
-                  syncExistingWithStripe({
-                    ...args,
-                    collection,
-                    pluginConfig,
-                  }),
-              ],
-              beforeValidate: [
-                ...(existingHooks?.beforeValidate || []),
-                (args) =>
-                  createNewInStripe({
-                    ...args,
-                    collection,
-                    pluginConfig,
-                  }),
-              ],
-            },
-          }
-        }
-
-        return collection
-      }),
-      endpoints,
+          }),
+      ]
+      collection.hooks.beforeChange = [
+        ...(existingHooks?.beforeChange || []),
+        (args) =>
+          syncExistingWithStripe({
+            ...args,
+            collection,
+            pluginConfig,
+          }),
+      ]
+      collection.hooks.beforeValidate = [
+        ...(existingHooks?.beforeValidate || []),
+        (args) =>
+          createNewInStripe({
+            ...args,
+            collection,
+            pluginConfig,
+          }),
+      ]
     }
+
+    config.endpoints = endpoints
+
+    return config
   }

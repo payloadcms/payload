@@ -11,7 +11,7 @@ export function TextPlugin({ features }: { features: SanitizedClientFeatures }) 
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
-    const disabledFormats = getDisabledFormats(features.enabledFormats as TextFormatType[])
+    const disabledFormats = getDisabledFormats(features.enabledFormats)
     if (disabledFormats.length === 0) {
       return
     }
@@ -33,10 +33,6 @@ export function TextPlugin({ features }: { features: SanitizedClientFeatures }) 
 }
 
 function getDisabledFormats(enabledFormats: TextFormatType[]): TextFormatType[] {
-  // not sure why Lexical added highlight as TextNode format.
-  // see https://github.com/facebook/lexical/pull/3583
-  // We are going to implement it in other way to support multiple colors
-  delete TEXT_TYPE_TO_FORMAT.highlight
   const allFormats = Object.keys(TEXT_TYPE_TO_FORMAT) as TextFormatType[]
   const enabledSet = new Set(enabledFormats)
 

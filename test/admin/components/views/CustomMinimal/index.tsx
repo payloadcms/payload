@@ -3,14 +3,14 @@ import React from 'react'
 
 // As this is the demo project, we import our dependencies from the `src` directory.
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 // In your projects, you can import as follows:
 // import { MinimalTemplate } from 'payload/components/templates';
 // import { Button } from 'payload/components/elements';
 // import { useConfig } from 'payload/components/utilities';
 
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { MinimalTemplate } from '@payloadcms/next/templates'
 import { Button } from '@payloadcms/ui'
@@ -20,7 +20,7 @@ import './index.scss'
 
 const baseClass = 'custom-minimal-view'
 
-export const CustomMinimalView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export function CustomMinimalView({ initPageResult }: AdminViewServerProps) {
   const {
     req: {
       payload: {

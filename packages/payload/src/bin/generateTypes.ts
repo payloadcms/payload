@@ -1,5 +1,7 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
 import { initI18n } from '@payloadcms/translations'
-import fs from 'fs'
+import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -20,7 +22,12 @@ export async function generateTypes(
   if (shouldLog) {
     logger.info('Compiling TS types for Collections and Globals...')
   }
-  const i18n = await initI18n({ config: config.i18n, context: 'api', language: 'en' })
+
+  const languages = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
+
+  const language = languages.includes('en') ? 'en' : config.i18n.fallbackLanguage
+
+  const i18n = await initI18n({ config: config.i18n, context: 'api', language })
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
 
@@ -51,7 +58,7 @@ export async function generateTypes(
 
   // Diff the compiled types against the existing types file
   try {
-    const existingTypes = fs.readFileSync(outputFile, 'utf-8')
+    const existingTypes = await fs.readFile(outputFile, 'utf-8')
 
     if (compiled === existingTypes) {
       return
@@ -60,7 +67,7 @@ export async function generateTypes(
     // swallow err
   }
 
-  fs.writeFileSync(outputFile, compiled)
+  await fs.writeFile(outputFile, compiled)
   if (shouldLog) {
     logger.info(`Types written to ${outputFile}`)
   }

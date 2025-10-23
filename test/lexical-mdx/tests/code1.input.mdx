@@ -1,0 +1,12 @@
+```ts
+import { buildConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export default buildConfig({
+  collections: [
+    // your collections here
+  ],
+  // Pass the Lexical editor to the root config
+  editor: lexicalEditor({}),
+})
+```

@@ -38,6 +38,14 @@
       flex-grow: 1;
       overflow: hidden;
       padding: base(0.8) 0;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__meta-icons {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.2);
+      flex-shrink: 0;
     }
 
     &__meta {
@@ -156,9 +164,11 @@
       // The timestamps and meta can scroll past
       // The same container needs to the sticky, though
       // So we use a static height with a negative top equal to the meta height plus top padding
-      top: base(-2.8);
-      padding-right: 0;
-      padding-left: 0;
+      &.gutter {
+        top: base(-2.8);
+        padding-right: 0;
+        padding-left: 0;
+      }
 
       &__wrapper {
         flex-direction: column;
@@ -174,6 +184,12 @@
         // this means the scrollbar (when present) overlaps the content
         &::-webkit-scrollbar {
           display: none;
+        }
+      }
+
+      &__popup {
+        [dir='rtl'] & {
+          padding-left: var(--gutter-h);
         }
       }
 
@@ -206,7 +222,9 @@
       }
 
       &__controls {
-        padding-left: var(--gutter-h);
+        [dir='ltr'] & {
+          padding-left: var(--gutter-h);
+        }
         overflow: auto;
 
         // do not show scrollbar because the parent container has a static height

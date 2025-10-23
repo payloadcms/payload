@@ -3,7 +3,14 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+/.idea/runConfigurations/_template*
 !/.idea/payload.iml
+
+# Local AI Agent files
+AGENTS.local.md
+CLAUDE.local.md
+.claude/commands/*.local.md
+.claude/artifacts
 
 # Custom actions
 !.github/actions/**/dist
@@ -21,7 +28,15 @@ meta_server.json
 meta_index.json
 meta_shared.json
 
+packages/payload/esbuild
+packages/ui/esbuild
+packages/next/esbuild
+packages/richtext-lexical/esbuild
+
+audit_output.json
+
 .turbo
+.wrangler
 
 # Ignore test directory media folder/files
 /media
@@ -306,14 +321,26 @@ $RECYCLE.BIN/
 /build
 .swc
 app/(payload)/admin/importMap.js
+test/admin-bar/app/(payload)/admin/importMap.js
+/test/admin-bar/app/(payload)/admin/importMap.js
 test/live-preview/app/(payload)/admin/importMap.js
 /test/live-preview/app/(payload)/admin/importMap.js
 test/admin-root/app/(payload)/admin/importMap.js
 /test/admin-root/app/(payload)/admin/importMap.js
 test/app/(payload)/admin/importMap.js
 /test/app/(payload)/admin/importMap.js
+test/plugin-ecommerce/app/(payload)/admin/importMap.js
+/test/plugin-ecommerce/app/(payload)/admin/importMap.js
 test/pnpm-lock.yaml
 test/databaseAdapter.js
 /filename-compound-index
 /media-with-relation-preview
 /media-without-relation-preview
+/media-without-cache-tags
+test/.localstack
+test/google-cloud-storage
+test/azurestoragedata/
+/media-without-delete-access
+
+
+licenses.csv

@@ -9,14 +9,14 @@ export const Geo: CollectionConfig = {
       views: {
         edit: {
           api: {
-            actions: ['/components/CollectionAPIButton/index.js#CollectionAPIButton'],
+            actions: ['/components/actions/CollectionAPIButton/index.js#CollectionAPIButton'],
           },
           default: {
-            actions: ['/components/CollectionEditButton/index.js#CollectionEditButton'],
+            actions: ['/components/actions/CollectionEditButton/index.js#CollectionEditButton'],
           },
         },
         list: {
-          actions: ['/components/CollectionListButton/index.js#CollectionListButton'],
+          actions: ['/components/actions/CollectionListButton/index.js#CollectionListButton'],
         },
       },
     },

@@ -5,6 +5,13 @@ import { draftCollectionSlug } from '../slugs.js'
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
   access: {
+    update: () => {
+      return {
+        restrictedToUpdate: {
+          not_equals: true,
+        },
+      }
+    },
     read: ({ req: { user } }) => {
       if (user) {
         return true
@@ -48,12 +55,17 @@ const DraftPosts: CollectionConfig = {
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      label: 'Title',
-      localized: true,
-      required: true,
-      unique: true,
+      type: 'group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          label: 'Title',
+          localized: true,
+          required: true,
+          unique: true,
+        },
+      ],
     },
     {
       name: 'description',
@@ -111,10 +123,18 @@ const DraftPosts: CollectionConfig = {
       type: 'relationship',
       relationTo: draftCollectionSlug,
     },
+    {
+      name: 'restrictedToUpdate',
+      type: 'checkbox',
+    },
   ],
   versions: {
-    drafts: true,
-    maxPerDoc: 35,
+    drafts: {
+      schedulePublish: {
+        timeFormat: 'HH:mm',
+      },
+    },
+    maxPerDoc: 0,
   },
 }
 

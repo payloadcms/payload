@@ -1,0 +1,51 @@
+@layer payload-default {
+  .timezone-picker-wrapper {
+    display: flex;
+    gap: calc(var(--base) / 4);
+    margin-top: calc(var(--base) / 4);
+    align-items: center;
+
+    .field-label {
+      margin-right: unset;
+      color: var(--theme-elevation-400);
+      flex-shrink: 0;
+    }
+
+    .timezone-picker {
+      display: inline-block;
+
+      .rs__menu {
+        min-width: calc(var(--base) * 14);
+        overflow: hidden;
+        border-radius: calc(var(--base) * 0.25);
+      }
+
+      .rs__value-container {
+        text-align: center;
+      }
+
+      .rs__control {
+        background: none;
+        border: none;
+        padding: 0;
+        min-height: auto !important;
+        position: relative;
+        box-shadow: unset;
+        min-width: var(--base);
+
+        &:hover {
+          cursor: pointer;
+          box-shadow: unset;
+        }
+
+        &.rs__control--menu-is-open::before {
+          display: block;
+        }
+      }
+
+      .rs__indicators {
+        margin-inline-start: calc(var(--base) * 0.25);
+      }
+    }
+  }
+}

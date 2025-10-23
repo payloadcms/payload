@@ -16,7 +16,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
       fields: global.fields,
       ...(flatten && {
         flattenedFields: global.flattenedFields,
-      }),
+      })!,
     },
     {
       name: 'createdAt',

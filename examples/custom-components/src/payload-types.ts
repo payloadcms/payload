@@ -38,9 +38,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -98,10 +98,30 @@ export interface CustomField {
     | null;
   checkboxFieldServerComponent?: boolean | null;
   checkboxFieldClientComponent?: boolean | null;
+  codeFieldServerComponent?: string | null;
+  codeFieldClientComponent?: string | null;
   dateFieldServerComponent?: string | null;
   dateFieldClientComponent?: string | null;
   emailFieldServerComponent?: string | null;
   emailFieldClientComponent?: string | null;
+  jsonFieldServerComponent?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonFieldClientComponent?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   numberFieldServerComponent?: number | null;
   numberFieldClientComponent?: number | null;
   /**
@@ -271,10 +291,14 @@ export interface CustomFieldsSelect<T extends boolean = true> {
       };
   checkboxFieldServerComponent?: T;
   checkboxFieldClientComponent?: T;
+  codeFieldServerComponent?: T;
+  codeFieldClientComponent?: T;
   dateFieldServerComponent?: T;
   dateFieldClientComponent?: T;
   emailFieldServerComponent?: T;
   emailFieldClientComponent?: T;
+  jsonFieldServerComponent?: T;
+  jsonFieldClientComponent?: T;
   numberFieldServerComponent?: T;
   numberFieldClientComponent?: T;
   pointFieldServerComponent?: T;

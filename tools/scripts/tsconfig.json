@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+  },
+  "references": [{ "path": "../../packages/translations" }, { "path": "../../packages/richtext-lexical"}, { "path": "../../packages/plugin-multi-tenant"}]
+}

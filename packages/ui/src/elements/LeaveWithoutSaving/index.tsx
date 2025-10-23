@@ -1,89 +1,70 @@
 'use client'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback } from 'react'
 
-import { useFormModified } from '../../forms/Form/index.js'
+import type { OnCancel } from '../ConfirmationModal/index.js'
+
+import { useForm, useFormModified } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Button } from '../Button/index.js'
-import { Modal, useModal } from '../Modal/index.js'
-import './index.scss'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
+import { useModal } from '../Modal/index.js'
 import { usePreventLeave } from './usePreventLeave.js'
 
 const modalSlug = 'leave-without-saving'
 
-const baseClass = 'leave-without-saving'
-
-const Component: React.FC<{
-  isActive: boolean
-  onCancel: () => void
-  onConfirm: () => void
-}> = ({ isActive, onCancel, onConfirm }) => {
-  const { closeModal, modalState, openModal } = useModal()
-  const { t } = useTranslation()
-
-  // Manually check for modal state as 'esc' key will not trigger the nav inactivity
-  // useEffect(() => {
-  //   if (!modalState?.[modalSlug]?.isOpen && isActive) {
-  //     onCancel()
-  //   }
-  // }, [modalState, isActive, onCancel])
-
-  useEffect(() => {
-    if (isActive) {
-      openModal(modalSlug)
-    } else {
-      closeModal(modalSlug)
-    }
-  }, [isActive, openModal, closeModal])
-
-  return (
-    <Modal className={baseClass} onClose={onCancel} slug={modalSlug}>
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          <h1>{t('general:leaveWithoutSaving')}</h1>
-          <p>{t('general:changesNotSaved')}</p>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <Button buttonStyle="secondary" onClick={onCancel} size="large">
-            {t('general:stayOnThisPage')}
-          </Button>
-          <Button onClick={onConfirm} size="large">
-            {t('general:leaveAnyway')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  )
+type LeaveWithoutSavingProps = {
+  onConfirm?: () => Promise<void> | void
+  onPrevent?: (nextHref: null | string) => void
 }
 
-export const LeaveWithoutSaving: React.FC = () => {
-  const { closeModal } = useModal()
+export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({ onConfirm, onPrevent }) => {
+  const { closeModal, openModal } = useModal()
   const modified = useFormModified()
+  const { isValid } = useForm()
   const { user } = useAuth()
-  const [show, setShow] = React.useState(false)
   const [hasAccepted, setHasAccepted] = React.useState(false)
+  const { t } = useTranslation()
 
-  const prevent = Boolean(modified && user)
+  const prevent = Boolean((modified || !isValid) && user)
 
-  const onPrevent = useCallback(() => {
-    setShow(true)
-  }, [])
+  const handlePrevent = useCallback(() => {
+    const activeHref = (document.activeElement as HTMLAnchorElement)?.href || null
+    if (onPrevent) {
+      onPrevent(activeHref)
+    }
+    openModal(modalSlug)
+  }, [openModal, onPrevent])
 
   const handleAccept = useCallback(() => {
     closeModal(modalSlug)
   }, [closeModal])
 
-  usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent, prevent })
+  usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent: handlePrevent, prevent })
+
+  const onCancel: OnCancel = useCallback(() => {
+    closeModal(modalSlug)
+  }, [closeModal])
+
+  const handleConfirm = useCallback(async () => {
+    if (onConfirm) {
+      try {
+        await onConfirm()
+      } catch (err) {
+        console.error('Error in LeaveWithoutSaving onConfirm:', err)
+      }
+    }
+    setHasAccepted(true)
+  }, [onConfirm])
 
   return (
-    <Component
-      isActive={show}
-      onCancel={() => {
-        setShow(false)
-      }}
-      onConfirm={() => {
-        setHasAccepted(true)
-      }}
+    <ConfirmationModal
+      body={t('general:changesNotSaved')}
+      cancelLabel={t('general:stayOnThisPage')}
+      confirmLabel={t('general:leaveAnyway')}
+      heading={t('general:leaveWithoutSaving')}
+      modalSlug={modalSlug}
+      onCancel={onCancel}
+      onConfirm={handleConfirm}
     />
   )
 }

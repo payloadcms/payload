@@ -128,6 +128,20 @@ const TextFields: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'hasManySecond',
+      type: 'text',
+      hasMany: true,
+    },
+    {
+      name: 'readOnlyHasMany',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: ['default'],
+    },
+    {
       name: 'validatesHasMany',
       type: 'text',
       hasMany: true,
@@ -159,20 +173,6 @@ const TextFields: CollectionConfig = {
       },
     },
     {
-      name: 'disableListColumnText',
-      type: 'text',
-      admin: {
-        disableListColumn: true,
-      },
-    },
-    {
-      name: 'disableListFilterText',
-      type: 'text',
-      admin: {
-        disableListFilter: true,
-      },
-    },
-    {
       name: 'array',
       type: 'array',
       fields: [
@@ -188,7 +188,7 @@ const TextFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithText',
           fields: [
             {
               name: 'texts',

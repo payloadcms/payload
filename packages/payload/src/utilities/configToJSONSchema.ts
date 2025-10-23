@@ -14,11 +14,10 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
-import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
-const fieldIsRequired = (field: FlattenedField) => {
+const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
   if (isConditional) {
     return false
@@ -50,13 +49,16 @@ function buildOptionEnums(options: Option[]): string[] {
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
 ): JSONSchema4 {
-  const properties = [...entities].reduce((acc, { slug }) => {
-    acc[slug] = {
-      $ref: `#/definitions/${slug}`,
-    }
+  const properties = [...entities].reduce(
+    (acc, { slug }) => {
+      acc[slug] = {
+        $ref: `#/definitions/${slug}`,
+      }
 
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
 
   return {
     type: 'object',
@@ -69,13 +71,16 @@ function generateEntitySchemas(
 function generateEntitySelectSchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
 ): JSONSchema4 {
-  const properties = [...entities].reduce((acc, { slug }) => {
-    acc[slug] = {
-      $ref: `#/definitions/${slug}_select`,
-    }
+  const properties = [...entities].reduce(
+    (acc, { slug }) => {
+      acc[slug] = {
+        $ref: `#/definitions/${slug}_select`,
+      }
 
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
 
   return {
     type: 'object',
@@ -87,22 +92,30 @@ function generateEntitySelectSchemas(
 
 function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
   const properties = [...collections].reduce<Record<string, JSONSchema4>>(
-    (acc, { slug, joins }) => {
+    (acc, { slug, joins, polymorphicJoins }) => {
       const schema = {
         type: 'object',
         additionalProperties: false,
         properties: {},
-        required: [],
+        required: [] as string[],
       } satisfies JSONSchema4
 
       for (const collectionSlug in joins) {
-        for (const join of joins[collectionSlug]) {
-          schema.properties[join.joinPath] = {
+        for (const join of joins[collectionSlug]!) {
+          ;(schema.properties as any)[join.joinPath] = {
             type: 'string',
             enum: [collectionSlug],
           }
           schema.required.push(join.joinPath)
         }
+      }
+
+      for (const join of polymorphicJoins) {
+        ;(schema.properties as any)[join.joinPath] = {
+          type: 'string',
+          enum: join.field.collection,
+        }
+        schema.required.push(join.joinPath)
       }
 
       if (Object.keys(schema.properties).length > 0) {
@@ -200,11 +213,9 @@ export function withNullableJSONSchemaType(
 }
 
 function entityOrFieldToJsDocs({
-  config,
   entity,
   i18n,
 }: {
-  config: SanitizedConfig
   entity: FlattenedField | SanitizedCollectionConfig | SanitizedGlobalConfig
   i18n?: I18n
 }): string | undefined {
@@ -213,14 +224,15 @@ function entityOrFieldToJsDocs({
     if (typeof entity?.admin?.description === 'string') {
       description = entity?.admin?.description
     } else if (typeof entity?.admin?.description === 'object') {
-      const defaultLocale = config?.localization ? config?.localization?.defaultLocale : undefined
       if (entity?.admin?.description?.en) {
         description = entity?.admin?.description?.en
-      } else if (entity?.admin?.description?.[defaultLocale]) {
-        description = entity?.admin?.description?.[defaultLocale]
+      } else if (entity?.admin?.description?.[i18n!.language]) {
+        description = entity?.admin?.description?.[i18n!.language]
       }
     } else if (typeof entity?.admin?.description === 'function' && i18n) {
-      description = entity?.admin?.description(i18n)
+      // do not evaluate description functions for generating JSDocs. The output of
+      // those can differ depending on where and when they are called, creating
+      // inconsistencies in the generated JSDocs.
     }
   }
   return description
@@ -249,13 +261,10 @@ export function fieldsToJSONSchema(
 
   return {
     properties: Object.fromEntries(
-      fields.reduce((fieldSchemas, field) => {
+      fields.reduce((fieldSchemas, field, index) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
-        if (isRequired) {
-          requiredFieldNames.add(field.name)
-        }
 
-        const fieldDescription = entityOrFieldToJsDocs({ config, entity: field, i18n })
+        const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
         if (fieldDescription) {
           baseFieldSchema.description = fieldDescription
@@ -294,14 +303,22 @@ export function fieldsToJSONSchema(
             // Check for a case where no blocks are provided.
             // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
             // so the best we can get is `unknown[]`
-            const hasBlocks = Boolean(field.blocks.length)
+            const hasBlocks = Boolean(
+              field.blockReferences ? field.blockReferences.length : field.blocks.length,
+            )
 
             fieldSchema = {
               ...baseFieldSchema,
               type: withNullableJSONSchemaType('array', isRequired),
               items: hasBlocks
                 ? {
-                    oneOf: field.blocks.map((block) => {
+                    oneOf: (field.blockReferences ?? field.blocks).map((block) => {
+                      if (typeof block === 'string') {
+                        const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
+                        return {
+                          $ref: `#/definitions/${resolvedBlock!.interfaceName ?? resolvedBlock!.slug}`,
+                        }
+                      }
                       const blockFieldSchemas = fieldsToJSONSchema(
                         collectionIDFieldTypes,
                         block.flattenedFields,
@@ -355,49 +372,80 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'group':
-          case 'tab': {
-            fieldSchema = {
-              ...baseFieldSchema,
-              type: 'object',
-              additionalProperties: false,
-              ...fieldsToJSONSchema(
-                collectionIDFieldTypes,
-                field.flattenedFields,
-                interfaceNameDefinitions,
-                config,
-                i18n,
-              ),
-            }
+          case 'group': {
+            if (fieldAffectsData(field)) {
+              fieldSchema = {
+                ...baseFieldSchema,
+                type: 'object',
+                additionalProperties: false,
+                ...fieldsToJSONSchema(
+                  collectionIDFieldTypes,
+                  field.flattenedFields,
+                  interfaceNameDefinitions,
+                  config,
+                  i18n,
+                ),
+              }
 
-            if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+              if (field.interfaceName) {
+                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-              fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+                fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+              }
             }
             break
           }
 
           case 'join': {
+            let items: JSONSchema4
+
+            if (Array.isArray(field.collection)) {
+              items = {
+                oneOf: field.collection.map((collection) => ({
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    relationTo: {
+                      const: collection,
+                    },
+                    value: {
+                      oneOf: [
+                        {
+                          type: collectionIDFieldTypes[collection],
+                        },
+                        {
+                          $ref: `#/definitions/${collection}`,
+                        },
+                      ],
+                    },
+                  },
+                  required: ['collectionSlug', 'value'],
+                })),
+              }
+            } else {
+              items = {
+                oneOf: [
+                  {
+                    type: collectionIDFieldTypes[field.collection],
+                  },
+                  {
+                    $ref: `#/definitions/${field.collection}`,
+                  },
+                ],
+              }
+            }
+
             fieldSchema = {
               ...baseFieldSchema,
-              type: withNullableJSONSchemaType('object', false),
+              type: 'object',
               additionalProperties: false,
               properties: {
                 docs: {
-                  type: withNullableJSONSchemaType('array', false),
-                  items: {
-                    oneOf: [
-                      {
-                        type: collectionIDFieldTypes[field.collection],
-                      },
-                      {
-                        $ref: `#/definitions/${field.collection}`,
-                      },
-                    ],
-                  },
+                  type: 'array',
+                  items,
                 },
-                hasNextPage: { type: withNullableJSONSchemaType('boolean', false) },
+                hasNextPage: { type: 'boolean' },
+                totalDocs: { type: 'number' },
               },
             }
             break
@@ -444,6 +492,7 @@ export function fieldsToJSONSchema(
             }
             break
           }
+
           case 'radio': {
             fieldSchema = {
               ...baseFieldSchema,
@@ -451,9 +500,16 @@ export function fieldsToJSONSchema(
               enum: buildOptionEnums(field.options),
             }
 
+            if (field.interfaceName) {
+              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+              fieldSchema = {
+                $ref: `#/definitions/${field.interfaceName}`,
+              }
+            }
+
             break
           }
-
           case 'relationship':
           case 'upload': {
             if (Array.isArray(field.relationTo)) {
@@ -534,7 +590,7 @@ export function fieldsToJSONSchema(
                 oneOf: [
                   {
                     type: withNullableJSONSchemaType(
-                      collectionIDFieldTypes[field.relationTo],
+                      collectionIDFieldTypes[field.relationTo]!,
                       isRequired,
                     ),
                   },
@@ -545,7 +601,6 @@ export function fieldsToJSONSchema(
 
             break
           }
-
           case 'richText': {
             if (!field?.editor) {
               throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -578,30 +633,73 @@ export function fieldsToJSONSchema(
 
             break
           }
+
           case 'select': {
             const optionEnums = buildOptionEnums(field.options)
+            // We get the previous field to check for a date in the case of a timezone select
+            // This works because timezone selects are always inserted right after a date with 'timezone: true'
+            const previousField = fields?.[index - 1]
+            const isTimezoneField =
+              previousField?.type === 'date' && previousField.timezone && field.name.includes('_tz')
 
-            if (field.hasMany) {
+            // Timezone selects should reference the supportedTimezones definition
+            if (isTimezoneField) {
               fieldSchema = {
-                ...baseFieldSchema,
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  type: 'string',
-                },
-              }
-              if (optionEnums?.length) {
-                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
+                $ref: `#/definitions/supportedTimezones`,
               }
             } else {
-              fieldSchema = {
-                ...baseFieldSchema,
-                type: withNullableJSONSchemaType('string', isRequired),
+              if (field.hasMany) {
+                fieldSchema = {
+                  ...baseFieldSchema,
+                  type: withNullableJSONSchemaType('array', isRequired),
+                  items: {
+                    type: 'string',
+                  },
+                }
+                if (optionEnums?.length) {
+                  ;(fieldSchema.items as JSONSchema4).enum = optionEnums
+                }
+              } else {
+                fieldSchema = {
+                  ...baseFieldSchema,
+                  type: withNullableJSONSchemaType('string', isRequired),
+                }
+                if (optionEnums?.length) {
+                  fieldSchema.enum = optionEnums
+                }
               }
-              if (optionEnums?.length) {
-                fieldSchema.enum = optionEnums
+
+              if (field.interfaceName) {
+                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+                fieldSchema = {
+                  $ref: `#/definitions/${field.interfaceName}`,
+                }
               }
+              break
             }
 
+            break
+          }
+          case 'tab': {
+            fieldSchema = {
+              ...baseFieldSchema,
+              type: 'object',
+              additionalProperties: false,
+              ...fieldsToJSONSchema(
+                collectionIDFieldTypes,
+                field.flattenedFields,
+                interfaceNameDefinitions,
+                config,
+                i18n,
+              ),
+            }
+
+            if (field.interfaceName) {
+              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+              fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+            }
             break
           }
 
@@ -627,11 +725,14 @@ export function fieldsToJSONSchema(
 
         if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
           for (const schema of field.typescriptSchema) {
-            fieldSchema = schema({ jsonSchema: fieldSchema })
+            fieldSchema = schema({ jsonSchema: fieldSchema! })
           }
         }
 
-        if (fieldSchema && fieldAffectsData(field)) {
+        if (fieldSchema! && fieldAffectsData(field)) {
+          if (isRequired && fieldSchema.required !== false) {
+            requiredFieldNames.add(field.name)
+          }
           fieldSchemas.set(field.name, fieldSchema)
         }
 
@@ -645,7 +746,7 @@ export function fieldsToJSONSchema(
 // This function is part of the public API and is exported through payload/utilities
 export function entityToJSONSchema(
   config: SanitizedConfig,
-  incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
+  entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
@@ -655,25 +756,30 @@ export function entityToJSONSchema(
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
   }
 
-  const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
+  let mutableFields = [...entity.flattenedFields]
+
   const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
-  const customIdField = entity.flattenedFields.find(
-    (field) => field.name === 'id',
-  ) as FieldAffectingData
+  const customIdField = mutableFields.find((field) => field.name === 'id') as FieldAffectingData
 
   if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
-    customIdField.required = true
+    mutableFields = mutableFields.map((field) => {
+      if (field === customIdField) {
+        return { ...field, required: true }
+      }
+
+      return field
+    })
   } else {
-    entity.flattenedFields.unshift(idField)
+    mutableFields.unshift(idField)
   }
 
   // mark timestamp fields required
   if ('timestamps' in entity && entity.timestamps !== false) {
-    entity.flattenedFields = entity.flattenedFields.map((field) => {
+    mutableFields = mutableFields.map((field) => {
       if (field.name === 'createdAt' || field.name === 'updatedAt') {
         return {
           ...field,
@@ -691,7 +797,7 @@ export function entityToJSONSchema(
       (typeof entity.auth?.disableLocalStrategy === 'object' &&
         entity.auth.disableLocalStrategy.enableFields))
   ) {
-    entity.flattenedFields.push({
+    mutableFields.push({
       name: 'password',
       type: 'text',
     })
@@ -703,14 +809,14 @@ export function entityToJSONSchema(
     title,
     ...fieldsToJSONSchema(
       collectionIDFieldTypes,
-      entity.flattenedFields,
+      mutableFields,
       interfaceNameDefinitions,
       config,
       i18n,
     ),
   }
 
-  const entityDescription = entityOrFieldToJsDocs({ config, entity, i18n })
+  const entityDescription = entityOrFieldToJsDocs({ entity, i18n })
 
   if (entityDescription) {
     jsonSchema.description = entityDescription
@@ -720,9 +826,11 @@ export function entityToJSONSchema(
 }
 
 export function fieldsToSelectJSONSchema({
+  config,
   fields,
   interfaceNameDefinitions,
 }: {
+  config: SanitizedConfig
   fields: FlattenedField[]
   interfaceNameDefinitions: Map<string, JSONSchema4>
 }): JSONSchema4 {
@@ -738,6 +846,7 @@ export function fieldsToSelectJSONSchema({
       case 'group':
       case 'tab': {
         let fieldSchema: JSONSchema4 = fieldsToSelectJSONSchema({
+          config,
           fields: field.flattenedFields,
           interfaceNameDefinitions,
         })
@@ -751,7 +860,7 @@ export function fieldsToSelectJSONSchema({
           }
         }
 
-        schema.properties[field.name] = {
+        schema.properties![field.name] = {
           oneOf: [
             {
               type: 'boolean',
@@ -770,8 +879,13 @@ export function fieldsToSelectJSONSchema({
           properties: {},
         }
 
-        for (const block of field.blocks) {
+        for (const block of field.blockReferences ?? field.blocks) {
+          if (typeof block === 'string') {
+            continue // TODO
+          }
+
           let blockSchema = fieldsToSelectJSONSchema({
+            config,
             fields: block.flattenedFields,
             interfaceNameDefinitions,
           })
@@ -784,7 +898,7 @@ export function fieldsToSelectJSONSchema({
             }
           }
 
-          blocksSchema.properties[block.slug] = {
+          blocksSchema.properties![block.slug] = {
             oneOf: [
               {
                 type: 'boolean',
@@ -794,7 +908,7 @@ export function fieldsToSelectJSONSchema({
           }
         }
 
-        schema.properties[field.name] = {
+        schema.properties![field.name] = {
           oneOf: [
             {
               type: 'boolean',
@@ -807,7 +921,7 @@ export function fieldsToSelectJSONSchema({
       }
 
       default:
-        schema.properties[field.name] = {
+        schema.properties![field.name] = {
           type: 'boolean',
         }
         break
@@ -957,15 +1071,30 @@ export function authCollectionToOperationsJSONSchema(
   }
 }
 
+// Generates the JSON Schema for supported timezones
+export function timezonesToJSONSchema(
+  supportedTimezones: SanitizedConfig['admin']['timezones']['supportedTimezones'],
+): JSONSchema4 {
+  return {
+    description: 'Supported timezones in IANA format.',
+    enum: supportedTimezones.map((timezone) =>
+      typeof timezone === 'string' ? timezone : timezone.value,
+    ),
+  }
+}
+
 function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
-  const properties = collections.reduce((acc, collection) => {
-    if (collection.auth) {
-      acc[collection.slug] = {
-        $ref: `#/definitions/auth/${collection.slug}`,
+  const properties = collections.reduce(
+    (acc, collection) => {
+      if (collection.auth) {
+        acc[collection.slug] = {
+          $ref: `#/definitions/auth/${collection.slug}`,
+        }
       }
-    }
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
 
   return {
     type: 'object',
@@ -987,7 +1116,10 @@ export function configToJSONSchema(
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
 
   //  Used for relationship fields, to determine whether to use a string or number type for the ID.
-  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({
+    config,
+    defaultIDType: defaultIDType!,
+  })
 
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
@@ -1009,17 +1141,18 @@ export function configToJSONSchema(
         config,
         entity,
         interfaceNameDefinitions,
-        defaultIDType,
+        defaultIDType!,
         collectionIDFieldTypes,
         i18n,
       )
       const select = fieldsToSelectJSONSchema({
+        config,
         fields: entity.flattenedFields,
         interfaceNameDefinitions,
       })
 
       if (type === 'global') {
-        select.properties.globalType = {
+        select.properties!.globalType = {
           type: 'boolean',
         }
       }
@@ -1032,8 +1165,10 @@ export function configToJSONSchema(
 
       return acc
     },
-    {},
+    {} as Record<string, JSONSchema4>,
   )
+
+  const timezoneDefinitions = timezonesToJSONSchema(config.admin.timezones.supportedTimezones)
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
@@ -1042,7 +1177,7 @@ export function configToJSONSchema(
         acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
         return acc
       },
-      { auth: {} },
+      { auth: {} as Record<string, JSONSchema4> },
     )
 
   const jobsSchemas = config.jobs
@@ -1055,9 +1190,48 @@ export function configToJSONSchema(
       )
     : {}
 
+  const blocksDefinition: JSONSchema4 | undefined = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+    required: [],
+  }
+  if (config?.blocks?.length) {
+    for (const block of config.blocks) {
+      const blockFieldSchemas = fieldsToJSONSchema(
+        collectionIDFieldTypes,
+        block.flattenedFields,
+        interfaceNameDefinitions,
+        config,
+        i18n,
+      )
+
+      const blockSchema: JSONSchema4 = {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          ...blockFieldSchemas.properties,
+          blockType: {
+            const: block.slug,
+          },
+        },
+        required: ['blockType', ...blockFieldSchemas.required],
+      }
+
+      const interfaceName = block.interfaceName ?? block.slug
+      interfaceNameDefinitions.set(interfaceName, blockSchema)
+
+      blocksDefinition.properties![block.slug] = {
+        $ref: `#/definitions/${interfaceName}`,
+      }
+      ;(blocksDefinition.required as string[]).push(block.slug)
+    }
+  }
+
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
+      supportedTimezones: timezoneDefinitions,
       ...entityDefinitions,
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,
@@ -1066,6 +1240,7 @@ export function configToJSONSchema(
     type: 'object',
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
+      blocks: blocksDefinition,
       collections: generateEntitySchemas(config.collections || []),
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
@@ -1086,16 +1261,18 @@ export function configToJSONSchema(
       'auth',
       'db',
       'jobs',
+      'blocks',
     ],
     title: 'Config',
   }
+
   if (jobsSchemas.definitions?.size) {
     for (const [key, value] of jobsSchemas.definitions) {
-      jsonSchema.definitions[key] = value
+      jsonSchema.definitions![key] = value
     }
   }
   if (jobsSchemas.properties) {
-    jsonSchema.properties.jobs = {
+    jsonSchema.properties!.jobs = {
       type: 'object',
       additionalProperties: false,
       properties: jobsSchemas.properties,
@@ -1105,7 +1282,7 @@ export function configToJSONSchema(
 
   if (config?.typescript?.schema?.length) {
     for (const schema of config.typescript.schema) {
-      jsonSchema = schema({ jsonSchema })
+      jsonSchema = schema({ collectionIDFieldTypes, config, i18n: i18n!, jsonSchema })
     }
   }
 

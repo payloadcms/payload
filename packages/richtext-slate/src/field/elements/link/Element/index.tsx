@@ -69,7 +69,7 @@ export const LinkElement = () => {
   const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const editor = useSlate()
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal, toggleModal } = useModal()
@@ -101,7 +101,9 @@ export const LinkElement = () => {
       const { state } = await getFormState({
         collectionSlug,
         data,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',
@@ -177,8 +179,7 @@ export const LinkElement = () => {
                   t={t}
                   variables={{
                     label: getTranslation(
-                      config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels
-                        ?.singular,
+                      getEntityConfig({ collectionSlug: element.doc.relationTo })?.labels?.singular,
                       i18n,
                     ),
                   }}

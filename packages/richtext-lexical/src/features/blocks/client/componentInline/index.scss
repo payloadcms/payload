@@ -1,24 +1,29 @@
-@import '../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .inline-block-container {
-    display: inline-block;
-  }
-
-  .inline-block {
+  .LexicalEditorTheme__inlineBlock {
     @extend %body;
     @include shadow-sm;
+    display: inline-block;
+    margin-right: base(0.2);
+    margin-left: base(0.2);
     padding: base(0.1);
     padding-inline-start: base(0.4);
-    display: flex;
-    align-items: center;
     background: var(--theme-input-bg);
     outline: 1px solid var(--theme-elevation-100);
     border-radius: $style-radius-s;
     max-width: calc(var(--base) * 15);
     font-family: var(--font-body);
-    margin-right: base(0.2);
-    margin-left: base(0.2);
+
+    &__container {
+      display: flex;
+      align-items: center;
+    }
+
+    &-not-found {
+      max-width: calc(var(--base) * 20);
+      color: var(--theme-error-500);
+    }
 
     &::selection {
       background: transparent;
@@ -31,11 +36,6 @@
     &__wrap {
       flex-grow: 1;
       overflow: hidden;
-    }
-
-    &--selected {
-      background: var(--theme-success-100);
-      outline: 1px solid var(--theme-success-400);
     }
 
     &__editButton.btn {

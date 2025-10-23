@@ -1,5 +1,5 @@
 'use client'
-const boolean = [
+const equalsOperators = [
   {
     label: 'equals',
     value: 'equals',
@@ -10,8 +10,7 @@ const boolean = [
   },
 ]
 
-const base = [
-  ...boolean,
+export const arrayOperators = [
   {
     label: 'isIn',
     value: 'in',
@@ -25,6 +24,8 @@ const base = [
     value: 'exists',
   },
 ]
+
+const base = [...equalsOperators, ...arrayOperators]
 
 const numeric = [
   ...base,
@@ -47,7 +48,7 @@ const numeric = [
 ]
 
 const geo = [
-  ...boolean,
+  ...equalsOperators,
   {
     label: 'exists',
     value: 'exists',
@@ -73,19 +74,29 @@ const like = {
   value: 'like',
 }
 
+const notLike = {
+  label: 'isNotLike',
+  value: 'not_like',
+}
+
 const contains = {
   label: 'contains',
   value: 'contains',
 }
 
-const fieldTypeConditions = {
+const fieldTypeConditions: {
+  [key: string]: {
+    component: string
+    operators: { label: string; value: string }[]
+  }
+} = {
   checkbox: {
     component: 'Text',
-    operators: boolean,
+    operators: equalsOperators,
   },
   code: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   date: {
     component: 'Date',
@@ -97,7 +108,7 @@ const fieldTypeConditions = {
   },
   json: {
     component: 'Text',
-    operators: [...base, like, contains, within, intersects],
+    operators: [...base, like, contains, notLike, within, intersects],
   },
   number: {
     component: 'Number',
@@ -117,7 +128,7 @@ const fieldTypeConditions = {
   },
   richText: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   select: {
     component: 'Select',
@@ -125,11 +136,11 @@ const fieldTypeConditions = {
   },
   text: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   textarea: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   upload: {
     component: 'Text',

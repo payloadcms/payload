@@ -5,7 +5,7 @@ import type {
   LexicalNodeReplacement,
   TextFormatType,
 } from 'lexical'
-import type { RichTextFieldClient } from 'payload'
+import type { ClientConfig, RichTextFieldClient } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
@@ -33,6 +33,8 @@ export type FeatureProviderClient<
   clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
+        config: ClientConfig
+        featureClientImportMap: Record<string, any>
         featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
@@ -104,7 +106,7 @@ export type ClientFeature<ClientFeatureProps> = {
   /**
    * The text formats which are enabled by this feature.
    */
-  enableFormats?: Array<Omit<TextFormatType, 'highlight'>>
+  enableFormats?: TextFormatType[]
   markdownTransformers?: (
     | ((props: {
         allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
@@ -214,7 +216,7 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, an
 export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  enabledFormats: Array<Omit<TextFormatType, 'highlight'>>
+  enabledFormats: TextFormatType[]
   markdownTransformers: Transformer[]
 
   /**

@@ -1,0 +1,120 @@
+---
+title: Rendering On Demand
+label: Rendering On Demand
+order: 50
+desc: Rendering rich text on demand
+keywords: lexical, rich text, editor, headless cms, render, rendering
+---
+
+Lexical in Payload is a **React Server Component (RSC)**. Historically that created three headaches: 1. You couldn't render the editor directly from the client. 2. Features like blocks, tables and link drawers require the server to know the shape of nested sub-fields at render time. If you tried to render on demand, the server didn't know those schemas. 3. The rich text field is designed to live inside a `Form`. For simple use cases, setting up a full form just to manage editor state was cumbersome.
+
+To simplify rendering richtext on demand, <RenderLexical />, that renders a Lexical editor while still covering the full feature set. On mount, it calls a server action to render the editor on the server using the new `render-field` server function. That server render gives Lexical everything it needs (including nested field schemas) and returns a ready-to-hydrate editor.
+
+<Banner type="warning">
+  `RenderLexical` and the underlying `render-field` server function are
+  experimental and may change in minor releases.
+</Banner>
+
+## Inside an existing Form
+
+If you have an existing Form and want to render a richtext field within it, you can use the `RenderLexical` component like this:
+
+```tsx
+'use client'
+
+import type { JSONFieldClientComponent } from 'payload'
+
+import {
+  buildEditorState,
+  RenderLexical,
+} from '@payloadcms/richtext-lexical/client'
+
+import { lexicalFullyFeaturedSlug } from '../../slugs.js'
+
+export const Component: JSONFieldClientComponent = (args) => {
+  return (
+    <RenderLexical
+      field={{
+        name: 'myFieldName' /* Make sure this matches the field name present in your form */,
+      }}
+      initialValue={buildEditorState<DefaultNodeTypes>({
+        text: 'default value',
+      })}
+      schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
+    />
+  )
+}
+```
+
+## Outside of a Form (you control state)
+
+```tsx
+'use client'
+
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import type { JSONFieldClientComponent } from 'payload'
+
+import {
+  buildEditorState,
+  RenderLexical,
+} from '@payloadcms/richtext-lexical/client'
+import React, { useState } from 'react'
+
+import { lexicalFullyFeaturedSlug } from '../../slugs.js'
+
+export const Component: JSONFieldClientComponent = (args) => {
+  // Manually manage the editor state
+  const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
+    buildEditorState<DefaultNodeTypes>({ text: 'state default' }),
+  )
+
+  const handleReset = React.useCallback(() => {
+    setValue(buildEditorState<DefaultNodeTypes>({ text: 'state default' }))
+  }, [])
+
+  return (
+    <div>
+      <RenderLexical
+        field={{ name: 'myField' }}
+        initialValue={buildEditorState<DefaultNodeTypes>({
+          text: 'default value',
+        })}
+        schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
+        setValue={setValue as any}
+        value={value}
+      />
+      <button onClick={handleReset} style={{ marginTop: 8 }} type="button">
+        Reset Editor State
+      </button>
+    </div>
+  )
+}
+```
+
+## Choosing the schemaPath
+
+`schemaPath` tells the server which richText field to render. This gives the server the exact nested field schemas (blocks, relationship drawers, upload fields, tables, etc.).
+
+Format:
+
+- `collection.<collectionSlug>.<fieldPath>`
+- `global.<globalSlug>.<fieldPath>`
+
+Example (top level): `collection.posts.richText`
+
+Example (nested in a group/tab): `collection.posts.content.richText`
+
+<Banner type="info">
+  **Tip:** If your target editor lives deep in arrays/blocks and you're unsure of the exact path, you can define a **hidden top-level richText** purely as a "render anchor":
+
+```ts
+{
+  name: 'onDemandAnchor',
+  type: 'richText',
+  admin: { hidden: true }
+}
+```
+
+Then use `schemaPath="collection.posts.onDemandAnchor"`
+
+</Banner>

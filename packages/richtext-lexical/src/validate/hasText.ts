@@ -19,7 +19,7 @@ export function hasText(
         hasOnlyEmptyParagraph = true
       } else if (paragraphNode?.children?.length === 1) {
         const paragraphNodeChild = paragraphNode?.children[0]
-        if (paragraphNodeChild.type === 'text') {
+        if (paragraphNodeChild?.type === 'text') {
           if (!(paragraphNodeChild as SerializedTextNode | undefined)?.['text']?.length) {
             hasOnlyEmptyParagraph = true
           }

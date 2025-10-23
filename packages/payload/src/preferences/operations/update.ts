@@ -1,7 +1,8 @@
 import type { Where } from '../../types/index.js'
 import type { PreferenceUpdateRequest } from '../types.js'
 
-import { UnauthorizedError } from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
+import { preferencesCollectionSlug } from '../config.js'
 
 export async function update(args: PreferenceUpdateRequest) {
   const {
@@ -15,8 +16,6 @@ export async function update(args: PreferenceUpdateRequest) {
   if (!user) {
     throw new UnauthorizedError(req.t)
   }
-
-  const collection = 'payload-preferences'
 
   const where: Where = {
     and: [
@@ -36,7 +35,7 @@ export async function update(args: PreferenceUpdateRequest) {
   }
 
   return await payload.db.upsert({
-    collection,
+    collection: preferencesCollectionSlug,
     data: preference,
     req,
     where,

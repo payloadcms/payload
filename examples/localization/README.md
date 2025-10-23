@@ -8,10 +8,14 @@ To facilitate the localization process, this example uses the next-intl library.
 
 ## Setup
 
-1. `cp .env.example .env` (copy the .env.example file to .env)
-2. `pnpm install` (`pnpm i --ignore-workspaces` if you are running from the monorepo)
-3. `pnpm run dev`
-4. Seed your database in the admin panel (see below)
+1. Run the following command to create a project from the example:
+
+- `npx create-payload-app --example localization`
+
+2. `cp .env.example .env` (copy the .env.example file to .env)
+3. `pnpm install`
+4. `pnpm run dev`
+5. Seed your database in the admin panel (see below)
 
 ## Seed
 

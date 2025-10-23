@@ -6,22 +6,74 @@ desc: Payload queries are equipped with automatic pagination so you create pagin
 keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-All collection `find` queries are paginated automatically. Responses are returned with top-level meta data related to pagination, and returned documents are nested within a `docs` array.
+With Pagination you can limit the number of documents returned per page, and get a specific page of results. This is useful for creating paginated lists of documents within your application.
 
-**`Find` response properties:**
+All paginated responses include documents nested within a `docs` array, and return top-level meta data related to pagination such as `totalDocs`, `limit`, `totalPages`, `page`, and more.
 
-| Property      | Description                                               |
-| ------------- | --------------------------------------------------------- |
-| docs          | Array of documents in the collection                      |
-| totalDocs     | Total available documents within the collection           |
-| limit         | Limit query parameter - defaults to `10`                  |
-| totalPages    | Total pages available, based upon the `limit` queried for |
-| page          | Current page number                                       |
-| pagingCounter | `number` of the first doc on the current page             |
-| hasPrevPage   | `true/false` if previous page exists                      |
-| hasNextPage   | `true/false` if next page exists                          |
-| prevPage      | `number` of previous page, `null` if it doesn't exist     |
-| nextPage      | `number` of next page, `null` if it doesn't exist         |
+<Banner type="success">
+  **Note:** Collection `find` queries are paginated automatically.
+</Banner>
+
+## Options
+
+All Payload APIs support the pagination controls below. With them, you can create paginated lists of documents within your application:
+
+| Control      | Default | Description                                                               |
+| ------------ | ------- | ------------------------------------------------------------------------- |
+| `limit`      | `10`    | Limits the number of documents returned per page. [More details](#limit). |
+| `pagination` | `true`  | Set to `false` to disable pagination and return all documents.            |
+| `page`       | `1`     | Get a specific page number.                                               |
+
+## Local API
+
+To specify pagination controls in the [Local API](../local-api/overview), you can use the `limit`, `page`, and `pagination` options in your query:
+
+```ts
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    // highlight-start
+    limit: 10,
+    page: 2,
+    // highlight-end
+  })
+
+  return posts
+}
+```
+
+## REST API
+
+With the [REST API](../rest-api/overview), you can use the pagination controls below as query strings:
+
+```ts
+// highlight-start
+fetch('https://localhost:3000/api/posts?limit=10&page=2')
+  // highlight-end
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+```
+
+## Response
+
+All paginated responses include documents nested within a `docs` array, and return top-level meta data related to pagination.
+
+The `find` operation includes the following properties in its response:
+
+| Property        | Description                                               |
+| --------------- | --------------------------------------------------------- |
+| `docs`          | Array of documents in the collection                      |
+| `totalDocs`     | Total available documents within the collection           |
+| `limit`         | Limit query parameter - defaults to `10`                  |
+| `totalPages`    | Total pages available, based upon the `limit` queried for |
+| `page`          | Current page number                                       |
+| `pagingCounter` | `number` of the first doc on the current page             |
+| `hasPrevPage`   | `true/false` if previous page exists                      |
+| `hasNextPage`   | `true/false` if next page exists                          |
+| `prevPage`      | `number` of previous page, `null` if it doesn't exist     |
+| `nextPage`      | `number` of next page, `null` if it doesn't exist         |
 
 **Example response:**
 
@@ -51,15 +103,59 @@ All collection `find` queries are paginated automatically. Responses are returne
 }
 ```
 
-## Pagination controls
+## Limit
 
-All Payload APIs support the pagination controls below. With them, you can create paginated lists of documents within your application:
+You can specify a `limit` to restrict the number of documents returned per page.
 
-| Control | Description                             |
-| ------- | --------------------------------------- |
-| `limit` | Limits the number of documents returned |
-| `page`  | Get a specific page number              |
+<Banner type="warning">
+  **Reminder:** By default, any query with `limit: 0` will automatically
+  [disable pagination](#disabling-pagination).
+</Banner>
 
-### Disabling pagination within Local API
+#### Performance benefits
+
+If you are querying for a specific document and can reliably expect only one document to match, you can set a limit of `1` (or another low number) to reduce the number of database lookups and improve performance.
+
+For example, when querying a document by a unique field such as `slug`, you can set the limit to `1` since you know there will only be one document with that slug.
+
+To do this, set the `limit` option in your query:
+
+```ts
+await payload.find({
+  collection: 'posts',
+  where: {
+    slug: {
+      equals: 'post-1',
+    },
+  },
+  // highlight-start
+  limit: 1,
+  // highlight-end
+})
+```
+
+## Disabling pagination
+
+Disabling pagination can improve performance by reducing the overhead of pagination calculations and improve query speed.
 
 For `find` operations within the Local API, you can disable pagination to retrieve all documents from a collection by passing `pagination: false` to the `find` local operation.
+
+To do this, set `pagination: false` in your query:
+
+```ts
+import type { Payload } from 'payload'
+
+const getPost = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    where: {
+      title: { equals: 'My Post' },
+    },
+    // highlight-start
+    pagination: false,
+    // highlight-end
+  })
+
+  return posts
+}
+```

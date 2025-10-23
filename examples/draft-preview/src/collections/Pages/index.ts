@@ -1,7 +1,6 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 import richText from '../../fields/richText'
-import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { loggedIn } from './access/loggedIn'
 import { publishedOrLoggedIn } from './access/publishedOrLoggedIn'
 import { formatSlug } from './hooks/formatSlug'
@@ -17,12 +16,15 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: (doc) => {
-      const path = generatePreviewPath({
-        slug: typeof doc?.slug === 'string' ? doc.slug : '',
-        collection: 'pages',
+    preview: ({ slug, collection }: { slug: string; collection: CollectionSlug }) => {
+      const encodedParams = new URLSearchParams({
+        slug,
+        collection,
+        path: `/${slug}`,
+        previewSecret: process.env.PREVIEW_SECRET || '',
       })
-      return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+
+      return `${process.env.NEXT_PUBLIC_SERVER_URL}/preview?${encodedParams.toString()}`
     },
     useAsTitle: 'title',
   },

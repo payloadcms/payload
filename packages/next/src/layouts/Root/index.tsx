@@ -1,15 +1,13 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
-import { RootProvider } from '@payloadcms/ui'
+import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { getPayload, parseCookies } from 'payload'
+import { cookies as nextCookies } from 'next/headers.js'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -25,26 +23,28 @@ export const metadata = {
 export const RootLayout = async ({
   children,
   config: configPromise,
+  htmlProps = {},
   importMap,
   serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
   checkDependencies()
 
-  const config = await configPromise
-
-  const headers = await getHeaders()
-  const cookies = parseCookies(headers)
-
-  const languageCode = getRequestLanguage({
-    config,
+  const {
     cookies,
     headers,
-  })
+    languageCode,
+    permissions,
+    req,
+    req: {
+      payload: { config },
+    },
+  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,
@@ -52,27 +52,22 @@ export const RootLayout = async ({
     headers,
   })
 
-  const payload = await getPayload({ config, importMap })
-
-  const { i18n, permissions, user } = await initReq(config)
-
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
     : 'LTR'
 
-  const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
-    (acc, [language, languageConfig]) => {
-      if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
-        acc.push({
-          label: languageConfig.translations.general.thisLanguage,
-          value: language,
-        })
-      }
+  const languageOptions: LanguageOptions = Object.entries(
+    config.i18n.supportedLanguages || {},
+  ).reduce((acc, [language, languageConfig]) => {
+    if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+      acc.push({
+        label: languageConfig.translations.general.thisLanguage,
+        value: language,
+      })
+    }
 
-      return acc
-    },
-    [],
-  )
+    return acc
+  }, [])
 
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
@@ -84,13 +79,28 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs({ payload, user })
+  const navPrefs = await getNavPrefs(req)
 
   const clientConfig = getClientConfig({
     config,
-    i18n,
+    i18n: req.i18n,
     importMap,
+    user: req.user,
   })
+
+  if (
+    clientConfig.localization &&
+    config.localization &&
+    typeof config.localization.filterAvailableLocales === 'function'
+  ) {
+    clientConfig.localization.locales = (
+      await config.localization.filterAvailableLocales({
+        locales: config.localization.locales,
+        req,
+      })
+    ).map(({ toString, ...rest }) => rest)
+    clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
+  }
 
   return (
     <html
@@ -98,6 +108,7 @@ export const RootLayout = async ({
       dir={dir}
       lang={languageCode}
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      {...htmlProps}
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
@@ -105,28 +116,30 @@ export const RootLayout = async ({
       <body>
         <RootProvider
           config={clientConfig}
-          dateFNSKey={i18n.dateFNSKey}
+          dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
-          permissions={permissions}
+          locale={req.locale}
+          permissions={req.user ? permissions : null}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
-          translations={i18n.translations}
-          user={user}
+          translations={req.i18n.translations}
+          user={req.user}
         >
+          <ProgressBar />
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
             <NestProviders
-              importMap={payload.importMap}
+              importMap={req.payload.importMap}
               providers={config.admin?.components?.providers}
               serverProps={{
-                i18n,
-                payload,
+                i18n: req.i18n,
+                payload: req.payload,
                 permissions,
-                user,
+                user: req.user,
               }}
             >
               {children}

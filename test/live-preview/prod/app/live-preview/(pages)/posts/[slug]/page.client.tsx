@@ -20,6 +20,8 @@ export const PostClient: React.FC<{
     serverURL: PAYLOAD_SERVER_URL,
   })
 
+  console.log(data)
+
   return (
     <React.Fragment>
       <PostHero post={data} />

@@ -1,33 +1,22 @@
-import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
+import type {
+  BrowserContext,
+  CDPSession,
+  ChromiumBrowserContext,
+  Locator,
+  Page,
+} from '@playwright/test'
 import type { Config } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
-import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-type FirstRegisterArgs = {
-  customAdminRoutes?: Config['admin']['routes']
-  customRoutes?: Config['routes']
-  page: Page
-  serverURL: string
-}
+export type AdminRoutes = NonNullable<Config['admin']>['routes']
 
-type LoginArgs = {
-  customAdminRoutes?: Config['admin']['routes']
-  customRoutes?: Config['routes']
-  data?: {
-    email: string
-    password: string
-  }
-  page: Page
-  serverURL: string
-}
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
 const networkConditions = {
@@ -38,7 +27,7 @@ const networkConditions = {
   },
   'Slow 3G': {
     download: ((500 * 1000) / 8) * 0.8,
-    latency: 400 * 5,
+    latency: 2500,
     upload: ((500 * 1000) / 8) * 0.8,
   },
   'Slow 4G': {
@@ -50,6 +39,11 @@ const networkConditions = {
     download: ((20 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
     upload: ((10 * 1000 * 1000) / 8) * 0.8,
+  },
+  None: {
+    download: 0,
+    latency: -1,
+    upload: -1,
   },
 }
 
@@ -66,16 +60,14 @@ export async function ensureCompilationIsDone({
   noAutoLogin,
   readyURL,
 }: {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
   page: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -91,10 +83,27 @@ export async function ensureCompilationIsDone({
       )
 
       await page.goto(adminURL)
-      await page.waitForURL(
-        readyURL ??
-          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
-      )
+
+      if (readyURL) {
+        await page.waitForURL(readyURL)
+      } else {
+        await expect
+          .poll(
+            () => {
+              if (noAutoLogin) {
+                const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
+                return (
+                  page.url() === `${baseAdminURL}create-first-user` ||
+                  page.url() === `${baseAdminURL}login`
+                )
+              } else {
+                return page.url() === adminURL
+              }
+            },
+            { timeout: POLL_TOPASS_TIMEOUT },
+          )
+          .toBe(true)
+      }
 
       console.log('Successfully compiled')
       return
@@ -133,7 +142,7 @@ export async function throttleTest({
   context: BrowserContext
   delay: keyof typeof networkConditions
   page: Page
-}) {
+}): Promise<CDPSession> {
   const cdpSession = await context.newCDPSession(page)
 
   await cdpSession.send('Network.emulateNetworkConditions', {
@@ -150,62 +159,8 @@ export async function throttleTest({
 
   const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
   await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
-}
 
-export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, page, serverURL } = args
-
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  await page.goto(`${serverURL}${adminRoute}`)
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
-  await page.fill('#field-confirm-password', devUser.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}${adminRoute}`)
-}
-
-export async function login(args: LoginArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
-
-  const {
-    admin: {
-      routes: { createFirstUser, login: incomingLoginRoute },
-    },
-    routes: { admin: incomingAdminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
-  const loginRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLoginRoute,
-  })
-  const createFirstUserRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: createFirstUser,
-  })
-
-  await page.goto(loginRoute)
-  await page.waitForURL(loginRoute)
-  await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(adminRoute)
-
-  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
+  return client
 }
 
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
@@ -227,7 +182,12 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 
 export async function saveDocAndAssert(
   page: Page,
-  selector = '#action-save',
+  selector:
+    | '#action-publish'
+    | '#action-save'
+    | '#action-save-draft'
+    | '#publish-locale'
+    | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
 ): Promise<void> {
   await wait(500) // TODO: Fix this
@@ -235,22 +195,10 @@ export async function saveDocAndAssert(
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
-}
-
-export async function openNav(page: Page): Promise<void> {
-  // check to see if the nav is already open and if not, open it
-  // use the `--nav-open` modifier class to check if the nav is open
-  // this will prevent clicking nav links that are bleeding off the screen
-  if (await page.locator('.template-default.template-default--nav-open').isVisible()) {
-    return
-  }
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
@@ -269,26 +217,53 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
   await wait(500) // wait for drawer form state to initialize
 }
 
-export async function closeNav(page: Page): Promise<void> {
-  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) {
-    return
+export async function openLocaleSelector(page: Page): Promise<void> {
+  const button = page.locator('.localizer button.popup-button')
+  const popup = page.locator('.localizer .popup.popup--active')
+
+  if (!(await popup.isVisible())) {
+    await button.click()
+    await expect(popup).toBeVisible()
   }
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+}
+
+export async function closeLocaleSelector(page: Page): Promise<void> {
+  const popup = page.locator('.localizer .popup.popup--active')
+
+  if (await popup.isVisible()) {
+    await page.click('body', { position: { x: 0, y: 0 } })
+    await expect(popup).toBeHidden()
+  }
 }
 
 export async function changeLocale(page: Page, newLocale: string) {
-  await page.locator('.localizer >> button').first().click()
-  await page
-    .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
-      hasText: newLocale,
+  await openLocaleSelector(page)
+
+  const currentlySelectedLocale = await page
+    .locator(
+      `.localizer .popup.popup--active .popup-button-list__button--selected .localizer__locale-code`,
+    )
+    .textContent()
+
+  if (currentlySelectedLocale !== `(${newLocale})`) {
+    const localeToSelect = page
+      .locator('.localizer .popup.popup--active .popup-button-list__button')
+      .locator('.localizer__locale-code', {
+        hasText: `${newLocale}`,
+      })
+
+    await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
     })
-    .first()
-    .click()
 
-  const regexPattern = new RegExp(`locale=${newLocale}`)
+    await localeToSelect.click()
 
-  await expect(page).toHaveURL(regexPattern)
+    const regexPattern = new RegExp(`locale=${newLocale}`)
+
+    await expect(page).toHaveURL(regexPattern)
+  }
+
+  await closeLocaleSelector(page)
 }
 
 export function exactText(text: string) {
@@ -314,22 +289,26 @@ export const checkBreadcrumb = async (page: Page, text: string) => {
     .toBe(text)
 }
 
-export const selectTableRow = async (page: Page, title: string): Promise<void> => {
+export const selectTableRow = async (scope: Locator | Page, title: string): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
-  await page.locator(selector).check()
-  await expect(page.locator(selector)).toBeChecked()
+  await scope.locator(selector).check()
+  await expect(scope.locator(selector)).toBeChecked()
 }
 
-export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
-  const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
-  expect(cell).toBeTruthy()
+  await expect(cell).toBeVisible()
   return cell
 }
 
-export const findTableRow = (page: Page, title: string): Locator => {
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
-  expect(row).toBeTruthy()
+  await expect(row).toBeVisible()
   return row
 }
 
@@ -339,14 +318,25 @@ export async function switchTab(page: Page, selector: string) {
   await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
 }
 
+export const openColumnControls = async (page: Page) => {
+  await page.locator('.list-controls__toggle-columns').click()
+  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+}
+
 /**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.
  *
  * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
  * @param page
+ * @param options
  */
-export function initPageConsoleErrorCatch(page: Page) {
+export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
+  const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
+  const consoleErrors: string[] = []
+
+  let shouldCollectErrors = false
+
   page.on('console', (msg) => {
     if (
       msg.type() === 'error' &&
@@ -361,14 +351,47 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
-      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') // This is a weird error that happens in the console
+      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
+      // Conditionally ignore CORS errors based on the `ignoreCORS` option
+      !(
+        ignoreCORS &&
+        msg.text().includes('Access to fetch at') &&
+        msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
+      ) &&
+      // Conditionally ignore network-related errors
+      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
       throw new Error(`Browser console error: ${msg.text()}`)
     }
+
+    // Log ignored CORS-related errors for visibility
+    if (msg.type() === 'error' && msg.text().includes('Access to fetch at') && ignoreCORS) {
+      console.log(`Ignoring expected CORS-related error: ${msg.text()}`)
+    }
+
+    // Log ignored network-related errors for visibility
+    if (msg.type() === 'error' && msg.text().includes('Failed to load resource: net::ERR_FAILED')) {
+      console.log(`Ignoring expected network error: ${msg.text()}`)
+    }
   })
+
+  // Capture uncaught errors that do not appear in the console
+  page.on('pageerror', (error) => {
+    if (shouldCollectErrors) {
+      consoleErrors.push(`Page error: ${error.message}`)
+    } else {
+      throw new Error(`Page error: ${error.message}`)
+    }
+  })
+
+  return {
+    consoleErrors,
+    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
+    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
+  }
 }
 
 export function describeIfInCIOrHasLocalstack(): jest.Describe {
@@ -389,8 +412,6 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   return describe
 }
 
-type AdminRoutes = Config['admin']['routes']
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -404,7 +425,7 @@ export function getRoutes({
   routes: Config['routes']
 } {
   let routes = defaults.routes
-  let adminRoutes = defaults.admin.routes
+  let adminRoutes = defaults.admin?.routes
 
   if (customAdminRoutes) {
     adminRoutes = {

@@ -9,7 +9,6 @@ export type Props = {
   operation: 'create' | 'update'
   readOnly: boolean
   requirePassword?: boolean
-  setSchemaPathSegments: (path: string[]) => void
   setValidateBeforeSubmit: (validate: boolean) => void
   useAPIKey?: boolean
   username: string

@@ -28,20 +28,18 @@ export const MyUIField: Field = {
 
 ## Config Options
 
-| Option                          | Description                                                                                                         |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*                   | A unique identifier for this field.                                                                                 |
-| **`label`**                     | Human-readable label for this UI field.                                                                             |
-| **`admin.components.Field`** \* | React component to be rendered for this field within the Edit View. [More](../admin/components/#field)    |
-| **`admin.components.Cell`**     | React component to be rendered as a Cell within collection List views. [More](../admin/components/#field) |
-| **`admin.disableListColumn`**   | Set `disableListColumn` to `true` to prevent the UI field from appearing in the list view column selector.          |
-| **`custom`**                    | Extension point for adding custom data (e.g. for plugins)                                                           |
+| Option                          | Description                                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **`name`** \*                   | A unique identifier for this field.                                                                        |
+| **`label`**                     | Human-readable label for this UI field.                                                                    |
+| **`admin.components.Field`** \* | React component to be rendered for this field within the Edit View. [More details](./overview#field).      |
+| **`admin.components.Cell`**     | React component to be rendered as a Cell within collection List views. [More details](./overview#cell).    |
+| **`admin.disableListColumn`**   | Set `disableListColumn` to `true` to prevent the UI field from appearing in the list view column selector. |
+| **`custom`**                    | Extension point for adding custom data (e.g. for plugins)                                                  |
 
 _\* An asterisk denotes that a property is required._
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'

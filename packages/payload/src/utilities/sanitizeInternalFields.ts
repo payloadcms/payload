@@ -1,22 +1,15 @@
-const internalFields = ['__v']
+export const sanitizeInternalFields = <T extends Record<string, unknown>>(incomingDoc: T): T => {
+  // Create a new object to hold the sanitized fields
+  const newDoc: Record<string, unknown> = {}
 
-const sanitizeInternalFields = <T extends Record<string, unknown>>(incomingDoc: T): T =>
-  Object.entries(incomingDoc).reduce((newDoc, [key, val]): T => {
+  for (const key in incomingDoc) {
+    const val = incomingDoc[key]
     if (key === '_id') {
-      return {
-        ...newDoc,
-        id: val,
-      }
+      newDoc['id'] = val
+    } else if (key !== '__v') {
+      newDoc[key] = val
     }
+  }
 
-    if (internalFields.indexOf(key) > -1) {
-      return newDoc
-    }
-
-    return {
-      ...newDoc,
-      [key]: val,
-    }
-  }, {} as T)
-
-export default sanitizeInternalFields
+  return newDoc as T
+}

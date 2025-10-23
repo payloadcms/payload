@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
-
 import {
   CheckboxField,
   CopyToClipboard,
@@ -10,23 +8,25 @@ import {
   MinimizeMaximizeIcon,
   NumberField,
   SetDocumentStepNav,
+  toast,
   useConfig,
   useDocumentInfo,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
-import * as React from 'react'
-import { toast } from 'sonner'
 
 import './index.scss'
+
+import * as React from 'react'
+
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 
 const baseClass = 'query-inspector'
 
 export const APIViewClient: React.FC = () => {
-  const { id, collectionSlug, globalSlug, initialData } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, initialData, isTrashed } = useDocumentInfo()
 
   const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
@@ -34,6 +34,7 @@ export const APIViewClient: React.FC = () => {
 
   const {
     config: {
+      defaultDepth,
       localization,
       routes: { api: apiRoute },
       serverURL,
@@ -41,8 +42,8 @@ export const APIViewClient: React.FC = () => {
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const localeOptions =
     localization &&
@@ -64,14 +65,19 @@ export const APIViewClient: React.FC = () => {
   const [data, setData] = React.useState<any>(initialData)
   const [draft, setDraft] = React.useState<boolean>(searchParams.get('draft') === 'true')
   const [locale, setLocale] = React.useState<string>(searchParams?.get('locale') || code)
-  const [depth, setDepth] = React.useState<string>(searchParams.get('depth') || '1')
+  const [depth, setDepth] = React.useState<string>(
+    searchParams.get('depth') || defaultDepth.toString(),
+  )
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
+
+  const trashParam = typeof initialData?.deletedAt === 'string'
 
   const params = new URLSearchParams({
     depth,
     draft: String(draft),
     locale,
+    trash: trashParam ? 'true' : 'false',
   }).toString()
 
   const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?${params}`
@@ -113,6 +119,7 @@ export const APIViewClient: React.FC = () => {
         globalLabel={globalConfig?.label}
         globalSlug={globalSlug}
         id={id}
+        isTrashed={isTrashed}
         pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"

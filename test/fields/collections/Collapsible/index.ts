@@ -36,6 +36,12 @@ const CollapsibleFields: CollectionConfig = {
                   name: 'textWithinSubGroup',
                   type: 'text',
                 },
+                {
+                  name: 'requiredTextWithinSubGroup',
+                  type: 'text',
+                  required: true,
+                  defaultValue: 'required text',
+                },
               ],
             },
           ],

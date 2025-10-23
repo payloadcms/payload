@@ -12,6 +12,8 @@ import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
+const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
+
 const title = 'title'
 
 let restClient: NextRESTClient
@@ -26,9 +28,7 @@ describe('collections-graphql', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('CRUD', () => {
@@ -1012,6 +1012,99 @@ describe('collections-graphql', () => {
         const queriedDoc = res.data.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
+
+      it('should still query hasMany relationships when some document was deleted', async () => {
+        const relation_1_draft = await payload.create({
+          collection: 'relation',
+          data: { _status: 'draft', name: 'relation_1_draft' },
+          draft: true,
+        })
+
+        const relation_2 = await payload.create({
+          collection: 'relation',
+          data: { name: 'relation_2', _status: 'published' },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          draft: true,
+          data: {
+            _status: 'draft',
+            title: 'post with relations in draft',
+            relationHasManyField: [relation_1_draft.id, relation_2.id],
+          },
+        })
+
+        await payload.delete({ collection: 'relation', id: relation_1_draft.id })
+
+        const query = `query {
+          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id,
+                name
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.Posts.docs[0]
+        expect(queriedDoc.title).toBe('post with relations in draft')
+
+        expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
+      })
+
+      it('should still query hasMany relationships when user doesnt have access to some document', async () => {
+        const relation_1_draft = await payload.create({
+          collection: 'relation',
+          data: { name: 'restricted' },
+        })
+
+        const relation_2 = await payload.create({
+          collection: 'relation',
+          data: { name: 'relation_2' },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          draft: true,
+          data: {
+            _status: 'draft',
+            title: 'post with relation restricted',
+            relationHasManyField: [relation_1_draft.id, relation_2.id],
+          },
+        })
+
+        const query = `query {
+          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id,
+                name
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.Posts.docs[0]
+        expect(queriedDoc.title).toBe('post with relation restricted')
+
+        expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
+      })
     })
   })
 
@@ -1108,7 +1201,7 @@ describe('collections-graphql', () => {
     })
 
     const query = `{
-      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+      CyclicalRelationship(id: ${formatID(newDoc.id)}) {
         media {
           id
           title
@@ -1159,7 +1252,7 @@ describe('collections-graphql', () => {
         })
         .then((res) => res.json())
       expect(Array.isArray(errors)).toBe(true)
-      expect(errors[0].message).toEqual('The following field is invalid: min')
+      expect(errors[0].message).toEqual('The following field is invalid: Min')
       expect(typeof errors[0].locations).toBeDefined()
     })
 
@@ -1207,7 +1300,7 @@ describe('collections-graphql', () => {
       expect(errors[1].extensions.data.errors[0].path).toEqual('email')
 
       expect(Array.isArray(errors[2].locations)).toEqual(true)
-      expect(errors[2].message).toEqual('The following field is invalid: email')
+      expect(errors[2].message).toEqual('The following field is invalid: Email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
       expect(errors[2].extensions.data.errors[0].message).toEqual(

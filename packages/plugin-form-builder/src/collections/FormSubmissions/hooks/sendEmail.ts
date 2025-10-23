@@ -36,7 +36,7 @@ export const sendEmail = async (
 
       if (emails && emails.length) {
         const formattedEmails: FormattedEmail[] = await Promise.all(
-          emails.map(async (email: Email): Promise<FormattedEmail | null> => {
+          emails.map(async (email: Email): Promise<FormattedEmail> => {
             const {
               bcc: emailBCC,
               cc: emailCC,

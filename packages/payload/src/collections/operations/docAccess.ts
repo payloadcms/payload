@@ -10,7 +10,7 @@ const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
 type Arguments = {
   collection: Collection
-  id: string
+  id: number | string
   req: PayloadRequest
 }
 
@@ -39,6 +39,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     const result = await getEntityPolicies({
       id,
       type: 'collection',
+      blockPolicies: {},
       entity: config,
       operations: collectionOperations,
       req,
@@ -50,7 +51,8 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       },
     })
 
-    return sanitizedPermissions?.collections?.[config.slug]
+    const collectionPermissions = sanitizedPermissions?.collections?.[config.slug]
+    return collectionPermissions ?? { fields: {} }
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

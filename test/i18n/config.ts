@@ -45,7 +45,25 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'collection1',
+      labels: {
+        singular: {
+          en: 'EN Collection 1',
+          es: 'ES Collection 1',
+        },
+        plural: {
+          en: 'EN Collection 1s',
+          es: 'ES Collection 1s',
+        },
+      },
       fields: [
+        {
+          name: 'i18nFieldLabel',
+          type: 'text',
+          label: {
+            en: 'en-label',
+            es: 'es-label',
+          },
+        },
         {
           name: 'fieldDefaultI18nValid',
           type: 'text',
@@ -77,6 +95,16 @@ export default buildConfigWithDefaults({
             t('fields:addLabel2'),
         },
       ],
+    },
+  ],
+  globals: [
+    {
+      slug: 'global',
+      label: {
+        en: 'EN Global',
+        es: 'ES Global',
+      },
+      fields: [{ name: 'text', type: 'text' }],
     },
   ],
   i18n: {

@@ -12,11 +12,11 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
-import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
+import { INSERT_TABLE_COMMAND, TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
 import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, use, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
 import type { PluginComponent } from '../../../../typesClient.js'
@@ -64,7 +64,7 @@ export function TableContext({ children }: { children: JSX.Element }) {
     cellEditorPlugins: null,
   })
   return (
-    <CellContext.Provider
+    <CellContext
       value={useMemo(
         () => ({
           cellEditorConfig: contextValue.cellEditorConfig,
@@ -77,13 +77,13 @@ export function TableContext({ children }: { children: JSX.Element }) {
       )}
     >
       {children}
-    </CellContext.Provider>
+    </CellContext>
   )
 }
 
 export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
-  const cellContext = useContext(CellContext)
+  const cellContext = use(CellContext)
   const editDepth = useEditDepth()
   const {
     fieldProps: { schemaPath },
@@ -97,8 +97,10 @@ export const TablePlugin: PluginComponent = () => {
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
-    if (!editor.hasNodes([TableNode])) {
-      throw new Error('TablePlugin: TableNode is not registered on editor')
+    if (!editor.hasNodes([TableNode, TableRowNode, TableCellNode])) {
+      throw new Error(
+        'TablePlugin: TableNode, TableRowNode, or TableCellNode is not registered on editor',
+      )
     }
 
     return mergeRegister(
@@ -143,7 +145,11 @@ export const TablePlugin: PluginComponent = () => {
         schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
-      <LexicalReactTablePlugin hasCellBackgroundColor={false} hasCellMerge />
+      <LexicalReactTablePlugin
+        hasCellBackgroundColor={false}
+        hasCellMerge
+        hasHorizontalScroll={true}
+      />
     </React.Fragment>
   )
 }

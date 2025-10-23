@@ -2,7 +2,7 @@
 import type { BaseSelection, LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
+import { $createParagraphNode, $createTextNode, $getRoot, getDOMSelection } from 'lexical'
 import * as React from 'react'
 import { type JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
@@ -153,7 +153,7 @@ function useTestRecorder(editor: LexicalEditor): [JSX.Element, JSX.Element | nul
 
   const generateTestContent = useCallback(() => {
     const rootElement = editor.getRootElement()
-    const browserSelection = window.getSelection()
+    const browserSelection = getDOMSelection(editor._window)
 
     if (
       rootElement == null ||
@@ -290,7 +290,7 @@ ${steps.map(formatStep).join(`\n`)}
         const skipNextSelectionChange = skipNextSelectionChangeRef.current
         if (previousSelection !== currentSelection) {
           if (dirtyLeaves.size === 0 && dirtyElements.size === 0 && !skipNextSelectionChange) {
-            const browserSelection = window.getSelection()
+            const browserSelection = getDOMSelection(editor._window)
             if (
               browserSelection &&
               (browserSelection.anchorNode == null || browserSelection.focusNode == null)
@@ -346,7 +346,7 @@ ${steps.map(formatStep).join(`\n`)}
     if (!isRecording) {
       return
     }
-    const browserSelection = window.getSelection()
+    const browserSelection = getDOMSelection(editor._window)
     if (
       browserSelection === null ||
       browserSelection.anchorNode == null ||
