@@ -11,7 +11,7 @@ import { parseParams } from './parseParams.js'
 export type BuildQueryJoinAliases = {
   condition: SQL
   queryPath?: string
-  table: GenericTable | PgTableWithColumns<any>
+  table: GenericTable<any> | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }[]
 
