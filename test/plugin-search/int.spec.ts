@@ -589,6 +589,88 @@ describe('@payloadcms/plugin-search', () => {
     )
   })
 
+  it('should reindex all configured locales', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      locale: 'en',
+      data: {
+        title: 'Test page published',
+        _status: 'published',
+        slug: 'test-en',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'es',
+      data: {
+        _status: 'published',
+        slug: 'test-es',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'de',
+      data: {
+        _status: 'published',
+        slug: 'test-de',
+      },
+    })
+
+    const {
+      docs: [postBeforeReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postBeforeReindex?.slug).not.toBeFalsy()
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [postsSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const {
+      docs: [postAfterReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postAfterReindex?.slug).not.toBeFalsy()
+    expect(postAfterReindex?.slug).toStrictEqual(postBeforeReindex?.slug)
+  })
+
   it('should sync trashed documents correctly with search plugin', async () => {
     // Create a published post
     const publishedPost = await payload.create({
