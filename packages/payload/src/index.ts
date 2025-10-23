@@ -1718,6 +1718,12 @@ export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+export {
+  type FieldBuilder,
+  getPathBuilder,
+  narrowBuilder,
+  type RootBuilder,
+} from './utilities/pathBuilder/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
@@ -1731,8 +1737,8 @@ export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundInde
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
-export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 
+export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'

@@ -831,6 +831,31 @@ export function getPathBuilder(_options?: {
 }
 
 /**
+ * Assertion function to narrow the builder type based on an already-narrowed field type.
+ * Use this after you've narrowed the field type to also narrow the builder.
+ *
+ * @example
+ * ```ts
+ * const field: Field = getFieldFromSomewhere()
+ * const builder = getPathBuilder().field(field)
+ *
+ * if (field.type === 'array') {
+ *   // field is now ArrayField, but builder is still a union
+ *   narrowBuilder(field, builder)
+ *   // Now builder is narrowed to ArrayFieldBuilder!
+ *   builder.index(0).text('label')
+ * }
+ * ```
+ */
+export function narrowBuilder<T extends Field>(
+  field: T,
+  builder: FieldTypeToBuilder<Field>,
+): asserts builder is FieldTypeToBuilder<T> {
+  // This is purely for type narrowing - no runtime logic needed
+  // TypeScript will use the field's already-narrowed type to narrow the builder
+}
+
+/**
  * @experimental may change in a minor release
  * @internal
  */
