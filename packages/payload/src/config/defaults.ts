@@ -165,6 +165,10 @@ export const addDefaultsToConfig = (config: Config): Config => {
     ...(config.auth || {}),
   }
 
+  if (config.kv?.kvCollection) {
+    config.collections.push(config.kv.kvCollection)
+  }
+
   if (
     config.folders !== false &&
     config.collections.some((collection) => Boolean(collection.folders))
