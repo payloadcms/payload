@@ -109,6 +109,9 @@ export function RelationshipContent(props: Props) {
             size="small"
           />
         )}
+        {showCollectionSlug && collectionConfig ? (
+          <Pill size="small">{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+        ) : null}
         <div className={`${baseClass}__details`}>
           <p className={`${baseClass}__filename`}>
             {src ? (
@@ -121,9 +124,6 @@ export function RelationshipContent(props: Props) {
           </p>
           {withMeta ? <p className={`${baseClass}__meta`}>{metaText}</p> : null}
         </div>
-        {showCollectionSlug && collectionConfig ? (
-          <Pill size="small">{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
-        ) : null}
       </div>
 
       {allowEdit !== false || allowRemove !== false ? (
