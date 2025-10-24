@@ -19,7 +19,7 @@ services:
   # Ensure your DATABASE_URI uses 'postgresql' as the hostname ie. postgresql://127.0.0.1:5432/your-database-name
   postgres:
     restart: always
-    image: postgres:latest
+    image: postgres:17
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
