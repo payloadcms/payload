@@ -1,6 +1,6 @@
 import type { PaginatedDocs, ValueWithRelation } from 'payload'
 
-type ValueAsDataWithRelation = {
+export type ValueAsDataWithRelation = {
   relationTo: string
   value: any
 }

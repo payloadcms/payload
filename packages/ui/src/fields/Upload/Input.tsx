@@ -18,12 +18,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
-import type { PopulateDocs, ReloadDoc } from './types.js'
-
-type ValueAsDataWithRelation = {
-  relationTo: string
-  value: any
-}
+import type { ReloadDoc, ValueAsDataWithRelation } from './types.js'
 
 import { type BulkUploadContext, useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -123,11 +118,30 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const { openModal } = useModal()
-  const { drawerSlug, setCollectionSlug, setInitialFiles, setMaxFiles, setOnSuccess } =
-    useBulkUpload()
+  const {
+    drawerSlug,
+    setCollectionSlug,
+    setInitialFiles,
+    setMaxFiles,
+    setOnSuccess,
+    setSelectableCollections,
+  } = useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
+
+  // This will be used by the bulk upload to allow you to select only collections you have create permissions for
+  const collectionSlugsWithCreatePermission = useMemo(() => {
+    if (Array.isArray(relationTo)) {
+      return relationTo.filter((relation) => {
+        if (permissions?.collections && permissions.collections?.[relation]?.create) {
+          return true
+        }
+        return false
+      })
+    }
+    return []
+  }, [relationTo, permissions])
 
   const filterOptions: FilterOptionsResult = useMemo(() => {
     const isPoly = Array.isArray(relationTo)
@@ -351,21 +365,29 @@ export function UploadInput(props: UploadInputProps) {
       }
       // Use activeRelationTo for poly uploads, or relationTo as string for single collection
       const collectionToUse = Array.isArray(relationTo) ? activeRelationTo : relationTo
+
       setCollectionSlug(collectionToUse)
+      if (Array.isArray(collectionSlugsWithCreatePermission)) {
+        setSelectableCollections(collectionSlugsWithCreatePermission)
+      }
+
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
+
       openModal(drawerSlug)
     },
     [
-      drawerSlug,
       hasMany,
-      openModal,
       relationTo,
       activeRelationTo,
       setCollectionSlug,
-      setInitialFiles,
+      collectionSlugsWithCreatePermission,
       maxRows,
+      openModal,
+      drawerSlug,
+      setInitialFiles,
+      setSelectableCollections,
       setMaxFiles,
     ],
   )
