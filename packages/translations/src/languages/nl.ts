@@ -464,6 +464,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiëren naar',
     copyToLocale: 'Kopieer naar taal',
     localeToPublish: 'Te publiceren taal',
+    localizedMeta: 'Gelokaliseerde Meta',
     selectLocaleToCopy: 'Selecteer taal om te kopiëren',
   },
   operators: {

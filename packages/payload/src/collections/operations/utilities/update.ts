@@ -28,6 +28,7 @@ import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { populateLocalizedMeta } from '../../../utilities/populateLocalizedMeta.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -139,6 +140,24 @@ export const updateDocument = async <
       operation: 'update',
       originalDoc,
       req,
+    })
+  }
+
+  // /////////////////////////////////////
+  // Handle localized meta
+  // /////////////////////////////////////
+
+  if (
+    config.experimental?.localizeMeta &&
+    config.localization &&
+    data._status &&
+    config.localization.locales.length > 0
+  ) {
+    data.localizedMeta = populateLocalizedMeta({
+      config,
+      previousMeta: originalDoc.localizedMeta,
+      publishSpecificLocale,
+      status: data._status,
     })
   }
 

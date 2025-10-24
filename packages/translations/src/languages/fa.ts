@@ -444,11 +444,12 @@ export const faTranslations: DefaultTranslationsObject = {
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',
     copyFrom: 'کپی از',
-    copyFromTo: 'کپی کردن از {{from}} به {{to}}',
-    copyTo: 'کپی به',
-    copyToLocale: 'کپی به زبان دیگر',
-    localeToPublish: 'زبان مورد نظر برای انتشار',
-    selectLocaleToCopy: 'یک زبان برای کپی کردن اطلاعات انتخاب کنید',
+    copyFromTo: 'کپی از {{from}} به {{to}}',
+    copyTo: 'کپی کنید به',
+    copyToLocale: 'کپی به محلی',
+    localeToPublish: 'محل انتشار',
+    localizedMeta: 'متا محلی',
+    selectLocaleToCopy: 'انتخاب مکان برای کپی کردن',
   },
   operators: {
     contains: 'شامل می‌شود',
