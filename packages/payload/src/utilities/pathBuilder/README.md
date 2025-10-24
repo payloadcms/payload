@@ -1,6 +1,6 @@
 # Path Builder Utility
 
-A fluent, type-safe API for building field paths in Payload CMS.
+A fluent, type-safe API for building field paths in Payload.
 
 ## Overview
 
@@ -9,13 +9,11 @@ Payload uses two types of paths:
 - **Data Path (`path`)**: Accesses actual data values, includes array indices (e.g., `content.0.title`)
 - **Schema Path (`schemaPath`)**: Accesses field schemas, uses block slugs and `_index-` notation for unnamed layout fields (e.g., `content.heroBlock.title` or `_index-0-1.field`)
 
-## Installation
+## Basic Usage
 
 ```ts
 import { getPathBuilder } from 'payload'
 ```
-
-## Basic Usage
 
 ### Simple Fields
 
@@ -262,30 +260,6 @@ const { path, schemaPath } = getPathBuilder()
 // }
 ```
 
-## Field Type Methods
-
-### Nesting-Capable Fields
-
-```ts
-.group(nameOrSchemaIndex: string | number)  // named or unnamed group
-.tabs(schemaIndex: number)                   // tabs container
-.tab(nameOrIndex: string | number)           // named or unnamed tab
-.collapsible(schemaIndex: number)            // collapsible (no names)
-.row(schemaIndex: number)                    // row (no names)
-.array(name: string)                         // array field
-.blocks(name: string)                        // blocks field
-```
-
-### Terminal Fields
-
-```ts
-.text(name)         .textarea(name)      .richText(name)
-.number(name)       .date(name)          .checkbox(name)
-.select(name)       .radio(name)         .code(name)
-.json(name)         .point(name)         .relationship(name)
-.upload(name)
-```
-
 ## Type Safety
 
 The builder enforces correct chaining at compile time:
@@ -306,113 +280,3 @@ getPathBuilder().blocks('content').block('hero').index(0).text('title')
 // ❌ Terminal fields can only call .build()
 getPathBuilder().text('title').text('subtitle') // TypeScript error!
 ```
-
-## API Reference
-
-### Core Methods
-
-#### `getPathBuilder(options?)`
-
-Create a new path builder instance.
-
-**Options:**
-
-- `prefix?: false | 'entity' | 'entityType.entity'` - Control entity context prefix
-  - `false` (default): No prefix, direct field access
-  - `'entity'`: Prefix with entity slug only (e.g., `'pages.title'`)
-  - `'entityType.entity'`: Prefix with entity type and slug (e.g., `'collection.pages.title'`)
-
-#### `.build()`
-
-Returns `{ indexPath: string, path: string | null, schemaPath: string | null }`
-
-- `indexPath`: The accumulated index path at the end (e.g., `'_index-0-1'`), or empty string
-- `path`: The data access path, or `null` when `noIndex()` is used
-- `schemaPath`: The schema definition path, or `null` when `noSchemaIndex()` is used
-
-### Array/Blocks Methods
-
-#### `.array(name: string)`
-
-Add an array field (must be followed by `.index()` or `.noIndex()`).
-
-#### `.blocks(name: string)`
-
-Add a blocks field (must be followed by `.block()`).
-
-#### `.block(slug: string)`
-
-Specify a block type (must be followed by `.index()`, `.noIndex()`, or `.build()`).
-
-#### `.index(i: number)`
-
-Add array/block index to data path only.
-
-#### `.noIndex()`
-
-Skip array/block index (useful for schema-only paths).
-
-### Entity Methods (with `prefix: 'entity'` or `prefix: 'entityType.entity'`)
-
-#### `.collections(slug: string)`
-
-Start with a collection context (must be followed by `.id()` or `.noId()`).
-
-#### `.globals(slug: string)`
-
-Start with a global context.
-
-#### `.id(id: number | string)` / `.noId()`
-
-Provide or skip document ID context (doesn't modify paths).
-
-## Use Cases
-
-### Form State Building
-
-```ts
-const pathInfo = getPathBuilder()
-  .blocks('content')
-  .block('heroBlock')
-  .index(blockIndex)
-  .richText('title')
-  .build()
-
-const fieldState = formState[pathInfo.path]
-const fieldSchema = fieldSchemaMap[pathInfo.schemaPath]
-```
-
-### Validation Error Paths
-
-```ts
-const errorPath = getPathBuilder()
-  .array('variants')
-  .index(variantIndex)
-  .number('price')
-  .build().path
-```
-
-### Schema Lookup
-
-```ts
-const { schemaPath } = getPathBuilder()
-  .array('items')
-  .noIndex() // skip index for schema lookup
-  .text('name')
-  .build()
-
-const fieldSchema = fieldSchemaMap[schemaPath]
-```
-
-## Testing
-
-```bash
-pnpm test:unit pathBuilder.spec
-```
-
-## Tips
-
-1. **Use specific field methods** for better clarity: `.richText('title')` over generic field access
-2. **Store the result** if you need both paths: `const paths = builder.build()`
-3. **Use `.noIndex()`** for schema-only lookups
-4. **Terminal fields** can only call `.build()` - this prevents invalid nesting at compile time
