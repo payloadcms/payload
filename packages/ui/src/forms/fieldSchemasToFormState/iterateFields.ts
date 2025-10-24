@@ -56,7 +56,7 @@ type Args = {
    */
   operation: 'create' | 'update'
   parentPassesCondition?: boolean
-  parentPath: FieldBuilder<string> | RootBuilder
+  parentPath: FieldBuilder | RootBuilder
   permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState

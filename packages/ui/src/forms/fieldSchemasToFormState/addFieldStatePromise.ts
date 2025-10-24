@@ -83,7 +83,7 @@ export type AddFieldStatePromiseArgs = {
   omitParents?: boolean
   operation: 'create' | 'update'
   parentPassesCondition?: boolean
-  parentPath: FieldBuilder<string> | RootBuilder
+  parentPath: FieldBuilder | RootBuilder
   parentPermissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
   previousFormState: FormState
