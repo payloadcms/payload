@@ -136,7 +136,9 @@ export const fieldSchemasToFormState = async ({
       fullData = documentData
     }
 
-    const parentPath = getPathBuilder({ prefix: 'entity' }).collections(collectionSlug).noId()
+    const parentPath = getPathBuilder({ legacySchemaPaths: true, prefix: 'entity' })
+      .collections(collectionSlug)
+      .noId()
     await iterateFields({
       id,
       addErrorPathToParent: null,

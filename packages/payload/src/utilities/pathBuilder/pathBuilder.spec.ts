@@ -896,4 +896,97 @@ describe('PathBuilder', () => {
       })
     })
   })
+
+  describe('Legacy schema paths', () => {
+    it('should omit _index- from schemaPath when not at the end (legacySchemaPaths: true)', () => {
+      const result = getPathBuilder({ legacySchemaPaths: true })
+        .group()
+        .schemaIndex(0)
+        .text('field')
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'field',
+        schemaPath: 'field', // _index-0 is omitted in legacy mode
+      })
+    })
+
+    it('should include _index- in schemaPath when at the end (legacySchemaPaths: true)', () => {
+      const result = getPathBuilder({ legacySchemaPaths: true })
+        .group()
+        .schemaIndex(0)
+        .row()
+        .schemaIndex(1)
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '_index-0-1',
+        path: '_index-0-1',
+        schemaPath: '_index-0-1', // included because it's at the end
+      })
+    })
+
+    it('should omit nested _index- from schemaPath when followed by named fields (legacySchemaPaths: true)', () => {
+      const result = getPathBuilder({ legacySchemaPaths: true })
+        .group()
+        .schemaIndex(0)
+        .group('named')
+        .group()
+        .schemaIndex(2)
+        .text('field')
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'named.field',
+        schemaPath: 'named.field', // both _index-0 and _index-2 are omitted
+      })
+    })
+
+    it('should work with tabs in legacy mode', () => {
+      const result = getPathBuilder({ legacySchemaPaths: true })
+        .tabs()
+        .schemaIndex(0)
+        .tab('general')
+        .text('title')
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'general.title',
+        schemaPath: 'general.title', // _index-0 is omitted
+      })
+    })
+
+    it('should preserve normal behavior when legacySchemaPaths: false', () => {
+      const result = getPathBuilder({ legacySchemaPaths: false })
+        .group()
+        .schemaIndex(0)
+        .text('field')
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'field',
+        schemaPath: '_index-0.field', // _index-0 is included (normal behavior)
+      })
+    })
+
+    it('should work with entity prefix in legacy mode', () => {
+      const result = getPathBuilder({ prefix: 'entity', legacySchemaPaths: true })
+        .collections('pages')
+        .noId()
+        .group()
+        .schemaIndex(0)
+        .text('title')
+        .build()
+
+      expect(result).toEqual({
+        indexPath: '',
+        path: 'pages.title',
+        schemaPath: 'pages.title', // _index-0 is omitted
+      })
+    })
+  })
 })

@@ -398,6 +398,11 @@ type PathBuilderState = {
    * When true, schemaPath should be null (used when noSchemaIndex is called)
    */
   hasNoSchemaIndex: boolean
+  /**
+   * @deprecated Legacy mode for compatibility with old field schema map bug
+   * When true, omits _index-X notation from schemaPath unless it's at the end
+   */
+  legacySchemaPaths: boolean
   pathSegments: string[]
   /**
    * Prefix mode for entity paths
@@ -418,6 +423,7 @@ const cloneBuilder = (state: PathBuilderState): PathBuilderState => {
     entityType: { value: state.entityType, writable: true },
     hasNoIndex: { value: state.hasNoIndex, writable: true },
     hasNoSchemaIndex: { value: state.hasNoSchemaIndex, writable: true },
+    legacySchemaPaths: { value: state.legacySchemaPaths, writable: true },
     pathSegments: { value: [...state.pathSegments], writable: false },
     prefixMode: { value: state.prefixMode, writable: true },
     schemaPathSegments: { value: [...state.schemaPathSegments], writable: false },
@@ -440,6 +446,7 @@ const appendSchemaPath = (state: PathBuilderState, segment: string): void => {
 
 /**
  * Flush accumulated indices as a single _index-X-Y-Z segment in schema path
+ * @param includeInPath - when true, add to path (only happens at the end of the path)
  */
 const flushAccumulatedIndices = (state: PathBuilderState, includeInPath = false): void => {
   if (state.accumulatedIndices.length > 0) {
@@ -447,7 +454,11 @@ const flushAccumulatedIndices = (state: PathBuilderState, includeInPath = false)
     if (includeInPath) {
       appendPath(state, indexMarker)
     }
-    appendSchemaPath(state, indexMarker)
+    // In legacy mode, only add to schemaPath if at the end (includeInPath = true)
+    // This maintains compatibility with old field schema map bug
+    if (!state.legacySchemaPaths || includeInPath) {
+      appendSchemaPath(state, indexMarker)
+    }
     state.accumulatedIndices = []
   }
 }
@@ -776,6 +787,7 @@ const methods = {
 // Create a new builder instance with state
 function createPathBuilder(
   prefixMode: 'entity' | 'entityType.entity' | false = false,
+  legacySchemaPaths = false,
 ): RootBuilder | RootBuilderWithEntity {
   const state: PathBuilderState = {
     accumulatedIndices: [],
@@ -783,6 +795,7 @@ function createPathBuilder(
     entityType: undefined,
     hasNoIndex: false,
     hasNoSchemaIndex: false,
+    legacySchemaPaths,
     pathSegments: [],
     prefixMode,
     schemaPathSegments: [],
@@ -796,6 +809,7 @@ function createPathBuilder(
     entityType: { value: undefined, writable: true },
     hasNoIndex: { value: false, writable: true },
     hasNoSchemaIndex: { value: false, writable: true },
+    legacySchemaPaths: { value: legacySchemaPaths, writable: true },
     pathSegments: { value: state.pathSegments, writable: false },
     prefixMode: { value: prefixMode, writable: true },
     schemaPathSegments: { value: state.schemaPathSegments, writable: false },
@@ -841,13 +855,31 @@ function createPathBuilder(
  */
 export function getPathBuilder(): RootBuilder
 export function getPathBuilder(options: {
+  /**
+   * @deprecated Legacy mode for compatibility with old field schema map bug.
+   * When true, omits _index-X notation from schemaPath unless it's at the end.
+   */
+  legacySchemaPaths: boolean
+}): RootBuilder
+export function getPathBuilder(options: {
+  /**
+   * @deprecated Legacy mode for compatibility with old field schema map bug.
+   * When true, omits _index-X notation from schemaPath unless it's at the end.
+   */
+  legacySchemaPaths?: boolean
   prefix: 'entity' | 'entityType.entity'
 }): RootBuilderWithEntity
 export function getPathBuilder(options?: {
+  /**
+   * @deprecated Legacy mode for compatibility with old field schema map bug.
+   * When true, omits _index-X notation from schemaPath unless it's at the end.
+   */
+  legacySchemaPaths?: boolean
   prefix?: 'entity' | 'entityType.entity' | false
 }): RootBuilder | RootBuilderWithEntity {
   const prefixMode = options?.prefix ?? false
-  return createPathBuilder(prefixMode)
+  const legacySchemaPaths = options?.legacySchemaPaths ?? false
+  return createPathBuilder(prefixMode, legacySchemaPaths)
 }
 
 /**

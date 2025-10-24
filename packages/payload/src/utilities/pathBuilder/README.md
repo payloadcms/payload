@@ -88,6 +88,30 @@ const { indexPath, path, schemaPath } = getPathBuilder().group('hero').text('tit
 // Result: { indexPath: '', path: 'hero.title', schemaPath: 'hero.title' }
 ```
 
+## Legacy Schema Paths (Deprecated)
+
+The `legacySchemaPaths` option exists for compatibility with an old bug in Payload's field schema map where `_index-` notation was omitted from schema paths unless at the end.
+
+**⚠️ This option is deprecated and should only be used for backwards compatibility.**
+
+```ts
+// Normal behavior
+const result = getPathBuilder().group().schemaIndex(0).text('field').build()
+// Result: { indexPath: '', path: 'field', schemaPath: '_index-0.field' }
+
+// Legacy behavior (omits _index- when not at end)
+const result = getPathBuilder({ legacySchemaPaths: true })
+  .group()
+  .schemaIndex(0)
+  .text('field')
+  .build()
+// Result: { indexPath: '', path: 'field', schemaPath: 'field' }
+
+// But preserves _index- at the end
+const result = getPathBuilder({ legacySchemaPaths: true }).group().schemaIndex(0).build()
+// Result: { indexPath: '_index-0', path: '_index-0', schemaPath: '_index-0' }
+```
+
 ## Array Fields
 
 ### With Index
