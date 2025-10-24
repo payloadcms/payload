@@ -6,6 +6,7 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
       admin: {
         description: 'The title of the post',
       },
@@ -14,6 +15,7 @@ export const Posts: CollectionConfig = {
     {
       name: 'content',
       type: 'text',
+      localized: true,
       admin: {
         description: 'The content of the post',
       },

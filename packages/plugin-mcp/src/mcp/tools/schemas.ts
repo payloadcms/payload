@@ -10,6 +10,10 @@ export const toolSchemas = {
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
         ),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
       limit: z
         .number()
         .int()
@@ -18,6 +22,12 @@ export const toolSchemas = {
         .optional()
         .default(10)
         .describe('Maximum number of documents to return (default: 10, max: 100)'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+        ),
       page: z
         .number()
         .int()
@@ -47,6 +57,16 @@ export const toolSchemas = {
         .optional()
         .default(false)
         .describe('Whether to create the document as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
     }),
   },
 
@@ -64,7 +84,17 @@ export const toolSchemas = {
         .default(0)
         .describe('Depth of population for relationships'),
       draft: z.boolean().optional().default(false).describe('Whether to update as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
       filePath: z.string().optional().describe('Optional: absolute file path for file uploads'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
       overrideLock: z
         .boolean()
         .optional()
@@ -94,6 +124,16 @@ export const toolSchemas = {
         .optional()
         .default(0)
         .describe('Depth of population for relationships in response'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code for the operation (e.g., "en", "es"). Defaults to the default locale',
+        ),
       where: z
         .string()
         .optional()
