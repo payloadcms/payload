@@ -107,23 +107,21 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
           <CheckboxInput
             checked={allLocalesSelected}
             id="select-locale-all"
-            onToggle={handleSelectAll}
-          />
-          <span>
-            {t('general:selectAll', {
+            label={t('general:selectAll', {
               count: allLocales.length,
               label: t('general:locales'),
             })}
-          </span>
+            onToggle={handleSelectAll}
+          />
         </div>
         {localeOptions.map((locale) => (
           <div className={`${baseClass}__item`} key={locale.value}>
             <CheckboxInput
               checked={selectedLocales.includes(locale.value)}
               id={`select-locale-${locale.value}`}
+              label={locale.label}
               onToggle={() => handleToggleLocale(locale.value)}
             />
-            <span>{locale.label}</span>
           </div>
         ))}
       </div>
