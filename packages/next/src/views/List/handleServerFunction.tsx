@@ -3,6 +3,7 @@ import type { CollectionPreferences, ListQuery, ServerFunction, VisibleEntities 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderListView } from './index.js'
 
@@ -55,13 +56,13 @@ export const renderListHandler: ServerFunction<
 
   await canAccessAdmin({ req })
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n,
     importMap: payload.importMap,
-    req,
     user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   const preferencesKey = `collection-${collectionSlug}`
 

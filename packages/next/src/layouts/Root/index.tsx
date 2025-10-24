@@ -5,6 +5,7 @@ import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
+import { applyLocaleFiltering } from 'payload/shared'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
@@ -81,13 +82,13 @@ export const RootLayout = async ({
 
   const navPrefs = await getNavPrefs(req)
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
-    req,
     user: req.user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   return (
     <html

@@ -101,7 +101,6 @@ export type CreateClientConfigArgs = {
   config: SanitizedConfig
   i18n: I18nClient
   importMap: ImportMap
-  req: PayloadRequest
   /**
    * If unauthenticated, the client config will omit some sensitive properties
    * such as field schemas, etc. This is useful for login and error pages where

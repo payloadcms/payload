@@ -4,6 +4,7 @@ import type { DocumentPreferences, VisibleEntities } from 'payload'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderDocument } from './index.js'
 
@@ -37,13 +38,13 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
 
   await canAccessAdmin({ req })
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n,
     importMap: req.payload.importMap,
-    req,
     user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let preferences: DocumentPreferences
 
