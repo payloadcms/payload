@@ -212,6 +212,18 @@ describe('database', () => {
       expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
       expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
     })
+
+    it('should properly give the result with hasMany relationships with custom numeric IDs', async () => {
+      await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
+      const res = await payload.create({
+        collection: 'posts',
+        data: { title: 'post', categoriesCustomID: [9999] },
+        depth: 0,
+      })
+      expect(res.categoriesCustomID[0]).toBe(9999)
+      const resFind = await payload.findByID({ collection: 'posts', id: res.id, depth: 0 })
+      expect(resFind.categoriesCustomID[0]).toBe(9999)
+    })
   })
 
   describe('timestamps', () => {
@@ -1102,6 +1114,225 @@ describe('database', () => {
     expect(result.values.some((v) => v.categoryPolyMany === null)).toBe(true)
   })
 
+  it('should find distinct values with field nested to a relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1' },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2' },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3' },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'category.title',
+    })
+
+    expect(res.values).toEqual([
+      {
+        'category.title': 'category_1',
+      },
+      {
+        'category.title': 'category_2',
+      },
+      {
+        'category.title': 'category_3',
+      },
+    ])
+  })
+
+  it('should find distinct values with virtual field linked to a relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1' },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2' },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3' },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'categoryTitle',
+    })
+
+    expect(res.values).toEqual([
+      {
+        categoryTitle: 'category_1',
+      },
+      {
+        categoryTitle: 'category_2',
+      },
+      {
+        categoryTitle: 'category_3',
+      },
+    ])
+  })
+
+  it('should find distinct values with field nested to a 2x relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'simple', where: {} })
+
+    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
+    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
+    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1', simple: simple_1 },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2', simple: simple_2 },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3', simple: simple_3 },
+    })
+    const category_4 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_4', simple: simple_3 },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_4 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'category.simple.text',
+    })
+
+    expect(res.values).toEqual([
+      {
+        'category.simple.text': 'simple_1',
+      },
+      {
+        'category.simple.text': 'simple_2',
+      },
+      {
+        'category.simple.text': 'simple_3',
+      },
+    ])
+  })
+
+  it('should find distinct values with virtual field linked to a 2x relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'simple', where: {} })
+
+    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
+    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
+    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1', simple: simple_1 },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2', simple: simple_2 },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3', simple: simple_3 },
+    })
+    const category_4 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_4', simple: simple_3 },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_4 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'categorySimpleText',
+    })
+
+    expect(res.values).toEqual([
+      {
+        categorySimpleText: 'simple_1',
+      },
+      {
+        categorySimpleText: 'simple_2',
+      },
+      {
+        categorySimpleText: 'simple_3',
+      },
+    ])
+  })
+
+  it('should find distinct values when the virtual field is linked to ID', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category' },
+    })
+    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    const distinct = await payload.findDistinct({ collection: 'posts', field: 'categoryID' })
+    expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
+  })
+
+  it('should find distinct values by the explicit ID field path', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category' },
+    })
+    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    const distinct = await payload.findDistinct({ collection: 'posts', field: 'category.id' })
+    expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
+  })
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -1552,7 +1783,9 @@ describe('database', () => {
   describe('transactions', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
-      if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (
+        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
+      ) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
             payload,
@@ -3831,12 +4064,14 @@ describe('database', () => {
           // Locales used => no optimized row update => need to pass full data, incuding title
           title: 'post',
           arrayWithIDsLocalized: {
-            $push: {
-              en: {
+            en: {
+              $push: {
                 text: 'some text 2',
                 id: new mongoose.Types.ObjectId().toHexString(),
               },
-              es: {
+            },
+            es: {
+              $push: {
                 text: 'some text 2 es',
                 id: new mongoose.Types.ObjectId().toHexString(),
               },
@@ -3845,7 +4080,7 @@ describe('database', () => {
         },
         collection: 'posts',
         id: post.id,
-      })) as unknown as any
+      })) as unknown as Post
 
       expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
       expect(res.arrayWithIDsLocalized?.en?.[0]?.text).toBe('some text')
@@ -3972,12 +4207,14 @@ describe('database', () => {
           // Locales used => no optimized row update => need to pass full data, incuding title
           title: 'post',
           arrayWithIDsLocalized: {
-            $push: {
-              en: {
+            en: {
+              $push: {
                 text: 'some text 2',
                 id: new mongoose.Types.ObjectId().toHexString(),
               },
-              es: [
+            },
+            es: {
+              $push: [
                 {
                   text: 'some text 2 es',
                   id: new mongoose.Types.ObjectId().toHexString(),
@@ -4001,6 +4238,781 @@ describe('database', () => {
       expect(res.arrayWithIDsLocalized?.es).toHaveLength(2)
       expect(res.arrayWithIDsLocalized?.es?.[0]?.text).toBe('some text 2 es')
       expect(res.arrayWithIDsLocalized?.es?.[1]?.text).toBe('some text 3 es')
+    })
+  })
+
+  describe('relationship $push', () => {
+    it('should allow appending relationships using $push with single value', async () => {
+      // First create some category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create a post with initial relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id],
+        },
+        depth: 0,
+      })
+
+      expect(post.categories).toHaveLength(1)
+      expect(post.categories?.[0]).toBe(cat1.id)
+
+      // Append another relationship using $push
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $push: cat2.id,
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.categories).toHaveLength(2)
+      // Handle both populated and non-populated relationships
+      const resultIds = result.categories?.map((cat) => cat as string)
+      expect(resultIds).toContain(cat1.id)
+      expect(resultIds).toContain(cat2.id)
+    })
+
+    it('should allow appending relationships using $push with array', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const cat3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create post with initial relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id],
+        },
+      })
+
+      // Append multiple relationships using $push
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $push: [cat2.id, cat3.id],
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.categories).toHaveLength(3)
+      // Handle both populated and non-populated relationships
+      const resultIds = result.categories?.map((cat) => cat as string)
+      expect(resultIds).toContain(cat1.id)
+      expect(resultIds).toContain(cat2.id)
+      expect(resultIds).toContain(cat3.id)
+    })
+
+    it('should prevent duplicates when using $push', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create post with initial relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id, cat2.id],
+        },
+      })
+
+      // Try to append existing relationship - should not create duplicates
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $push: [cat1.id, cat2.id], // Appending existing items
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.categories).toHaveLength(2) // Should still be 2, no duplicates
+      // Handle both populated and non-populated relationships
+      const resultIds = result.categories?.map((cat) => cat as string)
+      expect(resultIds).toContain(cat1.id)
+      expect(resultIds).toContain(cat2.id)
+    })
+
+    it('should work with updateMany for bulk append operations', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create multiple posts with initial relationships
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+          categories: [cat1.id],
+        },
+      })
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 2',
+          categories: [cat1.id],
+        },
+      })
+
+      // Append cat2 to all posts using updateMany
+      const result = (await payload.db.updateMany({
+        collection: 'posts',
+        where: {
+          id: { in: [post1.id, post2.id] },
+        },
+        data: {
+          categories: {
+            $push: cat2.id,
+          },
+        },
+      })) as unknown as Post[]
+
+      expect(result).toHaveLength(2)
+      result.forEach((post) => {
+        expect(post.categories).toHaveLength(2)
+        const categoryIds = post.categories?.map((cat) => cat as string)
+        expect(categoryIds).toContain(cat1.id)
+        expect(categoryIds).toContain(cat2.id)
+      })
+    })
+
+    it('should append polymorphic relationships using $push', async () => {
+      // Create a category and simple document for the polymorphic relationship
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'Test Category' },
+      })
+      const simple = await payload.create({
+        collection: 'simple',
+        data: { text: 'Test Simple' },
+      })
+
+      // Create post with initial polymorphic relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          polymorphicRelations: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+        },
+        depth: 0, // Don't populate relationships
+      })
+
+      expect(post.polymorphicRelations).toHaveLength(1)
+      expect(post.polymorphicRelations?.[0]).toEqual({
+        relationTo: 'categories',
+        value: category.id,
+      })
+
+      // Append another polymorphic relationship using $push
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          polymorphicRelations: {
+            $push: [
+              {
+                relationTo: 'simple',
+                value: simple.id,
+              },
+            ],
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.polymorphicRelations).toHaveLength(2)
+      expect(result.polymorphicRelations).toContainEqual({
+        relationTo: 'categories',
+        value: category.id,
+      })
+      expect(result.polymorphicRelations).toContainEqual({
+        relationTo: 'simple',
+        value: simple.id,
+      })
+    })
+
+    it('should prevent duplicates in polymorphic relationships with $push', async () => {
+      // Create a category
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'Test Category' },
+      })
+
+      // Create post with polymorphic relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          polymorphicRelations: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+        },
+        depth: 0,
+      })
+
+      // Try to append the same relationship - should not create duplicates
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          polymorphicRelations: {
+            $push: [
+              {
+                relationTo: 'categories',
+                value: category.id, // Same relationship
+              },
+            ],
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.polymorphicRelations).toHaveLength(1) // Should still be 1, no duplicates
+      expect(result.polymorphicRelations?.[0]).toEqual({
+        relationTo: 'categories',
+        value: category.id,
+      })
+    })
+
+    it('should handle localized polymorphic relationships with $push', async () => {
+      // Create documents for testing
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create post with localized polymorphic relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          localizedPolymorphicRelations: [
+            {
+              relationTo: 'categories',
+              value: category1.id,
+            },
+          ],
+        },
+        depth: 0,
+        locale: 'en',
+      })
+
+      // Append relationship using $push with correct localized structure
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          localizedPolymorphicRelations: {
+            en: {
+              $push: [
+                {
+                  relationTo: 'categories',
+                  value: category2.id,
+                },
+              ],
+            },
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.localizedPolymorphicRelations?.en).toHaveLength(2)
+      expect(result.localizedPolymorphicRelations?.en).toContainEqual({
+        relationTo: 'categories',
+        value: category1.id,
+      })
+      expect(result.localizedPolymorphicRelations?.en).toContainEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
+    })
+
+    it('should handle nested localized polymorphic relationships with $push', async () => {
+      // Create documents for the polymorphic relationship
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create a post with nested localized polymorphic relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Nested $push',
+          testNestedGroup: {
+            nestedLocalizedPolymorphicRelation: [
+              {
+                relationTo: 'categories',
+                value: category1.id,
+              },
+            ],
+          },
+        },
+        locale: 'en',
+      })
+
+      // Use low-level API to push new items
+      await payload.db.updateOne({
+        collection: 'posts',
+        where: { id: { equals: post.id } },
+        data: {
+          'testNestedGroup.nestedLocalizedPolymorphicRelation': {
+            en: {
+              $push: [
+                {
+                  relationTo: 'categories',
+                  value: category2.id,
+                },
+              ],
+            },
+          },
+        },
+      })
+
+      // Verify the operation worked
+      const result = await payload.findByID({
+        collection: 'posts',
+        id: post.id,
+        locale: 'en',
+        depth: 0,
+      })
+
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(2)
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toContainEqual({
+        relationTo: 'categories',
+        value: category1.id,
+      })
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toContainEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
+    })
+  })
+
+  describe('relationship $remove', () => {
+    it('should allow removing relationships using $remove with single value', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create post with relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id, cat2.id],
+        },
+      })
+
+      expect(post.categories).toHaveLength(2)
+
+      // Remove one relationship using $remove
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $remove: cat1.id,
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.categories).toHaveLength(1)
+      expect(result.categories?.[0]).toBe(cat2.id)
+    })
+
+    it('should allow removing relationships using $remove with array', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const cat3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create post with relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id, cat2.id, cat3.id],
+        },
+      })
+
+      expect(post.categories).toHaveLength(3)
+
+      // Remove multiple relationships using $remove
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $remove: [cat1.id, cat3.id],
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.categories).toHaveLength(1)
+      expect(result.categories?.[0]).toBe(cat2.id)
+    })
+
+    it('should work with updateMany for bulk remove operations', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const cat3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create multiple posts with relationships
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+          categories: [cat1.id, cat2.id, cat3.id],
+        },
+      })
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 2',
+          categories: [cat1.id, cat2.id, cat3.id],
+        },
+      })
+
+      // Remove cat1 and cat3 from all posts using updateMany
+      const result = (await payload.db.updateMany({
+        collection: 'posts',
+        where: {
+          id: { in: [post1.id, post2.id] },
+        },
+        data: {
+          categories: {
+            $remove: [cat1.id, cat3.id],
+          },
+        },
+      })) as unknown as Post[]
+
+      expect(result).toHaveLength(2)
+      result.forEach((post) => {
+        expect(post.categories).toHaveLength(1)
+        const categoryIds = post.categories?.map((cat) => cat as string)
+        expect(categoryIds).toContain(cat2.id)
+        expect(categoryIds).not.toContain(cat1.id)
+        expect(categoryIds).not.toContain(cat3.id)
+      })
+    })
+
+    it('should remove polymorphic relationships using $remove', async () => {
+      // Create documents
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Test Category 1' },
+      })
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Test Category 2' },
+      })
+
+      // Create post with multiple polymorphic relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          polymorphicRelations: [
+            {
+              relationTo: 'categories',
+              value: category1.id,
+            },
+            {
+              relationTo: 'categories',
+              value: category2.id,
+            },
+          ],
+        },
+        depth: 0,
+      })
+
+      expect(post.polymorphicRelations).toHaveLength(2)
+
+      // Remove one polymorphic relationship using $remove
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          polymorphicRelations: {
+            $remove: [
+              {
+                relationTo: 'categories',
+                value: category1.id,
+              },
+            ],
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.polymorphicRelations).toHaveLength(1)
+      expect(result.polymorphicRelations?.[0]).toEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
+    })
+
+    it('should remove multiple polymorphic relationships using $remove', async () => {
+      // Create documents
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Test Category 1' },
+      })
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Test Category 2' },
+      })
+      const simple = await payload.create({
+        collection: 'simple',
+        data: { text: 'Test Simple' },
+      })
+
+      // Create post with multiple polymorphic relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          polymorphicRelations: [
+            { relationTo: 'categories', value: category1.id },
+            { relationTo: 'categories', value: category2.id },
+            { relationTo: 'simple', value: simple.id },
+          ],
+        },
+        depth: 0,
+      })
+
+      expect(post.polymorphicRelations).toHaveLength(3)
+
+      // Remove multiple polymorphic relationships using $remove
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          polymorphicRelations: {
+            $remove: [
+              { relationTo: 'categories', value: category1.id },
+              { relationTo: 'simple', value: simple.id },
+            ],
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.polymorphicRelations).toHaveLength(1)
+      expect(result.polymorphicRelations?.[0]).toEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
+    })
+
+    it('should handle localized polymorphic relationships with $remove', async () => {
+      // Create documents for testing
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const category3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create post with multiple localized polymorphic relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          localizedPolymorphicRelations: [
+            { relationTo: 'categories', value: category1.id },
+            { relationTo: 'categories', value: category2.id },
+            { relationTo: 'categories', value: category3.id },
+          ],
+        },
+        depth: 0,
+        locale: 'en',
+      })
+
+      // Remove relationships using $remove with correct localized structure
+      const result = (await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          localizedPolymorphicRelations: {
+            en: {
+              $remove: [
+                { relationTo: 'categories', value: category1.id },
+                { relationTo: 'categories', value: category3.id },
+              ],
+            },
+          },
+        },
+      })) as unknown as Post
+
+      expect(result.localizedPolymorphicRelations?.en).toHaveLength(1)
+      expect(result.localizedPolymorphicRelations?.en).toContainEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
+      expect(result.localizedPolymorphicRelations?.en).not.toContainEqual({
+        relationTo: 'categories',
+        value: category1.id,
+      })
+      expect(result.localizedPolymorphicRelations?.en).not.toContainEqual({
+        relationTo: 'categories',
+        value: category3.id,
+      })
+    })
+
+    it('should handle nested localized polymorphic relationships with $remove', async () => {
+      // Create documents for the polymorphic relationship
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      const simple1 = await payload.create({
+        collection: 'simple',
+        data: { text: 'Simple 1' },
+      })
+
+      // Create a post with multiple items in nested localized polymorphic relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Nested $remove',
+          testNestedGroup: {
+            nestedLocalizedPolymorphicRelation: [
+              {
+                relationTo: 'categories',
+                value: category1.id,
+              },
+              {
+                relationTo: 'categories',
+                value: category2.id,
+              },
+              {
+                relationTo: 'simple',
+                value: simple1.id,
+              },
+            ],
+          },
+        },
+        locale: 'en',
+      })
+
+      // Use low-level API to remove items
+      await payload.db.updateOne({
+        collection: 'posts',
+        where: { id: { equals: post.id } },
+        data: {
+          'testNestedGroup.nestedLocalizedPolymorphicRelation': {
+            en: {
+              $remove: [
+                { relationTo: 'categories', value: category1.id },
+                { relationTo: 'simple', value: simple1.id },
+              ],
+            },
+          },
+        },
+      })
+
+      // Verify the operation worked
+      const result = await payload.findByID({
+        collection: 'posts',
+        id: post.id,
+        locale: 'en',
+        depth: 0,
+      })
+
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(1)
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation?.[0]).toEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
     })
   })
 

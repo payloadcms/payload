@@ -413,10 +413,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         // Handle blocks filterOptions
-        let filterOptionsValidationResult: null | ReturnType<typeof validateBlocksFilterOptions> =
-          null
+        let filterOptionsValidationResult: Awaited<
+          ReturnType<typeof validateBlocksFilterOptions>
+        > | null = null
         if (field.filterOptions) {
-          filterOptionsValidationResult = validateBlocksFilterOptions({
+          filterOptionsValidationResult = await validateBlocksFilterOptions({
             id,
             data: fullData,
             filterOptions: field.filterOptions,

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.57.0",
+  "version": "3.61.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -71,10 +71,11 @@
     "bin.js"
   ],
   "scripts": {
-    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && echo skipping esbuild",
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "bundle:types": "rollup -c rollup.dts.config.mjs",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
@@ -104,8 +105,8 @@
     "json-schema-to-typescript": "15.0.3",
     "minimist": "1.2.8",
     "path-to-regexp": "6.3.0",
-    "pino": "9.5.0",
-    "pino-pretty": "13.0.0",
+    "pino": "9.14.0",
+    "pino-pretty": "13.1.2",
     "pluralize": "8.0.0",
     "qs-esm": "7.0.2",
     "sanitize-filename": "1.6.3",
@@ -122,7 +123,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/minimist": "1.2.2",
-    "@types/nodemailer": "6.4.17",
+    "@types/nodemailer": "7.0.2",
     "@types/pluralize": "0.0.33",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
@@ -132,6 +133,8 @@
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
+    "rollup": "4.52.3",
+    "rollup-plugin-dts": "6.2.3",
     "sharp": "0.32.6"
   },
   "peerDependencies": {

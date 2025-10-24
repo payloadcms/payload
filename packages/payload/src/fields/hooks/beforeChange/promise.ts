@@ -205,7 +205,7 @@ export const promise = async ({
         if (field.type === 'blocks' && field.filterOptions) {
           // Re-run filteroptions. If the validation error is due to filteroptions, we need to add error paths to all the blocks
           // that are no longer valid
-          const validationResult = validateBlocksFilterOptions({
+          const validationResult = await validateBlocksFilterOptions({
             id,
             data,
             filterOptions: field.filterOptions,

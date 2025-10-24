@@ -8,6 +8,7 @@ import type { Config } from '../../../payload-types.js'
 
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../helpers/adminUrlUtil.js'
+import { assertNetworkRequests } from '../../../../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
@@ -63,10 +64,10 @@ describe('Lexical Fully Featured - database', () => {
       await lexical.drawer.locator('.bulk-upload--actions-bar').getByText('Save').click()
       await expect(lexical.drawer).toBeHidden()
 
-      await expect(lexical.editor.locator('.lexical-upload')).toHaveCount(1)
-      await expect(lexical.editor.locator('.lexical-upload__doc-drawer-toggler')).toHaveText(
-        expectedFileName || 'payload-1.jpg',
-      )
+      await expect(lexical.editor.locator('.LexicalEditorTheme__upload')).toHaveCount(1)
+      await expect(
+        lexical.editor.locator('.LexicalEditorTheme__upload__doc-drawer-toggler'),
+      ).toHaveText(expectedFileName || 'payload-1.jpg')
 
       const uploadedImage = await payload.find({
         collection: 'uploads',
@@ -122,6 +123,54 @@ describe('Lexical Fully Featured - database', () => {
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
       expect(uploadNode.value?.filename).toBe('payload-1.jpg')
+    })
+
+    test('ensure block contents are not reset on save on both create and update', async ({
+      page,
+    }) => {
+      await lexical.slashCommand('myblock')
+      await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
+
+      /**
+       * Test on create
+       */
+      await assertNetworkRequests(
+        page,
+        `/admin/collections/${lexicalFullyFeaturedSlug}`,
+        async () => {
+          await lexical.editor.locator('#field-someText').first().fill('Testing 123')
+        },
+        {
+          minimumNumberOfRequests: 2,
+          allowedNumberOfRequests: 3,
+        },
+      )
+
+      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await saveDocAndAssert(page)
+      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await page.reload()
+      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+
+      /**
+       * Test on update (this is where the issue appeared)
+       */
+      await assertNetworkRequests(
+        page,
+        `/admin/collections/${lexicalFullyFeaturedSlug}`,
+        async () => {
+          await lexical.editor.locator('#field-someText').first().fill('Updated text')
+        },
+        {
+          minimumNumberOfRequests: 2,
+          allowedNumberOfRequests: 2,
+        },
+      )
+      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await saveDocAndAssert(page)
+      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await page.reload()
+      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
     })
   })
 })

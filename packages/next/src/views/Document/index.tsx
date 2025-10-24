@@ -17,7 +17,7 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { handleLivePreview } from '@payloadcms/ui/rsc'
+import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
@@ -138,7 +138,7 @@ export const renderDocument = async ({
     }
   }
 
-  const isTrashedDoc = typeof doc?.deletedAt === 'string'
+  const isTrashedDoc = Boolean(doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string')
 
   const [
     docPreferences,
@@ -341,6 +341,9 @@ export const renderDocument = async ({
     req,
   })
 
+  // Extract Description from documentSlots to pass to DocumentHeader
+  const { Description } = documentSlots
+
   const clientProps: DocumentViewClientProps = {
     formState,
     ...documentSlots,
@@ -349,6 +352,15 @@ export const renderDocument = async ({
   }
 
   const { isLivePreviewEnabled, livePreviewConfig, livePreviewURL } = await handleLivePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
+
+  const { isPreviewEnabled, previewURL } = await handlePreview({
     collectionSlug,
     config,
     data: doc,
@@ -389,12 +401,17 @@ export const renderDocument = async ({
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
-          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          isLivePreviewing={Boolean(
+            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+          )}
+          isPreviewEnabled={Boolean(isPreviewEnabled)}
+          previewURL={previewURL}
           typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
+              AfterHeader={Description}
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
               permissions={permissions}
@@ -416,7 +433,7 @@ export const renderDocument = async ({
   }
 }
 
-export async function Document(props: AdminViewServerProps) {
+export async function DocumentView(props: AdminViewServerProps) {
   try {
     const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument

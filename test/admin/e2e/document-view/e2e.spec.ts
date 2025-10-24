@@ -160,7 +160,7 @@ describe('Document View', () => {
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('button#preview-button')).toBeVisible()
+      await expect(page.locator('#preview-button')).toBeVisible()
     })
 
     test('collection — should not render preview button when `admin.preview` is not set', async () => {
@@ -168,13 +168,13 @@ describe('Document View', () => {
       await page.goto(collectionWithoutPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('button#preview-button')).toBeHidden()
+      await expect(page.locator('#preview-button')).toBeHidden()
     })
 
     test('global — should render preview button when `admin.preview` is set', async () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(globalWithPreview.global(globalSlug))
-      await expect(page.locator('button#preview-button')).toBeVisible()
+      await expect(page.locator('#preview-button')).toBeVisible()
     })
 
     test('global — should not render preview button when `admin.preview` is not set', async () => {
@@ -182,7 +182,7 @@ describe('Document View', () => {
       await page.goto(globalWithoutPreview.global(group1GlobalSlug))
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('button#preview-button')).toBeHidden()
+      await expect(page.locator('#preview-button')).toBeHidden()
     })
   })
 
@@ -495,6 +495,19 @@ describe('Document View', () => {
 
       // Ensure the original page did not change
       expect(page.url()).toBe(currentUrl)
+    })
+
+    test('document drawer displays AfterHeader components', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+      await wait(500)
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      const afterHeader = page.locator('[id^=doc-drawer_posts_1_] .doc-drawer__after-header')
+      await expect(afterHeader).toBeVisible()
     })
   })
 

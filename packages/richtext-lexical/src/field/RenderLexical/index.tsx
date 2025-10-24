@@ -14,6 +14,7 @@ import {
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import type { DefaultTypedEditorState } from '../../nodeTypes.js'
+import type { LexicalRichTextField } from '../../types.js'
 
 /**
  * Utility to render a lexical editor on the client.
@@ -34,14 +35,14 @@ export const RenderLexical: React.FC<
 
     setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
     value?: FieldType<DefaultTypedEditorState | undefined>['value']
-  } & RenderFieldServerFnArgs
+  } & RenderFieldServerFnArgs<LexicalRichTextField>
 > = (args) => {
   const { field, initialValue, Loading, path, schemaPath, setValue, value } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const serverFunctionContext = useServerFunctions()
   const { _internal_renderField } = serverFunctionContext
 
-  const [entityType, entitySlug] = schemaPath.split('.')
+  const [entityType, entitySlug] = schemaPath.split('.', 2)
 
   const fieldPath = path ?? (field && 'name' in field ? field?.name : '') ?? ''
 
@@ -52,6 +53,8 @@ export const RenderLexical: React.FC<
           ...((field as RichTextField) || {}),
           type: 'richText',
           admin: {
+            ...((field as RichTextField)?.admin || {}),
+            // When using "fake" anchor fields, hidden is often set to true. We need to override that here to ensure the field is rendered.
             hidden: false,
           },
         },

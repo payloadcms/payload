@@ -536,7 +536,7 @@ export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksFi
  *
  * @internal - this may break or be removed at any time
  */
-export function validateBlocksFilterOptions({
+export async function validateBlocksFilterOptions({
   id,
   data,
   filterOptions,
@@ -546,7 +546,7 @@ export function validateBlocksFilterOptions({
 }: { value: Parameters<BlocksFieldValidation>[0] } & Pick<
   Parameters<BlocksFieldValidation>[1],
   'data' | 'filterOptions' | 'id' | 'req' | 'siblingData'
->): {
+>): Promise<{
   /**
    * All block slugs found in the value of the blocks field
    */
@@ -559,7 +559,7 @@ export function validateBlocksFilterOptions({
    * A list of block slugs that are used despite being disallowed. If undefined, field passed validation.
    */
   invalidBlockSlugs: string[] | undefined
-} {
+}> {
   const allBlockSlugs = Array.isArray(value)
     ? (value as Array<{ blockType?: string }>)
         .map((b) => b.blockType)
@@ -570,7 +570,7 @@ export function validateBlocksFilterOptions({
   let allowedBlockSlugs: string[] | undefined = undefined
 
   if (typeof filterOptions === 'function') {
-    const result = filterOptions({
+    const result = await filterOptions({
       id: id!, // original code asserted presence
       data,
       req,
@@ -599,7 +599,7 @@ export function validateBlocksFilterOptions({
     invalidBlockSlugs,
   }
 }
-export const blocks: BlocksFieldValidation = (
+export const blocks: BlocksFieldValidation = async (
   value,
   { id, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
 ) => {
@@ -609,7 +609,7 @@ export const blocks: BlocksFieldValidation = (
   }
 
   if (filterOptions) {
-    const { invalidBlockSlugs } = validateBlocksFilterOptions({
+    const { invalidBlockSlugs } = await validateBlocksFilterOptions({
       id,
       data,
       filterOptions,
@@ -1047,6 +1047,16 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
 
   if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
+  }
+
+  // Validate longitude bounds (-180 to 180)
+  if (value[0] && !Number.isNaN(lng) && (lng < -180 || lng > 180)) {
+    return t('validation:longitudeOutOfBounds')
+  }
+
+  // Validate latitude bounds (-90 to 90)
+  if (value[1] && !Number.isNaN(lat) && (lat < -90 || lat > 90)) {
+    return t('validation:latitudeOutOfBounds')
   }
 
   return true

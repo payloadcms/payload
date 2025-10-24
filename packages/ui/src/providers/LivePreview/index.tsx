@@ -1,5 +1,5 @@
 'use client'
-import type { CollectionPreferences, LivePreviewConfig } from 'payload'
+import type { CollectionPreferences, LivePreviewConfig, LivePreviewURLType } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -24,6 +24,14 @@ export type LivePreviewProviderProps = {
   }
   isLivePreviewEnabled?: boolean
   isLivePreviewing: boolean
+  /**
+   * This specifically relates to `admin.preview` function in the config instead of live preview.
+   */
+  isPreviewEnabled?: boolean
+  /**
+   * This specifically relates to `admin.preview` function in the config instead of live preview.
+   */
+  previewURL?: string
 } & Pick<LivePreviewContextType, 'typeofLivePreviewURL' | 'url'>
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
@@ -31,6 +39,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   children,
   isLivePreviewEnabled,
   isLivePreviewing: incomingIsLivePreviewing,
+  isPreviewEnabled,
+  previewURL: previewURLFromProps,
   typeofLivePreviewURL,
   url: urlFromProps,
 }) => {
@@ -51,6 +61,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   )
 
   const [url, setURL] = useState<string>('')
+  const [previewURL, setPreviewURL] = useState<string>(previewURLFromProps)
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -92,7 +103,15 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
    */
   const setLivePreviewURL = useCallback<LivePreviewContextType['setURL']>(
     (_incomingURL) => {
-      const incomingURL = formatAbsoluteURL(_incomingURL)
+      let incomingURL: LivePreviewURLType
+
+      if (typeof _incomingURL === 'string') {
+        incomingURL = formatAbsoluteURL(_incomingURL)
+      }
+
+      if (!incomingURL) {
+        setIsLivePreviewing(false)
+      }
 
       if (incomingURL !== url) {
         setAppIsReady(false)
@@ -106,7 +125,9 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
    * `url` needs to be relative to the window, which cannot be done on initial render.
    */
   useEffect(() => {
-    setURL(formatAbsoluteURL(urlFromProps))
+    if (typeof urlFromProps === 'string') {
+      setURL(formatAbsoluteURL(urlFromProps))
+    }
   }, [urlFromProps])
 
   // The toolbar needs to freely drag and drop around the page
@@ -237,11 +258,13 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         isLivePreviewEnabled,
         isLivePreviewing,
         isPopupOpen,
+        isPreviewEnabled,
         listeningForMessages,
         loadedURL,
         measuredDeviceSize,
         openPopupWindow,
         popupRef,
+        previewURL,
         previewWindowType,
         setAppIsReady,
         setBreakpoint,
@@ -249,6 +272,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setIsLivePreviewing,
         setLoadedURL,
         setMeasuredDeviceSize,
+        setPreviewURL,
         setPreviewWindowType: handleWindowChange,
         setSize,
         setToolbarPosition: setPosition,

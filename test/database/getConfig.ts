@@ -55,6 +55,11 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'title',
         },
         {
+          name: 'simple',
+          type: 'relationship',
+          relationTo: 'simple',
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -127,10 +132,31 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'category',
         },
         {
+          type: 'json',
+          name: 'categoryID',
+          virtual: 'category.id',
+        },
+        {
+          type: 'text',
+          name: 'categoryTitle',
+          virtual: 'category.title',
+        },
+        {
+          type: 'text',
+          name: 'categorySimpleText',
+          virtual: 'category.simple.text',
+        },
+        {
           type: 'relationship',
           relationTo: 'categories',
           hasMany: true,
           name: 'categories',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories-custom-id',
+          hasMany: true,
+          name: 'categoriesCustomID',
         },
         {
           type: 'relationship',
@@ -147,6 +173,19 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'relationship',
           relationTo: 'categories-custom-id',
           name: 'categoryCustomID',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          name: 'polymorphicRelations',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          localized: true,
+          name: 'localizedPolymorphicRelations',
         },
         {
           name: 'localized',
@@ -185,6 +224,32 @@ export const getConfig: () => Partial<Config> = () => ({
                   ],
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'testNestedGroup',
+          fields: [
+            {
+              name: 'nestedLocalizedPolymorphicRelation',
+              type: 'relationship',
+              relationTo: ['categories', 'simple'],
+              hasMany: true,
+              localized: true,
+            },
+            {
+              name: 'nestedLocalizedText',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'nestedText1',
+              type: 'text',
+            },
+            {
+              name: 'nestedText2',
+              type: 'text',
             },
           ],
         },

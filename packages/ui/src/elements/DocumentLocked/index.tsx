@@ -26,7 +26,7 @@ const formatDate = (date) => {
     minute: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(date)
+  }).format(new Date(date))
 }
 
 export const DocumentLocked: React.FC<{
@@ -78,6 +78,7 @@ export const DocumentLocked: React.FC<{
             buttonStyle="secondary"
             id={`${modalSlug}-go-back`}
             onClick={() => {
+              closeModal(modalSlug)
               startRouteTransition(() => handleGoBack())
             }}
             size="large"

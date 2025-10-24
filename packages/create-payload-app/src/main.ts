@@ -46,6 +46,7 @@ export class Main {
         '--name': String,
         '--secret': String,
         '--template': String,
+        '--version': String, // Allows overriding the installed Payload version instead of installing the latest
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?

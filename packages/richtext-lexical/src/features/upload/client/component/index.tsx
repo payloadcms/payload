@@ -2,6 +2,7 @@
 import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -25,24 +26,23 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import './index.scss'
-
-const baseClass = 'lexical-upload'
 
 const initialParams = {
   depth: 0,
 }
 
 export type ElementProps = {
+  className: string
   data: UploadData
   format?: ElementFormatType
   nodeKey: string
 }
 
-const Component: React.FC<ElementProps> = (props) => {
+export const UploadComponent: React.FC<ElementProps> = (props) => {
   const {
+    className: baseClass,
     data: { fields, relationTo, value },
     nodeKey,
   } = props
@@ -67,9 +67,9 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const {
     editorConfig,
-    fieldProps: { readOnly, schemaPath },
+    fieldProps: { schemaPath },
   } = useEditorConfigContext()
-
+  const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection] = useState<ClientCollectionConfig>(() =>
@@ -149,7 +149,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   return (
     <div
-      className={`${baseClass} ${baseClass}--${aspectRatio}`}
+      className={`${baseClass}__contents ${baseClass}__contents--${aspectRatio}`}
       data-filename={data?.filename}
       ref={uploadRef}
     >
@@ -163,14 +163,14 @@ const Component: React.FC<ElementProps> = (props) => {
             width={data?.width}
           />
 
-          {editor.isEditable() && (
+          {isEditable && (
             <div className={`${baseClass}__overlay ${baseClass}__floater`}>
               <div className={`${baseClass}__actions`} role="toolbar">
                 {hasExtraFields ? (
                   <Button
                     buttonStyle="icon-label"
                     className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={readOnly}
+                    disabled={!isEditable}
                     el="button"
                     icon="edit"
                     onClick={toggleDrawer}
@@ -183,7 +183,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__swap-drawer-toggler`}
-                  disabled={readOnly}
+                  disabled={!isEditable}
                   el="button"
                   icon="swap"
                   onClick={() => {
@@ -199,7 +199,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={readOnly}
+                  disabled={!isEditable}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()
@@ -241,13 +241,5 @@ const Component: React.FC<ElementProps> = (props) => {
         />
       ) : null}
     </div>
-  )
-}
-
-export const UploadComponent = (props: ElementProps): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition {...props} uploads>
-      <Component {...props} />
-    </EnabledRelationshipsCondition>
   )
 }

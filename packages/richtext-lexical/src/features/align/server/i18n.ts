@@ -85,6 +85,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Igazítás balra',
     alignRightLabel: 'Igazítás jobbra',
   },
+  is: {
+    alignCenterLabel: 'Miðju jöfnun',
+    alignJustifyLabel: 'Samræmd jöfnun',
+    alignLeftLabel: 'Vinstri jöfnun',
+    alignRightLabel: 'Hægri jöfnun',
+  },
   it: {
     alignCenterLabel: 'Allinea al centro',
     alignJustifyLabel: 'Allinea Giustifica',

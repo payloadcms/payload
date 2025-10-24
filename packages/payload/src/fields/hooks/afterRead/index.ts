@@ -13,7 +13,7 @@ export type AfterReadArgs<T extends JsonObject> = {
   depth: number
   doc: T
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   findMany?: boolean
   /**
    * Controls whether locales should be flattened into the requested locale.

@@ -43,8 +43,8 @@ describe('Lexical Fully Featured', () => {
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
-    await lexical.slashCommand('block')
-    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
+    await lexical.slashCommand('myblock')
+    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
     await lexical.slashCommand('relationship', true, 'Relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.save('drawer')
@@ -70,7 +70,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.editor.first().focus()
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
-    await lexical.slashCommand('block')
+    await lexical.slashCommand('myblock')
     await page.locator('#field-someText').first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
@@ -150,5 +150,150 @@ describe('Lexical Fully Featured', () => {
 
     await lexical.drawer.getByText('Save changes').click()
     await expect(lexical.drawer).toBeHidden()
+  })
+
+  test('ensure code block can be created using slash commands', async ({ page }) => {
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'abap')
+
+    // Does not contain payload types. However, since this is JavaScript and not TypeScript, there should be no errors.
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+  })
+
+  test('ensure code block can be created using client-side markdown shortcuts', async ({
+    page,
+  }) => {
+    await page.keyboard.type('```ts ')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'ts')
+
+    // Ensure it does not contain payload types
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+  })
+
+  test('ensure payload code block can be created using slash commands and it contains payload types', async ({
+    page,
+  }) => {
+    await lexical.slashCommand('payloadcode')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-PayloadCode')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'ts')
+
+    // Ensure it contains payload types
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+  })
+})
+
+describe('Lexical Fully Featured, admin panel in RTL', () => {
+  let lexical: LexicalHelpers
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+
+    const page = await browser.newPage()
+    await ensureCompilationIsDone({ page, serverURL })
+    await page.close()
+  })
+  beforeEach(async ({ page }) => {
+    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    lexical = new LexicalHelpers(page)
+    await page.goto(url.account)
+    await page.locator('.payload-settings__language .react-select').click()
+    const options = page.locator('.rs__option')
+    await options.locator('text=עברית').click()
+    await expect(page.getByText('משתמשים').first()).toBeVisible()
+    await page.goto(url.create)
+    await lexical.editor.first().focus()
+  })
+  test('slash menu should be positioned correctly in RTL', async ({ page }) => {
+    await page.keyboard.type('/')
+    const menu = page.locator('#slash-menu .slash-menu-popup')
+    await expect(menu).toBeVisible()
+
+    // left edge (0 indents)
+    const menuBox = (await menu.boundingBox())!
+    const slashBox = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      expect(menuBox.x).toBeGreaterThan(0)
+      expect(menuBox.x).toBeLessThan(slashBox.x)
+    }).toPass({ timeout: 100 })
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+
+    // A bit separated (3 tabs)
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Tab')
+    }
+    await page.keyboard.type('/')
+    await expect(menu).toBeVisible()
+    const menuBox2 = (await menu.boundingBox())!
+    const slashBox2 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      expect(menuBox2.x).toBe(menuBox.x)
+      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+      expect(slashBox2.x).toBe(slashBox.x + 40 * 3)
+    }).toPass({ timeout: 100 })
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+
+    // middle approx (13 tabs)
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Tab')
+    }
+    await page.keyboard.type('/')
+    await expect(menu).toBeVisible()
+    const menuBox3 = (await menu.boundingBox())!
+    const slashBox3 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      // The right edge of the menu should be approximately the same as the left edge of the slash
+      expect(menuBox3.x + menuBox3.width).toBeLessThan(slashBox3.x + 15)
+      expect(menuBox3.x + menuBox3.width).toBeGreaterThan(slashBox3.x - 15)
+      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+      expect(slashBox3.x).toBe(slashBox.x + 40 * 13)
+    }).toPass({ timeout: 100 })
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+
+    // right edge (27 tabs)
+    for (let i = 0; i < 14; i++) {
+      await page.keyboard.press('Tab')
+    }
+    await page.keyboard.type('/')
+    await expect(menu).toBeVisible()
+    const menuBox4 = (await menu.boundingBox())!
+    const slashBox4 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
+    await expect(() => {
+      // The right edge of the menu should be approximately the same as the left edge of the slash
+      expect(menuBox4.x + menuBox4.width).toBeLessThan(slashBox4.x + 15)
+      expect(menuBox4.x + menuBox4.width).toBeGreaterThan(slashBox4.x - 15)
+      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+      expect(slashBox4.x).toBe(slashBox.x + 40 * 27)
+    }).toPass({ timeout: 100 })
   })
 })
