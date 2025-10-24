@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.60.0",
+  "version": "3.61.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -42,6 +42,7 @@
     "build:plugin-ecommerce": "turbo build --filter \"@payloadcms/plugin-ecommerce\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-import-export": "turbo build --filter \"@payloadcms/plugin-import-export\"",
+    "build:plugin-mcp": "turbo build --filter \"@payloadcms/plugin-mcp\"",
     "build:plugin-multi-tenant": "turbo build --filter \"@payloadcms/plugin-multi-tenant\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
     "build:plugin-redirects": "turbo build --filter \"@payloadcms/plugin-redirects\"",
@@ -130,7 +131,8 @@
       "eslint --cache --fix"
     ],
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
-    "tsconfig.base.json": "node scripts/reset-tsconfig.js"
+    "tsconfig.base.json": "node scripts/reset-tsconfig.js",
+    "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",

@@ -26,7 +26,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
+import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
@@ -39,8 +39,8 @@ import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
-import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
+import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 
 const baseClass = 'collection-edit'
 
@@ -146,6 +146,7 @@ export function DefaultEditView({
     typeofLivePreviewURL,
     url: livePreviewURL,
   } = useLivePreviewContext()
+  const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -338,7 +339,7 @@ export function DefaultEditView({
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { livePreviewURL, state } = await getFormState({
+        const { livePreviewURL, previewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -350,6 +351,7 @@ export function DefaultEditView({
           renderAllFields: false,
           returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
+          returnPreviewURL: isPreviewEnabled,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
           skipValidation: true,
@@ -362,6 +364,10 @@ export function DefaultEditView({
 
         if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
           setLivePreviewURL(livePreviewURL)
+        }
+
+        if (isPreviewEnabled) {
+          setPreviewURL(previewURL)
         }
 
         reportUpdate({
@@ -389,6 +395,7 @@ export function DefaultEditView({
       depth,
       redirectAfterCreate,
       setLivePreviewURL,
+      setPreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -403,6 +410,7 @@ export function DefaultEditView({
       docPermissions,
       operation,
       isLivePreviewEnabled,
+      isPreviewEnabled,
       typeofLivePreviewURL,
       schemaPathSegments,
       isLockingEnabled,
