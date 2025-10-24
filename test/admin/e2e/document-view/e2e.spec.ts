@@ -49,13 +49,15 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
+import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
+import { selectInput } from '../../../helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../../../helpers/e2e/toggleDocDrawer.js'
+import { openNav } from '../../../helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
@@ -803,6 +805,43 @@ describe('Document View', () => {
 
       // Assert the href contains the same id
       await expect(customEditMenuItem).toHaveAttribute('href', `/custom-action?id=${docId}`)
+    })
+  })
+
+  describe('save before leaving modal', () => {
+    test('should prompt in drawer with edits', async () => {
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill('sean')
+      await saveDocAndAssert(page)
+
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill('heros')
+      await selectInput({
+        multiSelect: false,
+        option: 'sean',
+        filter: 'sean',
+        selectLocator: page.locator('#field-relationship'),
+        selectType: 'relationship',
+      })
+      await saveDocAndAssert(page)
+      await openDocDrawer({
+        page,
+        selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+      })
+      const editModal = page.locator('.drawer--is-open .collection-edit')
+      await editModal.locator('#field-title').fill('new sean')
+
+      // Attempt to close the drawer
+      const closeButton = editModal.locator('button.doc-drawer__header-close')
+      await closeButton.click()
+
+      const leaveModal = page.locator('#leave-without-saving-doc-drawer')
+      await expect(leaveModal).toBeVisible()
+      await leaveModal.locator('#confirm-cancel').click()
+      await expect(editModal).toBeVisible()
+      await closeButton.click()
+      await leaveModal.locator('#confirm-action').click()
+      await expect(editModal).toBeHidden()
     })
   })
 })
