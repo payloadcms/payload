@@ -1,4 +1,4 @@
-import type { ClientField, Field } from '../../index.js'
+import type { ClientField, CollectionSlug, Field, GlobalSlug } from '../../index.js'
 
 type PathResult = {
   /**
@@ -24,7 +24,7 @@ type RootBuilder = {
    * Build empty paths (rarely used)
    */
   build(): PathResult
-} & FieldBuilder<''>
+} & FieldAccessors
 
 // Root builder with entity - must start with collections or globals (when prefix is 'entity' or 'entityType.entity')
 type RootBuilderWithEntity = {
@@ -36,16 +36,16 @@ type RootBuilderWithEntity = {
   /**
    * Start with a collection slug (must call .id() or .noId() next)
    */
-  collections<TName extends string>(slug: TName): CollectionAfterSlugBuilder<TName>
+  collections(slug: CollectionSlug): CollectionAfterSlugBuilder
 
   /**
    * Start with a global slug (can directly access fields)
    */
-  globals<TName extends string>(slug: TName): GlobalBuilder<TName>
+  globals(slug: GlobalSlug): FieldAccessors
 }
 
 // Collection builder after slug - must specify id or noId
-type CollectionAfterSlugBuilder<TCollection extends string> = {
+type CollectionAfterSlugBuilder = {
   /**
    * Build without specifying id (rarely used)
    */
@@ -54,12 +54,12 @@ type CollectionAfterSlugBuilder<TCollection extends string> = {
   /**
    * Add a document ID to the (data) path (not included in schema path)
    */
-  id(id: number | string): CollectionBuilder<TCollection>
+  id(id: number | string): FieldAccessors
 
   /**
    * Explicitly state no ID context (continues without ID)
    */
-  noId(): CollectionBuilder<TCollection>
+  noId(): FieldAccessors
 }
 
 // Type for field parameter - accepts both Field and ClientField
@@ -67,13 +67,13 @@ type AnyField = ClientField | Field
 
 // Type to map field types to their corresponding builder return types
 type FieldTypeToBuilder<T extends AnyField> = T extends { type: 'array' }
-  ? ArrayFieldBuilder<string>
+  ? ArrayFieldBuilder
   : T extends { type: 'blocks' }
-    ? BlocksFieldBuilder<string>
+    ? BlocksFieldBuilder
     : T extends { type: 'collapsible' }
       ? CollapsibleAfterCallBuilder
       : T extends { name: string; type: 'group' }
-        ? FieldBuilder<string>
+        ? FieldAccessors
         : T extends { type: 'group' }
           ? GroupAfterCallBuilder
           : T extends { type: 'row' }
@@ -95,18 +95,18 @@ type FieldTypeToBuilder<T extends AnyField> = T extends { type: 'array' }
                     | { type: 'textarea' }
                     | { type: 'upload' }
                 ? TerminalFieldBuilder
-                : FieldBuilder<string>
+                : FieldAccessors
 
 // Common field accessor methods shared across builders
 type FieldAccessors = {
   /**
    * Add an array field
    */
-  array<TName extends string>(name: TName): ArrayFieldBuilder<TName>
+  array(name: string): ArrayFieldBuilder
   /**
    * Add a blocks field
    */
-  blocks<TName extends string>(name: TName): BlocksFieldBuilder<TName>
+  blocks(name: string): BlocksFieldBuilder
 
   /**
    * Build and return the final paths
@@ -116,12 +116,12 @@ type FieldAccessors = {
   /**
    * Add a checkbox field (terminal - no nesting allowed)
    */
-  checkbox<TName extends string>(name: TName): TerminalFieldBuilder
+  checkbox(name: string): TerminalFieldBuilder
 
   /**
    * Add a code field (terminal - no nesting allowed)
    */
-  code<TName extends string>(name: TName): TerminalFieldBuilder
+  code(name: string): TerminalFieldBuilder
 
   /**
    * Add a collapsible field (must call .schemaIndex() or .noSchemaIndex() next)
@@ -131,7 +131,7 @@ type FieldAccessors = {
   /**
    * Add a date field (terminal - no nesting allowed)
    */
-  date<TName extends string>(name: TName): TerminalFieldBuilder
+  date(name: string): TerminalFieldBuilder
 
   /**
    * Add any field based on its type (works with Field or ClientField)
@@ -146,37 +146,37 @@ type FieldAccessors = {
   /**
    * Add a named group field (allows nesting)
    */
-  group<TName extends string>(name: TName): FieldBuilder<string>
+  group(name: string): FieldAccessors
 
   /**
    * Add a JSON field (terminal - no nesting allowed)
    */
-  json<TName extends string>(name: TName): TerminalFieldBuilder
+  json(name: string): TerminalFieldBuilder
 
   /**
    * Add a number field (terminal - no nesting allowed)
    */
-  number<TName extends string>(name: TName): TerminalFieldBuilder
+  number(name: string): TerminalFieldBuilder
 
   /**
    * Add a point field (terminal - no nesting allowed)
    */
-  point<TName extends string>(name: TName): TerminalFieldBuilder
+  point(name: string): TerminalFieldBuilder
 
   /**
    * Add a radio field (terminal - no nesting allowed)
    */
-  radio<TName extends string>(name: TName): TerminalFieldBuilder
+  radio(name: string): TerminalFieldBuilder
 
   /**
    * Add a relationship field (terminal - no nesting allowed)
    */
-  relationship<TName extends string>(name: TName): TerminalFieldBuilder
+  relationship(name: string): TerminalFieldBuilder
 
   /**
    * Add a rich text field (terminal - no nesting allowed)
    */
-  richText<TName extends string>(name: TName): TerminalFieldBuilder
+  richText(name: string): TerminalFieldBuilder
 
   /**
    * Add a row field (must call .schemaIndex() or .noSchemaIndex() next)
@@ -186,7 +186,7 @@ type FieldAccessors = {
   /**
    * Add a select field (terminal - no nesting allowed)
    */
-  select<TName extends string>(name: TName): TerminalFieldBuilder
+  select(name: string): TerminalFieldBuilder
 
   /**
    * Add a tabs field (must call .schemaIndex() or .noSchemaIndex() next)
@@ -196,24 +196,18 @@ type FieldAccessors = {
   /**
    * Add a text field (terminal - no nesting allowed)
    */
-  text<TName extends string>(name: TName): TerminalFieldBuilder
+  text(name: string): TerminalFieldBuilder
 
   /**
    * Add a textarea field (terminal - no nesting allowed)
    */
-  textarea<TName extends string>(name: TName): TerminalFieldBuilder
+  textarea(name: string): TerminalFieldBuilder
 
   /**
    * Add an upload field (terminal - no nesting allowed)
    */
-  upload<TName extends string>(name: TName): TerminalFieldBuilder
+  upload(name: string): TerminalFieldBuilder
 }
-
-// Collection builder - after id/noId, can access fields
-type CollectionBuilder<_TCollection extends string> = FieldAccessors
-
-// Global builder - can directly access fields (same as CollectionBuilder but for globals)
-type GlobalBuilder<TGlobal extends string> = CollectionBuilder<TGlobal>
 
 // Terminal field builder - fields that cannot have nested fields (only build allowed)
 type TerminalFieldBuilder = {
@@ -222,9 +216,6 @@ type TerminalFieldBuilder = {
    */
   build(): PathResult
 }
-
-// Field builder - includes all field methods (both nesting-capable and terminal)
-type FieldBuilder<_TField extends string> = FieldAccessors
 
 // Tabs field builder - after calling tabs(), must specify schema index
 type TabsAfterCallBuilder = {
@@ -258,7 +249,7 @@ type TabsFieldBuilder = {
   /**
    * Navigate to a specific named tab
    */
-  tab<TName extends string>(name: TName): FieldBuilder<TName>
+  tab(name: string): FieldAccessors
 }
 
 // Tab field builder - after calling tab() without name, must specify schema index
@@ -271,12 +262,12 @@ type TabAfterCallBuilder = {
   /**
    * Skip adding schema index (makes schemaPath null)
    */
-  noSchemaIndex(): FieldBuilder<string>
+  noSchemaIndex(): FieldAccessors
 
   /**
    * Add schema index for the unnamed tab
    */
-  schemaIndex(index: number): FieldBuilder<string>
+  schemaIndex(index: number): FieldAccessors
 }
 
 // Group field builder - after calling group() without name, must specify schema index
@@ -289,12 +280,12 @@ type GroupAfterCallBuilder = {
   /**
    * Skip adding schema index (makes schemaPath null)
    */
-  noSchemaIndex(): FieldBuilder<string>
+  noSchemaIndex(): FieldAccessors
 
   /**
    * Add schema index for the unnamed group
    */
-  schemaIndex(index: number): FieldBuilder<string>
+  schemaIndex(index: number): FieldAccessors
 }
 
 // Row field builder - after calling row(), must specify schema index
@@ -307,12 +298,12 @@ type RowAfterCallBuilder = {
   /**
    * Skip adding schema index (makes schemaPath null)
    */
-  noSchemaIndex(): FieldBuilder<string>
+  noSchemaIndex(): FieldAccessors
 
   /**
    * Add schema index for the row
    */
-  schemaIndex(index: number): FieldBuilder<string>
+  schemaIndex(index: number): FieldAccessors
 }
 
 // Collapsible field builder - after calling collapsible(), must specify schema index
@@ -325,20 +316,20 @@ type CollapsibleAfterCallBuilder = {
   /**
    * Skip adding schema index (makes schemaPath null)
    */
-  noSchemaIndex(): FieldBuilder<string>
+  noSchemaIndex(): FieldAccessors
 
   /**
    * Add schema index for the collapsible
    */
-  schemaIndex(index: number): FieldBuilder<string>
+  schemaIndex(index: number): FieldAccessors
 }
 
 // Blocks field builder - must specify a block next
-type BlocksFieldBuilder<_TBlocks extends string> = {
+type BlocksFieldBuilder = {
   /**
    * Specify a block type by its slug
    */
-  block<TName extends string>(blockSlug: TName): BlockBuilder<TName>
+  block(blockSlug: string): BlockBuilder
 
   /**
    * Build without specifying a block (useful for getting the blocks field path)
@@ -347,7 +338,7 @@ type BlocksFieldBuilder<_TBlocks extends string> = {
 }
 
 // Block builder - must specify index or noIndex before accessing fields
-type BlockBuilder<TBlock extends string> = {
+type BlockBuilder = {
   /**
    * Build without specifying an index (useful for getting the block path)
    */
@@ -356,16 +347,16 @@ type BlockBuilder<TBlock extends string> = {
   /**
    * Add an array index for the block
    */
-  index(i: number): FieldBuilder<TBlock>
+  index(i: number): FieldAccessors
 
   /**
    * Skip adding index to path (useful for schema-only paths)
    */
-  noIndex(): FieldBuilder<TBlock>
+  noIndex(): FieldAccessors
 }
 
 // Array field builder - must specify index or noIndex
-type ArrayFieldBuilder<TArray extends string> = {
+type ArrayFieldBuilder = {
   /**
    * Build without specifying an index (useful for getting the array field path)
    */
@@ -374,12 +365,12 @@ type ArrayFieldBuilder<TArray extends string> = {
   /**
    * Add an array index
    */
-  index(i: number): FieldBuilder<TArray>
+  index(i: number): FieldAccessors
 
   /**
    * Skip adding index to path (useful for schema-only paths)
    */
-  noIndex(): FieldBuilder<TArray>
+  noIndex(): FieldAccessors
 }
 
 // State type for path building
@@ -472,7 +463,7 @@ const addField = (state: PathBuilderState, name: string): void => {
 
 // Shared builder methods object (created once, reused for all builders)
 const methods = {
-  array(this: PathBuilderState, name: string): ArrayFieldBuilder<string> {
+  array(this: PathBuilderState, name: string): ArrayFieldBuilder {
     const newState = cloneBuilder(this)
     newState.skipNextIndex = false // Reset flag when entering a new array
     addField(newState, name)
@@ -480,14 +471,14 @@ const methods = {
     return newState
   },
 
-  block(this: PathBuilderState, blockSlug: string): BlockBuilder<string> {
+  block(this: PathBuilderState, blockSlug: string): BlockBuilder {
     const newState = cloneBuilder(this)
     appendSchemaPath(newState, blockSlug)
     // @ts-expect-error - Prototype chain provides these methods
     return newState
   },
 
-  blocks(this: PathBuilderState, name: string): BlocksFieldBuilder<string> {
+  blocks(this: PathBuilderState, name: string): BlocksFieldBuilder {
     const newState = cloneBuilder(this)
     newState.skipNextIndex = false // Reset flag when entering a new blocks field
     addField(newState, name)
@@ -548,7 +539,7 @@ const methods = {
     return newState
   },
 
-  collections(this: PathBuilderState, slug: string): CollectionAfterSlugBuilder<string> {
+  collections(this: PathBuilderState, slug: string): CollectionAfterSlugBuilder {
     const newState = cloneBuilder(this)
     newState.entityType = 'collection'
     newState.entitySlug = slug
@@ -626,7 +617,7 @@ const methods = {
     }
   },
 
-  globals(this: PathBuilderState, slug: string): GlobalBuilder<string> {
+  globals(this: PathBuilderState, slug: string): FieldAccessors {
     const newState = cloneBuilder(this)
     newState.entityType = 'global'
     newState.entitySlug = slug
@@ -634,7 +625,7 @@ const methods = {
     return newState
   },
 
-  group(this: PathBuilderState, name?: string): FieldBuilder<string> | GroupAfterCallBuilder {
+  group(this: PathBuilderState, name?: string): FieldAccessors | GroupAfterCallBuilder {
     const newState = cloneBuilder(this)
     if (name !== undefined) {
       addField(newState, name)
@@ -643,20 +634,20 @@ const methods = {
     return newState
   },
 
-  id(this: PathBuilderState, id: number | string): CollectionBuilder<string> {
+  id(this: PathBuilderState, id: number | string): FieldAccessors {
     const newState = cloneBuilder(this)
     appendPath(newState, String(id))
     // @ts-expect-error - Prototype chain provides these methods
     return newState
   },
 
-  noId(this: PathBuilderState): CollectionBuilder<string> {
+  noId(this: PathBuilderState): FieldAccessors {
     const newState = cloneBuilder(this)
     // @ts-expect-error - Prototype chain provides these methods
     return newState
   },
 
-  index(this: PathBuilderState, i: number): FieldBuilder<string> {
+  index(this: PathBuilderState, i: number): FieldAccessors {
     const newState = cloneBuilder(this)
     if (!newState.skipNextIndex) {
       appendPath(newState, String(i))
@@ -673,7 +664,7 @@ const methods = {
     return newState
   },
 
-  noIndex(this: PathBuilderState): FieldBuilder<string> {
+  noIndex(this: PathBuilderState): FieldAccessors {
     const newState = cloneBuilder(this)
     newState.skipNextIndex = true
     newState.hasNoIndex = true
@@ -729,7 +720,7 @@ const methods = {
     return newState
   },
 
-  tab(this: PathBuilderState, name?: string): FieldBuilder<string> | TabAfterCallBuilder {
+  tab(this: PathBuilderState, name?: string): FieldAccessors | TabAfterCallBuilder {
     const newState = cloneBuilder(this)
     if (name !== undefined) {
       flushAccumulatedIndices(newState)
@@ -767,16 +758,14 @@ const methods = {
     return newState
   },
 
-  schemaIndex(this: PathBuilderState, index: number): FieldBuilder<string> | TabsFieldBuilder {
+  schemaIndex(this: PathBuilderState, index: number): FieldAccessors | TabsFieldBuilder {
     const newState = cloneBuilder(this)
     newState.accumulatedIndices.push(index)
     // @ts-expect-error - Prototype chain provides these methods
     return newState
   },
 
-  noSchemaIndex(
-    this: PathBuilderState,
-  ): FieldBuilder<string> | TabAfterCallBuilder | TabsFieldBuilder {
+  noSchemaIndex(this: PathBuilderState): FieldAccessors | TabAfterCallBuilder | TabsFieldBuilder {
     const newState = cloneBuilder(this)
     newState.hasNoSchemaIndex = true
     // @ts-expect-error - Prototype chain provides these methods
@@ -877,6 +866,8 @@ export function getPathBuilder(options?: {
  *   builder.index(0).text('label')
  * }
  * ```
+ * @experimental may change in a minor release
+ * @internal
  */
 export function narrowBuilder<T extends Field>(
   field: T,
@@ -896,10 +887,6 @@ export type {
   BlocksFieldBuilder,
   CollapsibleAfterCallBuilder,
   CollectionAfterSlugBuilder,
-  CollectionBuilder,
-  FieldAccessors,
-  FieldBuilder,
-  GlobalBuilder,
   GroupAfterCallBuilder,
   PathResult,
   RootBuilder,
