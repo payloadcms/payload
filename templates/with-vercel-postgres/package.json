@@ -19,16 +19,16 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@payloadcms/db-vercel-postgres": "3.59.1",
-    "@payloadcms/next": "3.59.1",
-    "@payloadcms/payload-cloud": "3.59.1",
-    "@payloadcms/richtext-lexical": "3.59.1",
-    "@payloadcms/storage-vercel-blob": "3.59.1",
-    "@payloadcms/ui": "3.59.1",
+    "@payloadcms/db-vercel-postgres": "3.61.1",
+    "@payloadcms/next": "3.61.1",
+    "@payloadcms/payload-cloud": "3.61.1",
+    "@payloadcms/richtext-lexical": "3.61.1",
+    "@payloadcms/storage-vercel-blob": "3.61.1",
+    "@payloadcms/ui": "3.61.1",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.4.4",
-    "payload": "3.59.1",
+    "payload": "3.61.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
@@ -50,7 +50,7 @@
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3"
   },
-  "packageManager": "pnpm@10.18.1",
+  "packageManager": "pnpm@10.19.0",
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
   },
