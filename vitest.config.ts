@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     environment: 'node',
-    testTimeout: 90000,
+    testTimeout: 5000,
     projects: ['packages/*'],
   },
 })
