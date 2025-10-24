@@ -1,6 +1,6 @@
 import type {
+  JsonObject,
   SanitizedCollectionConfig,
-  TypeWithID,
   TypeWithVersion,
   UpdateVersionArgs,
 } from 'payload'
@@ -14,7 +14,7 @@ import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function updateVersion<T extends TypeWithID>(
+export async function updateVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     id,

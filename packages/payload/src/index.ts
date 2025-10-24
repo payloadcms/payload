@@ -123,7 +123,8 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
-import type { ClientConfig, CreateClientConfigArgs } from './config/client.js'
+import type { ClientConfig } from './config/client.js'
+import type { KVAdapter } from './kv/index.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -549,6 +550,11 @@ export class BasePayload {
 
   jobs = getJobsLocalAPI(this)
 
+  /**
+   * Key Value storage
+   */
+  kv!: KVAdapter
+
   logger!: Logger
 
   login = async <TSlug extends CollectionSlug>(
@@ -813,6 +819,8 @@ export class BasePayload {
 
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this
+
+    this.kv = this.config.kv.init({ payload: this })
 
     if (this.db?.init) {
       await this.db.init()
@@ -1597,14 +1605,17 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
+
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export * from './kv/adapters/DatabaseKVAdapter.js'
+export * from './kv/adapters/InMemoryKVAdapter.js'
+export * from './kv/index.js'
 export type {
   CollapsedPreferences,
   CollectionPreferences,
