@@ -10,8 +10,10 @@ export const addListFilter = async ({
   fieldLabel = 'ID',
   operatorLabel = 'equals',
   value,
+  multiSelect,
 }: {
   fieldLabel: string
+  multiSelect?: boolean
   operatorLabel: string
   page: Page
   replaceExisting?: boolean
@@ -79,8 +81,9 @@ export const addListFilter = async ({
       } else {
         await selectInput({
           selectLocator: valueLocator,
-          multiSelect: false,
+          multiSelect: multiSelect ? undefined : false,
           option: value,
+          selectType: fieldType === 'relationship' ? 'relationship' : 'select',
         })
       }
     }

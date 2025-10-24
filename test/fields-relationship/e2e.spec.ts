@@ -1,14 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, Document } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { assertToastErrors } from 'helpers/assertToastErrors.js'
-import { addArrayRow } from 'helpers/e2e/fields/array/addArrayRow.js'
-import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -32,7 +25,14 @@ import {
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
+import { addArrayRow } from '../helpers/e2e/fields/array/addArrayRow.js'
+import { openCreateDocDrawer } from '../helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from '../helpers/e2e/filters/index.js'
+import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
+import { openDocControls } from '../helpers/e2e/openDocControls.js'
+import { openDocDrawer } from '../helpers/e2e/toggleDocDrawer.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -846,6 +846,96 @@ describe('Relationship Field', () => {
       await expect(field).toContainText(relationOneDoc.id)
 
       await saveDocAndAssert(page)
+    })
+  })
+
+  describe('relationship field in where builder', () => {
+    async function createRelatedDoc(): Promise<{
+      cleanup: () => Promise<void>
+      relatedDoc: Document
+    }> {
+      const relatedDoc = await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: 'Doc to filter on',
+        },
+      })
+
+      await payload.create({
+        collection: slug,
+        data: {
+          relationship: relatedDoc.id,
+          relationshipHasMany: [relatedDoc.id],
+          relationshipMultiple: {
+            relationTo: relationOneSlug,
+            value: relatedDoc.id,
+          },
+          relationshipHasManyMultiple: [
+            {
+              relationTo: relationOneSlug,
+              value: relatedDoc.id,
+            },
+          ],
+        },
+      })
+
+      const cleanup = async () => {
+        await payload.delete({
+          collection: slug,
+          id: relatedDoc.id,
+        })
+        await payload.delete({
+          collection: relationOneSlug,
+          id: relatedDoc.id,
+        })
+      }
+
+      return {
+        relatedDoc,
+        cleanup,
+      }
+    }
+
+    test('should filter on polymorphic hasMany=true relationship field', async () => {
+      const { relatedDoc, cleanup } = await createRelatedDoc()
+      await page.goto(url.create)
+      await page.goto(url.list)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship Has Many Multiple',
+        operatorLabel: 'equals',
+        value: relatedDoc.id,
+      })
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(1)
+      await cleanup()
+    })
+    test('should filter on polymorphic hasMany=false relationship field', async () => {
+      const { relatedDoc, cleanup } = await createRelatedDoc()
+      await page.goto(url.list)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship Multiple',
+        operatorLabel: 'equals',
+        value: relatedDoc.id,
+      })
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(1)
+      await cleanup()
+    })
+    test('should filter on monomorphic hasMany=true relationship field', async () => {
+      const { relatedDoc, cleanup } = await createRelatedDoc()
+      await page.goto(url.list)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship Has Many',
+        operatorLabel: 'in',
+        value: relatedDoc.id,
+        multiSelect: true,
+      })
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(1)
+      await cleanup()
     })
   })
 })

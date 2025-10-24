@@ -168,7 +168,11 @@ export const getValidFieldOperators = ({
   }[] = []
 
   if ('hasMany' in field && field.hasMany) {
-    validOperators = [...arrayOperators]
+    if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+      validOperators = [...equalsOperators]
+    } else {
+      validOperators = [...arrayOperators]
+    }
   } else {
     validOperators = [...fieldTypeConditions[field.type].operators]
   }
