@@ -3,6 +3,7 @@ import type { CollectionConfig } from '../../index.js'
 
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
 import { sanitizeCollection } from './sanitize.js'
+import { describe, it, expect } from 'vitest'
 
 describe('sanitize - collections -', () => {
   const config = {
