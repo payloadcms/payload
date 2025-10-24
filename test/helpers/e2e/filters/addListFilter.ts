@@ -83,7 +83,6 @@ export const addListFilter = async ({
           selectLocator: valueLocator,
           multiSelect: multiSelect ? undefined : false,
           option: value,
-          selectType: fieldType === 'relationship' ? 'relationship' : 'select',
         })
       }
     }
