@@ -1,4 +1,5 @@
 import { assert } from 'ts-essentials'
+import { describe, it, expect } from 'vitest'
 import { flattenAllFields } from './flattenAllFields.js'
 import { getFieldByPath } from './getFieldByPath.js'
 import type { FlattenedArrayField, FlattenedGroupField } from '../fields/config/types.js'

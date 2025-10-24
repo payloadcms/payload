@@ -91,6 +91,6 @@
   "include": [
     "${configDir}/src",
     ".next/types/**/*.ts",
-    "./scripts/**/*.ts",
+    "./scripts/**/*.ts"
   ]
 }

@@ -120,7 +120,7 @@
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:types": "tstyche",
-    "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
+    "test:unit": "vitest run",
     "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
   "lint-staged": {
@@ -135,7 +135,6 @@
     "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
   "devDependencies": {
-    "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "15.4.4",
     "@payloadcms/db-postgres": "workspace:*",
@@ -149,7 +148,6 @@
     "@swc/cli": "0.7.7",
     "@swc/jest": "0.2.38",
     "@types/fs-extra": "^11.0.2",
-    "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
     "@types/node": "22.15.30",
     "@types/react": "19.1.12",
@@ -169,7 +167,6 @@
     "fs-extra": "10.1.0",
     "globby": "11.1.0",
     "husky": "9.0.11",
-    "jest": "29.7.0",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
@@ -193,6 +190,7 @@
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
     "typescript": "5.7.3",
+    "vitest": "4.0.2",
     "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@9.7.1",

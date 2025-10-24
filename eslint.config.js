@@ -9,7 +9,7 @@ export const defaultESLintIgnores = [
   '**/.pnp.*',
   '**/.svn',
   '**/playwright.config.ts',
-  '**/jest.config.js',
+  '**/vitest.config.ts',
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
