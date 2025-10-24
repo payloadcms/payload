@@ -111,6 +111,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       },
       fieldConstraints: {},
       forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
+      foreignKeys: new Set(),
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',

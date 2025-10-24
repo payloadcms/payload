@@ -421,7 +421,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} が作成されました。',
     successfullyDuplicated: '{{label}} が複製されました。',
     successfullyReindexed:
-      '{{collections}} コレクションから {{total}} 件中 {{count}} 件のドキュメントが正常に再インデックスされました。',
+      '{{collections}} から {{total}} 件のうち {{count}} 件を正常に再インデックスし、{{skips}} 件の下書きをスキップしました。',
     takeOver: '引き継ぐ',
     thisLanguage: 'Japanese',
     time: '時間',

@@ -418,7 +418,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} veiksmīgi izveidots.',
     successfullyDuplicated: '{{label}} veiksmīgi dublēts.',
     successfullyReindexed:
-      'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}',
+      'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}, izlaisti {{skips}} melnraksti.',
     takeOver: 'Pārņemt',
     thisLanguage: 'Latviešu',
     time: 'Laiks',

@@ -413,7 +413,7 @@ export const etTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} edukalt loodud.',
     successfullyDuplicated: '{{label}} edukalt dubleeritud.',
     successfullyReindexed:
-      'Edukalt indekseeritud {{count}} {{total}}-st dokumendist kollektsioonides {{collections}}',
+      'Õnnestus ümberindekseerida {{count}} dokumenti {{total}}-st kollektsioonist {{collections}} ja {{skips}} mustandeid jäeti vahele.',
     takeOver: 'Võta üle',
     thisLanguage: 'Eesti',
     time: 'Aeg',

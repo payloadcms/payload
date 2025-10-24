@@ -399,7 +399,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     successfullyCreated: '成功创建 {{label}}',
     successfullyDuplicated: '成功复制 {{label}}',
     successfullyReindexed:
-      '成功重新索引了 {{collections}} 集合中 {{total}} 个文档中的 {{count}} 个。',
+      '已成功重新索引 {{count}} 个来自 {{collections}} 的 {{total}} 个文档，并跳过了 {{skips}} 个草稿。',
     takeOver: '接管',
     thisLanguage: '中文 (简体)',
     time: '时间',

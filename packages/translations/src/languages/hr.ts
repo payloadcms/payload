@@ -418,7 +418,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} uspješno izrađeno.',
     successfullyDuplicated: '{{label}} uspješno duplicirano.',
     successfullyReindexed:
-      'Uspješno ponovno indeksirano {{count}} od {{total}} dokumenata iz {{collections}} kolekcija.',
+      'Uspješno je reindeksirano {{count}} od {{total}} dokumenata iz {{collections}}, a {{skips}} nacrta je preskočeno.',
     takeOver: 'Preuzmi',
     thisLanguage: 'Hrvatski',
     time: 'Vrijeme',

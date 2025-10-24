@@ -421,7 +421,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} հաջողությամբ ստեղծվել է։',
     successfullyDuplicated: '{{label}} հաջողությամբ կրկնօրինակվել է։',
     successfullyReindexed:
-      'Հաջողությամբ վերաինդեքսավորվել են {{count}}-ը {{total}} փաստաթղթերից {{collections}}-ում',
+      '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
     takeOver: 'Վերցնել վերահսկողությունը',
     thisLanguage: 'Հայերեն',
     time: 'Ժամ',

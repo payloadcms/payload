@@ -419,7 +419,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} успешно креирано.',
     successfullyDuplicated: '{{label}} успешно дуплицирано.',
     successfullyReindexed:
-      'Успешно је реиндексирано {{count}} од {{total}} докумената из {{collections}} колекција.',
+      'Успешно је реиндексирано {{count}} од укупно {{total}} докумената из {{collections}}, и {{skips}} нацрта је прескочено.',
     takeOver: 'Превузети',
     thisLanguage: 'Српски (ћирилица)',
     time: 'Vreme',

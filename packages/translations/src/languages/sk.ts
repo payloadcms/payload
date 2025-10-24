@@ -417,7 +417,7 @@ export const skTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} úspešne vytvorené.',
     successfullyDuplicated: '{{label}} úspešne duplikované.',
     successfullyReindexed:
-      'Úspešne bolo reindexovaných {{count}} z {{total}} dokumentov z kolekcií {{collections}}.',
+      'Úspešne bolo preindexovaných {{count}} z {{total}} dokumentov z kolekcie {{collections}}, a {{skips}} konceptov bolo preskočených.',
     takeOver: 'Prevziať',
     thisLanguage: 'Slovenčina',
     time: 'Čas',

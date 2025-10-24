@@ -418,7 +418,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} успешно създаден.',
     successfullyDuplicated: '{{label}} успешно дупликиран.',
     successfullyReindexed:
-      'Успешно преиндексирани {{count}} от {{total}} документа от {{collections}} колекции.',
+      'Успешно преиндексирани {{count}} от общо {{total}} документа от {{collections}} и пропуснати {{skips}} чернови.',
     takeOver: 'Поемане',
     thisLanguage: 'Български',
     time: 'Време',

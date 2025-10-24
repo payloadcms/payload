@@ -397,7 +397,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     success: '成功',
     successfullyCreated: '已成功建立 {{label}}。',
     successfullyDuplicated: '已成功複製 {{label}}。',
-    successfullyReindexed: '已成功重新索引 {{collections}} 中 {{total}} 筆文件中的 {{count}} 筆。',
+    successfullyReindexed:
+      '已成功重新索引 {{count}} 個來自 {{collections}} 的 {{total}} 個文件，並跳過了 {{skips}} 個草稿。',
     takeOver: '接手編輯',
     thisLanguage: '中文（繁體）',
     time: '時間',

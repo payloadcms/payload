@@ -427,7 +427,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} succesvol aangemaakt.',
     successfullyDuplicated: '{{label}} succesvol gedupliceerd.',
     successfullyReindexed:
-      'Succesvol {{count}} van {{total}} documenten uit {{collections}} collecties herindexeerd.',
+      'Succesvol {{count}} van {{total}} documenten uit {{collections}} opnieuw geïndexeerd, en {{skips}} concepten werden overgeslagen.',
     takeOver: 'Overnemen',
     thisLanguage: 'Nederlands',
     time: 'Tijd',

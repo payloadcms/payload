@@ -429,7 +429,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} erfolgreich erstellt.',
     successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
     successfullyReindexed:
-      'Erfolgreich {{count}} von {{total}} Dokumenten aus {{collections}} Sammlungen neu indiziert.',
+      '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
     takeOver: 'Übernehmen',
     thisLanguage: 'Deutsch',
     time: 'Zeit',

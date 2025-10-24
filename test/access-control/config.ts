@@ -11,12 +11,16 @@ import type { Config, User } from './payload-types.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Auth } from './collections/Auth/index.js'
+import { BlocksFieldAccess } from './collections/BlocksFieldAccess/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
+import { ReadRestricted } from './collections/ReadRestricted/index.js'
+import { seedReadRestricted } from './collections/ReadRestricted/seed.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
@@ -64,9 +68,12 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
 
-function isUser(user: Config['user']): user is {
+function isUser(user?: Config['user']): user is {
   collection: 'users'
 } & User {
+  if (!user) {
+    return false
+  }
   return user?.collection === 'users'
 }
 
@@ -79,6 +86,17 @@ export default buildConfigWithDefaults(
         baseDir: path.resolve(dirname),
       },
     },
+    blocks: [
+      {
+        slug: 'titleblock',
+        fields: [
+          {
+            type: 'text',
+            name: 'title',
+          },
+        ],
+      },
+    ],
     collections: [
       {
         slug: 'users',
@@ -572,12 +590,14 @@ export default buildConfigWithDefaults(
           },
         ],
       },
+      BlocksFieldAccess,
       Disabled,
       RichText,
       Regression1,
       Regression2,
       Hooks,
       Auth,
+      ReadRestricted,
     ],
     globals: [
       {
@@ -687,6 +707,54 @@ export default buildConfigWithDefaults(
       })
 
       await payload.create({
+        collection: blocksFieldAccessSlug,
+        data: {
+          title: 'Blocks Field Access Test Document',
+          editableBlocks: [
+            {
+              blockType: 'testBlock',
+              title: 'Editable Block',
+              content: 'This block should be fully editable',
+            },
+          ],
+          readOnlyBlocks: [
+            {
+              blockType: 'testBlock2',
+              title: 'Read-Only Block',
+              content: 'This block should be read-only due to field access control',
+            },
+          ],
+          editableBlockRefs: [
+            {
+              blockType: 'titleblock',
+              title: 'Editable Block Reference',
+            },
+          ],
+          readOnlyBlockRefs: [
+            {
+              blockType: 'titleblock',
+              title: 'Read-Only Block Reference',
+            },
+          ],
+          tabReadOnlyTest: {
+            tabReadOnlyBlocks: [
+              {
+                blockType: 'testBlock3',
+                title: 'Tab Read-Only Block',
+                content: 'This block is read-only and inside a tab',
+              },
+            ],
+            tabReadOnlyBlockRefs: [
+              {
+                blockType: 'titleblock',
+                title: 'Tab Read-Only Block Reference',
+              },
+            ],
+          },
+        },
+      })
+
+      await payload.create({
         collection: restrictedVersionsSlug,
         data: {
           name: 'versioned',
@@ -769,6 +837,9 @@ export default buildConfigWithDefaults(
           },
         },
       })
+
+      // Seed read-restricted collection
+      await seedReadRestricted(payload)
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),

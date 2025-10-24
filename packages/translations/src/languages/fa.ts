@@ -409,7 +409,7 @@ export const faTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} با موفقیت ایجاد شد.',
     successfullyDuplicated: 'کپی از {{label}} با موفقیت ایجاد شد.',
     successfullyReindexed:
-      '{{count}} از {{total}} صفحه در مجموعه {{collections}} با موفقیت ایندکس مجدد شدند.',
+      'با موفقیت {{count}} از {{total}} سند از {{collections}} بازشاخص‌گذاری شد و {{skips}} پیش‌نویس رد شد.',
     takeOver: 'ادامه ویرایش',
     thisLanguage: 'فارسی',
     time: 'زمان',

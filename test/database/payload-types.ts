@@ -209,9 +209,19 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categoryID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   categoryTitle?: string | null;
   categorySimpleText?: string | null;
   categories?: (string | Category)[] | null;
+  categoriesCustomID?: (number | CategoriesCustomId)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
     value: string | Category;
@@ -881,9 +891,11 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categoryID?: T;
   categoryTitle?: T;
   categorySimpleText?: T;
   categories?: T;
+  categoriesCustomID?: T;
   categoryPoly?: T;
   categoryPolyMany?: T;
   categoryCustomID?: T;

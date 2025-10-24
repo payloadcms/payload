@@ -1,5 +1,3 @@
-import { title } from 'process'
-
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -422,7 +420,7 @@ export const enTranslations = {
     successfullyCreated: '{{label}} successfully created.',
     successfullyDuplicated: '{{label}} successfully duplicated.',
     successfullyReindexed:
-      'Successfully reindexed {{count}} of {{total}} documents from {{collections}}',
+      'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     takeOver: 'Take over',
     thisLanguage: 'English',
     time: 'Time',

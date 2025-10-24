@@ -417,7 +417,7 @@ export const taTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} வெற்றிகரமாக உருவாக்கப்பட்டது.',
     successfullyDuplicated: '{{label}} வெற்றிகரமாக நகலெடுக்கப்பட்டது.',
     successfullyReindexed:
-      'வெற்றிகரமாக {{collections}}-இல் {{total}} ஆவணங்களில் {{count}} மறுஅட்டவணை செய்யப்பட்டது',
+      '{{collections}} இலிருந்து மொத்த {{total}} ஆவணங்களில் {{count}} ஆவணங்கள் வெற்றிகரமாக மறுஇன்டெக்ஸ் செய்யப்பட்டன, மேலும் {{skips}} வரைவு எடுக்க முடியவில்லை.',
     takeOver: 'கையகப்படுத்து',
     thisLanguage: 'தமிழ்',
     time: 'நேரம்',

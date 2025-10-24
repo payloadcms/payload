@@ -421,7 +421,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} sėkmingai sukurtas.',
     successfullyDuplicated: '{{label}} sėkmingai dubliuotas.',
     successfullyReindexed:
-      'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}',
+      'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
     takeOver: 'Perimti',
     thisLanguage: 'Lietuvių',
     time: 'Laikas',

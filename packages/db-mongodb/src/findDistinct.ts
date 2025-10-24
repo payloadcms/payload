@@ -67,7 +67,10 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   let tempPath = ''
   let insideRelation = false
 
-  for (const segment of args.field.split('.')) {
+  const segments = args.field.split('.')
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
     const field = currentFields.find((e) => e.name === segment)
     if (rels.length) {
       insideRelation = true
@@ -92,6 +95,11 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       (field.type === 'relationship' || field.type === 'upload') &&
       typeof field.relationTo === 'string'
     ) {
+      if (i === segments.length - 2 && segments[i + 1] === 'id') {
+        foundField = field
+        fieldPath = tempPath
+        break
+      }
       rels.push({ fieldPath: tempPath, relationTo: field.relationTo })
       currentFields = this.payload.collections[field.relationTo]?.config
         .flattenedFields as FlattenedField[]

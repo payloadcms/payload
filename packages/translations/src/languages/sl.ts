@@ -418,7 +418,7 @@ export const slTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} uspešno ustvarjen.',
     successfullyDuplicated: '{{label}} uspešno podvojen.',
     successfullyReindexed:
-      'Uspešno reindeksiranih {{count}} od {{total}} dokumentov iz zbirk {{collections}}.',
+      'Uspešno je bilo ponovo indeksiranih {{count}} od skupno {{total}} dokumentov iz {{collections}}, in {{skips}} osnutkov je bilo preskočenih.',
     takeOver: 'Prevzemi',
     thisLanguage: 'Slovenščina',
     time: 'Čas',

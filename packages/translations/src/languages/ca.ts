@@ -421,7 +421,7 @@ export const caTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creada correctament.',
     successfullyDuplicated: '{{label}} duplicada correctament.',
     successfullyReindexed:
-      'Reindexació correcta de {{count}} de {{total}} documents de {{collections}}',
+      "S'han reindexat correctament {{count}} de {{total}} documents de {{collections}} i s'han omès {{skips}} esborranys.",
     takeOver: 'Prendre el control',
     thisLanguage: 'Catala',
     time: 'Temps',

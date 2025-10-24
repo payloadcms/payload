@@ -424,7 +424,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} সফলভাবে তৈরি করা হয়েছে।',
     successfullyDuplicated: '{{label}} সফলভাবে ডুপ্লিকেট করা হয়েছে।',
     successfullyReindexed:
-      '{{collections}} থেকে {{total}} ডকুমেন্টের মধ্যে {{count}} টি সফলভাবে পুনরায় সূচিবদ্ধ করা হয়েছে',
+      '{{collections}} থেকে মোট {{total}}টি ডকুমেন্টের মধ্যে {{count}}টি সফলভাবে পুনরায় ইনডেক্স করা হয়েছে এবং {{skips}}টি খসড়া বাদ দেওয়া হয়েছে।',
     takeOver: 'দায়িত্ব নিন',
     thisLanguage: 'বাংলা (বাংলাদেশ)',
     time: 'সময়',

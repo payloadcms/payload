@@ -419,7 +419,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} ble opprettet.',
     successfullyDuplicated: '{{label}} ble duplisert.',
     successfullyReindexed:
-      'Vellykket reindeksering av {{count}} av {{total}} dokumenter fra {{collections}} samlinger.',
+      'Vellykket reindeksering av {{count}} av totalt {{total}} dokumenter fra {{collections}}, og {{skips}} utkast ble hoppet over.',
     takeOver: 'Ta over',
     thisLanguage: 'Norsk',
     time: 'Tid',
