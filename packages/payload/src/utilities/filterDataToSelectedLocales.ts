@@ -1,11 +1,13 @@
-import type { Field, FlattenedBlock } from '../fields/config/types.js'
+import type { Block, ClientField, Field } from '../fields/config/types.js'
+import type { SanitizedConfig } from '../index.js'
 import type { JsonObject } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 
-type FilterDataToSelectedLocalesArgs = {
+type FilterDataToSelectedLocalesArgs<TFieldType extends ClientField = ClientField | Field> = {
+  configBlockReferences: SanitizedConfig['blocks']
   data: JsonObject
-  fields: Field[]
+  fields: TFieldType[]
   parentIsLocalized?: boolean
   selectedLocales: string[]
 }
@@ -16,12 +18,13 @@ type FilterDataToSelectedLocalesArgs = {
  * For localized fields, if selectedLocales is provided, returns only those locales.
  * If selectedLocales is not provided and field is localized, returns all locales.
  */
-export function filterDataToSelectedLocales({
+export function filterDataToSelectedLocales<TFieldType = ClientField | Field>({
+  configBlockReferences,
   data,
   fields,
   parentIsLocalized = false,
   selectedLocales,
-}: FilterDataToSelectedLocalesArgs): JsonObject {
+}: FilterDataToSelectedLocalesArgs<TFieldType>): JsonObject {
   if (!data || typeof data !== 'object') {
     return data
   }
@@ -37,6 +40,7 @@ export function filterDataToSelectedLocales({
           if (Array.isArray(data[field.name])) {
             result[field.name] = data[field.name].map((item: JsonObject) =>
               filterDataToSelectedLocales({
+                configBlockReferences,
                 data: item,
                 fields: field.fields,
                 parentIsLocalized: fieldIsLocalized,
@@ -50,19 +54,20 @@ export function filterDataToSelectedLocales({
         case 'blocks': {
           if (field.name in data && Array.isArray(data[field.name])) {
             result[field.name] = data[field.name].map((blockData: JsonObject) => {
-              // Find the block definition
-              const blockDefinition =
-                field.blockReferences?.find(
-                  (block) => typeof block !== 'string' && block.slug === blockData.blockType,
-                ) ??
-                field.blocks?.find(
-                  (block) => typeof block !== 'string' && block.slug === blockData.blockType,
-                )
+              let block: Block | undefined
+              if (field.blockReferences) {
+                block = configBlockReferences
+                  ? configBlockReferences.find((b) => b.slug === blockData.blockType)
+                  : undefined
+              } else {
+                block = field.blocks.find((b) => b.slug === blockData.blockType)
+              }
 
-              if (blockDefinition && typeof blockDefinition !== 'string') {
+              if (block) {
                 return filterDataToSelectedLocales({
+                  configBlockReferences,
                   data: blockData,
-                  fields: (blockDefinition as FlattenedBlock).fields,
+                  fields: block.fields,
                   parentIsLocalized: fieldIsLocalized,
                   selectedLocales,
                 })
@@ -82,6 +87,7 @@ export function filterDataToSelectedLocales({
             typeof data[field.name] === 'object'
           ) {
             result[field.name] = filterDataToSelectedLocales({
+              configBlockReferences,
               data: data[field.name] as JsonObject,
               fields: field.fields,
               parentIsLocalized: fieldIsLocalized,
@@ -90,6 +96,7 @@ export function filterDataToSelectedLocales({
           } else {
             // Unnamed groups pass through the same data level
             const nestedResult = filterDataToSelectedLocales({
+              configBlockReferences,
               data,
               fields: field.fields,
               parentIsLocalized,
@@ -137,6 +144,7 @@ export function filterDataToSelectedLocales({
         case 'row': {
           // These pass through the same data level
           const nestedResult = filterDataToSelectedLocales({
+            configBlockReferences,
             data,
             fields: field.fields,
             parentIsLocalized,
@@ -152,7 +160,8 @@ export function filterDataToSelectedLocales({
               // Named tabs create a nested data structure
               if (tab.name in data && typeof data[tab.name] === 'object') {
                 result[tab.name] = filterDataToSelectedLocales({
-                  data: data[tab.name] as JsonObject,
+                  configBlockReferences,
+                  data: data[tab.name],
                   fields: tab.fields,
                   parentIsLocalized,
                   selectedLocales,
@@ -161,6 +170,7 @@ export function filterDataToSelectedLocales({
             } else {
               // Unnamed tabs pass through the same data level
               const nestedResult = filterDataToSelectedLocales({
+                configBlockReferences,
                 data,
                 fields: tab.fields,
                 parentIsLocalized,
