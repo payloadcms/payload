@@ -414,6 +414,7 @@ export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
    * after a version is created (not during autosave)
    */
   snapshot?: true
+  unpublishedLocale?: string
   updatedAt: string
   versionData: T
 }
@@ -440,6 +441,7 @@ export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
    * after a version is created (not during autosave)
    */
   snapshot?: true
+  unpublishedLocale?: string
   updatedAt: string
   versionData: T
 }

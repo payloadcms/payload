@@ -2,7 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { reduceFieldsToValues } from 'payload/shared'
+import { reduceFieldsToValues, traverseForLocalizedFields } from 'payload/shared'
 import React from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'
@@ -33,7 +33,7 @@ export function AddingFilesView() {
     updateUploadEdits,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
   const { user } = useAuth()
   const { openModal } = useModal()
@@ -54,6 +54,10 @@ export function AddingFilesView() {
             collectionSlug={collectionSlug}
             currentEditor={user}
             docPermissions={docPermissions}
+            hasLocalizedFields={
+              config.localization &&
+              traverseForLocalizedFields({ config, fields: collectionConfig.fields })
+            }
             hasPublishedDoc={false}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}

@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, JsonObject } from '../../index.js'
+import type { GlobalSlug, JsonObject, TypeWithID } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
@@ -45,6 +45,7 @@ type Args<TSlug extends GlobalSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: string
+  unpublishSpecificLocale?: string
 }
 
 export const updateOperation = async <
@@ -55,6 +56,10 @@ export const updateOperation = async <
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
   if (args.publishSpecificLocale) {
     args.req.locale = args.publishSpecificLocale
+  }
+
+  if (args.unpublishSpecificLocale) {
+    args.req.locale = args.unpublishSpecificLocale
   }
 
   const {
@@ -72,6 +77,7 @@ export const updateOperation = async <
     req,
     select: incomingSelect,
     showHiddenFields,
+    unpublishSpecificLocale,
   } = args
 
   try {
@@ -237,12 +243,14 @@ export const updateOperation = async <
     let snapshotToSave: JsonObject | undefined
 
     if (payload.config.localization && globalConfig.versions) {
-      if (publishSpecificLocale) {
+      if (publishSpecificLocale || unpublishSpecificLocale) {
+        // snapshot will have full data before publishing/unpublishing
         snapshotToSave = deepCopyObjectSimple(result)
 
-        // the published data to save to the main document
+        // result will contain only published localized data
         result = await beforeChange({
           ...beforeChangeArgs,
+          data: unpublishSpecificLocale ? {} : beforeChangeArgs.data,
           docWithLocales:
             (
               await getLatestGlobalVersion({
@@ -254,7 +262,12 @@ export const updateOperation = async <
                 where: query,
               })
             )?.global || {},
+          skipValidation: unpublishSpecificLocale ? true : false,
         })
+
+        if (unpublishSpecificLocale && snapshotToSave && Object.keys(result).length === 0) {
+          result = snapshotToSave
+        }
       }
     }
 
@@ -310,6 +323,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: snapshotToSave,
+        unpublishSpecificLocale,
       })
 
       result = {

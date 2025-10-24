@@ -51,6 +51,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
+  unpublishSpecificLocale?: string
 }
 
 /**
@@ -90,6 +91,7 @@ export const updateDocument = async <
   req,
   select,
   showHiddenFields,
+  unpublishSpecificLocale,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const isSavingDraft =
@@ -114,6 +116,11 @@ export const updateDocument = async <
     overrideLock,
     req,
   })
+
+  // /////////////////////////////////////
+  // AfterRead runs on original doc
+  // to transform doc into 1 locale
+  // /////////////////////////////////////
 
   const originalDoc = await afterRead({
     collection: collectionConfig,
@@ -241,13 +248,15 @@ export const updateDocument = async <
   let result: JsonObject = await beforeChange(beforeChangeArgs)
   let snapshotToSave: JsonObject | undefined
 
-  if (config.localization && collectionConfig.versions) {
-    if (publishSpecificLocale) {
+  if (payload.config.localization && collectionConfig.versions) {
+    if (publishSpecificLocale || unpublishSpecificLocale) {
+      // snapshot will have full data before publishing/unpublishing
       snapshotToSave = deepCopyObjectSimple(result)
 
-      // the published data to save to the main document
+      // result will contain only published localized data
       result = await beforeChange({
         ...beforeChangeArgs,
+        data: unpublishSpecificLocale ? { id } : beforeChangeArgs.data,
         docWithLocales:
           (await getLatestCollectionVersion({
             id,
@@ -262,7 +271,17 @@ export const updateDocument = async <
             },
             req,
           })) || {},
+        skipValidation: unpublishSpecificLocale ? true : false,
       })
+
+      if (
+        unpublishSpecificLocale &&
+        snapshotToSave &&
+        Object.keys(result).length <= 1 &&
+        result.id
+      ) {
+        result = snapshotToSave
+      }
     }
   }
 
@@ -291,6 +310,8 @@ export const updateDocument = async <
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
+
+    // Publishing - save main collection document
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
@@ -316,6 +337,7 @@ export const updateDocument = async <
       publishSpecificLocale,
       req,
       snapshot: snapshotToSave,
+      unpublishSpecificLocale,
     })
   }
 

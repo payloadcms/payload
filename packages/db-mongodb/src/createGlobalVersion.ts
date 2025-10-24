@@ -16,6 +16,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     req,
     returning,
     snapshot,
+    unpublishedLocale,
     updatedAt,
     versionData,
   },
@@ -34,6 +35,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     latest: true,
     publishedLocale,
     snapshot,
+    unpublishedLocale,
     updatedAt,
     version: versionData,
   }

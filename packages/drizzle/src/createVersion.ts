@@ -21,6 +21,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     returning,
     select,
     snapshot,
+    unpublishedLocale,
     updatedAt,
     versionData,
   }: CreateVersionArgs<T>,
@@ -43,6 +44,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     parent,
     publishedLocale,
     snapshot,
+    unpublishedLocale,
     updatedAt,
     version,
   }

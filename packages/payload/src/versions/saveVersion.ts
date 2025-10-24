@@ -21,7 +21,12 @@ type Args<T extends JsonObject = JsonObject> = {
   publishSpecificLocale?: string
   req?: PayloadRequest
   select?: SelectType
+  /**
+   * If present, this is the latest document which should have
+   * all **draft and published** data.
+   */
   snapshot?: any
+  unpublishSpecificLocale?: string
 }
 
 export const saveVersion = async <TData extends JsonObject = JsonObject>({
@@ -37,6 +42,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   req,
   select,
   snapshot,
+  unpublishSpecificLocale,
 }: Args<TData>): Promise<JsonObject> => {
   let result: JsonObject | undefined
   let createNewVersion = true
@@ -136,6 +142,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
         publishedLocale: publishSpecificLocale || undefined,
         req,
         select: getQueryDraftsSelect({ select }),
+        unpublishedLocale: unpublishSpecificLocale || undefined,
         updatedAt: now,
         versionData,
       }

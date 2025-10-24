@@ -28,6 +28,7 @@ export const VersionPillLabel: React.FC<{
     [key: string]: unknown
     id: number | string
     publishedLocale?: string
+    unpublishedLocale?: string
     updatedAt?: string
     version: {
       [key: string]: unknown
@@ -85,15 +86,14 @@ export const VersionPillLabel: React.FC<{
     ? formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })
     : null
 
-  const localeCode = Array.isArray(doc.publishedLocale)
-    ? doc.publishedLocale[0]
-    : doc.publishedLocale
+  const getLocaleLabel = (input) => {
+    const code = Array.isArray(input) ? input[0] : input
+    const loc = localization && localization?.locales?.find((l) => l.code === code)
+    return loc?.label?.[i18n?.language] || loc?.label || null
+  }
 
-  const locale =
-    localization && localization?.locales
-      ? localization.locales.find((loc) => loc.code === localeCode)
-      : null
-  const localeLabel = locale ? locale?.label?.[i18n?.language] || locale?.label : null
+  const unpublishedLocaleLabel = getLocaleLabel(doc.unpublishedLocale)
+  const localeLabel = getLocaleLabel(doc.publishedLocale)
 
   return (
     <div className={baseClass}>
@@ -117,6 +117,11 @@ export const VersionPillLabel: React.FC<{
         </React.Fragment>
       )}
       {localeLabel && <Pill size="small">{localeLabel}</Pill>}
+      {unpublishedLocaleLabel && (
+        <Pill size="small">
+          {unpublishedLocaleLabel} {t('version:unpublished')}
+        </Pill>
+      )}
     </div>
   )
 }
