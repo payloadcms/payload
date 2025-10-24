@@ -1,13 +1,13 @@
-import type { Block, ClientField, Field } from '../fields/config/types.js'
+import type { Block, ClientField } from '../fields/config/types.js'
 import type { SanitizedConfig } from '../index.js'
 import type { JsonObject } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 
-type FilterDataToSelectedLocalesArgs<TFieldType extends ClientField = ClientField | Field> = {
+type FilterDataToSelectedLocalesArgs<TFields extends ClientField = ClientField> = {
   configBlockReferences: SanitizedConfig['blocks']
   data: JsonObject
-  fields: TFieldType[]
+  fields: TFields[]
   parentIsLocalized?: boolean
   selectedLocales: string[]
 }
@@ -18,13 +18,13 @@ type FilterDataToSelectedLocalesArgs<TFieldType extends ClientField = ClientFiel
  * For localized fields, if selectedLocales is provided, returns only those locales.
  * If selectedLocales is not provided and field is localized, returns all locales.
  */
-export function filterDataToSelectedLocales<TFieldType = ClientField | Field>({
+export function filterDataToSelectedLocales<TFields = ClientField>({
   configBlockReferences,
   data,
   fields,
   parentIsLocalized = false,
   selectedLocales,
-}: FilterDataToSelectedLocalesArgs<TFieldType>): JsonObject {
+}: FilterDataToSelectedLocalesArgs<TFields>): JsonObject {
   if (!data || typeof data !== 'object') {
     return data
   }
