@@ -1,13 +1,13 @@
-import type { Block, ClientField } from '../fields/config/types.js'
-import type { SanitizedConfig } from '../index.js'
+import type { ClientBlock, ClientField, Field, FlattenedBlock } from '../fields/config/types.js'
+import type { ClientConfig, SanitizedConfig } from '../index.js'
 import type { JsonObject } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 
-type FilterDataToSelectedLocalesArgs<TFields extends ClientField = ClientField> = {
-  configBlockReferences: SanitizedConfig['blocks']
+type FilterDataToSelectedLocalesArgs = {
+  configBlockReferences: ClientConfig['blocks'] | SanitizedConfig['blocks']
   data: JsonObject
-  fields: TFields[]
+  fields: (ClientField | Field)[]
   parentIsLocalized?: boolean
   selectedLocales: string[]
 }
@@ -18,13 +18,15 @@ type FilterDataToSelectedLocalesArgs<TFields extends ClientField = ClientField> 
  * For localized fields, if selectedLocales is provided, returns only those locales.
  * If selectedLocales is not provided and field is localized, returns all locales.
  */
-export function filterDataToSelectedLocales<TFields = ClientField>({
+export function filterDataToSelectedLocales({
   configBlockReferences,
   data,
-  fields,
+  fields: _fields,
   parentIsLocalized = false,
   selectedLocales,
-}: FilterDataToSelectedLocalesArgs<TFields>): JsonObject {
+}: FilterDataToSelectedLocalesArgs): JsonObject {
+  const fields = _fields as ClientField[]
+
   if (!data || typeof data !== 'object') {
     return data
   }
@@ -54,12 +56,16 @@ export function filterDataToSelectedLocales<TFields = ClientField>({
         case 'blocks': {
           if (field.name in data && Array.isArray(data[field.name])) {
             result[field.name] = data[field.name].map((blockData: JsonObject) => {
-              let block: Block | undefined
-              if (field.blockReferences) {
-                block = configBlockReferences
-                  ? configBlockReferences.find((b) => b.slug === blockData.blockType)
-                  : undefined
-              } else {
+              let block: ClientBlock | FlattenedBlock | undefined
+              if (configBlockReferences && field.blockReferences) {
+                for (const blockOrReference of field.blockReferences) {
+                  if (typeof blockOrReference === 'string') {
+                    block = configBlockReferences.find((b) => b.slug === blockData.blockType)
+                  } else {
+                    block = blockOrReference
+                  }
+                }
+              } else if (field.blocks) {
                 block = field.blocks.find((b) => b.slug === blockData.blockType)
               }
 
@@ -67,7 +73,7 @@ export function filterDataToSelectedLocales<TFields = ClientField>({
                 return filterDataToSelectedLocales({
                   configBlockReferences,
                   data: blockData,
-                  fields: block.fields,
+                  fields: block?.fields || [],
                   parentIsLocalized: fieldIsLocalized,
                   selectedLocales,
                 })
