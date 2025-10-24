@@ -1,8 +1,8 @@
-/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -112,6 +112,7 @@ export function DefaultEditView({
     onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
+  const { closeModal } = useModal()
 
   const isInDrawer = Boolean(drawerSlug)
 
@@ -175,17 +176,19 @@ export function DefaultEditView({
       (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
   )
 
-  const preventLeaveWithoutSaving =
-    typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled
-
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-
   const isLockExpired = Date.now() > lockExpiryTime
+
+  const preventLeaveWithoutSaving =
+    !isReadOnlyForIncomingUser &&
+    (typeof disableLeaveWithoutSaving !== 'undefined'
+      ? !disableLeaveWithoutSaving
+      : !autosaveEnabled)
 
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
@@ -253,16 +256,14 @@ export function DefaultEditView({
         nextPath.includes(path),
       )
 
-      // Only retain the lock if the user is still viewing the document
-      if (!isInternalView) {
-        if (isLockOwnedByCurrentUser) {
-          try {
-            await unlockDocument(id, collectionSlug ?? globalSlug)
-            setDocumentIsLocked(false)
-            setCurrentEditor(null)
-          } catch (err) {
-            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
-          }
+      // Remove the lock if the user is navigating away from the document view they have locked
+      if (isLockOwnedByCurrentUser && !isInternalView) {
+        try {
+          await unlockDocument(id, collectionSlug ?? globalSlug)
+          setDocumentIsLocked(false)
+          setCurrentEditor(null)
+        } catch (err) {
+          console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
         }
       }
     }
@@ -577,7 +578,7 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && (
+          {preventLeaveWithoutSaving && (
             <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
           )}
           {!isInDrawer && (
@@ -675,6 +676,7 @@ export function DefaultEditView({
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
+                          // eslint-disable-next-line react-compiler/react-compiler
                           useAPIKey={auth.useAPIKey}
                           username={data?.username}
                           verify={auth.verify}
