@@ -113,7 +113,7 @@ export function UploadInput(props: UploadInputProps) {
     }[]
   >()
 
-  const [activeRelationTo, setActiveRelationTo] = React.useState<string>(
+  const [activeRelationTo] = React.useState<string>(
     Array.isArray(relationTo) ? relationTo[0] : relationTo,
   )
 
@@ -635,6 +635,7 @@ export function UploadInput(props: UploadInputProps) {
                 readonly={readOnly}
                 reloadDoc={reloadDoc}
                 serverURL={serverURL}
+                showCollectionSlug={Array.isArray(relationTo)}
               />
             ) : (
               <div className={`${baseClass}__loadingRows`}>
@@ -655,6 +656,7 @@ export function UploadInput(props: UploadInputProps) {
                 readonly={readOnly}
                 reloadDoc={reloadDoc}
                 serverURL={serverURL}
+                showCollectionSlug={Array.isArray(relationTo)}
               />
             ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
               <>
