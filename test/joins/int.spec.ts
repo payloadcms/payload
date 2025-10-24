@@ -1844,6 +1844,7 @@ describe('Joins Field', () => {
       collection: 'posts',
       data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
     })
+
     const found = await payload.find({
       collection: 'categories',
       where: {

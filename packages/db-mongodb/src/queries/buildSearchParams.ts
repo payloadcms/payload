@@ -114,7 +114,7 @@ export async function buildSearchParam({
 
     const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
 
-    if (rawQuery) {
+    if (rawQuery && paths.length === 1) {
       return { value: rawQuery }
     }
 
