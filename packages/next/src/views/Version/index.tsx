@@ -213,7 +213,12 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config: payload.config, i18n, importMap: payload.importMap, user }),
+    config: getClientConfig({
+      config: payload.config,
+      i18n,
+      importMap: payload.importMap,
+      user,
+    }),
     globalSlug,
     i18n,
     payload,

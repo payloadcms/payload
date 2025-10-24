@@ -39,8 +39,8 @@ export {
 } from '../fields/config/types.js'
 
 export { getFieldPaths } from '../fields/getFieldPaths.js'
-export * from '../fields/validations.js'
 
+export * from '../fields/validations.js'
 export type {
   FolderBreadcrumb,
   FolderDocumentItemKey,
@@ -52,13 +52,15 @@ export type {
 } from '../folders/types.js'
 
 export { buildFolderWhereConstraints } from '../folders/utils/buildFolderWhereConstraints.js'
+
 export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 export { validOperators, validOperatorSet } from '../types/constants.js'
-
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
+
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
+export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 
 export {
