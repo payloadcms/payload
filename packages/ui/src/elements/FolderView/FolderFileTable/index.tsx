@@ -26,6 +26,7 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
     documents,
     focusedRowIndex,
     onItemClick,
+    onItemDrag,
     onItemKeyPress,
     selectedItemKeys,
     subfolders,
@@ -142,6 +143,12 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                 void onItemClick({
                   event,
                   index: rowIndex,
+                  item: subfolder,
+                })
+              }}
+              onDrag={(event) => {
+                void onItemDrag({
+                  event,
                   item: subfolder,
                 })
               }}

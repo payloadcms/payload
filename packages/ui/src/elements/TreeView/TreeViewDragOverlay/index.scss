@@ -1,0 +1,37 @@
+.tree-view-drag-overlay {
+  &__container {
+    background: var(--theme-elevation-0);
+    border: 1px solid var(--theme-elevation-400);
+    border-radius: var(--style-radius-s);
+    box-shadow: var(--style-shadow-lg);
+    opacity: 0.95;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.5);
+    padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
+    position: relative;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-success-500);
+    color: var(--theme-elevation-0);
+    border-radius: 50%;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+}
