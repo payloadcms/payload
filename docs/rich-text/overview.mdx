@@ -309,6 +309,30 @@ You can customize the placeholder (the text that appears in the editor when it's
 }
 ```
 
+## Views
+
+Views allow you to customize how Lexical nodes render in both the admin panel and frontend. You can define multiple named views (like `default`, `frontend`, `debug`) and switch between them using the built-in view selector.
+
+```ts
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const Posts = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      editor: lexicalEditor({
+        // Import path with #exportName to specify which view map to use
+        views: './views.js#postViews',
+      }),
+    },
+  ],
+}
+```
+
+Learn more about [Views](/docs/rich-text/views).
+
 ## Detecting empty editor state
 
 When you first type into a rich text field and subsequently delete everything through the admin panel, its value changes from `null` to a JSON object containing an empty paragraph.

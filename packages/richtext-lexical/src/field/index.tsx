@@ -26,6 +26,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     field,
     lexicalEditorConfig = defaultEditorLexicalConfig,
     schemaPath,
+    views,
   } = props
 
   const { config } = useConfig()
@@ -73,6 +74,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     finalSanitizedEditorConfig,
     lexicalEditorConfig,
     schemaPath,
+    views,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (

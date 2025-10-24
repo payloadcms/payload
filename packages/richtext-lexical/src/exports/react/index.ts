@@ -19,6 +19,7 @@ export { defaultJSXConverters } from '../../features/converters/lexicalToJSX/con
 export { convertLexicalNodesToJSX } from '../../features/converters/lexicalToJSX/converter/index.js'
 export type {
   JSXConverter,
+  JSXConverterArgs,
   JSXConverters,
   SerializedLexicalNodeWithParent,
 } from '../../features/converters/lexicalToJSX/converter/types.js'
