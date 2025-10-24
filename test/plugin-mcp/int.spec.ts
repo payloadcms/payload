@@ -49,13 +49,13 @@ async function parseStreamResponse(response: Response): Promise<any> {
   }
 }
 
-const getApiKey = async (): Promise<string> => {
+const getApiKey = async (enableUpdate = false, enableDelete = false): Promise<string> => {
   const doc = await payload.create({
     collection: 'payload-mcp-api-keys',
     data: {
       enableAPIKey: true,
       label: 'Test API Key',
-      posts: { find: true, create: true },
+      posts: { find: true, create: true, update: enableUpdate, delete: enableDelete },
       apiKey: randomUUID(),
       user: userId,
     },
@@ -381,5 +381,282 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain('"title": "Test Post for Finding"')
     expect(json.result.content[1].type).toBe('text')
     expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
+  })
+
+  describe('Localization', () => {
+    it('should include locale parameters in tool schemas', async () => {
+      const apiKey = await getApiKey(true, true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result.tools).toBeDefined()
+
+      // Check createPosts has locale parameters
+      const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
+      expect(createTool).toBeDefined()
+      expect(createTool.inputSchema.properties.locale).toBeDefined()
+      expect(createTool.inputSchema.properties.locale.type).toBe('string')
+      expect(createTool.inputSchema.properties.locale.description).toContain('locale code')
+      expect(createTool.inputSchema.properties.fallbackLocale).toBeDefined()
+
+      // Check updatePosts has locale parameters
+      const updateTool = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      expect(updateTool).toBeDefined()
+      expect(updateTool.inputSchema.properties.locale).toBeDefined()
+      expect(updateTool.inputSchema.properties.fallbackLocale).toBeDefined()
+
+      // Check findPosts has locale parameters
+      const findTool = json.result.tools.find((t: any) => t.name === 'findPosts')
+      expect(findTool).toBeDefined()
+      expect(findTool.inputSchema.properties.locale).toBeDefined()
+      expect(findTool.inputSchema.properties.fallbackLocale).toBeDefined()
+
+      // Check deletePosts has locale parameters
+      const deleteTool = json.result.tools.find((t: any) => t.name === 'deletePosts')
+      expect(deleteTool).toBeDefined()
+      expect(deleteTool.inputSchema.properties.locale).toBeDefined()
+      expect(deleteTool.inputSchema.properties.fallbackLocale).toBeDefined()
+    })
+
+    it('should create post with specific locale', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              title: 'Hello World',
+              content: 'This is my first post in English',
+              locale: 'en',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('Resource created successfully')
+      expect(json.result.content[0].text).toContain('"title": "Title Override: Hello World"')
+      expect(json.result.content[0].text).toContain('"content": "This is my first post in English"')
+    })
+
+    it('should update post to add translation', async () => {
+      // First create a post in English
+      const englishPost = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Title',
+          content: 'English Content',
+        },
+      })
+
+      // Update with Spanish translation via MCP
+      const apiKey = await getApiKey(true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePosts',
+            arguments: {
+              id: englishPost.id,
+              title: 'Título Español',
+              content: 'Contenido Español',
+              locale: 'es',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('Document updated successfully')
+      expect(json.result.content[0].text).toContain('"title": "Title Override: Título Español"')
+      expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
+    })
+
+    it('should find post in specific locale', async () => {
+      // Create a post with English and Spanish translations
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Post',
+          content: 'English Content',
+        },
+      })
+
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Publicación Española',
+          content: 'Contenido Español',
+        },
+        locale: 'es',
+      })
+
+      // Find in Spanish via MCP
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              locale: 'es',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('"title": "Publicación Española"')
+      expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
+    })
+
+    it('should find post with locale "all"', async () => {
+      // Create a post with multiple translations
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Title',
+          content: 'English Content',
+        },
+      })
+
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Título Español',
+          content: 'Contenido Español',
+        },
+        locale: 'es',
+      })
+
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Titre Français',
+          content: 'Contenu Français',
+        },
+        locale: 'fr',
+      })
+
+      // Find with locale: all via MCP
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              locale: 'all',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      const responseText = json.result.content[0].text
+
+      // Should contain locale objects with all translations
+      expect(responseText).toContain('"en":')
+      expect(responseText).toContain('"es":')
+      expect(responseText).toContain('"fr":')
+      expect(responseText).toContain('English Title')
+      expect(responseText).toContain('Título Español')
+      expect(responseText).toContain('Titre Français')
+    })
+
+    it('should use fallback locale when translation does not exist', async () => {
+      // Create a post only in English with explicit content
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Only Title',
+        },
+        locale: 'en',
+      })
+
+      // Try to find in French (which doesn't exist)
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              locale: 'fr',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      // Should fallback to English (with default value for content)
+      expect(json.result.content[0].text).toContain('"title": "English Only Title"')
+      expect(json.result.content[0].text).toContain('"content": "Hello World."')
+    })
   })
 })

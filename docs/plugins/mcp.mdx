@@ -31,6 +31,8 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
   - You can allow / disallow `find`, `create`, `update`, and `delete` operations for each collection
   - You can to allow / disallow capabilities in real time
   - You can define your own Prompts, Tools and Resources available over MCP
+- Full support for Payload's localization features with `locale` and `fallbackLocale` parameters
+- HTTP-based MCP server compatible with AI tools supporting the Model Context Protocol
 
 ## Installation
 
@@ -68,6 +70,51 @@ const config = buildConfig({
 
 export default config
 ```
+
+## Connecting AI Tools
+
+After installing and configuring the plugin, you can connect AI tools that support the Model Context Protocol (MCP) to your Payload server.
+
+### Step 1: Create an API Key
+
+1. Start your Payload server
+2. Navigate to your admin panel at `http://localhost:3000/admin`
+3. Go to **MCP → API Keys**
+4. Click **Create New**
+5. Configure permissions for each collection (enable find, create, update, delete as needed)
+6. Click **Create** and copy the generated API key
+
+### Step 2: Configure Your MCP Client
+
+Add your Payload MCP server to your MCP client's configuration file (typically `.mcp.json` or similar):
+
+```json
+{
+  "mcpServers": {
+    "payload-cms": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+Replace `YOUR_API_KEY_HERE` with the API key you created in Step 1.
+
+**Configuration Notes:**
+
+- **URL:** If you're using a custom `basePath` in your MCP plugin configuration, update the URL accordingly (e.g., `http://localhost:3000/custom-path/mcp`)
+- **Production:** For production deployments, use your domain instead of `localhost` (e.g., `https://yourdomain.com/api/mcp`)
+- **Headers:** The `Authorization` header with Bearer token is required for authentication
+
+### Step 3: Restart Your MCP Client
+
+Restart your MCP client for the configuration to take effect. The Payload MCP server should now be available, and the AI tool will be able to interact with your configured collections.
+
+Refer to your specific MCP client's documentation for additional configuration options and setup instructions.
 
 ### Options
 
@@ -141,6 +188,172 @@ mcpPlugin({
   // ... other options
 })
 ```
+
+## Localization Support
+
+The MCP plugin fully supports Payload's localization features, working the same way as Payload's REST API. All resource operations (create, update, find, delete) accept `locale` and `fallbackLocale` parameters, allowing you to manage multilingual content through MCP.
+
+### Prerequisites
+
+First, configure localization in your Payload config:
+
+```ts
+const config = buildConfig({
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'fr', label: 'French' },
+    ],
+  },
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true, // Enable localization for this field
+        },
+        {
+          name: 'content',
+          type: 'richText',
+          localized: true,
+        },
+      ],
+    },
+  ],
+  plugins: [
+    mcpPlugin({
+      collections: {
+        posts: {
+          enabled: true,
+        },
+      },
+    }),
+  ],
+})
+```
+
+### Creating Localized Content
+
+Create content in a specific locale using the `locale` parameter:
+
+```ts
+// Via MCP tool call
+{
+  "name": "createPosts",
+  "arguments": {
+    "title": "Hello World",
+    "content": "This is my first post in English",
+    "locale": "en"
+  }
+}
+```
+
+### Adding Translations
+
+Add translations to existing content by updating with a different locale:
+
+```ts
+// First, create in English
+{
+  "name": "createPosts",
+  "arguments": {
+    "title": "Hello World",
+    "content": "English content"
+  }
+}
+
+// Then, add Spanish translation
+{
+  "name": "updatePosts",
+  "arguments": {
+    "id": "document-id",
+    "title": "Hola Mundo",
+    "content": "Contenido en español",
+    "locale": "es"
+  }
+}
+```
+
+### Retrieving Localized Content
+
+Retrieve content in a specific locale:
+
+```ts
+// Get Spanish version
+{
+  "name": "findPosts",
+  "arguments": {
+    "id": "document-id",
+    "locale": "es"
+  }
+}
+```
+
+Retrieve all translations at once using `locale: 'all'`:
+
+```ts
+{
+  "name": "findPosts",
+  "arguments": {
+    "id": "document-id",
+    "locale": "all"
+  }
+}
+
+// Response will include all translations:
+// {
+//   "title": {
+//     "en": "Hello World",
+//     "es": "Hola Mundo",
+//     "fr": "Bonjour le Monde"
+//   },
+//   "content": { ... }
+// }
+```
+
+### Fallback Locales
+
+When requesting content in a locale that doesn't have a translation, Payload will automatically fall back to the default locale:
+
+```ts
+// Request French content when only English exists
+{
+  "name": "findPosts",
+  "arguments": {
+    "id": "document-id",
+    "locale": "fr"
+  }
+}
+
+// Returns English content (default locale) as fallback
+```
+
+You can also specify a custom fallback locale:
+
+```ts
+{
+  "name": "findPosts",
+  "arguments": {
+    "id": "document-id",
+    "locale": "fr",
+    "fallbackLocale": "es"  // Use Spanish as fallback instead of default
+  }
+}
+```
+
+### Locale Parameters
+
+All resource operation tools support these parameters:
+
+| Parameter        | Type     | Description                                                                                     |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `locale`         | `string` | The locale code to use for the operation (e.g., 'en', 'es'). Use 'all' to retrieve all locales. |
+| `fallbackLocale` | `string` | Optional fallback locale code to use when the requested locale is not available.                |
 
 ## Custom Prompts
 

@@ -21,6 +21,24 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [Users, Media, Posts, Products],
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: [
+      {
+        code: 'en',
+        label: 'English',
+      },
+      {
+        code: 'es',
+        label: 'Spanish',
+      },
+      {
+        code: 'fr',
+        label: 'French',
+      },
+    ],
+  },
   onInit: seed,
   plugins: [
     mcpPlugin({
@@ -43,6 +61,8 @@ export default buildConfigWithDefaults({
           enabled: {
             find: true,
             create: true,
+            update: true,
+            delete: true,
           },
           description: 'This is a Payload collection with Post documents.',
           override: (original: Record<string, unknown>, req) => {
