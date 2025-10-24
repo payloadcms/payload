@@ -13,7 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
-import fieldTypes from './field-types.js'
+import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
 import './index.scss'
 
 const baseClass = 'where-builder'
@@ -69,7 +69,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     async ({ andIndex, field, orIndex, relation }) => {
       const newConditions = [...conditions]
 
-      const defaultOperator = fieldTypes[field.field.type].operators[0].value
+      const defaultOperator = fieldTypeConditions[field.field.type].operators[0].value
 
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {
@@ -95,30 +95,21 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
-    async ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
+    async ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
       const existingCondition = conditions[orIndex].and[andIndex]
 
-      const defaults = fieldTypes[field.field.type]
-      const operator = incomingOperator || defaults.operators[0].value
-
       if (typeof existingCondition === 'object' && field.value) {
-        const value = valueArg ?? existingCondition?.[operator]
-
-        const valueChanged = value !== existingCondition?.[String(field.value)]?.[String(operator)]
-
-        const operatorChanged =
-          operator !== Object.keys(existingCondition?.[String(field.value)] || {})?.[0]
-
-        if (valueChanged || operatorChanged) {
-          const newRowCondition = {
-            [String(field.value)]: { [operator]: value },
-          }
-
-          const newConditions = [...conditions]
-          newConditions[orIndex].and[andIndex] = newRowCondition
-
-          await handleWhereChange({ or: newConditions })
+        const { validOperator } = getValidFieldOperators({
+          field: field.field,
+          operator: incomingOperator,
+        })
+        const newRowCondition = {
+          [String(field.value)]: { [validOperator]: value },
         }
+
+        const newConditions = [...conditions]
+        newConditions[orIndex].and[andIndex] = newRowCondition
+        await handleWhereChange({ or: newConditions })
       }
     },
     [conditions, handleWhereChange],

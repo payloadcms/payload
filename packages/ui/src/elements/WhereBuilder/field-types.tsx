@@ -1,4 +1,7 @@
 'use client'
+
+import type { ClientField } from 'payload'
+
 const equalsOperators = [
   {
     label: 'equals',
@@ -25,10 +28,8 @@ export const arrayOperators = [
   },
 ]
 
-const base = [...equalsOperators, ...arrayOperators]
-
 const numeric = [
-  ...base,
+  ...equalsOperators,
   {
     label: 'isGreaterThan',
     value: 'greater_than',
@@ -84,7 +85,7 @@ const contains = {
   value: 'contains',
 }
 
-const fieldTypeConditions: {
+export const fieldTypeConditions: {
   [key: string]: {
     component: string
     operators: { label: string; value: string }[]
@@ -96,23 +97,23 @@ const fieldTypeConditions: {
   },
   code: {
     component: 'Text',
-    operators: [...base, like, notLike, contains],
+    operators: [...equalsOperators, like, notLike, contains],
   },
   date: {
     component: 'Date',
-    operators: [...base, ...numeric],
+    operators: [...equalsOperators, ...numeric],
   },
   email: {
     component: 'Text',
-    operators: [...base, contains],
+    operators: [...equalsOperators, contains],
   },
   json: {
     component: 'Text',
-    operators: [...base, like, contains, notLike, within, intersects],
+    operators: [...equalsOperators, like, contains, notLike, within, intersects],
   },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
+    operators: [...equalsOperators, ...numeric],
   },
   point: {
     component: 'Point',
@@ -120,32 +121,63 @@ const fieldTypeConditions: {
   },
   radio: {
     component: 'Select',
-    operators: [...base],
+    operators: [...equalsOperators],
   },
   relationship: {
     component: 'Relationship',
-    operators: [...base],
+    operators: [...equalsOperators],
   },
   richText: {
     component: 'Text',
-    operators: [...base, like, notLike, contains],
+    operators: [...equalsOperators, like, notLike, contains],
   },
   select: {
     component: 'Select',
-    operators: [...base],
+    operators: [...equalsOperators],
   },
   text: {
     component: 'Text',
-    operators: [...base, like, notLike, contains],
+    operators: [...equalsOperators, like, notLike, contains],
   },
   textarea: {
     component: 'Text',
-    operators: [...base, like, notLike, contains],
+    operators: [...equalsOperators, like, notLike, contains],
   },
   upload: {
     component: 'Text',
-    operators: [...base],
+    operators: [...equalsOperators],
   },
 }
 
-export default fieldTypeConditions
+export const getValidFieldOperators = ({
+  field,
+  operator,
+}: {
+  field: ClientField
+  operator?: string
+}): {
+  validOperator: string
+  validOperators: {
+    label: string
+    value: string
+  }[]
+} => {
+  let validOperators: {
+    label: string
+    value: string
+  }[] = []
+
+  if ('hasMany' in field && field.hasMany) {
+    validOperators = [...arrayOperators]
+  } else {
+    validOperators = [...fieldTypeConditions[field.type].operators]
+  }
+
+  return {
+    validOperator:
+      operator && validOperators.find(({ value }) => value === operator)
+        ? operator
+        : validOperators[0].value,
+    validOperators,
+  }
+}
