@@ -71,6 +71,7 @@ export type AddCondition = ({
 }) => Promise<void> | void
 
 export type UpdateCondition = ({
+  type,
   andIndex,
   field,
   operator,
@@ -81,6 +82,7 @@ export type UpdateCondition = ({
   field: ReducedField
   operator: string
   orIndex: number
+  type: 'field' | 'operator' | 'value'
   value: Value
 }) => Promise<void> | void
 
