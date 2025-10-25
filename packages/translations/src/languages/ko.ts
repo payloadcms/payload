@@ -454,7 +454,9 @@ export const koTranslations: DefaultTranslationsObject = {
     copyTo: '복사하기',
     copyToLocale: '로케일로 복사',
     localeToPublish: '발행할 장소',
+    selectedLocales: '선택된 로케일들',
     selectLocaleToCopy: '복사할 지역을 선택하십시오.',
+    selectLocaleToDuplicate: '로케일을 복제할 선택하세요',
   },
   operators: {
     contains: '포함',
