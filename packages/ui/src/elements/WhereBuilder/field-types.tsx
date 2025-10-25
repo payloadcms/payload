@@ -28,8 +28,10 @@ export const arrayOperators = [
   },
 ]
 
+const base = [...equalsOperators, ...arrayOperators]
+
 const numeric = [
-  ...equalsOperators,
+  ...base,
   {
     label: 'isGreaterThan',
     value: 'greater_than',
@@ -93,27 +95,27 @@ export const fieldTypeConditions: {
 } = {
   checkbox: {
     component: 'Text',
-    operators: equalsOperators,
+    operators: [...equalsOperators],
   },
   code: {
     component: 'Text',
-    operators: [...equalsOperators, like, notLike, contains],
+    operators: [...base, like, notLike, contains],
   },
   date: {
     component: 'Date',
-    operators: [...equalsOperators, ...numeric],
+    operators: [...numeric],
   },
   email: {
     component: 'Text',
-    operators: [...equalsOperators, contains],
+    operators: [...base, contains],
   },
   json: {
     component: 'Text',
-    operators: [...equalsOperators, like, contains, notLike, within, intersects],
+    operators: [...base, like, contains, notLike, within, intersects],
   },
   number: {
     component: 'Number',
-    operators: [...equalsOperators, ...numeric],
+    operators: [...numeric],
   },
   point: {
     component: 'Point',
@@ -121,31 +123,31 @@ export const fieldTypeConditions: {
   },
   radio: {
     component: 'Select',
-    operators: [...equalsOperators],
+    operators: [...base],
   },
   relationship: {
     component: 'Relationship',
-    operators: [...equalsOperators],
+    operators: [...base],
   },
   richText: {
     component: 'Text',
-    operators: [...equalsOperators, like, notLike, contains],
+    operators: [...base, like, notLike, contains],
   },
   select: {
     component: 'Select',
-    operators: [...equalsOperators],
+    operators: [...base],
   },
   text: {
     component: 'Text',
-    operators: [...equalsOperators, like, notLike, contains],
+    operators: [...base, like, notLike, contains],
   },
   textarea: {
     component: 'Text',
-    operators: [...equalsOperators, like, notLike, contains],
+    operators: [...base, like, notLike, contains],
   },
   upload: {
     component: 'Text',
-    operators: [...equalsOperators],
+    operators: [...base],
   },
 }
 
@@ -167,11 +169,11 @@ export const getValidFieldOperators = ({
     value: string
   }[] = []
 
-  if ('hasMany' in field && field.hasMany) {
-    if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+  if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+    if ('hasMany' in field && field.hasMany) {
       validOperators = [...equalsOperators]
     } else {
-      validOperators = [...arrayOperators]
+      validOperators = [...base]
     }
   } else {
     validOperators = [...fieldTypeConditions[field.type].operators]

@@ -898,7 +898,6 @@ describe('Relationship Field', () => {
 
     test('should filter on polymorphic hasMany=true relationship field', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
-      await page.goto(url.create)
       await page.goto(url.list)
       await addListFilter({
         page,
@@ -929,7 +928,7 @@ describe('Relationship Field', () => {
       await addListFilter({
         page,
         fieldLabel: 'Relationship Has Many',
-        operatorLabel: 'in',
+        operatorLabel: 'is in',
         value: relatedDoc.id,
         multiSelect: true,
       })
