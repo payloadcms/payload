@@ -91,8 +91,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   user:
     | (User & {
@@ -274,6 +278,16 @@ export interface PayloadMcpApiKey {
     find?: boolean | null;
     /**
      * Allow clients to update media.
+     */
+    update?: boolean | null;
+  };
+  siteSettings?: {
+    /**
+     * Allow clients to find site-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update site-settings global.
      */
     update?: boolean | null;
   };
@@ -533,6 +547,12 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         update?: T;
       };
+  siteSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
   custom?:
     | T
     | {
@@ -607,6 +627,44 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: string;
+  /**
+   * The name of the site
+   */
+  siteName: string;
+  /**
+   * A brief description of the site
+   */
+  siteDescription?: string | null;
+  /**
+   * Enable or disable maintenance mode
+   */
+  maintenanceMode?: boolean | null;
+  /**
+   * Contact email address for the site
+   */
+  contactEmail?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  siteDescription?: T;
+  maintenanceMode?: T;
+  contactEmail?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

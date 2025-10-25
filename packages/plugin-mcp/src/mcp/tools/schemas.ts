@@ -1,6 +1,30 @@
 import { z } from 'zod'
 
 export const toolSchemas = {
+  findGlobal: {
+    description: 'Find a Payload global singleton configuration.',
+    parameters: z.object({
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('Depth of population for relationships'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+        ),
+    }),
+  },
+
   findResources: {
     description: 'Find documents in a Payload collection using Find or FindByID.',
     parameters: z.object({
@@ -98,6 +122,32 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe('Optional: JSON string for where clause to delete multiple documents'),
+    }),
+  },
+
+  updateGlobal: {
+    description: 'Update a Payload global singleton configuration.',
+    parameters: z.object({
+      data: z.string().describe('JSON string containing the data to update'),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('Depth of population for relationships'),
+      draft: z.boolean().optional().default(false).describe('Whether to update as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+        ),
     }),
   },
 

@@ -3,117 +3,49 @@ import type { CollectionConfig } from 'payload'
 import type { PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
+import { createApiKeyFields } from '../utils/createApiKeyFields.js'
 
-const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collections']) => {
-  const enabledCollectionSlugs = Object.keys(collections || {}).filter((collection) => {
-    const fullyEnabled =
-      typeof collections?.[collection]?.enabled === 'boolean' && collections?.[collection]?.enabled
+// Define operations for collections
+const COLLECTION_OPERATIONS = [
+  {
+    name: 'find',
+    description: (slug: string) => `Allow clients to find ${slug}.`,
+    label: 'Find',
+  },
+  {
+    name: 'create',
+    description: (slug: string) => `Allow clients to create ${slug}.`,
+    label: 'Create',
+  },
+  {
+    name: 'update',
+    description: (slug: string) => `Allow clients to update ${slug}.`,
+    label: 'Update',
+  },
+  {
+    name: 'delete',
+    description: (slug: string) => `Allow clients to delete ${slug}.`,
+    label: 'Delete',
+  },
+]
 
-    if (fullyEnabled) {
-      return true
-    }
-
-    const partiallyEnabled =
-      typeof collections?.[collection]?.enabled !== 'boolean' &&
-      ((typeof collections?.[collection]?.enabled?.find === 'boolean' &&
-        collections?.[collection]?.enabled?.find === true) ||
-        (typeof collections?.[collection]?.enabled?.create === 'boolean' &&
-          collections?.[collection]?.enabled?.create === true) ||
-        (typeof collections?.[collection]?.enabled?.update === 'boolean' &&
-          collections?.[collection]?.enabled?.update === true) ||
-        (typeof collections?.[collection]?.enabled?.delete === 'boolean' &&
-          collections?.[collection]?.enabled?.delete === true))
-
-    if (partiallyEnabled) {
-      return true
-    }
-  })
-  return enabledCollectionSlugs.map((enabledCollectionSlug) => ({
-    type: 'collapsible' as const,
-    admin: {
-      position: 'sidebar' as const,
-    },
-    fields: [
-      {
-        name: `${toCamelCase(enabledCollectionSlug)}`,
-        type: 'group' as const,
-        fields: [
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.find === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.find === true)
-            ? [
-                {
-                  name: `find`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to find ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Find',
-                },
-              ]
-            : []),
-
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.create === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.create === true)
-            ? [
-                {
-                  name: `create`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to create ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Create',
-                },
-              ]
-            : []),
-
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.update === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.update === true)
-            ? [
-                {
-                  name: `update`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to update ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Update',
-                },
-              ]
-            : []),
-
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.delete === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.delete === true)
-            ? [
-                {
-                  name: `delete`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to delete ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Delete',
-                },
-              ]
-            : []),
-        ],
-      },
-    ],
-    label: `${enabledCollectionSlug.charAt(0).toUpperCase() + toCamelCase(enabledCollectionSlug).slice(1)}`,
-  }))
-}
+// Define operations for globals
+const GLOBAL_OPERATIONS = [
+  {
+    name: 'find',
+    description: (slug: string) => `Allow clients to find ${slug} global.`,
+    label: 'Find',
+  },
+  {
+    name: 'update',
+    description: (slug: string) => `Allow clients to update ${slug} global.`,
+    label: 'Update',
+  },
+]
 
 export const createAPIKeysCollection = (
   collections: PluginMCPServerConfig['collections'],
+  globals: PluginMCPServerConfig['globals'],
   customTools: Array<{ description: string; name: string }> = [],
   experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] = {},
 ): CollectionConfig => {
@@ -165,7 +97,9 @@ export const createAPIKeysCollection = (
         },
       },
 
-      ...addEnabledCollectionTools(collections),
+      ...createApiKeyFields(collections, 'collection', COLLECTION_OPERATIONS),
+
+      ...createApiKeyFields(globals, 'global', GLOBAL_OPERATIONS),
 
       ...(customTools.length > 0
         ? [
