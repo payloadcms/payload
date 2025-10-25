@@ -84,7 +84,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
+  migrate: (args?: { failOnDev: boolean, migrations?: Migration[] }) => Promise<void>
   /**
    * Run any migration down functions that have been performed
    */
