@@ -31,7 +31,7 @@ services:
 
   # Uncomment the following to use mongodb
   # mongo:
-  #   image: mongo:latest
+  #   image: mongo:8
   #   ports:
   #     - '27017:27017'
   #   command:
