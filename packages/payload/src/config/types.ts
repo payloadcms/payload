@@ -130,7 +130,12 @@ export type BinScriptConfig = {
   scriptPath: string
 }
 
-export type BinScript = (config: SanitizedConfig) => Promise<void> | void
+export type BinScriptResult = {
+  exitCode?: number
+  payload?: Payload
+} | void
+
+export type BinScript = (config: SanitizedConfig) => BinScriptResult | Promise<BinScriptResult>
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
