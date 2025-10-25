@@ -1,13 +1,13 @@
-import type { ClientBlock, ClientField, Field, FlattenedBlock } from '../fields/config/types.js'
-import type { ClientConfig, SanitizedConfig } from '../index.js'
+import type { Block, Field, FlattenedBlock } from '../fields/config/types.js'
+import type { SanitizedConfig } from '../index.js'
 import type { JsonObject } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 
 type FilterDataToSelectedLocalesArgs = {
-  configBlockReferences: ClientConfig['blocks'] | SanitizedConfig['blocks']
-  data: JsonObject
-  fields: (ClientField | Field)[]
+  configBlockReferences: SanitizedConfig['blocks']
+  docWithLocales: JsonObject
+  fields: Field[]
   parentIsLocalized?: boolean
   selectedLocales: string[]
 }
@@ -20,15 +20,13 @@ type FilterDataToSelectedLocalesArgs = {
  */
 export function filterDataToSelectedLocales({
   configBlockReferences,
-  data,
-  fields: _fields,
+  docWithLocales,
+  fields,
   parentIsLocalized = false,
   selectedLocales,
 }: FilterDataToSelectedLocalesArgs): JsonObject {
-  const fields = _fields as ClientField[]
-
-  if (!data || typeof data !== 'object') {
-    return data
+  if (!docWithLocales || typeof docWithLocales !== 'object') {
+    return docWithLocales
   }
 
   const result: JsonObject = {}
@@ -39,11 +37,11 @@ export function filterDataToSelectedLocales({
 
       switch (field.type) {
         case 'array': {
-          if (Array.isArray(data[field.name])) {
-            result[field.name] = data[field.name].map((item: JsonObject) =>
+          if (Array.isArray(docWithLocales[field.name])) {
+            result[field.name] = docWithLocales[field.name].map((item: JsonObject) =>
               filterDataToSelectedLocales({
                 configBlockReferences,
-                data: item,
+                docWithLocales: item,
                 fields: field.fields,
                 parentIsLocalized: fieldIsLocalized,
                 selectedLocales,
@@ -54,9 +52,9 @@ export function filterDataToSelectedLocales({
         }
 
         case 'blocks': {
-          if (field.name in data && Array.isArray(data[field.name])) {
-            result[field.name] = data[field.name].map((blockData: JsonObject) => {
-              let block: ClientBlock | FlattenedBlock | undefined
+          if (field.name in docWithLocales && Array.isArray(docWithLocales[field.name])) {
+            result[field.name] = docWithLocales[field.name].map((blockData: JsonObject) => {
+              let block: Block | FlattenedBlock | undefined
               if (configBlockReferences && field.blockReferences) {
                 for (const blockOrReference of field.blockReferences) {
                   if (typeof blockOrReference === 'string') {
@@ -72,7 +70,7 @@ export function filterDataToSelectedLocales({
               if (block) {
                 return filterDataToSelectedLocales({
                   configBlockReferences,
-                  data: blockData,
+                  docWithLocales: blockData,
                   fields: block?.fields || [],
                   parentIsLocalized: fieldIsLocalized,
                   selectedLocales,
@@ -89,12 +87,12 @@ export function filterDataToSelectedLocales({
           // Named groups create a nested data structure
           if (
             fieldAffectsData(field) &&
-            field.name in data &&
-            typeof data[field.name] === 'object'
+            field.name in docWithLocales &&
+            typeof docWithLocales[field.name] === 'object'
           ) {
             result[field.name] = filterDataToSelectedLocales({
               configBlockReferences,
-              data: data[field.name] as JsonObject,
+              docWithLocales: docWithLocales[field.name] as JsonObject,
               fields: field.fields,
               parentIsLocalized: fieldIsLocalized,
               selectedLocales,
@@ -103,7 +101,7 @@ export function filterDataToSelectedLocales({
             // Unnamed groups pass through the same data level
             const nestedResult = filterDataToSelectedLocales({
               configBlockReferences,
-              data,
+              docWithLocales,
               fields: field.fields,
               parentIsLocalized,
               selectedLocales,
@@ -115,8 +113,8 @@ export function filterDataToSelectedLocales({
 
         default: {
           // For all other data-affecting fields (text, number, select, etc.)
-          if (field.name in data) {
-            const value = data[field.name]
+          if (field.name in docWithLocales) {
+            const value = docWithLocales[field.name]
 
             // If the field is localized and has locale data
             if (fieldIsLocalized && value && typeof value === 'object' && !Array.isArray(value)) {
@@ -151,7 +149,7 @@ export function filterDataToSelectedLocales({
           // These pass through the same data level
           const nestedResult = filterDataToSelectedLocales({
             configBlockReferences,
-            data,
+            docWithLocales,
             fields: field.fields,
             parentIsLocalized,
             selectedLocales,
@@ -164,10 +162,10 @@ export function filterDataToSelectedLocales({
           for (const tab of field.tabs) {
             if (tabHasName(tab)) {
               // Named tabs create a nested data structure
-              if (tab.name in data && typeof data[tab.name] === 'object') {
+              if (tab.name in docWithLocales && typeof docWithLocales[tab.name] === 'object') {
                 result[tab.name] = filterDataToSelectedLocales({
                   configBlockReferences,
-                  data: data[tab.name],
+                  docWithLocales: docWithLocales[tab.name],
                   fields: tab.fields,
                   parentIsLocalized,
                   selectedLocales,
@@ -177,7 +175,7 @@ export function filterDataToSelectedLocales({
               // Unnamed tabs pass through the same data level
               const nestedResult = filterDataToSelectedLocales({
                 configBlockReferences,
-                data,
+                docWithLocales,
                 fields: tab.fields,
                 parentIsLocalized,
                 selectedLocales,
