@@ -289,6 +289,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     deleted: 'Ištrinta',
     deletedAt: 'Ištrinta',
     deletedCountSuccessfully: 'Sėkmingai ištrinta {{count}} {{label}}.',
+    deletedInLocale:
+      'Sėkmingai pašalinti visi {{locale}} duomenys. Dokumentas pats nebuvo ištrintas.',
     deletedSuccessfully: 'Sėkmingai ištrinta.',
     deleteLabel: 'Ištrinti {{label}}',
     deletePermanently: 'Praleiskite šiukšliadėžę ir ištrinkite visam laikui',
@@ -329,6 +331,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     goBack: 'Grįžkite',
     groupByLabel: 'Grupuoti pagal {{label}}',
     import: 'Importas',
+    in: 'į',
     isEditing: 'redaguoja',
     item: 'Daiktas',
     items: 'elementai',
