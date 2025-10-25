@@ -94,6 +94,12 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    posts: PostLocalized;
+    'pg-migrations': PgMigrationLocalized;
+    'custom-schema': CustomSchemaLocalized;
+    'blocks-docs': BlocksDocLocalized;
+  };
   collectionsSelect: {
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -131,6 +137,7 @@ export interface Config {
     'global-3': Global3;
     'virtual-relation-global': VirtualRelationGlobal;
   };
+  globalsLocalized: {};
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
@@ -834,6 +841,299 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_localized".
+ */
+export interface PostLocalized {
+  id: string;
+  title: string;
+  category?: (string | null) | Category;
+  categoryID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  categoryTitle?: string | null;
+  categorySimpleText?: string | null;
+  categories?: (string | Category)[] | null;
+  categoriesCustomID?: (number | CategoriesCustomId)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
+  categoryCustomID?: (number | null) | CategoriesCustomId;
+  polymorphicRelations?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
+    | null;
+  localizedPolymorphicRelations?: {
+    en?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'simple';
+              value: string | Simple;
+            }
+        )[]
+      | null;
+    es?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'simple';
+              value: string | Simple;
+            }
+        )[]
+      | null;
+  };
+  localized?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  text?: string | null;
+  number?: number | null;
+  blocks?:
+    | {
+        nested?:
+          | {
+              nested?: unknown[] | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'block-fourth';
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block-third';
+      }[]
+    | null;
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?: {
+      en?:
+        | (
+            | {
+                relationTo: 'categories';
+                value: string | Category;
+              }
+            | {
+                relationTo: 'simple';
+                value: string | Simple;
+              }
+          )[]
+        | null;
+      es?:
+        | (
+            | {
+                relationTo: 'categories';
+                value: string | Category;
+              }
+            | {
+                relationTo: 'simple';
+                value: string | Simple;
+              }
+          )[]
+        | null;
+    };
+    nestedLocalizedText?: {
+      en?: string | null;
+      es?: string | null;
+    };
+    nestedText1?: string | null;
+    nestedText2?: string | null;
+  };
+  D1?: {
+    D2?: {
+      D3?: {
+        D4?: string | null;
+      };
+    };
+  };
+  hasTransaction?: boolean | null;
+  throwAfterChange?: boolean | null;
+  arrayWithIDs?:
+    | {
+        text?: string | null;
+        textLocalized?: {
+          en?: string | null;
+          es?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithIDsLocalized?: {
+    en?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  blocksWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block-first';
+      }[]
+    | null;
+  group?: {
+    text?: string | null;
+  };
+  tab?: {
+    text?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pg-migrations_localized".
+ */
+export interface PgMigrationLocalized {
+  id: string;
+  relation1?: (string | null) | RelationA;
+  myArray?:
+    | {
+        relation2?: (string | null) | RelationB;
+        mySubArray?:
+          | {
+              relation3?: {
+                en?: (string | null) | RelationB;
+                es?: (string | null) | RelationB;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  myGroup?: {
+    relation4?: {
+      en?: (string | null) | RelationB;
+      es?: (string | null) | RelationB;
+    };
+  };
+  myBlocks?:
+    | {
+        relation5?: (string | null) | RelationA;
+        relation6?: {
+          en?: (string | null) | RelationB;
+          es?: (string | null) | RelationB;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-schema_localized".
+ */
+export interface CustomSchemaLocalized {
+  id: string;
+  text?: string | null;
+  localizedText?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  relationship?: (string | RelationA)[] | null;
+  select?: ('a' | 'b' | 'c')[] | null;
+  radio?: ('a' | 'b' | 'c') | null;
+  array?:
+    | {
+        text?: string | null;
+        localizedText?: {
+          en?: string | null;
+          es?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        text?: string | null;
+        localizedText?: {
+          en?: string | null;
+          es?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block-second';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-docs_localized".
+ */
+export interface BlocksDocLocalized {
+  id: string;
+  testBlocksLocalized?: {
+    en?:
+      | {
+          text?: string | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'cta';
+        }[]
+      | null;
+    es?:
+      | {
+          text?: string | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'cta';
+        }[]
+      | null;
+  };
+  testBlocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cta';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

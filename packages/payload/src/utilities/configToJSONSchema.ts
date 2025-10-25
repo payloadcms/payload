@@ -12,10 +12,11 @@ import type { FieldAffectingData, FlattenedField, Option } from '../fields/confi
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
-import { fieldAffectsData } from '../fields/config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
+import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -48,11 +49,19 @@ function buildOptionEnums(options: Option[]): string[] {
 
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
+  {
+    entityDefinitions,
+    localized = false,
+  }: { entityDefinitions: { [k: string]: JSONSchema4 }; localized?: boolean },
 ): JSONSchema4 {
   const properties = [...entities].reduce(
     (acc, { slug }) => {
-      acc[slug] = {
-        $ref: `#/definitions/${slug}`,
+      const definition = `${slug}${localized ? `_localized` : ''}`
+
+      if (definition in entityDefinitions) {
+        acc[`${slug}`] = {
+          $ref: `#/definitions/${slug}${localized ? `_localized` : ''}`,
+        }
       }
 
       return acc
@@ -251,6 +260,13 @@ export function fieldsToJSONSchema(
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   config?: SanitizedConfig,
   i18n?: I18n,
+  {
+    localizedSchema = false,
+    parentIsLocalized = false,
+  }: {
+    localizedSchema?: boolean
+    parentIsLocalized?: boolean
+  } = {},
 ): {
   properties: {
     [k: string]: JSONSchema4
@@ -263,7 +279,7 @@ export function fieldsToJSONSchema(
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field, index) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
-
+        const localized = fieldShouldBeLocalized({ field, parentIsLocalized })
         const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
         if (fieldDescription) {
@@ -286,6 +302,10 @@ export function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                   config,
                   i18n,
+                  {
+                    localizedSchema,
+                    parentIsLocalized: localized,
+                  },
                 ),
               },
             }
@@ -325,6 +345,10 @@ export function fieldsToJSONSchema(
                         interfaceNameDefinitions,
                         config,
                         i18n,
+                        {
+                          localizedSchema,
+                          parentIsLocalized: localized,
+                        },
                       )
 
                       const blockSchema: JSONSchema4 = {
@@ -384,6 +408,10 @@ export function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                   config,
                   i18n,
+                  {
+                    localizedSchema,
+                    parentIsLocalized: localized,
+                  },
                 ),
               }
 
@@ -692,6 +720,10 @@ export function fieldsToJSONSchema(
                 interfaceNameDefinitions,
                 config,
                 i18n,
+                {
+                  localizedSchema,
+                  parentIsLocalized: localized,
+                },
               ),
             }
 
@@ -723,6 +755,25 @@ export function fieldsToJSONSchema(
           }
         }
 
+        if (
+          config &&
+          config.localization &&
+          localizedSchema &&
+          fieldShouldBeLocalized({ field, parentIsLocalized })
+        ) {
+          fieldSchema = {
+            type: 'object',
+            additionalProperties: false,
+            properties: config.localization.localeCodes.reduce(
+              (acc, locale) => {
+                acc[locale] = fieldSchema
+                return acc
+              },
+              {} as NonNullable<JSONSchema4['properties']>,
+            ),
+          }
+        }
+
         if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
           for (const schema of field.typescriptSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema! })
@@ -751,6 +802,7 @@ export function entityToJSONSchema(
   defaultIDType: 'number' | 'text',
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
   i18n?: I18n,
+  localizedSchema: boolean = false,
 ): JSONSchema4 {
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
@@ -806,13 +858,17 @@ export function entityToJSONSchema(
   const jsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
-    title,
+    title: localizedSchema ? `${title}_localized` : title,
     ...fieldsToJSONSchema(
       collectionIDFieldTypes,
       mutableFields,
       interfaceNameDefinitions,
       config,
       i18n,
+      {
+        localizedSchema,
+        parentIsLocalized: false,
+      },
     ),
   }
 
@@ -1151,6 +1207,18 @@ export function configToJSONSchema(
         interfaceNameDefinitions,
       })
 
+      if (config.localization && traverseForLocalizedFields({ config, fields: entity.fields })) {
+        acc[`${entity.slug}_localized`] = entityToJSONSchema(
+          config,
+          entity,
+          interfaceNameDefinitions,
+          defaultIDType!,
+          collectionIDFieldTypes,
+          i18n,
+          true,
+        )
+      }
+
       if (type === 'global') {
         select.properties!.globalType = {
           type: 'boolean',
@@ -1241,11 +1309,23 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       blocks: blocksDefinition,
-      collections: generateEntitySchemas(config.collections || []),
+      collections: generateEntitySchemas(config.collections || [], { entityDefinitions }),
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
+      ...(config.localization && {
+        collectionsLocalized: generateEntitySchemas(config.collections || [], {
+          entityDefinitions,
+          localized: true,
+        }),
+      }),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
-      globals: generateEntitySchemas(config.globals || []),
+      globals: generateEntitySchemas(config.globals || [], { entityDefinitions }),
+      ...(config.localization && {
+        globalsLocalized: generateEntitySchemas(config.globals || [], {
+          entityDefinitions,
+          localized: true,
+        }),
+      }),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
@@ -1262,6 +1342,7 @@ export function configToJSONSchema(
       'db',
       'jobs',
       'blocks',
+      ...(config.localization ? ['collectionsLocalized', 'globalsLocalized'] : []),
     ],
     title: 'Config',
   }

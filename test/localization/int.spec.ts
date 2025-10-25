@@ -1,4 +1,4 @@
-import type { Payload, User, Where } from 'payload'
+import type { LocaleValue, Payload, User, Where } from 'payload'
 
 import path from 'path'
 import { createLocalReq } from 'payload'
@@ -45,7 +45,7 @@ import {
 } from './shared.js'
 
 const collection = localizedPostsSlug
-const global = 'global-text'
+const globalSlug = 'global-text'
 let payload: Payload
 let restClient: NextRESTClient
 
@@ -90,7 +90,7 @@ describe('Localization', () => {
       })
 
       await payload.updateGlobal({
-        slug: global,
+        slug: globalSlug,
         data: {
           text: spanishTitle,
         },
@@ -98,7 +98,7 @@ describe('Localization', () => {
       })
 
       await payload.updateGlobal({
-        slug: global,
+        slug: globalSlug,
         data: {
           text: englishTitle,
         },
@@ -967,6 +967,7 @@ describe('Localization', () => {
       it('should allow moving rows and retain existing row locale data', async () => {
         const globalArray: any = await payload.findGlobal({
           slug: 'global-array',
+          locale: 'all',
         })
 
         const reversedArrayRows = [...globalArray.array].reverse()
@@ -2864,7 +2865,7 @@ describe('Localization', () => {
               },
             },
           })
-        ).docs[0] as unknown as User
+        ).docs[0] as User
 
         user['collection'] = 'users'
       })
@@ -3078,7 +3079,7 @@ describe('Localization', () => {
         describe('Globals', () => {
           it('should allow fallback locale to be an array', async () => {
             const result = await payload.findGlobal({
-              slug: global,
+              slug: globalSlug,
               locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
             })
@@ -3089,7 +3090,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const result = await payload.findGlobal({
-              slug: global,
+              slug: globalSlug,
               locale: portugueseLocale,
               fallbackLocale: ['hu', spanishLocale],
             })
@@ -3099,7 +3100,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const result = await payload.findGlobal({
-              slug: global,
+              slug: globalSlug,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
             })
@@ -3149,7 +3150,7 @@ describe('Localization', () => {
         describe('Globals', () => {
           it('should allow fallback locale to be an array', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
+              `/globals/${globalSlug}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
             )
 
             expect(response.status).toBe(200)
@@ -3159,7 +3160,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
+              `/globals/${globalSlug}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
             )
 
             expect(response.status).toBe(200)
@@ -3170,7 +3171,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
+              `/globals/${globalSlug}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
             )
 
             expect(response.status).toBe(200)
@@ -3354,7 +3355,7 @@ describe('Localization', () => {
 
         expect(updated.title).toEqual(spanishTitle)
 
-        const localized: any = await payload.findByID({
+        const localized = await payload.findByID({
           id: post1.id,
           collection,
           locale: 'all',
@@ -3404,6 +3405,254 @@ describe('Localization', () => {
         })
 
         expect(localizedFallback.title).not.toBeDefined()
+      })
+    })
+  })
+
+  describe('create / update with locale: all', () => {
+    it('should create and with locale all', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      expect(result.title).toEqual({
+        en: 'EN title',
+        ar: 'AR title',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+
+      const resultFromFind = await payload.findByID({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+      })
+
+      expect(resultFromFind.title).toEqual({
+        en: 'EN title',
+        ar: 'AR title',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+    })
+
+    it('should update a field with locale all (all locales)', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title updated',
+            ar: 'AR title updated',
+            es: 'ES title updated',
+            hu: 'HU title updated',
+            pt: 'PT title updated',
+            xx: 'XX title updated',
+          },
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title updated',
+        hu: 'HU title updated',
+        pt: 'PT title updated',
+        xx: 'XX title updated',
+      })
+    })
+
+    it('should update a field with locale all (2 locales)', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+        data: {
+          title: {
+            en: 'EN title updated',
+            ar: 'AR title updated',
+          },
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+    })
+
+    it('should update 2 fields with locale all (1 - all locales, 2 - 2 locales)', async () => {
+      const result = await payload.create({
+        collection: 'localized-posts',
+        locale: 'all',
+        data: {
+          localizedDescription: {
+            en: 'EN description',
+            ar: 'AR description',
+            es: 'ES description',
+            hu: 'HU description',
+            pt: 'PT description',
+            xx: 'XX description',
+          },
+          title: {
+            en: 'EN title',
+            ar: 'AR title',
+            es: 'ES title',
+            hu: 'HU title',
+            pt: 'PT title',
+            xx: 'XX title',
+          },
+        },
+      })
+
+      const resUpdate = await payload.update({
+        collection: 'localized-posts',
+        id: result.id,
+        locale: 'all',
+        data: {
+          localizedDescription: {
+            en: 'EN description updated',
+            ar: 'AR description updated',
+            es: 'ES description updated',
+            hu: 'HU description updated',
+            pt: 'PT description updated',
+            xx: 'XX description updated',
+          },
+          title: {
+            en: 'EN title updated',
+            ar: 'AR title updated',
+          },
+        },
+      })
+
+      expect(resUpdate.title).toEqual({
+        en: 'EN title updated',
+        ar: 'AR title updated',
+        es: 'ES title',
+        hu: 'HU title',
+        pt: 'PT title',
+        xx: 'XX title',
+      })
+      expect(resUpdate.localizedDescription).toEqual({
+        en: 'EN description updated',
+        ar: 'AR description updated',
+        es: 'ES description updated',
+        hu: 'HU description updated',
+        pt: 'PT description updated',
+        xx: 'XX description updated',
+      })
+    })
+
+    it('should update a field global with locale all (all locales)', async () => {
+      const res = await payload.updateGlobal({
+        slug: 'global-text',
+        data: {
+          text: {
+            ar: 'AR updated',
+            en: 'EN updated',
+            es: 'ES updated',
+            hu: 'HU updated',
+            pt: 'PT updated',
+            xx: 'XX updated',
+          },
+        },
+        locale: 'all',
+      })
+
+      expect(res.text).toStrictEqual({
+        ar: 'AR updated',
+        en: 'EN updated',
+        es: 'ES updated',
+        hu: 'HU updated',
+        pt: 'PT updated',
+        xx: 'XX updated',
+      })
+    })
+
+    it('should update a field global with locale all (2 locales)', async () => {
+      await payload.updateGlobal({
+        slug: 'global-text',
+        data: {
+          text: {
+            ar: 'AR',
+            en: 'EN',
+            es: 'ES',
+            hu: 'HU',
+            pt: 'PT',
+            xx: 'XX',
+          },
+        },
+        locale: 'all',
+      })
+
+      const res = await payload.updateGlobal({
+        slug: 'global-text',
+        data: {
+          text: {
+            ar: 'AR updated',
+            en: 'EN updated',
+          },
+        },
+        locale: 'all',
+      })
+
+      expect(res.text).toStrictEqual({
+        ar: 'AR updated',
+        en: 'EN updated',
+        es: 'ES',
+        hu: 'HU',
+        pt: 'PT',
+        xx: 'XX',
       })
     })
   })
