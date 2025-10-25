@@ -11,6 +11,10 @@ const equalsOperators = [
     label: 'isNotEqualTo',
     value: 'not_equals',
   },
+  {
+    label: 'exists',
+    value: 'exists',
+  },
 ]
 
 export const arrayOperators = [
@@ -21,10 +25,6 @@ export const arrayOperators = [
   {
     label: 'isNotIn',
     value: 'not_in',
-  },
-  {
-    label: 'exists',
-    value: 'exists',
   },
 ]
 
