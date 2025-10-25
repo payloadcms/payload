@@ -4,8 +4,9 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
-import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
-import { GetPlatformProxyOptions } from 'wrangler'
+import type { CloudflareContext } from '@opennextjs/cloudflare'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
+import type { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 
 import { Users } from './collections/Users'
@@ -14,11 +15,13 @@ import { Media } from './collections/Media'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const cloudflareRemoteBindings = process.env.NODE_ENV === 'production'
-const cloudflare =
-  process.argv.find((value) => value.match(/^(generate|migrate):?/)) || !cloudflareRemoteBindings
-    ? await getCloudflareContextFromWrangler()
-    : await getCloudflareContext({ async: true })
+const isProduction = process.env.NODE_ENV === 'production'
+const shouldUseWranglerProxy =
+  (process.argv ?? []).some((value) => /^(generate|migrate):?/u.test(value)) || !isProduction
+
+const cloudflare = shouldUseWranglerProxy
+  ? await getCloudflareContextFromWrangler()
+  : await getCloudflareContext({ async: true })
 
 export default buildConfig({
   admin: {
@@ -51,7 +54,6 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        experimental: { remoteBindings: cloudflareRemoteBindings },
       } satisfies GetPlatformProxyOptions),
   )
 }
