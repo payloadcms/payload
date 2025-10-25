@@ -48,6 +48,7 @@ export const packagePublishList = [
   'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
+  'plugin-mcp',
   'plugin-multi-tenant',
   'plugin-nested-docs',
   'plugin-redirects',
