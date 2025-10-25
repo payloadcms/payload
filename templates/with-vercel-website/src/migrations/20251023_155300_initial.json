@@ -1,5 +1,5 @@
 {
-  "id": "61df5806-88a9-45d6-b81d-9f1316d50fa8",
+  "id": "aeab24d1-2694-4d74-a75e-df1081ee7756",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1298,8 +1298,8 @@
         }
       },
       "foreignKeys": {
-        "pages_rels_parent_fk": {
-          "name": "pages_rels_parent_fk",
+        "pages_rels_parent_1_idx": {
+          "name": "pages_rels_parent_1_idx",
           "tableFrom": "pages_rels",
           "tableTo": "pages",
           "columnsFrom": ["parent_id"],
@@ -2797,8 +2797,8 @@
         }
       },
       "foreignKeys": {
-        "_pages_v_rels_parent_fk": {
-          "name": "_pages_v_rels_parent_fk",
+        "_pages_v_rels_parent_1_idx": {
+          "name": "_pages_v_rels_parent_1_idx",
           "tableFrom": "_pages_v_rels",
           "tableTo": "_pages_v",
           "columnsFrom": ["parent_id"],
@@ -3264,8 +3264,8 @@
         }
       },
       "foreignKeys": {
-        "posts_rels_parent_fk": {
-          "name": "posts_rels_parent_fk",
+        "posts_rels_parent_1_idx": {
+          "name": "posts_rels_parent_1_idx",
           "tableFrom": "posts_rels",
           "tableTo": "posts",
           "columnsFrom": ["parent_id"],
@@ -3851,8 +3851,8 @@
         }
       },
       "foreignKeys": {
-        "_posts_v_rels_parent_fk": {
-          "name": "_posts_v_rels_parent_fk",
+        "_posts_v_rels_parent_1_idx": {
+          "name": "_posts_v_rels_parent_1_idx",
           "tableFrom": "_posts_v_rels",
           "tableTo": "_posts_v",
           "columnsFrom": ["parent_id"],
@@ -5069,8 +5069,8 @@
         }
       },
       "foreignKeys": {
-        "redirects_rels_parent_fk": {
-          "name": "redirects_rels_parent_fk",
+        "redirects_rels_parent_1_idx": {
+          "name": "redirects_rels_parent_1_idx",
           "tableFrom": "redirects_rels",
           "tableTo": "redirects",
           "columnsFrom": ["parent_id"],
@@ -7030,8 +7030,8 @@
         }
       },
       "foreignKeys": {
-        "search_rels_parent_fk": {
-          "name": "search_rels_parent_fk",
+        "search_rels_parent_1_idx": {
+          "name": "search_rels_parent_1_idx",
           "tableFrom": "search_rels",
           "tableTo": "search",
           "columnsFrom": ["parent_id"],
@@ -7777,8 +7777,8 @@
         }
       },
       "foreignKeys": {
-        "payload_locked_documents_rels_parent_fk": {
-          "name": "payload_locked_documents_rels_parent_fk",
+        "payload_locked_documents_rels_parent_1_idx": {
+          "name": "payload_locked_documents_rels_parent_1_idx",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "payload_locked_documents",
           "columnsFrom": ["parent_id"],
@@ -8072,8 +8072,8 @@
         }
       },
       "foreignKeys": {
-        "payload_preferences_rels_parent_fk": {
-          "name": "payload_preferences_rels_parent_fk",
+        "payload_preferences_rels_parent_1_idx": {
+          "name": "payload_preferences_rels_parent_1_idx",
           "tableFrom": "payload_preferences_rels",
           "tableTo": "payload_preferences",
           "columnsFrom": ["parent_id"],
@@ -8421,8 +8421,8 @@
         }
       },
       "foreignKeys": {
-        "header_rels_parent_fk": {
-          "name": "header_rels_parent_fk",
+        "header_rels_parent_1_idx": {
+          "name": "header_rels_parent_1_idx",
           "tableFrom": "header_rels",
           "tableTo": "header",
           "columnsFrom": ["parent_id"],
@@ -8703,8 +8703,8 @@
         }
       },
       "foreignKeys": {
-        "footer_rels_parent_fk": {
-          "name": "footer_rels_parent_fk",
+        "footer_rels_parent_1_idx": {
+          "name": "footer_rels_parent_1_idx",
           "tableFrom": "footer_rels",
           "tableTo": "footer",
           "columnsFrom": ["parent_id"],
