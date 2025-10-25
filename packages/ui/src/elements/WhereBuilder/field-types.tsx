@@ -11,10 +11,6 @@ const equalsOperators = [
     label: 'isNotEqualTo',
     value: 'not_equals',
   },
-  {
-    label: 'exists',
-    value: 'exists',
-  },
 ]
 
 export const arrayOperators = [
@@ -28,7 +24,12 @@ export const arrayOperators = [
   },
 ]
 
-const base = [...equalsOperators, ...arrayOperators]
+const exists = {
+  label: 'exists',
+  value: 'exists',
+}
+
+const base = [...equalsOperators, ...arrayOperators, exists]
 
 const numeric = [
   ...base,
@@ -52,10 +53,6 @@ const numeric = [
 
 const geo = [
   ...equalsOperators,
-  {
-    label: 'exists',
-    value: 'exists',
-  },
   {
     label: 'near',
     value: 'near',
@@ -95,7 +92,7 @@ export const fieldTypeConditions: {
 } = {
   checkbox: {
     component: 'Text',
-    operators: [...equalsOperators],
+    operators: [...equalsOperators, exists],
   },
   code: {
     component: 'Text',
@@ -103,7 +100,7 @@ export const fieldTypeConditions: {
   },
   date: {
     component: 'Date',
-    operators: [...numeric],
+    operators: [...numeric, exists],
   },
   email: {
     component: 'Text',
@@ -115,11 +112,11 @@ export const fieldTypeConditions: {
   },
   number: {
     component: 'Number',
-    operators: [...numeric],
+    operators: [...numeric, exists],
   },
   point: {
     component: 'Point',
-    operators: [...geo, within, intersects],
+    operators: [...geo, exists, within, intersects],
   },
   radio: {
     component: 'Select',
@@ -171,7 +168,7 @@ export const getValidFieldOperators = ({
 
   if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
     if ('hasMany' in field && field.hasMany) {
-      validOperators = [...equalsOperators]
+      validOperators = [...equalsOperators, exists]
     } else {
       validOperators = [...base]
     }
