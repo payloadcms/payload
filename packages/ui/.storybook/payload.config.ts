@@ -56,6 +56,53 @@ const config = {
         useAsTitle: 'name',
       },
     },
+    {
+      slug: 'media',
+      labels: {
+        singular: 'Media',
+        plural: 'Media',
+      },
+      upload: {
+        staticDir: 'media',
+        staticURL: '/media',
+      },
+      fields: [
+        {
+          name: 'filename',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'alt',
+          type: 'text',
+        },
+      ],
+      admin: {
+        useAsTitle: 'filename',
+      },
+    },
+    {
+      slug: 'notes',
+      labels: {
+        singular: 'Note',
+        plural: 'Notes',
+      },
+      fields: [
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: 'posts',
+          required: true,
+        },
+        {
+          name: 'note',
+          type: 'textarea',
+        },
+      ],
+      admin: {
+        useAsTitle: 'note',
+      },
+    },
   ],
   globals: [],
   routes: {
