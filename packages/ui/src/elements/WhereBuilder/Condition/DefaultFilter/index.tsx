@@ -89,6 +89,19 @@ export const DefaultFilter: React.FC<Props> = ({
       )
     }
 
+    case 'upload': {
+      return (
+        <RelationshipFilter
+          disabled={disabled}
+          field={internalField.field}
+          filterOptions={filterOptions}
+          onChange={onChange}
+          operator={operator}
+          value={value}
+        />
+      )
+    }
+
     default: {
       return (
         <Text
