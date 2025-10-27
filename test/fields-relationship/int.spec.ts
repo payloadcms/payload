@@ -101,4 +101,1013 @@ describe('Relationship Fields', () => {
       )
     })
   })
+
+  describe('Atomic Operations', () => {
+    let relationDoc1: any
+    let relationDoc2: any
+    let relationDoc3: any
+    let testDoc: any
+
+    beforeAll(async () => {
+      // Create test relation documents
+      relationDoc1 = await payload.create({
+        collection: 'relation-one',
+        data: {
+          name: 'Relation 1',
+        },
+      })
+
+      relationDoc2 = await payload.create({
+        collection: 'relation-one',
+        data: {
+          name: 'Relation 2',
+        },
+      })
+
+      relationDoc3 = await payload.create({
+        collection: 'relation-two',
+        data: {
+          name: 'Relation 3',
+        },
+      })
+
+      // Create test document with initial relationships
+      testDoc = await payload.create({
+        collection: 'fields-relationship',
+        data: {
+          relationshipHasMany: [relationDoc1.id],
+          relationshipHasManyMultiple: [{ relationTo: 'relation-one', value: relationDoc1.id }],
+        },
+      })
+    })
+
+    describe('$push operations', () => {
+      it('should support $push on hasMany relationship fields', async () => {
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $push: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.relationshipHasMany).toHaveLength(2)
+        expect(result.relationshipHasMany).toContain(relationDoc1.id)
+        expect(result.relationshipHasMany).toContain(relationDoc2.id)
+      })
+
+      it('should support $push on polymorphic hasMany relationship fields', async () => {
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $push: {
+              relationshipHasManyMultiple: [
+                { relationTo: 'relation-one', value: relationDoc2.id },
+                { relationTo: 'relation-two', value: relationDoc3.id },
+              ],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.relationshipHasManyMultiple).toHaveLength(3)
+        expect(result.relationshipHasManyMultiple).toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc1.id,
+        })
+        expect(result.relationshipHasManyMultiple).toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc2.id,
+        })
+        expect(result.relationshipHasManyMultiple).toContainEqual({
+          relationTo: 'relation-two',
+          value: relationDoc3.id,
+        })
+      })
+
+      // Note: Array index paths (e.g., 'array.0.field') are not currently supported
+      // This is a known limitation of the current field path resolution logic
+
+      it('should support $push on nested hasMany relationship fields in groups', async () => {
+        // First create initial relationships in the group
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            nestedGroup: {
+              groupHasManyRelation: [{ relationTo: 'relation-one', value: relationDoc1.id }],
+            },
+          },
+        })
+
+        // Then push additional relationships to the nested group field
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $push: {
+              nestedGroup: {
+                groupHasManyRelation: [{ relationTo: 'relation-two', value: relationDoc3.id }],
+              },
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.nestedGroup?.groupHasManyRelation).toHaveLength(2)
+        expect(result.nestedGroup?.groupHasManyRelation).toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc1.id,
+        })
+        expect(result.nestedGroup?.groupHasManyRelation).toContainEqual({
+          relationTo: 'relation-two',
+          value: relationDoc3.id,
+        })
+      })
+
+      it('should allow updating nested text field via data while doing atomic operation on nested relationship field', async () => {
+        // First create initial relationships in the group
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            nestedGroup: {
+              groupTextField: 'initial text',
+              groupHasManyRelation: [{ relationTo: 'relation-one', value: relationDoc1.id }],
+            },
+          },
+        })
+
+        // Then update text field via data while pushing to relationship field via operations
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            nestedGroup: {
+              groupTextField: 'updated text',
+            },
+          },
+          operations: {
+            $push: {
+              nestedGroup: {
+                groupHasManyRelation: [{ relationTo: 'relation-two', value: relationDoc3.id }],
+              },
+            },
+          },
+          depth: 0,
+        })
+
+        // Verify both changes were applied
+        expect(result.nestedGroup?.groupTextField).toBe('updated text')
+        expect(result.nestedGroup?.groupHasManyRelation).toHaveLength(2)
+        expect(result.nestedGroup?.groupHasManyRelation).toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc1.id,
+        })
+        expect(result.nestedGroup?.groupHasManyRelation).toContainEqual({
+          relationTo: 'relation-two',
+          value: relationDoc3.id,
+        })
+      })
+    })
+
+    describe('$remove operations', () => {
+      it('should support $remove on hasMany relationship fields', async () => {
+        // First add multiple items
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            relationshipHasMany: [relationDoc1.id, relationDoc2.id],
+          },
+        })
+
+        // Then remove one
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $remove: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.relationshipHasMany).toHaveLength(1)
+        expect(result.relationshipHasMany).toContain(relationDoc1.id)
+        expect(result.relationshipHasMany).not.toContain(relationDoc2.id)
+      })
+
+      it('should support $remove on polymorphic hasMany relationship fields', async () => {
+        // First add multiple items
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            relationshipHasManyMultiple: [
+              { relationTo: 'relation-one', value: relationDoc1.id },
+              { relationTo: 'relation-one', value: relationDoc2.id },
+              { relationTo: 'relation-two', value: relationDoc3.id },
+            ],
+          },
+        })
+
+        // Then remove one
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $remove: {
+              relationshipHasManyMultiple: [{ relationTo: 'relation-one', value: relationDoc2.id }],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.relationshipHasManyMultiple).toHaveLength(2)
+        expect(result.relationshipHasManyMultiple).toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc1.id,
+        })
+        expect(result.relationshipHasManyMultiple).toContainEqual({
+          relationTo: 'relation-two',
+          value: relationDoc3.id,
+        })
+        expect(result.relationshipHasManyMultiple).not.toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc2.id,
+        })
+      })
+
+      // Note: Array index paths (e.g., 'array.0.field') are not currently supported
+      // This is a known limitation of the current field path resolution logic
+
+      it('should support $remove on nested hasMany relationship fields in groups', async () => {
+        // First create multiple relationships in the group
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            nestedGroup: {
+              groupHasManyRelation: [
+                { relationTo: 'relation-one', value: relationDoc1.id },
+                { relationTo: 'relation-one', value: relationDoc2.id },
+                { relationTo: 'relation-two', value: relationDoc3.id },
+              ],
+            },
+          },
+        })
+
+        // Then remove one relationship from the nested group field
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $remove: {
+              nestedGroup: {
+                groupHasManyRelation: [{ relationTo: 'relation-one', value: relationDoc2.id }],
+              },
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.nestedGroup?.groupHasManyRelation).toHaveLength(2)
+        expect(result.nestedGroup?.groupHasManyRelation).toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc1.id,
+        })
+        expect(result.nestedGroup?.groupHasManyRelation).toContainEqual({
+          relationTo: 'relation-two',
+          value: relationDoc3.id,
+        })
+        expect(result.nestedGroup?.groupHasManyRelation).not.toContainEqual({
+          relationTo: 'relation-one',
+          value: relationDoc2.id,
+        })
+      })
+    })
+
+    describe('Atomic operations with select', () => {
+      it('should support $remove on hasMany fields even when field is not in select', async () => {
+        // First add multiple items
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            relationshipHasMany: [relationDoc1.id, relationDoc2.id],
+          },
+        })
+
+        // Remove one item with select that doesn't include the field being modified
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $remove: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          select: {},
+          depth: 0,
+        })
+
+        // The field should not be in the response due to select
+        // @ts-expect-error - doing an invalid operation for testing
+        expect(result.relationshipHasMany).toBeUndefined()
+
+        // Verify the operation actually worked by fetching the document
+        const verifyDoc = await payload.findByID({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          depth: 0,
+        })
+
+        expect(verifyDoc.relationshipHasMany).toHaveLength(1)
+        expect(verifyDoc.relationshipHasMany).toContain(relationDoc1.id)
+        expect(verifyDoc.relationshipHasMany).not.toContain(relationDoc2.id)
+      })
+
+      it('should support $push on hasMany fields even when field is not in select', async () => {
+        // Reset to single item
+        await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {
+            relationshipHasMany: [relationDoc1.id],
+          },
+        })
+
+        // Push a new item with select that doesn't include the field being modified
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          data: {},
+          operations: {
+            $push: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          select: {},
+          depth: 0,
+        })
+
+        // The field should not be in the response due to select
+        // @ts-expect-error - doing an invalid operation for testing
+        expect(result.relationshipHasMany).toBeUndefined()
+
+        // Verify the operation actually worked by fetching the document
+        const verifyDoc = await payload.findByID({
+          collection: 'fields-relationship',
+          id: testDoc.id,
+          depth: 0,
+        })
+
+        expect(verifyDoc.relationshipHasMany).toHaveLength(2)
+        expect(verifyDoc.relationshipHasMany).toContain(relationDoc1.id)
+        expect(verifyDoc.relationshipHasMany).toContain(relationDoc2.id)
+      })
+    })
+
+    describe('Bulk update with atomic operations', () => {
+      let bulkTestDoc1: any
+      let bulkTestDoc2: any
+      let bulkTestDoc3: any
+
+      beforeAll(async () => {
+        // Create multiple test documents for bulk operations
+        bulkTestDoc1 = await payload.create({
+          collection: 'fields-relationship',
+          data: {
+            relationshipHasMany: [relationDoc1.id],
+          },
+        })
+
+        bulkTestDoc2 = await payload.create({
+          collection: 'fields-relationship',
+          data: {
+            relationshipHasMany: [relationDoc1.id],
+          },
+        })
+
+        bulkTestDoc3 = await payload.create({
+          collection: 'fields-relationship',
+          data: {
+            relationshipHasMany: [relationDoc1.id, relationDoc2.id],
+          },
+        })
+      })
+
+      it('should support $push on multiple documents', async () => {
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          where: {
+            id: {
+              in: [bulkTestDoc1.id, bulkTestDoc2.id],
+            },
+          },
+          data: {},
+          operations: {
+            $push: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.errors).toHaveLength(0)
+
+        // Verify both documents were updated
+        for (const doc of result.docs) {
+          expect(doc.relationshipHasMany).toHaveLength(2)
+          expect(doc.relationshipHasMany).toContain(relationDoc1.id)
+          expect(doc.relationshipHasMany).toContain(relationDoc2.id)
+        }
+      })
+
+      it('should support $remove on multiple documents', async () => {
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          where: {
+            id: {
+              in: [bulkTestDoc1.id, bulkTestDoc2.id, bulkTestDoc3.id],
+            },
+          },
+          data: {},
+          operations: {
+            $remove: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(result.docs).toHaveLength(3)
+        expect(result.errors).toHaveLength(0)
+
+        // Verify all documents were updated correctly
+        for (const doc of result.docs) {
+          expect(doc.relationshipHasMany).not.toContain(relationDoc2.id)
+
+          switch (doc.id) {
+            case bulkTestDoc1.id:
+              expect(doc.relationshipHasMany).toHaveLength(1)
+              expect(doc.relationshipHasMany).toContain(relationDoc1.id)
+              break
+            case bulkTestDoc2.id:
+              expect(doc.relationshipHasMany).toHaveLength(1)
+              expect(doc.relationshipHasMany).toContain(relationDoc1.id)
+              break
+            case bulkTestDoc3.id:
+              expect(doc.relationshipHasMany).toHaveLength(1)
+              expect(doc.relationshipHasMany).toContain(relationDoc1.id)
+              break
+          }
+        }
+      })
+
+      it('should support bulk update with atomic operations and select', async () => {
+        // Reset documents
+        await payload.update({
+          collection: 'fields-relationship',
+          where: {
+            id: {
+              in: [bulkTestDoc1.id, bulkTestDoc2.id],
+            },
+          },
+          data: {
+            relationshipHasMany: [relationDoc1.id],
+          },
+        })
+
+        // Perform bulk update with select that doesn't include the modified field
+        const result = await payload.update({
+          collection: 'fields-relationship',
+          where: {
+            id: {
+              in: [bulkTestDoc1.id, bulkTestDoc2.id],
+            },
+          },
+          data: {},
+          operations: {
+            $push: {
+              relationshipHasMany: [relationDoc2.id],
+            },
+          },
+          select: {},
+          depth: 0,
+        })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.errors).toHaveLength(0)
+
+        // Fields should not be in response due to select
+        for (const doc of result.docs) {
+          // @ts-expect-error - doing an invalid operation for testing
+          expect(doc.relationshipHasMany).toBeUndefined()
+        }
+
+        // Verify operations actually worked
+        const verifyDoc1 = await payload.findByID({
+          collection: 'fields-relationship',
+          id: bulkTestDoc1.id,
+          depth: 0,
+        })
+
+        expect(verifyDoc1.relationshipHasMany).toHaveLength(2)
+        expect(verifyDoc1.relationshipHasMany).toContain(relationDoc1.id)
+        expect(verifyDoc1.relationshipHasMany).toContain(relationDoc2.id)
+      })
+    })
+
+    describe('Error handling', () => {
+      it('should reject $push operations on non-hasMany relationship fields', async () => {
+        await expect(
+          payload.update({
+            collection: 'fields-relationship',
+            id: testDoc.id,
+            data: {},
+            operations: {
+              $push: {
+                // @ts-expect-error - doing an invalid operation for testing
+                relationship: [relationDoc1.id],
+              },
+            },
+          }),
+        ).rejects.toThrow(
+          'Invalid atomic operations: Field "relationship" of type "relationship" does not support atomic operations',
+        )
+      })
+
+      it('should reject $remove operations on non-hasMany relationship fields', async () => {
+        await expect(
+          payload.update({
+            collection: 'fields-relationship',
+            id: testDoc.id,
+            data: {},
+            operations: {
+              $remove: {
+                // @ts-expect-error - doing an invalid operation for testing
+                relationship: [relationDoc1.id],
+              },
+            },
+          }),
+        ).rejects.toThrow(
+          'Invalid atomic operations: Field "relationship" of type "relationship" does not support atomic operations',
+        )
+      })
+
+      it('should detect field conflicts between data and operations', async () => {
+        await expect(
+          payload.update({
+            collection: 'fields-relationship',
+            id: testDoc.id,
+            data: {
+              relationshipHasMany: [relationDoc1.id],
+            },
+            operations: {
+              $push: {
+                relationshipHasMany: [relationDoc2.id],
+              },
+            },
+          }),
+        ).rejects.toThrow('Field conflicts detected')
+      })
+
+      it('should reject $push operations on nested non-hasMany relationship fields', async () => {
+        await expect(
+          payload.update({
+            collection: 'fields-relationship',
+            id: testDoc.id,
+            data: {},
+            operations: {
+              $push: {
+                nestedGroup: {
+                  // @ts-expect-error - doing an invalid operation for testing
+                  nonExistentField: [relationDoc1.id],
+                },
+              },
+            },
+          }),
+        ).rejects.toThrow('not found in schema')
+      })
+    })
+  })
+
+  describe('Global Atomic Operations', () => {
+    let relation1Doc1: any
+    let relation1Doc2: any
+    let relation2Doc1: any
+
+    beforeAll(async () => {
+      relation1Doc1 = await payload.create({
+        collection: 'relation-one',
+        data: { name: 'Global Relation 1-1' },
+      })
+      relation1Doc2 = await payload.create({
+        collection: 'relation-one',
+        data: { name: 'Global Relation 1-2' },
+      })
+      relation2Doc1 = await payload.create({
+        collection: 'relation-two',
+        data: { name: 'Global Relation 2-1' },
+      })
+    })
+
+    describe('$push operation', () => {
+      it('should add items to a hasMany relationship field in a global', async () => {
+        // Initialize with one relation
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Test Global',
+            relations: [relation1Doc1.id],
+          },
+          depth: 0,
+        })
+
+        // Push another relation
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $push: {
+              relations: [relation1Doc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.relations).toHaveLength(2)
+        expect(updated.relations).toContainEqual(relation1Doc1.id)
+        expect(updated.relations).toContainEqual(relation1Doc2.id)
+      })
+
+      it('should add items to a polymorphic relationship field in a global', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            polymorphicRelations: [
+              {
+                relationTo: 'relation-one',
+                value: relation1Doc1.id,
+              },
+            ],
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $push: {
+              polymorphicRelations: [
+                {
+                  relationTo: 'relation-two',
+                  value: relation2Doc1.id,
+                },
+              ],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.polymorphicRelations).toHaveLength(2)
+        expect(updated.polymorphicRelations).toContainEqual({
+          relationTo: 'relation-one',
+          value: relation1Doc1.id,
+        })
+        expect(updated.polymorphicRelations).toContainEqual({
+          relationTo: 'relation-two',
+          value: relation2Doc1.id,
+        })
+      })
+
+      it('should work with nested relationship fields in a global', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            group: {
+              groupRelations: [relation1Doc1.id],
+            },
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $push: {
+              group: {
+                groupRelations: [relation1Doc2.id],
+              },
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.group?.groupRelations).toHaveLength(2)
+        expect(updated.group?.groupRelations).toContainEqual(relation1Doc1.id)
+        expect(updated.group?.groupRelations).toContainEqual(relation1Doc2.id)
+      })
+
+      it('should prevent duplicates when pushing existing items in a global', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            relations: [relation1Doc1.id],
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $push: {
+              relations: [relation1Doc1.id, relation1Doc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.relations).toHaveLength(2)
+        expect(updated.relations).toContainEqual(relation1Doc1.id)
+        expect(updated.relations).toContainEqual(relation1Doc2.id)
+      })
+    })
+
+    describe('$remove operation', () => {
+      it('should remove items from a hasMany relationship field in a global', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            relations: [relation1Doc1.id, relation1Doc2.id],
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $remove: {
+              relations: [relation1Doc1.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.relations).toHaveLength(1)
+        expect(updated.relations).toContainEqual(relation1Doc2.id)
+        expect(updated.relations).not.toContainEqual(relation1Doc1.id)
+      })
+
+      it('should remove items from a polymorphic relationship field in a global', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            polymorphicRelations: [
+              {
+                relationTo: 'relation-one',
+                value: relation1Doc1.id,
+              },
+              {
+                relationTo: 'relation-two',
+                value: relation2Doc1.id,
+              },
+            ],
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $remove: {
+              polymorphicRelations: [
+                {
+                  relationTo: 'relation-one',
+                  value: relation1Doc1.id,
+                },
+              ],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.polymorphicRelations).toHaveLength(1)
+        expect(updated.polymorphicRelations).toContainEqual({
+          relationTo: 'relation-two',
+          value: relation2Doc1.id,
+        })
+      })
+
+      it('should work with nested relationship fields in a global', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            group: {
+              groupRelations: [relation1Doc1.id, relation1Doc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $remove: {
+              group: {
+                groupRelations: [relation1Doc1.id],
+              },
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.group?.groupRelations).toHaveLength(1)
+        expect(updated.group?.groupRelations).toContainEqual(relation1Doc2.id)
+      })
+    })
+
+    describe('Atomic operations with select', () => {
+      it('should support $remove on hasMany fields even when field is not in select', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Test',
+            relations: [relation1Doc1.id, relation1Doc2.id],
+          },
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $remove: {
+              relations: [relation1Doc1.id],
+            },
+          },
+          select: {
+            title: true,
+          },
+        })
+
+        expect(updated.title).toBe('Test')
+        // @ts-expect-error - doing an invalid operation for testing
+        expect(updated.relations).toBeUndefined()
+
+        // Verify the operation was applied
+        const full = await payload.findGlobal({
+          slug: 'global-relationship',
+          depth: 0,
+        })
+        expect(full.relations).toHaveLength(1)
+        expect(full.relations).toContainEqual(relation1Doc2.id)
+      })
+
+      it('should support $push on hasMany fields even when field is not in select', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Test',
+            relations: [relation1Doc1.id],
+          },
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {},
+          operations: {
+            $push: {
+              relations: [relation1Doc2.id],
+            },
+          },
+          select: {
+            title: true,
+          },
+        })
+
+        expect(updated.title).toBe('Test')
+        // @ts-expect-error - doing an invalid operation for testing
+        expect(updated.relations).toBeUndefined()
+
+        // Verify the operation was applied
+        const full = await payload.findGlobal({
+          slug: 'global-relationship',
+          depth: 0,
+        })
+        expect(full.relations).toHaveLength(2)
+        expect(full.relations).toContainEqual(relation1Doc1.id)
+        expect(full.relations).toContainEqual(relation1Doc2.id)
+      })
+    })
+
+    describe('Combined operations', () => {
+      it('should allow updating a text field while doing atomic operation on relationship field', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Original',
+            relations: [relation1Doc1.id],
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Updated',
+          },
+          operations: {
+            $push: {
+              relations: [relation1Doc2.id],
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.title).toBe('Updated')
+        expect(updated.relations).toHaveLength(2)
+        expect(updated.relations).toContainEqual(relation1Doc1.id)
+        expect(updated.relations).toContainEqual(relation1Doc2.id)
+      })
+
+      it('should allow updating nested text field via data while doing atomic operation on nested relationship field', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Nested Test',
+            group: {
+              groupRelations: [relation1Doc1.id],
+            },
+          },
+          depth: 0,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            title: 'Updated Nested',
+          },
+          operations: {
+            $push: {
+              group: {
+                groupRelations: [relation1Doc2.id],
+              },
+            },
+          },
+          depth: 0,
+        })
+
+        expect(updated.title).toBe('Updated Nested')
+        expect(updated.group?.groupRelations).toHaveLength(2)
+        expect(updated.group?.groupRelations).toContainEqual(relation1Doc1.id)
+        expect(updated.group?.groupRelations).toContainEqual(relation1Doc2.id)
+      })
+    })
+
+    describe('Error handling', () => {
+      it('should detect field conflicts between data and operations', async () => {
+        await payload.updateGlobal({
+          slug: 'global-relationship',
+          data: {
+            relations: [relation1Doc1.id],
+          },
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: 'global-relationship',
+            data: {
+              relations: [relation1Doc2.id],
+            },
+            operations: {
+              $push: {
+                relations: [relation1Doc2.id],
+              },
+            },
+          }),
+        ).rejects.toThrow('Field conflicts detected')
+      })
+    })
+  })
 })
