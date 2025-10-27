@@ -17,7 +17,7 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { handleLivePreview } from '@payloadcms/ui/rsc'
+import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
@@ -360,6 +360,15 @@ export const renderDocument = async ({
     req,
   })
 
+  const { isPreviewEnabled, previewURL } = await handlePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
+
   return {
     data: doc,
     Document: (
@@ -395,6 +404,8 @@ export const renderDocument = async ({
           isLivePreviewing={Boolean(
             entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
           )}
+          isPreviewEnabled={Boolean(isPreviewEnabled)}
+          previewURL={previewURL}
           typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >

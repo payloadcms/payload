@@ -12,7 +12,6 @@ import { findByIDHandler } from './findByID.js'
 // import { findDistinctHandler } from './findDistinct.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
-import { previewHandler } from './preview.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
@@ -74,11 +73,6 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: findVersionByIDHandler,
       method: 'get',
       path: '/versions/:id',
-    },
-    {
-      handler: previewHandler,
-      method: 'get',
-      path: '/:id/preview',
     },
     {
       handler: restoreVersionHandler,
