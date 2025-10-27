@@ -1,5 +1,3 @@
-import type { JsonObject } from 'payload'
-
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
@@ -20,7 +18,7 @@ export type RowDropAreaProps = {
   placement?: Placement
   segmentWidth?: number
   style: React.CSSProperties
-  targetItems?: JsonObject[]
+  targetItems?: any[]
   xDragOffset?: number
   xSplitOffset?: string
 }

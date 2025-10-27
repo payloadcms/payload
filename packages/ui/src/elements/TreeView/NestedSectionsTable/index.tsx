@@ -1,12 +1,7 @@
 import React from 'react'
 
-import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
-import { Button } from '../../Button/index.js'
-import { DraggableWithClick } from '../../DraggableWithClick/index.js'
-import { Pill } from '../../Pill/index.js'
-import { RowDropArea } from './RowDropArea/index.js'
+import { Header } from './Header/index.js'
+import { NestedSectionsTableRow } from './Row/index.js'
 import './index.scss'
 
 export type SectionRow = {
@@ -25,6 +20,7 @@ interface NestedSectionsTableProps {
   columns?: Column[]
   disabledRowIDs?: (number | string)[]
   dropContextName: string
+  focusedRowIndex?: number
   hoveredRowID?: null | number | string
   initialOffset?: number
   isDragging?: boolean
@@ -40,7 +36,7 @@ interface NestedSectionsTableProps {
     row,
   }: {
     event: React.MouseEvent<HTMLElement>
-    from: 'checkbox' | 'dragHandle'
+    from: 'dragHandle' | 'row'
     row: SectionRow
   }) => void
   onRowDrag?: (params: { event: PointerEvent; item: null | SectionRow }) => void
@@ -59,6 +55,7 @@ interface DivTableSectionProps {
   firstCellRef?: React.RefObject<HTMLDivElement>
   firstCellWidth: number
   firstCellXOffset: number
+  focusedRowIndex?: number
   hasSelectedAncestor?: boolean
   hoveredRowID: null | number | string
   isDragging: boolean
@@ -76,7 +73,7 @@ interface DivTableSectionProps {
     row,
   }: {
     event: React.MouseEvent<HTMLElement>
-    from: 'checkbox' | 'dragHandle'
+    from: 'dragHandle' | 'row'
     row: SectionRow
   }) => void
   onRowDrag: (params: { event: PointerEvent; item: null | SectionRow }) => void
@@ -99,6 +96,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   columns = [{ name: 'name', label: 'Name' }],
   disabledRowIDs,
   dropContextName,
+  focusedRowIndex,
   hoveredRowID,
   isDragging = false,
   loadingRowIDs,
@@ -131,33 +129,15 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         .join(' ')}
     >
       <div className={baseClass}>
-        <div className={`${baseClass}__header`}>
-          <div className={`${baseClass}__header-cell`}>
-            <div className={`${baseClass}__row-actions`}>
-              <CheckboxInput
-                // checked={}
-                onToggle={
-                  ((event: React.MouseEvent<HTMLElement>) => {
-                    // toggle all visible rows
-                    // onRowClick({ event, from: 'checkbox', row})
-                  }) as unknown as (event: React.ChangeEvent) => void
-                }
-              />
-            </div>
-          </div>
-          {columns.map((col) => (
-            <div className={`${baseClass}__header-cell`} key={col.name}>
-              {col.label || col.name}
-            </div>
-          ))}
-        </div>
+        <Header columns={columns} />
 
         <DivTableSection
-          columns={[{ name: '_tree-actions' }, ...columns]}
+          columns={columns}
           dropContextName={dropContextName}
           firstCellRef={firstCellRef}
           firstCellWidth={firstCellWidth}
           firstCellXOffset={firstCellXOffset}
+          focusedRowIndex={focusedRowIndex}
           hoveredRowID={hoveredRowID}
           isDragging={isDragging}
           loadingRowIDs={loadingRowIDs}
@@ -185,6 +165,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   firstCellRef,
   firstCellWidth,
   firstCellXOffset,
+  focusedRowIndex,
   hasSelectedAncestor = false,
   hoveredRowID,
   isDragging,
@@ -260,200 +241,43 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
             ? firstCellWidth + segmentWidth * (level - targetItems.length + 1) + 28
             : firstCellWidth + segmentWidth * (hasNestedRows ? level + 1 : level) + 28
 
-        const isOdd = absoluteRowIndex % 2 === 1
         const isRowSelected = selectedRowIDs.includes(rowItem.rowID)
         const isInvalidTarget = hasSelectedAncestor || isRowSelected
+        const isFirstRowAtRootLevel = level === 0 && sectionRowIndex === 0
 
         const renderResult = (
           <React.Fragment key={rowItem.rowID}>
-            <div
-              className={[
-                `${baseClass}__section`,
-                isDragging && `${baseClass}__section--dragging`,
-                isDragging && isInvalidTarget && `${baseClass}__section--invalid-target`,
-                isOdd && `${baseClass}__section--odd`,
-                targetParentID === rowItem.rowID && `${baseClass}__section--target`,
-                isRowSelected && `${baseClass}__section--selected`,
-                hasSelectedAncestor && `${baseClass}__section--selected-descendant`,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onKeyDown={
-                onRowKeyPress
-                  ? (event) => {
-                      // Support Enter/Space for accessibility
-                      onRowKeyPress({ event, row: rowItem })
-                    }
-                  : undefined
-              }
-              role="button"
-              tabIndex={0}
-            >
-              <div className={`${baseClass}__row`}>
-                <div
-                  className={`${baseClass}__cell`}
-                  ref={level === 0 && sectionRowIndex === 0 ? firstCellRef : null}
-                >
-                  <div className={`${baseClass}__row-actions`}>
-                    <CheckboxInput
-                      checked={selectedRowIDs.includes(rowItem.rowID) || hasSelectedAncestor}
-                      onToggle={
-                        ((event: React.MouseEvent<HTMLElement>) => {
-                          if (!hasSelectedAncestor) {
-                            onRowClick({ event, from: 'checkbox', row: rowItem })
-                          }
-                        }) as unknown as (event: React.ChangeEvent) => void
-                      }
-                      readOnly={hasSelectedAncestor}
-                    />
-                    <DraggableWithClick
-                      disabled={
-                        selectedRowIDs.length > 1 && !selectedRowIDs.includes(rowItem.rowID)
-                      }
-                      onClick={(event) => {
-                        // needed for dragging unselected items
-                        onRowClick({ event, from: 'dragHandle', row: rowItem })
-                      }}
-                      onDrag={(event) => {
-                        onRowDrag({
-                          event,
-                          item: rowItem,
-                        })
-                      }}
-                    >
-                      <DragHandleIcon />
-                    </DraggableWithClick>
-                  </div>
-                </div>
-                {columns.map((col) =>
-                  col.name === '_tree-actions' ? null : (
-                    <div
-                      className={`${baseClass}__cell`}
-                      key={col.name}
-                      style={
-                        // TODO: temporary - will need to know title field name of document
-                        col.name === 'name'
-                          ? {
-                              width: '100%',
-                            }
-                          : undefined
-                      }
-                    >
-                      {col.name === 'name' ? (
-                        <span
-                          style={{
-                            alignItems: 'center',
-                            display: 'flex',
-                            gap: '8px',
-                            paddingLeft: level * segmentWidth,
-                            width: '100%',
-                          }}
-                        >
-                          {rowItem.hasChildren || rowItem.rows?.length ? (
-                            <Button
-                              buttonStyle="none"
-                              className={`${baseClass}__tree-toggle`}
-                              margin={false}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleRow(rowItem.rowID)
-                              }}
-                              size="small"
-                            >
-                              {loadingRowIDs?.has(rowItem.rowID) ? (
-                                <div className={`${baseClass}__tree-toggle-spinner`}>
-                                  <div className={`${baseClass}__spinner-bar`} />
-                                  <div className={`${baseClass}__spinner-bar`} />
-                                  <div className={`${baseClass}__spinner-bar`} />
-                                </div>
-                              ) : (
-                                <ChevronIcon
-                                  direction={openItemIDs?.has(rowItem.rowID) ? 'down' : 'right'}
-                                />
-                              )}
-                            </Button>
-                          ) : (
-                            <div className={`${baseClass}__tree-toggle-placeholder`} />
-                          )}
-                          <Pill
-                            pillStyle="light-gray"
-                            size="small"
-                          >{`${rowItem[col.name] ? `${rowItem[col.name]}` : `!`}`}</Pill>
-                        </span>
-                      ) : (
-                        `${rowItem[col.name] ? `${rowItem[col.name]}` : `!`}`
-                      )}
-                    </div>
-                  ),
-                )}
-                <div>
-                  {/* Add split-top drop area for first root-level row */}
-                  {level === 0 && sectionRowIndex === 0 && (
-                    <RowDropArea
-                      disabled={isInvalidTarget}
-                      dropContextName={dropContextName}
-                      isDragging={isDragging}
-                      onHover={(data) => {
-                        onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
-                      }}
-                      placement="split-top"
-                      segmentWidth={segmentWidth}
-                      style={{
-                        left: 0,
-                        width: '100%',
-                      }}
-                      targetItems={[null]}
-                      xDragOffset={firstCellXOffset + firstCellWidth + 28}
-                      xSplitOffset={`calc(${firstCellWidth + 28}px + var(--cell-inline-padding-start))`}
-                    />
-                  )}
-                  {/* Add row-drop-area on row */}
-                  <RowDropArea
-                    disabled={isInvalidTarget}
-                    dropContextName={dropContextName}
-                    isDragging={isDragging}
-                    onHover={(data) => {
-                      onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
-                    }}
-                    placement="middle"
-                    segmentWidth={segmentWidth}
-                    style={{ left: 0, width: '100%' }}
-                    targetItems={[rowItem]}
-                  />
-                  {/* Add split-bottom drop area on row */}
-                  <RowDropArea
-                    disabled={isInvalidTarget}
-                    dropContextName={dropContextName}
-                    isDragging={isDragging}
-                    onHover={(data) => {
-                      onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
-                    }}
-                    placement="split-bottom"
-                    segmentWidth={segmentWidth}
-                    style={{
-                      left: 0,
-                      width: '100%',
-                    }}
-                    targetItems={targetItems}
-                    xDragOffset={firstCellXOffset + startOffset}
-                    xSplitOffset={`calc(${startOffset}px + var(--cell-inline-padding-start))`}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Render placeholder row below the hovered row */}
-            {isDragging && hoveredRowID === rowItem.rowID && (
-              <div className={`${baseClass}__placeholder-section`}>
-                <div className={`${baseClass}__placeholder-row`}>
-                  {columns.map((col) => (
-                    <div className={`${baseClass}__cell`} key={col.name}>
-                      <div className={`${baseClass}__placeholder-cell-bg`} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <NestedSectionsTableRow
+              absoluteRowIndex={absoluteRowIndex}
+              columns={columns}
+              dropContextName={dropContextName}
+              firstCellRef={level === 0 && sectionRowIndex === 0 ? firstCellRef : undefined}
+              firstCellWidth={firstCellWidth}
+              firstCellXOffset={firstCellXOffset}
+              focusedRowIndex={focusedRowIndex}
+              hasSelectedAncestor={hasSelectedAncestor}
+              hoveredRowID={hoveredRowID}
+              isDragging={isDragging}
+              isFirstRowAtRootLevel={isFirstRowAtRootLevel}
+              isInvalidTarget={isInvalidTarget}
+              isLastRow={isLastRow}
+              isRowAtRootLevel={isRowAtRootLevel}
+              isRowSelected={isRowSelected}
+              level={level}
+              loadingRowIDs={loadingRowIDs}
+              onDroppableHover={onDroppableHover}
+              onRowClick={onRowClick}
+              onRowDrag={onRowDrag}
+              onRowKeyPress={onRowKeyPress}
+              openItemIDs={openItemIDs}
+              rowItem={rowItem}
+              segmentWidth={segmentWidth}
+              selectedRowIDs={selectedRowIDs}
+              startOffset={startOffset}
+              targetItems={targetItems}
+              targetParentID={targetParentID}
+              toggleRow={toggleRow}
+            />
 
             {hasNestedRows && (
               <DivTableSection
@@ -461,6 +285,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 dropContextName={dropContextName}
                 firstCellWidth={firstCellWidth}
                 firstCellXOffset={firstCellXOffset}
+                focusedRowIndex={focusedRowIndex}
                 hasSelectedAncestor={hasSelectedAncestor || isRowSelected}
                 hoveredRowID={hoveredRowID}
                 isDragging={isDragging}

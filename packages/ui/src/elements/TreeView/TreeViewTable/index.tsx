@@ -23,6 +23,7 @@ export function TreeViewTable() {
   const {
     clearSelections,
     collectionSlug,
+    focusedRowIndex,
     getSelectedItems,
     items,
     loadingRowIDs,
@@ -178,7 +179,7 @@ export function TreeViewTable() {
       row,
     }: {
       event: React.MouseEvent<HTMLElement>
-      from: 'checkbox' | 'dragHandle'
+      from: 'dragHandle' | 'row'
       row: SectionRow
     }) => {
       const index = items.findIndex((doc) => doc.value.id === row.rowID)
@@ -205,12 +206,10 @@ export function TreeViewTable() {
 
       switch (code) {
         case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
         case 'ArrowUp': {
           event.preventDefault()
 
-          const isBackward = code === 'ArrowLeft' || code === 'ArrowUp'
+          const isBackward = code === 'ArrowUp'
           const newItemIndex = isBackward ? index - 1 : index + 1
 
           if (newItemIndex < 0 || newItemIndex >= items.length) {
@@ -350,6 +349,7 @@ export function TreeViewTable() {
       <NestedSectionsTable
         className={baseClass}
         dropContextName={dropContextName}
+        focusedRowIndex={focusedRowIndex}
         hoveredRowID={hoveredRowID}
         isDragging={isDragging}
         loadingRowIDs={loadingRowIDs}

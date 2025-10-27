@@ -1,0 +1,311 @@
+@keyframes spinner-bar--1 {
+  0% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes spinner-bar--2 {
+  0% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes spinner-bar--3 {
+  0% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(-1px);
+  }
+}
+
+.nested-sections-table-row-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.nested-sections-table-row {
+  display: table;
+  min-width: 100%;
+
+  --cell-inline-padding-start: calc(var(--base) * 0.6);
+  --cell-inline-padding-end: calc(var(--base) * 0.6);
+
+  &__header {
+    display: table-header-group;
+  }
+
+  &__header-cell {
+    display: table-cell;
+    color: var(--theme-elevation-400);
+    vertical-align: top;
+    padding-block: calc(var(--base) * 0.6);
+    padding-inline-start: var(--cell-inline-padding-start);
+    padding-inline-end: var(--cell-inline-padding-end);
+    position: relative;
+    z-index: 1;
+
+    [dir='rtl'] & {
+      text-align: right;
+    }
+    &:first-child {
+      --cell-inline-padding-start: calc(var(--base) * (0.8));
+    }
+    &:last-child {
+      --cell-inline-padding-end: calc(var(--base) * (0.8));
+    }
+  }
+
+  &__row,
+  &__placeholder-row {
+    display: table-row;
+  }
+
+  &__row-actions {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.4);
+    color: var(--theme-elevation-600);
+  }
+
+  &__tree-toggle {
+    color: var(--theme-elevation-600);
+    display: flex;
+    height: 20px;
+    width: 20px;
+    justify-content: center;
+    align-items: center;
+
+    .btn__label {
+      display: flex;
+    }
+
+    &:hover {
+      color: var(--theme-elevation-400);
+    }
+  }
+
+  &__tree-toggle-placeholder {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+  }
+
+  &__tree-toggle-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 12px;
+  }
+
+  &__spinner-bar {
+    width: 1px;
+    background-color: currentColor;
+    height: 8px;
+    border-radius: 3px;
+
+    &:nth-child(1) {
+      animation: spinner-bar--1 1s infinite ease-in-out;
+    }
+
+    &:nth-child(2) {
+      animation: spinner-bar--2 1s infinite ease-in-out;
+    }
+
+    &:nth-child(3) {
+      animation: spinner-bar--3 1s infinite ease-in-out;
+    }
+  }
+
+  &__cell {
+    display: table-cell;
+    padding: 8px 12px;
+    vertical-align: middle;
+    position: relative;
+    background: var(--cell-bg-color);
+    border-radius: 0;
+    border-top: 1px solid var(--cell-border-color);
+    border-bottom: 1px solid var(--cell-border-color);
+
+    &:first-child {
+      padding-inline-start: calc(var(--base) * (0.8));
+      border-left: 1px solid var(--cell-border-color);
+      border-top-left-radius: var(--style-radius-s);
+      border-bottom-left-radius: var(--style-radius-s);
+    }
+    &:nth-last-child(2) {
+      padding-inline-end: calc(var(--base) * (0.8));
+      border-right: 1px solid var(--cell-border-color);
+      border-top-right-radius: var(--style-radius-s);
+      border-bottom-right-radius: var(--style-radius-s);
+    }
+  }
+
+  // When a selected section is followed by another selected section
+  &__section--selected + &__section--selected &__cell,
+  &__section--selected + &__section--selected-descendant &__cell,
+  &__section--selected-descendant + &__section--selected &__cell,
+  &__section--selected-descendant + &__section--selected-descendant &__cell {
+    border-top: none;
+
+    &:first-child {
+      border-top-left-radius: 0;
+    }
+    &:nth-last-child(2) {
+      border-top-right-radius: 0;
+    }
+  }
+
+  // Selected section followed by another selected section - remove bottom radius and add inner border
+  &__section--selected:has(+ &__section--selected) {
+    .nested-sections-table-row__cell {
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        height: 1px;
+        right: 0;
+        background-color: var(--cell-inner-border-color);
+        z-index: 1;
+      }
+
+      &:first-child {
+        border-bottom-left-radius: 0;
+      }
+      &:nth-last-child(2) {
+        border-bottom-right-radius: 0;
+      }
+    }
+  }
+
+  &__section--selected:has(+ &__section--selected-descendant),
+  &__section--selected-descendant:has(+ &__section--selected),
+  &__section--selected-descendant:has(+ &__section--selected-descendant) {
+    .nested-sections-table-row__cell {
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        height: 1px;
+        right: 0;
+        background-color: var(--cell-inner-border-color);
+        z-index: 1;
+      }
+
+      &:first-child {
+        border-bottom-left-radius: 0;
+      }
+      &:nth-last-child(2) {
+        border-bottom-right-radius: 0;
+      }
+    }
+  }
+
+  &__section {
+    position: relative;
+    display: table-row-group;
+    outline: 1px solid transparent;
+    --cell-bg-color: var(--theme-elevation-50);
+    --cell-border-color: var(--theme-elevation-50);
+  }
+
+  &__section--odd {
+    --cell-bg-color: var(--theme-elevation-0);
+    --cell-border-color: var(--theme-elevation-0);
+  }
+
+  &__section--target {
+    outline: 1px solid var(--theme-success-400);
+    border-radius: var(--style-radius-s);
+    z-index: 1;
+  }
+
+  &__section--hovered {
+    z-index: 1;
+    outline: 1px solid var(--theme-elevation-200);
+    transition:
+      background-color 0.2s ease-in-out,
+      outline 0.2s ease-in-out;
+  }
+
+  &__section--selected {
+    --cell-bg-color: var(--theme-success-50);
+    --cell-border-color: var(--theme-success-500);
+    --cell-inner-border-color: var(--theme-success-200);
+  }
+
+  &__section--selected-descendant {
+    --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
+    --cell-border-color: var(--theme-success-500);
+    --cell-inner-border-color: var(--theme-success-200);
+  }
+
+  &__section--selected-descendant.nested-sections-table-row__section--odd {
+    --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
+  }
+
+  &__section--selected.nested-sections-table-row__section--dragging {
+    opacity: 0.4;
+  }
+
+  &__section--invalid-target {
+    opacity: 0.4;
+  }
+
+  &__placeholder-section {
+    display: table-row-group;
+    pointer-events: none;
+    height: 36px;
+  }
+
+  &__placeholder-row {
+    .nested-sections-table-row__cell {
+      padding: 0;
+
+      &:first-child {
+        .nested-sections-table-row__placeholder-cell-bg {
+          border-radius: var(--style-radius-s) 0 0 var(--style-radius-s);
+          // border-left: 1px solid var(--theme-elevation-150);
+        }
+      }
+      &:last-child {
+        .nested-sections-table-row__placeholder-cell-bg {
+          right: 0px;
+          border-radius: 0 var(--style-radius-s) var(--style-radius-s) 0;
+          // border-right: 1px solid var(--theme-elevation-150);
+        }
+      }
+    }
+  }
+
+  &__placeholder-cell-bg {
+    // border: 1px solid var(--theme-elevation-100);
+    height: calc(100% - 10px);
+    border-right: none;
+    border-left: none;
+    position: absolute;
+    top: 50%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+  }
+}

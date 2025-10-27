@@ -1,0 +1,27 @@
+.nested-sections-table-header {
+  display: table-header-group;
+
+  --cell-inline-padding-start: calc(var(--base) * 0.6);
+  --cell-inline-padding-end: calc(var(--base) * 0.6);
+
+  &__cell {
+    display: table-cell;
+    color: var(--theme-elevation-400);
+    vertical-align: top;
+    padding-block: calc(var(--base) * 0.6);
+    padding-inline-start: var(--cell-inline-padding-start);
+    padding-inline-end: var(--cell-inline-padding-end);
+    position: relative;
+    z-index: 1;
+
+    [dir='rtl'] & {
+      text-align: right;
+    }
+    &:first-child {
+      --cell-inline-padding-start: calc(var(--base) * (0.8));
+    }
+    &:last-child {
+      --cell-inline-padding-end: calc(var(--base) * (0.8));
+    }
+  }
+}
