@@ -41,15 +41,7 @@ interface DivTableRowProps {
     placement?: string
     targetItem: null | SectionRow
   }) => void
-  onRowClick: ({
-    event,
-    from,
-    row,
-  }: {
-    event: React.MouseEvent<HTMLElement>
-    from: 'dragHandle' | 'row'
-    row: SectionRow
-  }) => void
+  onRowClick: ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => void
   onRowDrag: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onRowKeyPress?: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
   openItemIDs?: Set<number | string>
@@ -92,6 +84,7 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
   toggleRow,
 }) => {
   const isOdd = absoluteRowIndex % 2 === 1
+  const isFocused = focusedRowIndex !== undefined && focusedRowIndex === absoluteRowIndex
   const rowRef = React.useRef<HTMLDivElement>(null)
 
   // Focus this row when focusedRowIndex matches
@@ -106,7 +99,6 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
       selectRow: (event) => {
         onRowClick({
           event: event as React.MouseEvent<HTMLElement>,
-          from: 'row',
           row: rowItem,
         })
       },
@@ -129,6 +121,7 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
           targetParentID === rowItem.rowID && `${baseClass}__section--target`,
           isRowSelected && `${baseClass}__section--selected`,
           hasSelectedAncestor && `${baseClass}__section--selected-descendant`,
+          isFocused && `${baseClass}__section--focused`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -144,18 +137,15 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
         role="button"
         tabIndex={0}
       >
-        <div className={`${baseClass}__row`}>
+        <div className={baseClass}>
           <div className={`${baseClass}__cell`} ref={firstCellRef}>
-            <div className={`${baseClass}__row-actions`}>
+            <div className={`${baseClass}__actions`}>
               <DraggableWithClick
+                className={`${baseClass}__drag-handler`}
                 disabled={
                   hasSelectedAncestor ||
                   (selectedRowIDs.length > 1 && !selectedRowIDs.includes(rowItem.rowID))
                 }
-                onClick={(event) => {
-                  // needed for dragging unselected items
-                  onRowClick({ event, from: 'dragHandle', row: rowItem })
-                }}
                 onDrag={(event) => {
                   onRowDrag({
                     event,

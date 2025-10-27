@@ -40,43 +40,15 @@
 }
 
 .nested-sections-table-row {
-  display: table;
+  display: table-row;
   min-width: 100%;
+  border-collapse: collapse;
 
-  --cell-inline-padding-start: calc(var(--base) * 0.6);
-  --cell-inline-padding-end: calc(var(--base) * 0.6);
-
-  &__header {
-    display: table-header-group;
+  &__drag-handler {
+    cursor: grab;
   }
 
-  &__header-cell {
-    display: table-cell;
-    color: var(--theme-elevation-400);
-    vertical-align: top;
-    padding-block: calc(var(--base) * 0.6);
-    padding-inline-start: var(--cell-inline-padding-start);
-    padding-inline-end: var(--cell-inline-padding-end);
-    position: relative;
-    z-index: 1;
-
-    [dir='rtl'] & {
-      text-align: right;
-    }
-    &:first-child {
-      --cell-inline-padding-start: calc(var(--base) * (0.8));
-    }
-    &:last-child {
-      --cell-inline-padding-end: calc(var(--base) * (0.8));
-    }
-  }
-
-  &__row,
-  &__placeholder-row {
-    display: table-row;
-  }
-
-  &__row-actions {
+  &__actions {
     display: flex;
     align-items: center;
     gap: calc(var(--base) * 0.4);
@@ -162,7 +134,7 @@
   &__section--selected + &__section--selected-descendant &__cell,
   &__section--selected-descendant + &__section--selected &__cell,
   &__section--selected-descendant + &__section--selected-descendant &__cell {
-    border-top: none;
+    border-top-color: transparent;
 
     &:first-child {
       border-top-left-radius: 0;
@@ -172,20 +144,9 @@
     }
   }
 
-  // Selected section followed by another selected section - remove bottom radius and add inner border
+  // Selected section followed by another selected section - remove bottom radius
   &__section--selected:has(+ &__section--selected) {
     .nested-sections-table-row__cell {
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        height: 1px;
-        right: 0;
-        background-color: var(--cell-inner-border-color);
-        z-index: 1;
-      }
-
       &:first-child {
         border-bottom-left-radius: 0;
       }
@@ -199,17 +160,6 @@
   &__section--selected-descendant:has(+ &__section--selected),
   &__section--selected-descendant:has(+ &__section--selected-descendant) {
     .nested-sections-table-row__cell {
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        height: 1px;
-        right: 0;
-        background-color: var(--cell-inner-border-color);
-        z-index: 1;
-      }
-
       &:first-child {
         border-bottom-left-radius: 0;
       }
@@ -224,12 +174,12 @@
     display: table-row-group;
     outline: 1px solid transparent;
     --cell-bg-color: var(--theme-elevation-50);
-    --cell-border-color: var(--theme-elevation-50);
+    --cell-border-color: transparent;
   }
 
   &__section--odd {
     --cell-bg-color: var(--theme-elevation-0);
-    --cell-border-color: var(--theme-elevation-0);
+    --cell-border-color: transparent;
   }
 
   &__section--target {
@@ -247,19 +197,26 @@
   }
 
   &__section--selected {
-    --cell-bg-color: var(--theme-success-50);
-    --cell-border-color: var(--theme-success-500);
-    --cell-inner-border-color: var(--theme-success-200);
+    --cell-bg-color: var(--theme-success-100);
+    --cell-border-color: var(--theme-success-200);
   }
 
   &__section--selected-descendant {
     --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
-    --cell-border-color: var(--theme-success-500);
-    --cell-inner-border-color: var(--theme-success-200);
+    --cell-border-color: var(--theme-success-200);
   }
 
   &__section--selected-descendant.nested-sections-table-row__section--odd {
     --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
+  }
+
+  &__section--focused {
+    // --cell-border-color: var(--theme-elevation-400);
+    --cell-bg-color: var(--theme-elevation-200);
+  }
+
+  &__section--focused.nested-sections-table-row__section--odd {
+    --cell-bg-color: var(--theme-elevation-200);
   }
 
   &__section--selected.nested-sections-table-row__section--dragging {

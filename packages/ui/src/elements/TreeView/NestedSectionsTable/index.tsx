@@ -30,15 +30,7 @@ interface NestedSectionsTableProps {
     placement?: string
     targetItem: null | SectionRow
   }) => void
-  onRowClick?: ({
-    event,
-    from,
-    row,
-  }: {
-    event: React.MouseEvent<HTMLElement>
-    from: 'dragHandle' | 'row'
-    row: SectionRow
-  }) => void
+  onRowClick?: ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => void
   onRowDrag?: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onRowKeyPress?: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
   openItemIDs?: Set<number | string>

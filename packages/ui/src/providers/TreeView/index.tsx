@@ -37,7 +37,6 @@ export type TreeViewContextValue = {
     event: React.MouseEvent<HTMLElement>
     index: number
     item: TreeViewItem
-    keepSelected?: boolean
   }) => void
   openItemIDs: Set<number | string>
   parentFieldName: string
@@ -307,7 +306,7 @@ export function TreeViewProvider({
   )
 
   const onItemClick: TreeViewContextValue['onItemClick'] = React.useCallback(
-    ({ event, item: clickedItem, keepSelected }) => {
+    ({ event, item: clickedItem }) => {
       let doubleClicked: boolean = false
       const isCtrlPressed = event?.ctrlKey || event?.nativeEvent?.ctrlKey || event?.metaKey
       const isShiftPressed = event?.shiftKey || event?.nativeEvent?.shiftKey
@@ -318,7 +317,7 @@ export function TreeViewProvider({
         if (isCtrlPressed) {
           const indexes = items.reduce((acc, item, idx) => {
             if (item.itemKey === clickedItem.itemKey) {
-              if (!isCurrentlySelected || keepSelected) {
+              if (!isCurrentlySelected) {
                 acc.push(idx)
               }
             } else if (selectedItemKeys.has(item.itemKey)) {
@@ -348,7 +347,7 @@ export function TreeViewProvider({
               for (let idx = 0; idx < items.length; idx++) {
                 const item = items[idx]
                 if (clickedItem.itemKey === item.itemKey) {
-                  if (keepSelected || !selectedItemKeys.has(item.itemKey)) {
+                  if (!selectedItemKeys.has(item.itemKey)) {
                     indexes.push(idx)
                   }
                 } else if (selectedItemKeys.has(item.itemKey)) {

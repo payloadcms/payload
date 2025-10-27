@@ -68,7 +68,6 @@ export type FolderContextValue = {
     event: React.MouseEvent<HTMLElement>
     index: number
     item: FolderOrDocument
-    keepSelected?: boolean
   }) => void
   onItemDrag?: (args: { event: PointerEvent; item: FolderOrDocument }) => void
   onItemKeyPress: (args: {
@@ -617,7 +616,7 @@ export function FolderProvider({
   )
 
   const onItemClick: FolderContextValue['onItemClick'] = React.useCallback(
-    ({ event, item: clickedItem, keepSelected = false }) => {
+    ({ event, item: clickedItem }) => {
       let doubleClicked: boolean = false
       const isCtrlPressed = event.ctrlKey || event.metaKey
       const isShiftPressed = event.shiftKey
@@ -658,7 +657,7 @@ export function FolderProvider({
               for (let idx = 0; idx < allItems.length; idx++) {
                 const item = allItems[idx]
                 if (clickedItem.itemKey === item.itemKey) {
-                  if (keepSelected || !selectedItemKeys.has(item.itemKey)) {
+                  if (!selectedItemKeys.has(item.itemKey)) {
                     indexes.push(idx)
                   }
                 } else if (selectedItemKeys.has(item.itemKey)) {

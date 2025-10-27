@@ -1,6 +1,7 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
+import type { TreeViewItem } from 'payload/shared'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import React from 'react'
@@ -164,7 +165,6 @@ export function TreeViewTable() {
             } as any,
             index,
             item: dragItemDoc,
-            keepSelected: true,
           })
         }
       }
@@ -173,22 +173,65 @@ export function TreeViewTable() {
   )
 
   const onRowClick = React.useCallback(
-    ({
-      event,
-      from,
-      row,
-    }: {
-      event: React.MouseEvent<HTMLElement>
-      from: 'dragHandle' | 'row'
-      row: SectionRow
-    }) => {
+    ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => {
       const index = items.findIndex((doc) => doc.value.id === row.rowID)
       if (index !== -1) {
         const item = items[index]
-        void onItemClick({ event, index, item, keepSelected: from === 'dragHandle' })
+        void onItemClick({ event, index, item })
       }
     },
     [items, onItemClick],
+  )
+
+  // Helper to check if an item should be skipped during navigation
+  const isItemFocusable = React.useCallback(
+    (item: TreeViewItem) => {
+      // Check if this item is a descendant of any selected item
+      const selectedItems = Array.from(selectedItemKeys).map((key) =>
+        items.find((d) => d.itemKey === key),
+      )
+
+      for (const selectedItem of selectedItems) {
+        if (!selectedItem) {
+          continue
+        }
+
+        // Check if item is a descendant by walking up the parent chain
+        let current = item
+        while (current?.value?.parentID !== undefined && current.value.parentID !== null) {
+          if (current.value.parentID === selectedItem.value.id) {
+            return false // This item is a descendant of a selected item
+          }
+          // Find the parent item
+          const parentItem = items.find((i) => i.value.id === current.value.parentID)
+          if (!parentItem) {
+            break
+          }
+          current = parentItem
+        }
+      }
+
+      return true
+    },
+    [items, selectedItemKeys],
+  )
+
+  // Find next focusable item index, skipping disabled/invalid items
+  const findNextFocusableIndex = React.useCallback(
+    (currentIndex: number, direction: -1 | 1): number => {
+      let nextIndex = currentIndex + direction
+
+      while (nextIndex >= 0 && nextIndex < items.length) {
+        const nextItem = items[nextIndex]
+        if (isItemFocusable(nextItem)) {
+          return nextIndex
+        }
+        nextIndex += direction
+      }
+
+      return currentIndex // No valid item found, stay at current
+    },
+    [items, isItemFocusable],
   )
 
   const onRowKeyPress = React.useCallback(
@@ -209,47 +252,15 @@ export function TreeViewTable() {
         case 'ArrowUp': {
           event.preventDefault()
 
-          const isBackward = code === 'ArrowUp'
-          const newItemIndex = isBackward ? index - 1 : index + 1
+          const direction: -1 | 1 = code === 'ArrowUp' ? -1 : 1
+          const newItemIndex = findNextFocusableIndex(index, direction)
 
-          if (newItemIndex < 0 || newItemIndex >= items.length) {
-            return
+          if (newItemIndex === index) {
+            return // No valid row to navigate to
           }
 
+          // Just move focus, don't trigger selection
           setFocusedRowIndex(newItemIndex)
-
-          if (isCtrlPressed) {
-            break
-          }
-
-          if (isShiftPressed) {
-            // Let onItemClick handle shift selection
-            const newItem = items[newItemIndex]
-            onItemClick({
-              event: {
-                ctrlKey: false,
-                metaKey: false,
-                nativeEvent: {},
-                shiftKey: true,
-              } as any,
-              index: newItemIndex,
-              item: newItem,
-            })
-            return
-          }
-
-          // Single selection without shift
-          const newItem = items[newItemIndex]
-          onItemClick({
-            event: {
-              ctrlKey: false,
-              metaKey: false,
-              nativeEvent: {},
-              shiftKey: false,
-            } as any,
-            index: newItemIndex,
-            item: newItem,
-          })
 
           break
         }
@@ -279,7 +290,6 @@ export function TreeViewTable() {
                 } as any,
                 index: idx,
                 item: doc,
-                keepSelected: true,
               })
             })
           }
@@ -289,14 +299,13 @@ export function TreeViewTable() {
           event.preventDefault()
           onItemClick({
             event: {
-              ctrlKey: isShiftPressed,
-              metaKey: isShiftPressed,
+              ctrlKey: true,
+              metaKey: true,
               nativeEvent: {},
               shiftKey: false,
             } as any,
             index,
             item,
-            keepSelected: isCurrentlySelected,
           })
           break
         }
@@ -316,7 +325,14 @@ export function TreeViewTable() {
         }
       }
     },
-    [items, selectedItemKeys, onItemClick, setFocusedRowIndex, clearSelections],
+    [
+      items,
+      selectedItemKeys,
+      onItemClick,
+      setFocusedRowIndex,
+      clearSelections,
+      findNextFocusableIndex,
+    ],
   )
 
   const [columns] = React.useState(() => [

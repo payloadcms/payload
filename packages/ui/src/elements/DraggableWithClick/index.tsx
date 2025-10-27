@@ -56,14 +56,8 @@ export const DraggableWithClick = ({
 }: Props) => {
   const id = useId()
   const initialPos = useRef({ x: 0, y: 0 })
-  const dragStartX = useRef(0)
   const { attributes, listeners, setNodeRef } = useDraggable({
     id,
-    data: {
-      get dragStartX() {
-        return dragStartX.current
-      },
-    },
     disabled,
   })
   const isDragging = useRef(false)
@@ -81,7 +75,6 @@ export const DraggableWithClick = ({
   const handlePointerDown = React.useCallback(
     (e: PointerEvent) => {
       initialPos.current = { x: e.clientX, y: e.clientY }
-      dragStartX.current = e.clientX
       isDragging.current = false
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
