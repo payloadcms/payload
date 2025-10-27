@@ -7,7 +7,7 @@ export const es: GenericTranslationsObject = {
     active: 'Activo',
     address: 'Dirección',
     addressCity: 'Ciudad',
-    addressCompany: 'Compañia',
+    addressCompany: 'Compañía',
     addressCountry: 'País',
     addresses: 'Direcciones',
     addressesCollectionDescription:
@@ -75,7 +75,7 @@ export const es: GenericTranslationsObject = {
     transactionDetails: 'Detalles de la transacción',
     transactions: 'Transacciones',
     transactionsCollectionDescription:
-      'Las transacciones representan las intentos de pago realizados para un pedido. Un pedido puede tener múltiples transacciones asociadas con él, como una intento de pago inicial y reembolsos o ajustes posteriores.',
+      'Las transacciones representan las intentos de pago realizados para un pedido. Un pedido puede tener múltiples transacciones asociadas con él, como un intento de pago inicial y reembolsos o ajustes posteriores.',
     variant: 'Variante',
     variantOption: 'Opción de variante',
     variantOptions: 'Opciones de variante',
