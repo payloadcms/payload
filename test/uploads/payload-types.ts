@@ -122,7 +122,6 @@ export interface Config {
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
-    'polymorphic-uploads': PolymorphicUpload;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -185,7 +184,6 @@ export interface Config {
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
-    'polymorphic-uploads': PolymorphicUploadsSelect<false> | PolymorphicUploadsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1733,37 +1731,6 @@ export interface MediaWithImageSizeAdminProp {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "polymorphic-uploads".
- */
-export interface PolymorphicUpload {
-  id: string;
-  title?: string | null;
-  singleUpload?:
-    | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
-        relationTo: 'svg-only';
-        value: string | SvgOnly;
-      } | null);
-  multiUpload?:
-    | (
-        | {
-            relationTo: 'media';
-            value: string | Media;
-          }
-        | {
-            relationTo: 'svg-only';
-            value: string | SvgOnly;
-          }
-      )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -2012,10 +1979,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-image-size-admin-props';
         value: string | MediaWithImageSizeAdminProp;
-      } | null)
-    | ({
-        relationTo: 'polymorphic-uploads';
-        value: string | PolymorphicUpload;
       } | null)
     | ({
         relationTo: 'users';
@@ -3650,17 +3613,6 @@ export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
               filename?: T;
             };
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "polymorphic-uploads_select".
- */
-export interface PolymorphicUploadsSelect<T extends boolean = true> {
-  title?: T;
-  singleUpload?: T;
-  multiUpload?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

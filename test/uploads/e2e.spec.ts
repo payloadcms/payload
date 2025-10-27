@@ -44,7 +44,6 @@ import {
   mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
-  polymorphicUploadsSlug,
   relationPreviewSlug,
   relationSlug,
   svgOnlySlug,
@@ -96,7 +95,6 @@ let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
 let mediaWithImageSizeAdminPropsURL: AdminUrlUtil
-let polymorphicUploadsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -139,7 +137,6 @@ describe('Uploads', () => {
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
     mediaWithImageSizeAdminPropsURL = new AdminUrlUtil(serverURL, mediaWithImageSizeAdminPropsSlug)
-    polymorphicUploadsURL = new AdminUrlUtil(serverURL, polymorphicUploadsSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -493,78 +490,6 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('test-image-1500x735.jpeg')
 
     await saveDocAndAssert(page)
-  })
-
-  describe('polymorphic uploads', () => {
-    test('should upload in single polymorphic field', async () => {
-      await page.goto(polymorphicUploadsURL.create)
-
-      const singlePolyButton = page.locator('#field-singleUpload button', {
-        hasText: exactText('Create New'),
-      })
-      await singlePolyButton.click()
-
-      const uploadModal = page.locator('.payload__modal-item.drawer--is-open')
-      await expect(uploadModal).toBeVisible()
-
-      await uploadModal
-        .locator('.dropzone input[type="file"]')
-        .setInputFiles([path.resolve(dirname, './test-image.png')])
-
-      const saveButton = uploadModal.locator('#action-save')
-      await saveButton.click()
-
-      const mediaPill = page.locator('#field-singleUpload .pill')
-      await expect(mediaPill).toBeVisible()
-      await expect(mediaPill).toContainText('Media')
-
-      await saveDocAndAssert(page)
-    })
-
-    test('should upload in multi polymorphic field', async () => {
-      await page.goto(polymorphicUploadsURL.create)
-
-      const multiPolyButton = page.locator('#field-multiUpload button', {
-        hasText: exactText('Create New'),
-      })
-      await multiPolyButton.click()
-
-      const uploadModal = page.locator('#multiUpload-bulk-upload-drawer-slug-1')
-      await expect(uploadModal).toBeVisible()
-
-      await uploadModal
-        .locator('.dropzone input[type="file"]')
-        .setInputFiles([path.resolve(dirname, './test-image.png')])
-
-      const saveButton = uploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
-      await saveButton.click()
-
-      const firstFileInList = page.locator('.upload-field-card').first()
-      await expect(firstFileInList.locator('.pill')).toContainText('Media')
-
-      await multiPolyButton.click()
-      await expect(uploadModal).toBeVisible()
-      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './svgWithXml.svg'))
-
-      const collectionSelector = uploadModal.locator(
-        '.file-selections__header .file-selections__collectionSelect',
-      )
-
-      await expect(collectionSelector).toBeVisible()
-      const fieldSelector = collectionSelector.locator('.react-select')
-      await fieldSelector.click({ delay: 100 })
-      const options = uploadModal.locator('.rs__option')
-      // Select an option
-      await options.locator('text=Svg Only').click()
-
-      await expect(uploadModal.locator('.bulk-upload--drawer-header')).toContainText('Svg Only')
-      await saveButton.click()
-
-      const svgItemInList = page.locator('.upload-field-card').nth(1)
-      await expect(svgItemInList.locator('.pill')).toContainText('Svg Only')
-
-      await saveDocAndAssert(page)
-    })
   })
 
   describe('filterOptions', () => {

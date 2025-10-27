@@ -15,7 +15,6 @@ import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
-import { PolymorphicUploadsCollection } from './collections/PolymorphicUploads/index.js'
 import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
@@ -38,7 +37,6 @@ import {
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
-  polymorphicUploadsSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
@@ -1032,7 +1030,6 @@ export default buildConfigWithDefaults({
         ],
       },
     },
-    PolymorphicUploadsCollection,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
