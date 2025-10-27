@@ -77,7 +77,6 @@ describe('@payloadcms/sdk', () => {
     const result = await sdk.findByID({
       disableErrors: true,
       collection: 'posts',
-      // eslint-disable-next-line jest/no-conditional-in-test
       id: typeof post.id === 'string' ? randomUUID() : 999,
     })
 

@@ -1,5 +1,6 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
+import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
@@ -28,6 +29,7 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Global2, Post } from './payload-types.js'
 
@@ -598,12 +600,10 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
-    // eslint-disable-next-line jest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
-    // eslint-disable-next-line jest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
@@ -771,7 +771,6 @@ describe('database', () => {
     ].map((title) => ({ title }))
 
     for (const { title } of titles) {
-      // eslint-disable-next-line jest/no-conditional-in-test
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
         await payload.create({ collection: 'posts', data: { title } })
@@ -839,7 +838,6 @@ describe('database', () => {
     }
 
     for (const { category } of categoriesIDS) {
-      // eslint-disable-next-line jest/no-conditional-in-test
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
         await payload.create({ collection: 'posts', data: { title: randomUUID(), category } })
@@ -937,7 +935,6 @@ describe('database', () => {
     }
 
     // Non-consistent sorting by ID
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (process.env.PAYLOAD_DATABASE?.includes('uuid')) {
       return
     }
@@ -1468,7 +1465,6 @@ describe('database', () => {
 
     it('should run migrate:down', async () => {
       // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (!isMongoose(payload)) {
         return
       }
@@ -1507,7 +1503,6 @@ describe('database', () => {
 
     it('should run migrate:refresh', async () => {
       // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (!isMongoose(payload)) {
         return
       }
@@ -1529,7 +1524,6 @@ describe('database', () => {
 
   it('should run migrate:reset', async () => {
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (!isMongoose(payload)) {
       return
     }
@@ -1550,7 +1544,6 @@ describe('database', () => {
 
   describe('predefined migrations', () => {
     it('mongoose - should execute migrateVersionsV1_V2', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name !== 'mongoose') {
         return
       }
@@ -1571,7 +1564,6 @@ describe('database', () => {
     })
 
     it('mongoose - should execute migrateRelationshipsV2_V3', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name !== 'mongoose') {
         return
       }
@@ -2749,7 +2741,6 @@ describe('database', () => {
 
     // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
     it.skip('should add tables with hooks', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -2757,9 +2748,7 @@ describe('database', () => {
       let added_table_before: Table
       let added_table_after: Table
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('postgres')) {
-        // eslint-disable-next-line jest/no-conditional-in-test
         const t = (payload.db.pgSchema?.table ?? drizzlePg.pgTable) as typeof drizzlePg.pgTable
         added_table_before = t('added_table_before', {
           id: drizzlePg.serial('id').primaryKey(),
@@ -2772,7 +2761,6 @@ describe('database', () => {
         })
       }
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('sqlite')) {
         added_table_before = drizzleSqlite.sqliteTable('added_table_before', {
           id: drizzleSqlite.integer('id').primaryKey(),
@@ -2839,7 +2827,6 @@ describe('database', () => {
     })
 
     it('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -2852,11 +2839,9 @@ describe('database', () => {
             table: schema.tables.places,
             columns: {
               // SQLite doesn't have DB length enforcement
-              // eslint-disable-next-line jest/no-conditional-in-test
               ...(payload.db.name === 'postgres' && {
                 city: drizzlePg.varchar('city', { length: 10 }),
               }),
-              // eslint-disable-next-line jest/no-conditional-in-test
               extraColumn: isSQLite
                 ? drizzleSqlite.integer('extra_column')
                 : drizzlePg.integer('extra_column'),
@@ -2881,7 +2866,6 @@ describe('database', () => {
         },
       })
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       const tableName = payload.db.schemaName ? `"${payload.db.schemaName}"."places"` : 'places'
 
       await payload.db.execute({
@@ -2897,7 +2881,6 @@ describe('database', () => {
       expect(res_with_extra_col.rows[0].extra_column).toBe(10)
 
       // SQLite doesn't have DB length enforcement
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'postgres') {
         await expect(
           payload.db.execute({
@@ -2909,7 +2892,6 @@ describe('database', () => {
     })
 
     it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -2921,7 +2903,6 @@ describe('database', () => {
           extendTable({
             table: schema.tables.places,
             extraConfig: (t) => ({
-              // eslint-disable-next-line jest/no-conditional-in-test
               uniqueOnCityAndCountry: (isSQLite ? drizzleSqlite : drizzlePg)
                 .unique()
                 .on(t.city, t.country),
@@ -3401,11 +3382,9 @@ describe('database', () => {
 
     it('should automatically add hasMany: true to a virtual field that references a hasMany relationship', () => {
       const field = payload.collections['virtual-relations'].config.fields.find(
-        // eslint-disable-next-line jest/no-conditional-in-test
         (each) => 'name' in each && each.name === 'postsTitles',
       )!
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       expect('hasMany' in field && field.hasMany).toBe(true)
     })
 
@@ -3654,7 +3633,6 @@ describe('database', () => {
   })
 
   it('mongodb additional keys stripping', async () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (payload.db.name !== 'mongoose') {
       return
     }
@@ -3899,7 +3877,6 @@ describe('database', () => {
     const res = await payload.find({
       collection: 'categories',
       draft: true,
-      // eslint-disable-next-line jest/no-conditional-in-test
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
     })
     expect(res.docs).toHaveLength(1)
@@ -5042,7 +5019,6 @@ describe('database', () => {
 
   it('should ignore blocks that exist in the db but not in the config', async () => {
     // not possible w/ SQL anyway
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (payload.db.name !== 'mongoose') {
       return
     }
@@ -5088,7 +5064,6 @@ describe('database', () => {
   })
 
   it('should CRUD with blocks as JSON in SQL adapters', async () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (!('drizzle' in payload.db)) {
       return
     }

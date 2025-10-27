@@ -821,7 +821,6 @@ describe('Collections - Uploads', () => {
           const isIPV6 = hostname.includes('::')
 
           // Strip brackets from IPv6 addresses
-          // eslint-disable-next-line jest/no-conditional-in-test
           if (isIPV6) {
             hostname = hostname.slice(1, -1)
           }
@@ -830,7 +829,6 @@ describe('Collections - Uploads', () => {
           // we'd like to test for
           // @ts-expect-error this does not need to be mocked 100% correctly
           _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             callback(null, hostname as any, isIPV6 ? 6 : 4)
           }
 

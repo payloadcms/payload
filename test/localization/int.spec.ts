@@ -1267,7 +1267,6 @@ describe('Localization', () => {
           locale: spanishLocale,
         })
 
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (isMongoose(payload)) {
           expect(docWithoutFallback.items).toStrictEqual(null)
         } else {

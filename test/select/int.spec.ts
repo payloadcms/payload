@@ -410,7 +410,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? block
               : {
@@ -436,7 +435,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? { id: block.id, blockType: block.blockType, ctaText: block.ctaText }
               : {
@@ -701,7 +699,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
           ),
         })
@@ -722,7 +719,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocks: post.blocks?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if ('ctaText' in block) {
               delete block['ctaText']
             }
@@ -733,7 +729,6 @@ describe('Select', () => {
       })
 
       it('should exclude a point field', async () => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -1008,7 +1003,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? block
               : {
@@ -1033,7 +1027,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? { id: block.id, blockType: block.blockType, ctaText: block.ctaText }
               : {
@@ -1058,7 +1051,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocksSecond: post.blocksSecond?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'second'
               ? { id: block.id, blockType: block.blockType, text: block.text }
               : {
@@ -1083,7 +1075,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocksSecond: post.blocksSecond?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'first'
               ? { id: block.id, blockType: block.blockType, firstText: block.firstText }
               : {
@@ -1316,7 +1307,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
           ),
         })
@@ -1336,7 +1326,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocks: post.blocks?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if ('ctaText' in block) {
               delete block['ctaText']
             }
@@ -1360,7 +1349,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocksSecond: post.blocksSecond?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (block.blockType === 'second') {
               delete block['text']
             }
@@ -1384,7 +1372,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocksSecond: post.blocksSecond?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if ('firstText' in block) {
               delete block['firstText']
             }

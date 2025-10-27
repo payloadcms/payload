@@ -650,7 +650,6 @@ describe('Relationships', () => {
             },
           })
 
-          // eslint-disable-next-line jest/no-standalone-expect
           expect(query1.totalDocs).toStrictEqual(1)
         })
 
@@ -1659,7 +1658,6 @@ describe('Relationships', () => {
         })
         .then((res) => res.json())
 
-      // eslint-disable-next-line jest/no-standalone-expect
       expect(queryOne.docs).toHaveLength(1)
     })
 

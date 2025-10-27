@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { Point, Post } from './payload-types.js'
 
@@ -61,7 +61,7 @@ describePostgres('Select - with postgres logs', () => {
       const post = await createPost()
 
       // Count every console log
-      const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
       const res = removeEmptyAndUndefined(
         (await payload.db.updateOne({
@@ -103,7 +103,7 @@ describePostgres('Select - with postgres logs', () => {
       })
 
       // Count every console log
-      const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
       const res = removeEmptyAndUndefined(
         (await payload.db.updateOne({

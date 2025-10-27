@@ -18,7 +18,7 @@ export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() 
 
 export default defineConfig({
   // Look for test files in the "test" directory, relative to this configuration file
-  testDir: '',
+  testDir: './_community',
   testMatch: '*e2e.spec.ts',
   timeout: TEST_TIMEOUT, // 1 minute
   use: {

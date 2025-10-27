@@ -775,7 +775,6 @@ describe('Fields', () => {
 
       expect(res.docs.every(filter)).toBe(true)
       expect(dataSample.filter(filter)).toHaveLength(res.totalDocs)
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (res.totalDocs > 10) {
         // This is where postgres might fail! selectDistinct actually removed some rows here, because it distincts by:
         // not only ID, but also created_at, updated_at, items_date
@@ -3376,7 +3375,6 @@ describe('Fields', () => {
       })
 
       it('should query deeply', async () => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (payload.db.name === 'sqlite') {
           return
         }
