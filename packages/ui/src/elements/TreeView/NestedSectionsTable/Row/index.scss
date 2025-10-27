@@ -223,6 +223,10 @@
     opacity: 0.4;
   }
 
+  &__section--selected.nested-sections-table-row__section--focused {
+    --cell-bg-color: var(--theme-success-150);
+  }
+
   &__section--invalid-target {
     opacity: 0.4;
   }

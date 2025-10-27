@@ -30,6 +30,7 @@ interface NestedSectionsTableProps {
     placement?: string
     targetItem: null | SectionRow
   }) => void
+  onFocusChange?: (focusedIndex: number) => void
   onRowClick?: ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => void
   onRowDrag?: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onRowKeyPress?: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
@@ -59,6 +60,7 @@ interface DivTableSectionProps {
     placement?: string
     targetItem: null | SectionRow
   }) => void
+  onFocusChange?: (focusedIndex: number) => void
   onRowClick: ({
     event,
     from,
@@ -93,6 +95,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   isDragging = false,
   loadingRowIDs,
   onDroppableHover,
+  onFocusChange,
   onRowClick,
   onRowDrag,
   onRowKeyPress,
@@ -119,6 +122,29 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       className={[`${baseClass}__wrapper`, isDragging && `${baseClass}--dragging`, className]
         .filter(Boolean)
         .join(' ')}
+      onBlur={(e) => {
+        // Check if focus is leaving the table completely (not just moving between children)
+        if (!e.currentTarget.contains(e.relatedTarget as Node) && onFocusChange) {
+          onFocusChange(-1)
+        }
+      }}
+      onFocus={(e) => {
+        // Check if focus is entering the table from outside (not from a child)
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          // Focus the first selected row, or the first row if nothing is selected
+          if (selectedRowIDs && selectedRowIDs.length > 0) {
+            const firstSelectedID = selectedRowIDs[0]
+            const firstSelectedIndex = sections?.findIndex((row) => row.rowID === firstSelectedID)
+            if (firstSelectedIndex !== undefined && firstSelectedIndex >= 0) {
+              onFocusChange?.(firstSelectedIndex)
+            }
+          } else if (focusedRowIndex === undefined || focusedRowIndex < 0) {
+            onFocusChange?.(0)
+          }
+        }
+      }}
+      role="table"
+      tabIndex={-1}
     >
       <div className={baseClass}>
         <Header columns={columns} />
@@ -134,6 +160,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           isDragging={isDragging}
           loadingRowIDs={loadingRowIDs}
           onDroppableHover={onDroppableHover}
+          onFocusChange={onFocusChange}
           onRowClick={onRowClick}
           onRowDrag={onRowDrag}
           onRowKeyPress={onRowKeyPress}
@@ -165,6 +192,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   level = 0,
   loadingRowIDs,
   onDroppableHover,
+  onFocusChange,
   onRowClick,
   onRowDrag,
   onRowKeyPress,
@@ -258,6 +286,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
               level={level}
               loadingRowIDs={loadingRowIDs}
               onDroppableHover={onDroppableHover}
+              onFocusChange={onFocusChange}
               onRowClick={onRowClick}
               onRowDrag={onRowDrag}
               onRowKeyPress={onRowKeyPress}
@@ -285,6 +314,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 level={level + 1}
                 loadingRowIDs={loadingRowIDs}
                 onDroppableHover={onDroppableHover}
+                onFocusChange={onFocusChange}
                 onRowClick={onRowClick}
                 onRowDrag={onRowDrag}
                 onRowKeyPress={onRowKeyPress}

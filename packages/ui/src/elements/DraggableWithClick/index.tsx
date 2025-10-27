@@ -1,3 +1,5 @@
+import type { UseDraggableArguments } from '@dnd-kit/core'
+
 import { useDraggable } from '@dnd-kit/core'
 import React, { useId, useRef } from 'react'
 
@@ -10,6 +12,12 @@ type Props = {
    * @default 'div'
    */
   readonly as?: React.ElementType
+  /**
+   * Additional attributes to spread onto the root element.
+   * This can be useful for accessibility or data attributes.
+   * @default {}
+   */
+  readonly attributes?: UseDraggableArguments['attributes']
   /** The content to be rendered inside the component. */
   readonly children?: React.ReactNode
   /**
@@ -45,6 +53,7 @@ type Props = {
 
 export const DraggableWithClick = ({
   as = 'div',
+  attributes: draggableAttributes = {},
   children,
   className,
   disabled = false,
@@ -58,6 +67,7 @@ export const DraggableWithClick = ({
   const initialPos = useRef({ x: 0, y: 0 })
   const { attributes, listeners, setNodeRef } = useDraggable({
     id,
+    attributes: draggableAttributes,
     disabled,
   })
   const isDragging = useRef(false)

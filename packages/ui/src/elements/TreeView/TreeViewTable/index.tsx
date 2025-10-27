@@ -309,20 +309,6 @@ export function TreeViewTable() {
           })
           break
         }
-        case 'Tab': {
-          if (isShiftPressed) {
-            const prevIndex = index - 1
-            if (prevIndex < 0 && selectedItemKeys?.size > 0) {
-              setFocusedRowIndex(prevIndex)
-            }
-          } else {
-            const nextIndex = index + 1
-            if (nextIndex === items.length && selectedItemKeys.size > 0) {
-              setFocusedRowIndex(items.length - 1)
-            }
-          }
-          break
-        }
       }
     },
     [
@@ -370,6 +356,7 @@ export function TreeViewTable() {
         isDragging={isDragging}
         loadingRowIDs={loadingRowIDs}
         onDroppableHover={onDroppableHover}
+        onFocusChange={setFocusedRowIndex}
         onRowClick={onRowClick}
         onRowDrag={onRowDrag}
         onRowKeyPress={onRowKeyPress}

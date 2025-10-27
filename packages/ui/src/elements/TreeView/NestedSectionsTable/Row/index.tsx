@@ -41,6 +41,7 @@ interface DivTableRowProps {
     placement?: string
     targetItem: null | SectionRow
   }) => void
+  onFocusChange?: (focusedIndex: number) => void
   onRowClick: ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => void
   onRowDrag: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onRowKeyPress?: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
@@ -71,6 +72,7 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
   level,
   loadingRowIDs,
   onDroppableHover,
+  onFocusChange,
   onRowClick,
   onRowDrag,
   onRowKeyPress,
@@ -126,6 +128,17 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
           .filter(Boolean)
           .join(' ')}
         onClick={handleClick}
+        onFocus={(e) => {
+          // Update focus index when row receives focus via tab, only if it's a valid focusable row
+          // Only update if the row itself is being focused, not a child element (like the chevron button)
+          if (
+            focusedRowIndex !== absoluteRowIndex &&
+            onFocusChange &&
+            e.target === e.currentTarget
+          ) {
+            onFocusChange(absoluteRowIndex)
+          }
+        }}
         onKeyDown={
           onRowKeyPress
             ? (event) => {
@@ -135,12 +148,15 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
         }
         ref={rowRef}
         role="button"
-        tabIndex={0}
+        tabIndex={hasSelectedAncestor ? -1 : 0}
       >
         <div className={baseClass}>
           <div className={`${baseClass}__cell`} ref={firstCellRef}>
             <div className={`${baseClass}__actions`}>
               <DraggableWithClick
+                attributes={{
+                  tabIndex: -1,
+                }}
                 className={`${baseClass}__drag-handler`}
                 disabled={
                   hasSelectedAncestor ||
@@ -187,7 +203,10 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__tree-toggle`}
-                      extraButtonProps={{ [dataAttributeName]: actionNames.toggleExpand }}
+                      extraButtonProps={{
+                        [dataAttributeName]: actionNames.toggleExpand,
+                        tabIndex: hasSelectedAncestor ? -1 : 0,
+                      }}
                       margin={false}
                       size="small"
                     >
