@@ -108,9 +108,13 @@
     "typescript": "5.7.3",
     "uuid": "10.0.0",
     "wrangler": "~4.42.0",
-    "zod": "^3.25.5"
+    "zod": "^3.25.5",
+    "vitest": "4.0.2"
   },
   "pnpm": {
-    "neverBuiltDependencies": []
+    "neverBuiltDependencies": [],
+    "overrides": {
+      "graphql": "16.8.1"
+    }
   }
 }

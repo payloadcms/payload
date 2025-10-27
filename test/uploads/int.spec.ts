@@ -8,6 +8,7 @@ import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
@@ -689,7 +690,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
           collection: skipSafeFetchMediaSlug,
@@ -719,7 +720,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         // spin up a temporary server so fetch to the local doesn't fail
         const server = createServer((req, res) => {
@@ -763,7 +764,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
           collection: skipSafeFetchHeaderFilterSlug,

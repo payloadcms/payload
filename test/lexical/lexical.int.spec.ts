@@ -4,6 +4,8 @@ import type {
 } from '@payloadcms/richtext-lexical/lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+
 /* eslint-disable jest/no-conditional-in-test */
 import {
   buildEditorState,

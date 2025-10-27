@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 import assert from 'assert'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { withoutAutoRun } from './utilities.js'

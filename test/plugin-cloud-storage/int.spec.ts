@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Config } from './payload-types.js'
 

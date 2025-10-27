@@ -1,9 +1,9 @@
-/* eslint-disable jest/require-top-level-describe */
 import type { Payload } from 'payload'
 
 import path from 'path'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Point, Post } from './payload-types.js'
 
