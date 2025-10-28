@@ -6,15 +6,11 @@ import type {
   Page,
 } from '@playwright/test'
 import type { Config } from 'payload'
-import type { SuiteAPI } from 'vitest'
 
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { wait } from 'payload/shared'
-import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
-import { describe as viteDescribe, VitestUtils } from 'vitest'
-import { Vitest } from 'vitest/node'
 
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
@@ -395,24 +391,6 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
     collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
     stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
   }
-}
-
-export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
-  if (process.env.CI) {
-    return viteDescribe
-  }
-
-  // Check that localstack is running
-  const { code } = shelljs.exec(`docker ps | grep localstack`)
-
-  if (code !== 0) {
-    console.warn('Localstack is not running. Skipping test suite.')
-    return viteDescribe.skip
-  }
-
-  console.log('Localstack is running. Running test suite.')
-
-  return viteDescribe
 }
 
 export function getRoutes({
