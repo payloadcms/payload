@@ -52,7 +52,7 @@ interface DivTableRowProps {
       shiftKey: boolean
     }
   }) => void
-  openItemIDs?: Set<number | string>
+  openItemKeys?: Set<ItemKey>
   rowItem: SectionRow
   segmentWidth: number
   selectedItemKeys: Set<ItemKey>
@@ -83,7 +83,7 @@ export const Row: React.FC<DivTableRowProps> = ({
   onRowDrag,
   onRowKeyPress,
   onSelectionChange,
-  openItemIDs,
+  openItemKeys,
   rowItem,
   segmentWidth,
   selectedItemKeys,
@@ -226,7 +226,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                         </div>
                       ) : (
                         <ChevronIcon
-                          direction={openItemIDs?.has(rowItem.rowID) ? 'down' : 'right'}
+                          direction={openItemKeys?.has(rowItem.rowID) ? 'down' : 'right'}
                         />
                       )}
                     </Button>

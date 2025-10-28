@@ -32,7 +32,10 @@ export type TreeViewContextValue = {
   itemKeysToMove?: Set<TreeViewItemKey>
   items?: TreeViewItem[]
   loadingRowIDs: Set<number | string>
-  moveItems: (args: { docIDs: (number | string)[]; parentID?: number | string }) => Promise<void>
+  moveItems: (args: {
+    docsToMove: { relationTo: string; value: number | string }[]
+    parentID?: number | string
+  }) => Promise<void>
   onItemSelection: (args: {
     eventOptions?: {
       ctrlKey?: boolean
@@ -41,7 +44,7 @@ export type TreeViewContextValue = {
     }
     item: TreeViewItem
   }) => void
-  openItemIDs: Set<number | string>
+  openItemKeys: Set<ItemKey>
   parentFieldName: string
   refineTreeViewData: (args: { query?: TreeViewQueryParams; updateURL: boolean }) => void
   search: string
@@ -63,7 +66,7 @@ const Context = React.createContext<TreeViewContextValue>({
   loadingRowIDs: new Set<number | string>(),
   moveItems: () => Promise.resolve(undefined),
   onItemSelection: () => undefined,
-  openItemIDs: new Set<number | string>(),
+  openItemKeys: new Set<ItemKey>(),
   parentFieldName: '_parentDoc',
   refineTreeViewData: () => undefined,
   search: '',
@@ -240,10 +243,12 @@ export function TreeViewProvider({
 
   const moveItems: TreeViewContextValue['moveItems'] = React.useCallback(
     async (args) => {
-      const { docIDs, parentID } = args
-      if (!docIDs.length) {
+      const { docsToMove, parentID } = args
+      if (!docsToMove.length) {
         return
       }
+
+      const docIDs = docsToMove.map((d) => d.value)
 
       // Optimistically update local documents
       setItems((prevDocs) =>
@@ -402,7 +407,7 @@ export function TreeViewProvider({
         loadingRowIDs,
         moveItems,
         onItemSelection,
-        openItemIDs: openItemKeys,
+        openItemKeys,
         parentFieldName,
         refineTreeViewData,
         search,

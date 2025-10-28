@@ -1,10 +1,12 @@
 import type { TreeViewItem } from 'payload/shared'
 
+import type { ItemKey } from './itemsToSectionRows.js'
+
 type GetAllDescendantIDsArgs = {
   /**
-   * IDs of the items to get descendants for
+   * Item Keys of the items to get descendants for
    */
-  itemIDs: (number | string)[]
+  itemKeys: Set<ItemKey>
   /**
    * All items in the tree
    */
@@ -31,24 +33,21 @@ type GetAllDescendantIDsArgs = {
  * getAllDescendantIDs({ itemID: ['A', 'D'], items: documents })
  * // Returns Set { 'A', 'B', 'C', 'D' }
  */
-export function getAllDescendantIDs({
-  itemIDs,
-  items,
-}: GetAllDescendantIDsArgs): Set<number | string> {
-  const result = new Set<number | string>()
+export function getAllDescendantIDs({ itemKeys, items }: GetAllDescendantIDsArgs): Set<ItemKey> {
+  const result = new Set<ItemKey>()
 
-  const collectDescendants = (parentID: number | string) => {
+  const collectDescendants = (parentItemKey: ItemKey) => {
     items.forEach((doc) => {
-      if (doc.value.parentID === parentID) {
-        result.add(doc.value.id)
+      if (doc.parentItemKey === parentItemKey) {
+        result.add(doc.itemKey)
         // Recursively collect this child's descendants
-        collectDescendants(doc.value.id)
+        collectDescendants(doc.itemKey)
       }
     })
   }
 
-  itemIDs.forEach((id) => {
-    collectDescendants(id)
+  itemKeys.forEach((itemKey) => {
+    collectDescendants(itemKey)
   })
 
   return result

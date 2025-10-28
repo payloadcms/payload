@@ -36,7 +36,7 @@ interface RenderTableSectionProps {
       shiftKey: boolean
     }
   }) => void
-  openItemIDs?: Set<number | string>
+  openItemKeys?: Set<ItemKey>
   parentItems?: SectionRow[]
   rowIndexOffset?: number
   rows: SectionRow[]
@@ -64,7 +64,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
   onRowDrag,
   onRowKeyPress,
   onSelectionChange,
-  openItemIDs,
+  openItemKeys,
   parentItems = [],
   rowIndexOffset = 0,
   rows,
@@ -76,7 +76,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
   // Helper to count all rows recursively, only counting visible (open) rows
   const countRows = (items: SectionRow[]): number => {
     return items.reduce((count, item) => {
-      const isOpen = openItemIDs?.has(item.rowID)
+      const isOpen = openItemKeys?.has(item.rowID)
       return count + 1 + (item.rows && isOpen ? countRows(item.rows) : 0)
     }, 0)
   }
@@ -86,7 +86,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
     let offset = rowIndexOffset
     for (let i = 0; i < index; i++) {
       offset += 1
-      const isOpen = openItemIDs?.has(rows[i].rowID)
+      const isOpen = openItemKeys?.has(rows[i].rowID)
       if (rows[i].rows && isOpen) {
         offset += countRows(rows[i].rows || [])
       }
@@ -99,7 +99,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
       {rows.map((rowItem, sectionRowIndex: number) => {
         const absoluteRowIndex = getAbsoluteRowIndex(sectionRowIndex)
         const isLastRow = rows.length - 1 === sectionRowIndex
-        const hasNestedRows = Boolean(rowItem?.rows?.length) && openItemIDs?.has(rowItem.rowID)
+        const hasNestedRows = Boolean(rowItem?.rows?.length) && openItemKeys?.has(rowItem.rowID)
         const isRowAtRootLevel = level === 0 || (isLastRow && isLastRowOfRoot)
 
         // Calculate drop target items based on position in hierarchy
@@ -158,7 +158,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
               onRowDrag={onRowDrag}
               onRowKeyPress={onRowKeyPress}
               onSelectionChange={onSelectionChange}
-              openItemIDs={openItemIDs}
+              openItemKeys={openItemKeys}
               rowItem={rowItem}
               segmentWidth={segmentWidth}
               selectedItemKeys={selectedItemKeys}
@@ -186,7 +186,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
                 onRowDrag={onRowDrag}
                 onRowKeyPress={onRowKeyPress}
                 onSelectionChange={onSelectionChange}
-                openItemIDs={openItemIDs}
+                openItemKeys={openItemKeys}
                 parentItems={[...parentItems, rowItem]}
                 rowIndexOffset={absoluteRowIndex + 1}
                 rows={rowItem.rows}

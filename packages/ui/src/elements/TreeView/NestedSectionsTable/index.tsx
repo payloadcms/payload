@@ -15,14 +15,14 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   dropContextName,
   hoveredRowID,
   isDragging = false,
-  isRowFocusable = () => true,
+  isRowFocusable,
   loadingRowIDs,
   onDroppableHover,
   onEnter,
   onEscape,
   onRowDrag,
   onSelectAll,
-  openItemIDs,
+  openItemKeys,
   sections,
   segmentWidth = DEFAULT_SEGMENT_WIDTH,
   selectedItemKeys,
@@ -42,13 +42,13 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       let count = 0
       for (const row of rows) {
         count++
-        if (row.rows && openItemIDs?.has(row.rowID)) {
+        if (row.rows && openItemKeys?.has(row.rowID)) {
           count += countVisibleRows(row.rows)
         }
       }
       return count
     },
-    [openItemIDs],
+    [openItemKeys],
   )
 
   const totalVisibleRows = React.useMemo(
@@ -70,7 +70,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
             return row
           }
           currentIndex++
-          if (row.rows && openItemIDs?.has(row.rowID)) {
+          if (row.rows && openItemKeys?.has(row.rowID)) {
             const found = findRow(row.rows)
             if (found) {
               return found
@@ -82,7 +82,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
 
       return findRow(sections)
     },
-    [sections, openItemIDs],
+    [sections, openItemKeys],
   )
 
   // Get visual index from row ID
@@ -99,7 +99,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
             return currentIndex
           }
           currentIndex++
-          if (row.rows && openItemIDs?.has(row.rowID)) {
+          if (row.rows && openItemKeys?.has(row.rowID)) {
             const found = findIndex(row.rows)
             if (found !== -1) {
               return found
@@ -111,7 +111,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
 
       return sections ? findIndex(sections) : -1
     },
-    [sections, openItemIDs],
+    [sections, openItemKeys],
   )
 
   // Get the current focused row index for passing down to Row components
@@ -206,13 +206,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           const direction: -1 | 1 = code === 'ArrowUp' ? -1 : 1
           const currentIndex = getIndexFromRowID(row.rowID)
           let nextIndex = currentIndex + direction
-
-          if (shiftKey) {
-            onSelectionChange({
-              itemKey: row.rowID,
-              options: { ctrlKey, metaKey, shiftKey },
-            })
-          }
 
           // Find next focusable row
           while (nextIndex >= 0 && nextIndex < totalVisibleRows) {
@@ -349,7 +342,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           onRowDrag={onRowDrag}
           onRowKeyPress={handleRowKeyPress}
           onSelectionChange={onSelectionChange}
-          openItemIDs={openItemIDs}
+          openItemKeys={openItemKeys}
           parentItems={[]}
           rowIndexOffset={0}
           rows={sections}

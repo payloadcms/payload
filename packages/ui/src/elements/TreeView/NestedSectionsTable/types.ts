@@ -28,7 +28,7 @@ export type NestedSectionsTableProps = {
   onEscape: () => void
   onRowDrag?: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onSelectAll: () => void
-  openItemIDs?: Set<number | string>
+  openItemKeys?: Set<ItemKey>
   sections: SectionRow[]
   segmentWidth?: number
   selectedItemKeys: Set<ItemKey>

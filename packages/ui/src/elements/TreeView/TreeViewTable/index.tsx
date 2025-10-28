@@ -6,7 +6,7 @@ import { useDndMonitor } from '@dnd-kit/core'
 import React from 'react'
 import { toast } from 'sonner'
 
-import type { SectionRow } from '../NestedSectionsTable/types.js'
+import type { ItemKey, SectionRow } from '../NestedSectionsTable/types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useTreeView } from '../../../providers/TreeView/index.js'
@@ -28,7 +28,7 @@ export function TreeViewTable() {
     loadingRowIDs,
     moveItems,
     onItemSelection,
-    openItemIDs,
+    openItemKeys,
     selectAll,
     selectedItemKeys,
     toggleRow,
@@ -46,13 +46,6 @@ export function TreeViewTable() {
     [items, i18n.language],
   )
 
-  const selectedRowIDs = React.useMemo(() => {
-    return Array.from(selectedItemKeys).map((key) => {
-      const doc = items.find((d) => d.itemKey === key)
-      return doc?.value.id || ''
-    })
-  }, [selectedItemKeys, items])
-
   // Handle drag/drop events
   const onDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
@@ -65,14 +58,24 @@ export function TreeViewTable() {
         'targetItem' in event.over.data.current
       ) {
         const selectedItems = getSelectedItems()
-        const docIDs = selectedItems.map((doc) => doc.value.id)
+        const { docsToMove, itemKeys } = selectedItems.reduce(
+          (acc, doc) => {
+            acc.itemKeys.add(doc.itemKey)
+            acc.docsToMove.push({
+              relationTo: doc.relationTo,
+              value: doc.value.id,
+            })
+            return acc
+          },
+          { docsToMove: [], itemKeys: new Set<ItemKey>() },
+        )
         const targetItem = event.over.data.current.targetItem
         const targetID = targetItem?.rowID
 
         // Validate: prevent moving a parent into its own descendant
-        const invalidTargets = new Set<number | string>()
-        docIDs.forEach((id) => {
-          const descendants = getAllDescendantIDs({ itemIDs: [id], items })
+        const invalidTargets = new Set<ItemKey>()
+        itemKeys.forEach((itemKey) => {
+          const descendants = getAllDescendantIDs({ itemKeys: new Set([itemKey]), items })
           descendants.forEach((descendantID) => invalidTargets.add(descendantID))
         })
         if (targetID && invalidTargets.has(targetID)) {
@@ -82,7 +85,7 @@ export function TreeViewTable() {
 
         try {
           await moveItems({
-            docIDs,
+            docsToMove,
             parentID: targetID,
           })
         } catch (error) {
@@ -144,7 +147,6 @@ export function TreeViewTable() {
       const isCurrentlySelected = selectedItemKeys.has(dragItemDoc.itemKey)
 
       if (!isCurrentlySelected) {
-        const index = items.findIndex((d) => d.itemKey === dragItemDoc.itemKey)
         onItemSelection({
           eventOptions: {
             ctrlKey: event.ctrlKey || event.metaKey,
@@ -159,8 +161,8 @@ export function TreeViewTable() {
   )
 
   const unfocusableIDs = React.useMemo(() => {
-    return getAllDescendantIDs({ itemIDs: selectedRowIDs, items })
-  }, [selectedRowIDs, items])
+    return getAllDescendantIDs({ itemKeys: selectedItemKeys, items })
+  }, [selectedItemKeys, items])
 
   const isRowFocusable = React.useCallback(
     (row: SectionRow) => {
@@ -198,7 +200,7 @@ export function TreeViewTable() {
         onEscape={clearSelections}
         onRowDrag={onRowDrag}
         onSelectAll={handleSelectAll}
-        openItemIDs={openItemIDs}
+        openItemKeys={openItemKeys}
         sections={sections}
         selectedItemKeys={selectedItemKeys}
         targetParentID={targetParentID}
