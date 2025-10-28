@@ -107,6 +107,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       login: '/login',
       logout: '/logout',
       reset: '/reset',
+      systemInfo: '/system-info',
       unauthorized: '/unauthorized',
       ...(config?.admin?.routes || {}),
     },

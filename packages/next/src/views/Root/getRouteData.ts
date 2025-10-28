@@ -28,6 +28,7 @@ import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
 import { LogoutInactivity, LogoutView } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
+import { SystemInfoView } from '../SystemInfo/index.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
@@ -42,6 +43,7 @@ const baseClasses = {
   forgot: forgotPasswordBaseClass,
   login: loginBaseClass,
   reset: resetPasswordBaseClass,
+  systemInfo: 'system-info',
   verify: verifyBaseClass,
 }
 
@@ -62,6 +64,7 @@ const oneSegmentViews: OneSegmentViews = {
   inactivity: LogoutInactivity,
   login: LoginView,
   logout: LogoutView,
+  systemInfo: SystemInfoView,
   unauthorized: UnauthorizedView,
 }
 
@@ -157,6 +160,10 @@ export const getRouteData = ({
 
       if (config.admin.routes) {
         const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
+          // Skip routes that are explicitly disabled (set to false)
+          if (route === false) {
+            return false
+          }
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
@@ -205,6 +212,12 @@ export const getRouteData = ({
         // --> /logout-inactivity
         // --> /unauthorized
 
+        // Check if the System Info page is explicitly disabled
+        if (viewKey === 'systemInfo' && config.admin.routes.systemInfo === false) {
+          // System Info page is disabled, don't render it
+          break
+        }
+
         ViewToRender = {
           Component: oneSegmentViews[viewKey],
         }
@@ -214,7 +227,7 @@ export const getRouteData = ({
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
-        if (viewKey === 'account') {
+        if (viewKey === 'systemInfo' || viewKey === 'account') {
           templateType = 'default'
         }
 
