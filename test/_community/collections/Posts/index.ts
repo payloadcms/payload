@@ -10,6 +10,16 @@ export const PostsCollection: CollectionConfig = {
     useAsTitle: 'title',
     enableListViewSelectAPI: true,
   },
+  versions: {
+    drafts: true,
+  },
+  hooks: {
+    beforeDelete: [
+      ({ id }) => {
+        throw new Error(`Test error: cannot delete document with ID ${id}`)
+      },
+    ],
+  },
   fields: [
     {
       name: 'title',
