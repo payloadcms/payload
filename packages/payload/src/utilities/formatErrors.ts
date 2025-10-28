@@ -19,7 +19,13 @@ export const formatErrors = (incoming: unknown): ErrorResult => {
     }
 
     // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
-    if (!(incoming instanceof APIError || incoming instanceof Error) && incoming.errors) {
+    if (
+      typeof incoming === 'object' &&
+      incoming !== null &&
+      !(incoming instanceof APIError || incoming instanceof Error) &&
+      'errors' in incoming &&
+      incoming.errors
+    ) {
       return {
         errors: Object.keys(incoming.errors).reduce(
           (acc, key) => {
