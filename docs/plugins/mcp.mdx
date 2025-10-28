@@ -32,7 +32,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
   - You can to allow / disallow capabilities in real time
   - You can define your own Prompts, Tools and Resources available over MCP
 - Full support for Payload's localization features with `locale` and `fallbackLocale` parameters
-- HTTP-based MCP server compatible with AI tools supporting the Model Context Protocol
+- MCP server supporting HTTP (with REDIS and STDIO under consideration)
 
 ## Installation
 
@@ -115,6 +115,30 @@ Replace `YOUR_API_KEY_HERE` with the API key you created in Step 1.
 Restart your MCP client for the configuration to take effect. The Payload MCP server should now be available, and the AI tool will be able to interact with your configured collections.
 
 Refer to your specific MCP client's documentation for additional configuration options and setup instructions.
+
+## Connection Methods
+
+The MCP plugin supports different connection methods for communicating with AI tools:
+
+### HTTP (Currently Supported)
+
+The HTTP transport is the primary and currently supported connection method. As shown in the configuration example above, clients connect via HTTP requests to your Payload server's MCP endpoint (default: `/api/mcp`).
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "payload-cms": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
 
 ### Options
 
