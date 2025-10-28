@@ -21,7 +21,7 @@ const baseClass = 'collection-tree-view-list'
 
 export function DefaultCollectionTreeView({
   collectionSlug,
-  expandedItemIDs,
+  expandedItemKeys,
   items,
   parentFieldName,
   search,
@@ -32,7 +32,7 @@ export function DefaultCollectionTreeView({
   return (
     <TreeViewProvider
       collectionSlug={collectionSlug}
-      expandedItemIDs={expandedItemIDs}
+      expandedItemKeys={expandedItemKeys}
       items={items}
       parentFieldName={parentFieldName}
       search={search}

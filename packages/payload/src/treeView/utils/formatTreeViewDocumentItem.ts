@@ -39,6 +39,11 @@ export function formatTreeViewDocumentItem({ relationTo, useAsTitle, value }: Ar
   return {
     hasChildren: true,
     itemKey: `${relationTo}-${value.id}`,
+    parentItemKey:
+      'parentID' in itemValue &&
+      (typeof itemValue.parentID === 'string' || typeof itemValue.parentID === 'number')
+        ? `${relationTo}-${itemValue.parentID}`
+        : undefined,
     relationTo,
     value: itemValue,
   }

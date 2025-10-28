@@ -4,10 +4,11 @@ import type {
   ListQuery,
   TreeViewClientProps,
 } from 'payload'
+import type { TreeViewItemKey } from 'payload/shared'
 
 import { DefaultCollectionTreeView, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { getTreeViewResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
+import { getTreeViewResultsComponentAndData } from '@payloadcms/ui/rsc'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
 
@@ -117,7 +118,9 @@ export const buildCollectionTreeView = async (
               disableBulkDelete,
               disableBulkEdit,
               enableRowSelections,
-              expandedItemIDs: preferences?.value.expandedIDs || [],
+              expandedItemKeys: (preferences?.value.expandedIDs || []).map<TreeViewItemKey>(
+                (id) => `${collectionSlug}-${id}`,
+              ),
               items,
               parentFieldName: '_parentDoc',
               search,

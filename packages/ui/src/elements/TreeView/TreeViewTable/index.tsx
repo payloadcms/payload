@@ -1,20 +1,19 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { TreeViewItem } from 'payload/shared'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import React from 'react'
 import { toast } from 'sonner'
 
-import type { SectionRow } from '../NestedSectionsTable/index.js'
+import type { SectionRow } from '../NestedSectionsTable/types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useTreeView } from '../../../providers/TreeView/index.js'
 import { NestedSectionsTable } from '../NestedSectionsTable/index.js'
 import { SeedDataButton } from '../SeedDataButton/index.js'
-import { itemsToSectionRows } from '../utils/documentsToSectionRows.js'
 import { getAllDescendantIDs } from '../utils/getAllDescendantIDs.js'
+import { itemsToSectionRows } from '../utils/itemsToSectionRows.js'
 import './index.scss'
 
 const baseClass = 'tree-view-results-table'
@@ -24,33 +23,35 @@ export function TreeViewTable() {
   const {
     clearSelections,
     collectionSlug,
-    focusedRowIndex,
     getSelectedItems,
     items,
     loadingRowIDs,
     moveItems,
-    onItemClick,
+    onItemSelection,
     openItemIDs,
+    selectAll,
     selectedItemKeys,
-    setFocusedRowIndex,
     toggleRow,
+    updateSelections,
   } = useTreeView()
   const { i18n, t } = useTranslation()
 
-  // Local drag state
+  // UI-only drag state
   const [isDragging, setIsDragging] = React.useState(false)
   const [hoveredRowID, setHoveredRowID] = React.useState<null | number | string>(null)
   const [targetParentID, setTargetParentID] = React.useState<null | number | string>(null)
 
-  // Compute drag overlay item from selected items
-  const dragOverlayItem = React.useMemo(() => {
-    if (!isDragging || selectedItemKeys.size === 0) {
-      return undefined
-    }
-    // Use the first selected item as the drag overlay
-    const firstKey = Array.from(selectedItemKeys)[0]
-    return items.find((d) => d.itemKey === firstKey)
-  }, [isDragging, selectedItemKeys, items])
+  const sections = React.useMemo(
+    () => itemsToSectionRows({ i18nLanguage: i18n.language, items }),
+    [items, i18n.language],
+  )
+
+  const selectedRowIDs = React.useMemo(() => {
+    return Array.from(selectedItemKeys).map((key) => {
+      const doc = items.find((d) => d.itemKey === key)
+      return doc?.value.id || ''
+    })
+  }, [selectedItemKeys, items])
 
   // Handle drag/drop events
   const onDragEnd = React.useCallback(
@@ -69,7 +70,11 @@ export function TreeViewTable() {
         const targetID = targetItem?.rowID
 
         // Validate: prevent moving a parent into its own descendant
-        const invalidTargets = getAllDescendantIDs(docIDs, items)
+        const invalidTargets = new Set<number | string>()
+        docIDs.forEach((id) => {
+          const descendants = getAllDescendantIDs({ itemIDs: [id], items })
+          descendants.forEach((descendantID) => invalidTargets.add(descendantID))
+        })
         if (targetID && invalidTargets.has(targetID)) {
           toast.error(t('general:cannotMoveParentIntoChild'))
           return
@@ -95,7 +100,7 @@ export function TreeViewTable() {
       setIsDragging(false)
       setHoveredRowID(null)
       setTargetParentID(null)
-      // todo: do this differently
+      // eslint-disable-next-line react-compiler/react-compiler
       document.body.style.cursor = ''
     },
     onDragEnd(event) {
@@ -105,7 +110,7 @@ export function TreeViewTable() {
       document.body.style.cursor = ''
       void onDragEnd(event)
     },
-    onDragStart(event) {
+    onDragStart() {
       setIsDragging(true)
       document.body.style.cursor = 'grabbing'
     },
@@ -136,213 +141,46 @@ export function TreeViewTable() {
         return
       }
 
-      const isCtrlPressed = event.ctrlKey || event.metaKey
-      const isShiftPressed = event.shiftKey
       const isCurrentlySelected = selectedItemKeys.has(dragItemDoc.itemKey)
 
       if (!isCurrentlySelected) {
-        // Select the dragged item (and maintain ctrl/shift selections)
-        const indexes: number[] = []
-        for (let idx = 0; idx < items.length; idx++) {
-          const doc = items[idx]
-          if (doc.itemKey === dragItemDoc.itemKey) {
-            indexes.push(idx)
-          } else if ((isCtrlPressed || isShiftPressed) && selectedItemKeys.has(doc.itemKey)) {
-            indexes.push(idx)
-          }
-        }
-
-        // Update selections through provider's onItemClick
-        if (indexes.length > 0) {
-          const index = items.findIndex((d) => d.itemKey === dragItemDoc.itemKey)
-          // Call onItemClick to update selections in provider
-          onItemClick({
-            event: {
-              ctrlKey: isCtrlPressed,
-              metaKey: isCtrlPressed,
-              nativeEvent: event,
-              shiftKey: isShiftPressed,
-            } as any,
-            index,
-            item: dragItemDoc,
-          })
-        }
+        const index = items.findIndex((d) => d.itemKey === dragItemDoc.itemKey)
+        onItemSelection({
+          eventOptions: {
+            ctrlKey: event.ctrlKey || event.metaKey,
+            metaKey: event.ctrlKey || event.metaKey,
+            shiftKey: event.shiftKey,
+          },
+          item: dragItemDoc,
+        })
       }
     },
-    [items, selectedItemKeys, onItemClick],
+    [items, selectedItemKeys, onItemSelection],
   )
 
-  const onRowClick = React.useCallback(
-    ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => {
-      const index = items.findIndex((doc) => doc.value.id === row.rowID)
-      if (index !== -1) {
-        const item = items[index]
-        void onItemClick({ event, index, item })
+  const unfocusableIDs = React.useMemo(() => {
+    return getAllDescendantIDs({ itemIDs: selectedRowIDs, items })
+  }, [selectedRowIDs, items])
+
+  const isRowFocusable = React.useCallback(
+    (row: SectionRow) => {
+      return !unfocusableIDs.has(row.rowID)
+    },
+    [unfocusableIDs],
+  )
+
+  const handleSelectAll = React.useCallback(() => {
+    selectAll()
+  }, [selectAll])
+
+  const handleEnter = React.useCallback(
+    (row: SectionRow) => {
+      if (selectedItemKeys.size === 1) {
+        // TODO: Navigate to the selected item
       }
     },
-    [items, onItemClick],
+    [selectedItemKeys],
   )
-
-  // Helper to check if an item should be skipped during navigation
-  const isItemFocusable = React.useCallback(
-    (item: TreeViewItem) => {
-      // Check if this item is a descendant of any selected item
-      const selectedItems = Array.from(selectedItemKeys).map((key) =>
-        items.find((d) => d.itemKey === key),
-      )
-
-      for (const selectedItem of selectedItems) {
-        if (!selectedItem) {
-          continue
-        }
-
-        // Check if item is a descendant by walking up the parent chain
-        let current = item
-        while (current?.value?.parentID !== undefined && current.value.parentID !== null) {
-          if (current.value.parentID === selectedItem.value.id) {
-            return false // This item is a descendant of a selected item
-          }
-          // Find the parent item
-          const parentItem = items.find((i) => i.value.id === current.value.parentID)
-          if (!parentItem) {
-            break
-          }
-          current = parentItem
-        }
-      }
-
-      return true
-    },
-    [items, selectedItemKeys],
-  )
-
-  // Find next focusable item index, skipping disabled/invalid items
-  const findNextFocusableIndex = React.useCallback(
-    (currentIndex: number, direction: -1 | 1): number => {
-      let nextIndex = currentIndex + direction
-
-      while (nextIndex >= 0 && nextIndex < items.length) {
-        const nextItem = items[nextIndex]
-        if (isItemFocusable(nextItem)) {
-          return nextIndex
-        }
-        nextIndex += direction
-      }
-
-      return currentIndex // No valid item found, stay at current
-    },
-    [items, isItemFocusable],
-  )
-
-  const onRowKeyPress = React.useCallback(
-    ({ event, row }: { event: React.KeyboardEvent; row: SectionRow }) => {
-      const index = items.findIndex((doc) => doc.value.id === row.rowID)
-      if (index === -1) {
-        return
-      }
-
-      const item = items[index]
-      const { code, ctrlKey, metaKey, shiftKey } = event
-      const isShiftPressed = shiftKey
-      const isCtrlPressed = ctrlKey || metaKey
-      const isCurrentlySelected = selectedItemKeys.has(item.itemKey)
-
-      switch (code) {
-        case 'ArrowDown':
-        case 'ArrowUp': {
-          event.preventDefault()
-
-          const direction: -1 | 1 = code === 'ArrowUp' ? -1 : 1
-          const newItemIndex = findNextFocusableIndex(index, direction)
-
-          if (newItemIndex === index) {
-            return // No valid row to navigate to
-          }
-
-          // Just move focus, don't trigger selection
-          setFocusedRowIndex(newItemIndex)
-
-          break
-        }
-        case 'Enter': {
-          if (selectedItemKeys.size === 1) {
-            setFocusedRowIndex(undefined)
-            // TODO: Navigate to the selected item
-          }
-          break
-        }
-        case 'Escape': {
-          clearSelections()
-          break
-        }
-        case 'KeyA': {
-          if (isCtrlPressed) {
-            event.preventDefault()
-            setFocusedRowIndex(items.length - 1)
-            // Select all by clicking on each item
-            items.forEach((doc, idx) => {
-              onItemClick({
-                event: {
-                  ctrlKey: true,
-                  metaKey: true,
-                  nativeEvent: {},
-                  shiftKey: false,
-                } as any,
-                index: idx,
-                item: doc,
-              })
-            })
-          }
-          break
-        }
-        case 'Space': {
-          event.preventDefault()
-          onItemClick({
-            event: {
-              ctrlKey: true,
-              metaKey: true,
-              nativeEvent: {},
-              shiftKey: false,
-            } as any,
-            index,
-            item,
-          })
-          break
-        }
-      }
-    },
-    [
-      items,
-      selectedItemKeys,
-      onItemClick,
-      setFocusedRowIndex,
-      clearSelections,
-      findNextFocusableIndex,
-    ],
-  )
-
-  const [columns] = React.useState(() => [
-    {
-      name: 'name',
-      label: t('general:name'),
-    },
-    {
-      name: 'updatedAt',
-      label: t('general:updatedAt'),
-    },
-  ])
-
-  const sections = React.useMemo(
-    () => itemsToSectionRows({ i18nLanguage: i18n.language, items }),
-    [items, i18n.language],
-  )
-
-  const selectedRowIDs = React.useMemo(() => {
-    return Array.from(selectedItemKeys).map((key) => {
-      const doc = items.find((d) => d.itemKey === key)
-      return doc?.value.id || ''
-    })
-  }, [selectedItemKeys, items])
 
   return (
     <>
@@ -351,25 +189,22 @@ export function TreeViewTable() {
       <NestedSectionsTable
         className={baseClass}
         dropContextName={dropContextName}
-        focusedRowIndex={focusedRowIndex}
         hoveredRowID={hoveredRowID}
         isDragging={isDragging}
+        isRowFocusable={isRowFocusable}
         loadingRowIDs={loadingRowIDs}
         onDroppableHover={onDroppableHover}
-        onFocusChange={setFocusedRowIndex}
-        onRowClick={onRowClick}
+        onEnter={handleEnter}
+        onEscape={clearSelections}
         onRowDrag={onRowDrag}
-        onRowKeyPress={onRowKeyPress}
+        onSelectAll={handleSelectAll}
         openItemIDs={openItemIDs}
         sections={sections}
-        selectedRowIDs={selectedRowIDs}
+        selectedItemKeys={selectedItemKeys}
         targetParentID={targetParentID}
-        toggleRow={toggleRow}
-        // columns={columns}
+        toggleRowExpand={toggleRow}
+        updateSelections={updateSelections}
       />
-      {/* {selectedItemKeys.size > 0 && dragOverlayItem && (
-        <TreeViewDragOverlay item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
-      )} */}
     </>
   )
 }

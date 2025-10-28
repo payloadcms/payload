@@ -7,22 +7,24 @@ type Args = {
   items: TreeViewItem[]
 }
 
+export type ItemKey = `${string}-${number | string}`
+
 export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] {
   // Create a map for quick lookups
-  const itemMap = new Map<number | string, TreeViewItem>()
+  const itemMap = new Map<ItemKey, TreeViewItem>()
   items.forEach((item) => {
-    itemMap.set(item.value.id, item)
+    itemMap.set(item.itemKey, item)
   })
 
   // Create a map to store section rows
-  const sectionRowMap = new Map<number | string, SectionRow>()
+  const sectionRowMap = new Map<ItemKey, SectionRow>()
 
   // Convert each item to a SectionRow
   items.forEach((item) => {
-    const sectionRow: SectionRow = {
+    sectionRowMap.set(item.itemKey, {
       name: item.value.title,
       hasChildren: item.hasChildren,
-      rowID: item.value.id,
+      rowID: item.itemKey,
       rows: [],
       updatedAt: item.value.updatedAt
         ? new Date(item.value.updatedAt).toLocaleDateString(i18nLanguage, {
@@ -31,22 +33,21 @@ export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] 
             year: 'numeric',
           })
         : '',
-    }
-    sectionRowMap.set(item.value.id, sectionRow)
+    })
   })
 
   // Build the hierarchy
   const rootSections: SectionRow[] = []
 
   items.forEach((item) => {
-    const sectionRow = sectionRowMap.get(item.value.id)
+    const sectionRow = sectionRowMap.get(item.itemKey)
     if (!sectionRow) {
       return
     }
 
-    if (item.value.parentID) {
+    if (item.parentItemKey) {
       // This is a child - add it to its parent's rows array
-      const parentRow = sectionRowMap.get(item.value.parentID)
+      const parentRow = sectionRowMap.get(item.parentItemKey)
       if (parentRow) {
         if (!parentRow.rows) {
           parentRow.rows = []

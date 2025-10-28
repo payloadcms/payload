@@ -4,10 +4,11 @@ import type { CollectionSlug, FolderSortKeys } from 'payload'
 import type { TreeViewItem, TreeViewItemKey } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { extractID } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
+
+import type { ItemKey } from '../../elements/TreeView/NestedSectionsTable/types.js'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
@@ -27,48 +28,51 @@ export type TreeViewContextValue = {
   checkIfItemIsDisabled: (item: TreeViewItem) => boolean
   clearSelections: () => void
   collectionSlug: CollectionSlug
-  focusedRowIndex: number
   getSelectedItems?: () => TreeViewItem[]
   itemKeysToMove?: Set<TreeViewItemKey>
   items?: TreeViewItem[]
   loadingRowIDs: Set<number | string>
   moveItems: (args: { docIDs: (number | string)[]; parentID?: number | string }) => Promise<void>
-  onItemClick: (args: {
-    event: React.MouseEvent<HTMLElement>
-    index: number
+  onItemSelection: (args: {
+    eventOptions?: {
+      ctrlKey?: boolean
+      metaKey?: boolean
+      shiftKey?: boolean
+    }
     item: TreeViewItem
   }) => void
   openItemIDs: Set<number | string>
   parentFieldName: string
   refineTreeViewData: (args: { query?: TreeViewQueryParams; updateURL: boolean }) => void
   search: string
+  selectAll: () => void
   readonly selectedItemKeys: Set<TreeViewItemKey>
-  setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   sort: FolderSortKeys
   TableComponent: React.ReactNode
-  toggleRow: (docID: number | string) => void
+  toggleRow: (itemKey: TreeViewItemKey) => void
+  updateSelections: (args: { itemKeys: Set<TreeViewItemKey> | TreeViewItemKey[] }) => void
 }
 
 const Context = React.createContext<TreeViewContextValue>({
   checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
   collectionSlug: '' as CollectionSlug,
-  focusedRowIndex: -1,
   getSelectedItems: () => [],
   itemKeysToMove: undefined,
   items: [],
   loadingRowIDs: new Set<number | string>(),
   moveItems: () => Promise.resolve(undefined),
-  onItemClick: () => undefined,
+  onItemSelection: () => undefined,
   openItemIDs: new Set<number | string>(),
   parentFieldName: '_parentDoc',
   refineTreeViewData: () => undefined,
   search: '',
+  selectAll: () => undefined,
   selectedItemKeys: new Set<TreeViewItemKey>(),
-  setFocusedRowIndex: () => -1,
   sort: 'name',
   TableComponent: null,
   toggleRow: () => undefined,
+  updateSelections: () => undefined,
 })
 
 export type TreeViewProviderProps = {
@@ -81,15 +85,11 @@ export type TreeViewProviderProps = {
   /**
    * An array of IDs that should be expanded initially
    */
-  readonly expandedItemIDs?: (number | string)[]
+  readonly expandedItemKeys?: ItemKey[]
   /**
    * All items in the tree
    */
   readonly items: TreeViewItem[]
-  /**
-   * Optional function to call when an item is clicked
-   */
-  readonly onItemClick?: (item: TreeViewItem) => void
   /**
    * The field name that holds the parent reference
    */
@@ -115,9 +115,8 @@ export function TreeViewProvider({
   allowMultiSelection = true,
   children,
   collectionSlug,
-  expandedItemIDs,
+  expandedItemKeys,
   items: itemsFromProps,
-  onItemClick: onItemClickFromProps,
   parentFieldName = '_parentDoc',
   search,
   sort = 'name',
@@ -136,8 +135,8 @@ export function TreeViewProvider({
   const currentlySelectedIndexes = React.useRef(new Set<number>())
 
   const [items, setItems] = React.useState(itemsFromProps)
-  const [openItemIDs, setOpenItemIDs] = React.useState<Set<number | string>>(
-    () => new Set(expandedItemIDs || []),
+  const [openItemKeys, setOpenItemKeys] = React.useState<Set<ItemKey>>(
+    () => new Set(expandedItemKeys),
   )
   const [loadingRowIDs, setLoadingRowIDs] = React.useState<Set<number | string>>(() => new Set())
   const [TableComponent, setTableComponentToRender] = React.useState(
@@ -151,13 +150,9 @@ export function TreeViewProvider({
   const [selectedItemKeys, setSelectedItemKeys] = React.useState<Set<TreeViewItemKey>>(
     () => new Set(),
   )
-  const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
-  const [isDoubleClickEnabled] = React.useState(false)
-  const lastClickTime = React.useRef<null | number>(null)
   const { clearRouteCache } = useRouteCache()
 
   const clearSelections = React.useCallback(() => {
-    setFocusedRowIndex(-1)
     setSelectedItemKeys(new Set())
     currentlySelectedIndexes.current = new Set()
   }, [])
@@ -216,168 +211,31 @@ export function TreeViewProvider({
     }, [])
   }, [selectedItemKeys, getItem])
 
-  const navigateAfterSelection = React.useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID?: number | string }) => {
-      clearSelections()
-      if (typeof onItemClickFromProps === 'function') {
-        onItemClickFromProps(getItem(`${collectionSlug}-${docID}`))
-      }
-    },
-    [clearSelections, getItem, onItemClickFromProps],
-  )
-
-  const handleShiftSelection = React.useCallback(
-    (targetIndex: number) => {
-      const allItems = items
-
-      // Find existing selection boundaries
-      const existingIndexes = allItems.reduce((acc, item, idx) => {
-        if (selectedItemKeys.has(item.itemKey)) {
-          acc.push(idx)
-        }
-        return acc
-      }, [])
-
-      if (existingIndexes.length === 0) {
-        // No existing selection, just select target
-        return [targetIndex]
-      }
-
-      const firstSelectedIndex = Math.min(...existingIndexes)
-      const lastSelectedIndex = Math.max(...existingIndexes)
-      const isWithinBounds = targetIndex >= firstSelectedIndex && targetIndex <= lastSelectedIndex
-
-      // Choose anchor based on whether we're contracting or extending
-      let anchorIndex = targetIndex
-      if (isWithinBounds) {
-        // Contracting: if target is at a boundary, use target as anchor
-        // Otherwise, use furthest boundary to maintain opposite edge
-        if (targetIndex === firstSelectedIndex || targetIndex === lastSelectedIndex) {
-          anchorIndex = targetIndex
-        } else {
-          const distanceToFirst = Math.abs(targetIndex - firstSelectedIndex)
-          const distanceToLast = Math.abs(targetIndex - lastSelectedIndex)
-          anchorIndex = distanceToFirst >= distanceToLast ? firstSelectedIndex : lastSelectedIndex
-        }
-      } else {
-        // Extending: use closest boundary
-        const distanceToFirst = Math.abs(targetIndex - firstSelectedIndex)
-        const distanceToLast = Math.abs(targetIndex - lastSelectedIndex)
-        anchorIndex = distanceToFirst <= distanceToLast ? firstSelectedIndex : lastSelectedIndex
-      }
-
-      // Create range from anchor to target
-      const startIndex = Math.min(anchorIndex, targetIndex)
-      const endIndex = Math.max(anchorIndex, targetIndex)
-      const newRangeIndexes = Array.from(
-        { length: endIndex - startIndex + 1 },
-        (_, i) => startIndex + i,
-      )
-
-      if (isWithinBounds) {
-        // Contracting: replace with new range
-        return newRangeIndexes
-      } else {
-        // Extending: union with existing
-        return [...new Set([...existingIndexes, ...newRangeIndexes])]
-      }
-    },
-    [items, selectedItemKeys],
-  )
-
   const updateSelections = React.useCallback(
-    ({ indexes }: { indexes: number[] }) => {
-      const allItems = items
-      const { newSelectedItemKeys } = allItems.reduce(
-        (acc, item, index) => {
-          if (indexes.includes(index)) {
-            acc.newSelectedItemKeys.add(item.itemKey)
-          }
-          return acc
-        },
-        {
-          newSelectedItemKeys: new Set<TreeViewItemKey>(),
-        },
-      )
-
-      setSelectedItemKeys(newSelectedItemKeys)
+    ({ itemKeys }: { itemKeys: Set<TreeViewItemKey> | TreeViewItemKey[] }) => {
+      setSelectedItemKeys(new Set(itemKeys))
     },
-    [items],
+    [],
   )
 
-  const onItemClick: TreeViewContextValue['onItemClick'] = React.useCallback(
-    ({ event, item: clickedItem }) => {
-      let doubleClicked: boolean = false
-      const isCtrlPressed = event?.ctrlKey || event?.nativeEvent?.ctrlKey || event?.metaKey
-      const isShiftPressed = event?.shiftKey || event?.nativeEvent?.shiftKey
+  const selectAll: TreeViewContextValue['selectAll'] = React.useCallback(() => {
+    const allItemKeys = items.map((item) => item.itemKey)
+    updateSelections({ itemKeys: allItemKeys })
+  }, [items, updateSelections])
+
+  const onItemSelection: TreeViewContextValue['onItemSelection'] = React.useCallback(
+    ({ item: clickedItem }) => {
+      // Simple toggle - selection logic now handled by the table
       const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
-
-      if (allowMultiSelection && (isCtrlPressed || isShiftPressed)) {
-        const currentItemIndex = items.findIndex((item) => item.itemKey === clickedItem.itemKey)
-        if (isCtrlPressed) {
-          const indexes = items.reduce((acc, item, idx) => {
-            if (item.itemKey === clickedItem.itemKey) {
-              if (!isCurrentlySelected) {
-                acc.push(idx)
-              }
-            } else if (selectedItemKeys.has(item.itemKey)) {
-              acc.push(idx)
-            }
-            return acc
-          }, [])
-
-          updateSelections({ indexes })
-        } else if (currentItemIndex !== -1) {
-          const selectedIndexes = handleShiftSelection(currentItemIndex)
-          updateSelections({ indexes: selectedIndexes })
-        }
+      if (isCurrentlySelected) {
+        const newItemKeys = new Set(selectedItemKeys)
+        newItemKeys.delete(clickedItem.itemKey)
+        updateSelections({ itemKeys: newItemKeys })
       } else {
-        // Normal click - select single item
-        const now = Date.now()
-        const lastSelectedKey = Array.from(selectedItemKeys)[selectedItemKeys.size - 1]
-        const lastSelectedItem = lastSelectedKey ? getItem(lastSelectedKey) : undefined
-        doubleClicked =
-          now - lastClickTime.current < 400 && lastSelectedItem?.itemKey === clickedItem.itemKey
-        lastClickTime.current = now
-        if (!doubleClicked || !isDoubleClickEnabled) {
-          updateSelections({
-            indexes: (() => {
-              const indexes: number[] = []
-
-              for (let idx = 0; idx < items.length; idx++) {
-                const item = items[idx]
-                if (clickedItem.itemKey === item.itemKey) {
-                  if (!selectedItemKeys.has(item.itemKey)) {
-                    indexes.push(idx)
-                  }
-                } else if (selectedItemKeys.has(item.itemKey)) {
-                  indexes.push(idx)
-                }
-              }
-
-              return indexes
-            })(),
-          })
-        }
-
-        if (isDoubleClickEnabled && doubleClicked) {
-          navigateAfterSelection({
-            collectionSlug: clickedItem.relationTo,
-            docID: extractID(clickedItem.value),
-          })
-        }
+        updateSelections({ itemKeys: [clickedItem.itemKey] })
       }
     },
-    [
-      isDoubleClickEnabled,
-      navigateAfterSelection,
-      selectedItemKeys,
-      items,
-      allowMultiSelection,
-      getItem,
-      updateSelections,
-      handleShiftSelection,
-    ],
+    [selectedItemKeys, updateSelections],
   )
 
   const moveItems: TreeViewContextValue['moveItems'] = React.useCallback(
@@ -451,38 +309,38 @@ export function TreeViewProvider({
   )
 
   const toggleRow: TreeViewContextValue['toggleRow'] = React.useCallback(
-    (docID) => {
-      const updatedOpenDocIDs = new Set(openItemIDs)
+    (itemKey) => {
+      const updatedOpenItemKeys = new Set(openItemKeys)
 
-      if (updatedOpenDocIDs.has(docID)) {
+      if (updatedOpenItemKeys.has(itemKey)) {
         // When closing a parent, also close all its descendants
-        updatedOpenDocIDs.delete(docID)
+        updatedOpenItemKeys.delete(itemKey)
 
         // Find all descendant IDs and remove them from the open set
-        const descendantIDs = new Set<number | string>()
-        const collectDescendants = (parentID: number | string) => {
+        const descendantItemKeys = new Set<TreeViewItemKey>()
+        const collectDescendants = (parentItemKey: TreeViewItemKey) => {
           items.forEach((item) => {
-            if (item.value.parentID === parentID) {
-              descendantIDs.add(item.value.id)
-              collectDescendants(item.value.id)
+            if (item.parentItemKey === parentItemKey) {
+              descendantItemKeys.add(item.itemKey)
+              collectDescendants(item.itemKey)
             }
           })
         }
-        collectDescendants(docID)
+        collectDescendants(itemKey)
 
-        descendantIDs.forEach((id) => {
-          updatedOpenDocIDs.delete(id)
+        descendantItemKeys.forEach((id) => {
+          updatedOpenItemKeys.delete(id)
         })
 
         // Remove descendant items from the items array
-        setItems((prevItems) => prevItems.filter((item) => !descendantIDs.has(item.value.id)))
+        setItems((prevItems) => prevItems.filter((item) => !descendantItemKeys.has(item.itemKey)))
 
         // Also deselect all descendant items
         setSelectedItemKeys((prevSelectedKeys) => {
           const newSelectedKeys = new Set(prevSelectedKeys)
-          descendantIDs.forEach((id) => {
+          descendantItemKeys.forEach((descendantItemKey) => {
             // Find the item key for this ID
-            const item = items.find((i) => i.value.id === id)
+            const item = items.find((i) => i.itemKey === descendantItemKey)
             if (item) {
               newSelectedKeys.delete(item.itemKey)
             }
@@ -490,20 +348,20 @@ export function TreeViewProvider({
           return newSelectedKeys
         })
       } else {
-        updatedOpenDocIDs.add(docID)
-
-        // Add to loading state when opening
-        setLoadingRowIDs((prev) => new Set(prev).add(docID))
+        updatedOpenItemKeys.add(itemKey)
+        setLoadingRowIDs((prev) => new Set(prev).add(itemKey))
       }
 
-      setOpenItemIDs(updatedOpenDocIDs)
+      setOpenItemKeys(updatedOpenItemKeys)
 
       void setPreference(`collection-${collectionSlug}-treeView`, {
-        expandedIDs: Array.from(updatedOpenDocIDs),
+        expandedIDs: items
+          .filter((item) => updatedOpenItemKeys.has(item.itemKey))
+          .map((item) => item.value.id),
       })
       clearRouteCache()
     },
-    [collectionSlug, openItemIDs, items, setPreference, clearRouteCache],
+    [collectionSlug, openItemKeys, items, setPreference, clearRouteCache],
   )
 
   const checkIfItemIsDisabled: TreeViewContextValue['checkIfItemIsDisabled'] = React.useCallback(
@@ -532,35 +390,28 @@ export function TreeViewProvider({
     }
   }, [InitialTableComponent])
 
-  React.useEffect(
-    () => () => {
-      setLoadingRowIDs(new Set())
-    },
-    [],
-  )
-
   return (
     <Context
       value={{
         checkIfItemIsDisabled,
         clearSelections,
         collectionSlug,
-        focusedRowIndex,
         getSelectedItems,
         itemKeysToMove: parentTreeViewContext.selectedItemKeys,
         items,
         loadingRowIDs,
         moveItems,
-        onItemClick,
-        openItemIDs,
+        onItemSelection,
+        openItemIDs: openItemKeys,
         parentFieldName,
         refineTreeViewData,
         search,
+        selectAll,
         selectedItemKeys,
-        setFocusedRowIndex,
         sort,
         TableComponent,
         toggleRow,
+        updateSelections,
       }}
     >
       {children}

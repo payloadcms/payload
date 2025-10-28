@@ -23,6 +23,7 @@ export type TreeViewItemKey = `${string}-${number | string}`
 export type TreeViewItem = {
   hasChildren?: boolean
   itemKey: TreeViewItemKey
+  parentItemKey: TreeViewItemKey | undefined
   relationTo: CollectionSlug
   value: {
     createdAt?: string

@@ -60,7 +60,6 @@ export const getTreeViewData = async ({
       value: doc,
     }),
   )
-  console.log('docs', result)
 
   // Identify parent IDs and potential leaf nodes
   const parentIDsInResult = new Set<number | string>()

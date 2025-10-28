@@ -1,7 +1,11 @@
 import React from 'react'
 
+type EventHandler<
+  TEvent extends React.KeyboardEvent | React.MouseEvent = React.KeyboardEvent | React.MouseEvent,
+> = (event: TEvent) => void
+
 interface UseActionDelegationOptions<
-  TActions extends Record<string, (event: React.MouseEvent) => void>,
+  TActions extends Record<string, EventHandler<React.KeyboardEvent | React.MouseEvent>>,
 > {
   /**
    * Object mapping action names to handler functions.
@@ -27,28 +31,30 @@ interface UseActionDelegationOptions<
 
 /**
  * Hook for handling event delegation with data attributes.
- * Provides a generic way to handle clicks on elements marked with a specific data attribute,
+ * Provides a generic way to handle events on elements marked with a specific data attribute,
  * while ensuring user-provided interactive elements work independently.
  *
  * @param options - Configuration options
- * @returns Object with handleClick function, dataAttributeName, and actionNames (with full TS inference)
+ * @returns Object with event handlers, dataAttributeName, and actionNames (with full TS inference)
  *
  * @example
  * ```tsx
- * const { handleClick, actionNames } = useActionDelegation({
+ * const { handleClick, handleKeyDown, actionNames } = useActionDelegation({
  *   dataAttributeName: 'data-row-action',
  *   actions: {
- *     'select-row': (event) => handleSelect(),
- *     'toggle-expand': (event) => handleToggle(),
+ *     selectRow: (event) => handleSelect(),
+ *     toggleExpand: (event) => handleToggle(),
  *   }
  * })
  *
- * // Use with full intellisense:
- * <div data-row-action={actionNames['select-row']}>...</div>
+ * <div onClick={handleClick} onKeyDown={handleKeyDown}>
+ *   <div data-row-action={actionNames.selectRow}>Click or press key</div>
+ *   <button data-row-action={actionNames.toggleExpand}>Toggle</button>
+ * </div>
  * ```
  */
 export function useActionDelegation<
-  TActions extends Record<string, (event: React.MouseEvent) => void>,
+  TActions extends Record<string, EventHandler<React.KeyboardEvent | React.MouseEvent>>,
 >({
   actions,
   dataAttributeName,
@@ -68,8 +74,9 @@ export function useActionDelegation<
     [actions],
   )
 
-  const handleClick = React.useCallback(
-    (event: React.MouseEvent) => {
+  // Generic handler that works with any event type
+  const createHandler = React.useCallback(
+    (event: React.KeyboardEvent | React.MouseEvent) => {
       // Early return if disabled
       if (disabled) {
         return
@@ -77,7 +84,7 @@ export function useActionDelegation<
 
       const target = event.target as HTMLElement
 
-      // Check if click came from an interactive element (but not the row wrapper)
+      // Check if event came from an interactive element (but not the row wrapper)
       const interactiveElement = target.closest(interactiveSelector)
 
       if (interactiveElement) {
@@ -101,9 +108,27 @@ export function useActionDelegation<
     [dataAttributeName, actions, disabled, interactiveSelector],
   )
 
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent) => {
+      createHandler(event)
+    },
+    [createHandler],
+  )
+
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent) => {
+      // Only handle Enter and Space on interactive elements
+      if (event.code === 'Enter' || event.code === 'Space') {
+        createHandler(event)
+      }
+    },
+    [createHandler],
+  )
+
   return {
     actionNames,
     dataAttributeName,
     handleClick,
+    handleKeyDown,
   }
 }

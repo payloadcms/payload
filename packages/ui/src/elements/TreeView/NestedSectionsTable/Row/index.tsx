@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { SectionRow } from '../index.js'
+import type { ItemKey, SectionRow } from '../types.js'
 
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { DragHandleIcon } from '../../../../icons/DragHandle/index.js'
@@ -41,21 +41,28 @@ interface DivTableRowProps {
     placement?: string
     targetItem: null | SectionRow
   }) => void
-  onFocusChange?: (focusedIndex: number) => void
-  onRowClick: ({ event, row }: { event: React.MouseEvent<HTMLElement>; row: SectionRow }) => void
+  onFocusChange: (focusedIndex: number) => void
   onRowDrag: (params: { event: PointerEvent; item: null | SectionRow }) => void
-  onRowKeyPress?: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
+  onRowKeyPress: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
+  onSelectionChange: (params: {
+    itemKey: `${string}-${number | string}`
+    options: {
+      ctrlKey: boolean
+      metaKey: boolean
+      shiftKey: boolean
+    }
+  }) => void
   openItemIDs?: Set<number | string>
   rowItem: SectionRow
   segmentWidth: number
-  selectedRowIDs: (number | string)[]
+  selectedItemKeys: Set<ItemKey>
   startOffset: number
   targetItems: (null | SectionRow)[]
   targetParentID: null | number | string
-  toggleRow: (docID: number | string) => void
+  toggleRowExpand: (docID: number | string) => void
 }
 
-export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
+export const Row: React.FC<DivTableRowProps> = ({
   absoluteRowIndex,
   columns,
   dropContextName,
@@ -73,17 +80,17 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
   loadingRowIDs,
   onDroppableHover,
   onFocusChange,
-  onRowClick,
   onRowDrag,
   onRowKeyPress,
+  onSelectionChange,
   openItemIDs,
   rowItem,
   segmentWidth,
-  selectedRowIDs,
+  selectedItemKeys,
   startOffset,
   targetItems,
   targetParentID,
-  toggleRow,
+  toggleRowExpand: toggleRow,
 }) => {
   const isOdd = absoluteRowIndex % 2 === 1
   const isFocused = focusedRowIndex !== undefined && focusedRowIndex === absoluteRowIndex
@@ -99,9 +106,13 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
   const { actionNames, dataAttributeName, handleClick } = useActionDelegation({
     actions: {
       selectRow: (event) => {
-        onRowClick({
-          event: event as React.MouseEvent<HTMLElement>,
-          row: rowItem,
+        onSelectionChange({
+          itemKey: rowItem.rowID,
+          options: {
+            ctrlKey: event.ctrlKey || event.metaKey,
+            metaKey: event.ctrlKey || event.metaKey,
+            shiftKey: event.shiftKey,
+          },
         })
       },
       toggleExpand: () => {
@@ -129,26 +140,16 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
           .join(' ')}
         onClick={handleClick}
         onFocus={(e) => {
-          // Update focus index when row receives focus via tab, only if it's a valid focusable row
-          // Only update if the row itself is being focused, not a child element (like the chevron button)
-          if (
-            focusedRowIndex !== absoluteRowIndex &&
-            onFocusChange &&
-            e.target === e.currentTarget
-          ) {
+          if (e.target === e.currentTarget && focusedRowIndex !== absoluteRowIndex) {
             onFocusChange(absoluteRowIndex)
           }
         }}
-        onKeyDown={
-          onRowKeyPress
-            ? (event) => {
-                onRowKeyPress({ event, row: rowItem })
-              }
-            : undefined
-        }
+        onKeyDown={(event) => {
+          if (event.target === event.currentTarget) {
+            onRowKeyPress({ event, row: rowItem })
+          }
+        }}
         onMouseDown={(e) => {
-          // Prevent focus on mouse click to avoid the flash of focused state
-          // Focus should only be triggered via keyboard navigation
           e.preventDefault()
         }}
         ref={rowRef}
@@ -158,24 +159,26 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
         <div className={baseClass}>
           <div className={`${baseClass}__cell`} ref={firstCellRef}>
             <div className={`${baseClass}__actions`}>
-              <DraggableWithClick
-                attributes={{
-                  tabIndex: -1,
-                }}
-                className={`${baseClass}__drag-handler`}
-                disabled={
-                  hasSelectedAncestor ||
-                  (selectedRowIDs.length > 1 && !selectedRowIDs.includes(rowItem.rowID))
-                }
-                onDrag={(event) => {
-                  onRowDrag({
-                    event,
-                    item: rowItem,
-                  })
-                }}
-              >
-                <DragHandleIcon />
-              </DraggableWithClick>
+              {!hasSelectedAncestor ? (
+                <DraggableWithClick
+                  attributes={{
+                    tabIndex: -1,
+                  }}
+                  className={`${baseClass}__drag-handler`}
+                  disabled={
+                    hasSelectedAncestor ||
+                    (selectedItemKeys.size > 1 && !selectedItemKeys.has(rowItem.rowID))
+                  }
+                  onDrag={(event) => {
+                    onRowDrag({
+                      event,
+                      item: rowItem,
+                    })
+                  }}
+                >
+                  <DragHandleIcon />
+                </DraggableWithClick>
+              ) : null}
             </div>
           </div>
 

@@ -1,12 +1,22 @@
 import type { TreeViewItem } from 'payload/shared'
 
+type GetAllDescendantIDsArgs = {
+  /**
+   * IDs of the items to get descendants for
+   */
+  itemIDs: (number | string)[]
+  /**
+   * All items in the tree
+   */
+  items: TreeViewItem[]
+}
+
 /**
- * Recursively collects all descendant IDs for the given parent IDs.
- * This is used to determine invalid drop targets when dragging tree items.
+ * Recursively collects all descendant IDs for the given item ID(s).
+ * This is used to determine invalid drop targets when dragging tree items,
+ * or to find all descendants of selected items.
  *
- * @param draggedItemIDs - Array of IDs for items being dragged
- * @param items - All documents in the tree
- * @returns Set containing the dragged IDs and all their descendant IDs at any depth
+ * @returns Set containing the item ID(s) and all their descendant IDs at any depth
  *
  * @example
  * // Tree structure:
@@ -15,34 +25,31 @@ import type { TreeViewItem } from 'payload/shared'
  * // │   └── C
  * // └── D
  *
- * getAllDescendantIDs(['A'], documents)
+ * getAllDescendantIDs({ itemID: 'A', items: documents })
  * // Returns Set { 'A', 'B', 'C', 'D' }
- * // (A cannot be dropped into itself, B, C, or D)
+ *
+ * getAllDescendantIDs({ itemID: ['A', 'D'], items: documents })
+ * // Returns Set { 'A', 'B', 'C', 'D' }
  */
-export function getAllDescendantIDs(
-  draggedItemIDs: (number | string)[],
-  items: TreeViewItem[],
-): Set<number | string> {
-  const invalidTargets = new Set<number | string>()
+export function getAllDescendantIDs({
+  itemIDs,
+  items,
+}: GetAllDescendantIDsArgs): Set<number | string> {
+  const result = new Set<number | string>()
 
-  // Helper to recursively collect all descendants of a parent
   const collectDescendants = (parentID: number | string) => {
     items.forEach((doc) => {
       if (doc.value.parentID === parentID) {
-        invalidTargets.add(doc.value.id)
+        result.add(doc.value.id)
         // Recursively collect this child's descendants
         collectDescendants(doc.value.id)
       }
     })
   }
 
-  // For each dragged item, add it and all its descendants to the invalid set
-  draggedItemIDs.forEach((id) => {
-    // Can't drop on itself
-    invalidTargets.add(id)
-    // Can't drop on any descendant at any level
+  itemIDs.forEach((id) => {
     collectDescendants(id)
   })
 
-  return invalidTargets
+  return result
 }
