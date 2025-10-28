@@ -20,7 +20,6 @@ import {
   find,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -52,7 +51,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteD1Adapter } from './types.js'
