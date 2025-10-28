@@ -21,10 +21,8 @@ import type {
   UpdateVersionArgs,
 } from 'payload'
 
-import fs from 'fs'
 import mongoose from 'mongoose'
-import path from 'path'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 
 import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -332,44 +330,3 @@ export function mongooseAdapter({
 }
 
 export { compatibilityOptions } from './utilities/compatibilityOptions.js'
-
-/**
- * Attempt to find migrations directory.
- *
- * Checks for the following directories in order:
- * - `migrationDir` argument from Payload config
- * - `src/migrations`
- * - `dist/migrations`
- * - `migrations`
- *
- * Defaults to `src/migrations`
- *
- * @param migrationDir
- * @returns
- */
-function findMigrationDir(migrationDir?: string): string {
-  const cwd = process.cwd()
-  const srcDir = path.resolve(cwd, 'src/migrations')
-  const distDir = path.resolve(cwd, 'dist/migrations')
-  const relativeMigrations = path.resolve(cwd, 'migrations')
-
-  // Use arg if provided
-  if (migrationDir) {
-    return migrationDir
-  }
-
-  // Check other common locations
-  if (fs.existsSync(srcDir)) {
-    return srcDir
-  }
-
-  if (fs.existsSync(distDir)) {
-    return distDir
-  }
-
-  if (fs.existsSync(relativeMigrations)) {
-    return relativeMigrations
-  }
-
-  return srcDir
-}
