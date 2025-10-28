@@ -146,6 +146,11 @@ export const NestedSectionsTableRow: React.FC<DivTableRowProps> = ({
               }
             : undefined
         }
+        onMouseDown={(e) => {
+          // Prevent focus on mouse click to avoid the flash of focused state
+          // Focus should only be triggered via keyboard navigation
+          e.preventDefault()
+        }}
         ref={rowRef}
         role="button"
         tabIndex={hasSelectedAncestor ? -1 : 0}
