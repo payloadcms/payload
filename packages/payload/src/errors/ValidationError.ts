@@ -8,8 +8,10 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from './APIError.js'
 
-// This gets dynamically reassigned during compilation
-export let ValidationErrorName = 'ValidationError'
+/**
+ * @deprecated Remove this in 4.0 - this is no longer needed as we assign the prototype correctly in the constructor
+ */
+export const ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
   label?: LabelFunction | StaticLabel
@@ -76,6 +78,10 @@ export class ValidationError extends APIError<{
       results,
     )
 
-    ValidationErrorName = this.constructor.name
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'ValidationError'
+    Object.defineProperty(this.constructor, 'name', { value: 'ValidationError' })
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, ValidationError.prototype)
   }
 }

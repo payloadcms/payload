@@ -1,20 +1,12 @@
 import type { ErrorResult } from '../config/types.js'
-import type { APIError } from '../errors/APIError.js'
 
-import { APIErrorName } from '../errors/APIError.js'
-import { ValidationErrorName } from '../errors/ValidationError.js'
+import { APIError } from '../errors/APIError.js'
+import { ValidationError } from '../errors/ValidationError.js'
 
-export const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
+export const formatErrors = (incoming: unknown): ErrorResult => {
   if (incoming) {
-    // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
-    // Instead, get the prototype of the incoming error and check its constructor name
-    const proto = Object.getPrototypeOf(incoming)
-
     // Payload 'ValidationError' and 'APIError'
-    if (
-      (proto.constructor.name === ValidationErrorName || proto.constructor.name === APIErrorName) &&
-      incoming.data
-    ) {
+    if ((incoming instanceof ValidationError || incoming instanceof APIError) && incoming.data) {
       return {
         errors: [
           {
@@ -27,7 +19,7 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
     }
 
     // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
-    if (proto.constructor.name === ValidationErrorName && 'errors' in incoming && incoming.errors) {
+    if (!(incoming instanceof APIError || incoming instanceof Error) && incoming.errors) {
       return {
         errors: Object.keys(incoming.errors).reduce(
           (acc, key) => {
@@ -42,17 +34,22 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
       }
     }
 
-    if (Array.isArray(incoming.message)) {
+    if (
+      typeof incoming === 'object' &&
+      incoming !== null &&
+      'message' in incoming &&
+      Array.isArray(incoming.message)
+    ) {
       return {
         errors: incoming.message,
       }
     }
 
-    if (incoming.name) {
+    if (typeof incoming === 'object' && incoming !== null && 'name' in incoming) {
       return {
         errors: [
           {
-            message: incoming.message,
+            message: (incoming as any).message,
           },
         ],
       }

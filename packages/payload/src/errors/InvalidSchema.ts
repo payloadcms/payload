@@ -5,5 +5,11 @@ import { APIError } from './APIError.js'
 export class InvalidSchema extends APIError {
   constructor(message: string, results: any) {
     super(message, httpStatus.INTERNAL_SERVER_ERROR, results)
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'InvalidSchema'
+    Object.defineProperty(this.constructor, 'name', { value: 'InvalidSchema' })
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, InvalidSchema.prototype)
   }
 }

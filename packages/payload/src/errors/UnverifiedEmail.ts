@@ -11,5 +11,11 @@ export class UnverifiedEmail extends APIError {
       t ? t('error:unverifiedEmail') : en.translations.error.unverifiedEmail,
       httpStatus.FORBIDDEN,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'UnverifiedEmail'
+    Object.defineProperty(this.constructor, 'name', { value: 'UnverifiedEmail' })
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, UnverifiedEmail.prototype)
   }
 }

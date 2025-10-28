@@ -13,5 +13,11 @@ export class AuthenticationError extends APIError {
         : en.translations.error.emailOrPasswordIncorrect,
       httpStatus.UNAUTHORIZED,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'AuthenticationError'
+    Object.defineProperty(this.constructor, 'name', { value: 'AuthenticationError' })
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, AuthenticationError.prototype)
   }
 }

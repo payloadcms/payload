@@ -7,5 +7,11 @@ export class InvalidFieldJoin extends APIError {
     super(
       `Invalid join field ${field.name}. The config does not have a field '${field.on}' in collection '${field.collection}'.`,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'InvalidFieldJoin'
+    Object.defineProperty(this.constructor, 'name', { value: 'InvalidFieldJoin' })
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, InvalidFieldJoin.prototype)
   }
 }

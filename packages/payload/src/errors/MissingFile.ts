@@ -11,5 +11,11 @@ export class MissingFile extends APIError {
       t ? t('error:noFilesUploaded') : en.translations.error.noFilesUploaded,
       httpStatus.BAD_REQUEST,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'MissingFile'
+    Object.defineProperty(this.constructor, 'name', { value: 'MissingFile' })
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, MissingFile.prototype)
   }
 }
