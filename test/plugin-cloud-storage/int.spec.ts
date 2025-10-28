@@ -18,6 +18,7 @@ const dirname = path.dirname(filename)
 
 let payload: Payload
 
+// needs to be here as it imports vitest functions and conflicts with playwright that uses jest
 export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   if (process.env.CI) {
     return describe
