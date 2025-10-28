@@ -82,8 +82,14 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
       sanitizedDefault = `sql\`${column.default}\``
     } else if (column.type === 'jsonb') {
       sanitizedDefault = `sql\`'${JSON.stringify(column.default)}'::jsonb\``
-    } else if (column.type === 'numeric') {
-      sanitizedDefault = `${column.default}`
+    } else if (column.type === 'numeric' || column.type === 'integer' || column.type === 'serial') {
+      const numericValue =
+        typeof column.default === 'string' ? Number(column.default) : column.default
+      sanitizedDefault = `${numericValue}`
+    } else if (column.type === 'boolean') {
+      const booleanValue =
+        typeof column.default === 'string' ? column.default === 'true' : column.default
+      sanitizedDefault = `${booleanValue}`
     } else if (typeof column.default === 'string') {
       sanitizedDefault = `${JSON.stringify(column.default)}`
     }
