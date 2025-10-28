@@ -11,7 +11,6 @@ export class NotFound extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'NotFound'
-    Object.defineProperty(this.constructor, 'name', { value: 'NotFound' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, NotFound.prototype)
   }

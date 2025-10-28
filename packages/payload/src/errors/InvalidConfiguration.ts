@@ -8,7 +8,6 @@ export class InvalidConfiguration extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'InvalidConfiguration'
-    Object.defineProperty(this.constructor, 'name', { value: 'InvalidConfiguration' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, InvalidConfiguration.prototype)
   }

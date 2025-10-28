@@ -11,7 +11,6 @@ export class UnauthorizedError extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'UnauthorizedError'
-    Object.defineProperty(this.constructor, 'name', { value: 'UnauthorizedError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, UnauthorizedError.prototype)
   }

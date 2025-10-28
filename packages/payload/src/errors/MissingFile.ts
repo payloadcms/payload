@@ -14,7 +14,6 @@ export class MissingFile extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'MissingFile'
-    Object.defineProperty(this.constructor, 'name', { value: 'MissingFile' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, MissingFile.prototype)
   }

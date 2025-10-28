@@ -10,7 +10,6 @@ export class InvalidFieldJoin extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'InvalidFieldJoin'
-    Object.defineProperty(this.constructor, 'name', { value: 'InvalidFieldJoin' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, InvalidFieldJoin.prototype)
   }

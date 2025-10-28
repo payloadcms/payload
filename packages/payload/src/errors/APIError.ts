@@ -27,7 +27,6 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'ExtendableError'
-    Object.defineProperty(this.constructor, 'name', { value: 'ExtendableError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, ExtendableError.prototype)
 
@@ -60,7 +59,6 @@ export class APIError<
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'APIError'
-    Object.defineProperty(this.constructor, 'name', { value: 'APIError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, APIError.prototype)
   }

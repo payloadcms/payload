@@ -80,7 +80,6 @@ export class ValidationError extends APIError<{
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'ValidationError'
-    Object.defineProperty(this.constructor, 'name', { value: 'ValidationError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, ValidationError.prototype)
   }

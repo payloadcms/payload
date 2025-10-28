@@ -8,7 +8,6 @@ export class DuplicateGlobal extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'DuplicateGlobal'
-    Object.defineProperty(this.constructor, 'name', { value: 'DuplicateGlobal' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, DuplicateGlobal.prototype)
   }

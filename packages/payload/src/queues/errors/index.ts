@@ -31,7 +31,6 @@ export class TaskError extends Error {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'TaskError'
-    Object.defineProperty(this.constructor, 'name', { value: 'TaskError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, TaskError.prototype)
   }
@@ -45,7 +44,6 @@ export class WorkflowError extends Error {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'WorkflowError'
-    Object.defineProperty(this.constructor, 'name', { value: 'WorkflowError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, WorkflowError.prototype)
   }
@@ -62,7 +60,6 @@ export class JobCancelledError extends Error {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'JobCancelledError'
-    Object.defineProperty(this.constructor, 'name', { value: 'JobCancelledError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, JobCancelledError.prototype)
   }

@@ -10,7 +10,6 @@ export class InvalidFieldName extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'InvalidFieldName'
-    Object.defineProperty(this.constructor, 'name', { value: 'InvalidFieldName' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, InvalidFieldName.prototype)
   }

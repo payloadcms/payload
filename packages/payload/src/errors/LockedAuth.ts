@@ -11,7 +11,6 @@ export class LockedAuth extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'LockedAuth'
-    Object.defineProperty(this.constructor, 'name', { value: 'LockedAuth' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, LockedAuth.prototype)
   }

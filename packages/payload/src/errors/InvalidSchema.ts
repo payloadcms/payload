@@ -8,7 +8,6 @@ export class InvalidSchema extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'InvalidSchema'
-    Object.defineProperty(this.constructor, 'name', { value: 'InvalidSchema' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, InvalidSchema.prototype)
   }

@@ -14,7 +14,6 @@ export class FileUploadError extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'FileUploadError'
-    Object.defineProperty(this.constructor, 'name', { value: 'FileUploadError' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, FileUploadError.prototype)
   }

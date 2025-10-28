@@ -14,7 +14,6 @@ export class ErrorDeletingFile extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'ErrorDeletingFile'
-    Object.defineProperty(this.constructor, 'name', { value: 'ErrorDeletingFile' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, ErrorDeletingFile.prototype)
   }

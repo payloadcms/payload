@@ -14,7 +14,6 @@ export class Forbidden extends APIError {
 
     // Ensure error name is not lost during swc minification when running next build
     this.name = 'Forbidden'
-    Object.defineProperty(this.constructor, 'name', { value: 'Forbidden' })
     // Ensure instanceof works correctly
     Object.setPrototypeOf(this, Forbidden.prototype)
   }
