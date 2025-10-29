@@ -49,7 +49,7 @@ import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
-import { resolveSelect} from '../utilities/select.js'
+import { resolveSelect } from '../utilities/select.js'
 import { buildObjectType, type ObjectTypeConfig } from './buildObjectType.js'
 import { isFieldNullable } from './isFieldNullable.js'
 import { withNullableType } from './withNullableType.js'
@@ -57,7 +57,11 @@ import { withNullableType } from './withNullableType.js'
 function formattedNameResolver({
   field,
   ...rest
-}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<any, Context, any> {
+}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<
+  any,
+  Context,
+  any
+> {
   if ('name' in field) {
     if (formatName(field.name) !== field.name) {
       return {
@@ -669,21 +673,24 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 id = relatedDoc.value
               }
 
-              const result = await context.req.payloadDataLoader.load(
-                createDataloaderCacheKey({
-                  collectionSlug: collectionSlug as string,
-                  currentDepth: 0,
-                  depth: 0,
-                  docID: id,
-                  draft,
-                  fallbackLocale,
-                  locale,
-                  overrideAccess: false,
-                  select,
-                  showHiddenFields: false,
-                  transactionID: context.req.transactionID,
-                }),
-              )
+              const inline = field.inline && typeof id === 'object'
+              const result = inline
+                ? id
+                : await context.req.payloadDataLoader.load(
+                    createDataloaderCacheKey({
+                      collectionSlug: collectionSlug as string,
+                      currentDepth: 0,
+                      depth: 0,
+                      docID: id,
+                      draft,
+                      fallbackLocale,
+                      locale,
+                      overrideAccess: false,
+                      select,
+                      showHiddenFields: false,
+                      transactionID: context.req.transactionID,
+                    }),
+                  )
 
               if (result) {
                 if (isRelatedToManyCollections) {
@@ -719,21 +726,24 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
         if (id) {
           if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
-            const relatedDocument = await context.req.payloadDataLoader.load(
-              createDataloaderCacheKey({
-                collectionSlug: relatedCollectionSlug as string,
-                currentDepth: 0,
-                depth: 0,
-                docID: id,
-                draft,
-                fallbackLocale,
-                locale,
-                overrideAccess: false,
-                select,
-                showHiddenFields: false,
-                transactionID: context.req.transactionID,
-              }),
-            )
+            const inline = field.inline && typeof id === 'object'
+            const relatedDocument = inline
+              ? id
+              : await context.req.payloadDataLoader.load(
+                  createDataloaderCacheKey({
+                    collectionSlug: relatedCollectionSlug as string,
+                    currentDepth: 0,
+                    depth: 0,
+                    docID: id,
+                    draft,
+                    fallbackLocale,
+                    locale,
+                    overrideAccess: false,
+                    select,
+                    showHiddenFields: false,
+                    transactionID: context.req.transactionID,
+                  }),
+                )
 
             if (relatedDocument) {
               if (isRelatedToManyCollections) {
@@ -970,7 +980,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     const hasManyValues = field.hasMany
     const relationshipName = combineParentName(parentName, toWords(field.name, true))
 
-    let type
+    let type: GraphQLOutputType
     let relationToType = null
 
     if (Array.isArray(relationTo)) {
@@ -1079,21 +1089,24 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
               id = relatedDoc.value
             }
 
-            const result = await context.req.payloadDataLoader.load(
-              createDataloaderCacheKey({
-                collectionSlug,
-                currentDepth: 0,
-                depth: 0,
-                docID: id,
-                draft,
-                fallbackLocale,
-                locale,
-                overrideAccess: false,
-                select,
-                showHiddenFields: false,
-                transactionID: context.req.transactionID,
-              }),
-            )
+            const inline = field.inline && typeof id === 'object'
+            const result = inline
+              ? id
+              : await context.req.payloadDataLoader.load(
+                  createDataloaderCacheKey({
+                    collectionSlug,
+                    currentDepth: 0,
+                    depth: 0,
+                    docID: id,
+                    draft,
+                    fallbackLocale,
+                    locale,
+                    overrideAccess: false,
+                    select,
+                    showHiddenFields: false,
+                    transactionID: context.req.transactionID,
+                  }),
+                )
 
             if (result) {
               if (isRelatedToManyCollections) {
@@ -1127,21 +1140,24 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         }
 
         if (id) {
-          const relatedDocument = await context.req.payloadDataLoader.load(
-            createDataloaderCacheKey({
-              collectionSlug: relatedCollectionSlug,
-              currentDepth: 0,
-              depth: 0,
-              docID: id,
-              draft,
-              fallbackLocale,
-              locale,
-              overrideAccess: false,
-              select,
-              showHiddenFields: false,
-              transactionID: context.req.transactionID,
-            }),
-          )
+          const inline = field.inline && typeof id === 'object'
+          const relatedDocument = inline
+            ? id
+            : await context.req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug: relatedCollectionSlug,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess: false,
+                  select,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
+              )
 
           if (relatedDocument) {
             if (isRelatedToManyCollections) {
