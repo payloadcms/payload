@@ -45,7 +45,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       let count = 0
       for (const row of rows) {
         count++
-        if (row.rows && openItemKeys?.has(row.rowID)) {
+        if (row.rows && openItemKeys?.has(row.itemKey)) {
           count += countVisibleRows(row.rows)
         }
       }
@@ -69,7 +69,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
             return row
           }
           currentIndex++
-          if (row.rows && openItemKeys?.has(row.rowID)) {
+          if (row.rows && openItemKeys?.has(row.itemKey)) {
             const found = findRow(row.rows)
             if (found) {
               return found
@@ -86,19 +86,19 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
 
   // Get visual index from row ID
   const getIndexFromRowID = React.useCallback(
-    (rowID: null | number | string): number => {
-      if (rowID === null) {
+    (rowItemKey: ItemKey | null): number => {
+      if (rowItemKey === null) {
         return -1
       }
 
       let currentIndex = 0
       const findIndex = (rows: SectionRow[]): number => {
         for (const row of rows) {
-          if (row.rowID === rowID) {
+          if (row.itemKey === rowItemKey) {
             return currentIndex
           }
           currentIndex++
-          if (row.rows && openItemKeys?.has(row.rowID)) {
+          if (row.rows && openItemKeys?.has(row.itemKey)) {
             const found = findIndex(row.rows)
             if (found !== -1) {
               return found
@@ -161,7 +161,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         for (let i = startIndex; i <= endIndex; i++) {
           const row = getRowAtVisibleIndex(i)
           if (row && isRowFocusable(row)) {
-            rangeItemKeys.push(row.rowID)
+            rangeItemKeys.push(row.itemKey)
           }
         }
 
@@ -203,21 +203,21 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           event.preventDefault()
 
           const direction: -1 | 1 = code === 'ArrowUp' ? -1 : 1
-          const currentIndex = getIndexFromRowID(row.rowID)
+          const currentIndex = getIndexFromRowID(row.itemKey)
           let nextIndex = currentIndex + direction
 
           // Find next focusable row
           while (nextIndex >= 0 && nextIndex < totalVisibleRows) {
             const nextRow = getRowAtVisibleIndex(nextIndex)
             if (nextRow && isRowFocusable(nextRow)) {
-              setFocusedRowID(nextRow.rowID)
+              setFocusedRowID(nextRow.itemKey)
 
               // Handle shift+arrow for range selection
               if (shiftKey) {
                 // Pass the selection event with shiftKey to the next row
                 // The parent's selection logic should handle range selection
                 onSelectionChange({
-                  itemKey: nextRow.rowID,
+                  itemKey: nextRow.itemKey,
                   options: { ctrlKey, metaKey, shiftKey },
                 })
               }
@@ -235,7 +235,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           // Handle expand/collapse for rows with children
           if (row.rows?.length || row.hasChildren) {
             event.preventDefault()
-            toggleRowExpand(row.rowID)
+            toggleRowExpand(row.itemKey)
           }
           break
         }
@@ -264,7 +264,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         case 'Space': {
           event.preventDefault()
           onSelectionChange({
-            itemKey: row.rowID,
+            itemKey: row.itemKey,
             options: { ctrlKey, metaKey, shiftKey },
           })
           break
@@ -319,7 +319,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       targetItem: null | SectionRow
     }) => {
       setHoveredRowItemKey(newHoveredRowItemKey || null)
-      setTargetParentID(targetItem?.rowID || null)
+      setTargetParentID(targetItem?.itemKey || null)
     },
     [],
   )
@@ -344,7 +344,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         event.over.data.current.type === 'tree-view-table' &&
         'targetItem' in event.over.data.current
       ) {
-        void onDrop({ targetItemKey: event.over.data.current.targetItem?.rowID })
+        void onDrop({ targetItemKey: event.over.data.current.targetItem?.itemKey })
       }
     },
     onDragStart() {
@@ -379,7 +379,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           if (selectedItemKeys && selectedItemKeys.size > 0) {
             setFocusedRowID(Array.from(selectedItemKeys)[0])
           } else if (focusedRowID === null && sections && sections.length > 0) {
-            setFocusedRowID(sections[0].rowID)
+            setFocusedRowID(sections[0].itemKey)
           }
         }
       }}
@@ -404,7 +404,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
             // Convert index back to row ID
             const row = getRowAtVisibleIndex(index)
             if (row) {
-              setFocusedRowID(row.rowID)
+              setFocusedRowID(row.itemKey)
             }
           }}
           onRowDrag={onRowDrag}

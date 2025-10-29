@@ -10,12 +10,6 @@ type Args = {
 export type ItemKey = `${string}-${number | string}`
 
 export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] {
-  // Create a map for quick lookups
-  const itemMap = new Map<ItemKey, TreeViewItem>()
-  items.forEach((item) => {
-    itemMap.set(item.itemKey, item)
-  })
-
   // Create a map to store section rows
   const sectionRowMap = new Map<ItemKey, SectionRow>()
 
@@ -24,7 +18,7 @@ export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] 
     sectionRowMap.set(item.itemKey, {
       name: item.value.title,
       hasChildren: item.hasChildren,
-      rowID: item.itemKey,
+      itemKey: item.itemKey,
       rows: [],
       updatedAt: item.value.updatedAt
         ? new Date(item.value.updatedAt).toLocaleDateString(i18nLanguage, {
