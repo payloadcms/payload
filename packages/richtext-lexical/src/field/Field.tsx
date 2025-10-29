@@ -147,7 +147,12 @@ const RichTextComponent: React.FC<
       // If we used JSON.stringify, the editor would re-mount every time you save the document, as the order of keys changes => change detected => re-mount.
       if (
         prevValueRef.current !== value &&
-        !dequal(JSON.parse(JSON.stringify(prevValueRef.current)), value)
+        !dequal(
+          prevValueRef.current != null
+            ? JSON.parse(JSON.stringify(prevValueRef.current))
+            : prevValueRef.current,
+          value,
+        )
       ) {
         prevInitialValueRef.current = initialValue
         prevValueRef.current = value
