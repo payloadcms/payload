@@ -84,7 +84,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     }
 
     // Use the 'default' view if available, otherwise undefined
-    const nodeViews = views?.[currentView]
+    const nodeViews = views?.[currentView]?.nodes
 
     return {
       editable: readOnly !== true,
