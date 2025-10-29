@@ -557,7 +557,7 @@ export const translations = {
   },
 }
 
-// src/index.ts
+// src/plugin.ts
 import { deepMergeSimple } from 'payload/shared'
 import { translations } from './translations/index.js'
 
