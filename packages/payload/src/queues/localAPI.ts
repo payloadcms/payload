@@ -2,6 +2,8 @@ import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.j
 
 import {
   createLocalReq,
+  executeAccess,
+  Forbidden,
   type Job,
   type Payload,
   type PayloadRequest,
@@ -56,9 +58,17 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
           meta?: BaseJob['meta']
+          /**
+           * If set to false, access control as defined in jobsConfig.access.queue will be run.
+           * By default, this is true and no access control will be run.
+           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
+           * run (which is a function that returns `true` if the user is logged in).
+           *
+           * @default true
+           */
+          overrideAccess?: boolean
           queue?: string
           req?: PayloadRequest
-          // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
           task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
           waitUntil?: Date
           workflow?: never
@@ -66,6 +76,15 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
           meta?: BaseJob['meta']
+          /**
+           * If set to false, access control as defined in jobsConfig.access.queue will be run.
+           * By default, this is true and no access control will be run.
+           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
+           * run (which is a function that returns `true` if the user is logged in).
+           *
+           * @default true
+           */
+          overrideAccess?: boolean
           queue?: string
           req?: PayloadRequest
           task?: never
@@ -118,20 +137,36 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
+    const overrideAccess = args?.overrideAccess !== false
+
+    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+
     if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
       return (await payload.create({
         collection: jobsCollectionSlug,
         data,
         depth: payload.config.jobs.depth ?? 0,
-        req: args.req,
+        overrideAccess,
+        req,
       })) as ReturnType
     } else {
+      if (!overrideAccess) {
+        /**
+         * By default, jobsConfig.access.queue will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+         */
+        const accessFn = payload.config.jobs?.access?.queue ?? (() => true)
+        const hasAccess = await accessFn({ req })
+        if (!hasAccess) {
+          throw new Forbidden(req.t)
+        }
+      }
+
       return jobAfterRead({
         config: payload.config,
         doc: await payload.db.create({
           collection: jobsCollectionSlug,
           data,
-          req: args.req,
+          req,
         }),
       }) as unknown as ReturnType
     }
@@ -151,6 +186,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      * @default 10
      */
     limit?: number
+    /**
+     * If set to false, access control as defined in jobsConfig.access.run will be run.
+     * By default, this is true and no access control will be run.
+     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
+     * run (which is a function that returns `true` if the user is logged in).
+     *
+     * @default true
+     */
     overrideAccess?: boolean
     /**
      * Adjust the job processing order using a Payload sort string.
@@ -198,6 +241,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
   runByID: async (args: {
     id: number | string
+    /**
+     * If set to false, access control as defined in jobsConfig.access.run will be run.
+     * By default, this is true and no access control will be run.
+     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
+     * run (which is a function that returns `true` if the user is logged in).
+     *
+     * @default true
+     */
     overrideAccess?: boolean
     req?: PayloadRequest
     /**
@@ -221,12 +272,32 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   },
 
   cancel: async (args: {
+    /**
+     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
+     * By default, this is true and no access control will be run.
+     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
+     * run (which is a function that returns `true` if the user is logged in).
+     *
+     * @default true
+     */
     overrideAccess?: boolean
     queue?: string
     req?: PayloadRequest
     where: Where
   }): Promise<void> => {
-    const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+
+    const overrideAccess = args.overrideAccess !== false
+    if (!overrideAccess) {
+      /**
+       * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       */
+      const accessFn = payload.config.jobs?.access?.cancel ?? (() => true)
+      const hasAccess = await accessFn({ req })
+      if (!hasAccess) {
+        throw new Forbidden(req.t)
+      }
+    }
 
     const and: Where[] = [
       args.where,
@@ -262,7 +333,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       },
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
-      req: newReq,
+      req,
       returning: false,
       where: { and },
     })
@@ -270,10 +341,30 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
   cancelByID: async (args: {
     id: number | string
+    /**
+     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
+     * By default, this is true and no access control will be run.
+     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
+     * run (which is a function that returns `true` if the user is logged in).
+     *
+     * @default true
+     */
     overrideAccess?: boolean
     req?: PayloadRequest
   }): Promise<void> => {
-    const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+
+    const overrideAccess = args.overrideAccess !== false
+    if (!overrideAccess) {
+      /**
+       * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       */
+      const accessFn = payload.config.jobs?.access?.cancel ?? (() => true)
+      const hasAccess = await accessFn({ req })
+      if (!hasAccess) {
+        throw new Forbidden(req.t)
+      }
+    }
 
     await updateJob({
       id: args.id,
@@ -288,7 +379,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       },
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
-      req: newReq,
+      req,
       returning: false,
     })
   },

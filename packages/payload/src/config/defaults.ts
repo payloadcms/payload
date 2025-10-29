@@ -57,6 +57,8 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   i18n: {},
   jobs: {
     access: {
+      cancel: defaultAccess,
+      queue: defaultAccess,
       run: defaultAccess,
     },
     deleteJobOnComplete: true,
@@ -136,6 +138,8 @@ export const addDefaultsToConfig = (config: Config): Config => {
     depth: 0,
     ...(config.jobs || {}),
     access: {
+      cancel: defaultAccess,
+      queue: defaultAccess,
       run: defaultAccess,
       ...(config.jobs?.access || {}),
     },
