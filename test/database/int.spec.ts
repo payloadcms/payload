@@ -2103,6 +2103,60 @@ describe('database', () => {
       expect(worldDocs).toHaveLength(5)
     })
 
+    it('should bulk update with singleTransaction: true', async () => {
+      const collectionConfig = payload.config.collections.find((c) => c.slug === collection)
+
+      assert(collectionConfig)
+
+      const originalConfig = collectionConfig.bulkOperations
+      collectionConfig.bulkOperations = { singleTransaction: true }
+
+      try {
+        const posts = await Promise.all([
+          payload.create({ collection, data: { title: 'test1' } }),
+          payload.create({ collection, data: { title: 'test2' } }),
+          payload.create({ collection, data: { title: 'test3' } }),
+        ])
+
+        const result = await payload.update({
+          collection,
+          data: { title: 'updated' },
+          where: { id: { in: posts.map((p) => p.id) } },
+        })
+
+        expect(result.docs).toHaveLength(3)
+        expect(result.errors).toHaveLength(0)
+      } finally {
+        collectionConfig.bulkOperations = originalConfig
+      }
+    })
+
+    it('should bulk delete with singleTransaction: true', async () => {
+      const collectionConfig = payload.config.collections.find((c) => c.slug === collection)
+
+      assert(collectionConfig)
+
+      const originalConfig = collectionConfig.bulkOperations
+      collectionConfig.bulkOperations = { singleTransaction: true }
+
+      try {
+        const posts = await Promise.all([
+          payload.create({ collection, data: { title: 'toDelete1' } }),
+          payload.create({ collection, data: { title: 'toDelete2' } }),
+        ])
+
+        const result = await payload.delete({
+          collection,
+          where: { id: { in: posts.map((p) => p.id) } },
+        })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.errors).toHaveLength(0)
+      } finally {
+        collectionConfig.bulkOperations = originalConfig
+      }
+    })
+
     it('should CRUD point field', async () => {
       const result = await payload.create({
         collection: 'default-values',
