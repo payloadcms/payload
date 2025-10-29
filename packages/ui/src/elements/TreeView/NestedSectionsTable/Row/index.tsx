@@ -107,7 +107,7 @@ export const Row: React.FC<DivTableRowProps> = ({
     actions: {
       selectRow: (event) => {
         onSelectionChange({
-          itemKey: rowItem.rowID,
+          itemKey: rowItem.itemKey,
           options: {
             ctrlKey: event.ctrlKey || event.metaKey,
             metaKey: event.ctrlKey || event.metaKey,
@@ -116,7 +116,7 @@ export const Row: React.FC<DivTableRowProps> = ({
         })
       },
       toggleExpand: () => {
-        toggleRow(rowItem.rowID)
+        toggleRow(rowItem.itemKey)
       },
     },
     dataAttributeName: 'data-row-action',
@@ -131,7 +131,7 @@ export const Row: React.FC<DivTableRowProps> = ({
           isDragging && `${baseClass}__section--dragging`,
           isDragging && isInvalidTarget && `${baseClass}__section--invalid-target`,
           isOdd && `${baseClass}__section--odd`,
-          targetParentID === rowItem.rowID && `${baseClass}__section--target`,
+          targetParentID === rowItem.itemKey && `${baseClass}__section--target`,
           isRowSelected && `${baseClass}__section--selected`,
           hasSelectedAncestor && `${baseClass}__section--selected-descendant`,
           isFocused && `${baseClass}__section--focused`,
@@ -167,7 +167,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                   className={`${baseClass}__drag-handler`}
                   disabled={
                     hasSelectedAncestor ||
-                    (selectedItemKeys.size > 1 && !selectedItemKeys.has(rowItem.rowID))
+                    (selectedItemKeys.size > 1 && !selectedItemKeys.has(rowItem.itemKey))
                   }
                   onDrag={(event) => {
                     onRowDrag({
@@ -218,7 +218,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                       margin={false}
                       size="small"
                     >
-                      {loadingRowIDs?.has(rowItem.rowID) ? (
+                      {loadingRowIDs?.has(rowItem.itemKey) ? (
                         <div className={`${baseClass}__tree-toggle-spinner`}>
                           <div className={`${baseClass}__spinner-bar`} />
                           <div className={`${baseClass}__spinner-bar`} />
@@ -226,7 +226,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                         </div>
                       ) : (
                         <ChevronIcon
-                          direction={openItemKeys?.has(rowItem.rowID) ? 'down' : 'right'}
+                          direction={openItemKeys?.has(rowItem.itemKey) ? 'down' : 'right'}
                         />
                       )}
                     </Button>
@@ -251,7 +251,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                 dropContextName={dropContextName}
                 isDragging={isDragging}
                 onHover={(data) => {
-                  onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
+                  onDroppableHover({ ...data, hoveredRowID: rowItem.itemKey })
                 }}
                 placement="split-top"
                 segmentWidth={segmentWidth}
@@ -271,7 +271,7 @@ export const Row: React.FC<DivTableRowProps> = ({
               dropContextName={dropContextName}
               isDragging={isDragging}
               onHover={(data) => {
-                onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
+                onDroppableHover({ ...data, hoveredRowID: rowItem.itemKey })
               }}
               placement="middle"
               segmentWidth={segmentWidth}
@@ -284,7 +284,7 @@ export const Row: React.FC<DivTableRowProps> = ({
               dropContextName={dropContextName}
               isDragging={isDragging}
               onHover={(data) => {
-                onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
+                onDroppableHover({ ...data, hoveredRowID: rowItem.itemKey })
               }}
               placement="split-bottom"
               segmentWidth={segmentWidth}
@@ -301,7 +301,7 @@ export const Row: React.FC<DivTableRowProps> = ({
       </div>
 
       {/* Render placeholder row below the hovered row */}
-      {isDragging && hoveredRowItemKey === rowItem.rowID && (
+      {isDragging && hoveredRowItemKey === rowItem.itemKey && (
         <div className={`${baseClass}__placeholder-section`}>
           <div className={`${baseClass}__placeholder-row`}>
             {columns.map((col) => (

@@ -382,7 +382,7 @@ export function TreeViewProvider({
   const isRowFocusable = React.useCallback(
     (row: SectionRow) => {
       const unfocusableIDs = getAllDescendantIDs({ itemKeys: selectedItemKeys, items })
-      return !unfocusableIDs.has(row.rowID)
+      return !unfocusableIDs.has(row.itemKey)
     },
     [selectedItemKeys, items],
   )

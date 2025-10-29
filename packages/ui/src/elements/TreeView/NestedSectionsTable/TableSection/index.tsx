@@ -74,10 +74,10 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
   toggleRowExpand: toggleRow,
 }) => {
   // Helper to count all rows recursively, only counting visible (open) rows
-  const countRows = (items: SectionRow[]): number => {
-    return items.reduce((count, item) => {
-      const isOpen = openItemKeys?.has(item.rowID)
-      return count + 1 + (item.rows && isOpen ? countRows(item.rows) : 0)
+  const countRows = (rows: SectionRow[]): number => {
+    return rows.reduce((count, row) => {
+      const isOpen = openItemKeys?.has(row.itemKey)
+      return count + 1 + (row.rows && isOpen ? countRows(row.rows) : 0)
     }, 0)
   }
 
@@ -86,7 +86,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
     let offset = rowIndexOffset
     for (let i = 0; i < index; i++) {
       offset += 1
-      const isOpen = openItemKeys?.has(rows[i].rowID)
+      const isOpen = openItemKeys?.has(rows[i].itemKey)
       if (rows[i].rows && isOpen) {
         offset += countRows(rows[i].rows || [])
       }
@@ -99,7 +99,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
       {rows.map((rowItem, sectionRowIndex: number) => {
         const absoluteRowIndex = getAbsoluteRowIndex(sectionRowIndex)
         const isLastRow = rows.length - 1 === sectionRowIndex
-        const hasNestedRows = Boolean(rowItem?.rows?.length) && openItemKeys?.has(rowItem.rowID)
+        const hasNestedRows = Boolean(rowItem?.rows?.length) && openItemKeys?.has(rowItem.itemKey)
         const isRowAtRootLevel = level === 0 || (isLastRow && isLastRowOfRoot)
 
         // Calculate drop target items based on position in hierarchy
@@ -129,12 +129,12 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
             ? firstCellWidth + segmentWidth * (level - targetItems.length + 1) + 28
             : firstCellWidth + segmentWidth * (hasNestedRows ? level + 1 : level) + 28
 
-        const isRowSelected = selectedItemKeys.has(rowItem.rowID)
+        const isRowSelected = selectedItemKeys.has(rowItem.itemKey)
         const isInvalidTarget = hasSelectedAncestor || isRowSelected
         const isFirstRowAtRootLevel = level === 0 && sectionRowIndex === 0
 
         const renderResult = (
-          <React.Fragment key={rowItem.rowID}>
+          <React.Fragment key={rowItem.itemKey}>
             <Row
               absoluteRowIndex={absoluteRowIndex}
               columns={columns}

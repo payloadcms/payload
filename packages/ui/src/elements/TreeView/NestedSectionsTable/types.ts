@@ -1,7 +1,7 @@
 export type ItemKey = `${string}-${number | string}`
 export type SectionRow = {
+  itemKey: ItemKey
   name: string
-  rowID: ItemKey
   rows?: SectionRow[]
 } & Record<string, any>
 
