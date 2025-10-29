@@ -19,7 +19,6 @@
     min-width: unset;
 
     &.is-dragging.is-over {
-      z-index: 1;
       .row-drop-area__split-marker {
         opacity: 1;
       }
@@ -39,6 +38,7 @@
 
 .row-drop-area__split-marker {
   height: 4px;
+  z-index: 100;
   opacity: 0;
   background-color: var(--theme-success-400);
   border-radius: var(--style-radius-l);

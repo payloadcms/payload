@@ -8,10 +8,10 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
-import type { ItemKey, SectionRow } from '../../elements/TreeView/NestedSectionsTable/types.js'
+import type { ItemKey, SectionItem } from '../../elements/TreeView/NestedSectionsTable/types.js'
 
+import { buildItemHierarchy } from '../../elements/TreeView/utils/buildItemHierarchy.js'
 import { getAllDescendantIDs } from '../../elements/TreeView/utils/getAllDescendantIDs.js'
-import { itemsToSectionRows } from '../../elements/TreeView/utils/itemsToSectionRows.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
@@ -27,10 +27,10 @@ type TreeViewQueryParams = {
 }
 
 export type TreeViewContextValue = {
+  canFocusItem: (item: SectionItem) => boolean
   clearSelections: () => void
   collectionSlug: CollectionSlug
-  isRowFocusable: (row: SectionRow) => boolean
-  loadingRowItemKeys: Set<ItemKey>
+  loadingItemKeys: Set<ItemKey>
   onDrop: (params: { targetItemKey: ItemKey | null }) => Promise<void>
   onItemSelection: (args: {
     eventOptions?: {
@@ -42,30 +42,30 @@ export type TreeViewContextValue = {
   }) => void
   openItemKeys: Set<ItemKey>
   refineTreeViewData: (args: { query?: TreeViewQueryParams; updateURL: boolean }) => void
+  rootItems: SectionItem[]
   search: string
-  sections: SectionRow[]
   selectAll: () => void
   readonly selectedItemKeys: Set<TreeViewItemKey>
   sort: FolderSortKeys
-  toggleRow: (itemKey: TreeViewItemKey) => void
+  toggleItemExpand: (itemKey: TreeViewItemKey) => void
   updateSelections: (args: { itemKeys: Set<TreeViewItemKey> | TreeViewItemKey[] }) => void
 }
 
 const Context = React.createContext<TreeViewContextValue>({
+  canFocusItem: () => true,
   clearSelections: () => {},
   collectionSlug: '' as CollectionSlug,
-  isRowFocusable: () => true,
-  loadingRowItemKeys: new Set<ItemKey>(),
+  loadingItemKeys: new Set<ItemKey>(),
   onDrop: () => Promise.resolve(undefined),
   onItemSelection: () => undefined,
   openItemKeys: new Set<ItemKey>(),
   refineTreeViewData: () => undefined,
+  rootItems: [],
   search: '',
-  sections: [],
   selectAll: () => undefined,
   selectedItemKeys: new Set<TreeViewItemKey>(),
   sort: 'name',
-  toggleRow: () => undefined,
+  toggleItemExpand: () => undefined,
   updateSelections: () => undefined,
 })
 
@@ -127,7 +127,7 @@ export function TreeViewProvider({
   const [openItemKeys, setOpenItemKeys] = React.useState<Set<ItemKey>>(
     () => new Set(expandedItemKeys),
   )
-  const [loadingRowItemKeys, setLoadingRowItemKeys] = React.useState<Set<ItemKey>>(() => new Set())
+  const [loadingItemKeys, setLoadingItemKeys] = React.useState<Set<ItemKey>>(() => new Set())
 
   const localeCode = locale ? locale.code : undefined
   const currentlySelectedIndexes = React.useRef(new Set<number>())
@@ -271,7 +271,7 @@ export function TreeViewProvider({
     ],
   )
 
-  const toggleRow: TreeViewContextValue['toggleRow'] = React.useCallback(
+  const toggleItemExpand: TreeViewContextValue['toggleItemExpand'] = React.useCallback(
     (itemKey) => {
       const updatedOpenItemKeys = new Set(openItemKeys)
 
@@ -312,7 +312,7 @@ export function TreeViewProvider({
         })
       } else {
         updatedOpenItemKeys.add(itemKey)
-        setLoadingRowItemKeys((prev) => new Set(prev).add(itemKey))
+        setLoadingItemKeys((prev) => new Set(prev).add(itemKey))
       }
 
       setOpenItemKeys(updatedOpenItemKeys)
@@ -379,51 +379,42 @@ export function TreeViewProvider({
     [moveItems, getSelectedItems, items, t],
   )
 
-  const isRowFocusable = React.useCallback(
-    (row: SectionRow) => {
+  const canFocusItem = React.useCallback(
+    (item: SectionItem) => {
       const unfocusableIDs = getAllDescendantIDs({ itemKeys: selectedItemKeys, items })
-      return !unfocusableIDs.has(row.itemKey)
+      return !unfocusableIDs.has(item.itemKey)
     },
     [selectedItemKeys, items],
   )
 
-  const sections: TreeViewContextValue['sections'] = React.useMemo(
-    () => itemsToSectionRows({ i18nLanguage: i18n.language, items }),
+  const rootItems: TreeViewContextValue['rootItems'] = React.useMemo(
+    () => buildItemHierarchy({ i18nLanguage: i18n.language, items }),
     [items, i18n.language],
   )
-
   // Sync documents when prop changes and clear loading state
   React.useEffect(() => {
     setItems(itemsFromProps)
     // Clear loading state since new data has arrived
-    setLoadingRowItemKeys(new Set())
+    setLoadingItemKeys(new Set())
   }, [itemsFromProps])
-
-  // If a new component is provided, update the state so children can re-render with the new component
-  // React.useEffect(() => {
-  //   if (InitialTableComponent) {
-  //     setTableComponentToRender(InitialTableComponent)
-  //   }
-  // }, [InitialTableComponent])
 
   return (
     <Context
       value={{
+        canFocusItem,
         clearSelections,
         collectionSlug,
-        isRowFocusable,
-        loadingRowItemKeys,
+        loadingItemKeys,
         onDrop,
         onItemSelection,
         openItemKeys,
         refineTreeViewData,
+        rootItems,
         search,
-        sections,
         selectAll,
         selectedItemKeys,
         sort,
-        // TableComponent,
-        toggleRow,
+        toggleItemExpand,
         updateSelections,
       }}
     >

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { ItemKey, SectionRow } from '../types.js'
+import type { ItemKey, SectionItem } from '../types.js'
 
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { DragHandleIcon } from '../../../../icons/DragHandle/index.js'
@@ -19,32 +19,23 @@ interface Column {
 }
 
 interface DivTableRowProps {
-  absoluteRowIndex: number
+  absoluteIndex: number
   columns: Column[]
   dropContextName: string
   firstCellRef?: React.RefObject<HTMLDivElement>
   firstCellWidth: number
   firstCellXOffset: number
-  focusedRowIndex?: number
   hasSelectedAncestor: boolean
-  hoveredRowItemKey: ItemKey | null
   isDragging: boolean
-  isFirstRowAtRootLevel: boolean
+  isFirstRootItem: boolean
+  isFocused: boolean
+  isHovered: boolean
   isInvalidTarget: boolean
-  isLastRow: boolean
-  isRowAtRootLevel: boolean
-  isRowSelected: boolean
+  isSelected: boolean
+  item: SectionItem
   level: number
-  loadingRowItemKeys?: Set<ItemKey>
-  onDroppableHover: (params: {
-    hoveredRowID?: ItemKey
-    placement?: string
-    targetItem: null | SectionRow
-  }) => void
-  onFocusChange: (focusedIndex: number) => void
-  onRowDrag: (params: { event: PointerEvent; item: null | SectionRow }) => void
-  onRowKeyPress: (params: { event: React.KeyboardEvent; row: SectionRow }) => void
-  onSelectionChange: (params: {
+  loadingItemKeys: Set<ItemKey>
+  onClick: (params: {
     itemKey: `${string}-${number | string}`
     options: {
       ctrlKey: boolean
@@ -52,72 +43,71 @@ interface DivTableRowProps {
       shiftKey: boolean
     }
   }) => void
-  openItemKeys?: Set<ItemKey>
-  rowItem: SectionRow
+  onDrag: (params: { event: PointerEvent; item: null | SectionItem }) => void
+  onDroppableHover: (params: { hoveredItemKey?: ItemKey; targetItem: null | SectionItem }) => void
+  onFocusChange: (focusedIndex: number) => void
+  onKeyPress: (params: { event: React.KeyboardEvent; item: SectionItem }) => void
+  openItemKeys: Set<ItemKey>
   segmentWidth: number
   selectedItemKeys: Set<ItemKey>
   startOffset: number
-  targetItems: (null | SectionRow)[]
-  targetParentID: null | number | string
-  toggleRowExpand: (docID: number | string) => void
+  targetItems: (null | SectionItem)[]
+  targetParentItemKey: ItemKey | null
+  toggleExpand: (docID: number | string) => void
 }
 
 export const Row: React.FC<DivTableRowProps> = ({
-  absoluteRowIndex,
+  absoluteIndex,
   columns,
   dropContextName,
   firstCellRef,
   firstCellWidth,
   firstCellXOffset,
-  focusedRowIndex,
   hasSelectedAncestor,
-  hoveredRowItemKey,
   isDragging,
-  isFirstRowAtRootLevel,
+  isFirstRootItem,
+  isFocused,
+  isHovered,
   isInvalidTarget,
-  isRowSelected,
+  isSelected,
+  item,
   level,
-  loadingRowItemKeys: loadingRowIDs,
+  loadingItemKeys,
+  onClick,
+  onDrag,
   onDroppableHover,
   onFocusChange,
-  onRowDrag,
-  onRowKeyPress,
-  onSelectionChange,
+  onKeyPress,
   openItemKeys,
-  rowItem,
   segmentWidth,
   selectedItemKeys,
   startOffset,
   targetItems,
-  targetParentID,
-  toggleRowExpand: toggleRow,
+  targetParentItemKey,
+  toggleExpand,
 }) => {
-  const isOdd = absoluteRowIndex % 2 === 1
-  const isFocused = focusedRowIndex !== undefined && focusedRowIndex === absoluteRowIndex
+  const isOdd = absoluteIndex % 2 === 1
   const rowRef = React.useRef<HTMLDivElement>(null)
 
   // Focus this row when focusedRowIndex matches
   React.useEffect(() => {
-    if (focusedRowIndex !== undefined && focusedRowIndex === absoluteRowIndex) {
+    if (isFocused) {
       rowRef.current?.focus()
     }
-  }, [focusedRowIndex, absoluteRowIndex])
+  }, [isFocused])
 
   const { actionNames, dataAttributeName, handleClick } = useActionDelegation({
     actions: {
-      selectRow: (event) => {
-        onSelectionChange({
-          itemKey: rowItem.itemKey,
+      onClick: (event) =>
+        onClick({
+          itemKey: item.itemKey,
           options: {
             ctrlKey: event.ctrlKey || event.metaKey,
             metaKey: event.ctrlKey || event.metaKey,
             shiftKey: event.shiftKey,
           },
-        })
-      },
-      toggleExpand: () => {
-        toggleRow(rowItem.itemKey)
-      },
+        }),
+      toggleExpand: () => toggleExpand(item.itemKey),
     },
     dataAttributeName: 'data-row-action',
     disabled: hasSelectedAncestor,
@@ -131,8 +121,8 @@ export const Row: React.FC<DivTableRowProps> = ({
           isDragging && `${baseClass}__section--dragging`,
           isDragging && isInvalidTarget && `${baseClass}__section--invalid-target`,
           isOdd && `${baseClass}__section--odd`,
-          targetParentID === rowItem.itemKey && `${baseClass}__section--target`,
-          isRowSelected && `${baseClass}__section--selected`,
+          targetParentItemKey === item.itemKey && `${baseClass}__section--target`,
+          isSelected && `${baseClass}__section--selected`,
           hasSelectedAncestor && `${baseClass}__section--selected-descendant`,
           isFocused && `${baseClass}__section--focused`,
         ]
@@ -140,13 +130,13 @@ export const Row: React.FC<DivTableRowProps> = ({
           .join(' ')}
         onClick={handleClick}
         onFocus={(e) => {
-          if (e.target === e.currentTarget && focusedRowIndex !== absoluteRowIndex) {
-            onFocusChange(absoluteRowIndex)
+          if (e.target === e.currentTarget && !isFocused) {
+            onFocusChange(absoluteIndex)
           }
         }}
         onKeyDown={(event) => {
           if (event.target === event.currentTarget) {
-            onRowKeyPress({ event, row: rowItem })
+            onKeyPress({ event, item })
           }
         }}
         onMouseDown={(e) => {
@@ -167,12 +157,12 @@ export const Row: React.FC<DivTableRowProps> = ({
                   className={`${baseClass}__drag-handler`}
                   disabled={
                     hasSelectedAncestor ||
-                    (selectedItemKeys.size > 1 && !selectedItemKeys.has(rowItem.itemKey))
+                    (selectedItemKeys.size > 1 && !selectedItemKeys.has(item.itemKey))
                   }
                   onDrag={(event) => {
-                    onRowDrag({
+                    onDrag({
                       event,
-                      item: rowItem,
+                      item,
                     })
                   }}
                 >
@@ -186,7 +176,7 @@ export const Row: React.FC<DivTableRowProps> = ({
           {columns.map((col) => (
             <div
               className={`${baseClass}__cell`}
-              {...{ [dataAttributeName]: actionNames.selectRow }}
+              {...{ [dataAttributeName]: actionNames.onClick }}
               key={col.name}
               style={
                 // TODO: temporary - will need to know title field name of document
@@ -207,7 +197,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                     width: '100%',
                   }}
                 >
-                  {rowItem.hasChildren || rowItem.rows?.length ? (
+                  {item.hasChildren || item.rows?.length ? (
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__tree-toggle`}
@@ -218,7 +208,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                       margin={false}
                       size="small"
                     >
-                      {loadingRowIDs?.has(rowItem.itemKey) ? (
+                      {loadingItemKeys?.has(item.itemKey) ? (
                         <div className={`${baseClass}__tree-toggle-spinner`}>
                           <div className={`${baseClass}__spinner-bar`} />
                           <div className={`${baseClass}__spinner-bar`} />
@@ -226,7 +216,7 @@ export const Row: React.FC<DivTableRowProps> = ({
                         </div>
                       ) : (
                         <ChevronIcon
-                          direction={openItemKeys?.has(rowItem.itemKey) ? 'down' : 'right'}
+                          direction={openItemKeys?.has(item.itemKey) ? 'down' : 'right'}
                         />
                       )}
                     </Button>
@@ -234,24 +224,24 @@ export const Row: React.FC<DivTableRowProps> = ({
                     <div className={`${baseClass}__tree-toggle-placeholder`} />
                   )}
                   <Pill pillStyle="light-gray" size="small">
-                    {`${rowItem[col.name] ? `${rowItem[col.name]}` : `!`}`}
+                    {`${item[col.name] ? `${item[col.name]}` : `!`}`}
                   </Pill>
                 </span>
               ) : (
-                `${rowItem[col.name] ? `${rowItem[col.name]}` : `!`}`
+                `${item[col.name] ? `${item[col.name]}` : `!`}`
               )}
             </div>
           ))}
 
           <div>
             {/* Add split-top drop area for first root-level row */}
-            {isFirstRowAtRootLevel && (
+            {isFirstRootItem && (
               <RowDropArea
                 disabled={isInvalidTarget}
                 dropContextName={dropContextName}
                 isDragging={isDragging}
                 onHover={(data) => {
-                  onDroppableHover({ ...data, hoveredRowID: rowItem.itemKey })
+                  onDroppableHover({ ...data, hoveredItemKey: item.itemKey })
                 }}
                 placement="split-top"
                 segmentWidth={segmentWidth}
@@ -271,12 +261,12 @@ export const Row: React.FC<DivTableRowProps> = ({
               dropContextName={dropContextName}
               isDragging={isDragging}
               onHover={(data) => {
-                onDroppableHover({ ...data, hoveredRowID: rowItem.itemKey })
+                onDroppableHover({ ...data, hoveredItemKey: item.itemKey })
               }}
               placement="middle"
               segmentWidth={segmentWidth}
               style={{ left: 0, width: '100%' }}
-              targetItems={[rowItem]}
+              targetItems={[item]}
             />
             {/* Add split-bottom drop area on row */}
             <RowDropArea
@@ -284,7 +274,7 @@ export const Row: React.FC<DivTableRowProps> = ({
               dropContextName={dropContextName}
               isDragging={isDragging}
               onHover={(data) => {
-                onDroppableHover({ ...data, hoveredRowID: rowItem.itemKey })
+                onDroppableHover({ ...data, hoveredItemKey: item.itemKey })
               }}
               placement="split-bottom"
               segmentWidth={segmentWidth}
@@ -301,7 +291,7 @@ export const Row: React.FC<DivTableRowProps> = ({
       </div>
 
       {/* Render placeholder row below the hovered row */}
-      {isDragging && hoveredRowItemKey === rowItem.itemKey && (
+      {isDragging && isHovered && (
         <div className={`${baseClass}__placeholder-section`}>
           <div className={`${baseClass}__placeholder-row`}>
             {columns.map((col) => (

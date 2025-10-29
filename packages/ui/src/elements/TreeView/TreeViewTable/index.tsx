@@ -12,17 +12,17 @@ const dropContextName = 'tree-view-table'
 
 export function TreeViewTable() {
   const {
+    canFocusItem,
     clearSelections,
     collectionSlug,
-    isRowFocusable,
-    loadingRowItemKeys,
+    loadingItemKeys,
     onDrop,
     onItemSelection,
     openItemKeys,
-    sections,
+    rootItems,
     selectAll,
     selectedItemKeys,
-    toggleRow,
+    toggleItemExpand,
     updateSelections,
   } = useTreeView()
 
@@ -31,19 +31,19 @@ export function TreeViewTable() {
       {/* TODO: remove this button */}
       <SeedDataButton collectionSlug={collectionSlug} />
       <NestedSectionsTable
+        canFocusItem={canFocusItem}
         className={baseClass}
         dropContextName={dropContextName}
-        isRowFocusable={isRowFocusable}
-        loadingRowItemKeys={loadingRowItemKeys}
+        loadingItemKeys={loadingItemKeys}
         onDrop={onDrop}
         // onEnter={handleEnter}
         onEscape={clearSelections}
         onItemSelection={onItemSelection}
         onSelectAll={selectAll}
         openItemKeys={openItemKeys}
-        sections={sections}
+        rootItems={rootItems}
         selectedItemKeys={selectedItemKeys}
-        toggleRowExpand={toggleRow}
+        toggleItemExpand={toggleItemExpand}
         updateSelections={updateSelections}
       />
     </>
