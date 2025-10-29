@@ -3145,6 +3145,26 @@ describe('Fields', () => {
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
     })
 
+    it('should save a localized json', async () => {
+      const doc = await payload.create({
+        locale: 'en',
+        collection: 'json-fields',
+        data: { localizedJSON: { a: 1 } },
+      })
+      await payload.update({
+        collection: 'json-fields',
+        id: doc.id,
+        locale: 'es',
+        data: { localizedJSON: { a: 2 } },
+      })
+      const docLocaleAll = await payload.findByID({
+        collection: 'json-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      expect(docLocaleAll.localizedJSON).toEqual({ en: { a: 1 }, es: { a: 2 } })
+    })
+
     describe('querying', () => {
       let fooBar
       let bazBar

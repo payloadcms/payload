@@ -77,9 +77,14 @@ const JSON: CollectionConfig = {
       },
       label: 'Custom Json',
     },
+    {
+      name: 'localizedJSON',
+      type: 'json',
+      localized: true,
+    },
   ],
   versions: {
-    maxPerDoc: 1,
+    drafts: true,
   },
 }
 
