@@ -157,16 +157,10 @@ export const getRouteData = ({
 
       if (config.admin.routes) {
         const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
-          const path = formatAdminURL({ adminRoute, path: route })
-
-          if (!path) {
-            return false
-          }
-
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path,
+            path: formatAdminURL({ adminRoute, path: route }),
           })
         })
 
