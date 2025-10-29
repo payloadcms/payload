@@ -13,13 +13,21 @@ import type { LexicalFieldAdminClientProps, LexicalRichTextFieldProps } from '..
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
-import { RichTextViewProvider } from './RichTextViewProvider.js'
+import { RichTextViewProvider, useRichTextView } from './RichTextViewProvider.js'
 
 const RichTextEditor = lazy(() =>
   import('./Field.js').then((module) => ({ default: module.RichText })),
 )
 
 export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
+  return (
+    <RichTextViewProvider views={props.views}>
+      <RichTextFieldImpl {...props} />
+    </RichTextViewProvider>
+  )
+}
+
+export const RichTextFieldImpl: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin: _admin = {},
     clientFeatures,
@@ -30,7 +38,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     schemaPath,
     views,
   } = props
-  const [currentView, setCurrentView] = useState<string>('default')
+  const { currentView } = useRichTextView()
   const currentViewAdminConfig: LexicalFieldAdminClientProps = views?.[currentView]?.admin ?? _admin
   const currentViewLexicalEditorConfig: LexicalEditorConfig =
     views?.[currentView]?.lexical ?? _lexicalEditorConfig
@@ -89,20 +97,14 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (
-    <RichTextViewProvider
-      currentView={currentView}
-      setCurrentView={setCurrentView}
-      views={props.views}
-    >
-      <Suspense fallback={<ShimmerEffect height="35vh" />}>
-        {finalSanitizedEditorConfig && (
-          <RichTextEditor
-            {...props}
-            editorConfig={finalSanitizedEditorConfig}
-            key={finalSanitizedEditorConfig.view}
-          />
-        )}
-      </Suspense>
-    </RichTextViewProvider>
+    <Suspense fallback={<ShimmerEffect height="35vh" />}>
+      {finalSanitizedEditorConfig && (
+        <RichTextEditor
+          {...props}
+          editorConfig={finalSanitizedEditorConfig}
+          key={finalSanitizedEditorConfig.view}
+        />
+      )}
+    </Suspense>
   )
 }
