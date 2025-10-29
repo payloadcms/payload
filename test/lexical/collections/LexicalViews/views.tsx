@@ -38,6 +38,9 @@ export const lexicalViews: LexicalEditorViewMap = {
 
 export const lexicalFrontendViews: LexicalEditorViewMap = {
   frontend: {
+    admin: {
+      hideGutter: true,
+    },
     nodes: {
       blocks: {
         viewsTestBlock: {

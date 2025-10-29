@@ -7,11 +7,12 @@ import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalFieldAdminClientProps, LexicalRichTextFieldProps } from '../types.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
+import { RichTextViewProvider } from './RichTextViewProvider.js'
 
 const RichTextEditor = lazy(() =>
   import('./Field.js').then((module) => ({ default: module.RichText })),
@@ -28,6 +29,8 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     schemaPath,
     views,
   } = props
+  const [currentView, setCurrentView] = useState<string>('default')
+  const currentViewAdminConfig: LexicalFieldAdminClientProps = views?.[currentView]?.admin ?? admin
 
   const { config } = useConfig()
 
@@ -35,7 +38,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     useState<null | SanitizedClientEditorConfig>(null)
 
   useEffect(() => {
-    if (finalSanitizedEditorConfig) {
+    if (finalSanitizedEditorConfig && finalSanitizedEditorConfig.view === currentView) {
       return
     }
 
@@ -62,10 +65,15 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     })
 
     setFinalSanitizedEditorConfig(
-      sanitizeClientEditorConfig(resolvedClientFeatures, lexicalEditorConfig, admin),
+      sanitizeClientEditorConfig(
+        resolvedClientFeatures,
+        lexicalEditorConfig,
+        currentViewAdminConfig,
+        currentView,
+      ),
     )
   }, [
-    admin,
+    currentViewAdminConfig,
     clientFeatures,
     config,
     featureClientImportMap,
@@ -74,14 +82,20 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     finalSanitizedEditorConfig,
     lexicalEditorConfig,
     schemaPath,
-    views,
+    currentView,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (
-    <Suspense fallback={<ShimmerEffect height="35vh" />}>
-      {finalSanitizedEditorConfig && (
-        <RichTextEditor {...props} editorConfig={finalSanitizedEditorConfig} />
-      )}
-    </Suspense>
+    <RichTextViewProvider
+      currentView={currentView}
+      setCurrentView={setCurrentView}
+      views={props.views}
+    >
+      <Suspense fallback={<ShimmerEffect height="35vh" />}>
+        {finalSanitizedEditorConfig && (
+          <RichTextEditor {...props} editorConfig={finalSanitizedEditorConfig} key={currentView} />
+        )}
+      </Suspense>
+    </RichTextViewProvider>
   )
 }

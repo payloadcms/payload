@@ -222,7 +222,7 @@ export type LexicalEditorNodeMap<
  */
 export type LexicalEditorViewMap = {
   [viewKey: string]: {
-    admin?: LexicalFieldAdminProps
+    admin?: LexicalFieldAdminClientProps
     nodes: LexicalEditorNodeMap
   }
 }
