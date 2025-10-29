@@ -1010,6 +1010,10 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  timezoneGroup?: {
+    dayAndTime?: string | null;
+    dayAndTime_tz?: SupportedTimezones;
+  };
   array?:
     | {
         date?: string | null;
@@ -2733,6 +2737,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
         dayAndTime?: T;
         dayAndTime_tz?: T;
         id?: T;
+      };
+  timezoneGroup?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_tz?: T;
       };
   array?:
     | T

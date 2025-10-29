@@ -24,4 +24,8 @@ export const dateDoc: Partial<DateField> = {
       dayAndTime_tz: 'Europe/Berlin',
     },
   ],
+  timezoneGroup: {
+    dayAndTime: '2025-01-31T09:00:00.000Z',
+    dayAndTime_tz: 'Europe/Berlin',
+  },
 }

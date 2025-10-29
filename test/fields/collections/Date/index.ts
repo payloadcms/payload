@@ -8,6 +8,7 @@ const DateFields: CollectionConfig = {
   slug: dateFieldsSlug,
   admin: {
     useAsTitle: 'default',
+    defaultColumns: ['default', 'timeOnly', 'dayAndTimeWithTimezone', 'timezoneGroup.dayAndTime'],
   },
   fields: [
     {
@@ -112,6 +113,22 @@ const DateFields: CollectionConfig = {
     {
       type: 'array',
       name: 'timezoneArray',
+      fields: [
+        {
+          name: 'dayAndTime',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+          },
+          timezone: true,
+        },
+      ],
+    },
+    {
+      type: 'group',
+      name: 'timezoneGroup',
       fields: [
         {
           name: 'dayAndTime',
