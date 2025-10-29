@@ -3,6 +3,7 @@ import type { Config } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
 import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
+import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -62,6 +63,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     deleteJobOnComplete: true,
     depth: 0,
   } as JobsConfig,
+
   localization: false,
   maxDepth: 10,
   routes: {
@@ -161,6 +163,12 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     jwtOrder: ['JWT', 'Bearer', 'cookie'],
     ...(config.auth || {}),
+  }
+
+  config.kv = config.kv ?? databaseKVAdapter()
+
+  if (config.kv?.kvCollection) {
+    config.collections.push(config.kv.kvCollection)
   }
 
   if (
