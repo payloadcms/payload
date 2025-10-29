@@ -14,7 +14,7 @@ export const isPathMatchingRoute = ({
   strict?: boolean
 }) => {
   const keys = []
-
+  console.log('isPathMatchingRoute', { keys, viewPath })
   // run the view path through `pathToRegexp` to resolve any dynamic segments
   // i.e. `/admin/custom-view/:id` -> `/admin/custom-view/123`
   const regex = pathToRegexp(viewPath, keys, {

@@ -137,7 +137,7 @@ export const getRouteData = ({
     []
 
   const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
-
+  console.log('getRouteData segments', { adminRoute, currentRoute, segments })
   switch (segments.length) {
     case 0: {
       if (currentRoute === adminRoute) {
@@ -155,6 +155,9 @@ export const getRouteData = ({
       // i.e.{ admin: { routes: { logout: '/sign-out', inactivity: '/idle' }}}
       let viewKey: keyof typeof oneSegmentViews
 
+      console.log('admin.routes', config.admin.routes, {
+        entries: Object.entries(config.admin.routes),
+      })
       if (config.admin.routes) {
         const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
           return isPathMatchingRoute({
