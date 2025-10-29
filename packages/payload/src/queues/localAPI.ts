@@ -2,7 +2,6 @@ import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.j
 
 import {
   createLocalReq,
-  executeAccess,
   Forbidden,
   type Job,
   type Payload,
@@ -98,6 +97,20 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug>
   > => {
+    const overrideAccess = args?.overrideAccess !== false
+    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+
+    if (!overrideAccess) {
+      /**
+       * By default, jobsConfig.access.queue will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       */
+      const accessFn = payload.config.jobs?.access?.queue ?? (() => true)
+      const hasAccess = await accessFn({ req })
+      if (!hasAccess) {
+        throw new Forbidden(req.t)
+      }
+    }
+
     let queue: string | undefined = undefined
 
     // If user specifies queue, use that
@@ -137,10 +150,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
-    const overrideAccess = args?.overrideAccess !== false
-
-    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
-
     if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
       return (await payload.create({
         collection: jobsCollectionSlug,
@@ -150,17 +159,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         req,
       })) as ReturnType
     } else {
-      if (!overrideAccess) {
-        /**
-         * By default, jobsConfig.access.queue will be `defaultAccess` which is a function that returns `true` if the user is logged in.
-         */
-        const accessFn = payload.config.jobs?.access?.queue ?? (() => true)
-        const hasAccess = await accessFn({ req })
-        if (!hasAccess) {
-          throw new Forbidden(req.t)
-        }
-      }
-
       return jobAfterRead({
         config: payload.config,
         doc: await payload.db.create({
