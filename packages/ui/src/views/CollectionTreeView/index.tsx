@@ -41,7 +41,6 @@ export function DefaultCollectionTreeView({
       <CollectionTreeViewInContext
         {...restOfProps}
         collectionSlug={collectionSlug}
-        noResults={!Array.isArray(items) || items.length === 0}
         TreeViewComponent={TreeViewComponent}
       />
     </TreeViewProvider>

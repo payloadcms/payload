@@ -89,8 +89,8 @@ export const buildCollectionTreeView = async (
       user,
     }
 
-    // We could support slots in the folder view in the future
-    // const folderViewSlots = renderFolderViewSlots({
+    // We could support slots in the tree view in the future
+    // const treeViewSlots = renderTreeViewSlots({
     //   clientProps: {
     //     collectionSlug,
     //     hasCreatePermission,
@@ -122,6 +122,7 @@ export const buildCollectionTreeView = async (
                 (id) => `${collectionSlug}-${id}`,
               ),
               items,
+              noResults: !Array.isArray(items) || items.length === 0,
               parentFieldName: '_parentDoc',
               search,
               TreeViewComponent,
