@@ -221,7 +221,11 @@ export type LexicalEditorNodeMap<
  * @internal
  */
 export type LexicalEditorViewMap = {
-  [viewKey: string]: LexicalEditorNodeMap
+  [viewKey: string]: {
+    admin?: LexicalFieldAdminClientProps
+    lexical?: LexicalEditorConfig
+    nodes: LexicalEditorNodeMap
+  }
 }
 
 /**

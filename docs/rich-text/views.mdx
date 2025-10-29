@@ -6,21 +6,29 @@ desc: Customize how Lexical nodes render in the admin panel and frontend using v
 keywords: lexical, rich text, views, rendering, custom components, admin panel, frontend
 ---
 
-Views allow you to customize how Lexical nodes render in both the admin panel editor and frontend applications. This powerful feature enables you to create different rendering modes for the same content, perfect for scenarios like:
+Views allow you to customize how the Lexical editor behaves and how nodes render in both the admin panel editor and frontend applications. This powerful feature enables you to create different rendering modes for the same content, perfect for scenarios like:
 
 - Preview modes that match your frontend design
 - Debug views showing additional metadata
-- Simplified editing experiences
+- Simplified editing experiences with hidden UI elements
+- Different visual themes per view
 - A/B testing different designs
 
 ## Overview
 
-The view system works by overriding how individual node types render, without changing the underlying data structure. You can define multiple named views and switch between them using the built-in view selector.
+The view system works by overriding three aspects of the editor per view:
+
+1. **Node Rendering**: Customize how individual node types render
+2. **Admin Configuration**: Control UI elements like gutter, add block button, etc.
+3. **Lexical Editor Config**: Override theme classes and other editor-level settings
+
+You can define multiple named views and switch between them using the built-in view selector, without changing the underlying data structure.
 
 ### Key Concepts
 
 - **View Map**: A collection of named views (e.g., `default`, `frontend`, `debug`)
 - **Node Map**: Overrides for specific node types within a view
+- **View Configuration**: Each view can override `nodes`, `admin`, and `lexical` editor config
 - **Dual Usage**: The same view definitions work in both the admin panel editor and JSX converters for frontend rendering
 
 ## Defining Views
@@ -39,43 +47,57 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 export const postViews: LexicalEditorViewMap = {
   // The 'default' view is used when the field is first loaded
   default: {
-    heading: {
-      createDOM(args) {
-        const { node } = args
-        const heading = document.createElement(node.getTag())
-        heading.style.color = '#333'
-        return heading
+    nodes: {
+      heading: {
+        createDOM(args) {
+          const { node } = args
+          const heading = document.createElement(node.getTag())
+          heading.style.color = '#333'
+          return heading
+        },
       },
     },
   },
   // Additional custom views
   frontend: {
-    heading: {
-      createDOM(args) {
-        const { node } = args
-        const heading = document.createElement(node.getTag())
-        heading.style.color = '#3b82f6'
-        heading.style.borderBottom = '2px solid #60a5fa'
-        return heading
+    admin: {
+      hideGutter: true,
+    },
+    lexical: {
+      theme: {
+        link: 'frontend-link',
+        paragraph: 'frontend-paragraph',
       },
     },
-    blocks: {
-      myBlock: {
-        Component: ({ node, isEditor, isJSXConverter }) => {
-          const text = isEditor ? node.__fields?.text : node.fields?.text
+    nodes: {
+      heading: {
+        createDOM(args) {
+          const { node } = args
+          const heading = document.createElement(node.getTag())
+          heading.style.color = '#3b82f6'
+          heading.style.borderBottom = '2px solid #60a5fa'
+          return heading
+        },
+      },
+      blocks: {
+        myBlock: {
+          Component: ({ node, isEditor, isJSXConverter }) => {
+            const text = isEditor ? node.__fields?.text : node.fields?.text
 
-          return (
-            <div
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-              }}
-            >
-              {text}
-            </div>
-          )
+            return (
+              <div
+                style={{
+                  background:
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  padding: '24px',
+                  borderRadius: '12px',
+                }}
+              >
+                {text}
+              </div>
+            )
+          },
         },
       },
     },
@@ -107,7 +129,66 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-## Node Override Options
+## View Configuration Options
+
+Each view can customize three aspects of the editor:
+
+### Admin Configuration
+
+Override admin UI settings for a specific view:
+
+```tsx
+{
+  myView: {
+    admin: {
+      hideGutter: true,
+      hideAddBlockButton: false,
+      hideDraggableBlockElement: false,
+      hideInsertParagraphAtEnd: false,
+      placeholder: 'Start typing in this view...',
+    },
+    nodes: {
+      // ... node overrides
+    },
+  },
+}
+```
+
+Available admin options:
+
+- `hideGutter`: Controls if the gutter (left padding and gray vertical line) should be hidden
+- `hideAddBlockButton`: Controls if the add block button should be hidden
+- `hideDraggableBlockElement`: Controls if draggable block handles should be hidden
+- `hideInsertParagraphAtEnd`: Controls if the insert paragraph button at the end should be hidden
+- `placeholder`: Custom placeholder text when the editor is empty
+
+### Lexical Editor Configuration
+
+Override Lexical editor settings like theme classes and editor behavior:
+
+```tsx
+{
+  myView: {
+    lexical: {
+      theme: {
+        link: 'custom-link-class',
+        paragraph: 'custom-paragraph-class',
+        heading: {
+          h1: 'custom-h1-class',
+          h2: 'custom-h2-class',
+        },
+      },
+    },
+    nodes: {
+      // ... node overrides
+    },
+  },
+}
+```
+
+The `lexical` property accepts any standard [Lexical Editor Config](https://lexical.dev/docs/api/interfaces/lexical.EditorConfig) options, allowing you to customize themes, namespace, and other editor-level settings per view.
+
+### Node Overrides
 
 Each node type can be customized using three different approaches:
 
@@ -117,16 +198,20 @@ Use a React component for full control over rendering. Works in both admin panel
 
 ```tsx
 {
-  myNode: {
-    Component: ({ node, editor, config, isEditor, isJSXConverter }) => {
-      // isEditor: true when rendering in admin panel, false in JSX converter
-      // isJSXConverter: true when rendering for frontend, false in admin panel
+  myView: {
+    nodes: {
+      myNode: {
+        Component: ({ node, editor, config, isEditor, isJSXConverter }) => {
+          // isEditor: true when rendering in admin panel, false in JSX converter
+          // isJSXConverter: true when rendering for frontend, false in admin panel
 
-      const nodeData = isEditor
-        ? node.__fields // Access Lexical node fields in editor
-        : node.fields    // Access serialized fields in JSX converter
+          const nodeData = isEditor
+            ? node.__fields // Access Lexical node fields in editor
+            : node.fields    // Access serialized fields in JSX converter
 
-      return <div>{nodeData.text}</div>
+          return <div>{nodeData.text}</div>
+        },
+      },
     },
   },
 }
@@ -138,12 +223,16 @@ Use native DOM manipulation for ElementNodes. Only works in the admin panel edit
 
 ```tsx
 {
-  heading: {
-    createDOM(args) {
-      const { node, editor, config, isEditor, isJSXConverter } = args
-      const heading = document.createElement(node.getTag())
-      heading.style.color = '#3b82f6'
-      return heading
+  myView: {
+    nodes: {
+      heading: {
+        createDOM(args) {
+          const { node, editor, config, isEditor, isJSXConverter } = args
+          const heading = document.createElement(node.getTag())
+          heading.style.color = '#3b82f6'
+          return heading
+        },
+      },
     },
   },
 }
@@ -155,10 +244,14 @@ Provide raw HTML as a string or function. Works in both admin panel and JSX conv
 
 ```tsx
 {
-  link: {
-    html: ({ node, isEditor, isJSXConverter }) => {
-      const url = isEditor ? node.__url : node.url
-      return `<a href="${url}">Click here</a>`
+  myView: {
+    nodes: {
+      link: {
+        html: ({ node, isEditor, isJSXConverter }) => {
+          const url = isEditor ? node.__url : node.url
+          return `<a href="${url}">Click here</a>`
+        },
+      },
     },
   },
 }
@@ -168,20 +261,26 @@ Provide raw HTML as a string or function. Works in both admin panel and JSX conv
 
 ## Node Type Reference
 
+All node overrides are placed within the `nodes` property of a view.
+
 ### Built-in Nodes
 
 Override built-in Lexical nodes:
 
 ```tsx
 {
-  heading: { /* overrides */ },
-  paragraph: { /* overrides */ },
-  link: { /* overrides */ },
-  list: { /* overrides */ },
-  listitem: { /* overrides */ },
-  quote: { /* overrides */ },
-  horizontalrule: { /* overrides */ },
-  // ... other built-in nodes
+  myView: {
+    nodes: {
+      heading: { /* overrides */ },
+      paragraph: { /* overrides */ },
+      link: { /* overrides */ },
+      list: { /* overrides */ },
+      listitem: { /* overrides */ },
+      quote: { /* overrides */ },
+      horizontalrule: { /* overrides */ },
+      // ... other built-in nodes
+    },
+  },
 }
 ```
 
@@ -191,11 +290,15 @@ Override specific block types:
 
 ```tsx
 {
-  blocks: {
-    myBlockType: {
-      Component: ({ node }) => {
-        // node.__fields in editor, node.fields in JSX converter
-        return <div>Custom block</div>
+  myView: {
+    nodes: {
+      blocks: {
+        myBlockType: {
+          Component: ({ node }) => {
+            // node.__fields in editor, node.fields in JSX converter
+            return <div>Custom block</div>
+          },
+        },
       },
     },
   },
@@ -208,9 +311,13 @@ Override specific inline block types:
 
 ```tsx
 {
-  inlineBlocks: {
-    myInlineBlockType: {
-      Component: ({ node }) => <span>Custom inline block</span>,
+  myView: {
+    nodes: {
+      inlineBlocks: {
+        myInlineBlockType: {
+          Component: ({ node }) => <span>Custom inline block</span>,
+        },
+      },
     },
   },
 }
@@ -234,8 +341,13 @@ function MyCustomComponent() {
   return (
     <div>
       <p>Current view: {currentView}</p>
-      {/* currentViewMap contains the active node overrides */}
-      {currentViewMap?.heading && <p>Custom heading rendering is active</p>}
+      {/* currentViewMap contains the active view config */}
+      {currentViewMap?.nodes?.heading && (
+        <p>Custom heading rendering is active</p>
+      )}
+      {currentViewMap?.admin?.hideGutter && (
+        <p>Gutter is hidden in this view</p>
+      )}
     </div>
   )
 }
@@ -243,7 +355,7 @@ function MyCustomComponent() {
 
 ## Using Views in Frontend (JSX Converters)
 
-Pass the view map to JSX converters to render content with the same customizations:
+Pass the node map from your view to JSX converters to render content with the same customizations:
 
 ```tsx
 import { convertLexicalToJSX } from '@payloadcms/richtext-lexical'
@@ -254,7 +366,7 @@ export function BlogPost({ post }) {
     <div>
       {convertLexicalToJSX({
         editorState: post.content,
-        nodeMap: myViews.frontend, // Use the frontend view
+        nodeMap: myViews.frontend.nodes, // Use the frontend view's node map
       })}
     </div>
   )
@@ -271,76 +383,97 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
 export const articleViews: LexicalEditorViewMap = {
   default: {
-    heading: {
-      createDOM({ node }) {
-        const heading = document.createElement(node.getTag())
-        heading.className = 'editor-heading'
-        return heading
+    nodes: {
+      heading: {
+        createDOM({ node }) {
+          const heading = document.createElement(node.getTag())
+          heading.className = 'editor-heading'
+          return heading
+        },
       },
     },
   },
 
   frontend: {
-    heading: {
-      createDOM({ node }) {
-        const heading = document.createElement(node.getTag())
-        heading.className = 'article-heading'
-        heading.style.color = '#1a202c'
-        heading.style.marginBottom = '1rem'
-        return heading
+    admin: {
+      hideGutter: true,
+    },
+    lexical: {
+      theme: {
+        heading: {
+          h1: 'article-heading article-h1',
+          h2: 'article-heading article-h2',
+        },
+        link: 'article-link',
       },
     },
-
-    blocks: {
-      imageBlock: {
-        Component: ({ node, isEditor, isJSXConverter }) => {
-          const fields = isEditor ? node.__fields : node.fields
-
-          return (
-            <figure className="article-image">
-              <img src={fields.image?.url} alt={fields.caption || ''} />
-              {fields.caption && <figcaption>{fields.caption}</figcaption>}
-            </figure>
-          )
+    nodes: {
+      heading: {
+        createDOM({ node }) {
+          const heading = document.createElement(node.getTag())
+          heading.className = 'article-heading'
+          heading.style.color = '#1a202c'
+          heading.style.marginBottom = '1rem'
+          return heading
         },
       },
 
-      quoteBlock: {
-        Component: ({ node, isEditor }) => {
-          const fields = isEditor ? node.__fields : node.fields
+      blocks: {
+        imageBlock: {
+          Component: ({ node, isEditor, isJSXConverter }) => {
+            const fields = isEditor ? node.__fields : node.fields
 
-          return (
-            <blockquote className="article-quote">
-              <p>{fields.quote}</p>
-              {fields.author && <cite>— {fields.author}</cite>}
-            </blockquote>
-          )
+            return (
+              <figure className="article-image">
+                <img src={fields.image?.url} alt={fields.caption || ''} />
+                {fields.caption && <figcaption>{fields.caption}</figcaption>}
+              </figure>
+            )
+          },
+        },
+
+        quoteBlock: {
+          Component: ({ node, isEditor }) => {
+            const fields = isEditor ? node.__fields : node.fields
+
+            return (
+              <blockquote className="article-quote">
+                <p>{fields.quote}</p>
+                {fields.author && <cite>— {fields.author}</cite>}
+              </blockquote>
+            )
+          },
         },
       },
-    },
 
-    link: {
-      html: ({ node, isEditor }) => {
-        const fields = isEditor ? node.fields : node.fields
-        const url = fields.url
-        const text = fields.text
+      link: {
+        html: ({ node, isEditor }) => {
+          const fields = isEditor ? node.fields : node.fields
+          const url = fields.url
+          const text = fields.text
 
-        return `<a href="${url}" class="article-link">${text}</a>`
+          return `<a href="${url}" class="article-link">${text}</a>`
+        },
       },
     },
   },
 
   debug: {
-    blocks: {
-      imageBlock: {
-        Component: ({ node, isEditor }) => {
-          const fields = isEditor ? node.__fields : node.fields
+    admin: {
+      placeholder: 'Debug mode - showing raw data',
+    },
+    nodes: {
+      blocks: {
+        imageBlock: {
+          Component: ({ node, isEditor }) => {
+            const fields = isEditor ? node.__fields : node.fields
 
-          return (
-            <div style={{ border: '2px dashed red', padding: '1rem' }}>
-              <pre>{JSON.stringify(fields, null, 2)}</pre>
-            </div>
-          )
+            return (
+              <div style={{ border: '2px dashed red', padding: '1rem' }}>
+                <pre>{JSON.stringify(fields, null, 2)}</pre>
+              </div>
+            )
+          },
         },
       },
     },
@@ -357,13 +490,26 @@ import type {
   LexicalEditorViewMap,
   LexicalEditorNodeMap,
   NodeMapValue,
-  WithinEditorArgs,
-  JSXConverterArgs,
+  LexicalFieldAdminClientProps,
 } from '@payloadcms/richtext-lexical'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 // Full view map
 type LexicalEditorViewMap = {
-  [viewKey: string]: LexicalEditorNodeMap
+  [viewKey: string]: {
+    admin?: LexicalFieldAdminClientProps
+    lexical?: LexicalEditorConfig
+    nodes: LexicalEditorNodeMap
+  }
+}
+
+// Admin configuration options
+type LexicalFieldAdminClientProps = {
+  hideGutter?: boolean
+  hideAddBlockButton?: boolean
+  hideDraggableBlockElement?: boolean
+  hideInsertParagraphAtEnd?: boolean
+  placeholder?: string
 }
 
 // Node overrides for a single view

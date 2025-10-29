@@ -22,7 +22,11 @@ const transformWhereToNaturalLanguage = (where: Where): string => {
     const operator = Object.keys(andQuery[key])[0]
     const value = andQuery[key][operator]
 
-    return `${toWords(key)} ${operator} ${toWords(value)}`
+    if (typeof value === 'string') {
+      return `${toWords(key)} ${operator} ${toWords(value)}`
+    } else if (Array.isArray(value)) {
+      return `${toWords(key)} ${operator} ${value.map((val) => toWords(val)).join(' or ')}`
+    }
   }
 
   return ''

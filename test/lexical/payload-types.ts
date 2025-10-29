@@ -90,6 +90,7 @@ export interface Config {
     'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
     'lexical-views': LexicalView;
+    'lexical-views-2': LexicalViews2;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
@@ -117,6 +118,7 @@ export interface Config {
     'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-views': LexicalViewsSelect<false> | LexicalViewsSelect<true>;
+    'lexical-views-2': LexicalViews2Select<false> | LexicalViews2Select<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
@@ -390,6 +392,32 @@ export interface LexicalView {
     [k: string]: unknown;
   } | null;
   vanillaView?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This collection only has a single field with a single custom view. This is to test an issue where views were not updated when there is only one field and one view.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-2".
+ */
+export interface LexicalViews2 {
+  id: number;
+  customView?: {
     root: {
       type: string;
       children: {
@@ -709,8 +737,24 @@ export interface LexicalRelationshipField {
     };
     [k: string]: unknown;
   } | null;
+  richTextLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1095,6 +1139,10 @@ export interface PayloadLockedDocument {
         value: number | LexicalView;
       } | null)
     | ({
+        relationTo: 'lexical-views-2';
+        value: number | LexicalViews2;
+      } | null)
+    | ({
         relationTo: 'lexical-migrate-fields';
         value: number | LexicalMigrateField;
       } | null)
@@ -1263,6 +1311,15 @@ export interface LexicalViewsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-2_select".
+ */
+export interface LexicalViews2Select<T extends boolean = true> {
+  customView?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-migrate-fields_select".
  */
 export interface LexicalMigrateFieldsSelect<T extends boolean = true> {
@@ -1346,8 +1403,10 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   richText?: T;
   richText2?: T;
   richText3?: T;
+  richTextLocalized?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

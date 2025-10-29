@@ -105,21 +105,18 @@ export const seed = async (_payload: Payload) => {
     collection: arrayFieldsSlug,
     data: arrayDoc,
     depth: 0,
-    overrideAccess: true,
   })
 
   const createdTextDoc = await _payload.create({
     collection: textFieldsSlug,
     data: textDoc,
     depth: 0,
-    overrideAccess: true,
   })
 
   await _payload.create({
     collection: textFieldsSlug,
     data: anotherTextDoc,
     depth: 0,
-    overrideAccess: true,
   })
 
   const createdPNGDoc = await _payload.create({
@@ -127,7 +124,6 @@ export const seed = async (_payload: Payload) => {
     data: {},
     file: pngFile,
     depth: 0,
-    overrideAccess: true,
   })
 
   const createdPNGDoc2 = await _payload.create({
@@ -135,7 +131,6 @@ export const seed = async (_payload: Payload) => {
     data: {},
     file: pngFile,
     depth: 0,
-    overrideAccess: true,
   })
 
   const createdJPGDoc = await _payload.create({
@@ -146,7 +141,6 @@ export const seed = async (_payload: Payload) => {
     },
     file: jpgFile,
     depth: 0,
-    overrideAccess: true,
   })
 
   const formattedID =
@@ -177,14 +171,12 @@ export const seed = async (_payload: Payload) => {
     collection: richTextFieldsSlug,
     data: richTextBulletsDocWithRelId,
     depth: 0,
-    overrideAccess: true,
   })
 
   const createdRichTextDoc = await _payload.create({
     collection: richTextFieldsSlug,
     data: richTextDocWithRelationship,
     depth: 0,
-    overrideAccess: true,
   })
 
   const formattedRichTextDocID =
@@ -213,14 +205,12 @@ export const seed = async (_payload: Payload) => {
       email: devUser.email,
       password: devUser.password,
     },
-    overrideAccess: true,
   })
 
   await _payload.create({
     collection: lexicalFieldsSlug,
     data: lexicalDocWithRelId,
     depth: 0,
-    overrideAccess: true,
   })
 
   const editorState = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({
@@ -289,7 +279,14 @@ export const seed = async (_payload: Payload) => {
       customFrontendViews: editorState,
       vanillaView: editorState,
     },
-    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: 'lexical-views-2',
+    depth: 0,
+    data: {
+      customView: editorState,
+    },
   })
 
   const lexicalLocalizedDoc1 = await _payload.create({
@@ -304,7 +301,6 @@ export const seed = async (_payload: Payload) => {
     },
     locale: 'en',
     depth: 0,
-    overrideAccess: true,
   })
 
   await _payload.create({
@@ -313,7 +309,6 @@ export const seed = async (_payload: Payload) => {
       richText: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
     },
     depth: 0,
-    overrideAccess: true,
   })
 
   await _payload.update({
@@ -330,7 +325,6 @@ export const seed = async (_payload: Payload) => {
     },
     locale: 'es',
     depth: 0,
-    overrideAccess: true,
   })
 
   const lexicalLocalizedDoc2 = await _payload.create({
@@ -365,7 +359,6 @@ export const seed = async (_payload: Payload) => {
     },
     locale: 'en',
     depth: 0,
-    overrideAccess: true,
   })
 
   await _payload.update({
@@ -389,14 +382,12 @@ export const seed = async (_payload: Payload) => {
     },
     locale: 'es',
     depth: 0,
-    overrideAccess: true,
   })
 
   await _payload.create({
     collection: lexicalMigrateFieldsSlug,
     data: lexicalMigrateDocWithRelId,
     depth: 0,
-    overrideAccess: true,
   })
 
   const getInlineBlock = () => ({

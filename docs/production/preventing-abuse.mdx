@@ -16,7 +16,7 @@ Set the max number of failed login attempts before a user account is locked out 
 
 ## Max Depth
 
-Querying a collection and automatically including related documents via `depth` incurs a performance cost. Also, it's possible that your configs may have circular relationships, meaning scenarios where an infinite amount of relationships might populate back and forth until your server times out and crashes. You can prevent any potential of depth-related issues by setting a `maxDepth` property on your Payload Config.. The maximum allowed depth should be as small as possible without interrupting dev experience, and it defaults to `10`.
+Querying a collection and automatically including related documents via `depth` incurs a performance cost. Also, it's possible that your configs may have circular relationships, meaning scenarios where an infinite amount of relationships might populate back and forth until your server times out and crashes. You can prevent any potential of depth-related issues by setting a `maxDepth` property on your Payload Config. The maximum allowed depth should be as small as possible without interrupting dev experience, and it defaults to `10`.
 
 ## Cross-Site Request Forgery (CSRF)
 
@@ -32,7 +32,7 @@ Because GraphQL gives the power of query writing outside a server's control, som
 
 Any GraphQL request that is calculated to be too expensive is rejected. On the Payload Config, in `graphQL` you can set the `maxComplexity` value as an integer. For reference, the default complexity value for each added field is 1, and all `relationship` and `upload` fields are assigned a value of 10.
 
-If you do not need GraphQL it is advised that you disable it altogether with the Payload Config by setting `graphQL.disable: true`. Should you wish to enable GraphQL again, you can remove this property or set it `false`, any time. By turning it off, Payload will bypass creating schemas from your collections and will not register the route.
+If you do not need GraphQL it is advised that you disable it altogether with the Payload Config by setting `graphQL.disable: true`. Should you wish to enable GraphQL again, you can remove this property or set it to `false` any time. By turning it off, Payload will bypass creating schemas from your collections and will not register the route.
 
 ## Malicious File Uploads
 

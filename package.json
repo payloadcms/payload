@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.60.0",
+  "version": "3.61.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -132,7 +132,8 @@
       "eslint --cache --fix"
     ],
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
-    "tsconfig.base.json": "node scripts/reset-tsconfig.js"
+    "tsconfig.base.json": "node scripts/reset-tsconfig.js",
+    "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",

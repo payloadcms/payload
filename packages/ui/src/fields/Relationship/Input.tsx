@@ -21,7 +21,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueues } from '../../hooks/useQueues.js'
+import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -96,7 +96,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
-  const { queueTask } = useQueues()
+  const { queueTask } = useQueue()
 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 

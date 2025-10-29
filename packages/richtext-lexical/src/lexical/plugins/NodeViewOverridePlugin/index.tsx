@@ -16,13 +16,13 @@ export function NodeViewOverridePlugin(): null {
 
     if (currentView === 'default') {
       if (views.default) {
-        registerEditorNodeViews(editor, views.default)
+        registerEditorNodeViews(editor, views.default?.nodes)
       } else {
         clearEditorNodeViews(editor)
       }
     } else if (views[currentView]) {
       clearEditorNodeViews(editor)
-      registerEditorNodeViews(editor, views[currentView])
+      registerEditorNodeViews(editor, views[currentView]?.nodes)
     }
   }, [editor, views, currentView])
 
