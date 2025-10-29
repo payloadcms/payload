@@ -4,6 +4,7 @@ import type { DeepPartial } from 'ts-essentials'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
