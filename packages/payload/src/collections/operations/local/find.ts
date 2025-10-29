@@ -8,6 +8,7 @@ import type {
 } from '../../../index.js'
 import type {
   Document,
+  DraftTransformCollectionWithSelect,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -136,10 +137,17 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDraft extends boolean = false,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
+  options: { draft?: TDraft } & Options<TSlug, TSelect>,
+): Promise<
+  PaginatedDocs<
+    TDraft extends true
+      ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+      : TransformCollectionWithSelect<TSlug, TSelect>
+  >
+> {
   const {
     collection: collectionSlug,
     currentDepth,
