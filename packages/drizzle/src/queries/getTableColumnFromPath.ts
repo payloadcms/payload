@@ -697,7 +697,7 @@ export const getTableColumnFromPath = ({
                   idType === 'uuid' &&
                   hasCustomCollectionWithCustomID
                 ) {
-                  if (!uuidValidate(value)) {
+                  if (!uuidValidate(value as string)) {
                     return null
                   }
                 }
@@ -706,7 +706,7 @@ export const getTableColumnFromPath = ({
                   Array.isArray(value) &&
                   idType === 'uuid' &&
                   hasCustomCollectionWithCustomID &&
-                  !value.some((val) => uuidValidate(val))
+                  !value.some((val) => uuidValidate(val as string))
                 ) {
                   return null
                 }
