@@ -84,7 +84,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     }
 
     // Use the 'default' view if available, otherwise undefined
-    const nodeViews = views?.default
+    const nodeViews = views?.[currentView]
 
     return {
       editable: readOnly !== true,
@@ -101,7 +101,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     }
     // Important: do not add readOnly and value to the dependencies array. This will cause the entire lexical editor to re-render if the document is saved, which will
     // cause the editor to lose focus.
-  }, [editorConfig, views])
+  }, [editorConfig, views, currentView])
 
   if (!initialConfig) {
     return <p>Loading...</p>
