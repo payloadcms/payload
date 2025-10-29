@@ -42,17 +42,17 @@
     "test": "jest"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity": "^3.614.0",
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@aws-sdk/credential-providers": "^3.614.0",
-    "@aws-sdk/lib-storage": "^3.614.0",
+    "@aws-sdk/client-cognito-identity": "catalog:",
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/credential-providers": "catalog:",
+    "@aws-sdk/lib-storage": "catalog:",
     "@payloadcms/email-nodemailer": "workspace:*",
-    "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "7.0.9"
+    "amazon-cognito-identity-js": "catalog:",
+    "nodemailer": "catalog:"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
-    "@types/nodemailer": "7.0.2",
+    "@types/jest": "catalog:",
+    "@types/nodemailer": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {

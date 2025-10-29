@@ -42,7 +42,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
+    "@types/jest": "catalog:",
     "jest": "^29.7.0",
     "payload": "workspace:*"
   },

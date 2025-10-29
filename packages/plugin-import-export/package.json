@@ -70,11 +70,11 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/modal": "catalog:",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "csv-parse": "^5.6.0",
-    "csv-stringify": "^6.5.2",
+    "csv-parse": "catalog:",
+    "csv-stringify": "catalog:",
     "qs-esm": "7.0.2"
   },
   "devDependencies": {

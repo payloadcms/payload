@@ -43,7 +43,7 @@
   "dependencies": {
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
-    "ts-essentials": "10.0.3"
+    "ts-essentials": "catalog:"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*"

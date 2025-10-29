@@ -57,15 +57,15 @@
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "is-hotkey": "0.2.0",
-    "slate": "0.91.4",
-    "slate-history": "0.86.0",
-    "slate-hyperscript": "0.81.3",
-    "slate-react": "0.92.0"
+    "is-hotkey": "catalog:",
+    "slate": "catalog:",
+    "slate-history": "catalog:",
+    "slate-hyperscript": "catalog:",
+    "slate-react": "catalog:"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/is-hotkey": "^0.1.10",
+    "@types/is-hotkey": "catalog:",
     "@types/node": "22.15.30",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
