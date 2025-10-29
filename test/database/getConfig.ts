@@ -201,6 +201,11 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'number',
         },
         {
+          name: 'numberDefault',
+          type: 'number',
+          defaultValue: 1,
+        },
+        {
           type: 'blocks',
           name: 'blocks',
           blocks: [
