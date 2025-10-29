@@ -123,7 +123,7 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes} id={id}>
+    <div className={classes}>
       <div className={`${baseClass}__icon-wrap`}>
         {dateTimePickerProps.selected && (
           <button
@@ -140,6 +140,7 @@ const DatePicker: React.FC<Props> = (props) => {
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
+          id={id}
           showMonthDropdown
           showYearDropdown
         />
