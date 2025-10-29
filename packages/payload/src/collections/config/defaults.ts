@@ -1,4 +1,5 @@
 import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { Config } from '../../config/types.js'
 import type { CollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
@@ -54,7 +55,10 @@ export const defaults: Partial<CollectionConfig> = {
   versions: false,
 }
 
-export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
+export const addDefaultsToCollectionConfig = (
+  collection: CollectionConfig,
+  config?: Config,
+): CollectionConfig => {
   collection.access = {
     create: defaultAccess,
     delete: defaultAccess,
@@ -103,6 +107,11 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     me: [],
     refresh: [],
     ...(collection.hooks || {}),
+  }
+
+  collection.bulkOperations = {
+    singleTransaction: config?.bulkOperations?.singleTransaction ?? false,
+    ...(collection.bulkOperations || {}),
   }
 
   collection.timestamps = collection.timestamps ?? true

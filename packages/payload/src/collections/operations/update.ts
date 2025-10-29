@@ -231,6 +231,12 @@ export const updateOperation = async <
       const { id } = docWithLocales
 
       try {
+        // Each document gets its own transaction when singleTransaction is enabled
+        let docShouldCommit = false
+        if (collectionConfig.bulkOperations?.singleTransaction) {
+          docShouldCommit = await initTransaction(req)
+        }
+
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
@@ -263,8 +269,15 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
         })
 
+        if (docShouldCommit) {
+          await commitTransaction(req)
+        }
+
         return updatedDoc
       } catch (error) {
+        if (collectionConfig.bulkOperations?.singleTransaction) {
+          await killTransaction(req)
+        }
         errors.push({
           id,
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -279,7 +292,17 @@ export const updateOperation = async <
       req,
     })
 
-    const awaitedDocs = await Promise.all(promises)
+    // Process sequentially when using single transaction mode to avoid shared state issues
+    // Process in parallel when using one transaction for better performance
+    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
+    if (collectionConfig.bulkOperations?.singleTransaction) {
+      awaitedDocs = []
+      for (const promise of promises) {
+        awaitedDocs.push(await promise)
+      }
+    } else {
+      awaitedDocs = await Promise.all(promises)
+    }
 
     let result = {
       docs: awaitedDocs.filter(Boolean),
