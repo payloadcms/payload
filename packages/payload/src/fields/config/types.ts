@@ -340,6 +340,8 @@ export type BlocksFilterOptions<TData = any> =
     ) => BlockSlugOrString | Promise<BlockSlugOrString | true> | true)
   | BlockSlugOrString
 
+export type FieldPosition = 'main' | 'sidebar'
+
 export type FieldAdmin = {
   className?: string
   components?: {
@@ -382,7 +384,7 @@ export type FieldAdmin = {
    */
   disableListFilter?: boolean
   hidden?: boolean
-  position?: 'sidebar'
+  position?: FieldPosition
   readOnly?: boolean
   style?: CSSProperties
   width?: CSSProperties['width']
@@ -411,7 +413,7 @@ export type AdminClient = {
    */
   disableListFilter?: boolean
   hidden?: boolean
-  position?: 'sidebar'
+  position?: FieldPosition
   readOnly?: boolean
   style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
   width?: CSSProperties['width']
