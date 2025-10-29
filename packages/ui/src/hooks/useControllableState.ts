@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * A hook for managing state that can be controlled by props but also overridden locally.
@@ -23,9 +23,5 @@ export function useControllableState<T>(
     setLocalValue(propValue)
   }, [propValue])
 
-  const setValue = useCallback((value: ((prev: T) => T) | T) => {
-    setLocalValue(value)
-  }, [])
-
-  return [localValue, setValue]
+  return [localValue, setLocalValue]
 }
