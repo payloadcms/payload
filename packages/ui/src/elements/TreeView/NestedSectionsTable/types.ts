@@ -1,8 +1,8 @@
 export type ItemKey = `${string}-${number | string}`
-export type SectionRow = {
+export type SectionItem = {
   itemKey: ItemKey
   name: string
-  rows?: SectionRow[]
+  rows?: SectionItem[]
 } & Record<string, any>
 
 export type Column = {
@@ -11,15 +11,16 @@ export type Column = {
 }
 
 export type NestedSectionsTableProps = {
+  canFocusItem: (item: SectionItem) => boolean
   className?: string
   columns?: Column[]
   dropContextName: string
   initialOffset?: number
-  isRowFocusable: (row: SectionRow) => boolean
-  loadingRowItemKeys?: Set<ItemKey>
+  loadingItemKeys?: Set<ItemKey>
   onDrop?: (params: { targetItemKey: ItemKey | null }) => Promise<void>
-  // onEnter: (row: SectionRow) => void
+  // onEnter: (item: SectionItem) => void
   onEscape: () => void
+  onItemDrag?: (params: { event: PointerEvent; item: null | SectionItem }) => void
   onItemSelection?: (args: {
     eventOptions: {
       ctrlKey: boolean
@@ -28,12 +29,11 @@ export type NestedSectionsTableProps = {
     }
     itemKey: ItemKey
   }) => void
-  onRowDrag?: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onSelectAll: () => void
   openItemKeys?: Set<ItemKey>
-  sections: SectionRow[]
+  rootItems: SectionItem[]
   segmentWidth?: number
   selectedItemKeys: Set<ItemKey>
-  toggleRowExpand: (docID: number | string) => void
+  toggleItemExpand: (itemKey: ItemKey) => void
   updateSelections: (args: { itemKeys: ItemKey[] | Set<ItemKey> }) => void
 }

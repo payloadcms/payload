@@ -40,6 +40,9 @@
 }
 
 .nested-sections-table-row {
+  --cell-inline-padding-start: calc(var(--base) * 0.6);
+  --cell-inline-padding-end: calc(var(--base) * 0.6);
+
   display: table-row;
   min-width: 100%;
   border-collapse: collapse;

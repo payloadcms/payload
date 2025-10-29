@@ -1,6 +1,6 @@
 import type { TreeViewItem } from 'payload/shared'
 
-import type { SectionRow } from '../NestedSectionsTable/types.js'
+import type { SectionItem } from '../NestedSectionsTable/types.js'
 
 type Args = {
   i18nLanguage: string
@@ -9,9 +9,9 @@ type Args = {
 
 export type ItemKey = `${string}-${number | string}`
 
-export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] {
+export function buildItemHierarchy({ i18nLanguage, items }: Args): SectionItem[] {
   // Create a map to store section rows
-  const sectionRowMap = new Map<ItemKey, SectionRow>()
+  const sectionRowMap = new Map<ItemKey, SectionItem>()
 
   // Convert each item to a SectionRow
   items.forEach((item) => {
@@ -31,7 +31,7 @@ export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] 
   })
 
   // Build the hierarchy
-  const rootSections: SectionRow[] = []
+  const rootSections: SectionItem[] = []
 
   items.forEach((item) => {
     const sectionRow = sectionRowMap.get(item.itemKey)
@@ -58,7 +58,7 @@ export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] 
   })
 
   // Clean up empty rows arrays
-  const cleanEmptyRows = (section: SectionRow): SectionRow => {
+  const cleanEmptyRows = (section: SectionItem): SectionItem => {
     if (section.rows && section.rows.length === 0) {
       delete section.rows
     } else if (section.rows) {
