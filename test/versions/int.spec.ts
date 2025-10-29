@@ -2554,6 +2554,37 @@ describe('Versions', () => {
       expect(retrieved.title).toStrictEqual('i will be a draft')
     })
 
+    it('should not return _status field when access control denies read', async () => {
+      // Create a draft global
+      const draft = await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          _status: 'draft',
+          title: 'draft only',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      // Read with a custom req that has no user (simulating unauthenticated request)
+      // Access control on draftGlobalSlug requires published status when no user
+      const result = await payload.findGlobal({
+        slug: draftGlobalSlug,
+        overrideAccess: false,
+        req: {
+          ...payload.config,
+          user: null,
+          payload,
+        } as any,
+      })
+
+      // Should return empty object, not {_status: 'draft'}
+      // The _status field should not be populated with its default value
+      expect(Object.keys(result)).toHaveLength(0)
+      expect(result._status).toBeUndefined()
+    })
+
     describe('server functions', () => {
       let draftDoc
       let event
