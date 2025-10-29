@@ -137,7 +137,7 @@ export const getRouteData = ({
     []
 
   const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
-  console.log('getRouteData segments', { adminRoute, currentRoute, segments })
+
   switch (segments.length) {
     case 0: {
       if (currentRoute === adminRoute) {
@@ -155,9 +155,6 @@ export const getRouteData = ({
       // i.e.{ admin: { routes: { logout: '/sign-out', inactivity: '/idle' }}}
       let viewKey: keyof typeof oneSegmentViews
 
-      console.log('admin.routes', config.admin.routes, {
-        entries: Object.entries(config.admin.routes),
-      })
       if (config.admin.routes) {
         const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
           const path = formatAdminURL({ adminRoute, path: route })
@@ -173,22 +170,16 @@ export const getRouteData = ({
           })
         })
 
-        console.log({ matchedRoute })
-
         if (matchedRoute) {
           viewKey = matchedRoute[0] as keyof typeof oneSegmentViews
         }
       }
-
-      console.log({ viewKey })
 
       // Check if a custom view is configured for this viewKey
       // First try to get custom view by the known viewKey, then fallback to route matching
       const customView =
         (viewKey && getCustomViewByKey({ config, viewKey })) ||
         getCustomViewByRoute({ config, currentRoute })
-
-      console.log({ customView })
 
       if (customView?.view?.payloadComponent || customView?.view?.Component) {
         // User has configured a custom view (either overriding a built-in or a new custom view)
