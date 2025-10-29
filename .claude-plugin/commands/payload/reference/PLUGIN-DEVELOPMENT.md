@@ -905,8 +905,6 @@ for (const collection of config.collections!) {
 
 #### TypeScript Schema Extension
 
-**Used by:** plugin-ecommerce
-
 Add custom properties to generated TypeScript schema:
 
 ```ts
@@ -934,8 +932,6 @@ incomingConfig.typescript.schema.push((args) => {
 ```
 
 #### Module Declaration Augmentation
-
-**Used by:** plugin-import-export
 
 Extend Payload types for plugin-specific field properties:
 
@@ -1427,14 +1423,14 @@ export const stripePlugin =
 
 Include a `dev/` directory with a complete Payload project for local development:
 
-1. **Create `dev/.env` from `.env.example`:**
+1. Create `dev/.env` from `.env.example`:
 
 ```bash
 DATABASE_URI=mongodb://127.0.0.1/plugin-dev
 PAYLOAD_SECRET=your-secret-here
 ```
 
-2. **Configure `dev/payload.config.ts`:**
+2. Configure `dev/payload.config.ts`:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -1458,7 +1454,7 @@ export default buildConfig({
 })
 ```
 
-3. **Run development server:**
+3. Run development server:
 
 ```bash
 npm run dev  # Starts Next.js on http://localhost:3000
