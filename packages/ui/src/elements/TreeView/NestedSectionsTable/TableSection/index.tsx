@@ -12,13 +12,13 @@ interface RenderTableSectionProps {
   firstCellXOffset: number
   focusedRowIndex?: number
   hasSelectedAncestor?: boolean
-  hoveredRowID: null | number | string
+  hoveredRowItemKey: ItemKey | null
   isDragging: boolean
   isLastRowOfRoot?: boolean
   level?: number
-  loadingRowIDs?: Set<number | string>
+  loadingRowItemKeys?: Set<ItemKey>
   onDroppableHover: (params: {
-    hoveredRowID?: number | string
+    hoveredRowID?: ItemKey
     placement?: string
     targetItem: null | SectionRow
   }) => void
@@ -54,11 +54,11 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
   firstCellXOffset,
   focusedRowIndex,
   hasSelectedAncestor = false,
-  hoveredRowID,
+  hoveredRowItemKey,
   isDragging,
   isLastRowOfRoot = false,
   level = 0,
-  loadingRowIDs,
+  loadingRowItemKeys,
   onDroppableHover,
   onFocusChange,
   onRowDrag,
@@ -144,7 +144,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
               firstCellXOffset={firstCellXOffset}
               focusedRowIndex={focusedRowIndex}
               hasSelectedAncestor={hasSelectedAncestor}
-              hoveredRowID={hoveredRowID}
+              hoveredRowItemKey={hoveredRowItemKey}
               isDragging={isDragging}
               isFirstRowAtRootLevel={isFirstRowAtRootLevel}
               isInvalidTarget={isInvalidTarget}
@@ -152,7 +152,7 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
               isRowAtRootLevel={isRowAtRootLevel}
               isRowSelected={isRowSelected}
               level={level}
-              loadingRowIDs={loadingRowIDs}
+              loadingRowItemKeys={loadingRowItemKeys}
               onDroppableHover={onDroppableHover}
               onFocusChange={onFocusChange}
               onRowDrag={onRowDrag}
@@ -176,11 +176,11 @@ export const TableSection: React.FC<RenderTableSectionProps> = ({
                 firstCellXOffset={firstCellXOffset}
                 focusedRowIndex={focusedRowIndex}
                 hasSelectedAncestor={hasSelectedAncestor || isRowSelected}
-                hoveredRowID={hoveredRowID}
+                hoveredRowItemKey={hoveredRowItemKey}
                 isDragging={isDragging}
                 isLastRowOfRoot={isRowAtRootLevel}
                 level={level + 1}
-                loadingRowIDs={loadingRowIDs}
+                loadingRowItemKeys={loadingRowItemKeys}
                 onDroppableHover={onDroppableHover}
                 onFocusChange={onFocusChange}
                 onRowDrag={onRowDrag}

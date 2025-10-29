@@ -1,6 +1,9 @@
+'use client'
+
+import { useDndMonitor } from '@dnd-kit/core'
 import React from 'react'
 
-import type { NestedSectionsTableProps, SectionRow } from './types.js'
+import type { ItemKey, NestedSectionsTableProps, SectionRow } from './types.js'
 
 import { Header } from './Header/index.js'
 import { TableSection } from './TableSection/index.js'
@@ -13,20 +16,17 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   className = '',
   columns = [{ name: 'name', label: 'Name' }],
   dropContextName,
-  hoveredRowID,
-  isDragging = false,
   isRowFocusable,
-  loadingRowIDs,
-  onDroppableHover,
-  onEnter,
+  loadingRowItemKeys,
+  onDrop,
+  // onEnter,
   onEscape,
-  onRowDrag,
+  onItemSelection,
   onSelectAll,
   openItemKeys,
   sections,
   segmentWidth = DEFAULT_SEGMENT_WIDTH,
   selectedItemKeys,
-  targetParentID,
   toggleRowExpand,
   updateSelections,
 }) => {
@@ -36,9 +36,12 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   const [firstCellWidth, setFirstCellWidth] = React.useState(0)
   const firstCellRef = React.useRef<HTMLDivElement>(null)
 
-  // Helper to count all visible rows (including nested)
-  const countVisibleRows = React.useCallback(
-    (rows: SectionRow[]): number => {
+  const totalVisibleRows = React.useMemo(() => {
+    if (!sections) {
+      return 0
+    }
+
+    const countVisibleRows = (rows: SectionRow[]): number => {
       let count = 0
       for (const row of rows) {
         count++
@@ -47,14 +50,10 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         }
       }
       return count
-    },
-    [openItemKeys],
-  )
+    }
 
-  const totalVisibleRows = React.useMemo(
-    () => (sections ? countVisibleRows(sections) : 0),
-    [sections, countVisibleRows],
-  )
+    return countVisibleRows(sections)
+  }, [sections, openItemKeys])
 
   // Get row at a specific visible index
   const getRowAtVisibleIndex = React.useCallback(
@@ -241,11 +240,11 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           break
         }
 
-        case 'Enter': {
-          event.preventDefault()
-          onEnter?.(row)
-          break
-        }
+        // case 'Enter': {
+        //   event.preventDefault()
+        //   onEnter?.(row)
+        //   break
+        // }
 
         case 'Escape': {
           event.preventDefault()
@@ -277,13 +276,82 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       totalVisibleRows,
       getRowAtVisibleIndex,
       isRowFocusable,
-      onEnter,
+      // onEnter,
       onEscape,
       onSelectAll,
       toggleRowExpand,
       onSelectionChange,
     ],
   )
+
+  const onRowDrag = React.useCallback(
+    ({ event, item: dragItem }: { event: PointerEvent; item: null | SectionRow }) => {
+      if (!dragItem) {
+        return
+      }
+
+      const isCurrentlySelected = selectedItemKeys.has(dragItem.itemKey)
+
+      if (!isCurrentlySelected) {
+        onItemSelection({
+          eventOptions: {
+            ctrlKey: event.ctrlKey || event.metaKey,
+            metaKey: event.ctrlKey || event.metaKey,
+            shiftKey: event.shiftKey,
+          },
+          itemKey: dragItem.itemKey,
+        })
+      }
+    },
+    [selectedItemKeys, onItemSelection],
+  )
+
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [hoveredRowItemKey, setHoveredRowItemKey] = React.useState<ItemKey | null>(null)
+  const [targetParentID, setTargetParentID] = React.useState<null | number | string>(null)
+
+  const onDroppableHover = React.useCallback(
+    ({
+      hoveredRowItemKey: newHoveredRowItemKey,
+      targetItem,
+    }: {
+      hoveredRowItemKey?: ItemKey
+      targetItem: null | SectionRow
+    }) => {
+      setHoveredRowItemKey(newHoveredRowItemKey || null)
+      setTargetParentID(targetItem?.rowID || null)
+    },
+    [],
+  )
+
+  useDndMonitor({
+    onDragCancel() {
+      setIsDragging(false)
+      setHoveredRowItemKey(null)
+      setTargetParentID(null)
+      document.body.style.cursor = ''
+    },
+    onDragEnd(event) {
+      setIsDragging(false)
+      setHoveredRowItemKey(null)
+      setTargetParentID(null)
+      document.body.style.cursor = ''
+      if (!event.over) {
+        return
+      }
+
+      if (
+        event.over.data.current.type === 'tree-view-table' &&
+        'targetItem' in event.over.data.current
+      ) {
+        void onDrop({ targetItemKey: event.over.data.current.targetItem?.rowID })
+      }
+    },
+    onDragStart() {
+      setIsDragging(true)
+      document.body.style.cursor = 'grabbing'
+    },
+  })
 
   React.useEffect(() => {
     if (isDragging && firstCellRef.current) {
@@ -328,9 +396,9 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           firstCellWidth={firstCellWidth}
           firstCellXOffset={firstCellXOffset}
           focusedRowIndex={focusedRowIndex}
-          hoveredRowID={hoveredRowID}
+          hoveredRowItemKey={hoveredRowItemKey}
           isDragging={isDragging}
-          loadingRowIDs={loadingRowIDs}
+          loadingRowItemKeys={loadingRowItemKeys}
           onDroppableHover={onDroppableHover}
           onFocusChange={(index) => {
             // Convert index back to row ID

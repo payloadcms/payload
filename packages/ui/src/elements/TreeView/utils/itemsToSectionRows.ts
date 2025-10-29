@@ -1,6 +1,6 @@
 import type { TreeViewItem } from 'payload/shared'
 
-import type { SectionRow } from '../NestedSectionsTable/index.js'
+import type { SectionRow } from '../NestedSectionsTable/types.js'
 
 type Args = {
   i18nLanguage: string

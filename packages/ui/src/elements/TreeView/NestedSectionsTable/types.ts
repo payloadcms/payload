@@ -14,25 +14,26 @@ export type NestedSectionsTableProps = {
   className?: string
   columns?: Column[]
   dropContextName: string
-  hoveredRowID?: null | number | string
   initialOffset?: number
-  isDragging?: boolean
   isRowFocusable: (row: SectionRow) => boolean
-  loadingRowIDs?: Set<number | string>
-  onDroppableHover: (params: {
-    hoveredRowID?: number | string
-    placement?: string
-    targetItem: null | SectionRow
-  }) => void
-  onEnter: (row: SectionRow) => void
+  loadingRowItemKeys?: Set<ItemKey>
+  onDrop?: (params: { targetItemKey: ItemKey | null }) => Promise<void>
+  // onEnter: (row: SectionRow) => void
   onEscape: () => void
+  onItemSelection?: (args: {
+    eventOptions: {
+      ctrlKey: boolean
+      metaKey: boolean
+      shiftKey: boolean
+    }
+    itemKey: ItemKey
+  }) => void
   onRowDrag?: (params: { event: PointerEvent; item: null | SectionRow }) => void
   onSelectAll: () => void
   openItemKeys?: Set<ItemKey>
   sections: SectionRow[]
   segmentWidth?: number
   selectedItemKeys: Set<ItemKey>
-  targetParentID?: null | number | string
   toggleRowExpand: (docID: number | string) => void
   updateSelections: (args: { itemKeys: ItemKey[] | Set<ItemKey> }) => void
 }

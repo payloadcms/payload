@@ -27,6 +27,7 @@ export type TreeViewClientProps = {
   enableRowSelections?: boolean
   expandedItemKeys?: TreeViewItemKey[]
   items: TreeViewItem[]
+  noResults: boolean
   parentFieldName: string
   search?: string
   sort?: FolderSortKeys

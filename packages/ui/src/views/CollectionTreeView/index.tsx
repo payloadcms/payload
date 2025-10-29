@@ -37,16 +37,20 @@ export function DefaultCollectionTreeView({
       parentFieldName={parentFieldName}
       search={search}
       sort={sort}
-      TableComponent={TreeViewComponent}
     >
-      <CollectionTreeViewInContext {...restOfProps} collectionSlug={collectionSlug} />
+      <CollectionTreeViewInContext
+        {...restOfProps}
+        collectionSlug={collectionSlug}
+        noResults={!Array.isArray(items) || items.length === 0}
+        TreeViewComponent={TreeViewComponent}
+      />
     </TreeViewProvider>
   )
 }
 
 type CollectionTreeViewInContextProps = Omit<
   TreeViewClientProps,
-  'breadcrumbs' | 'items' | 'parentFieldName' | 'search' | 'sort' | 'TreeViewComponent'
+  'breadcrumbs' | 'items' | 'parentFieldName' | 'search' | 'sort'
 >
 
 function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
@@ -57,12 +61,14 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
     BeforeTreeViewListTable,
     collectionSlug,
     Description,
+    noResults,
+    TreeViewComponent,
   } = props
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
 
-  const { items, search, TableComponent: ComponentToRender } = useTreeView()
+  const { search } = useTreeView()
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { labels, upload } = collectionConfig
@@ -194,8 +200,8 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
             searchQueryParam={search}
           />
           {BeforeTreeViewListTable}
-          {items.length > 0 && ComponentToRender}
-          {items.length === 0 && (
+          {!noResults && TreeViewComponent}
+          {noResults && (
             <NoListResults
               Actions={[
                 // allowCreateCollectionSlugs.includes(folderCollectionSlug) && (

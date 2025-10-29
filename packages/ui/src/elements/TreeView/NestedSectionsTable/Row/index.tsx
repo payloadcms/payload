@@ -27,7 +27,7 @@ interface DivTableRowProps {
   firstCellXOffset: number
   focusedRowIndex?: number
   hasSelectedAncestor: boolean
-  hoveredRowID: null | number | string
+  hoveredRowItemKey: ItemKey | null
   isDragging: boolean
   isFirstRowAtRootLevel: boolean
   isInvalidTarget: boolean
@@ -35,9 +35,9 @@ interface DivTableRowProps {
   isRowAtRootLevel: boolean
   isRowSelected: boolean
   level: number
-  loadingRowIDs?: Set<number | string>
+  loadingRowItemKeys?: Set<ItemKey>
   onDroppableHover: (params: {
-    hoveredRowID?: number | string
+    hoveredRowID?: ItemKey
     placement?: string
     targetItem: null | SectionRow
   }) => void
@@ -71,13 +71,13 @@ export const Row: React.FC<DivTableRowProps> = ({
   firstCellXOffset,
   focusedRowIndex,
   hasSelectedAncestor,
-  hoveredRowID,
+  hoveredRowItemKey,
   isDragging,
   isFirstRowAtRootLevel,
   isInvalidTarget,
   isRowSelected,
   level,
-  loadingRowIDs,
+  loadingRowItemKeys: loadingRowIDs,
   onDroppableHover,
   onFocusChange,
   onRowDrag,
@@ -301,7 +301,7 @@ export const Row: React.FC<DivTableRowProps> = ({
       </div>
 
       {/* Render placeholder row below the hovered row */}
-      {isDragging && hoveredRowID === rowItem.rowID && (
+      {isDragging && hoveredRowItemKey === rowItem.rowID && (
         <div className={`${baseClass}__placeholder-section`}>
           <div className={`${baseClass}__placeholder-row`}>
             {columns.map((col) => (

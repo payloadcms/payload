@@ -8,8 +8,10 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
-import type { ItemKey } from '../../elements/TreeView/NestedSectionsTable/types.js'
+import type { ItemKey, SectionRow } from '../../elements/TreeView/NestedSectionsTable/types.js'
 
+import { getAllDescendantIDs } from '../../elements/TreeView/utils/getAllDescendantIDs.js'
+import { itemsToSectionRows } from '../../elements/TreeView/utils/itemsToSectionRows.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
@@ -25,55 +27,44 @@ type TreeViewQueryParams = {
 }
 
 export type TreeViewContextValue = {
-  checkIfItemIsDisabled: (item: TreeViewItem) => boolean
   clearSelections: () => void
   collectionSlug: CollectionSlug
-  getSelectedItems?: () => TreeViewItem[]
-  itemKeysToMove?: Set<TreeViewItemKey>
-  items?: TreeViewItem[]
-  loadingRowIDs: Set<number | string>
-  moveItems: (args: {
-    docsToMove: { relationTo: string; value: number | string }[]
-    parentID?: number | string
-  }) => Promise<void>
+  isRowFocusable: (row: SectionRow) => boolean
+  loadingRowItemKeys: Set<ItemKey>
+  onDrop: (params: { targetItemKey: ItemKey | null }) => Promise<void>
   onItemSelection: (args: {
     eventOptions?: {
       ctrlKey?: boolean
       metaKey?: boolean
       shiftKey?: boolean
     }
-    item: TreeViewItem
+    itemKey: TreeViewItemKey
   }) => void
   openItemKeys: Set<ItemKey>
-  parentFieldName: string
   refineTreeViewData: (args: { query?: TreeViewQueryParams; updateURL: boolean }) => void
   search: string
+  sections: SectionRow[]
   selectAll: () => void
   readonly selectedItemKeys: Set<TreeViewItemKey>
   sort: FolderSortKeys
-  TableComponent: React.ReactNode
   toggleRow: (itemKey: TreeViewItemKey) => void
   updateSelections: (args: { itemKeys: Set<TreeViewItemKey> | TreeViewItemKey[] }) => void
 }
 
 const Context = React.createContext<TreeViewContextValue>({
-  checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
   collectionSlug: '' as CollectionSlug,
-  getSelectedItems: () => [],
-  itemKeysToMove: undefined,
-  items: [],
-  loadingRowIDs: new Set<number | string>(),
-  moveItems: () => Promise.resolve(undefined),
+  isRowFocusable: () => true,
+  loadingRowItemKeys: new Set<ItemKey>(),
+  onDrop: () => Promise.resolve(undefined),
   onItemSelection: () => undefined,
   openItemKeys: new Set<ItemKey>(),
-  parentFieldName: '_parentDoc',
   refineTreeViewData: () => undefined,
   search: '',
+  sections: [],
   selectAll: () => undefined,
   selectedItemKeys: new Set<TreeViewItemKey>(),
   sort: 'name',
-  TableComponent: null,
   toggleRow: () => undefined,
   updateSelections: () => undefined,
 })
@@ -109,10 +100,6 @@ export type TreeViewProviderProps = {
    * `-name` for ascending
    */
   readonly sort?: FolderSortKeys
-  /**
-   * The component to render the folder results
-   */
-  readonly TableComponent: React.ReactNode
 }
 export function TreeViewProvider({
   allowMultiSelection = true,
@@ -123,69 +110,49 @@ export function TreeViewProvider({
   parentFieldName = '_parentDoc',
   search,
   sort = 'name',
-  TableComponent: InitialTableComponent,
 }: TreeViewProviderProps) {
-  const parentTreeViewContext = useTreeView()
   const { config } = useConfig()
   const { routes, serverURL } = config
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
   const locale = useLocale()
-  const localeCode = locale ? locale.code : undefined
+  const { clearRouteCache } = useRouteCache()
   const { setPreference } = usePreferences()
 
-  const currentlySelectedIndexes = React.useRef(new Set<number>())
-
   const [items, setItems] = React.useState(itemsFromProps)
+  const [selectedItemKeys, setSelectedItemKeys] = React.useState<Set<TreeViewItemKey>>(
+    () => new Set(),
+  )
   const [openItemKeys, setOpenItemKeys] = React.useState<Set<ItemKey>>(
     () => new Set(expandedItemKeys),
   )
-  const [loadingRowIDs, setLoadingRowIDs] = React.useState<Set<number | string>>(() => new Set())
-  const [TableComponent, setTableComponentToRender] = React.useState(
-    InitialTableComponent || (() => null),
-  )
+  const [loadingRowItemKeys, setLoadingRowItemKeys] = React.useState<Set<ItemKey>>(() => new Set())
+
+  const localeCode = locale ? locale.code : undefined
+  const currentlySelectedIndexes = React.useRef(new Set<number>())
 
   const rawSearchParams = useSearchParams()
   const searchParams = React.useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
   const [currentQuery, setCurrentQuery] = React.useState<TreeViewQueryParams>(searchParams)
 
-  const [selectedItemKeys, setSelectedItemKeys] = React.useState<Set<TreeViewItemKey>>(
-    () => new Set(),
-  )
-  const { clearRouteCache } = useRouteCache()
-
-  const clearSelections = React.useCallback(() => {
-    setSelectedItemKeys(new Set())
-    currentlySelectedIndexes.current = new Set()
-  }, [])
-
-  const mergeQuery = React.useCallback(
-    (newQuery: Partial<TreeViewQueryParams> = {}): Partial<TreeViewQueryParams> => {
-      let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
-
-      if ('search' in newQuery) {
-        page = '1'
-      }
-
-      const mergedQuery = {
-        ...currentQuery,
-        ...newQuery,
-        locale: localeCode,
-        page,
-        search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
-        sort: 'sort' in newQuery ? newQuery.sort : (currentQuery?.sort ?? undefined),
-      }
-
-      return mergedQuery
-    },
-    [currentQuery, localeCode],
-  )
-
-  const refineTreeViewData: TreeViewContextValue['refineTreeViewData'] = React.useCallback(
-    ({ query, updateURL }) => {
+  const refineTreeViewData = React.useCallback(
+    ({ query, updateURL }: { query?: TreeViewQueryParams; updateURL: boolean }) => {
       if (updateURL) {
-        const queryParams = mergeQuery(query)
+        let page = 'page' in query ? query.page : currentQuery?.page
+
+        if ('search' in query) {
+          page = '1'
+        }
+
+        const queryParams = {
+          ...currentQuery,
+          ...query,
+          locale: localeCode,
+          page,
+          search: 'search' in query ? query.search : currentQuery?.search,
+          sort: 'sort' in query ? query.sort : (currentQuery?.sort ?? undefined),
+        }
 
         startRouteTransition(() =>
           router.replace(`${qs.stringify(queryParams, { addQueryPrefix: true })}`),
@@ -194,25 +161,8 @@ export function TreeViewProvider({
         setCurrentQuery(queryParams)
       }
     },
-    [mergeQuery, router, startRouteTransition],
+    [router, startRouteTransition, currentQuery, localeCode],
   )
-
-  const getItem = React.useCallback(
-    (itemKey: TreeViewItemKey) => {
-      return items.find((doc) => doc.itemKey === itemKey)
-    },
-    [items],
-  )
-
-  const getSelectedItems = React.useCallback(() => {
-    return Array.from(selectedItemKeys).reduce((acc, itemKey) => {
-      const item = getItem(itemKey)
-      if (item) {
-        acc.push(item)
-      }
-      return acc
-    }, [])
-  }, [selectedItemKeys, getItem])
 
   const updateSelections = React.useCallback(
     ({ itemKeys }: { itemKeys: Set<TreeViewItemKey> | TreeViewItemKey[] }) => {
@@ -221,28 +171,36 @@ export function TreeViewProvider({
     [],
   )
 
-  const selectAll: TreeViewContextValue['selectAll'] = React.useCallback(() => {
-    const allItemKeys = items.map((item) => item.itemKey)
-    updateSelections({ itemKeys: allItemKeys })
-  }, [items, updateSelections])
-
   const onItemSelection: TreeViewContextValue['onItemSelection'] = React.useCallback(
-    ({ item: clickedItem }) => {
+    ({ itemKey: selectionItemKey }) => {
       // Simple toggle - selection logic now handled by the table
-      const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
+      const isCurrentlySelected = selectedItemKeys.has(selectionItemKey)
       if (isCurrentlySelected) {
         const newItemKeys = new Set(selectedItemKeys)
-        newItemKeys.delete(clickedItem.itemKey)
+        newItemKeys.delete(selectionItemKey)
         updateSelections({ itemKeys: newItemKeys })
       } else {
-        updateSelections({ itemKeys: [clickedItem.itemKey] })
+        updateSelections({ itemKeys: [selectionItemKey] })
       }
     },
     [selectedItemKeys, updateSelections],
   )
 
-  const moveItems: TreeViewContextValue['moveItems'] = React.useCallback(
-    async (args) => {
+  const selectAll: TreeViewContextValue['selectAll'] = React.useCallback(() => {
+    const allItemKeys = items.map((item) => item.itemKey)
+    updateSelections({ itemKeys: allItemKeys })
+  }, [items, updateSelections])
+
+  const clearSelections = React.useCallback(() => {
+    setSelectedItemKeys(new Set())
+    currentlySelectedIndexes.current = new Set()
+  }, [])
+
+  const moveItems = React.useCallback(
+    async (args: {
+      docsToMove: { relationTo: string; value: number | string }[]
+      parentID?: number | string
+    }) => {
       const { docsToMove, parentID } = args
       if (!docsToMove.length) {
         return
@@ -354,7 +312,7 @@ export function TreeViewProvider({
         })
       } else {
         updatedOpenItemKeys.add(itemKey)
-        setLoadingRowIDs((prev) => new Set(prev).add(itemKey))
+        setLoadingRowItemKeys((prev) => new Set(prev).add(itemKey))
       }
 
       setOpenItemKeys(updatedOpenItemKeys)
@@ -369,52 +327,102 @@ export function TreeViewProvider({
     [collectionSlug, openItemKeys, items, setPreference, clearRouteCache],
   )
 
-  const checkIfItemIsDisabled: TreeViewContextValue['checkIfItemIsDisabled'] = React.useCallback(
-    (item) => {
-      if (parentTreeViewContext?.selectedItemKeys?.size) {
-        // Disable selected items from being navigated to in move to drawer
-        if (parentTreeViewContext.selectedItemKeys.has(item.itemKey)) {
-          return true
-        }
+  const getSelectedItems = React.useCallback(() => {
+    return Array.from(selectedItemKeys).reduce((acc, itemKey) => {
+      const item = items.find((doc) => doc.itemKey === itemKey)
+      if (item) {
+        acc.push(item)
+      }
+      return acc
+    }, [])
+  }, [selectedItemKeys, items])
+
+  const onDrop: TreeViewContextValue['onDrop'] = React.useCallback(
+    async (params: { targetItemKey: ItemKey | null }) => {
+      const selectedItems = getSelectedItems()
+      const { docsToMove, itemKeys } = selectedItems.reduce(
+        (acc, doc) => {
+          acc.itemKeys.add(doc.itemKey)
+          acc.docsToMove.push({
+            relationTo: doc.relationTo,
+            value: doc.value.id,
+          })
+          return acc
+        },
+        { docsToMove: [], itemKeys: new Set<ItemKey>() },
+      )
+      const targetItemKey = params.targetItemKey
+      const targetItem = items.find((item) => item.itemKey === targetItemKey)
+
+      // Validate: prevent moving a parent into its own descendant
+      const invalidTargets = new Set<ItemKey>()
+      itemKeys.forEach((itemKey) => {
+        const descendants = getAllDescendantIDs({ itemKeys: new Set([itemKey]), items })
+        descendants.forEach((descendantID) => invalidTargets.add(descendantID))
+      })
+      if (targetItemKey && invalidTargets.has(targetItemKey)) {
+        toast.error(t('general:cannotMoveParentIntoChild'))
+        return
+      }
+
+      try {
+        await moveItems({
+          docsToMove,
+          parentID: targetItem ? targetItem.value.id : null,
+        })
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error moving items:', error)
+        toast.error(t('general:errorMovingItems'))
       }
     },
-    [parentTreeViewContext?.selectedItemKeys],
+    [moveItems, getSelectedItems, items, t],
+  )
+
+  const isRowFocusable = React.useCallback(
+    (row: SectionRow) => {
+      const unfocusableIDs = getAllDescendantIDs({ itemKeys: selectedItemKeys, items })
+      return !unfocusableIDs.has(row.rowID)
+    },
+    [selectedItemKeys, items],
+  )
+
+  const sections: TreeViewContextValue['sections'] = React.useMemo(
+    () => itemsToSectionRows({ i18nLanguage: i18n.language, items }),
+    [items, i18n.language],
   )
 
   // Sync documents when prop changes and clear loading state
   React.useEffect(() => {
     setItems(itemsFromProps)
     // Clear loading state since new data has arrived
-    setLoadingRowIDs(new Set())
+    setLoadingRowItemKeys(new Set())
   }, [itemsFromProps])
 
   // If a new component is provided, update the state so children can re-render with the new component
-  React.useEffect(() => {
-    if (InitialTableComponent) {
-      setTableComponentToRender(InitialTableComponent)
-    }
-  }, [InitialTableComponent])
+  // React.useEffect(() => {
+  //   if (InitialTableComponent) {
+  //     setTableComponentToRender(InitialTableComponent)
+  //   }
+  // }, [InitialTableComponent])
 
   return (
     <Context
       value={{
-        checkIfItemIsDisabled,
         clearSelections,
         collectionSlug,
-        getSelectedItems,
-        itemKeysToMove: parentTreeViewContext.selectedItemKeys,
-        items,
-        loadingRowIDs,
-        moveItems,
+        isRowFocusable,
+        loadingRowItemKeys,
+        onDrop,
         onItemSelection,
         openItemKeys,
-        parentFieldName,
         refineTreeViewData,
         search,
+        sections,
         selectAll,
         selectedItemKeys,
         sort,
-        TableComponent,
+        // TableComponent,
         toggleRow,
         updateSelections,
       }}
