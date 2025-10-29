@@ -7,18 +7,15 @@ import { useEffect, useRef, useState } from 'react'
  *
  * @internal - may change or be removed without a major version bump
  */
-export function useControllableState<T>(
+export function useControllableState<T, D>(
   propValue: T,
-  defaultValue: NonNullable<T>,
-): [NonNullable<T>, (value: ((prev: T) => T) | T) => void]
-export function useControllableState<T>(
+  defaultValue: D,
+): [T extends NonNullable<T> ? T : D | NonNullable<T>, (value: ((prev: T) => T) | T) => void]
+export function useControllableState<T>(propValue: T): [T, (value: ((prev: T) => T) | T) => void]
+export function useControllableState<T, D>(
   propValue: T,
-  defaultValue?: undefined,
-): [T, (value: ((prev: T) => T) | T) => void]
-export function useControllableState<T>(
-  propValue: T,
-  defaultValue?: NonNullable<T>,
-): [NonNullable<T> | T, (value: ((prev: T) => T) | T) => void] {
+  defaultValue?: D,
+): [T extends NonNullable<T> ? T : D | NonNullable<T>, (value: ((prev: T) => T) | T) => void] {
   const [localValue, setLocalValue] = useState<T>(propValue)
   const initialRenderRef = useRef(true)
 
@@ -31,5 +28,8 @@ export function useControllableState<T>(
     setLocalValue(propValue)
   }, [propValue])
 
-  return [localValue ?? defaultValue, setLocalValue]
+  return [localValue ?? defaultValue, setLocalValue] as [
+    T extends NonNullable<T> ? T : D | NonNullable<T>,
+    (value: ((prev: T) => T) | T) => void,
+  ]
 }
