@@ -173,7 +173,12 @@ const RichTextComponent: React.FC<
   }, [initialValue])
 
   return (
-    <div className={classes} key={pathWithEditDepth} style={styles}>
+    <div
+      className={classes}
+      data-lexical-view={editorConfig?.view}
+      key={pathWithEditDepth}
+      style={styles}
+    >
       <RenderCustomComponent
         CustomComponent={Error}
         Fallback={<FieldError path={path} showError={showError} />}
