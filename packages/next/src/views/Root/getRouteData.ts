@@ -160,23 +160,35 @@ export const getRouteData = ({
       })
       if (config.admin.routes) {
         const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
+          const path = formatAdminURL({ adminRoute, path: route })
+
+          if (!path) {
+            return false
+          }
+
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: formatAdminURL({ adminRoute, path: route }),
+            path,
           })
         })
+
+        console.log({ matchedRoute })
 
         if (matchedRoute) {
           viewKey = matchedRoute[0] as keyof typeof oneSegmentViews
         }
       }
 
+      console.log({ viewKey })
+
       // Check if a custom view is configured for this viewKey
       // First try to get custom view by the known viewKey, then fallback to route matching
       const customView =
         (viewKey && getCustomViewByKey({ config, viewKey })) ||
         getCustomViewByRoute({ config, currentRoute })
+
+      console.log({ customView })
 
       if (customView?.view?.payloadComponent || customView?.view?.Component) {
         // User has configured a custom view (either overriding a built-in or a new custom view)
