@@ -35,7 +35,7 @@ export type AzureStorageOptions = {
    * Optional cache key to identify the Azure Blob storage client instance.
    * If not provided, a default key will be used.
    *
-   * @defaultValue `azure:containerName`
+   * @default `azure:containerName`
    */
   clientCacheKey?: string
 

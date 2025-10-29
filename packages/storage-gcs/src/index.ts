@@ -29,7 +29,7 @@ export interface GcsStorageOptions {
    * Optional cache key to identify the GCS storage client instance.
    * If not provided, a default key will be used.
    *
-   * @defaultValue `gcs:containerName`
+   * @default `gcs:containerName`
    */
   clientCacheKey?: string
   /**

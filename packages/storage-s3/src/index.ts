@@ -39,7 +39,7 @@ export type S3StorageOptions = {
    * Optional cache key to identify the S3 storage client instance.
    * If not provided, a default key will be used.
    *
-   * @defaultValue `s3:containerName`
+   * @default `s3:containerName`
    */
   clientCacheKey?: string
 
