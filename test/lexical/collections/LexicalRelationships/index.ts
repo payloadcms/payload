@@ -5,6 +5,7 @@ import {
   FixedToolbarFeature,
   lexicalEditor,
   RelationshipFeature,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalRelationshipFieldsSlug } from '../../slugs.js'
@@ -14,6 +15,7 @@ export const LexicalRelationshipsFields: CollectionConfig = {
   access: {
     read: () => true,
   },
+  versions: { drafts: true },
   fields: [
     {
       name: 'richText',
@@ -24,6 +26,9 @@ export const LexicalRelationshipsFields: CollectionConfig = {
           RelationshipFeature({
             enabledCollections: ['array-fields'],
           }),
+          UploadFeature({
+            enabledCollections: ['uploads'],
+          }),
         ],
       }),
     },
@@ -32,6 +37,34 @@ export const LexicalRelationshipsFields: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor({
         features: [...defaultEditorFeatures, RelationshipFeature(), FixedToolbarFeature()],
+      }),
+    },
+    {
+      name: 'richText3',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: [
+          ...defaultEditorFeatures,
+          UploadFeature({
+            disabledCollections: ['uploads'],
+          }),
+        ],
+      }),
+    },
+    {
+      name: 'richTextLocalized',
+      type: 'richText',
+      localized: true,
+      editor: lexicalEditor({
+        features: [
+          ...defaultEditorFeatures,
+          RelationshipFeature({
+            enabledCollections: ['array-fields'],
+          }),
+          UploadFeature({
+            enabledCollections: ['uploads'],
+          }),
+        ],
       }),
     },
   ],

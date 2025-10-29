@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
@@ -8,6 +7,7 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DataFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -51,7 +51,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -93,7 +93,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: Document
 }
 
-export default async function updateLocal<
+export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(
@@ -128,8 +128,8 @@ export default async function updateLocal<
     overrideAccess,
     overrideLock,
     populate,
-    publishSpecificLocale,
-    req: await createLocalReq(options, payload),
+    publishSpecificLocale: publishSpecificLocale!,
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   })

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 import { v4 as uuid } from 'uuid'
 
@@ -8,17 +7,21 @@ import type {
   SanitizedJoins,
 } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { GlobalConfig } from '../../globals/config/types.js'
 import type { Field } from './types.js'
 
 import {
   DuplicateFieldName,
+  InvalidConfiguration,
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingEditorProp,
   MissingFieldType,
 } from '../../errors/index.js'
 import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
@@ -32,13 +35,19 @@ import {
   reservedVerifyFieldNames,
 } from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
+import {
+  fieldAffectsData as _fieldAffectsData,
+  fieldIsLocalized,
+  fieldIsVirtual,
+  tabHasName,
+} from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  globalConfig?: GlobalConfig
   /**
    * Used to prevent unnecessary sanitization of fields that are not top-level.
    */
@@ -73,6 +82,7 @@ export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
+  globalConfig,
   isTopLevelField = true,
   joinPath = '',
   joins,
@@ -87,7 +97,7 @@ export const sanitizeFields = async ({
   }
 
   for (let i = 0; i < fields.length; i++) {
-    const field = fields[i]
+    const field = fields[i]!
 
     if ('_sanitized' in field && field._sanitized === true) {
       continue
@@ -121,10 +131,12 @@ export const sanitizeFields = async ({
         }
 
         if (collectionConfig.auth.verify) {
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           if (reservedAPIKeyFieldNames.includes(field.name)) {
             throw new ReservedFieldName(field, field.name)
           }
 
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           if (reservedVerifyFieldNames.includes(field.name)) {
             throw new ReservedFieldName(field, field.name)
           }
@@ -199,7 +211,10 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'array' && field.fields) {
-      field.fields.push(baseIDField)
+      const hasCustomID = field.fields.some((f) => 'name' in f && f.name === 'id')
+      if (!hasCustomID) {
+        field.fields.push(baseIDField)
+      }
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label) {
@@ -231,9 +246,10 @@ export const sanitizeFields = async ({
       }
 
       if (typeof field.validate === 'undefined') {
-        const defaultValidate = validations[field.type]
+        const defaultValidate = validations[field.type as keyof typeof validations]
         if (defaultValidate) {
-          field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
+          field.validate = (val: any, options: any) =>
+            defaultValidate(val, { ...field, ...options })
         } else {
           field.validate = (): true => true
         }
@@ -270,12 +286,12 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
-            parentIsLocalized: parentIsLocalized || field.localized,
+            parentIsLocalized: (parentIsLocalized || field.localized)!,
           })
         }
 
         if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
-          config.i18n.translations = deepMergeSimple(config.i18n.translations, field.editor.i18n)
+          config.i18n!.translations = deepMergeSimple(config.i18n!.translations!, field.editor.i18n)
         }
       }
       if (richTextSanitizationPromises) {
@@ -318,7 +334,7 @@ export const sanitizeFields = async ({
           existingFieldNames: new Set(),
           fields: block.fields,
           isTopLevelField: false,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          parentIsLocalized: (parentIsLocalized || field.localized)!,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -345,7 +361,7 @@ export const sanitizeFields = async ({
 
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
-        const tab = field.tabs[j]
+        const tab = field.tabs[j]!
 
         const isNamedTab = tabHasName(tab)
 
@@ -371,7 +387,7 @@ export const sanitizeFields = async ({
           isTopLevelField: isTopLevelField && !isNamedTab,
           joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
-          parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized),
+          parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized)!,
           polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
@@ -391,9 +407,9 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin.timezones.defaultTimezone
+      const defaultTimezone = config.admin?.timezones?.defaultTimezone
 
-      const supportedTimezones = config.admin.timezones.supportedTimezones
+      const supportedTimezones = config.admin?.timezones?.supportedTimezones
 
       const options =
         typeof supportedTimezones === 'function'
@@ -410,6 +426,51 @@ export const sanitizeFields = async ({
       })
 
       fields.splice(++i, 0, timezoneField)
+    }
+
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      const virtualField = field
+      const fields = (collectionConfig || globalConfig)?.fields
+      if (fields) {
+        let flattenFields = flattenAllFields({ fields })
+        const paths = field.virtual.split('.')
+        let isHasMany = false
+
+        for (const [i, segment] of paths.entries()) {
+          const field = flattenFields.find((e) => e.name === segment)
+          if (!field) {
+            break
+          }
+
+          if (field.type === 'group' || field.type === 'tab' || field.type === 'array') {
+            flattenFields = field.flattenedFields
+          } else if (
+            (field.type === 'relationship' || field.type === 'upload') &&
+            i !== paths.length - 1 &&
+            typeof field.relationTo === 'string'
+          ) {
+            if (
+              field.hasMany &&
+              (virtualField.type === 'text' ||
+                virtualField.type === 'number' ||
+                virtualField.type === 'select')
+            ) {
+              if (isHasMany) {
+                throw new InvalidConfiguration(
+                  `Virtual field ${virtualField.name} in ${globalConfig ? `global ${globalConfig.slug}` : `collection ${collectionConfig?.slug}`} references 2 or more hasMany relationships on the path ${virtualField.virtual} which is not allowed.`,
+                )
+              }
+
+              isHasMany = true
+              virtualField.hasMany = true
+            }
+            const relatedCollection = config.collections?.find((e) => e.slug === field.relationTo)
+            if (relatedCollection) {
+              flattenFields = flattenAllFields({ fields: relatedCollection.fields })
+            }
+          }
+        }
+      }
     }
   }
 

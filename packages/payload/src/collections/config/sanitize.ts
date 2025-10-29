@@ -1,5 +1,3 @@
-// @ts-strict-ignore
-
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type {
   CollectionConfig,
@@ -13,12 +11,12 @@ import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import baseVersionFields from '../../versions/baseFields.js'
+import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import {
@@ -55,7 +53,7 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+  const validRelationships = _validRelationships ?? config.collections!.map((c) => c.slug) ?? []
 
   const joins: SanitizedJoins = {}
 
@@ -99,6 +97,7 @@ export const sanitizeCollection = async (
     // add default timestamps fields only as needed
     let hasUpdatedAt: boolean | null = null
     let hasCreatedAt: boolean | null = null
+    let hasDeletedAt: boolean | null = null
 
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
@@ -109,9 +108,13 @@ export const sanitizeCollection = async (
         if (field.name === 'createdAt') {
           hasCreatedAt = true
         }
+
+        if (field.name === 'deletedAt') {
+          hasDeletedAt = true
+        }
       }
 
-      return hasCreatedAt && hasUpdatedAt
+      return hasCreatedAt && hasUpdatedAt && (!sanitized.trash || hasDeletedAt)
     })
 
     if (!hasUpdatedAt) {
@@ -140,9 +143,27 @@ export const sanitizeCollection = async (
         label: ({ t }) => t('general:createdAt'),
       })
     }
+
+    if (sanitized.trash && !hasDeletedAt) {
+      sanitized.fields.push({
+        name: 'deletedAt',
+        type: 'date',
+        admin: {
+          disableBulkEdit: true,
+          hidden: true,
+        },
+        index: true,
+        label: ({ t }) => t('general:deletedAt'),
+      })
+    }
   }
 
-  sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
+  const defaultLabels = formatLabels(sanitized.slug)
+
+  sanitized.labels = {
+    plural: sanitized.labels?.plural || defaultLabels.plural,
+    singular: sanitized.labels?.singular || defaultLabels.singular,
+  }
 
   if (sanitized.versions) {
     if (sanitized.versions === true) {
@@ -178,6 +199,14 @@ export const sanitizeCollection = async (
     }
   }
 
+  if (sanitized.folders === true) {
+    sanitized.folders = {
+      browseByFolder: true,
+    }
+  } else if (sanitized.folders) {
+    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
+  }
+
   if (sanitized.upload) {
     if (sanitized.upload === true) {
       sanitized.upload = {}
@@ -186,7 +215,7 @@ export const sanitizeCollection = async (
     sanitized.upload.cacheTags = sanitized.upload?.cacheTags ?? true
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
-    sanitized.admin.useAsTitle =
+    sanitized.admin!.useAsTitle =
       sanitized.admin?.useAsTitle && sanitized.admin.useAsTitle !== 'id'
         ? sanitized.admin.useAsTitle
         : 'filename'
@@ -226,14 +255,14 @@ export const sanitizeCollection = async (
     }
 
     if (!collection?.admin?.useAsTitle) {
-      sanitized.admin.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
+      sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
-    sanitized.admin.pagination.limits = collection.admin.pagination.limits
+    sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
   }
 
   validateUseAsTitle(sanitized)

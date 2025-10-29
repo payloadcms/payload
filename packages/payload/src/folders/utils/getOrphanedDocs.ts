@@ -1,40 +1,39 @@
 import type { CollectionSlug, PayloadRequest, Where } from '../../index.js'
 import type { FolderOrDocument } from '../types.js'
 
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type Args = {
   collectionSlug: CollectionSlug
+  folderFieldName: string
   req: PayloadRequest
-  search?: string
+  /**
+   * Optional where clause to filter documents by
+   * @default undefined
+   */
+  where?: Where
 }
 export async function getOrphanedDocs({
   collectionSlug,
+  folderFieldName,
   req,
-  search,
+  where,
 }: Args): Promise<FolderOrDocument[]> {
   const { payload, user } = req
-  let whereConstraints: Where = {
+  const noParentFolderConstraint: Where = {
     or: [
       {
-        [payload.config.folders.fieldName]: {
+        [folderFieldName]: {
           exists: false,
         },
       },
       {
-        [payload.config.folders.fieldName]: {
+        [folderFieldName]: {
           equals: null,
         },
       },
     ],
-  }
-
-  if (collectionSlug && search && payload.collections[collectionSlug].config.admin?.useAsTitle) {
-    whereConstraints = {
-      [payload.collections[collectionSlug].config.admin.useAsTitle]: {
-        like: search,
-      },
-    }
   }
 
   const orphanedFolders = await payload.find({
@@ -42,18 +41,20 @@ export async function getOrphanedDocs({
     limit: 0,
     overrideAccess: false,
     req,
-    sort: payload.collections[collectionSlug].config.admin.useAsTitle,
+    sort: payload.collections[collectionSlug]?.config.admin.useAsTitle,
     user,
-    where: whereConstraints,
+    where: where
+      ? combineWhereConstraints([noParentFolderConstraint, where])
+      : noParentFolderConstraint,
   })
 
   return (
     orphanedFolders?.docs.map((doc) =>
       formatFolderOrDocumentItem({
-        folderFieldName: payload.config.folders.fieldName,
-        isUpload: Boolean(payload.collections[collectionSlug].config.upload),
+        folderFieldName,
+        isUpload: Boolean(payload.collections[collectionSlug]?.config.upload),
         relationTo: collectionSlug,
-        useAsTitle: payload.collections[collectionSlug].config.admin.useAsTitle,
+        useAsTitle: payload.collections[collectionSlug]?.config.admin.useAsTitle,
         value: doc,
       }),
     ) || []

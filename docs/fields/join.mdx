@@ -135,7 +135,7 @@ powerful Admin UI.
 
 | Option                 | Description                                                                                                                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*          | To be used as the property name when retrieved from the database. [More](./overview#field-names)                                                                                                                                       |
+| **`name`** \*          | To be used as the property name when retrieved from the database. [More details](./overview#field-names).                                                                                                                              |
 | **`collection`** \*    | The `slug`s having the relationship field or an array of collection slugs.                                                                                                                                                             |
 | **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'. If `collection` is an array, this field must exist for all specified collections |
 | **`orderable`**        | If true, enables custom ordering and joined documents can be reordered via drag and drop. Uses [fractional indexing](https://observablehq.com/@dgreensp/implementing-fractional-indexing) for efficient reordering.                    |
@@ -157,11 +157,12 @@ _\* An asterisk denotes that a property is required._
 
 You can control the user experience of the join field using the `admin` config properties. The following options are supported:
 
-| Option                 | Description                                                                                                                |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **`defaultColumns`**   | Array of field names that correspond to which columns to show in the relationship table. Default is the collection config. |
-| **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field.                                    |
-| **`components.Label`** | Override the default Label of the Field Component. [More details](./overview#label)                                        |
+| Option                 | Description                                                                                                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`defaultColumns`**   | Array of field names that correspond to which columns to show in the relationship table. Default is the collection config.                                                                |
+| **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field.                                                                                                   |
+| **`components.Label`** | Override the default Label of the Field Component. [More details](./overview#label)                                                                                                       |
+| **`disableRowTypes`**  | Set to `false` to render row types, and `true` to hide them. Defaults to `false` for join fields with a singular `relationTo`, and `true` for join fields where `relationTo` is an array. |
 
 ## Join Field Data
 
@@ -296,11 +297,16 @@ query {
         sort: "createdAt"
         limit: 5
         where: { author: { equals: "66e3431a3f23e684075aaeb9" } }
+        """
+        Optionally pass count: true if you want to retrieve totalDocs
+        """
+        count: true -- s
       ) {
         docs {
           title
         }
         hasNextPage
+        totalDocs
       }
     }
   }

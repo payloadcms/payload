@@ -1,51 +1,17 @@
 'use client'
+
 import React, { useEffect, useRef, useState } from 'react'
 
-export type SearchFilterProps = {
-  /**
-   * This prop is deprecated and will be removed in the next major version.
-   *
-   * @deprecated
-   */
-  fieldName?: string
-  handleChange?: (search: string) => void
-  /**
-   * This prop is deprecated and will be removed in the next major version.
-   *
-   * Prefer passing in `searchString` instead.
-   *
-   * @deprecated
-   */
-  initialParams?: ParsedQs
-  label: string
-  searchQueryParam?: string
-  /**
-   * This prop is deprecated and will be removed in the next major version.
-   *
-   * @deprecated
-   */
-  setValue?: (arg: string) => void
-  /**
-   * This prop is deprecated and will be removed in the next major version.
-   *
-   * @deprecated
-   */
-  value?: string
-}
-
-import type { ParsedQs } from 'qs-esm'
-
-import { usePathname } from 'next/navigation.js'
+import type { SearchFilterProps } from './types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
 import './index.scss'
 
 const baseClass = 'search-filter'
 
-export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
+export function SearchFilter(props: SearchFilterProps) {
   const { handleChange, initialParams, label, searchQueryParam } = props
   const searchParam = initialParams?.search || searchQueryParam
-  const pathname = usePathname()
   const [search, setSearch] = useState(typeof searchParam === 'string' ? searchParam : undefined)
 
   /**
@@ -67,7 +33,12 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
       setSearch(searchParam as string)
       previousSearch.current = searchParam as string
     }
-  }, [searchParam, pathname])
+
+    return () => {
+      shouldUpdateState.current = true
+      previousSearch.current = undefined
+    }
+  }, [searchParam])
 
   useEffect(() => {
     if (debouncedSearch !== previousSearch.current && shouldUpdateState.current) {

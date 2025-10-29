@@ -18,9 +18,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('seed', () => {
@@ -181,19 +179,15 @@ describe('@payloadcms/plugin-nested-docs', () => {
         })
         .then(({ docs }) => docs[0])
 
-      if (!updatedChild) {
-        return
-      }
-
       // breadcrumbs should be updated
-      expect(updatedChild.breadcrumbs).toHaveLength(2)
+      expect(updatedChild!.breadcrumbs).toHaveLength(2)
 
-      expect(updatedChild.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
-      expect(updatedChild.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
+      expect(updatedChild!.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
+      expect(updatedChild!.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
 
       // no other data should be affected
-      expect(updatedChild.title).toEqual('child doc')
-      expect(updatedChild.slug).toEqual('child')
+      expect(updatedChild!.title).toEqual('child doc')
+      expect(updatedChild!.slug).toEqual('child')
     })
   })
 

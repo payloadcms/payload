@@ -2,17 +2,20 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientComponentProps,
   ClientField,
+  CollectionPreferences,
   CollectionSlug,
   Column,
   DefaultCellComponentProps,
   Document,
   Field,
-  ListPreferences,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   ServerComponentProps,
   StaticLabel,
+  ViewTypes,
 } from 'payload'
 
 import {
@@ -30,7 +33,7 @@ import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
-import { filterFields } from './filterFields.js'
+import { filterFieldsWithPermissions } from './filterFieldsWithPermissions.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'
 import { sortFieldMap } from './sortFieldMap.js'
@@ -38,17 +41,19 @@ import { sortFieldMap } from './sortFieldMap.js'
 export type BuildColumnStateArgs = {
   beforeRows?: Column[]
   clientFields: ClientField[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columns?: CollectionPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   enableLinkedCell?: boolean
   enableRowSelections: boolean
   enableRowTypes?: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   i18n: I18nClient
   payload: Payload
+  req?: PayloadRequest
   serverFields: Field[]
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
+  viewType?: ViewTypes
 } & (
   | {
       collectionSlug: CollectionSlug
@@ -70,36 +75,47 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     beforeRows,
     clientFields,
     collectionSlug,
-    columnPreferences,
     columns,
     customCellProps,
     dataType,
     docs,
     enableLinkedCell = true,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     payload,
+    req,
     serverFields,
     sortColumnProps,
     useAsTitle,
+    viewType,
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenTopLevelFields(filterFields(clientFields), {
-    i18n,
-    keepPresentationalFields: true,
-    moveSubFieldsToTop: true,
-  }) as ClientField[]
+  let sortedFieldMap = flattenTopLevelFields(
+    filterFieldsWithPermissions({ fieldPermissions, fields: clientFields }),
+    {
+      i18n,
+      keepPresentationalFields: true,
+      moveSubFieldsToTop: true,
+    },
+  ) as ClientField[]
 
-  let _sortedFieldMap = flattenTopLevelFields(filterFields(serverFields), {
-    i18n,
-    keepPresentationalFields: true,
-    moveSubFieldsToTop: true,
-  }) as Field[] // TODO: think of a way to avoid this additional flatten
+  let _sortedFieldMap = flattenTopLevelFields(
+    filterFieldsWithPermissions({
+      fieldPermissions,
+      fields: serverFields,
+    }),
+    {
+      i18n,
+      keepPresentationalFields: true,
+      moveSubFieldsToTop: true,
+    },
+  ) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
-  // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
+  // then sort the rest of the fields based on the `defaultColumns` or `columns`
   const idFieldIndex = sortedFieldMap?.findIndex((field) => fieldIsID(field))
 
   if (idFieldIndex > -1) {
@@ -116,10 +132,10 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     sortedFieldMap.unshift(useAsTitleField)
   }
 
-  const sortTo = columnPreferences || columns
+  const sortTo = columns
 
   if (sortTo) {
-    // sort the fields to the order of `defaultColumns` or `columnPreferences`
+    // sort the fields to the order of `defaultColumns` or `columns`
     sortedFieldMap = sortFieldMap<ClientField>(sortedFieldMap, sortTo)
     _sortedFieldMap = sortFieldMap<Field>(_sortedFieldMap, sortTo) // TODO: think of a way to avoid this additional sort
   }
@@ -150,14 +166,14 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       return acc // skip any group without a custom cell
     }
 
-    const columnPreference = columnPreferences?.find(
+    const columnPref = columns?.find(
       (preference) => clientField && 'name' in clientField && preference.accessor === accessor,
     )
 
     const isActive = isColumnActive({
       accessor,
       activeColumnsIndices,
-      columnPreference,
+      column: columnPref,
       columns,
     })
 
@@ -248,8 +264,10 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               i18n,
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
               payload,
+              req,
               rowIndex,
               serverField,
+              viewType,
             })
           })
         : [],

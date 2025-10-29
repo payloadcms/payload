@@ -12,6 +12,7 @@ import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
@@ -156,6 +157,17 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     })
   } else {
     result = await Model.paginate(versionQuery, paginationOptions)
+  }
+
+  if (!this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: result.docs as Record<string, unknown>[],
+      joins,
+      locale,
+      versions: true,
+    })
   }
 
   transform({

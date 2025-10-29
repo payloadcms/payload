@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Feltöltés',
   },
+  is: {
+    label: 'Hlaða upp',
+  },
   it: {
     label: 'Carica',
   },
@@ -87,6 +90,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Ladda upp',
+  },
+  ta: {
+    label: 'பதிவேற்றம்',
   },
   th: {
     label: 'อัปโหลด',

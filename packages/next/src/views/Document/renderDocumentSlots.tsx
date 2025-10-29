@@ -1,7 +1,7 @@
 import type {
   BeforeDocumentControlsServerPropsOnly,
-  DefaultServerFunctionArgs,
   DocumentSlots,
+  EditMenuItemsServerPropsOnly,
   PayloadRequest,
   PreviewButtonServerPropsOnly,
   PublishButtonServerPropsOnly,
@@ -10,6 +10,7 @@ import type {
   SanitizedGlobalConfig,
   SaveButtonServerPropsOnly,
   SaveDraftButtonServerPropsOnly,
+  ServerFunction,
   ServerProps,
   StaticDescription,
   ViewDescriptionClientProps,
@@ -25,10 +26,11 @@ export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
+  id?: number | string
   permissions: SanitizedDocumentPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
-  const { collectionConfig, globalConfig, hasSavePermission, req } = args
+  const { id, collectionConfig, globalConfig, hasSavePermission, req } = args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -37,6 +39,7 @@ export const renderDocumentSlots: (args: {
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
 
   const serverProps: ServerProps = {
+    id,
     i18n: req.i18n,
     payload: req.payload,
     user: req.user,
@@ -55,6 +58,16 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+
+  if (EditMenuItems) {
+    components.EditMenuItems = RenderServerComponent({
+      Component: EditMenuItems,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
+    })
+  }
+
   const CustomPreviewButton =
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
     globalConfig?.admin?.components?.elements?.PreviewButton
@@ -64,6 +77,18 @@ export const renderDocumentSlots: (args: {
       Component: CustomPreviewButton,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
+    })
+  }
+
+  const LivePreview =
+    collectionConfig?.admin?.components?.views?.edit?.livePreview ||
+    globalConfig?.admin?.components?.views?.edit?.livePreview
+
+  if (LivePreview?.Component) {
+    components.LivePreview = RenderServerComponent({
+      Component: LivePreview.Component,
+      importMap: req.payload.importMap,
+      serverProps,
     })
   }
 
@@ -146,13 +171,22 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {
+    components.UploadControls = RenderServerComponent({
+      Component: collectionConfig.upload.admin.components.controls,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   return components
 }
 
-export const renderDocumentSlotsHandler = async (
-  args: { collectionSlug: string } & DefaultServerFunctionArgs,
-) => {
-  const { collectionSlug, req } = args
+export const renderDocumentSlotsHandler: ServerFunction<{
+  collectionSlug: string
+  id?: number | string
+}> = async (args) => {
+  const { id, collectionSlug, req } = args
 
   const collectionConfig = req.payload.collections[collectionSlug]?.config
 
@@ -167,6 +201,7 @@ export const renderDocumentSlotsHandler = async (
   })
 
   return renderDocumentSlots({
+    id,
     collectionConfig,
     hasSavePermission,
     permissions: docPermissions,

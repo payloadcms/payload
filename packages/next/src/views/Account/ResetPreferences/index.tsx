@@ -1,5 +1,5 @@
 'use client'
-import type { User } from 'payload'
+import type { TypedUser } from 'payload'
 
 import { Button, ConfirmationModal, toast, useModal, useTranslation } from '@payloadcms/ui'
 import * as qs from 'qs-esm'
@@ -9,7 +9,7 @@ const confirmResetModalSlug = 'confirm-reset-modal'
 
 export const ResetPreferences: React.FC<{
   readonly apiRoute: string
-  readonly user?: User
+  readonly user?: TypedUser
 }> = ({ apiRoute, user }) => {
   const { openModal } = useModal()
   const { t } = useTranslation()

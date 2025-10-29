@@ -116,7 +116,13 @@ export async function createSnapshot(
   collectionSlugs: string[],
 ) {
   if (isMongoose(_payload) && 'collections' in _payload.db) {
-    const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
+    const firstCollectionSlug = collectionSlugs?.[0]
+
+    if (!firstCollectionSlug?.length) {
+      throw new Error('No collection slugs provided to reset the database.')
+    }
+
+    const mongooseCollections = _payload.db.collections[firstCollectionSlug]?.db.collections
 
     await createMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {

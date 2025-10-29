@@ -124,6 +124,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   text?: string | null;
+  postsRelationship?: (string | Post)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -154,6 +155,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -261,7 +269,7 @@ export interface PayloadQueryPreset {
     | null;
   relatedCollection: 'pages' | 'posts';
   /**
-   * This is a tempoary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
    */
   isTemp?: boolean | null;
   updatedAt: string;
@@ -273,6 +281,7 @@ export interface PayloadQueryPreset {
  */
 export interface PagesSelect<T extends boolean = true> {
   text?: T;
+  postsRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -301,6 +310,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

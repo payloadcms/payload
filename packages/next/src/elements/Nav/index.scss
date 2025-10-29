@@ -1,4 +1,4 @@
-@import '../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .nav {
@@ -11,6 +11,10 @@
     border-right: 1px solid var(--theme-elevation-100);
     opacity: 0;
     overflow: hidden;
+    --nav-padding-inline-start: var(--base);
+    --nav-padding-inline-end: var(--base);
+    --nav-padding-block-start: var(--app-header-height);
+    --nav-padding-block-end: calc(var(--base) * 2);
 
     [dir='rtl'] & {
       border-right: none;
@@ -51,7 +55,8 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      padding: var(--app-header-height) base(1) base(2) base(1);
+      padding: var(--nav-padding-block-start) var(--nav-padding-inline-end)
+        var(--nav-padding-block-end) var(--nav-padding-inline-start);
       overflow-y: auto;
 
       // remove the scrollbar here to prevent layout shift as nav groups are toggled
@@ -73,10 +78,13 @@
     }
 
     &__controls {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.75);
       margin-top: auto;
       margin-bottom: 0;
 
-      > * {
+      > :first-child {
         margin-top: base(1);
       }
 
@@ -140,13 +148,15 @@
 
     @include mid-break {
       &__scroll {
-        padding: var(--app-header-height) base(0.5) base(2);
+        --nav-padding-inline-start: calc(var(--base) * 0.5);
+        --nav-padding-inline-end: calc(var(--base) * 0.5);
       }
     }
 
     @include small-break {
       &__scroll {
-        padding: var(--app-header-height) var(--gutter-h) base(2);
+        --nav-padding-inline-start: var(--gutter-h);
+        --nav-padding-inline-end: var(--gutter-h);
       }
 
       &__link {

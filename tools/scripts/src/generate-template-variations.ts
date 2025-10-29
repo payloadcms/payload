@@ -30,6 +30,10 @@ type TemplateVariation = {
   envNames?: {
     dbUri: string
   }
+  /**
+   * If the template is part of the workspace, then do not replace the package.json versions
+   */
+  workspace?: boolean
   generateLockfile?: boolean
   /** package.json name */
   name: string
@@ -51,7 +55,7 @@ type TemplateVariation = {
    *
    * @default 'default'
    */
-  targetDeployment?: 'default' | 'vercel'
+  targetDeployment?: 'cloudflare' | 'default' | 'vercel'
 }
 
 main().catch((error) => {
@@ -69,7 +73,7 @@ async function main() {
 
   let variations: TemplateVariation[] = [
     {
-      name: 'payload-vercel-postgres-template',
+      name: 'with-vercel-postgres',
       db: 'vercel-postgres',
       dirname: 'with-vercel-postgres',
       envNames: {
@@ -92,7 +96,7 @@ async function main() {
         ),
     },
     {
-      name: 'payload-vercel-website-template',
+      name: 'with-vercel-website',
       base: 'website', // This is the base template to copy from
       db: 'vercel-postgres',
       dirname: 'with-vercel-website',
@@ -116,7 +120,7 @@ async function main() {
         ),
     },
     {
-      name: 'payload-postgres-template',
+      name: 'with-postgres',
       db: 'postgres',
       dirname: 'with-postgres',
       sharp: true,
@@ -124,7 +128,7 @@ async function main() {
       storage: 'localDisk',
     },
     {
-      name: 'payload-vercel-mongodb-template',
+      name: 'with-vercel-mongodb',
       db: 'mongodb',
       dirname: 'with-vercel-mongodb',
       envNames: {
@@ -157,6 +161,8 @@ async function main() {
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
+      workspace: true,
+      base: 'none', // Do not copy from the base _template directory
     },
     {
       name: 'website',
@@ -172,6 +178,40 @@ async function main() {
       base: 'none',
       skipDockerCompose: true,
       skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'ecommerce',
+      db: 'mongodb',
+      dirname: 'ecommerce',
+      generateLockfile: true,
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'with-cloudflare-d1',
+      db: 'd1-sqlite',
+      dirname: 'with-cloudflare-d1',
+      generateLockfile: false,
+      sharp: false,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'r2Storage',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: false,
+      targetDeployment: 'cloudflare',
     },
   ]
 
@@ -200,6 +240,7 @@ async function main() {
       storage,
       vercelDeployButtonLink,
       targetDeployment = 'default',
+      workspace = false,
     } = variation
 
     header(`Generating ${name}...`)
@@ -229,6 +270,7 @@ async function main() {
         sharp,
         storageAdapter: storage,
       }
+
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
@@ -255,18 +297,25 @@ async function main() {
     // Fetch latest npm version of payload package:
     const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
 
-    // Bump package.json versions
-    await bumpPackageJson({
-      templateDir: destDir,
-      latestVersion: payloadVersion,
-    })
+    // Bump package.json versions only in non-workspace templates such as Vercel variants
+    // Workspace templates should always continue to point to `workspace:*` version of payload packages
+    if (!workspace) {
+      await bumpPackageJson({
+        templateDir: destDir,
+        latestVersion: payloadVersion,
+      })
+    }
 
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
+      execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+        cwd: destDir,
+      })
     } else {
       log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
+      execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+        cwd: destDir,
+      })
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 
@@ -307,11 +356,19 @@ async function main() {
 
     // Generate importmap
     log('Generating import map')
-    execSyncSafe(`pnpm --ignore-workspace generate:importmap`, { cwd: destDir })
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+      cwd: destDir,
+    })
+
+    // Generate types
+    log('Generating types')
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
+      cwd: destDir,
+    })
 
     if (shouldBuild) {
       log('Building...')
-      execSyncSafe(`pnpm --ignore-workspace build`, { cwd: destDir })
+      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -514,9 +571,18 @@ async function getLatestPackageVersion({
   packageName?: string
 }) {
   try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}`)
+    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
     const data = await response.json()
-    const latestVersion = data['dist-tags'].latest
+
+    // Monster chaining for type safety just checking for data.latest
+    const latestVersion =
+      data &&
+      typeof data === 'object' &&
+      'latest' in data &&
+      data.latest &&
+      typeof data.latest === 'string'
+        ? data.latest
+        : null
 
     log(`Found latest version of ${packageName}: ${latestVersion}`)
 

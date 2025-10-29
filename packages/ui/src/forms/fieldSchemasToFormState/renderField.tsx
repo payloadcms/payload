@@ -32,6 +32,7 @@ export const renderField: RenderFieldMethod = ({
   fieldConfig,
   fieldSchemaMap,
   fieldState,
+  forceCreateClientField,
   formState,
   indexPath,
   lastRenderedPath,
@@ -42,6 +43,7 @@ export const renderField: RenderFieldMethod = ({
   path,
   permissions,
   preferences,
+  readOnly: readOnlyFromProps,
   renderAllFields,
   req,
   schemaPath,
@@ -53,20 +55,26 @@ export const renderField: RenderFieldMethod = ({
     return
   }
 
-  const clientField = clientFieldSchemaMap
-    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
-    : createClientField({
-        defaultIDType: req.payload.config.db.defaultIDType,
-        field: fieldConfig,
-        i18n: req.i18n,
-        importMap: req.payload.importMap,
-      })
+  const clientField =
+    clientFieldSchemaMap && !forceCreateClientField
+      ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+      : createClientField({
+          defaultIDType: req.payload.config.db.defaultIDType,
+          field: fieldConfig,
+          i18n: req.i18n,
+          importMap: req.payload.importMap,
+        })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
     path,
     permissions,
-    readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
+    readOnly:
+      readOnlyFromProps === true
+        ? true
+        : typeof permissions === 'boolean'
+          ? !permissions
+          : !permissions?.[operation],
     schemaPath,
   }
 
@@ -249,7 +257,13 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: fieldConfig.editor.FieldComponent,
             importMap: req.payload.importMap,
-            serverProps,
+            serverProps: {
+              ...serverProps,
+              // Manually inject lexical-specific `sanitizedEditorConfig` server prop, in order to reduce the size of the field schema.
+              // Otherwise, the editorConfig would be included twice - once on the top-level, and once as part of the `FieldComponent` server props.
+              sanitizedEditorConfig:
+                'editorConfig' in fieldConfig.editor ? fieldConfig.editor.editorConfig : undefined,
+            },
           })}
         </WatchCondition>
       ) : (

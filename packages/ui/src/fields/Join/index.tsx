@@ -24,8 +24,7 @@ import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Recursively builds the default data for joined collection
@@ -189,7 +188,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       collectionSlug: docConfig?.slug,
       config,
       docID,
-      fields: relatedCollection.fields,
+      fields: relatedCollection?.fields,
       segments: field.on.split('.'),
     })
   }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID, config])
@@ -213,6 +212,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         BeforeInput={BeforeInput}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
+        fieldPath={path}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         initialDrawerData={initialDrawerData}

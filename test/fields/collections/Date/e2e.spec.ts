@@ -85,6 +85,19 @@ describe('Date', () => {
     await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
   })
 
+  test('should retain date format in useAsTitle after modifying value', async () => {
+    await page.goto(url.list)
+    await page.locator('.row-1 .cell-default a').click()
+    await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
+
+    const dateField = page.locator('#field-default input')
+    await expect(dateField).toBeVisible()
+    await dateField.fill('02/07/2023')
+
+    await expect(dateField).toHaveValue('02/07/2023')
+    await expect(page.locator('.doc-header__title.render-title')).toContainText('February')
+  })
+
   test('should clear date', async () => {
     await page.goto(url.create)
     const dateField = page.locator('#field-default input')
@@ -109,6 +122,70 @@ describe('Date', () => {
     await expect(clearButton).toBeVisible()
     await clearButton.click()
     await expect(dateField).toHaveValue('')
+  })
+
+  test('should clear miliseconds from dates with time', async () => {
+    await page.goto(url.create)
+    const dateField = page.locator('#field-default input')
+    await expect(dateField).toBeVisible()
+    // Fill in required fields, this is just to make sure saving is possible
+    await dateField.fill('02/07/2023')
+    const dateWithTz = page.locator('#field-dayAndTimeWithTimezone .react-datepicker-wrapper input')
+
+    await dateWithTz.fill('08/12/2027 10:00 AM')
+
+    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+    const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
+
+    await page.click(dropdownControlSelector)
+    await page.click(timezoneOptionSelector)
+
+    // Test the time field
+    const timeField = page.locator('#field-timeOnly input')
+    await timeField.fill('08/12/2027 10:00:00.123 AM')
+
+    await saveDocAndAssert(page)
+
+    const id = page.url().split('/').pop()
+
+    const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+
+    await expect(() => {
+      // Ensure that the time field does not contain milliseconds
+      expect(doc?.timeOnly).toContain('00:00.000Z')
+    }).toPass()
+  })
+
+  test("should keep miliseconds when they're provided in the date format", async () => {
+    await page.goto(url.create)
+    const dateField = page.locator('#field-default input')
+    await expect(dateField).toBeVisible()
+    // Fill in required fields, this is just to make sure saving is possible
+    await dateField.fill('02/07/2023')
+    const dateWithTz = page.locator('#field-dayAndTimeWithTimezone .react-datepicker-wrapper input')
+
+    await dateWithTz.fill('08/12/2027 10:00 AM')
+
+    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+    const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
+
+    await page.click(dropdownControlSelector)
+    await page.click(timezoneOptionSelector)
+
+    // Test the time field
+    const timeField = page.locator('#field-timeOnlyWithMiliseconds input')
+    await timeField.fill('6:00.00.625 PM')
+
+    await saveDocAndAssert(page)
+
+    const id = page.url().split('/').pop()
+
+    const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+
+    await expect(() => {
+      // Ensure that the time with miliseconds field contains the exact miliseconds specified
+      expect(doc?.timeOnlyWithMiliseconds).toContain('625Z')
+    }).toPass()
   })
 
   describe('localized dates', () => {

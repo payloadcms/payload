@@ -1,7 +1,7 @@
 import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
+import { defaultAccess } from '../auth/defaultAccess.js'
 import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 
 /**
@@ -112,13 +112,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
   }
 
-  config.folders = {
-    slug: foldersSlug,
-    debug: false,
-    fieldName: parentFolderFieldName,
-    ...(config.folders || {}),
-  }
-
   config.bin = config.bin ?? []
   config.collections = config.collections ?? []
   config.cookiePrefix = config.cookiePrefix ?? 'payload'
@@ -130,6 +123,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.endpoints = config.endpoints ?? []
   config.globals = config.globals ?? []
   config.graphQL = {
+    disableIntrospectionInProduction: true,
     disablePlaygroundInProduction: true,
     maxComplexity: 1000,
     schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
@@ -167,6 +161,22 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     jwtOrder: ['JWT', 'Bearer', 'cookie'],
     ...(config.auth || {}),
+  }
+
+  if (
+    config.folders !== false &&
+    config.collections.some((collection) => Boolean(collection.folders))
+  ) {
+    config.folders = {
+      slug: config.folders?.slug ?? foldersSlug,
+      browseByFolder: config.folders?.browseByFolder ?? true,
+      collectionOverrides: config.folders?.collectionOverrides || undefined,
+      collectionSpecific: config.folders?.collectionSpecific ?? true,
+      debug: config.folders?.debug ?? false,
+      fieldName: config.folders?.fieldName ?? parentFolderFieldName,
+    }
+  } else {
+    config.folders = false
   }
 
   return config

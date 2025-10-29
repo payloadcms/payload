@@ -1,21 +1,14 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../../../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -118,6 +111,27 @@ describe('Group', () => {
       const unnamedNestedGroupSelector = `.field-type.group-field .field-type.group-field .field-type.group-field .field-type.group-field .field-type.group-field #field-deeplyNestedGroup__insideNestedUnnamedGroup`
       const unnamedNestedGroupField = page.locator(unnamedNestedGroupSelector)
       await expect(unnamedNestedGroupField).toBeVisible()
+    })
+
+    test('should display with no label when label is undefined', async () => {
+      await page.goto(url.create)
+
+      // Makes sure the fields are rendered
+      await page.mouse.wheel(0, 2000)
+
+      const nolabelGroupSelector = `.field-type.group-field#field-_index-14 .group-field__header`
+      const nolabelGroupField = page.locator(nolabelGroupSelector)
+
+      await expect(nolabelGroupField).toBeHidden()
+
+      // Makes sure the fields are rendered
+      await page.mouse.wheel(0, 2000)
+
+      // Children should render even if the group has no label
+      const nolabelGroupChildSelector = `.field-type.group-field#field-_index-14 #field-insideGroupWithNoLabel`
+      const nolabelGroupChildField = page.locator(nolabelGroupChildSelector)
+
+      await expect(nolabelGroupChildField).toBeVisible()
     })
   })
 })

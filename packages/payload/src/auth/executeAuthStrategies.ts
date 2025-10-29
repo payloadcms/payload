@@ -14,6 +14,8 @@ export const executeAuthStrategies = async (
   for (const strategy of args.payload.authStrategies) {
     // add the configured AuthStrategy `name` to the strategy function args
     args.strategyName = strategy.name
+    args.isGraphQL = Boolean(args.isGraphQL)
+    args.canSetHeaders = Boolean(args.canSetHeaders)
 
     try {
       const authResult = await strategy.authenticate(args)

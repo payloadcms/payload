@@ -12,6 +12,7 @@ import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
 import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
@@ -53,7 +54,7 @@ export const find: Find = async function find(
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       sortAggregation,
-      timestamps: true,
+      timestamps: collectionConfig.timestamps || false,
     })
   }
 
@@ -153,6 +154,16 @@ export const find: Find = async function find(
     })
   } else {
     result = await Model.paginate(query, paginationOptions)
+  }
+
+  if (!this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: result.docs as Record<string, unknown>[],
+      joins,
+      locale,
+    })
   }
 
   transform({

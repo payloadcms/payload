@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
+  CodeBlock,
   defaultColors,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
@@ -31,11 +32,42 @@ export const LexicalFullyFeatured: CollectionConfig = {
           EXPERIMENTAL_TableFeature(),
           TextStateFeature({
             state: {
-              color: { ...defaultColors.background, ...defaultColors.text },
+              color: { ...defaultColors.text },
+              backgroundColor: { ...defaultColors.background },
             },
           }),
           BlocksFeature({
             blocks: [
+              CodeBlock(),
+              CodeBlock({
+                slug: 'PayloadCode',
+                defaultLanguage: 'ts',
+                languages: {
+                  js: 'JavaScript',
+                  ts: 'TypeScript',
+                  json: 'JSON',
+                  plaintext: 'Plain Text',
+                },
+                typescript: {
+                  fetchTypes: [
+                    {
+                      url: 'https://unpkg.com/payload@3.59.0-internal.8435f3c/dist/index.bundled.d.ts',
+                      filePath: 'file:///node_modules/payload/index.d.ts',
+                    },
+                    {
+                      url: 'https://unpkg.com/@types/react@19.1.17/index.d.ts',
+                      filePath: 'file:///node_modules/@types/react/index.d.ts',
+                    },
+                  ],
+                  paths: {
+                    payload: ['file:///node_modules/payload/index.d.ts'],
+                    react: ['file:///node_modules/@types/react/index.d.ts'],
+                  },
+                  typeRoots: ['node_modules/@types', 'node_modules/payload'],
+                  enableSemanticValidation: true,
+                },
+              }),
+
               {
                 slug: 'myBlock',
                 fields: [
@@ -53,6 +85,20 @@ export const LexicalFullyFeatured: CollectionConfig = {
                   {
                     name: 'someText',
                     type: 'text',
+                  },
+                ],
+              },
+              {
+                slug: 'inlineBlockWithRelationship',
+                fields: [
+                  {
+                    name: 'relationship',
+                    type: 'relationship',
+                    relationTo: 'text-fields',
+                    admin: {
+                      // Required to reproduce issue: https://github.com/payloadcms/payload/issues/13778
+                      appearance: 'drawer',
+                    },
                   },
                 ],
               },

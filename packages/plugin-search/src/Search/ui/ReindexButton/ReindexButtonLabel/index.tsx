@@ -5,7 +5,7 @@ export const ReindexButtonLabel = () => {
     i18n: { t },
   } = useTranslation()
   return (
-    <Pill className="pill--has-action" icon={<ChevronIcon />} pillStyle="light">
+    <Pill className="pill--has-action" icon={<ChevronIcon />} pillStyle="light" size="small">
       {t('general:reindex')}
     </Pill>
   )

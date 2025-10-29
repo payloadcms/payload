@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     drafts: Draft;
     autosave: Autosave;
+    'omitted-from-browse-by': OmittedFromBrowseBy;
     users: User;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,7 +80,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave';
+      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by';
     };
   };
   collectionsSelect: {
@@ -87,6 +88,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    'omitted-from-browse-by': OmittedFromBrowseBySelect<false> | OmittedFromBrowseBySelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -191,10 +193,16 @@ export interface FolderInterface {
           relationTo?: 'autosave';
           value: string | Autosave;
         }
+      | {
+          relationTo?: 'omitted-from-browse-by';
+          value: string | OmittedFromBrowseBy;
+        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by')[] | null;
+  folderSlug?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -224,6 +232,17 @@ export interface Autosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "omitted-from-browse-by".
+ */
+export interface OmittedFromBrowseBy {
+  id: string;
+  title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -237,6 +256,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -261,6 +287,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave';
         value: string | Autosave;
+      } | null)
+    | ({
+        relationTo: 'omitted-from-browse-by';
+        value: string | OmittedFromBrowseBy;
       } | null)
     | ({
         relationTo: 'users';
@@ -366,6 +396,16 @@ export interface AutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "omitted-from-browse-by_select".
+ */
+export interface OmittedFromBrowseBySelect<T extends boolean = true> {
+  title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -378,6 +418,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -387,6 +434,8 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   name?: T;
   folder?: T;
   documentsAndFolders?: T;
+  folderType?: T;
+  folderSlug?: T;
   updatedAt?: T;
   createdAt?: T;
 }

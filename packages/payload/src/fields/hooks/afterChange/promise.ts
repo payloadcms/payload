@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -74,7 +73,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // Execute hooks
-    if (field.hooks?.afterChange) {
+    if ('hooks' in field && field.hooks?.afterChange) {
       for (const hook of field.hooks.afterChange) {
         const hookedValue = await hook({
           blockData,
@@ -89,12 +88,12 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc[field.name],
+          previousValue: previousDoc?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
-          value: siblingDoc[field.name],
+          siblingFields: siblingFields!,
+          value: siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {
@@ -110,7 +109,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
@@ -144,7 +143,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
@@ -227,10 +226,10 @@ export const promise = async ({
           parentPath: path,
           parentSchemaPath: schemaPath,
           previousDoc,
-          previousSiblingDoc: previousDoc[field.name] as JsonObject,
+          previousSiblingDoc: (previousDoc?.[field.name] as JsonObject) || {},
           req,
           siblingData: (siblingData?.[field.name] as JsonObject) || {},
-          siblingDoc: siblingDoc[field.name] as JsonObject,
+          siblingDoc: (siblingDoc?.[field.name] as JsonObject) || {},
         })
       } else {
         await traverseFields({
@@ -283,11 +282,11 @@ export const promise = async ({
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
-            previousValue: previousDoc[field.name],
+            previousValue: previousDoc?.[field.name],
             req,
             schemaPath: schemaPathSegments,
             siblingData,
-            value: siblingDoc[field.name],
+            value: siblingDoc?.[field.name],
           })
 
           if (hookedValue !== undefined) {
@@ -306,9 +305,9 @@ export const promise = async ({
       const isNamedTab = tabHasName(field)
 
       if (isNamedTab) {
-        tabSiblingData = (siblingData[field.name] as JsonObject) ?? {}
-        tabSiblingDoc = (siblingDoc[field.name] as JsonObject) ?? {}
-        tabPreviousSiblingDoc = (previousDoc[field.name] as JsonObject) ?? {}
+        tabSiblingData = (siblingData?.[field.name] ?? {}) as JsonObject
+        tabSiblingDoc = (siblingDoc?.[field.name] ?? {}) as JsonObject
+        tabPreviousSiblingDoc = (previousDoc?.[field.name] ?? {}) as JsonObject
       }
 
       await traverseFields({

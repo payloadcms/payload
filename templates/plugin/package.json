@@ -1,14 +1,14 @@
 {
-  "name": "plugin-package-name-placeholder",
+  "name": "plugin",
   "version": "1.0.0",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/exports/index.ts",
-      "types": "./src/exports/index.ts",
-      "default": "./src/exports/index.ts"
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./client": {
       "import": "./src/exports/client.ts",
@@ -21,8 +21,8 @@
       "default": "./src/exports/rsc.ts"
     }
   },
-  "main": "./src/exports/index.ts",
-  "types": "./src/exports/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist"
   ],
@@ -36,6 +36,8 @@
     "dev:generate-importmap": "pnpm dev:payload generate:importmap",
     "dev:generate-types": "pnpm dev:payload generate:types",
     "dev:payload": "cross-env PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
+    "generate:importmap": "pnpm dev:generate-importmap",
+    "generate:types": "pnpm dev:generate-types",
     "lint": "eslint",
     "lint:fix": "eslint ./src --fix",
     "prepublishOnly": "pnpm clean && pnpm build",
@@ -56,15 +58,15 @@
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
     "@types/node": "^22.5.4",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
     "copyfiles": "2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.23.0",
-    "eslint-config-next": "15.3.0",
+    "eslint-config-next": "15.4.4",
     "graphql": "^16.8.1",
-    "mongodb-memory-server": "^10.1.2",
-    "next": "15.3.0",
+    "mongodb-memory-server": "10.1.4",
+    "next": "15.4.4",
     "open": "^10.1.0",
     "payload": "3.37.0",
     "prettier": "^3.4.2",
@@ -72,7 +74,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "rimraf": "3.0.2",
-    "sharp": "0.32.6",
+    "sharp": "0.34.2",
     "sort-package-json": "^2.10.0",
     "typescript": "5.7.3",
     "vite-tsconfig-paths": "^5.1.4",
@@ -88,9 +90,9 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/exports/index.js",
-        "types": "./dist/exports/index.d.ts",
-        "default": "./dist/exports/index.js"
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "./client": {
         "import": "./dist/exports/client.js",
@@ -103,12 +105,14 @@
         "default": "./dist/exports/rsc.js"
       }
     },
-    "main": "./dist/exports/index.js",
-    "types": "./dist/exports/index.d.ts"
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sharp"
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
     ]
   },
   "registry": "https://registry.npmjs.org/"

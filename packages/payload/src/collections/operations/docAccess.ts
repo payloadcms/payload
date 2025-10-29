@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
@@ -52,7 +51,8 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       },
     })
 
-    return sanitizedPermissions?.collections?.[config.slug]
+    const collectionPermissions = sanitizedPermissions?.collections?.[config.slug]
+    return collectionPermissions ?? { fields: {} }
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

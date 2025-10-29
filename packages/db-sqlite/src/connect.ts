@@ -15,11 +15,6 @@ export const connect: Connect = async function connect(
 ) {
   const { hotReload } = options
 
-  this.schema = {
-    ...this.tables,
-    ...this.relations,
-  }
-
   try {
     if (!this.client) {
       this.client = createClient(this.clientConfig)

@@ -58,7 +58,7 @@ export async function generateImportMap(
 
   const baseDir = config.admin.importMap.baseDir ?? process.cwd()
 
-  const importMapFilePath = resolveImportMapFilePath({
+  const importMapFilePath = await resolveImportMapFilePath({
     adminRoute: config.routes.admin,
     importMapFile: config?.admin?.importMap?.importMapFile,
     rootDir,

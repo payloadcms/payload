@@ -16,8 +16,8 @@ export const getFolderBreadcrumbs = async ({
   req,
 }: GetFolderBreadcrumbsArgs): Promise<FolderBreadcrumb[] | null> => {
   const { payload, user } = req
-  const folderFieldName: string = payload.config.folders.fieldName
-  if (folderID) {
+  if (folderID && payload.config.folders) {
+    const folderFieldName: string = payload.config.folders.fieldName
     const folderQuery = await payload.find({
       collection: payload.config.folders.slug,
       depth: 0,
@@ -27,6 +27,7 @@ export const getFolderBreadcrumbs = async ({
       select: {
         name: true,
         [folderFieldName]: true,
+        folderType: true,
       },
       user,
       where: {
@@ -42,6 +43,7 @@ export const getFolderBreadcrumbs = async ({
       breadcrumbs.push({
         id: folder.id,
         name: folder.name,
+        folderType: folder.folderType,
       })
       if (folder[folderFieldName]) {
         return getFolderBreadcrumbs({

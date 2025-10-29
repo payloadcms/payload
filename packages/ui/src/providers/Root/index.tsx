@@ -6,7 +6,7 @@ import type {
   Locale,
   SanitizedPermissions,
   ServerFunctionClient,
-  User,
+  TypedUser,
 } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
@@ -52,7 +52,7 @@ type Props = {
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
-  readonly user: null | User
+  readonly user: null | TypedUser
 }
 
 export const RootProvider: React.FC<Props> = ({
@@ -139,7 +139,7 @@ export const RootProvider: React.FC<Props> = ({
           </RouteCache>
         </RouteTransitionProvider>
       </ServerFunctionsProvider>
-      <ToastContainer />
+      <ToastContainer config={config} />
     </ClickOutsideProvider>
   )
 }

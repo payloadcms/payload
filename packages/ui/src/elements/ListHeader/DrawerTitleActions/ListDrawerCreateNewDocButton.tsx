@@ -25,7 +25,7 @@ export function ListDrawerCreateNewDocButton({
       className={`${baseClass}__create-new-button`}
       key="create-new-button-toggler"
     >
-      <Pill>{t('general:createNew')}</Pill>
+      <Pill size="small">{t('general:createNew')}</Pill>
     </DocumentDrawerToggler>
   )
 }

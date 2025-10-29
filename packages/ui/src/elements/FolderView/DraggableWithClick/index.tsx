@@ -1,5 +1,5 @@
 import { useDraggable } from '@dnd-kit/core'
-import React, { useRef } from 'react'
+import React, { useId, useRef } from 'react'
 
 import './index.scss'
 
@@ -9,7 +9,7 @@ type Props = {
   readonly as?: React.ElementType
   readonly children?: React.ReactNode
   readonly className?: string
-  readonly id: string
+  readonly disabled?: boolean
   readonly onClick: (e: React.MouseEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly ref?: React.RefObject<HTMLDivElement>
@@ -17,16 +17,17 @@ type Props = {
 }
 
 export const DraggableWithClick = ({
-  id,
   as = 'div',
   children,
   className,
+  disabled = false,
   onClick,
   onKeyDown,
   ref,
   thresholdPixels = 3,
 }: Props) => {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id })
+  const id = useId()
+  const { attributes, listeners, setNodeRef } = useDraggable({ id, disabled })
   const initialPos = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
 
@@ -75,10 +76,15 @@ export const DraggableWithClick = ({
       role="button"
       tabIndex={0}
       {...attributes}
-      className={`${baseClass} ${className || ''}`.trim()}
-      onKeyDown={onKeyDown}
-      onPointerDown={onClick ? handlePointerDown : undefined}
+      className={[baseClass, className, disabled ? `${baseClass}--disabled` : '']
+        .filter(Boolean)
+        .join(' ')}
+      onKeyDown={disabled ? undefined : onKeyDown}
+      onPointerDown={disabled ? undefined : onClick ? handlePointerDown : undefined}
       ref={(node) => {
+        if (disabled) {
+          return
+        }
         setNodeRef(node)
         if (ref) {
           ref.current = node

@@ -141,7 +141,7 @@ export const traverseFields = ({
       adapter.payload.config.localization &&
       (isFieldLocalized || forceLocalized) &&
       field.type !== 'array' &&
-      field.type !== 'blocks' &&
+      (field.type !== 'blocks' || adapter.blocksAsJSON) &&
       (('hasMany' in field && field.hasMany !== true) || !('hasMany' in field))
     ) {
       hasLocalizedField = true
@@ -370,6 +370,17 @@ export const traverseFields = ({
         break
       }
       case 'blocks': {
+        if (adapter.blocksAsJSON) {
+          targetTable[fieldName] = withDefault(
+            {
+              name: columnName,
+              type: 'jsonb',
+            },
+            field,
+          )
+          break
+        }
+
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         ;(field.blockReferences ?? field.blocks).forEach((_block) => {
@@ -387,6 +398,7 @@ export const traverseFields = ({
           if (typeof blocksTableNameMap[blockTableName] === 'undefined') {
             blocksTableNameMap[blockTableName] = 1
           } else if (
+            !adapter.rawTables[blockTableName] ||
             !validateExistingBlockIsIdentical({
               block,
               localized: field.localized,

@@ -12,7 +12,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     autosave,
     createdAt,
     globalSlug,
-    parent,
     publishedLocale,
     req,
     returning,
@@ -25,17 +24,21 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 
   const options = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const data = {
     autosave,
     createdAt,
     latest: true,
-    parent,
     publishedLocale,
     snapshot,
     updatedAt,
     version: versionData,
+  }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
   }
 
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
@@ -55,11 +58,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
         {
           _id: {
             $ne: doc._id,
-          },
-        },
-        {
-          parent: {
-            $eq: parent,
           },
         },
         {

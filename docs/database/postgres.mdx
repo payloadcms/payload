@@ -1,7 +1,7 @@
 ---
 title: Postgres
 label: Postgres
-order: 50
+order: 60
 desc: Payload supports Postgres through an officially supported Drizzle Database Adapter.
 keywords: Postgres, documentation, typescript, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -51,7 +51,7 @@ export default buildConfig({
 ```
 
 <Banner type="info">
-  **Note:** If you're using `vercelPostgresAdapter` your
+  **Note:** If you're using `vercelPostgresAdapter` and your
   `process.env.POSTGRES_URL` or `pool.connectionString` points to a local
   database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module
   for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres`
@@ -80,6 +80,8 @@ export default buildConfig({
 | `afterSchemaInit`           | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
 | `generateSchemaOutputFile`  | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
 | `allowIDOnCreate`           | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
+| `readReplicas`              | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                      |
+| `blocksAsJSON`              | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
 
 ## Access to Drizzle
 

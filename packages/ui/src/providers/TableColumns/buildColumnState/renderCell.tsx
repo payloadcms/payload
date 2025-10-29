@@ -6,9 +6,12 @@ import type {
   Document,
   Field,
   Payload,
+  PayloadRequest,
+  ViewTypes,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
@@ -30,8 +33,10 @@ type RenderCellArgs = {
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean
   readonly payload: Payload
+  readonly req?: PayloadRequest
   readonly rowIndex: number
   readonly serverField: Field
+  readonly viewType?: ViewTypes
 }
 export function renderCell({
   clientField,
@@ -43,8 +48,10 @@ export function renderCell({
   i18n,
   isLinkedColumn,
   payload,
+  req,
   rowIndex,
   serverField,
+  viewType,
 }: RenderCellArgs) {
   const baseCellClientProps: DefaultCellComponentProps = {
     cellData: undefined,
@@ -52,17 +59,56 @@ export function renderCell({
     customCellProps,
     field: clientField,
     rowData: undefined,
+    viewType,
   }
 
   const accessor: string | undefined =
     ('accessor' in clientField ? (clientField.accessor as string) : undefined) ??
     ('name' in clientField ? clientField.name : undefined)
-  const dotAccessor = accessor?.replace(/-/g, '.')
+
+  // Check if there's a custom formatDocURL function for this linked column
+  let shouldLink = isLinkedColumn
+  let customLinkURL: string | undefined
+
+  if (isLinkedColumn && req) {
+    const collectionConfig = payload.collections[collectionSlug]?.config
+    const formatDocURL = collectionConfig?.admin?.formatDocURL
+
+    if (typeof formatDocURL === 'function') {
+      // Generate the default URL that would normally be used
+      const adminRoute = req.payload.config.routes?.admin || '/admin'
+      const defaultURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(String(doc.id))}`,
+      })
+
+      const customURL = formatDocURL({
+        collectionSlug,
+        defaultURL,
+        doc,
+        req,
+        viewType,
+      })
+
+      if (customURL === null) {
+        // formatDocURL returned null = disable linking entirely
+        shouldLink = false
+      } else if (typeof customURL === 'string') {
+        // formatDocURL returned a string = use custom URL
+        shouldLink = true
+        customLinkURL = customURL
+      } else {
+        // formatDocURL returned unexpected type = disable linking for safety
+        shouldLink = false
+      }
+    }
+  }
 
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, dotAccessor) : undefined,
-    link: isLinkedColumn,
+    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
+    link: shouldLink,
+    linkURL: customLinkURL,
     rowData: doc,
   }
 
@@ -75,7 +121,8 @@ export function renderCell({
     customCellProps: baseCellClientProps.customCellProps,
     field: serverField,
     i18n,
-    link: cellClientProps.link,
+    link: shouldLink,
+    linkURL: customLinkURL,
     onClick: baseCellClientProps.onClick,
     payload,
     rowData: doc,

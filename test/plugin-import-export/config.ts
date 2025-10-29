@@ -8,6 +8,7 @@ import { es } from '@payloadcms/translations/languages/es'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Pages } from './collections/Pages.js'
+import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 export default buildConfigWithDefaults({
@@ -16,7 +17,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Pages],
+  collections: [Users, Pages, Posts],
   localization: {
     defaultLocale: 'en',
     fallback: true,

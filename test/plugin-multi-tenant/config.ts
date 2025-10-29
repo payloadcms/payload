@@ -7,15 +7,17 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
+import { Relationships } from './collections/Relationships.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
-import { menuItemsSlug, menuSlug } from './shared.js'
+import { autosaveGlobalSlug, menuItemsSlug, menuSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  collections: [Tenants, Users, MenuItems, Menu],
+  collections: [Tenants, Users, MenuItems, Menu, AutosaveGlobal, Relationships],
   admin: {
     autoLogin: false,
     importMap: {
@@ -31,17 +33,34 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     multiTenantPlugin<ConfigType>({
+      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+      useTenantsCollectionAccess: false,
       tenantField: {
         access: {},
       },
       collections: {
-        [menuItemsSlug]: {},
+        [menuItemsSlug]: {
+          useTenantAccess: false,
+        },
         [menuSlug]: {
           isGlobal: true,
         },
+        [autosaveGlobalSlug]: {
+          isGlobal: true,
+        },
+
+        ['relationships']: {},
       },
-      tenantSelectorLabel: { en: 'Site', es: 'Site in es' },
+      i18n: {
+        translations: {
+          en: {
+            'field-assignedTenant-label': 'Site',
+            'nav-tenantSelector-label': 'Filter by Site',
+            'assign-tenant-button-label': 'Assign Site',
+          },
+        },
+      },
     }),
   ],
   typescript: {

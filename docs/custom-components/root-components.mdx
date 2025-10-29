@@ -45,13 +45,14 @@ The following options are available:
 | `header`          | An array of Custom Components to be injected above the Payload header. [More details](#header).                                                                          |
 | `logout.Button`   | The button displayed in the sidebar that logs the user out. [More details](#logoutbutton).                                                                               |
 | `Nav`             | Contains the sidebar / mobile menu in its entirety. [More details](#nav).                                                                                                |
+| `settingsMenu`    | An array of Custom Components to inject into a popup menu accessible via a gear icon above the logout button. [More details](#settingsMenu).                             |
 | `providers`       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](./custom-providers). |
 | `views`           | Override or create new views within the Admin Panel. [More details](./custom-views).                                                                                     |
 
 _For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._
 
 <Banner type="success">
-  **Note:** You can also use set [Collection
+  **Note:** You can also set [Collection
   Components](../configuration/collections#custom-components) and [Global
   Components](../configuration/globals#custom-components) in their respective
   configs.
@@ -271,6 +272,65 @@ export default function MyAfterNavLinksComponent() {
 }
 ```
 
+### settingsMenu
+
+The `settingsMenu` property allows you to inject Custom Components into a popup menu accessible via a gear icon in the navigation controls, positioned above the logout button. This is ideal for adding custom actions, utilities, or settings that are relevant at the admin level.
+
+To add `settingsMenu` components, use the `admin.components.settingsMenu` property in your Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      settingsMenu: ['/path/to/your/component#ComponentName'],
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `settingsMenu` component:
+
+```tsx
+'use client'
+import { PopupList } from '@payloadcms/ui'
+
+export function MySettingsMenu() {
+  return (
+    <PopupList.ButtonGroup>
+      <PopupList.Button onClick={() => console.log('Action triggered')}>
+        Custom Action
+      </PopupList.Button>
+      <PopupList.Button onClick={() => window.open('/admin/custom-page')}>
+        Custom Page
+      </PopupList.Button>
+    </PopupList.ButtonGroup>
+  )
+}
+```
+
+You can pass multiple components to create organized groups of menu items:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    components: {
+      settingsMenu: [
+        '/components/SystemActions#SystemActions',
+        '/components/DataManagement#DataManagement',
+      ],
+    },
+  },
+})
+```
+
 ### Nav
 
 The `Nav` property contains the sidebar / mobile menu in its entirety. Use this property to completely replace the built-in Nav with your own custom navigation.
@@ -372,13 +432,13 @@ export default function MyCustomLogo() {
 }
 ```
 
-### Header
+### header
 
-The `Header` property allows you to inject Custom Components above the Payload header.
+The `header` property allows you to inject Custom Components above the Payload header.
 
 Examples of a custom header components might include an announcements banner, a notifications bar, or anything else you'd like to display at the top of the Admin Panel in a prominent location.
 
-To add `Header` components, use the `admin.components.header` property in your Payload Config:
+To add `header` components, use the `admin.components.header` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -388,14 +448,14 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      Header: ['/path/to/your/component'],
+      header: ['/path/to/your/component'],
     },
     // highlight-end
   },
 })
 ```
 
-Here is an example of a simple `Header` component:
+Here is an example of a simple `header` component:
 
 ```tsx
 export default function MyCustomHeader() {

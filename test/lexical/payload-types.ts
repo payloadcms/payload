@@ -85,6 +85,9 @@ export interface Config {
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-link-feature': LexicalLinkFeature;
+    'lexical-lists-features': LexicalListsFeature;
+    'lexical-heading-feature': LexicalHeadingFeature;
+    'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
@@ -95,7 +98,10 @@ export interface Config {
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
     uploads: Upload;
+    uploads2: Uploads2;
     'array-fields': ArrayField;
+    OnDemandForm: OnDemandForm;
+    OnDemandOutsideForm: OnDemandOutsideForm;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -105,6 +111,9 @@ export interface Config {
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
+    'lexical-lists-features': LexicalListsFeaturesSelect<false> | LexicalListsFeaturesSelect<true>;
+    'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
+    'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
@@ -115,7 +124,10 @@ export interface Config {
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
+    uploads2: Uploads2Select<false> | Uploads2Select<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
+    OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
+    OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -130,7 +142,7 @@ export interface Config {
   globalsSelect: {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
-  locale: 'en' | 'es';
+  locale: 'en' | 'es' | 'he';
   user: User & {
     collection: 'users';
   };
@@ -167,7 +179,7 @@ export interface LexicalFullyFeatured {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -191,7 +203,79 @@ export interface LexicalLinkFeature {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-lists-features".
+ */
+export interface LexicalListsFeature {
+  id: string;
+  onlyOrderedList?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-heading-feature".
+ */
+export interface LexicalHeadingFeature {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-jsx-converter".
+ */
+export interface LexicalJsxConverter {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -216,7 +300,7 @@ export interface LexicalField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -227,11 +311,14 @@ export interface LexicalField {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * A simple lexical field
+   */
   lexicalSimple?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -242,11 +329,14 @@ export interface LexicalField {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Should not be rendered
+   */
   lexicalWithBlocks: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -272,7 +362,7 @@ export interface LexicalMigrateField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -287,7 +377,7 @@ export interface LexicalMigrateField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -302,7 +392,7 @@ export interface LexicalMigrateField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -319,7 +409,7 @@ export interface LexicalMigrateField {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -338,7 +428,7 @@ export interface LexicalMigrateField {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -370,7 +460,7 @@ export interface LexicalLocalizedField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -388,7 +478,7 @@ export interface LexicalLocalizedField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -412,7 +502,7 @@ export interface LexicalObjectReferenceBug {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -427,7 +517,7 @@ export interface LexicalObjectReferenceBug {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -451,7 +541,7 @@ export interface LexicalInBlock {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -468,7 +558,7 @@ export interface LexicalInBlock {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -498,7 +588,7 @@ export interface LexicalAccessControl {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -522,7 +612,7 @@ export interface LexicalRelationshipField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -537,7 +627,37 @@ export interface LexicalRelationshipField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richText3?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richTextLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -550,6 +670,7 @@ export interface LexicalRelationshipField {
   } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -562,7 +683,7 @@ export interface RichTextField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -581,7 +702,7 @@ export interface RichTextField {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -706,6 +827,27 @@ export interface Upload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads2".
+ */
+export interface Uploads2 {
+  id: string;
+  text?: string | null;
+  media?: (string | null) | Upload;
+  altText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
@@ -804,6 +946,57 @@ export interface ArrayField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OnDemandForm".
+ */
+export interface OnDemandForm {
+  id: string;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OnDemandOutsideForm".
+ */
+export interface OnDemandOutsideForm {
+  id: string;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  hiddenAnchor?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -817,6 +1010,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -833,6 +1033,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'lexical-link-feature';
         value: string | LexicalLinkFeature;
+      } | null)
+    | ({
+        relationTo: 'lexical-lists-features';
+        value: string | LexicalListsFeature;
+      } | null)
+    | ({
+        relationTo: 'lexical-heading-feature';
+        value: string | LexicalHeadingFeature;
+      } | null)
+    | ({
+        relationTo: 'lexical-jsx-converter';
+        value: string | LexicalJsxConverter;
       } | null)
     | ({
         relationTo: 'lexical-fields';
@@ -875,8 +1087,20 @@ export interface PayloadLockedDocument {
         value: string | Upload;
       } | null)
     | ({
+        relationTo: 'uploads2';
+        value: string | Uploads2;
+      } | null)
+    | ({
         relationTo: 'array-fields';
         value: string | ArrayField;
+      } | null)
+    | ({
+        relationTo: 'OnDemandForm';
+        value: string | OnDemandForm;
+      } | null)
+    | ({
+        relationTo: 'OnDemandOutsideForm';
+        value: string | OnDemandOutsideForm;
       } | null)
     | ({
         relationTo: 'users';
@@ -938,6 +1162,33 @@ export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
  * via the `definition` "lexical-link-feature_select".
  */
 export interface LexicalLinkFeatureSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-lists-features_select".
+ */
+export interface LexicalListsFeaturesSelect<T extends boolean = true> {
+  onlyOrderedList?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-heading-feature_select".
+ */
+export interface LexicalHeadingFeatureSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-jsx-converter_select".
+ */
+export interface LexicalJsxConverterSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1039,8 +1290,11 @@ export interface LexicalAccessControlSelect<T extends boolean = true> {
 export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   richText?: T;
   richText2?: T;
+  richText3?: T;
+  richTextLocalized?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1128,6 +1382,26 @@ export interface TextFieldsSelect<T extends boolean = true> {
 export interface UploadsSelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads2_select".
+ */
+export interface Uploads2Select<T extends boolean = true> {
+  text?: T;
+  media?: T;
+  altText?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1242,6 +1516,25 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OnDemandForm_select".
+ */
+export interface OnDemandFormSelect<T extends boolean = true> {
+  json?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OnDemandOutsideForm_select".
+ */
+export interface OnDemandOutsideFormSelect<T extends boolean = true> {
+  json?: T;
+  hiddenAnchor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1254,6 +1547,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1298,7 +1598,7 @@ export interface TabsWithRichText {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -1315,7 +1615,7 @@ export interface TabsWithRichText {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];

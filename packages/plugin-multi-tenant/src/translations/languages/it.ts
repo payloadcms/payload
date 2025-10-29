@@ -2,10 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const itTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Stai per cambiare proprietà da <0>{{fromTenant}}</0> a <0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': 'Conferma il cambiamento di {{tenantLabel}}',
-    'field-assignedTentant-label': 'Inquilino Assegnato',
+    'assign-tenant-button-label': 'Assegna Tenant',
+    'assign-tenant-modal-title': 'Assegna "{{title}}"',
+    'field-assignedTenant-label': 'Inquilino Assegnato',
+    'nav-tenantSelector-label': 'Inquilino',
   },
 }
 

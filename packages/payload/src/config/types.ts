@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
@@ -12,7 +11,7 @@ import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
-import type { DestinationStream, Level, pino } from 'pino'
+import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -52,6 +51,7 @@ import type {
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
+import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -138,6 +138,8 @@ type Prettify<T> = {
 
 export type Plugin = (config: Config) => Config | Promise<Config>
 
+export type LivePreviewURLType = null | string | undefined
+
 export type LivePreviewConfig = {
   /**
    Device breakpoints to use for the `iframe` of the Live Preview window.
@@ -151,10 +153,16 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-   The frontend application is responsible for receiving the message and updating the UI accordingly.
-   Use the `useLivePreview` hook to get started in React applications.
+   * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   * The frontend application is responsible for receiving the message and updating the UI accordingly.
+   * @see https://payloadcms.com/docs/live-preview/frontend
+   *
+   * To conditionally render Live Preview, use a function that returns `undefined` or `null`.
+   *
+   * Note: this function may run often if autosave is enabled with a small interval.
+   * For performance, avoid long-running tasks or expensive operations within this function,
+   * or if you need to do something more complex, cache your function as needed.
    */
   url?:
     | ((args: {
@@ -168,9 +176,14 @@ export type LivePreviewConfig = {
          */
         payload: Payload
         req: PayloadRequest
-      }) => Promise<string> | string)
-    | string
+      }) => LivePreviewURLType | Promise<LivePreviewURLType>)
+    | LivePreviewURLType
 }
+
+export type RootLivePreviewConfig = {
+  collections?: string[]
+  globals?: string[]
+} & LivePreviewConfig
 
 export type OGImageConfig = {
   alt?: string
@@ -202,7 +215,7 @@ export type MetaConfig = {
   titleSuffix?: string
 } & DeepClone<Metadata>
 
-export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
+export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
   locale: string
@@ -252,6 +265,13 @@ export type InitOptions = {
    * and the backend functionality
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
+  /**
+   * If set to `true`, payload will initialize crons for things like autorunning jobs on initialization.
+   *
+   * @default false
+   */
+  cron?: boolean
+
   /**
    * Disable connect to the database on init
    */
@@ -341,35 +361,57 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewComponent` instead.
+ */
+export type EditViewComponent = DocumentViewComponent
 
-export type EditViewConfig = {
+export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
+
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewConfig` instead.
+ */
+export type EditViewConfig = DocumentViewConfig
+
+type BaseDocumentViewConfig = {
+  actions?: CustomComponent[]
   meta?: MetaConfig
-} & (
-  | {
-      actions?: CustomComponent[]
-    }
-  | {
-      Component: EditViewComponent
-      path?: string
-    }
-  | {
-      path?: string
-      /**
-       * Add a new Edit View to the admin panel
-       * i.e. you can render a custom view that has no tab, if desired
-       * Or override a specific properties of an existing one
-       * i.e. you can customize the `Default` view tab label, if desired
-       */
-      tab?: DocumentTabConfig
-    }
-)
+  tab?: DocumentTabConfig
+}
+
+/*
+  If your view does not originate from a "known" key, e.g. `myCustomView`, then it is considered a "custom" view and can accept a `path`, etc.
+  To render just a tab component without an accompanying view, you can omit the `path` and `Component` properties altogether.
+*/
+export type CustomDocumentViewConfig =
+  | ({
+      Component: DocumentViewComponent
+      path: `/${string}`
+    } & BaseDocumentViewConfig)
+  | ({
+      Component?: DocumentViewComponent
+      path?: never
+    } & BaseDocumentViewConfig)
+
+/*
+  If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept a `path`, etc.
+*/
+export type DefaultDocumentViewConfig = {
+  Component?: DocumentViewComponent
+} & BaseDocumentViewConfig
+
+export type DocumentViewConfig = CustomDocumentViewConfig | DefaultDocumentViewConfig
 
 export type Params = { [key: string]: string | string[] | undefined }
 
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
+  readonly id?: number | string
   readonly locale?: Locale
   readonly params?: Params
   readonly payload: Payload
@@ -428,7 +470,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -678,6 +720,16 @@ export type AfterErrorHookArgs = {
   result?: ErrorResult
 }
 
+export type ImportMapGenerators = Array<
+  (props: {
+    addToImportMap: AddToImportMap
+    baseDir: string
+    config: SanitizedConfig
+    importMap: InternalImportMap
+    imports: Imports
+  }) => void
+>
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -709,7 +761,12 @@ export type Config = {
           username?: string
         }
       | false
-
+    /**
+     * Automatically refresh user tokens for users logged into the dashboard
+     *
+     * @default false
+     */
+    autoRefresh?: boolean
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -717,6 +774,7 @@ export type Config = {
       | {
           Component: PayloadComponent
         }
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -776,6 +834,11 @@ export type Config = {
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
       /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      settingsMenu?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -785,8 +848,10 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         account?: AdminViewConfig
         /** Replace the admin homepage */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         dashboard?: AdminViewConfig
       }
     }
@@ -821,25 +886,19 @@ export type Config = {
        * You can use generators to add custom components to the component import map.
        * This allows you to import custom components in the admin panel.
        */
-      generators?: Array<
-        (props: {
-          addToImportMap: AddToImportMap
-          baseDir: string
-          config: SanitizedConfig
-          importMap: InternalImportMap
-          imports: Imports
-        }) => void
-      >
+      generators?: ImportMapGenerators
       /**
        * If Payload cannot find the import map file location automatically,
        * you can manually provide it here.
        */
       importMapFile?: string
     }
-    livePreview?: {
-      collections?: string[]
-      globals?: string[]
-    } & LivePreviewConfig
+    /**
+     * Live Preview options.
+     *
+     * @see https://payloadcms.com/docs/live-preview/overview
+     */
+    livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
@@ -905,9 +964,34 @@ export type Config = {
      * Configure timezone related settings for the admin panel.
      */
     timezones?: TimezonesConfig
+    /**
+     * Configure toast message behavior and appearance in the admin panel.
+     * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     *
+     * @experimental This property is experimental and may change in future releases. Use at your own risk.
+     */
+    toast?: {
+      /**
+       * Time in milliseconds until the toast automatically closes.
+       * @default 4000
+       */
+      duration?: number
+      /**
+       * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
+       * Otherwise only the latest notification can be read until the user hovers the stack.
+       * @default false
+       */
+      expand?: boolean
+      /**
+       * The maximum number of toasts that can be visible on the screen at once.
+       * @default 5
+       */
+      limit?: number
+    }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+
   /**
    * Configure authentication-related Payload-wide settings.
    */
@@ -921,6 +1005,15 @@ export type Config = {
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
+  /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own risk.
+   */
+  bodyParser?: Partial<BusboyConfig>
   /**
    * Manage the datamodel of your application
    *
@@ -952,10 +1045,8 @@ export type Config = {
   cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
-
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -986,9 +1077,10 @@ export type Config = {
   endpoints?: Endpoint[]
   /**
    * Options for folder view within the admin panel
-   * @experimental this feature may change in minor versions until it is fully stable
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
    */
-  folders?: RootFoldersConfiguration
+  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1002,6 +1094,17 @@ export type Config = {
    */
   graphQL?: {
     disable?: boolean
+    /**
+     * Disable introspection queries in production.
+     *
+     * @default true
+     */
+    disableIntrospectionInProduction?: boolean
+    /**
+     * Disable the GraphQL Playground in production.
+     *
+     * @default true
+     */
     disablePlaygroundInProduction?: boolean
     maxComplexity?: number
     /**
@@ -1074,7 +1177,7 @@ export type Config = {
    *
    * ```
    */
-  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+  logger?: 'sync' | { destination?: DestinationStream; options: LoggerOptions } | PayloadLogger
 
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
@@ -1135,18 +1238,35 @@ export type Config = {
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
-  /** Control the routing structure that Payload binds itself to. */
+  /**
+   * Control the routing structure that Payload binds itself to.
+   * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+   */
   routes?: {
-    /** The route for the admin panel.
-     * @example "/my-admin"
+    /**
+     * The route for the admin panel.
+     * @example "/my-admin" or "/"
      * @default "/admin"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
      */
     admin?: string
-    /** @default "/api"  */
+    /**
+     * The base route for all REST API endpoints.
+     * @default "/api"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     api?: string
-    /** @default "/graphql"  */
+    /**
+     * The base route for all GraphQL endpoints.
+     * @default "/graphql"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQL?: string
-    /** @default "/graphql-playground" */
+    /**
+     * The route for the GraphQL Playground.
+     * @default "/graphql-playground"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQLPlayground?: string
   }
   /** Secure string that Payload will use for any encryption workflows */
@@ -1226,7 +1346,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
-  jobs: JobsConfig // Redefine here, as the DeepRequired<Config> can break its type
+  jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
@@ -1251,46 +1371,53 @@ export type SanitizedConfig = {
   | 'endpoint'
   | 'globals'
   | 'i18n'
+  | 'jobs'
   | 'localization'
   | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
+/**
+ * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+ * + `root` - `/admin/collections/:collection/:id/**\/*`
+ * @link https://payloadcms.com/docs/custom-components/document-views#document-root
+ */
 export type EditConfigWithRoot = {
   api?: never
   default?: never
   livePreview?: never
-  /**
-   * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
-   * + `root` - `/admin/collections/:collection/:id/**\/*`
-   */
-  root: Partial<EditViewConfig>
+  root: DefaultDocumentViewConfig
   version?: never
   versions?: never
 }
 
+type KnownEditKeys = 'api' | 'default' | 'livePreview' | 'root' | 'version' | 'versions'
+
+/**
+ * Replace or modify individual nested routes, or add new ones:
+ * + `default` - `/admin/collections/:collection/:id`
+ * + `api` - `/admin/collections/:collection/:id/api`
+ * + `livePreview` - `/admin/collections/:collection/:id/preview`
+ * + `references` - `/admin/collections/:collection/:id/references`
+ * + `relationships` - `/admin/collections/:collection/:id/relationships`
+ * + `versions` - `/admin/collections/:collection/:id/versions`
+ * + `version` - `/admin/collections/:collection/:id/versions/:version`
+ * + `customView` - `/admin/collections/:collection/:id/:path`
+ *
+ * To override the entire Edit View including all nested views, use the `root` key.
+ *
+ * @link https://payloadcms.com/docs/custom-components/document-views
+ */
 export type EditConfigWithoutRoot = {
-  [key: string]: EditViewConfig
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   *
-   * To override the entire Edit View including all nested views, use the `root` key.
-   */
-  api?: Partial<EditViewConfig>
-  default?: Partial<EditViewConfig>
-  livePreview?: Partial<EditViewConfig>
+  [K in Exclude<string, KnownEditKeys>]: CustomDocumentViewConfig
+} & {
+  api?: DefaultDocumentViewConfig
+  default?: DefaultDocumentViewConfig
+  livePreview?: DefaultDocumentViewConfig
   root?: never
-  version?: Partial<EditViewConfig>
-  versions?: Partial<EditViewConfig>
+  version?: DefaultDocumentViewConfig
+  versions?: DefaultDocumentViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent

@@ -1,6 +1,5 @@
 import type { Stats } from 'fs'
 
-// @ts-strict-ignore
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
 import { status as httpStatus } from 'http-status'
@@ -18,7 +17,7 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const filename = req.routeParams.filename as string
+  const filename = req.routeParams?.filename as string
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -27,26 +26,32 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
-  const accessResult = await checkFileAccess({
+  const accessResult = (await checkFileAccess({
     collection,
     filename,
     req,
-  })
+  }))!
 
   if (accessResult instanceof Response) {
     return accessResult
   }
 
   if (collection.config.upload.handlers?.length) {
-    let customResponse = null
+    let customResponse: null | Response | void = null
+    const headers = new Headers()
+
     for (const handler of collection.config.upload.handlers) {
       customResponse = await handler(req, {
         doc: accessResult,
+        headers,
         params: {
           collection: collection.config.slug,
           filename,
         },
       })
+      if (customResponse && customResponse instanceof Response) {
+        break
+      }
     }
 
     if (customResponse instanceof Response) {
@@ -61,7 +66,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   try {
     stats = await fsPromises.stat(filePath)
   } catch (err) {
-    if (err.code === 'ENOENT') {
+    if ((err as { code?: string }).code === 'ENOENT') {
       req.payload.logger.error(
         `File ${filename} for collection ${collection.config.slug} is missing on the disk. Expected path: ${filePath}`,
       )
@@ -91,12 +96,17 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   const data = streamFile(filePath)
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
+  let mimeType = fileTypeResult.mime
+
+  if (filePath.endsWith('.svg') && fileTypeResult.mime === 'application/xml') {
+    mimeType = 'image/svg+xml'
+  }
 
   let headers = new Headers()
-  headers.set('Content-Type', fileTypeResult.mime)
+  headers.set('Content-Type', mimeType)
   headers.set('Content-Length', stats.size + '')
   headers = collection.config.upload?.modifyResponseHeaders
-    ? collection.config.upload.modifyResponseHeaders({ headers })
+    ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
     : headers
 
   return new Response(data, {

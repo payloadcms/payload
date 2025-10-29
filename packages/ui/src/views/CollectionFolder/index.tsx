@@ -1,24 +1,22 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { CollectionSlug, Document, FolderListViewClientProps } from 'payload'
-import type { FolderDocumentItemKey } from 'payload/shared'
+import type { FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
-import { formatFolderOrDocumentItem } from 'payload/shared'
+import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
-import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
-import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
-import { ListFolderPills } from '../../elements/ListFolderPills/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
@@ -29,16 +27,64 @@ import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useFolder } from '../../providers/Folders/index.js'
+import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
+import './index.scss'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
-import './index.scss'
 
 const baseClass = 'collection-folder-list'
 
-export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
+export function DefaultCollectionFolderView({
+  allCollectionFolderSlugs: folderCollectionSlugs,
+  allowCreateCollectionSlugs,
+  baseFolderPath,
+  breadcrumbs,
+  documents,
+  folderFieldName,
+  folderID,
+  FolderResultsComponent,
+  search,
+  sort,
+  subfolders,
+  ...restOfProps
+}: FolderListViewClientProps) {
+  return (
+    <FolderProvider
+      allCollectionFolderSlugs={folderCollectionSlugs}
+      allowCreateCollectionSlugs={allowCreateCollectionSlugs}
+      baseFolderPath={baseFolderPath}
+      breadcrumbs={breadcrumbs}
+      documents={documents}
+      folderFieldName={folderFieldName}
+      folderID={folderID}
+      FolderResultsComponent={FolderResultsComponent}
+      search={search}
+      sort={sort}
+      subfolders={subfolders}
+    >
+      <CollectionFolderViewInContext {...restOfProps} />
+    </FolderProvider>
+  )
+}
+
+type CollectionFolderViewInContextProps = Omit<
+  FolderListViewClientProps,
+  | 'allCollectionFolderSlugs'
+  | 'allowCreateCollectionSlugs'
+  | 'baseFolderPath'
+  | 'breadcrumbs'
+  | 'documents'
+  | 'folderFieldName'
+  | 'folderID'
+  | 'FolderResultsComponent'
+  | 'subfolders'
+>
+
+function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps) {
   const {
     AfterFolderList,
     AfterFolderListTable,
@@ -48,7 +94,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
-    hasCreatePermission,
+    search,
     viewPreference,
   } = props
 
@@ -58,26 +104,25 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
   const { setStepNav } = useStepNav()
   const { setPreference } = usePreferences()
   const {
-    addItems,
+    allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
-    filterItems,
-    focusedRowIndex,
+    dragOverlayItem,
     folderCollectionConfig,
+    folderCollectionSlug,
+    FolderResultsComponent,
+    folderType,
     getSelectedItems,
-    isDragging,
-    lastSelectedIndex,
     moveToFolder,
-    onItemClick,
-    onItemKeyPress,
-    search,
-    selectedIndexes,
-    setFolderID,
+    refineFolderData,
+    selectedItemKeys,
     setIsDragging,
     subfolders,
   } = useFolder()
 
-  const [activeView, setActiveView] = React.useState<'grid' | 'list'>(viewPreference || 'grid')
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
+  const { clearRouteCache } = useRouteCache()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -96,50 +141,31 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
       }
 
       if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
-        await moveToFolder({
-          itemsToMove: getSelectedItems(),
-          toFolderID: event.over.data.current.id || null,
-        })
+        try {
+          await moveToFolder({
+            itemsToMove: getSelectedItems(),
+            toFolderID: event.over.data.current.id,
+          })
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error moving items:', error)
+        }
+
+        clearRouteCache()
       }
     },
-    [moveToFolder, getSelectedItems],
+    [moveToFolder, getSelectedItems, clearRouteCache],
   )
 
-  const onCreateSuccess = React.useCallback(
-    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
-      const collectionConfig = getEntityConfig({ collectionSlug })
-      void addItems([
-        formatFolderOrDocumentItem({
-          folderFieldName: config.folders.fieldName,
-          isUpload: Boolean(collectionConfig?.upload),
-          relationTo: collectionSlug,
-          useAsTitle: collectionConfig.admin.useAsTitle,
-          value: doc,
-        }),
-      ])
+  const handleSetViewType = React.useCallback(
+    async (view: 'grid' | 'list') => {
+      await setPreference(`${collectionSlug}-collection-folder`, {
+        viewPreference: view,
+      })
+      clearRouteCache()
     },
-    [getEntityConfig, addItems, config.folders.fieldName],
+    [collectionSlug, setPreference, clearRouteCache],
   )
-
-  const selectedItemKeys = React.useMemo(() => {
-    return new Set(
-      getSelectedItems().reduce<FolderDocumentItemKey[]>((acc, item) => {
-        if (item) {
-          if (item.relationTo && item.value) {
-            acc.push(`${item.relationTo}-${item.value.id}`)
-          }
-        }
-        return acc
-      }, []),
-    )
-  }, [getSelectedItems])
-
-  const handleSetViewType = React.useCallback((view: 'grid' | 'list') => {
-    void setPreference(`${collectionSlug}-collection-folder`, {
-      viewPreference: view,
-    })
-    setActiveView(view)
-  }, [])
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -165,7 +191,16 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   id={null}
                   key="root"
                   onClick={() => {
-                    void setFolderID({ folderID: null })
+                    startRouteTransition(() => {
+                      if (config.folders) {
+                        router.push(
+                          formatAdminURL({
+                            adminRoute: config.routes.admin,
+                            path: `/collections/${collectionSlug}/${config.folders.slug}`,
+                          }),
+                        )
+                      }
+                    })
                   }}
                 >
                   <ColoredFolderIcon />
@@ -184,7 +219,16 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   id={crumb.id}
                   key={crumb.id}
                   onClick={() => {
-                    void setFolderID({ folderID: crumb.id })
+                    startRouteTransition(() => {
+                      if (config.folders) {
+                        router.push(
+                          formatAdminURL({
+                            adminRoute: config.routes.admin,
+                            path: `/collections/${collectionSlug}/${config.folders.slug}/${crumb.id}`,
+                          }),
+                        )
+                      }
+                    })
                   }}
                 >
                   {crumb.name}
@@ -194,13 +238,25 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
         }),
       ])
     }
-  }, [setStepNav, labels, drawerDepth, i18n, breadcrumbs, setFolderID])
+  }, [
+    breadcrumbs,
+    collectionSlug,
+    config.folders,
+    config.routes.admin,
+    drawerDepth,
+    i18n,
+    labels?.plural,
+    router,
+    setStepNav,
+    startRouteTransition,
+  ])
 
   const totalDocsAndSubfolders = documents.length + subfolders.length
 
   return (
     <Fragment>
       <DndEventListener onDragEnd={onDragEnd} setIsDragging={setIsDragging} />
+
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeFolderList}
         <Gutter className={`${baseClass}__wrap`}>
@@ -209,31 +265,42 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
               !smallBreak && (
                 <ListSelection
                   disableBulkDelete={disableBulkDelete}
-                  disableBulkEdit={disableBulkEdit}
+                  disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
+                  folderAssignedCollections={
+                    Array.isArray(folderType) ? folderType : [collectionSlug]
+                  }
                   key="list-selection"
                 />
               ),
-              <ListFolderPills
+              <DefaultListViewTabs
                 collectionConfig={collectionConfig}
-                key="list-header-buttons"
+                config={config}
+                key="default-list-actions"
                 viewType="folders"
               />,
             ].filter(Boolean)}
             AfterListHeaderContent={Description}
             title={getTranslation(labels?.plural, i18n)}
             TitleActions={[
-              hasCreatePermission && (
+              allowCreateCollectionSlugs.length && (
                 <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
-                  collectionSlugs={[folderCollectionConfig.slug, collectionSlug]}
+                  buttonLabel={
+                    allowCreateCollectionSlugs.length > 1
+                      ? t('general:createNew')
+                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                  }
+                  collectionSlugs={allowCreateCollectionSlugs}
+                  folderAssignedCollections={
+                    Array.isArray(folderType) ? folderType : [collectionSlug]
+                  }
                   key="create-new-button"
-                  onCreateSuccess={onCreateSuccess}
+                  onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
                 />
               ),
               <ListBulkUploadButton
                 collectionSlug={collectionSlug}
-                hasCreatePermission={hasCreatePermission}
+                hasCreatePermission={allowCreateCollectionSlugs.includes(collectionSlug)}
                 isBulkUploadEnabled={isBulkUploadEnabled}
                 key="bulk-upload-button"
               />,
@@ -243,7 +310,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
             Actions={[
               <SortByPill key="sort-by-pill" />,
               <ToggleViewButtons
-                activeView={activeView}
+                activeView={viewPreference}
                 key="toggle-view-buttons"
                 setActiveView={handleSetViewType}
               />,
@@ -252,70 +319,38 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
             label={t('general:searchBy', {
               label: t('general:name'),
             })}
-            onSearchChange={(search) => filterItems({ search })}
+            onSearchChange={(search) => refineFolderData({ query: { search }, updateURL: true })}
             searchQueryParam={search}
           />
           {BeforeFolderListTable}
-          {totalDocsAndSubfolders > 0 && (
-            <>
-              {activeView === 'grid' ? (
-                <div>
-                  {subfolders.length ? (
-                    <>
-                      <ItemCardGrid
-                        items={subfolders}
-                        selectedItemKeys={selectedItemKeys}
-                        title={'Folders'}
-                        type="folder"
-                      />
-                    </>
-                  ) : null}
-
-                  {documents.length ? (
-                    <>
-                      <ItemCardGrid
-                        items={documents}
-                        selectedItemKeys={selectedItemKeys}
-                        subfolderCount={subfolders.length}
-                        title={'Documents'}
-                        type="file"
-                      />
-                    </>
-                  ) : null}
-                </div>
-              ) : (
-                <FolderFileTable
-                  dateFormat={config.admin.dateFormat}
-                  documents={documents}
-                  focusedRowIndex={focusedRowIndex}
-                  i18n={i18n}
-                  isMovingItems={isDragging}
-                  onRowClick={onItemClick}
-                  onRowPress={onItemKeyPress}
-                  selectedItems={selectedItemKeys}
-                  showRelationCell={false}
-                  subfolders={subfolders}
-                />
-              )}
-            </>
-          )}
+          {totalDocsAndSubfolders > 0 && FolderResultsComponent}
           {totalDocsAndSubfolders === 0 && (
             <NoListResults
               Actions={[
-                <ListCreateNewDocInFolderButton
-                  buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                  collectionSlugs={[folderCollectionConfig.slug]}
-                  key="create-folder"
-                  onCreateSuccess={onCreateSuccess}
-                  slugPrefix="create-folder--no-results"
-                />,
-                <ListCreateNewDocInFolderButton
-                  buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                  collectionSlugs={[collectionSlug]}
-                  key="create-document"
-                  onCreateSuccess={onCreateSuccess}
-                  slugPrefix="create-document--no-results"
-                />,
+                allowCreateCollectionSlugs.includes(folderCollectionSlug) && (
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    collectionSlugs={[folderCollectionConfig.slug]}
+                    folderAssignedCollections={
+                      Array.isArray(folderType) ? folderType : [collectionSlug]
+                    }
+                    key="create-folder"
+                    onCreateSuccess={clearRouteCache}
+                    slugPrefix="create-folder--no-results"
+                  />
+                ),
+                allowCreateCollectionSlugs.includes(collectionSlug) && (
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    collectionSlugs={[collectionSlug]}
+                    folderAssignedCollections={
+                      Array.isArray(folderType) ? folderType : [collectionSlug]
+                    }
+                    key="create-document"
+                    onCreateSuccess={clearRouteCache}
+                    slugPrefix="create-document--no-results"
+                  />
+                ),
               ].filter(Boolean)}
               Message={
                 <p>
@@ -333,14 +368,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
         </Gutter>
         {AfterFolderList}
       </div>
-      <DragOverlaySelection
-        allItems={[...subfolders, ...documents]}
-        lastSelected={lastSelectedIndex}
-        selectedCount={selectedIndexes.size}
-      />
+      {selectedItemKeys.size > 0 && dragOverlayItem && (
+        <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
+      )}
     </Fragment>
   )
 }
+
 function DndEventListener({ onDragEnd, setIsDragging }) {
   useDndMonitor({
     onDragCancel() {

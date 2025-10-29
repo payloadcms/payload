@@ -25,6 +25,7 @@ type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
   blocks: (ClientBlock | string)[] | ClientBlock[]
+  copyRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
@@ -35,6 +36,7 @@ type BlocksFieldProps = {
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
+  pasteRow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
@@ -51,6 +53,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   attributes,
   block,
   blocks,
+  copyRow,
   duplicateRow,
   errorCount,
   fields,
@@ -62,6 +65,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   listeners,
   moveRow,
   parentPath,
+  pasteRow,
   path,
   permissions,
   readOnly,
@@ -90,16 +94,39 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  let blockPermissions: RenderFieldsProps['permissions'] = undefined
+  let blockPermissions: RenderFieldsProps['permissions'] = true
 
   if (permissions === true) {
     blockPermissions = true
   } else {
-    const permissionsBlockSpecific = permissions?.blocks?.[block.slug]
+    const permissionsBlockSpecific = permissions?.blocks?.[block.slug] || permissions?.blocks
     if (permissionsBlockSpecific === true) {
       blockPermissions = true
+    } else if (permissionsBlockSpecific?.fields) {
+      blockPermissions = permissionsBlockSpecific.fields
     } else {
-      blockPermissions = permissionsBlockSpecific?.fields
+      // Check if we should fall back to read-only mode based on permission structure
+      // This handles cases where field-level access control exists but block permissions were sanitized
+      if (typeof permissions === 'object' && permissions && !permissionsBlockSpecific) {
+        // If permissions object exists but has no block-specific permissions,
+        // check if it has any restrictive characteristics
+        const hasReadPermission = permissions.read === true
+        const missingCreateOrUpdate = !permissions.create || !permissions.update
+        const hasRestrictiveStructure =
+          hasReadPermission &&
+          (missingCreateOrUpdate ||
+            (typeof permissions === 'object' &&
+              Object.keys(permissions).length === 1 &&
+              permissions.read))
+
+        if (hasRestrictiveStructure) {
+          blockPermissions = { read: true }
+        } else {
+          blockPermissions = permissionsBlockSpecific?.fields
+        }
+      } else {
+        blockPermissions = permissionsBlockSpecific?.fields
+      }
     }
   }
 
@@ -119,12 +146,14 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               addRow={addRow}
               blocks={blocks}
               blockType={row.blockType}
+              copyRow={copyRow}
               duplicateRow={duplicateRow}
               fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              pasteRow={pasteRow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}

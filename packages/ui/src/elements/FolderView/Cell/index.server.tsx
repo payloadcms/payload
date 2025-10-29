@@ -9,12 +9,18 @@ export const FolderTableCell = (props: DefaultServerCellComponentProps) => {
     (props.collectionConfig.upload ? props.rowData?.filename : props.rowData?.title) ||
     props.rowData.id
 
+  if (!props.payload.config.folders) {
+    return null
+  }
+
   return (
     <FolderTableCellClient
       collectionSlug={props.collectionSlug}
       data={props.rowData}
       docTitle={titleToRender}
+      folderCollectionSlug={props.payload.config.folders.slug}
       folderFieldName={props.payload.config.folders.fieldName}
+      viewType={props.viewType}
     />
   )
 }

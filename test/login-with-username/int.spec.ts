@@ -17,9 +17,7 @@ describe('Login With Username Feature', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should not allow creation with neither email nor username', async () => {

@@ -94,6 +94,7 @@ export interface Config {
     'point-fields': PointField;
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
+    'slug-fields': SlugField;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -133,6 +134,7 @@ export interface Config {
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
+    'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -226,6 +228,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -293,9 +302,15 @@ export interface ArrayField {
   potentiallyEmptyArray?:
     | {
         text?: string | null;
-        groupInRow?: {
-          textInGroupInRow?: string | null;
+        group?: {
+          text?: string | null;
         };
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -346,6 +361,12 @@ export interface ArrayField {
     | {
         text?: string | null;
         id?: string | null;
+      }[]
+    | null;
+  arrayWithCustomID?:
+    | {
+        id?: string | null;
+        text?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -536,6 +557,62 @@ export interface BlockField {
           }
       )[]
     | null;
+  readOnly?:
+    | {
+        title?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'readOnlyBlock';
+      }[]
+    | null;
+  /**
+   * Change the value of this field to change the enabled blocks of the blocksWithDynamicFilterOptions field. If it's empty, all blocks are enabled.
+   */
+  enabledBlocks?: string | null;
+  blocksWithDynamicFilterOptions?:
+    | (
+        | {
+            block1Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockOne';
+          }
+        | {
+            block2Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockTwo';
+          }
+        | {
+            block3Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockThree';
+          }
+      )[]
+    | null;
+  blocksWithFilterOptions?:
+    | (
+        | {
+            block1Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockFour';
+          }
+        | {
+            block2Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockFive';
+          }
+        | {
+            block3Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockSix';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -700,6 +777,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  hasManySecond?: string[] | null;
   readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
@@ -790,6 +868,7 @@ export interface ConditionalLogic {
   id: string;
   text: string;
   toggleField?: boolean | null;
+  fieldWithDocIDCondition?: string | null;
   fieldWithCondition?: string | null;
   fieldWithOperationCondition?: string | null;
   customFieldWithField?: string | null;
@@ -800,7 +879,7 @@ export interface ConditionalLogic {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -903,6 +982,7 @@ export interface DateField {
   id: string;
   default: string;
   timeOnly?: string | null;
+  timeOnlyWithMiliseconds?: string | null;
   timeOnlyWithCustomFormat?: string | null;
   dayOnly?: string | null;
   dayAndTime?: string | null;
@@ -1082,6 +1162,7 @@ export interface GroupField {
       | null;
   };
   insideUnnamedGroup?: string | null;
+  insideGroupWithNoLabel?: string | null;
   deeplyNestedGroup?: {
     insideNestedUnnamedGroup?: string | null;
   };
@@ -1106,6 +1187,34 @@ export interface RowField {
   no_set_width_within_row_b?: string | null;
   no_set_width_within_row_c?: string | null;
   field_20_percent_width_within_row_d?: string | null;
+  leftColumn?:
+    | {
+        leftText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'leftTextBlock';
+      }[]
+    | null;
+  rightColumn?:
+    | {
+        rightText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rightTextBlock';
+      }[]
+    | null;
+  arrayLeftColumn?:
+    | {
+        leftArrayChild?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayRightColumn?:
+    | {
+        rightArrayChild?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1259,6 +1368,11 @@ export interface PointField {
    * @minItems 2
    * @maxItems 2
    */
+  camelCasePoint?: [number, number] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
   localized?: [number, number] | null;
   group?: {
     /**
@@ -1383,6 +1497,27 @@ export interface SelectField {
   selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   disallowOption1?: boolean | null;
   selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields".
+ */
+export interface SlugField {
+  id: string;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  localizedTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLocalizedSlug?: boolean | null;
+  localizedSlug?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1736,6 +1871,10 @@ export interface PayloadLockedDocument {
         value: string | SelectField;
       } | null)
     | ({
+        relationTo: 'slug-fields';
+        value: string | SlugField;
+      } | null)
+    | ({
         relationTo: 'tabs-fields-2';
         value: string | TabsFields2;
       } | null)
@@ -1836,6 +1975,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1908,10 +2054,16 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
-        groupInRow?:
+        group?:
           | T
           | {
-              textInGroupInRow?: T;
+              text?: T;
+            };
+        array?:
+          | T
+          | {
+              text?: T;
+              id?: T;
             };
         id?: T;
       };
@@ -1960,6 +2112,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  arrayWithCustomID?:
+    | T
+    | {
+        id?: T;
+        text?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2194,6 +2352,68 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  readOnly?:
+    | T
+    | {
+        readOnlyBlock?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  enabledBlocks?: T;
+  blocksWithDynamicFilterOptions?:
+    | T
+    | {
+        blockOne?:
+          | T
+          | {
+              block1Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockTwo?:
+          | T
+          | {
+              block2Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockThree?:
+          | T
+          | {
+              block3Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithFilterOptions?:
+    | T
+    | {
+        blockFour?:
+          | T
+          | {
+              block1Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockFive?:
+          | T
+          | {
+              block2Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockSix?:
+          | T
+          | {
+              block3Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2384,6 +2604,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
 export interface ConditionalLogicSelect<T extends boolean = true> {
   text?: T;
   toggleField?: T;
+  fieldWithDocIDCondition?: T;
   fieldWithCondition?: T;
   fieldWithOperationCondition?: T;
   customFieldWithField?: T;
@@ -2485,6 +2706,7 @@ export interface CustomRowIdSelect<T extends boolean = true> {
 export interface DateFieldsSelect<T extends boolean = true> {
   default?: T;
   timeOnly?: T;
+  timeOnlyWithMiliseconds?: T;
   timeOnlyWithCustomFormat?: T;
   dayOnly?: T;
   dayAndTime?: T;
@@ -2685,6 +2907,7 @@ export interface GroupFieldsSelect<T extends boolean = true> {
         email?: T;
       };
   insideUnnamedGroup?: T;
+  insideGroupWithNoLabel?: T;
   deeplyNestedGroup?:
     | T
     | {
@@ -2711,6 +2934,40 @@ export interface RowFieldsSelect<T extends boolean = true> {
   no_set_width_within_row_b?: T;
   no_set_width_within_row_c?: T;
   field_20_percent_width_within_row_d?: T;
+  leftColumn?:
+    | T
+    | {
+        leftTextBlock?:
+          | T
+          | {
+              leftText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  rightColumn?:
+    | T
+    | {
+        rightTextBlock?:
+          | T
+          | {
+              rightText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  arrayLeftColumn?:
+    | T
+    | {
+        leftArrayChild?: T;
+        id?: T;
+      };
+  arrayRightColumn?:
+    | T
+    | {
+        rightArrayChild?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2808,6 +3065,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
  */
 export interface PointFieldsSelect<T extends boolean = true> {
   point?: T;
+  camelCasePoint?: T;
   localized?: T;
   group?:
     | T
@@ -2883,6 +3141,20 @@ export interface SelectFieldsSelect<T extends boolean = true> {
   selectWithJsxLabelOption?: T;
   disallowOption1?: T;
   selectWithFilteredOptions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields_select".
+ */
+export interface SlugFieldsSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  localizedTitle?: T;
+  generateLocalizedSlug?: T;
+  localizedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3038,6 +3310,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  hasManySecond?: T;
   readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;

@@ -84,7 +84,7 @@ export type SanitizedSearchPluginConfig = {
 
 export type SyncWithSearchArgs = {
   collection: string
-  pluginConfig: SearchPluginConfig
+  pluginConfig: SanitizedSearchPluginConfig
 } & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>
 
 export type SyncDocArgs = {

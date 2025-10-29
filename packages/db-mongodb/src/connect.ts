@@ -35,11 +35,38 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    if (!this.connection) {
+      this.connection = await mongoose.createConnection(urlToConnect, connectionOptions).asPromise()
+    }
+
+    await this.connection.openUri(urlToConnect, connectionOptions)
+
+    if (this.useAlternativeDropDatabase) {
+      if (this.connection.db) {
+        // Firestore doesn't support dropDatabase, so we monkey patch
+        // dropDatabase to delete all documents from all collections instead
+        this.connection.db.dropDatabase = async function (): Promise<boolean> {
+          const existingCollections = await this.listCollections().toArray()
+          await Promise.all(
+            existingCollections.map(async (collectionInfo) => {
+              const collection = this.collection(collectionInfo.name)
+              await collection.deleteMany({})
+            }),
+          )
+          return true
+        }
+        this.connection.dropDatabase = async function () {
+          await this.db?.dropDatabase()
+        }
+      }
+    }
 
     // If we are running a replica set with MongoDB Memory Server,
     // wait until the replica set elects a primary before proceeding
     if (this.mongoMemoryServer) {
+      this.payload.logger.info(
+        'Waiting for MongoDB Memory Server replica set to elect a primary...',
+      )
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
 
@@ -50,10 +77,11 @@ export const connect: Connect = async function connect(
       this.beginTransaction = defaultBeginTransaction()
     }
 
-    if (!this.mongoMemoryServer && !hotReload) {
+    if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
-        await mongoose.connection.dropDatabase()
+        await this.connection.dropDatabase()
+
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }

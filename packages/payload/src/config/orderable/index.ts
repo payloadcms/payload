@@ -4,7 +4,7 @@ import type { BeforeChangeHook, CollectionConfig } from '../../collections/confi
 import type { Field } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -89,6 +89,7 @@ export const addOrderableFieldsAndHook = (
       admin: {
         disableBulkEdit: true,
         disabled: true,
+        disableGroupBy: true,
         disableListColumn: true,
         disableListFilter: true,
         hidden: true,

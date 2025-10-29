@@ -35,5 +35,18 @@ export const OrderableJoinCollection: CollectionConfig = {
       on: 'orderableField',
       collection: 'orderable',
     },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'orderableJoinField',
+          type: 'join',
+          on: 'orderableField',
+          orderable: true,
+          collection: 'orderable',
+        },
+      ],
+    },
   ],
 }

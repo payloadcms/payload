@@ -37,11 +37,16 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.Description)
 
     addToImportMap(collection.admin?.components?.edit?.beforeDocumentControls)
+    addToImportMap(collection.admin?.components?.edit?.editMenuItems)
     addToImportMap(collection.admin?.components?.edit?.PreviewButton)
     addToImportMap(collection.admin?.components?.edit?.PublishButton)
     addToImportMap(collection.admin?.components?.edit?.SaveButton)
     addToImportMap(collection.admin?.components?.edit?.SaveDraftButton)
     addToImportMap(collection.admin?.components?.edit?.Upload)
+
+    if (collection.upload?.admin?.components?.controls) {
+      addToImportMap(collection.upload?.admin?.components?.controls)
+    }
 
     if (collection.admin?.components?.views?.edit) {
       for (const editViewConfig of Object.values(collection.admin?.components?.views?.edit)) {
