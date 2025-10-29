@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * A hook for managing state that can be controlled by props but also overridden locally.
@@ -7,11 +7,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  *
  * @internal - may change or be removed without a major version bump
  */
-export function useControllableState<T>(
+export function useControllableState<T, D>(
   propValue: T,
-  defaultValue?: T,
-): [T, (value: ((prev: T) => T) | T) => void] {
-  const [localValue, setLocalValue] = useState<T>(propValue ?? defaultValue)
+  defaultValue: D,
+): [T extends NonNullable<T> ? T : D | NonNullable<T>, (value: ((prev: T) => T) | T) => void]
+export function useControllableState<T>(propValue: T): [T, (value: ((prev: T) => T) | T) => void]
+export function useControllableState<T, D>(
+  propValue: T,
+  defaultValue?: D,
+): [T extends NonNullable<T> ? T : D | NonNullable<T>, (value: ((prev: T) => T) | T) => void] {
+  const [localValue, setLocalValue] = useState<T>(propValue)
   const initialRenderRef = useRef(true)
 
   useEffect(() => {
@@ -23,9 +28,8 @@ export function useControllableState<T>(
     setLocalValue(propValue)
   }, [propValue])
 
-  const setValue = useCallback((value: ((prev: T) => T) | T) => {
-    setLocalValue(value)
-  }, [])
-
-  return [localValue, setValue]
+  return [localValue ?? defaultValue, setLocalValue] as [
+    T extends NonNullable<T> ? T : D | NonNullable<T>,
+    (value: ((prev: T) => T) | T) => void,
+  ]
 }
