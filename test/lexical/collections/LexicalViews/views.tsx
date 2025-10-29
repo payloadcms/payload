@@ -1,6 +1,7 @@
 'use client'
 import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
-import type { BlockNode } from '@payloadcms/richtext-lexical/client'
+
+import { type BlockNode, defaultEditorLexicalConfig } from '@payloadcms/richtext-lexical/client'
 
 export const lexicalViews: LexicalEditorViewMap = {
   default: {
@@ -40,6 +41,14 @@ export const lexicalFrontendViews: LexicalEditorViewMap = {
   frontend: {
     admin: {
       hideGutter: true,
+    },
+    lexical: {
+      ...defaultEditorLexicalConfig,
+      theme: {
+        ...defaultEditorLexicalConfig.theme,
+        link: 'frontend-link',
+        paragraph: 'frontend-paragraph',
+      },
     },
     nodes: {
       blocks: {

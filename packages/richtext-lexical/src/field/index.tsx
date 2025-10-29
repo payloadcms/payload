@@ -1,5 +1,6 @@
 'use client'
 
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import type { RichTextFieldClient } from 'payload'
 
 import { ShimmerEffect, useConfig } from '@payloadcms/ui'
@@ -20,17 +21,19 @@ const RichTextEditor = lazy(() =>
 
 export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
-    admin = {},
+    admin: _admin = {},
     clientFeatures,
     featureClientImportMap = {},
     featureClientSchemaMap,
     field,
-    lexicalEditorConfig = defaultEditorLexicalConfig,
+    lexicalEditorConfig: _lexicalEditorConfig = defaultEditorLexicalConfig,
     schemaPath,
     views,
   } = props
   const [currentView, setCurrentView] = useState<string>('default')
-  const currentViewAdminConfig: LexicalFieldAdminClientProps = views?.[currentView]?.admin ?? admin
+  const currentViewAdminConfig: LexicalFieldAdminClientProps = views?.[currentView]?.admin ?? _admin
+  const currentViewLexicalEditorConfig: LexicalEditorConfig =
+    views?.[currentView]?.lexical ?? _lexicalEditorConfig
 
   const { config } = useConfig()
 
@@ -60,14 +63,14 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       schemaPath: schemaPath ?? field.name,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
-        lexical: lexicalEditorConfig,
+        lexical: currentViewLexicalEditorConfig,
       },
     })
 
     setFinalSanitizedEditorConfig(
       sanitizeClientEditorConfig(
         resolvedClientFeatures,
-        lexicalEditorConfig,
+        currentViewLexicalEditorConfig,
         currentViewAdminConfig,
         currentView,
       ),
@@ -80,7 +83,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     featureClientSchemaMap,
     field,
     finalSanitizedEditorConfig,
-    lexicalEditorConfig,
+    currentViewLexicalEditorConfig,
     schemaPath,
     currentView,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
@@ -93,7 +96,11 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     >
       <Suspense fallback={<ShimmerEffect height="35vh" />}>
         {finalSanitizedEditorConfig && (
-          <RichTextEditor {...props} editorConfig={finalSanitizedEditorConfig} key={currentView} />
+          <RichTextEditor
+            {...props}
+            editorConfig={finalSanitizedEditorConfig}
+            key={finalSanitizedEditorConfig.view}
+          />
         )}
       </Suspense>
     </RichTextViewProvider>
