@@ -501,6 +501,19 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * Configuration for bulk operations
+   */
+  bulkOperations?: {
+    /**
+     * When true, bulk operations will process documents one at a time
+     * in separate transactions instead of all at once in a single transaction.
+     * Useful for avoiding database-side transaction limitations.
+     *
+     * @default false
+     */
+    singleTransaction?: boolean
+  }
   /** Extension point to add your custom data. Server only. */
   custom?: CollectionCustom
   /**

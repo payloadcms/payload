@@ -1028,6 +1028,20 @@ export type Config = {
    */
   bodyParser?: Partial<BusboyConfig>
   /**
+   * Global default configuration for bulk operations across all collections.
+   * Can be overridden per collection.
+   */
+  bulkOperations?: {
+    /**
+     * When true, bulk operations will process documents one at a time
+     * in separate transactions instead of all at once in a single transaction.
+     * Useful for avoiding transaction limitations with large datasets.
+     *
+     * @default false
+     */
+    singleTransaction?: boolean
+  }
+  /**
    * Manage the datamodel of your application
    *
    * @see https://payloadcms.com/docs/configuration/collections#collection-configs

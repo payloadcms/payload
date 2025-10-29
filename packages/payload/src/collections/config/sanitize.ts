@@ -47,7 +47,7 @@ export const sanitizeCollection = async (
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
+  const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection, config)
 
   // /////////////////////////////////
   // Sanitize fields
