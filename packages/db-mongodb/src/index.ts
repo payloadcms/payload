@@ -24,7 +24,13 @@ import type {
 import mongoose from 'mongoose'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 
-import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
+import type {
+  CollectionModel,
+  GlobalModel,
+  MigrateDownArgs,
+  MigrateUpArgs,
+  MongooseMigration,
+} from './types.js'
 
 import { connect } from './connect.js'
 import { count } from './count.js'
@@ -136,7 +142,7 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  prodMigrations?: Migration[]
+  prodMigrations?: MongooseMigration[]
 
   transactionOptions?: false | TransactionOptions
 
