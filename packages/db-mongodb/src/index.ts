@@ -12,7 +12,6 @@ import type {
   CollectionSlug,
   DatabaseAdapterObj,
   JsonObject,
-  Migration,
   Payload,
   TypeWithVersion,
   UpdateGlobalArgs,
