@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionPermission, FieldsPermissions, GlobalPermission } from '../auth/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Access } from '../config/types.js'
@@ -78,6 +77,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           overrideAccess: true,
           req,
         }
+
         if (operation === 'readVersions') {
           const paginatedRes = await payload.findVersions({
             ...options,
@@ -91,6 +91,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           pagination: false,
           where: combineQueries(where, { id: { equals: id } }),
         })
+
         return paginatedRes?.docs?.[0] || undefined
       }
 
@@ -102,6 +103,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         locale,
         overrideAccess: true,
         req,
+        trash: true,
       })
     }
   }
@@ -111,14 +113,16 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     accessLevel,
     disableWhere = false,
     operation,
-    policiesObj: mutablePolicies,
+    policiesObj,
   }) => {
+    const mutablePolicies = policiesObj as Record<string, any>
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
       // assign docBeingAccessed first as the promise to avoid multiple calls to getEntityDoc
       docBeingAccessed = getEntityDoc().then((doc) => {
         docBeingAccessed = doc
       })
     }
+
     // awaiting the promise to ensure docBeingAccessed is assigned before it is used
     await docBeingAccessed
 
@@ -142,15 +146,15 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   }
 
   for (const operation of operations) {
-    if (typeof entity.access[operation] === 'function') {
+    if (typeof entity.access[operation as keyof typeof entity.access] === 'function') {
       await createAccessPromise({
-        access: entity.access[operation],
+        access: entity.access[operation as keyof typeof entity.access],
         accessLevel: 'entity',
         operation,
         policiesObj: policies,
       })
     } else {
-      policies[operation] = {
+      ;(policies as any)[operation] = {
         permission: isLoggedIn,
       }
     }
@@ -158,7 +162,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     await executeFieldPolicies({
       blockPolicies,
       createAccessPromise,
-      entityPermission: policies[operation].permission as boolean,
+      entityPermission: (policies as any)[operation].permission as boolean,
       fields: entity.fields,
       operation,
       payload,
@@ -189,7 +193,7 @@ const executeFieldPolicies = async ({
   payload: Payload
   policiesObj: CollectionPermission | FieldsPermissions | GlobalPermission
 }) => {
-  const mutablePolicies = policiesObj.fields
+  const mutablePolicies = policiesObj.fields as Record<string, any>
 
   // Fields don't have all operations of a collection
   if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
@@ -213,7 +217,7 @@ const executeFieldPolicies = async ({
           })
         } else {
           mutablePolicies[field.name][operation] = {
-            permission: policiesObj[operation]?.permission,
+            permission: (policiesObj as any)[operation]?.permission,
           }
         }
 
@@ -245,6 +249,11 @@ const executeFieldPolicies = async ({
             (field.blockReferences ?? field.blocks).map(async (_block) => {
               const block = typeof _block === 'string' ? payload.blocks[_block] : _block
 
+              // Skip if block doesn't exist (invalid block reference)
+              if (!block) {
+                return
+              }
+
               if (typeof _block === 'string') {
                 if (blockPolicies[_block]) {
                   if (typeof blockPolicies[_block].then === 'function') {
@@ -260,22 +269,32 @@ const executeFieldPolicies = async ({
                   // so that any parallel calls will just await this same promise
                   // instead of re-running executeFieldPolicies.
                   blockPolicies[_block] = (async () => {
-                    // If the block doesn’t exist yet in our mutablePolicies, initialize it
+                    // If the block doesn't exist yet in our mutablePolicies, initialize it
                     if (!mutablePolicies[field.name].blocks?.[block.slug]) {
+                      // Use field-level permission instead of entityPermission for blocks
+                      // This ensures that if the field has access control, it applies to all blocks in the field
+                      const fieldPermission =
+                        mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                       mutablePolicies[field.name].blocks[block.slug] = {
                         fields: {},
-                        [operation]: { permission: entityPermission },
+                        [operation]: { permission: fieldPermission },
                       }
                     } else if (!mutablePolicies[field.name].blocks[block.slug][operation]) {
+                      // Use field-level permission for consistency
+                      const fieldPermission =
+                        mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                       mutablePolicies[field.name].blocks[block.slug][operation] = {
-                        permission: entityPermission,
+                        permission: fieldPermission,
                       }
                     }
 
                     await executeFieldPolicies({
                       blockPolicies,
                       createAccessPromise,
-                      entityPermission,
+                      entityPermission:
+                        mutablePolicies[field.name][operation]?.permission ?? entityPermission,
                       fields: block.fields,
                       operation,
                       payload,
@@ -292,20 +311,29 @@ const executeFieldPolicies = async ({
               }
 
               if (!mutablePolicies[field.name].blocks?.[block.slug]) {
+                // Use field-level permission instead of entityPermission for blocks
+                const fieldPermission =
+                  mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                 mutablePolicies[field.name].blocks[block.slug] = {
                   fields: {},
-                  [operation]: { permission: entityPermission },
+                  [operation]: { permission: fieldPermission },
                 }
               } else if (!mutablePolicies[field.name].blocks[block.slug][operation]) {
+                // Use field-level permission for consistency
+                const fieldPermission =
+                  mutablePolicies[field.name][operation]?.permission ?? entityPermission
+
                 mutablePolicies[field.name].blocks[block.slug][operation] = {
-                  permission: entityPermission,
+                  permission: fieldPermission,
                 }
               }
 
               await executeFieldPolicies({
                 blockPolicies,
                 createAccessPromise,
-                entityPermission,
+                entityPermission:
+                  mutablePolicies[field.name][operation]?.permission ?? entityPermission,
                 fields: block.fields,
                 operation,
                 payload,

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
@@ -13,6 +12,7 @@ import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
 
 type Args = {
+  canSetHeaders?: boolean
   config: Promise<SanitizedConfig> | SanitizedConfig
   params?: {
     collection: string
@@ -21,12 +21,13 @@ type Args = {
 }
 
 export const createPayloadRequest = async ({
+  canSetHeaders,
   config: configPromise,
   params,
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise, cron: true })
 
   const { config } = payload
   const localization = config.localization
@@ -49,10 +50,7 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  const fallbackFromRequest =
-    searchParams.get('fallback-locale') || searchParams.get('fallbackLocale')
   let locale = searchParams.get('locale')
-  let fallbackLocale = fallbackFromRequest
 
   const { search: queryToParse } = urlProperties
 
@@ -64,20 +62,27 @@ export const createPayloadRequest = async ({
       })
     : {}
 
+  const fallbackFromRequest =
+    (query.fallbackLocale as string | string[]) ||
+    searchParams.get('fallback-locale') ||
+    searchParams.get('fallbackLocale')
+
+  let fallbackLocale = fallbackFromRequest
+
   if (localization) {
     const locales = sanitizeLocales({
-      fallbackLocale,
-      locale,
+      fallbackLocale: fallbackLocale!,
+      locale: locale!,
       localization,
     })
 
-    fallbackLocale = locales.fallbackLocale
-    locale = locales.locale
+    fallbackLocale = locales.fallbackLocale!
+    locale = locales.locale!
   }
 
   const customRequest: CustomPayloadRequestProperties = {
     context: {},
-    fallbackLocale,
+    fallbackLocale: fallbackLocale!,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
@@ -87,7 +92,7 @@ export const createPayloadRequest = async ({
     pathname: urlProperties.pathname,
     payload,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    payloadDataLoader: undefined,
+    payloadDataLoader: undefined!,
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
@@ -105,6 +110,7 @@ export const createPayloadRequest = async ({
   req.payloadDataLoader = getDataLoader(req)
 
   const { responseHeaders, user } = await executeAuthStrategies({
+    canSetHeaders,
     headers: req.headers,
     isGraphQL,
     payload,

@@ -50,7 +50,7 @@ export const extractJWT = (args: Omit<AuthStrategyFunctionArgs, 'strategyName'>)
   const extractionOrder = payload.config.auth.jwtOrder
 
   for (const extractionStrategy of extractionOrder) {
-    const result = extractionMethods[extractionStrategy]({ headers, payload })
+    const result = extractionMethods[extractionStrategy]!({ headers, payload })
 
     if (result) {
       return result

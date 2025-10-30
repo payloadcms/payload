@@ -67,8 +67,6 @@ export const CollectionWithHooks: CollectionConfig = {
 
 The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
 
-Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh`, and `forgotPassword`.
-
 ```ts
 import type { CollectionBeforeOperationHook } from 'payload'
 
@@ -83,12 +81,12 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 
 The following arguments are provided to the `beforeOperation` hook:
 
-| Option           | Description                                                                                                                                           |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
-| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                       |
-| **`operation`**  | The name of the operation that this hook is running within.                                                                                           |
-| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| Option           | Description                                                                                                                                                                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against. Available options include: `autosave`, `count`, `countVersions`, `create`, `delete`, `forgotPassword`, `login`, `read`, `readDistinct`, `refresh`, `resetPassword`, `restoreVersion`, and `update`. |
+| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                                                                                                                                                           |
+| **`operation`**  | The name of the operation that this hook is running within.                                                                                                                                                                                                                               |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                     |
 
 ### beforeValidate
 
@@ -121,7 +119,7 @@ The following arguments are provided to the `beforeValidate` hook:
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+Immediately before validation, beforeChange hooks will run during create and update operations. At this stage, the data should be treated as unvalidated user input. There is no guarantee that required fields exist or that fields are in the correct format. As such, using this data for side effects requires manual validation. You can optionally modify the shape of the data to be saved.
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
@@ -160,6 +158,7 @@ The following arguments are provided to the `afterChange` hook:
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
 | **`doc`**         | The resulting Document after changes are applied.                                                                                                     |
 | **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
 | **`previousDoc`** | The Document before changes were applied.                                                                                                             |

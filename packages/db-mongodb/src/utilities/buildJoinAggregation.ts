@@ -44,6 +44,9 @@ export const buildJoinAggregation = async ({
   projection,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
+  if (!adapter.useJoinAggregations) {
+    return
+  }
   if (
     (Object.keys(collectionConfig.joins).length === 0 &&
       collectionConfig.polymorphicJoins.length == 0) ||

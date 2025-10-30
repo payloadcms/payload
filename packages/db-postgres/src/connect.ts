@@ -1,31 +1,32 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Migration, Payload } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { withReplicas } from 'drizzle-orm/pg-core'
 
 import type { PostgresAdapter } from './types.js'
 
 const connectWithReconnect = async function ({
   adapter,
-  payload,
+  pool,
   reconnect = false,
 }: {
   adapter: PostgresAdapter
-  payload: Payload
+  pool: PostgresAdapter['pool']
   reconnect?: boolean
 }) {
   let result
 
   if (!reconnect) {
-    result = await adapter.pool.connect()
+    result = await pool.connect()
   } else {
     try {
-      result = await adapter.pool.connect()
+      result = await pool.connect()
     } catch (ignore) {
       setTimeout(() => {
-        payload.logger.info('Reconnecting to postgres')
-        void connectWithReconnect({ adapter, payload, reconnect: true })
+        adapter.payload.logger.info('Reconnecting to postgres')
+        void connectWithReconnect({ adapter, pool, reconnect: true })
       }, 1000)
     }
   }
@@ -35,7 +36,7 @@ const connectWithReconnect = async function ({
   result.prependListener('error', (err) => {
     try {
       if (err.code === 'ECONNRESET') {
-        void connectWithReconnect({ adapter, payload, reconnect: true })
+        void connectWithReconnect({ adapter, pool, reconnect: true })
       }
     } catch (ignore) {
       // swallow error
@@ -51,21 +52,31 @@ export const connect: Connect = async function connect(
 ) {
   const { hotReload } = options
 
-  this.schema = {
-    pgSchema: this.pgSchema,
-    ...this.tables,
-    ...this.relations,
-    ...this.enums,
-  }
-
   try {
     if (!this.pool) {
       this.pool = new this.pg.Pool(this.poolOptions)
-      await connectWithReconnect({ adapter: this, payload: this.payload })
+      await connectWithReconnect({ adapter: this, pool: this.pool })
     }
 
     const logger = this.logger || false
     this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
+
+    if (this.readReplicaOptions) {
+      const readReplicas = this.readReplicaOptions.map((connectionString) => {
+        const options = {
+          ...this.poolOptions,
+          connectionString,
+        }
+        const pool = new this.pg.Pool(options)
+        void connectWithReconnect({
+          adapter: this,
+          pool,
+        })
+        return drizzle({ client: pool, logger, schema: this.schema })
+      })
+      const myReplicas = withReplicas(this.drizzle, readReplicas as any)
+      this.drizzle = myReplicas
+    }
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

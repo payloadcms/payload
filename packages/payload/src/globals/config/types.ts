@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
@@ -50,6 +51,7 @@ export type BeforeChangeHook = (args: {
 
 export type AfterChangeHook = (args: {
   context: RequestContext
+  data: any
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
@@ -72,6 +74,22 @@ export type AfterReadHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   query?: Where
+  req: PayloadRequest
+}) => any
+
+export type HookOperationType = 'countVersions' | 'read' | 'restoreVersion' | 'update'
+
+export type BeforeOperationHook = (args: {
+  args?: any
+  context: RequestContext
+  /**
+   * The Global which this hook is being run on
+   * */
+  global: SanitizedGlobalConfig
+  /**
+   * Hook operation being performed
+   */
+  operation: HookOperationType
   req: PayloadRequest
 }) => any
 
@@ -185,6 +203,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     afterChange?: AfterChangeHook[]
     afterRead?: AfterReadHook[]
     beforeChange?: BeforeChangeHook[]
+    beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
@@ -214,9 +233,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
-
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded

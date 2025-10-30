@@ -1,5 +1,11 @@
 'use client'
-import type { ArrayField, ClientField, Row, SanitizedFieldPermissions } from 'payload'
+import type {
+  ArrayField,
+  ClientComponentProps,
+  ClientField,
+  Row,
+  SanitizedFieldPermissions,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -21,17 +27,18 @@ const baseClass = 'array-field'
 
 type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly copyRow: (rowIndex: number) => void
   readonly CustomRowLabel?: React.ReactNode
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
   readonly fields: ClientField[]
-  readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly isLoading?: boolean
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly parentPath: string
+  readonly pasteRow: (rowIndex: number) => void
   readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly?: boolean
@@ -41,11 +48,13 @@ type ArrayRowProps = {
   readonly rowIndex: number
   readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
-} & UseDraggableSortableReturn
+} & Pick<ClientComponentProps, 'forceRender'> &
+  UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   addRow,
   attributes,
+  copyRow,
   CustomRowLabel,
   duplicateRow,
   errorCount,
@@ -59,6 +68,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   listeners,
   moveRow,
   parentPath,
+  pasteRow,
   path,
   permissions,
   readOnly,
@@ -107,11 +117,13 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           !readOnly ? (
             <ArrayAction
               addRow={addRow}
+              copyRow={copyRow}
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
               index={rowIndex}
               isSortable={isSortable}
               moveRow={moveRow}
+              pasteRow={pasteRow}
               removeRow={removeRow}
               rowCount={rowCount}
             />

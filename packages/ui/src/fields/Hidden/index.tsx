@@ -15,15 +15,15 @@ import { withCondition } from '../../forms/withCondition/index.js'
 const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
   const { disableModifyingForm = true, path: pathFromProps, value: valueFromProps } = props
 
-  const { path, setValue, value } = useField({
+  const { formInitializing, path, setValue, value } = useField({
     potentiallyStalePath: pathFromProps,
   })
 
   useEffect(() => {
-    if (valueFromProps !== undefined) {
+    if (valueFromProps !== undefined && !formInitializing) {
       setValue(valueFromProps, disableModifyingForm)
     }
-  }, [valueFromProps, setValue, disableModifyingForm])
+  }, [valueFromProps, setValue, disableModifyingForm, formInitializing])
 
   return (
     <input

@@ -73,7 +73,16 @@ export function generateSlateRichText() {
         {
           children: [
             {
-              text: "It's built with SlateJS",
+              // This node is untyped, because I want to test this scenario:
+              // https://github.com/payloadcms/payload/pull/13202
+              children: [
+                {
+                  text: 'This editor is built ',
+                },
+                {
+                  text: 'with SlateJS',
+                },
+              ],
             },
           ],
           type: 'li',

@@ -15,6 +15,7 @@ import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
 import { InlineBlocksIcon } from '../../../lexical/ui/icons/InlineBlocks/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { getBlockImageComponent } from './getBlockImageComponent.js'
+import { getBlockMarkdownTransformers } from './markdown/markdownTransformer.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './plugin/commands.js'
@@ -66,6 +67,10 @@ export const BlocksFeatureClient = createClientFeature(
       .filter((block) => block !== undefined)
 
     return {
+      markdownTransformers: getBlockMarkdownTransformers({
+        blocks: clientBlocks,
+        inlineBlocks: clientInlineBlocks,
+      }),
       nodes: [BlockNode, InlineBlockNode],
       plugins: [
         {

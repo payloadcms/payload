@@ -8,6 +8,7 @@ import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { draftsSlug } from './collections/Drafts/index.js'
+import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
@@ -24,9 +25,7 @@ describe('Sort', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Local API', () => {
@@ -130,6 +129,154 @@ describe('Sort', () => {
           'Post 2',
           'Post 1',
         ])
+      })
+    })
+
+    describe('Non-unique sorting', () => {
+      // There are situations where the sort order is not guaranteed to be consistent, such as when sorting by a non-unique field in MongoDB which does not keep an internal order of items
+      // As a result, every time you fetch, including fetching specific pages, the order of items may change and appear as duplicated to some users.
+      it('should always be consistent when sorting', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should always be consistent when sorting - with limited pages', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+          limit: 5,
+          page: 2,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+              limit: 5,
+              page: 2,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should sort by createdAt as fallback', async () => {
+        // This is the (reverse - newest first) order that the posts are created in so this should remain consistent as the sort should fallback to '-createdAt'
+        const postsInOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+              page: 2,
+              limit: 4,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        console.log({ fetch1, fetch2, fetch3 })
+
+        expect(fetch1).toEqual(postsInOrder)
+
+        expect(fetch2).toEqual(postsInOrder)
+
+        expect(fetch3).toEqual(postsInOrder)
+      })
+
+      it('should always be consistent without sort params in the query', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should always be consistent without sort params in the query - with limited pages', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          page: 2,
+          limit: 4,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              page: 2,
+              limit: 4,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
       })
     })
 
@@ -481,6 +628,77 @@ describe('Sort', () => {
           parseInt(docDuplicatedAfterReorder._order!, 16),
         )
       })
+
+      it('should not break with existing base 62 digits', async () => {
+        const collection = orderableSlug
+        // create seed docs with aa, aA, a0 (legacy base64 chars for backward compatibility)
+        const aa = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 aa',
+            _order: 'aa',
+          },
+        })
+        const aA = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 aA',
+            _order: 'aA',
+          },
+        })
+        const a0 = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 a0',
+            _order: 'a0',
+          },
+        })
+
+        const orderableDoc = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 new',
+          },
+        })
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [orderableDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: aA.id,
+              key: aA._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const { docs } = await payload.find({
+          collection,
+          sort: '-_order',
+          where: {
+            title: {
+              contains: 'Base62 ',
+            },
+          },
+        })
+
+        expect(docs).toHaveLength(4)
+        const ids = [aa.id, aA.id, a0.id, orderableDoc.id]
+        expect(docs.every(({ id }) => ids.includes(id))).toBe(true)
+
+        const a0Index = docs.findIndex((d) => d.id === a0.id)
+        const aAIndex = docs.findIndex((d) => d.id === aA.id)
+        const orderableIndex = docs.findIndex((d) => d.id === orderableDoc.id)
+
+        // The reordered document should be positioned after the target (aA) since newKeyWillBe: 'greater'
+        // and before the target (a0) since (a0) is the smallest fractional index
+        expect(orderableIndex).toBeGreaterThan(aAIndex)
+        expect(orderableIndex).toBeLessThan(a0Index)
+      })
     })
 
     describe('Orderable join', () => {
@@ -547,6 +765,7 @@ describe('Sort', () => {
         expect(orderable2._orderable_orderableJoinField1_order).toBe('e4')
         expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
       })
+
       it('should sort join docs in the correct', async () => {
         related = await payload.findByID({
           collection: orderableJoinSlug,

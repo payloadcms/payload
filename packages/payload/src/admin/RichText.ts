@@ -1,9 +1,9 @@
-// @ts-strict-ignore
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type { ImportMapGenerators, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
   FieldAffectingData,
@@ -18,8 +18,11 @@ import type { RichTextFieldClientProps, RichTextFieldServerProps } from './field
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TData extends TypeWithID = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   currentDepth?: number
@@ -28,7 +31,7 @@ export type AfterReadRichTextHookArgs<
 
   draft?: boolean
 
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -54,6 +57,7 @@ export type AfterReadRichTextHookArgs<
 export type AfterChangeRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
@@ -65,9 +69,11 @@ export type AfterChangeRichTextHookArgs<
   /** The previous value of the field, before changes */
   previousValue?: TValue
 }
+
 export type BeforeValidateRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
@@ -82,6 +88,7 @@ export type BeforeValidateRichTextHookArgs<
 export type BeforeChangeRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /**
@@ -102,11 +109,11 @@ export type BeforeChangeRichTextHookArgs<
   mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
+  overrideAccess: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
   previousValue?: TValue
-
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
@@ -190,12 +197,23 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
+
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateImportMap?: Config['admin']['importMap']['generators'][0]
+  /**
+   * Provide a function that can be used to add items to the import map. This is useful for
+   * making modules available to the client.
+   */
+  generateImportMap?: ImportMapGenerators[0]
+  /**
+   * Provide a function that can be used to add items to the schema map. This is useful for
+   * richtext sub-fields the server needs to "know" about in order to do things like calculate form state.
+   *
+   * This function is run within `buildFieldSchemaMap`.
+   */
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
@@ -227,7 +245,16 @@ type RichTextAdapterBase<
     siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
+  /**
+   * @deprecated - manually merge i18n translations into the config.i18n.translations object within the adapter provider instead.
+   * This property will be removed in v4.
+   */
   i18n?: Partial<GenericLanguages>
+  /**
+   * Return the JSON schema for the field value. The JSON schema is read by
+   * `json-schema-to-typescript` which is used to generate types for this richtext field
+   * payload-types.ts)
+   */
   outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
@@ -239,6 +266,10 @@ type RichTextAdapterBase<
     interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
+  /**
+   * Provide validation function for the richText field. This function is run the same way
+   * as other field validation functions.
+   */
   validate: Validate<
     Value,
     Value,
@@ -252,6 +283,10 @@ export type RichTextAdapter<
   AdapterProps = any,
   ExtraFieldProperties = any,
 > = {
+  /**
+   * Component that will be displayed in the list view. Can be typed as
+   * `DefaultCellComponentProps` or `DefaultServerCellComponentProps`.
+   */
   CellComponent: PayloadComponent<never>
   /**
    * Component that will be displayed in the version diff view.
@@ -261,6 +296,9 @@ export type RichTextAdapter<
     FieldDiffServerProps<RichTextField, RichTextFieldClient>,
     FieldDiffClientProps<RichTextFieldClient>
   >
+  /**
+   * Component that will be displayed in the edit view.
+   */
   FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
@@ -275,7 +313,8 @@ export type RichTextAdapterProvider<
 }: {
   config: SanitizedConfig
   /**
-   * Whether or not this is the root richText editor, defined in the payload.config.ts.
+   * Whether or not this is the root richText editor, defined in the top-level `editor` property
+   * of the Payload Config.
    *
    * @default false
    */

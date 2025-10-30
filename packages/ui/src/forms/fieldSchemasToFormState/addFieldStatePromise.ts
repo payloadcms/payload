@@ -15,11 +15,12 @@ import type {
   SanitizedFieldsPermissions,
   SelectMode,
   SelectType,
+  TabAsField,
   Validate,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { getBlockSelect } from 'payload'
+import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -34,10 +35,10 @@ import {
 import type { RenderFieldMethod } from './types.js'
 
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
+import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -84,6 +85,7 @@ export type AddFieldStatePromiseArgs = {
   path: string
   preferences: DocumentPreferences
   previousFormState: FormState
+  readOnly?: boolean
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   /**
@@ -135,6 +137,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     path,
     preferences,
     previousFormState,
+    readOnly,
     renderAllFields,
     renderFieldFn,
     req,
@@ -147,6 +150,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
 
   if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
     )
@@ -248,6 +252,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
+    /**
+     * This function adds the error **path** to the current field and all its parents. If a field is invalid, all its parents are also invalid.
+     * It does not add the error **message** to the current field, as that shouldn't apply to all parents.
+     * This is done separately below.
+     */
     const addErrorPathToParent = (errorPath: string) => {
       if (typeof addErrorPathToParentArg === 'function') {
         addErrorPathToParentArg(errorPath)
@@ -319,6 +328,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   fieldPermissions === true ? fieldPermissions : fieldPermissions?.fields || {},
                 preferences,
                 previousFormState,
+                readOnly,
                 renderAllFields,
                 renderFieldFn,
                 req,
@@ -334,10 +344,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rows = []
             }
 
-            const previousRows = previousFormState?.[path]?.rows || []
-
             // First, check if `previousFormState` has a matching row
-            const previousRow: Row = previousRows.find((prevRow) => prevRow.id === row.id)
+            const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+              (prevRow) => prevRow.id === row.id,
+            )
 
             const newRow: Row = {
               id: row.id,
@@ -348,33 +358,29 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               newRow.lastRenderedPath = previousRow.lastRenderedPath
             }
 
-            acc.rows.push(newRow)
-
-            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
-
-            const collapsed = (() => {
-              if (previousRow) {
-                return previousRow.collapsed ?? false
-              }
-
-              // If previousFormState is undefined, check preferences
-              if (collapsedRowIDsFromPrefs !== undefined) {
-                return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
-              }
-
-              // If neither exists, fallback to `field.admin.initCollapsed`
-              return field.admin.initCollapsed
-            })()
-
-            if (collapsed) {
-              acc.rows[acc.rows.length - 1].collapsed = collapsed
+            // add addedByServer flag
+            if (!previousRow) {
+              newRow.addedByServer = true
             }
+
+            const isCollapsed = isRowCollapsed({
+              collapsedPrefs: preferences?.fields?.[path]?.collapsed,
+              field,
+              previousRow,
+              row,
+            })
+
+            if (isCollapsed) {
+              newRow.collapsed = true
+            }
+
+            acc.rows.push(newRow)
 
             return acc
           },
           {
             promises: [],
-            rows: undefined,
+            rows: [],
           },
         )
 
@@ -405,6 +411,23 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       case 'blocks': {
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
+
+        // Handle blocks filterOptions
+        let filterOptionsValidationResult: Awaited<
+          ReturnType<typeof validateBlocksFilterOptions>
+        > | null = null
+        if (field.filterOptions) {
+          filterOptionsValidationResult = await validateBlocksFilterOptions({
+            id,
+            data: fullData,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData: data,
+            value: data[field.name],
+          })
+
+          fieldState.blocksFilterOptions = filterOptionsValidationResult.allowedBlockSlugs
+        }
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
@@ -440,6 +463,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[idKey] = {
                   initialValue: row.id,
                   value: row.id,
+                }
+
+                // If the blocks field fails filterOptions validation, add error paths to the individual blocks that are no longer allowed
+                if (
+                  filterOptionsValidationResult?.invalidBlockSlugs?.length &&
+                  filterOptionsValidationResult.invalidBlockSlugs.includes(row.blockType)
+                ) {
+                  state[idKey].errorMessage = req.t('validation:invalidBlock', {
+                    block: row.blockType,
+                  })
+                  state[idKey].valid = false
+                  addErrorPathToParent(idKey)
+
+                  // If the error is due to block filterOptions, we want the blocks field (fieldState) to include all the filterOptions-related
+                  // error paths for each sub-block, not for the validation result of the block itself. Otherwise, say there are 2 invalid blocks,
+                  // the blocks field will have 3 instead of 2 error paths - one for itself, and one for each invalid block.
+                  // Instead, we want only the 2 error paths for the individual, invalid blocks.
+                  fieldState.errorPaths = fieldState.errorPaths.filter(
+                    (errorPath) => errorPath !== path,
+                  )
                 }
 
                 if (includeSchema) {
@@ -513,6 +556,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                         : parentPermissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
+                  readOnly,
                   renderAllFields,
                   renderFieldFn,
                   req,
@@ -524,10 +568,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              const previousRows = previousFormState?.[path]?.rows || []
-
               // First, check if `previousFormState` has a matching row
-              const previousRow: Row = previousRows.find((prevRow) => prevRow.id === row.id)
+              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+                (prevRow) => prevRow.id === row.id,
+              )
 
               const newRow: Row = {
                 id: row.id,
@@ -541,15 +585,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
               acc.rowMetadata.push(newRow)
 
-              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+              const isCollapsed = isRowCollapsed({
+                collapsedPrefs: preferences?.fields?.[path]?.collapsed,
+                field,
+                previousRow,
+                row,
+              })
 
-              const collapsed =
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id)
-
-              if (collapsed) {
-                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = collapsed
+              if (isCollapsed) {
+                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = true
               }
             }
 
@@ -619,6 +663,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             typeof fieldPermissions === 'boolean' ? fieldPermissions : fieldPermissions?.fields,
           preferences,
           previousFormState,
+          readOnly,
           renderAllFields,
           renderFieldFn,
           req,
@@ -631,6 +676,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         break
       }
+
       case 'relationship':
       case 'upload': {
         if (field.filterOptions) {
@@ -719,6 +765,28 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         break
       }
 
+      case 'select': {
+        if (typeof field.filterOptions === 'function') {
+          fieldState.selectFilterOptions = field.filterOptions({
+            data: fullData,
+            options: field.options,
+            req,
+            siblingData: data,
+          })
+        }
+
+        if (data[field.name] !== undefined) {
+          fieldState.value = data[field.name]
+          fieldState.initialValue = data[field.name]
+        }
+
+        if (!filter || filter(args)) {
+          state[path] = fieldState
+        }
+
+        break
+      }
+
       default: {
         if (data[field.name] !== undefined) {
           fieldState.value = data[field.name]
@@ -734,7 +802,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
   } else if (fieldHasSubFields(field) && !fieldAffectsData(field)) {
-    // Handle field types that do not use names (row, collapsible, etc)
+    // Handle field types that do not use names (row, collapsible, unnamed group etc)
 
     if (!filter || filter(args)) {
       state[path] = {
@@ -773,6 +841,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: parentPermissions, // TODO: Verify this is correct
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,
@@ -785,15 +854,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       const isNamedTab = tabHasName(tab)
       let tabSelect: SelectType | undefined
 
+      const tabField: TabAsField = {
+        ...tab,
+        type: 'tab',
+      }
+
       const {
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
       } = getFieldPaths({
-        field: {
-          ...tab,
-          type: 'tab',
-        },
+        field: tabField,
         index: tabIndex,
         parentIndexPath: indexPath,
         parentPath,
@@ -803,6 +874,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       let childPermissions: SanitizedFieldsPermissions = undefined
 
       if (isNamedTab) {
+        const shouldContinue = stripUnselectedFields({
+          field: tabField,
+          select,
+          selectMode,
+          siblingDoc: data?.[tab.name] || {},
+        })
+
+        if (!shouldContinue) {
+          return
+        }
+
         if (parentPermissions === true) {
           childPermissions = true
         } else {
@@ -867,6 +949,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         permissions: childPermissions,
         preferences,
         previousFormState,
+        readOnly,
         renderAllFields,
         renderFieldFn,
         req,
@@ -926,6 +1009,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: fieldPermissions,
       preferences,
       previousFieldState: previousFormState?.[path],
+      readOnly,
       renderAllFields,
       req,
       schemaPath,

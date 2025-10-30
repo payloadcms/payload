@@ -17,9 +17,9 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -37,6 +37,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -53,7 +54,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
@@ -99,6 +100,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({
@@ -118,6 +120,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -139,6 +142,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
+      readReplicaOptions: args.readReplicas,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
@@ -175,10 +179,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      updateJobs,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,
@@ -194,6 +197,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
@@ -205,7 +209,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

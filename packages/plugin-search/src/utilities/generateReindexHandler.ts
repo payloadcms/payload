@@ -1,4 +1,4 @@
-import type { PayloadHandler } from 'payload'
+import type { PayloadHandler, Where } from 'payload'
 
 import {
   addLocalesToRequestFromData,
@@ -82,21 +82,28 @@ export const generateReindexHandler =
     }
 
     const payload = req.payload
-    const batchSize = pluginConfig.reindexBatchSize
+    const { reindexBatchSize: batchSize, syncDrafts } = pluginConfig
 
     const defaultLocalApiProps = {
       overrideAccess: false,
       req,
       user: req.user,
     }
+    const whereStatusPublished: Where = {
+      _status: {
+        equals: 'published',
+      },
+    }
+    let aggregateDocsWithDrafts = 0
     let aggregateErrors = 0
     let aggregateDocs = 0
 
-    const countDocuments = async (collection: string): Promise<number> => {
+    const countDocuments = async (collection: string, drafts?: boolean): Promise<number> => {
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
         req: undefined,
+        where: drafts ? undefined : whereStatusPublished,
       })
       return totalDocs
     }
@@ -112,8 +119,16 @@ export const generateReindexHandler =
     }
 
     const reindexCollection = async (collection: string) => {
-      const totalDocs = await countDocuments(collection)
+      const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
+
+      const totalDocsWithDrafts = await countDocuments(collection, true)
+      const totalDocs =
+        syncDrafts || !draftsEnabled
+          ? totalDocsWithDrafts
+          : await countDocuments(collection, !draftsEnabled)
       const totalBatches = Math.ceil(totalDocs / batchSize)
+
+      aggregateDocsWithDrafts += totalDocsWithDrafts
       aggregateDocs += totalDocs
 
       for (let j = 0; j < reindexLocales.length; j++) {
@@ -128,12 +143,14 @@ export const generateReindexHandler =
             limit: batchSize,
             locale: localeToSync,
             page: i + 1,
+            where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
             ...defaultLocalApiProps,
           })
 
           for (const doc of docs) {
             await syncDocAsSearchIndex({
               collection,
+              data: doc,
               doc,
               locale: localeToSync,
               onSyncError: () => operation === 'create' && aggregateErrors++,
@@ -146,28 +163,37 @@ export const generateReindexHandler =
       }
     }
 
-    await initTransaction(req)
+    const shouldCommit = await initTransaction(req)
 
-    for (const collection of collections) {
-      try {
-        await deleteIndexes(collection)
-        await reindexCollection(collection)
-      } catch (err) {
-        const message = t('error:unableToReindexCollection', { collection })
-        payload.logger.error({ err, msg: message })
+    try {
+      const promises = collections.map(async (collection) => {
+        try {
+          await deleteIndexes(collection)
+          await reindexCollection(collection)
+        } catch (err) {
+          const message = t('error:unableToReindexCollection', { collection })
+          payload.logger.error({ err, msg: message })
+        }
+      })
 
+      await Promise.all(promises)
+    } catch (err: any) {
+      if (shouldCommit) {
         await killTransaction(req)
-        return Response.json({ message }, { headers, status: 500 })
       }
+      return Response.json({ message: err.message }, { headers, status: 500 })
     }
 
     const message = t('general:successfullyReindexed', {
       collections: collections.join(', '),
       count: aggregateDocs - aggregateErrors,
-      total: aggregateDocs,
+      skips: syncDrafts ? 0 : aggregateDocsWithDrafts - aggregateDocs,
+      total: aggregateDocsWithDrafts,
     })
 
-    await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return Response.json({ message }, { headers, status: 200 })
   }

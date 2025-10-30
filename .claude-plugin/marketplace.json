@@ -1,0 +1,13 @@
+{
+  "name": "payload",
+  "owner": {
+    "name": "Payload",
+    "email": "info@payloadcms.com"
+  },
+  "plugins": [
+    {
+      "name": "payload",
+      "source": "./"
+    }
+  ]
+}

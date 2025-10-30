@@ -3,12 +3,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDiffLabel, useTranslation } from '@payloadcms/ui'
+import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'
-import { diffStyles } from '../styles.js'
-import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'select-diff'
 
@@ -60,59 +58,58 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
 }
 
 export const Select: SelectFieldDiffClientComponent = ({
-  comparisonValue,
+  comparisonValue: valueFrom,
   diffMethod,
   field,
   locale,
-  versionValue,
+  nestingLevel,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
 
-  let placeholder = ''
-
-  if (versionValue == comparisonValue) {
-    placeholder = `[${i18n.t('general:noValue')}]`
-  }
-
   const options = 'options' in field && field.options
 
-  const comparisonToRender =
-    typeof comparisonValue !== 'undefined'
+  const renderedValueFrom =
+    typeof valueFrom !== 'undefined'
       ? getTranslatedOptions(
           getOptionsToRender(
-            typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue),
+            typeof valueFrom === 'string' ? valueFrom : JSON.stringify(valueFrom),
             options,
             field.hasMany,
           ),
           i18n,
         )
-      : placeholder
+      : ''
 
-  const versionToRender =
-    typeof versionValue !== 'undefined'
+  const renderedValueTo =
+    typeof valueTo !== 'undefined'
       ? getTranslatedOptions(
           getOptionsToRender(
-            typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue),
+            typeof valueTo === 'string' ? valueTo : JSON.stringify(valueTo),
             options,
             field.hasMany,
           ),
           i18n,
         )
-      : placeholder
+      : ''
+
+  const { From, To } = getHTMLDiffComponents({
+    fromHTML: '<p>' + renderedValueFrom + '</p>',
+    toHTML: '<p>' + renderedValueTo + '</p>',
+    tokenizeByCharacter: true,
+  })
 
   return (
-    <div className={baseClass}>
-      <FieldDiffLabel>
-        {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {'label' in field && getTranslation(field.label || '', i18n)}
-      </FieldDiffLabel>
-      <DiffViewer
-        comparisonToRender={comparisonToRender}
-        diffMethod={diffMethod}
-        diffStyles={diffStyles}
-        placeholder={placeholder}
-        versionToRender={versionToRender}
-      />
-    </div>
+    <FieldDiffContainer
+      className={baseClass}
+      From={From}
+      i18n={i18n}
+      label={{
+        label: field.label,
+        locale,
+      }}
+      nestingLevel={nestingLevel}
+      To={To}
+    />
   )
 }

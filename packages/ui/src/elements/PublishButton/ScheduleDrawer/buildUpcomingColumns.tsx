@@ -41,7 +41,7 @@ export const buildUpcomingColumns = ({
         const type = doc.input?.type
 
         return (
-          <Pill key={doc.id} pillStyle={type === 'publish' ? 'success' : 'warning'}>
+          <Pill key={doc.id} pillStyle={type === 'publish' ? 'success' : 'warning'} size="small">
             {type === 'publish' && t('version:publish')}
             {type === 'unpublish' && t('version:unpublish')}
           </Pill>

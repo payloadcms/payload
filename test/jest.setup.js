@@ -10,6 +10,7 @@ import nodemailer from 'nodemailer'
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
 
 process.env.PAYLOAD_DISABLE_ADMIN = 'true'
+
 process.env.PAYLOAD_DROP_DATABASE = 'true'
 
 process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER = 's3'
@@ -35,5 +36,6 @@ if (!process.env.PAYLOAD_DATABASE) {
   // Mutate env so we can use conditions by DB adapter in tests properly without ignoring // eslint no-jest-conditions.
   process.env.PAYLOAD_DATABASE = 'mongodb'
 }
+process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
 generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)

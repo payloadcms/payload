@@ -1,61 +1,63 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import React from 'react'
 
-import React, { Fragment } from 'react'
+import type { Props as ButtonProps } from '../Button/types.js'
 
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { DeleteMany } from '../DeleteMany/index.js'
-import { EditMany } from '../EditMany/index.js'
-import { PublishMany } from '../PublishMany/index.js'
-import { UnpublishMany } from '../UnpublishMany/index.js'
+import { Button } from '../Button/index.js'
 import './index.scss'
 
 const baseClass = 'list-selection'
 
-export type ListSelectionProps = {
-  collectionConfig?: ClientCollectionConfig
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  label: string
+type ListSelection_v4Props = {
+  /**
+   * The count of selected items
+   */
+  readonly count: number
+  /**
+   * Actions that apply to the list as a whole
+   *
+   * @example select all, clear selection
+   */
+  readonly ListActions?: React.ReactNode[]
+  /**
+   * Actions that apply to the selected items
+   *
+   * @example edit, delete, publish, unpublish
+   */
+  readonly SelectionActions?: React.ReactNode[]
 }
-
-export const ListSelection: React.FC<ListSelectionProps> = ({
-  collectionConfig,
-  disableBulkDelete,
-  disableBulkEdit,
-  label,
-}) => {
-  const { count, selectAll, toggleAll, totalDocs } = useSelection()
+export function ListSelection_v4({ count, ListActions, SelectionActions }: ListSelection_v4Props) {
   const { t } = useTranslation()
-
-  if (count === 0) {
-    return null
-  }
 
   return (
     <div className={baseClass}>
       <span>{t('general:selectedCount', { count, label: '' })}</span>
-      {selectAll !== SelectAllStatus.AllAvailable && count < totalDocs && (
-        <button
-          aria-label={t('general:selectAll', { count, label })}
-          className={`${baseClass}__button`}
-          id="select-all-across-pages"
-          onClick={() => toggleAll(true)}
-          type="button"
-        >
-          {t('general:selectAll', { count: totalDocs, label: '' })}
-        </button>
+      {ListActions && ListActions.length > 0 && (
+        <React.Fragment>
+          <span>&mdash;</span>
+          <div className={`${baseClass}__actions`}>{ListActions}</div>
+        </React.Fragment>
       )}
-      {!disableBulkEdit && !disableBulkDelete && <span>&mdash;</span>}
-      {!disableBulkEdit && (
-        <Fragment>
-          <EditMany collection={collectionConfig} />
-          <PublishMany collection={collectionConfig} />
-          <UnpublishMany collection={collectionConfig} />
-        </Fragment>
+      {SelectionActions && SelectionActions.length > 0 && (
+        <React.Fragment>
+          <span>&mdash;</span>
+          <div className={`${baseClass}__actions`}>{SelectionActions}</div>
+        </React.Fragment>
       )}
-      {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
     </div>
+  )
+}
+
+type ListSelectionButtonProps = {} & ButtonProps
+export function ListSelectionButton({ children, className, ...props }: ListSelectionButtonProps) {
+  return (
+    <Button
+      {...props}
+      buttonStyle="none"
+      className={[`${baseClass}__button`, className].filter(Boolean).join(' ')}
+    >
+      {children}
+    </Button>
   )
 }

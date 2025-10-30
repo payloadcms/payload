@@ -13,6 +13,14 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'computedTitle',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+      label: 'Computed Title',
+    },
+    {
       name: 'renderTracker',
       type: 'text',
       admin: {
@@ -85,6 +93,32 @@ export const PostsCollection: CollectionConfig = {
         },
         {
           name: 'defaultTextField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'computedArray',
+      type: 'array',
+      admin: {
+        description:
+          'If there is no value, a default row will be added by a beforeChange hook. Otherwise, modifies the rows on save.',
+      },
+      hooks: {
+        beforeChange: [
+          ({ value }) =>
+            !value?.length
+              ? [
+                  {
+                    text: 'This is a computed value.',
+                  },
+                ]
+              : value,
+        ],
+      },
+      fields: [
+        {
+          name: 'text',
           type: 'text',
         },
       ],

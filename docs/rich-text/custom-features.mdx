@@ -474,11 +474,15 @@ const MyNodeComponent = React.lazy(() =>
 )
 
 /**
- * This node is a DecoratorNode. DecoratorNodes allow you to render React components in the editor.
+ * This node is a DecoratorNode. DecoratorNodes allow
+ * you to render React components in the editor.
  *
- * They need both createDom and decorate functions. createDom => outside of the html. decorate => React Component inside of the html.
+ * They need both createDom and decorate functions.
+ * createDom => outside of the html.
+ * decorate => React Component inside of the html.
  *
- * If we used DecoratorBlockNode instead, we would only need a decorate method
+ * If we used DecoratorBlockNode instead,
+ * we would only need a decorate method
  */
 export class MyNode extends DecoratorNode<React.ReactElement> {
   static clone(node: MyNode): MyNode {
@@ -490,9 +494,11 @@ export class MyNode extends DecoratorNode<React.ReactElement> {
   }
 
   /**
-   * Defines what happens if you copy a div element from another page and paste it into the lexical editor
+   * Defines what happens if you copy a div element
+   * from another page and paste it into the lexical editor
    *
-   * This also determines the behavior of lexical's internal HTML -> Lexical converter
+   * This also determines the behavior of lexical's
+   * internal HTML -> Lexical converter
    */
   static importDOM(): DOMConversionMap | null {
     return {
@@ -504,14 +510,18 @@ export class MyNode extends DecoratorNode<React.ReactElement> {
   }
 
   /**
-   * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
+   * The data for this node is stored serialized as JSON.
+   * This is the "load function" of that node: it takes
+   * the saved data and converts it into a node.
    */
   static importJSON(serializedNode: SerializedMyNode): MyNode {
     return $createMyNode()
   }
 
   /**
-   * Determines how the hr element is rendered in the lexical editor. This is only the "initial" / "outer" HTML element.
+   * Determines how the hr element is rendered in the
+   * lexical editor. This is only the "initial" / "outer"
+   * HTML element.
    */
   createDOM(config: EditorConfig): HTMLElement {
     const element = document.createElement('div')
@@ -519,22 +529,28 @@ export class MyNode extends DecoratorNode<React.ReactElement> {
   }
 
   /**
-   * Allows you to render a React component within whatever createDOM returns.
+   * Allows you to render a React component within
+   * whatever createDOM returns.
    */
   decorate(): React.ReactElement {
     return <MyNodeComponent nodeKey={this.__key} />
   }
 
   /**
-   * Opposite of importDOM, this function defines what happens when you copy a div element from the lexical editor and paste it into another page.
+   * Opposite of importDOM, this function defines what
+   * happens when you copy a div element from the lexical
+   * editor and paste it into another page.
    *
-   * This also determines the behavior of lexical's internal Lexical -> HTML converter
+   * This also determines the behavior of lexical's
+   * internal Lexical -> HTML converter
    */
   exportDOM(): DOMExportOutput {
     return { element: document.createElement('div') }
   }
   /**
-   * Opposite of importJSON. This determines what data is saved in the database / in the lexical editor state.
+   * Opposite of importJSON. This determines what
+   * data is saved in the database / in the lexical
+   * editor state.
    */
   exportJSON(): SerializedLexicalNode {
     return {
@@ -556,18 +572,23 @@ export class MyNode extends DecoratorNode<React.ReactElement> {
   }
 }
 
-// This is used in the importDOM method. Totally optional if you do not want your node to be created automatically when copy & pasting certain dom elements
-// into your editor.
+// This is used in the importDOM method. Totally optional
+// if you do not want your node to be created automatically
+// when copy & pasting certain dom elements into your editor.
 function $yourConversionMethod(): DOMConversionOutput {
   return { node: $createMyNode() }
 }
 
-// This is a utility method to create a new MyNode. Utility methods prefixed with $ make it explicit that this should only be used within lexical
+// This is a utility method to create a new MyNode.
+// Utility methods prefixed with $ make it explicit
+// that this should only be used within lexical
 export function $createMyNode(): MyNode {
   return $applyNodeReplacement(new MyNode())
 }
 
-// This is just a utility method you can use to check if a node is a MyNode. This also ensures correct typing.
+// This is just a utility method you can use
+// to check if a node is a MyNode. This also
+// ensures correct typing.
 export function $isMyNode(
   node: LexicalNode | null | undefined,
 ): node is MyNode {
@@ -626,10 +647,12 @@ export const INSERT_MYNODE_COMMAND: LexicalCommand<void> = createCommand(
 )
 
 /**
- * Plugin which registers a lexical command to insert a new MyNode into the editor
+ * Plugin which registers a lexical command to
+ * insert a new MyNode into the editor
  */
 export const MyNodePlugin: PluginComponent = () => {
-  // The useLexicalComposerContext hook can be used to access the lexical editor instance
+  // The useLexicalComposerContext hook can be used
+  // to access the lexical editor instance
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
@@ -826,7 +849,7 @@ export function mwnSlashMenuGroupWithItems(
 }
 ```
 
-By creating a helper function like this, you can easily re-use it and add items to it. All Slash Menu groups with the same keys will have their items merged together.
+By creating a helper function like this, you can easily reuse it and add items to it. All Slash Menu groups with the same keys will have their items merged together.
 
 | Option      | Description                                                                                                                           |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |

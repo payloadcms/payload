@@ -2,7 +2,12 @@ import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
+import { selectInput } from 'helpers/e2e/selectInput.js'
+import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -18,7 +23,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug } from './shared.js'
+import { postsSlug, tabsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,11 +35,13 @@ let serverURL: string
 test.describe('Bulk Edit', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let tabsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
+    tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -92,7 +99,7 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToDelete2)
 
     await page.locator('.delete-documents__toggle').click()
-    await page.locator('#delete-posts #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Deleted 2 Posts successfully.',
@@ -121,15 +128,19 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToPublish1)
     await selectTableRow(page, titleOfPostToPublish2)
 
-    await page.locator('.publish-many__toggle').click()
+    await page.locator('.list-selection__button[aria-label="Publish"]').click()
     await page.locator('#publish-posts #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should unpublish many', async () => {
@@ -151,11 +162,15 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToUnpublish1)
     await selectTableRow(page, titleOfPostToUnpublish2)
 
-    await page.locator('.unpublish-many__toggle').click()
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
     await page.locator('#unpublish-posts #confirm-action').click()
 
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText(
+      'Draft',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText(
+      'Draft',
+    )
   })
 
   test('should update many', async () => {
@@ -234,8 +249,12 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should draft many from drawer', async () => {
@@ -272,8 +291,8 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })
 
   test('should delete all on page', async () => {
@@ -287,8 +306,8 @@ test.describe('Bulk Edit', () => {
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(3)
 
     await page.locator('input#select-all').check()
-    await page.locator('.delete-documents__toggle').click()
-    await page.locator('#delete-posts #confirm-action').click()
+    await page.locator('.list-selection__button[aria-label="Delete"]').click()
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Deleted 3 Posts successfully.',
@@ -306,15 +325,15 @@ test.describe('Bulk Edit', () => {
 
     await page.goto(postsUrl.list)
 
-    await expect(page.locator('.collection-list__page-info')).toContainText('1-5 of 6')
+    await expect(page.locator('.page-controls__page-info')).toContainText('1-5 of 6')
 
     await page.locator('#search-filter-input').fill('Post')
     await page.waitForURL(/search=Post/)
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
     await page.locator('input#select-all').check()
     await page.locator('button#select-all-across-pages').click()
-    await page.locator('.delete-documents__toggle').click()
-    await page.locator('#delete-posts #confirm-action').click()
+    await page.locator('.list-selection__button[aria-label="Delete"]').click()
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Deleted 6 Posts successfully.',
@@ -482,11 +501,187 @@ test.describe('Bulk Edit', () => {
 
     const { field } = await selectFieldToEdit(page, { fieldLabel: 'Array', fieldID: 'array' })
 
-    await field.locator('button.array-field__add-row').click()
+    await wait(500)
+
+    await addArrayRow(page, { fieldName: 'array' })
+
+    const row = page.locator(`#array-row-0`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-array__0__optional`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      targetState: 'open',
+      rowIndex: 0,
+      fieldName: 'array',
+    })
 
     await expect(field.locator('#field-array__0__optional')).toBeVisible()
     await expect(field.locator('#field-array__0__noRead')).toBeHidden()
     await expect(field.locator('#field-array__0__noUpdate')).toBeDisabled()
+  })
+
+  test('should toggle list selections off on successful publish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}` }, { draft: true })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Publish"]').click()
+    await page.locator('#publish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should toggle list selections off on successful unpublish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}`, _status: 'published' })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
+    await page.locator('#unpublish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should toggle list selections off on successful edit', async () => {
+    await deleteAllPosts()
+    const bulkEditValue = 'test'
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}` })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Edit"]').click()
+
+    const editDrawer = page.locator('dialog#edit-posts')
+    await expect(editDrawer).toBeVisible()
+
+    const fieldSelect = editDrawer.locator('.field-select')
+    await expect(fieldSelect).toBeVisible()
+
+    const fieldSelectControl = fieldSelect.locator('.rs__control')
+    await expect(fieldSelectControl).toBeVisible()
+    await fieldSelectControl.click()
+
+    const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
+    await titleOption.click()
+
+    await editDrawer.locator('input#field-title').fill(bulkEditValue)
+
+    await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should not delete nested un-named tab array data', async () => {
+    const originalDoc = await payload.create({
+      collection: tabsSlug,
+      data: {
+        title: 'Tab Title',
+        tabTab: {
+          tabTabArray: [
+            {
+              tabTabArrayText: 'nestedText',
+            },
+          ],
+        },
+      },
+    })
+
+    await page.goto(tabsUrl.list)
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: originalDoc.id,
+    })
+
+    // select first item
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    // open bulk edit drawer
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await selectInput({
+      selectLocator: bulkEditForm.locator('.react-select'),
+      options: ['Title'],
+      multiSelect: true,
+    })
+
+    await bulkEditForm.locator('#field-title').fill('Updated Tab Title')
+    await bulkEditForm.locator('button[type="submit"]').click()
+
+    await expect(bulkEditForm).toBeHidden()
+
+    const updatedDocQuery = await payload.find({
+      collection: tabsSlug,
+      where: {
+        id: {
+          equals: originalDoc.id,
+        },
+      },
+    })
+    const updatedDoc = updatedDocQuery.docs[0]
+    await expect.poll(() => updatedDoc?.title).toEqual('Updated Tab Title')
+    await expect.poll(() => updatedDoc?.tabTab?.tabTabArray?.length).toBe(1)
+
+    await expect
+      .poll(() => updatedDoc?.tabTab?.tabTabArray?.[0]?.tabTabArrayText)
+      .toEqual('nestedText')
   })
 })
 

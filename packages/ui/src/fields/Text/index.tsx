@@ -21,7 +21,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: { className, description, placeholder, rtl } = {},
+      admin: { autoComplete, className, description, placeholder, rtl } = {},
       hasMany,
       label,
       localized,
@@ -123,6 +123,9 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       description={description}
       Error={Error}
       hasMany={hasMany}
+      htmlAttributes={{
+        autoComplete: autoComplete || undefined,
+      }}
       inputRef={inputRef}
       Label={Label}
       label={label}

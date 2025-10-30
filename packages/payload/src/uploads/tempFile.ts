@@ -1,10 +1,9 @@
-// @ts-strict-ignore
 import fs from 'fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { v4 as uuid } from 'uuid'
 
-async function runTask(temporaryPath: string, callback) {
+async function runTask(temporaryPath: string, callback: (temporaryPath: string) => Promise<any>) {
   try {
     return await callback(temporaryPath)
   } finally {
@@ -17,7 +16,10 @@ type Options = {
   name?: string
 }
 
-export const temporaryFileTask = async (callback, options: Options = {}) => {
+export const temporaryFileTask = async (
+  callback: (temporaryPath: string) => Promise<any>,
+  options: Options = {},
+) => {
   const filePath = await temporaryFile(options)
   return runTask(filePath, callback)
 }

@@ -15,12 +15,10 @@ import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
-  id: existingDocID,
-  AfterFields,
+  id: docID,
   collectionSlug,
   disableActions,
   drawerSlug,
-  Header,
   initialData,
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
@@ -29,6 +27,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
+  redirectAfterRestore,
 }) => {
   const { getEntityConfig } = useConfig()
   const locale = useLocale()
@@ -44,14 +43,17 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
-  const hasRenderedDocument = useRef(false)
+
+  const hasInitialized = useRef(false)
 
   const getDocumentView = useCallback(
-    (docID?: number | string) => {
+    (docID?: DocumentDrawerProps['id'], showLoadingIndicator: boolean = false) => {
       const controller = handleAbortRef(abortGetDocumentViewRef)
 
       const fetchDocumentView = async () => {
-        setIsLoading(true)
+        if (showLoadingIndicator) {
+          setIsLoading(true)
+        }
 
         try {
           const result = await renderDocument({
@@ -66,6 +68,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
             redirectAfterDuplicate:
               redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+            redirectAfterRestore: redirectAfterRestore !== undefined ? redirectAfterRestore : false,
             signal: controller.signal,
           })
 
@@ -76,7 +79,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         } catch (error) {
           toast.error(error?.message || t('error:unspecific'))
           closeModal(drawerSlug)
-          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
         }
 
         abortGetDocumentViewRef.current = null
@@ -91,7 +93,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       initialData,
       redirectAfterDelete,
       redirectAfterDuplicate,
+      redirectAfterRestore,
       renderDocument,
+      redirectAfterCreate,
       closeModal,
       overrideEntityVisibility,
       t,
@@ -101,7 +105,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      getDocumentView(args.doc.id)
+      if (args.operation === 'create') {
+        getDocumentView(args.doc.id)
+      }
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -142,15 +148,15 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const clearDoc = useCallback(() => {
-    getDocumentView()
+    getDocumentView(undefined, true)
   }, [getDocumentView])
 
   useEffect(() => {
-    if (!DocumentView && !hasRenderedDocument.current) {
-      getDocumentView(existingDocID)
-      hasRenderedDocument.current = true
+    if (!DocumentView && !hasInitialized.current) {
+      getDocumentView(docID, true)
+      hasInitialized.current = true
     }
-  }, [DocumentView, getDocumentView, existingDocID])
+  }, [DocumentView, getDocumentView, docID])
 
   // Cleanup any pending requests when the component unmounts
   useEffect(() => {

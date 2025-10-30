@@ -3,6 +3,7 @@ import type { ClientUser } from 'payload'
 
 import React, { useEffect } from 'react'
 
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
@@ -25,7 +26,7 @@ const formatDate = (date) => {
     minute: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(date)
+  }).format(new Date(date))
 }
 
 export const DocumentLocked: React.FC<{
@@ -38,6 +39,7 @@ export const DocumentLocked: React.FC<{
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
+  const { clearRouteCache } = useRouteCache()
   const { startRouteTransition } = useRouteTransition()
 
   useEffect(() => {
@@ -51,6 +53,8 @@ export const DocumentLocked: React.FC<{
   return (
     <Modal
       className={baseClass}
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
       onClose={() => {
         startRouteTransition(() => handleGoBack())
       }}
@@ -74,6 +78,7 @@ export const DocumentLocked: React.FC<{
             buttonStyle="secondary"
             id={`${modalSlug}-go-back`}
             onClick={() => {
+              closeModal(modalSlug)
               startRouteTransition(() => handleGoBack())
             }}
             size="large"
@@ -86,6 +91,7 @@ export const DocumentLocked: React.FC<{
             onClick={() => {
               onReadOnly()
               closeModal(modalSlug)
+              clearRouteCache()
             }}
             size="large"
           >
@@ -95,7 +101,7 @@ export const DocumentLocked: React.FC<{
             buttonStyle="primary"
             id={`${modalSlug}-take-over`}
             onClick={() => {
-              void onTakeOver()
+              onTakeOver()
               closeModal(modalSlug)
             }}
             size="large"

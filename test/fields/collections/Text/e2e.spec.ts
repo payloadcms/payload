@@ -2,10 +2,9 @@ import type { Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -84,7 +83,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.column-selector__column', {
+        columnContainer.locator('.pill-selector__pill', {
           hasText: exactText('Hidden Text Field'),
         }),
       ).toBeHidden()
@@ -110,7 +109,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.column-selector__column', {
+        columnContainer.locator('.pill-selector__pill', {
           hasText: exactText('Disabled Text Field'),
         }),
       ).toBeHidden()
@@ -138,7 +137,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.column-selector__column', {
+        columnContainer.locator('.pill-selector__pill', {
           hasText: exactText('Admin Hidden Text Field'),
         }),
       ).toBeVisible()
@@ -184,7 +183,7 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      page.locator(`.column-selector .column-selector__column`, {
+      page.locator(`.pill-selector .pill-selector__pill`, {
         hasText: exactText('Disable List Column Text'),
       }),
     ).toBeHidden()
@@ -200,7 +199,7 @@ describe('Text', () => {
     await toggleColumn(page, {
       targetState: 'on',
       columnLabel: 'Text en',
-      columnName: 'localizedText',
+      columnName: 'i18nText',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')

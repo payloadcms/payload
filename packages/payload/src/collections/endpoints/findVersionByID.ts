@@ -12,6 +12,7 @@ import { findVersionByIDOperation } from '../operations/findVersionByID.js'
 export const findVersionByIDHandler: PayloadHandler = async (req) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
+  const trash = searchParams.get('trash') === 'true'
 
   const { id, collection } = getRequestCollectionWithID(req)
 
@@ -22,6 +23,7 @@ export const findVersionByIDHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),
+    trash,
   })
 
   return Response.json(result, {

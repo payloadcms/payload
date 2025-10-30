@@ -84,7 +84,7 @@ The following options are available:
 | `slug` \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
 | `typescript`    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
 | `versions`      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#global-config).                                                                |
-| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks                                          |
+| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).      |
 
 _\* An asterisk denotes that a property is required._
 
@@ -205,7 +205,7 @@ You can also pass an object to the global's `graphQL` property, which allows you
 
 ## TypeScript
 
-You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizeGlobalConfig`.
+You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizedGlobalConfig`.
 
 The `GlobalConfig` type represents a raw Global Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedGlobalConfig` type represents a Global Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 

@@ -14,7 +14,7 @@ import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
@@ -32,6 +32,7 @@ export const renderField: RenderFieldMethod = ({
   fieldConfig,
   fieldSchemaMap,
   fieldState,
+  forceCreateClientField,
   formState,
   indexPath,
   lastRenderedPath,
@@ -42,6 +43,7 @@ export const renderField: RenderFieldMethod = ({
   path,
   permissions,
   preferences,
+  readOnly: readOnlyFromProps,
   renderAllFields,
   req,
   schemaPath,
@@ -53,20 +55,26 @@ export const renderField: RenderFieldMethod = ({
     return
   }
 
-  const clientField = clientFieldSchemaMap
-    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
-    : createClientField({
-        defaultIDType: req.payload.config.db.defaultIDType,
-        field: fieldConfig,
-        i18n: req.i18n,
-        importMap: req.payload.importMap,
-      })
+  const clientField =
+    clientFieldSchemaMap && !forceCreateClientField
+      ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+      : createClientField({
+          defaultIDType: req.payload.config.db.defaultIDType,
+          field: fieldConfig,
+          i18n: req.i18n,
+          importMap: req.payload.importMap,
+        })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
     path,
     permissions,
-    readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
+    readOnly:
+      readOnlyFromProps === true
+        ? true
+        : typeof permissions === 'boolean'
+          ? !permissions
+          : !permissions?.[operation],
     schemaPath,
   }
 
@@ -100,6 +108,7 @@ export const renderField: RenderFieldMethod = ({
     req,
     siblingData,
     user: req.user,
+    value: 'name' in fieldConfig && data?.[fieldConfig.name],
   }
 
   switch (fieldConfig.type) {
@@ -248,7 +257,13 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: fieldConfig.editor.FieldComponent,
             importMap: req.payload.importMap,
-            serverProps,
+            serverProps: {
+              ...serverProps,
+              // Manually inject lexical-specific `sanitizedEditorConfig` server prop, in order to reduce the size of the field schema.
+              // Otherwise, the editorConfig would be included twice - once on the top-level, and once as part of the `FieldComponent` server props.
+              sanitizedEditorConfig:
+                'editorConfig' in fieldConfig.editor ? fieldConfig.editor.editorConfig : undefined,
+            },
           })}
         </WatchCondition>
       ) : (

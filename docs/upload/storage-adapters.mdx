@@ -15,6 +15,7 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 | Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
 | Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
 | Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
+| R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
 
 ## Vercel Blob Storage
 
@@ -84,7 +85,7 @@ pnpm add @payloadcms/storage-s3
 - The `config` object can be any [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object (from [`@aws-sdk/client-s3`](https://github.com/aws/aws-sdk-js-v3)). _This is highly dependent on your AWS setup_. Check the AWS documentation for more information.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
-- Configure `signedDownloads` (either globally of per-collection in `collections`) to use [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) for files downloading. This can improve performance for large files (like videos) while still respecting your access control.
+- Configure `signedDownloads` (either globally of per-collection in `collections`) to use [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) for files downloading. This can improve performance for large files (like videos) while still respecting your access control. Additionally, with `signedDownloads.shouldUseSignedURL` you can specify a condition whether Payload should use a presigned URL, if you want to use this feature only for specific files.
 
 ```ts
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -99,6 +100,14 @@ export default buildConfig({
         media: true,
         'media-with-prefix': {
           prefix,
+        },
+        'media-with-presigned-downloads': {
+          // Filter only mp4 files
+          signedDownloads: {
+            shouldUseSignedURL: ({ collection, filename, req }) => {
+              return filename.endsWith('.mp4')
+            },
+          },
         },
       },
       bucket: process.env.S3_BUCKET,
@@ -117,7 +126,7 @@ export default buildConfig({
 
 ### Configuration Options#s3-configuration
 
-See the the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object for guidance on AWS S3 configuration.
+See the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object for guidance on AWS S3 configuration.
 
 ## Azure Blob Storage
 
@@ -269,6 +278,43 @@ export default buildConfig({
 | `defaultKeyType` | Default key type for file operations                          | `fileKey`     |
 | `clientUploads`  | Do uploads directly on the client to bypass limits on Vercel. |               |
 
+## R2 Storage
+
+<Banner type="warning">
+  **Note**: The R2 Storage Adapter is in **beta** as some aspects of it may
+  change on any minor releases.
+</Banner>
+
+[`@payloadcms/storage-r2`](https://www.npmjs.com/package/@payloadcms/storage-r2)
+
+Use this adapter to store uploads in a Cloudflare R2 bucket via the Cloudflare Workers environment. If you're trying to connect to R2 using the S3 API then you should use the [S3](#s3-storage) adapter instead.
+
+### Installation#r2-installation
+
+```sh
+pnpm add @payloadcms/storage-r2
+```
+
+### Usage#r2-usage
+
+- Configure the `collections` object to specify which collections should use r2. The slug _must_ match one of your existing collection slugs and be an `upload` type.
+- Pass in the R2 bucket binding to the `bucket` option, this should be done in the environment where Payload is running (e.g. Cloudflare Worker).
+- You can conditionally determine whether or not to enable the plugin with the `enabled` option.
+
+```ts
+export default buildConfig({
+  collections: [Media],
+  plugins: [
+    r2Storage({
+      collections: {
+        media: true,
+      },
+      bucket: cloudflare.env.R2,
+    }),
+  ],
+})
+```
+
 ## Custom Storage Adapters
 
 If you need to create a custom storage adapter, you can use the [`@payloadcms/plugin-cloud-storage`](https://www.npmjs.com/package/@payloadcms/plugin-cloud-storage) package. This package is used internally by the storage adapters mentioned above.
@@ -284,7 +330,8 @@ Reference any of the existing storage adapters for guidance on how this should b
 ```ts
 export interface GeneratedAdapter {
   /**
-   * Additional fields to be injected into the base collection and image sizes
+   * Additional fields to be injected into the base
+   * collection and image sizes
    */
   fields?: Field[]
   /**

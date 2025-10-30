@@ -1,6 +1,6 @@
 import type { DefaultCellComponentProps } from 'payload'
 
-import React from 'react'
+import { isValidReactElement } from './isValidReactElement.js'
 
 export const hasOptionLabelJSXElement = (cellClientProps: DefaultCellComponentProps) => {
   const { cellData, field } = cellClientProps
@@ -13,7 +13,7 @@ export const hasOptionLabelJSXElement = (cellClientProps: DefaultCellComponentPr
     if (
       matchingOption &&
       typeof matchingOption === 'object' &&
-      React.isValidElement(matchingOption.label)
+      isValidReactElement(matchingOption.label)
     ) {
       return true
     }

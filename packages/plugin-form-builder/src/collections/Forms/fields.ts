@@ -487,6 +487,55 @@ const Checkbox: Block = {
   },
 }
 
+const Date: Block = {
+  slug: 'date',
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          ...name,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      name: 'defaultValue',
+      type: 'date',
+      label: 'Default Value',
+    },
+  ],
+  labels: {
+    plural: 'Date Fields',
+    singular: 'Date',
+  },
+}
+
 const Payment = (fieldConfig: PaymentFieldConfig): Block => {
   let paymentProcessorField = null
   if (fieldConfig?.paymentProcessor) {
@@ -669,6 +718,7 @@ const Message: Block = {
 export const fields = {
   checkbox: Checkbox,
   country: Country,
+  date: Date,
   email: Email,
   message: Message,
   number: Number,

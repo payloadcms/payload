@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadComponent } from '../../../config/types.js'
 
 export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
@@ -6,19 +5,20 @@ export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   path: string
 } {
   if (!PayloadComponent) {
-    return null
+    return null!
   }
 
   const pathAndMaybeExport =
     typeof PayloadComponent === 'string' ? PayloadComponent : PayloadComponent.path
 
-  let path = ''
-  let exportName = 'default'
+  let path: string
+  let exportName: string
 
-  if (pathAndMaybeExport?.includes('#')) {
-    ;[path, exportName] = pathAndMaybeExport.split('#')
+  if (pathAndMaybeExport.includes('#')) {
+    ;[path, exportName] = pathAndMaybeExport.split('#', 2) as [string, string]
   } else {
     path = pathAndMaybeExport
+    exportName = 'default'
   }
 
   if (typeof PayloadComponent === 'object' && PayloadComponent.exportName) {

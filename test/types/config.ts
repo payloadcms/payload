@@ -19,6 +19,11 @@ export default buildConfigWithDefaults({
           name: 'text',
         },
         {
+          type: 'richText',
+          name: 'richText',
+          required: true,
+        },
+        {
           type: 'text',
           name: 'title',
         },
@@ -35,6 +40,26 @@ export default buildConfigWithDefaults({
             {
               label: 'Option 2',
               value: 'option-2',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          label: 'Unnamed Group',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideUnnamedGroup',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'namedGroup',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideNamedGroup',
             },
           ],
         },

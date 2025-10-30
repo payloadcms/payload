@@ -39,7 +39,7 @@ const GlobalWithAccessControl: GlobalConfig = {
     update: ({ req: { user } }) => {...},
 
     // Version-enabled Globals only
-    readVersion: () => {...},
+    readVersions: () => {...},
   },
   // highlight-end
 }
@@ -64,7 +64,7 @@ If a Global supports [Versions](../versions/overview), the following additional 
 
 Returns a boolean result or optionally a [query constraint](../queries/overview) which limits who can read this global based on its current properties.
 
-To add read Access Control to a [Global](../configuration/globals), use the `read` property in the [Global Config](../configuration/globals):
+To add read Access Control to a [Global](../configuration/globals), use the `access` property in the [Global Config](../configuration/globals):
 
 ```ts
 import { GlobalConfig } from 'payload'
@@ -72,7 +72,7 @@ import { GlobalConfig } from 'payload'
 const Header: GlobalConfig = {
   // ...
   // highlight-start
-  read: {
+  access: {
     read: ({ req: { user } }) => {
       return Boolean(user)
     },

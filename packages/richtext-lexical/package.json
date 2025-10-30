@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.37.0",
+  "version": "3.62.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,7 +17,10 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -180,6 +183,11 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts"
     },
+    "./lexical/react/LexicalNodeContextMenuPlugin": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts"
+    },
     "./lexical/react/LexicalDecoratorBlockNode": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.ts",
@@ -334,18 +342,19 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:bundle-for-analysis": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
-    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
+    "build:esbuild": "node bundle.js",
+    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm build:esbuild:postproces && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
@@ -356,25 +365,27 @@
     ]
   },
   "dependencies": {
-    "@lexical/headless": "0.28.0",
-    "@lexical/html": "0.28.0",
-    "@lexical/link": "0.28.0",
-    "@lexical/list": "0.28.0",
-    "@lexical/mark": "0.28.0",
-    "@lexical/react": "0.28.0",
-    "@lexical/rich-text": "0.28.0",
-    "@lexical/selection": "0.28.0",
-    "@lexical/table": "0.28.0",
-    "@lexical/utils": "0.28.0",
+    "@lexical/clipboard": "0.35.0",
+    "@lexical/headless": "0.35.0",
+    "@lexical/html": "0.35.0",
+    "@lexical/link": "0.35.0",
+    "@lexical/list": "0.35.0",
+    "@lexical/mark": "0.35.0",
+    "@lexical/react": "0.35.0",
+    "@lexical/rich-text": "0.35.0",
+    "@lexical/selection": "0.35.0",
+    "@lexical/table": "0.35.0",
+    "@lexical/utils": "0.35.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@types/uuid": "10.0.0",
     "acorn": "8.12.1",
     "bson-objectid": "2.0.4",
+    "csstype": "3.1.3",
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
     "jsox": "1.2.121",
-    "lexical": "0.28.0",
+    "lexical": "0.35.0",
     "mdast-util-from-markdown": "2.0.2",
     "mdast-util-mdx-jsx": "3.1.3",
     "micromark-extension-mdx-jsx": "3.0.1",
@@ -384,28 +395,27 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
-    "@lexical/eslint-plugin": "0.28.0",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@lexical/eslint-plugin": "0.35.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
-    "@types/node": "22.5.4",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.2",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
+    "@types/node": "22.15.30",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "babel-plugin-react-compiler": "19.1.0-rc.3",
     "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.24.2",
+    "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "3.1.0"
+    "swc-plugin-transform-remove-imports": "4.0.4"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.0-beta.2",
+    "@faceless-ui/modal": "3.0.0",
     "@faceless-ui/scroll-info": "2.0.0",
     "@payloadcms/next": "workspace:*",
     "payload": "workspace:*",
@@ -576,6 +586,11 @@
         "import": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js"
+      },
+      "./lexical/react/LexicalNodeContextMenuPlugin": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js"
       },
       "./lexical/react/LexicalDecoratorBlockNode": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.js",

@@ -2,7 +2,7 @@
 description: Manage SEO metadata from your Payload admin
 keywords: plugins, seo, meta, search, engine, ranking, google
 label: SEO
-order: 30
+order: 100
 title: SEO Plugin
 ---
 
@@ -28,7 +28,7 @@ To help you visualize what your page might look like in a search engine, a previ
 
 - Adds a `meta` field group to every SEO-enabled collection or global
 - Allows you to define custom functions to auto-generate metadata
-- Displays hints and indicators to help content editor write effective meta
+- Displays hints and indicators to help content editors write effective meta
 - Renders a snippet of what a search engine might display
 - Extendable so you can define custom fields like `og:title` or `json-ld`
 - Soon will support dynamic variable injection
@@ -115,6 +115,7 @@ Set the `uploadsCollection` to your application's upload-enabled collection slug
 ##### `tabbedUI`
 
 When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](../fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
+Note that the order of plugins or fields in your config may affect whether or not the plugin can smartly merge tabs with your existing fields. If you have a complex structure we recommend you [make use of the fields directly](#direct-use-of-fields) instead of relying on this config option.
 
 <Banner type="info">
   If you wish to continue to use top-level or sidebar fields with `tabbedUI`,

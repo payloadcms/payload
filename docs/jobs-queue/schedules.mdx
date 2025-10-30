@@ -1,0 +1,169 @@
+---
+title: Job Schedules
+label: Schedules
+order: 60
+desc: Payload allows you to schedule jobs to run periodically
+keywords: jobs queue, application framework, typescript, node, react, nextjs, scheduling, cron, schedule
+---
+
+Payload's `schedule` property lets you enqueue Jobs regularly according to a cron schedule - daily, weekly, hourly, or any custom interval. This is ideal for tasks or workflows that must repeat automatically and without manual intervention.
+
+Scheduling Jobs differs significantly from running them:
+
+- **Queueing**: Scheduling only creates (enqueues) the Job according to your cron expression. It does not immediately execute any business logic.
+- **Running**: Execution happens separately through your Jobs runner - such as autorun, or manual invocation using `payload.jobs.run()` or the `payload-jobs/run` endpoint.
+
+Use the `schedule` property specifically when you have recurring tasks or workflows. To enqueue a single Job to run once in the future, use the `waitUntil` property instead.
+
+## Example use cases
+
+**Regular emails or notifications**
+
+Send nightly digests, weekly newsletters, or hourly updates.
+
+**Batch processing during off-hours**
+
+Process analytics data or rebuild static sites during low-traffic times.
+
+**Periodic data synchronization**
+
+Regularly push or pull updates to or from external APIs.
+
+## Handling schedules
+
+Something needs to actually trigger the scheduling of jobs (execute the scheduling lifecycle seen below). By default, the `jobs.autorun` configuration, as well as the `/api/payload-jobs/run` will also handle scheduling for the queue specified in the `autorun` configuration.
+
+You can disable this behavior by setting `disableScheduling: true` in your `autorun` configuration, or by passing `disableScheduling=true` to the `/api/payload-jobs/run` endpoint. This is useful if you want to handle scheduling manually, for example, by using a cron job or a serverless function that calls the `/api/payload-jobs/handle-schedules` endpoint or the `payload.jobs.handleSchedules()` local API method.
+
+### Bin Scripts
+
+Payload provides a set of bin scripts that can be used to handle schedules. If you're already using the `jobs:run` bin script, you can set it to also handle schedules by passing the `--handle-schedules` flag:
+
+```sh
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
+```
+
+If you only want to handle schedules, you can use the dedicated `jobs:handle-schedules` bin script:
+
+```sh
+pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --queue myQueue # or --all-queues
+```
+
+## Defining schedules on Tasks or Workflows
+
+Schedules are defined using the `schedule` property:
+
+```ts
+export type ScheduleConfig = {
+  cron: string // required, supports seconds precision
+  queue: string // required, the queue to push Jobs onto
+  hooks?: {
+    // Optional hooks to customize scheduling behavior
+    beforeSchedule?: BeforeScheduleFn
+    afterSchedule?: AfterScheduleFn
+  }
+}
+```
+
+### Example schedule
+
+The following example demonstrates scheduling a Job to enqueue every day at midnight:
+
+```ts
+import type { TaskConfig } from 'payload'
+
+export const SendDigestEmail: TaskConfig<'SendDigestEmail'> = {
+  slug: 'SendDigestEmail',
+  schedule: [
+    {
+      cron: '0 0 * * *', // Every day at midnight
+      queue: 'nightly',
+    },
+  ],
+  handler: async () => {
+    await sendDigestToAllUsers()
+  },
+}
+```
+
+This configuration only queues the Job - it does not execute it immediately. To actually run the queued Job, you configure autorun in your Payload config (note that autorun should **not** be used on serverless platforms):
+
+```ts
+export default buildConfig({
+  jobs: {
+    autoRun: [
+      {
+        cron: '* * * * *', // Runs every minute
+        queue: 'nightly',
+      },
+    ],
+    tasks: [SendDigestEmail],
+  },
+})
+```
+
+That way, Payload's scheduler will automatically enqueue the job into the `nightly` queue every day at midnight. The autorun configuration will check the `nightly` queue every minute and execute any Jobs that are due to run.
+
+## Scheduling lifecycle
+
+Here's how the scheduling process operates in detail:
+
+1. **Cron evaluation**: Payload (or your external trigger in `manual` mode) identifies which schedules are due to run. To do that, it will
+   read the `payload-jobs-stats` global which contains information about the last time each scheduled task or workflow was run.
+2. **BeforeSchedule hook**:
+   - The default beforeSchedule hook checks how many active or runnable jobs of the same type that have been queued by the scheduling system currently exist.
+     If such a job exists, it will skip scheduling a new one.
+   - You can provide your own `beforeSchedule` hook to customize this behavior. For example, you might want to allow multiple overlapping Jobs or dynamically set the Job input data.
+3. **Enqueue Job**: Payload queues up a new job. This job will have `waitUntil` set to the next scheduled time based on the cron expression.
+4. **AfterSchedule hook**:
+   - The default afterSchedule hook updates the `payload-jobs-stats` global metadata with the last scheduled time for the Job.
+   - You can provide your own afterSchedule hook to it for custom logging, metrics, or other post-scheduling actions.
+
+## Customizing concurrency and input (Advanced)
+
+You may want more control over concurrency or dynamically set Job inputs at scheduling time. For instance, allowing multiple overlapping Jobs to be scheduled, even if a previously scheduled job has not completed yet, or preparing dynamic data to pass to your Job handler:
+
+```ts
+import { countRunnableOrActiveJobsForQueue } from 'payload'
+
+schedule: [
+  {
+    cron: '* * * * *', // every minute
+    queue: 'reports',
+    hooks: {
+      beforeSchedule: async ({ queueable, req }) => {
+        const runnableOrActiveJobsForQueue =
+          await countRunnableOrActiveJobsForQueue({
+            queue: queueable.scheduleConfig.queue,
+            req,
+            taskSlug: queueable.taskConfig?.slug,
+            workflowSlug: queueable.workflowConfig?.slug,
+            onlyScheduled: true,
+          })
+
+        // Allow up to 3 simultaneous scheduled jobs and set dynamic input
+        return {
+          shouldSchedule: runnableOrActiveJobsForQueue < 3,
+          input: { text: 'Hi there' },
+        }
+      },
+    },
+  },
+]
+```
+
+This allows fine-grained control over how many Jobs can run simultaneously and provides dynamically computed input values each time a Job is scheduled.
+
+## Scheduling in serverless environments
+
+On serverless platforms, scheduling must be triggered externally since Payload does not automatically run cron schedules in ephemeral environments. You have two main ways to trigger scheduling manually:
+
+- **Invoke via Payload's API:** `payload.jobs.handleSchedules()`
+- **Use the REST API endpoint:** `/api/payload-jobs/handle-schedules`
+- **Use the run endpoint, which also handles scheduling by default:** `GET /api/payload-jobs/run`
+
+For example, on Vercel, you can set up a Vercel Cron to regularly trigger scheduling:
+
+- **Vercel Cron Job:** Configure Vercel Cron to periodically call `GET /api/payload-jobs/handle-schedules`. If you would like to auto-run your scheduled jobs as well, you can use the `GET /api/payload-jobs/run` endpoint.
+
+Once Jobs are queued, their execution depends entirely on your configured runner setup (e.g., autorun, or manual invocation).

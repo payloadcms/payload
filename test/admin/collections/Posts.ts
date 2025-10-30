@@ -8,7 +8,15 @@ import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
   admin: {
-    defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+    defaultColumns: [
+      'id',
+      'number',
+      'title',
+      'description',
+      'demoUIField',
+      'disableListColumnTextInRow',
+      'someGroup.disableListColumnTextInGroup',
+    ],
     description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
@@ -35,22 +43,7 @@ export const Posts: CollectionConfig = {
       ],
       listMenuItems: [
         {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'listMenuItems',
-          },
-        },
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'Many of them',
-          },
-        },
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'Ok last one',
-          },
+          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
         },
       ],
       afterList: [
@@ -140,6 +133,68 @@ export const Posts: CollectionConfig = {
           admin: {
             description: () => `t:${customTabAdminDescription}`,
           },
+        },
+      ],
+    },
+    {
+      name: 'someTextField',
+      type: 'text',
+    },
+    {
+      name: 'namedGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'someTextField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          name: 'textFieldInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'groupWithCustomCell',
+      type: 'group',
+      admin: {
+        components: {
+          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
+        },
+      },
+      fields: [
+        {
+          name: 'nestedTextFieldInGroupWithCustomCell',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'namedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInNamedTab',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'unnamedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInUnnamedTab',
+              type: 'text',
+            },
+          ],
         },
       ],
     },
@@ -245,6 +300,38 @@ export const Posts: CollectionConfig = {
     {
       name: 'file',
       type: 'text',
+    },
+    {
+      name: 'noReadAccessField',
+      type: 'text',
+      access: {
+        read: () => false,
+      },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'disableListColumnTextInRow',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+          },
+        },
+      ],
+    },
+    {
+      name: 'someGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'disableListColumnTextInGroup',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+          },
+        },
+      ],
     },
   ],
   labels: {

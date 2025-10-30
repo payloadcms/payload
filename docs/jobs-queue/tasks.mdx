@@ -13,7 +13,7 @@ keywords: jobs queue, application framework, typescript, node, react, nextjs
 
 You can register Tasks on the Payload config, and then create [Jobs](/docs/jobs-queue/jobs) or [Workflows](/docs/jobs-queue/workflows) that use them. Think of Tasks like tidy, isolated "functions that do one specific thing".
 
-Payload Tasks can be configured to automatically retried if they fail, which makes them valuable for "durable" workflows like AI applications where LLMs can return non-deterministic results, and might need to be retried.
+Payload Tasks can be configured to be automatically retried if they fail, which makes them valuable for "durable" workflows like AI applications where LLMs can return non-deterministic results, and might need to be retried.
 
 Tasks can either be defined within the `jobs.tasks` array in your Payload config, or they can be defined inline within a workflow.
 
@@ -33,7 +33,7 @@ Simply add a task to the `jobs.tasks` array in your Payload config. A task consi
 | `onSuccess`     | Function to be executed if the task succeeds.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `retries`       | Specify the number of times that this step should be retried if it fails. If this is undefined, the task will either inherit the retries from the workflow or have no retries. If this is 0, the task will not be retried. By default, this is undefined.                                                                                                                                                                                        |
 
-The logic for the Task is defined in the `handler` - which can be defined as a function, or a path to a function. The `handler` will run once a worker picks picks up a Job that includes this task.
+The logic for the Task is defined in the `handler` - which can be defined as a function, or a path to a function. The `handler` will run once a worker picks up a Job that includes this task.
 
 It should return an object with an `output` key, which should contain the output of the task as you've defined.
 
@@ -157,7 +157,7 @@ You can configure this behavior through the `retries.shouldRestore` property. Th
 
 If `shouldRestore` is set to true, the task will only be re-run if it previously failed. This is the default behavior.
 
-If `shouldRestore` this is set to false, the task will be re-run even if it previously succeeded, ignoring the maximum number of retries.
+If `shouldRestore` is set to false, the task will be re-run even if it previously succeeded, ignoring the maximum number of retries.
 
 If `shouldRestore` is a function, the return value of the function will determine whether the task should be re-run. This can be used for more complex restore logic, e.g you may want to re-run a task up to X amount of times and then restore it for consecutive runs, or only re-run a task if the input has changed.
 
@@ -213,7 +213,7 @@ export default buildConfig({
 
 ## Nested tasks
 
-You can run sub-tasks within an existing task, by using the `tasks` or `ìnlineTask` arguments passed to the task `handler` function:
+You can run sub-tasks within an existing task, by using the `tasks` or `inlineTask` arguments passed to the task `handler` function:
 
 ```ts
 export default buildConfig({

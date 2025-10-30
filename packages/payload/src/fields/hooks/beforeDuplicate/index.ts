@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
@@ -33,15 +32,15 @@ export const beforeDuplicate = async <T extends JsonObject>({
     collection,
     context,
     doc,
-    fields: collection?.fields,
+    fields: collection!.fields,
     overrideAccess,
     parentIndexPath: '',
     parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,
-    siblingDoc: doc,
+    siblingDoc: doc!,
   })
 
-  return doc
+  return doc!
 }

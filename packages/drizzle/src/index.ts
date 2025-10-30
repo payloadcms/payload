@@ -12,9 +12,9 @@ export { deleteVersions } from './deleteVersions.js'
 export { destroy } from './destroy.js'
 export { find } from './find.js'
 export { chainMethods } from './find/chainMethods.js'
+export { findDistinct } from './findDistinct.js'
 export { findGlobal } from './findGlobal.js'
 export { findGlobalVersions } from './findGlobalVersions.js'
-export { findMigrationDir } from './findMigrationDir.js'
 export { findOne } from './findOne.js'
 export { findVersions } from './findVersions.js'
 export { migrate } from './migrate.js'
@@ -23,7 +23,7 @@ export { migrateFresh } from './migrateFresh.js'
 export { migrateRefresh } from './migrateRefresh.js'
 export { migrateReset } from './migrateReset.js'
 export { migrateStatus } from './migrateStatus.js'
-export { default as buildQuery } from './queries/buildQuery.js'
+export { buildQuery } from './queries/buildQuery.js'
 export { operatorMap } from './queries/operatorMap.js'
 export type { Operators } from './queries/operatorMap.js'
 export { parseParams } from './queries/parseParams.js'
@@ -78,6 +78,7 @@ export { updateJobs } from './updateJobs.js'
 export { updateMany } from './updateMany.js'
 export { updateOne } from './updateOne.js'
 export { updateVersion } from './updateVersion.js'
+export { upsert } from './upsert.js'
 export { upsertRow } from './upsertRow/index.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
@@ -87,3 +88,13 @@ export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'
+import { findMigrationDir as payloadFindMigrationDir } from 'payload'
+
+/**
+ * @deprecated remove in 4.0
+ * use
+ * ```ts
+ * import { findMigrationDir } from 'payload'
+ * ```
+ */
+export const findMigrationDir = payloadFindMigrationDir

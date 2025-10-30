@@ -68,6 +68,7 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessAuthOperations;
   };
   blocks: {};
   collections: {
@@ -77,6 +78,7 @@ export interface Config {
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
+    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccess;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,6 +91,7 @@ export interface Config {
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
+    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessSelect<false> | ApiKeysWithFieldReadAccessSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -114,6 +117,9 @@ export interface Config {
       })
     | (PublicUser & {
         collection: 'public-users';
+      })
+    | (ApiKeysWithFieldReadAccess & {
+        collection: 'api-keys-with-field-read-access';
       });
   jobs: {
     tasks: unknown;
@@ -210,6 +216,24 @@ export interface PublicUserAuthOperations {
     password: string;
   };
 }
+export interface ApiKeysWithFieldReadAccessAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -219,6 +243,21 @@ export interface User {
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   namedSaveToJWT?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -236,6 +275,7 @@ export interface User {
   unnamedTabSaveToJWTString?: string | null;
   unnamedTabSaveToJWTFalse?: string | null;
   custom?: string | null;
+  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -248,6 +288,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -265,6 +312,13 @@ export interface PartialDisableLocalStrategy {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -306,6 +360,13 @@ export interface PublicUser {
   _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -318,6 +379,18 @@ export interface RelationsCollection {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-field-read-access".
+ */
+export interface ApiKeysWithFieldReadAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -349,6 +422,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationsCollection';
         value: string | RelationsCollection;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
       } | null);
   globalSlug?: string | null;
   user:
@@ -371,6 +448,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
       };
   updatedAt: string;
   createdAt: string;
@@ -401,6 +482,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
       };
   key?: string | null;
   value?:
@@ -434,6 +519,7 @@ export interface UsersSelect<T extends boolean = true> {
   adminOnlyField?: T;
   roles?: T;
   namedSaveToJWT?: T;
+  richText?: T;
   group?:
     | T
     | {
@@ -459,6 +545,7 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
+  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -471,6 +558,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -486,6 +580,13 @@ export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -523,6 +624,13 @@ export interface PublicUsersSelect<T extends boolean = true> {
   _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -533,6 +641,17 @@ export interface RelationsCollectionSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-field-read-access_select".
+ */
+export interface ApiKeysWithFieldReadAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

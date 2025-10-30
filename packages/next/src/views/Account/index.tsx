@@ -16,7 +16,7 @@ import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
-export async function Account({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -137,9 +137,8 @@ export async function Account({ initPageResult, params, searchParams }: AdminVie
           <DocumentHeader
             collectionConfig={collectionConfig}
             hideTabs
-            i18n={i18n}
-            payload={payload}
             permissions={permissions}
+            req={req}
           />
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
@@ -148,6 +147,7 @@ export async function Account({ initPageResult, params, searchParams }: AdminVie
             importMap: payload.importMap,
             serverProps: {
               doc: data,
+              hasPublishedDoc,
               i18n,
               initPageResult,
               locale,

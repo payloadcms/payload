@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -14,6 +15,7 @@ import {
   // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertNetworkRequests } from '../../../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -98,6 +100,53 @@ describe('Conditional Logic', () => {
     expect(true).toBe(true)
   })
 
+  test('ensure conditions receive document ID during form state request', async () => {
+    await page.goto(url.create)
+
+    const fieldOnlyVisibleIfNoID = page.locator('#field-fieldWithDocIDCondition')
+
+    await expect(fieldOnlyVisibleIfNoID).toBeVisible()
+
+    const textField = page.locator('#field-text')
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/conditional-logic',
+      async () => {
+        await textField.fill('some text')
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      '/api/conditional-logic',
+      async () => {
+        await saveDocAndAssert(page)
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
+
+    // Fill text and wait for form state request to come back
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/conditional-logic',
+      async () => {
+        await textField.fill('updated text')
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
+  })
+
   test('should conditionally render custom field that renders a Payload field', async () => {
     await page.goto(url.create)
 
@@ -175,7 +224,7 @@ describe('Conditional Logic', () => {
 
   test('should not render fields when adding array or blocks rows until form state returns', async () => {
     await page.goto(url.create)
-    await page.locator('#field-arrayWithConditionalField .array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'arrayWithConditionalField' })
     const shimmer = '#field-arrayWithConditionalField .collapsible__content > .shimmer-effect'
 
     await expect(page.locator(shimmer)).toBeVisible()
@@ -204,14 +253,11 @@ describe('Conditional Logic', () => {
   test('should render field based on path argument', async () => {
     await page.goto(url.create)
 
-    const arrayOneButton = page.locator('#field-arrayOne .array-field__add-row')
-    await arrayOneButton.click()
+    await addArrayRow(page, { fieldName: 'arrayOne' })
 
-    const arrayTwoButton = page.locator('#arrayOne-row-0 .array-field__add-row')
-    await arrayTwoButton.click()
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo' })
 
-    const arrayThreeButton = page.locator('#arrayOne-0-arrayTwo-row-0 .array-field__add-row')
-    await arrayThreeButton.click()
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo__0__arrayThree' })
 
     const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
 

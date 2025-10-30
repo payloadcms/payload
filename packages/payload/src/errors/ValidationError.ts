@@ -63,7 +63,7 @@ export class ValidationError extends APIError<{
                 return f.label[req.i18n.language]
               }
 
-              return f.label[Object.keys(f.label)[0]]
+              return f.label[Object.keys(f.label)[0]!]
             }
 
             return f.label

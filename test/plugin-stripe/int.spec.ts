@@ -16,9 +16,7 @@ describe('Stripe Plugin', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should create products', async () => {

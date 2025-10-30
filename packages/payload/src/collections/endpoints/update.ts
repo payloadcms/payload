@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getTranslation } from '@payloadcms/translations'
 import { status as httpStatus } from 'http-status'
 
@@ -14,7 +13,7 @@ import { updateOperation } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, draft, limit, overrideLock, populate, select, sort, where } = req.query as {
+  const { depth, draft, limit, overrideLock, populate, select, sort, trash, where } = req.query as {
     depth?: string
     draft?: string
     limit?: string
@@ -22,12 +21,13 @@ export const updateHandler: PayloadHandler = async (req) => {
     populate?: Record<string, unknown>
     select?: Record<string, unknown>
     sort?: string
+    trash?: string
     where?: Where
   }
 
   const result = await updateOperation({
     collection,
-    data: req.data,
+    data: req.data!,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',
     limit: isNumber(limit) ? Number(limit) : undefined,
@@ -36,7 +36,8 @@ export const updateHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
-    where,
+    trash: trash === 'true',
+    where: where!,
   })
 
   const headers = headersWithCors({

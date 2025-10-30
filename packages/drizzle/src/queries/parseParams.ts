@@ -3,18 +3,20 @@ import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
-import { QueryError } from 'payload'
+import { APIError, QueryError } from 'payload'
 import { validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
+import { isValidStringID } from '../utilities/isValidStringID.js'
+import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
-export type QueryContext = { sort: Sort }
+export type QueryContext = { rawSort?: SQL; sort: Sort }
 
 type Args = {
   adapter: DrizzleAdapter
@@ -108,6 +110,17 @@ export function parseParams({
                   value: val,
                 })
 
+                const resolvedColumn =
+                  rawColumn ||
+                  (aliasTable && tableName === getNameFromDrizzleTable(table)
+                    ? aliasTable[columnName]
+                    : table[columnName])
+
+                if (val === DistinctSymbol) {
+                  selectFields['_selected'] = resolvedColumn
+                  break
+                }
+
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {
                     constraints.push(adapter.operators.like(constraintTable[col], value))
@@ -117,7 +130,8 @@ export function parseParams({
                 })
 
                 if (
-                  ['json', 'richText'].includes(field.type) &&
+                  (['json', 'richText'].includes(field.type) ||
+                    (field.type === 'blocks' && adapter.blocksAsJSON)) &&
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
@@ -206,7 +220,10 @@ export function parseParams({
 
                 if (
                   operator === 'like' &&
-                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                  (field.type === 'number' ||
+                    field.type === 'relationship' ||
+                    field.type === 'upload' ||
+                    table[columnName].columnType === 'PgUUID')
                 ) {
                   operator = 'equals'
                 }
@@ -280,12 +297,6 @@ export function parseParams({
                   break
                 }
 
-                const resolvedColumn =
-                  rawColumn ||
-                  (aliasTable && tableName === getNameFromDrizzleTable(table)
-                    ? aliasTable[columnName]
-                    : table[columnName])
-
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
                     or(
@@ -348,6 +359,7 @@ export function parseParams({
                       }
                       if (geoConstraints.length) {
                         context.sort = relationOrPath
+                        context.rawSort = sql`${table[columnName]} <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`
                         constraints.push(and(...geoConstraints))
                       }
                       break
@@ -366,7 +378,74 @@ export function parseParams({
                   break
                 }
 
-                constraints.push(adapter.operators[queryOperator](resolvedColumn, queryValue))
+                const orConditions: SQL<unknown>[] = []
+                let resolvedQueryValue = queryValue
+                if (
+                  operator === 'in' &&
+                  Array.isArray(queryValue) &&
+                  queryValue.some((v) => v === null)
+                ) {
+                  orConditions.push(isNull(resolvedColumn))
+                  resolvedQueryValue = queryValue.filter((v) => v !== null)
+                }
+
+                let constraint = adapter.operators[queryOperator](
+                  resolvedColumn,
+                  resolvedQueryValue,
+                )
+
+                if (
+                  adapter.limitedBoundParameters &&
+                  (operator === 'in' || operator === 'not_in') &&
+                  relationOrPath === 'id' &&
+                  Array.isArray(queryValue)
+                ) {
+                  let isInvalid = false
+                  for (const val of queryValue) {
+                    if (typeof val === 'number' || val === null) {
+                      continue
+                    }
+                    if (typeof val === 'string') {
+                      if (!isValidStringID(val)) {
+                        isInvalid = true
+                        break
+                      } else {
+                        continue
+                      }
+                    }
+                    isInvalid = true
+                    break
+                  }
+
+                  if (isInvalid) {
+                    throw new APIError(`Invalid ID value in ${JSON.stringify(queryValue)}`)
+                  }
+
+                  constraints.push(
+                    sql.raw(
+                      `${resolvedColumn.name} ${operator === 'in' ? 'IN' : 'NOT IN'} (${queryValue
+                        .map((e) => {
+                          if (e === null) {
+                            return `NULL`
+                          }
+
+                          if (typeof e === 'number') {
+                            return e
+                          }
+
+                          return `'${e}'`
+                        })
+                        .join(',')})`,
+                    ),
+                  )
+                  break
+                }
+
+                if (orConditions.length) {
+                  orConditions.push(constraint)
+                  constraint = or(...orConditions)
+                }
+                constraints.push(constraint)
               }
             }
           }

@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type {
@@ -26,7 +26,7 @@ export type { Payload } from '../index.js'
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   i18n: I18n
   /**
    * The requested locale if specified
@@ -137,7 +137,9 @@ export type WhereField = {
 
 export type Where = {
   [key: string]: Where[] | WhereField
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   and?: Where[]
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   or?: Where[]
 }
 
@@ -261,3 +263,8 @@ export type TransformGlobalWithSelect<
 export type PopulateType = Partial<TypedCollectionSelect>
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
+
+export type PickPreserveOptional<T, K extends keyof T> = Partial<
+  Pick<T, Extract<K, OptionalKeys<T>>>
+> &
+  Pick<T, Extract<K, RequiredKeys<T>>>

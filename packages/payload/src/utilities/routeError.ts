@@ -21,7 +21,7 @@ export const routeError = async ({
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
   req: PayloadRequest | Request
-}) => {
+}): Promise<Response> => {
   if ('payloadInitError' in err && err.payloadInitError === true) {
     // do not attempt initializing Payload if the error is due to a failed initialization. Otherwise,
     // it will cause an infinite loop of initialization attempts and endless error responses, without
@@ -39,8 +39,8 @@ export const routeError = async ({
 
   if (!payload) {
     try {
-      payload = await getPayload({ config: configArg })
-    } catch (e) {
+      payload = await getPayload({ config: configArg, cron: true })
+    } catch (ignore) {
       return Response.json(
         {
           message: 'There was an error initializing Payload',

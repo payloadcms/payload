@@ -374,7 +374,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      {!errorLoading && (
+      {errorLoading ? (
+        <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
+      ) : (
         <ReactSelect
           disabled={disabled}
           isMulti={hasMany}
@@ -416,7 +418,6 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           value={valueToRender}
         />
       )}
-      {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
     </div>
   )
 }

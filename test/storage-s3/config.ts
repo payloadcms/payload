@@ -44,7 +44,11 @@ export default buildConfigWithDefaults({
           prefix,
         },
         [mediaWithSignedDownloadsSlug]: {
-          signedDownloads: true,
+          signedDownloads: {
+            shouldUseSignedURL: (args) => {
+              return args.req.headers.get('X-Disable-Signed-URL') !== 'true'
+            },
+          },
         },
       },
       bucket: process.env.S3_BUCKET,
