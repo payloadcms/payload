@@ -2068,6 +2068,9 @@ importers:
       '@types/escape-html':
         specifier: 1.0.4
         version: 1.0.4
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/json-schema':
         specifier: 'catalog:'
         version: 7.0.15
@@ -2092,6 +2095,9 @@ importers:
       esbuild-sass-plugin:
         specifier: 'catalog:'
         version: 3.3.1(esbuild@0.25.5)(sass-embedded@1.80.6)
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -3041,6 +3047,9 @@ importers:
       '@types/jest':
         specifier: 'catalog:'
         version: 29.5.12
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/react':
         specifier: 19.1.12
         version: 19.1.12
@@ -3092,6 +3101,9 @@ importers:
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@22.15.30)(babel-plugin-macros@3.1.0)
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
       jwt-decode:
         specifier: 'catalog:'
         version: 4.0.0
@@ -8311,6 +8323,9 @@ packages:
 
   '@types/jest@29.5.12':
     resolution: {integrity: sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==}
+
+  '@types/js-yaml@4.0.9':
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -22095,6 +22110,8 @@ snapshots:
     dependencies:
       expect: 29.7.0
       pretty-format: 29.7.0
+
+  '@types/js-yaml@4.0.9': {}
 
   '@types/json-schema@7.0.15': {}
 

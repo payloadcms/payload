@@ -403,6 +403,7 @@
     "@lexical/eslint-plugin": "catalog:",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
+    "@types/js-yaml": "^4.0.9",
     "@types/json-schema": "catalog:",
     "@types/node": "22.15.30",
     "@types/react": "19.1.12",
@@ -411,6 +412,7 @@
     "babel-plugin-transform-remove-imports": "catalog:",
     "esbuild": "catalog:",
     "esbuild-sass-plugin": "catalog:",
+    "js-yaml": "^4.1.0",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "catalog:"
   },
