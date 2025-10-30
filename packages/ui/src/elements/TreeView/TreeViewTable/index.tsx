@@ -34,7 +34,6 @@ export function TreeViewTable() {
         dropContextName={dropContextName}
         loadingItemKeys={loadingItemKeys}
         onDrop={onDrop}
-        // onEnter={handleEnter}
         onEscape={clearSelections}
         onItemSelection={onItemSelection}
         onSelectAll={selectAll}

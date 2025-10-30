@@ -17,9 +17,7 @@ export type NestedSectionsTableProps = {
   initialOffset?: number
   loadingItemKeys?: Set<ItemKey>
   onDrop?: (params: { targetItemKey: ItemKey | null }) => Promise<void>
-  // onEnter: (item: SectionItem) => void
   onEscape: () => void
-  onItemDrag?: (params: { event: PointerEvent; item: null | SectionItem }) => void
   onItemSelection?: (args: {
     eventOptions: {
       ctrlKey: boolean

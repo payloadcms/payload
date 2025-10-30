@@ -24,7 +24,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   dropContextName,
   loadingItemKeys,
   onDrop,
-  // onEnter,
   onEscape,
   onItemSelection,
   onSelectAll,
@@ -40,46 +39,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   const [firstCellXOffset, setFirstCellXOffset] = React.useState(0)
   const [firstCellWidth, setFirstCellWidth] = React.useState(0)
   const firstCellRef = React.useRef<HTMLDivElement>(null)
-
-  const getIndexFromItemKey = React.useCallback(
-    (itemKey: ItemKey | null): number => {
-      if (itemKey === null) {
-        return -1
-      }
-
-      let currentIndex = 0
-      const findIndex = ({
-        items,
-        targetItemKey,
-      }: {
-        items: SectionItem[]
-        targetItemKey: ItemKey | null
-      }): number => {
-        for (const item of items) {
-          if (item.itemKey === targetItemKey) {
-            return currentIndex
-          }
-          currentIndex++
-          if (item.rows && openItemKeys?.has(item.itemKey)) {
-            const found = findIndex({ items: item.rows, targetItemKey })
-            if (found !== -1) {
-              return found
-            }
-          }
-        }
-        return -1
-      }
-
-      return rootItems ? findIndex({ items: rootItems, targetItemKey: itemKey }) : -1
-    },
-    [rootItems, openItemKeys],
-  )
-
-  // Get the current focused row index for passing down to Row components
-  const focusedRowIndex = React.useMemo(
-    () => getIndexFromItemKey(focusedItemKey),
-    [focusedItemKey, getIndexFromItemKey],
-  )
 
   const onItemClick = React.useCallback(
     ({
@@ -282,7 +241,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       setIsDragging(false)
       setHoveredItemKey(null)
       setTargetParentItemKey(null)
-
       document.body.style.cursor = ''
     },
     onDragEnd(event) {
