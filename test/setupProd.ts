@@ -1,4 +1,5 @@
 import fs from 'fs'
+import yaml from 'js-yaml'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -94,6 +95,25 @@ export function setupProd() {
 
   // write it out
   fs.writeFileSync(path.resolve(dirname, 'package.json'), JSON.stringify(packageJson, null, 2))
+
+  // Copy the catalog from root pnpm-workspace.yaml to test/pnpm-workspace.yaml
+  // so that catalog: entries can be resolved when using --ignore-workspace
+  const rootWorkspaceYamlPath = path.resolve(dirname, '../pnpm-workspace.yaml')
+  const rootWorkspaceYaml = fs.readFileSync(rootWorkspaceYamlPath, 'utf-8')
+  const rootWorkspaceConfig = yaml.load(rootWorkspaceYaml) as {
+    catalog?: Record<string, string>
+  }
+
+  // Create a minimal pnpm-workspace.yaml in test directory with just the catalog
+  const testWorkspaceConfig = {
+    packages: [],
+    catalog: rootWorkspaceConfig.catalog || {},
+  }
+
+  const testWorkspaceYamlPath = path.resolve(dirname, 'pnpm-workspace.yaml')
+  fs.writeFileSync(testWorkspaceYamlPath, yaml.dump(testWorkspaceConfig))
+
+  console.log('✓ Created test/pnpm-workspace.yaml with catalog entries')
 }
 
 setupProd()
