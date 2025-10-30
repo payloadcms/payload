@@ -166,8 +166,6 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
               targetItems={targetItems}
               targetParentItemKey={targetParentItemKey}
               toggleExpand={toggleItemExpand}
-              // isFirstSiblingItem={isFirstSiblingItem}
-              // isLastSiblingItem={isLastSiblingItem}
             />
 
             {hasNestedItems && sectionItem.rows && (
