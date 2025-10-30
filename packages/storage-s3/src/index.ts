@@ -36,6 +36,12 @@ export type S3StorageOptions = {
   bucket: string
 
   /**
+   * Cache-Control header value to set on uploaded files.
+   * For example: 'max-age=31536000, public'.
+   */
+  cacheControl?: string
+
+  /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
    */
   clientUploads?: ClientUploadsConfig
@@ -121,6 +127,7 @@ export const s3Storage: S3StoragePlugin =
             : undefined,
         acl: s3StorageOptions.acl,
         bucket: s3StorageOptions.bucket,
+        cacheControl: s3StorageOptions.cacheControl,
         collections: s3StorageOptions.collections,
         getStorageClient,
       }),
@@ -175,6 +182,7 @@ function s3StorageInternal(
   {
     acl,
     bucket,
+    cacheControl,
     clientUploads,
     collections,
     config = {},
@@ -201,6 +209,7 @@ function s3StorageInternal(
       handleUpload: getHandleUpload({
         acl,
         bucket,
+        cacheControl,
         collection,
         getStorageClient,
         prefix,
