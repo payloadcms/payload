@@ -1331,6 +1331,9 @@ export type Config = {
     /** Filename to write the generated types to */
     outputFile?: string
 
+    /** Prefix to add to the generated interface names */
+    interfacePrefix?: string
+
     /**
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
