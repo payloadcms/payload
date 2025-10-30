@@ -1,4 +1,5 @@
 import type {
+  DecoratorNode,
   EditorConfig,
   LexicalEditor,
   EditorConfig as LexicalEditorConfig,
@@ -120,7 +121,8 @@ export type NodeMapValue<
       | ({
           isEditor: true
           isJSXConverter: false
-        } & WithinEditorArgs),
+          node: DecoratorNode
+        } & Omit<WithinEditorArgs, 'node'>),
   ) => JSX.Element
   /**
    * Provide a function to create the DOM element for the node.
