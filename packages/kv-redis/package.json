@@ -1,12 +1,12 @@
 {
   "name": "@payloadcms/kv-redis",
   "version": "3.6.0",
-  "description": "Payload storage adapter for uploadthing",
+  "description": "Redis KV adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/storage-uploadthing"
+    "directory": "packages/kv-redis"
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",

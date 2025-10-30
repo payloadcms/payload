@@ -188,7 +188,7 @@ jobs:
       redis:
         image: redis:latest
         ports:
-          - 6379:6379 # Expose Redis on port 6379
+          - 6379:6379
 
         options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
 

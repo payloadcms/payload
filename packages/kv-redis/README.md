@@ -19,7 +19,7 @@ export default buildConfig({
     // Redis connection URL. Defaults to process.env.REDIS_URL
     redisURL: 'redis://localhost:6379',
     // Optional prefix for Redis keys to isolate the store. Defaults to 'payload-kv'
-    prefix: 'kv-storage',
+    keyPrefix: 'kv-storage',
   }),
 })
 ```
@@ -29,5 +29,5 @@ Then you can access the KV storage using `payload.kv`:
 ```ts
 await payload.kv.set('key', { value: 1 })
 const data = await payload.kv.get('key')
-payload.loger.info(data)
+payload.logger.info(data)
 ```
