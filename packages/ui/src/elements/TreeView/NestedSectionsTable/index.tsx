@@ -314,7 +314,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           loadingItemKeys={loadingItemKeys}
           onDroppableHover={onDroppableHover}
           onFocusChange={(indexPath: number[]) => {
-            // Convert index back to row ID
             const row = getItemByPath({
               indexPath,
               rootItems,
