@@ -33,6 +33,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Global2, Post } from './payload-types.js'
 
+import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
@@ -5101,5 +5102,29 @@ describe('database', () => {
     delete payload.db.pool
     await payload.db.init()
     await payload.db.connect()
+  })
+
+  it('ensure mongodb query sanitization does not duplicate IDs', () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+
+    const res: any = sanitizeQueryValue({
+      field: {
+        name: '_id',
+        type: 'text',
+      },
+      hasCustomID: false,
+      operator: 'in',
+      val: ['68378b649ca45274fb10126f'],
+      path: '_id',
+      parentIsLocalized: false,
+      payload,
+    })
+
+    expect(res?.val).toHaveLength(1)
+    expect(typeof res?.val?.[0]).toBe('object')
+    expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 })

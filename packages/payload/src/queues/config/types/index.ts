@@ -127,6 +127,7 @@ export type JobsConfig = {
    * queries will be used.
    *
    * @default 0
+   * @deprecated - this will be removed in 4.0
    */
   depth?: number
   /**

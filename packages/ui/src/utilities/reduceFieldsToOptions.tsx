@@ -7,7 +7,10 @@ import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
-import fieldTypes, { arrayOperators } from '../elements/WhereBuilder/field-types.js'
+import {
+  fieldTypeConditions,
+  getValidFieldOperators,
+} from '../elements/WhereBuilder/field-types.js'
 import { createNestedClientFieldPath } from '../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from './combineFieldLabel.js'
 
@@ -199,7 +202,7 @@ export const reduceFieldsToOptions = ({
       return reduced
     }
 
-    if (typeof fieldTypes[field.type] === 'object') {
+    if (typeof fieldTypeConditions[field.type] === 'object') {
       if (
         fieldIsID(field) ||
         fieldPermissions === true ||
@@ -208,10 +211,11 @@ export const reduceFieldsToOptions = ({
       ) {
         const operatorKeys = new Set()
 
-        const fieldOperators =
-          'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+        const { validOperators } = getValidFieldOperators({
+          field,
+        })
 
-        const operators = fieldOperators.reduce((acc, operator) => {
+        const operators = validOperators.reduce((acc, operator) => {
           if (!operatorKeys.has(operator.value)) {
             operatorKeys.add(operator.value)
             const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
@@ -239,7 +243,7 @@ export const reduceFieldsToOptions = ({
           label: formattedLabel,
           plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
           value: fieldPath,
-          ...fieldTypes[field.type],
+          ...fieldTypeConditions[field.type],
           field,
           operators,
         }
