@@ -762,7 +762,7 @@ admin: {
 
 ### onInit Pattern
 
-Always call existing `onInit` before your initialization. See [onInit Hook](#onit-hook) pattern for full example.
+Always call existing `onInit` before your initialization. See [onInit Hook](#oninit-hook) pattern for full example.
 
 ## Advanced Patterns
 
@@ -1242,70 +1242,7 @@ collection.endpoints = [
 ]
 ```
 
-#### Error Boundary Customization
-
-Add custom error handling to admin UI:
-
-```ts
-// From plugin-sentry
-config.admin = {
-  ...config.admin,
-  components: {
-    ...config.admin?.components,
-    errorBoundary: '/components/SentryErrorBoundary#SentryErrorBoundary',
-  },
-}
-```
-
 ### Field & Collection Modifications
-
-#### Deep Merge Pattern
-
-Recursively merge plugin fields with existing fields:
-
-```ts
-// From plugin-seo
-import { deepMerge } from 'payload'
-
-function addFieldsToCollection(
-  collection: CollectionConfig,
-  fieldsToAdd: Field[],
-): CollectionConfig {
-  return {
-    ...collection,
-    fields: deepMerge(collection.fields, fieldsToAdd),
-  }
-}
-```
-
-#### Field Recursion for Nested Structures
-
-Process fields recursively to handle blocks, arrays, groups:
-
-```ts
-// From plugin-cloud-storage
-function traverseFields(fields: Field[], callback: (field: Field) => Field): Field[] {
-  return fields.map((field) => {
-    const modified = callback(field)
-
-    if ('fields' in modified && Array.isArray(modified.fields)) {
-      return { ...modified, fields: traverseFields(modified.fields, callback) }
-    }
-
-    if (modified.type === 'blocks' && modified.blocks) {
-      return {
-        ...modified,
-        blocks: modified.blocks.map((block) => ({
-          ...block,
-          fields: traverseFields(block.fields, callback),
-        })),
-      }
-    }
-
-    return modified
-  })
-}
-```
 
 #### Admin Folders Override
 
@@ -1319,73 +1256,6 @@ collection.admin = {
   hidden: pluginOptions.hidden,
   defaultColumns: pluginOptions.defaultColumns || ['from', 'to', 'updatedAt'],
 }
-```
-
-### Upload & Storage
-
-#### Upload Collection Modification
-
-Modify upload collections for custom storage:
-
-```ts
-// From plugin-cloud-storage
-config.collections = (config.collections || []).map((collection) => {
-  if (!collection.upload) return collection
-
-  return {
-    ...collection,
-    upload: {
-      ...collection.upload,
-      handlers: [
-        ...(collection.upload.handlers || []),
-        async ({ file, req }) => {
-          // Upload to cloud storage
-          const url = await cloudStorage.upload(file)
-          return { ...file, url }
-        },
-      ],
-    },
-  }
-})
-```
-
-#### Adapter Pattern for Pluggable Backends
-
-Abstract storage implementation:
-
-```ts
-// From plugin-cloud-storage
-interface StorageAdapter {
-  handleUpload: (args: { file: File; req: PayloadRequest }) => Promise<File>
-  handleDelete: (args: { doc: any; req: PayloadRequest }) => Promise<void>
-  generateURL: (args: { filename: string }) => string
-}
-
-export const cloudStoragePlugin =
-  (adapter: StorageAdapter) =>
-  (config: Config): Config => ({
-    ...config,
-    collections: config.collections?.map((collection) =>
-      collection.upload
-        ? {
-            ...collection,
-            hooks: {
-              ...collection.hooks,
-              beforeChange: [
-                ...(collection.hooks?.beforeChange || []),
-                async ({ req, data }) => {
-                  if (req.file) {
-                    const uploaded = await adapter.handleUpload({ file: req.file, req })
-                    data.url = adapter.generateURL({ filename: uploaded.filename })
-                  }
-                  return data
-                },
-              ],
-            },
-          }
-        : collection,
-    ),
-  })
 ```
 
 ### Background Jobs & Async Operations
