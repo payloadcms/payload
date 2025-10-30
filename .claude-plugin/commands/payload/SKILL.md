@@ -1,5 +1,5 @@
 ---
-name: payload-cms
+name: payload
 description: Use when working with Payload CMS projects, payload.config.ts, collections, fields, hooks, access control, or Payload API. Provides TypeScript patterns and examples for Payload 3.x development.
 ---
 
@@ -27,6 +27,10 @@ Payload 3.x is a Next.js native CMS with TypeScript-first architecture, providin
 | Custom API routes        | Collection/root endpoints                 | [ADVANCED.md#custom-endpoints](reference/ADVANCED.md#custom-endpoints)                                                           |
 | Cloud storage            | Storage adapter plugins                   | [ADAPTERS.md#storage-adapters](reference/ADAPTERS.md#storage-adapters)                                                           |
 | Multi-language           | `localization` config + `localized: true` | [ADVANCED.md#localization](reference/ADVANCED.md#localization)                                                                   |
+| Create plugin            | `(options) => (config) => Config`         | [PLUGIN-DEVELOPMENT.md#plugin-architecture](reference/PLUGIN-DEVELOPMENT.md#plugin-architecture)                                 |
+| Plugin package setup     | Package structure with SWC                | [PLUGIN-DEVELOPMENT.md#plugin-package-structure](reference/PLUGIN-DEVELOPMENT.md#plugin-package-structure)                       |
+| Add fields to collection | Map collections, spread fields            | [PLUGIN-DEVELOPMENT.md#adding-fields-to-collections](reference/PLUGIN-DEVELOPMENT.md#adding-fields-to-collections)               |
+| Plugin hooks             | Preserve existing hooks in array          | [PLUGIN-DEVELOPMENT.md#adding-hooks](reference/PLUGIN-DEVELOPMENT.md#adding-hooks)                                               |
 
 ## Quick Start
 
@@ -199,6 +203,7 @@ import type { Post, User } from '@/payload-types'
 - **[QUERIES.md](reference/QUERIES.md)** - Query operators, Local/REST/GraphQL APIs
 - **[ADAPTERS.md](reference/ADAPTERS.md)** - Database, storage, email adapters, transactions
 - **[ADVANCED.md](reference/ADVANCED.md)** - Authentication, jobs, endpoints, components, plugins, localization
+- **[PLUGIN-DEVELOPMENT.md](reference/PLUGIN-DEVELOPMENT.md)** - Plugin architecture, monorepo structure, patterns, best practices
 
 ## Resources
 
