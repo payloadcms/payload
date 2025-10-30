@@ -736,6 +736,17 @@ export type AfterErrorHook = (
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
 /**
+ * Experimental features.
+ * These may be unstable and may change or be removed in future releases.
+ */
+export type ExperimentalConfig = {
+  /**
+   * When `true`, shows document metadata (e.g., status, updatedAt) per locale in the admin panel instead of showing the latest overall metadata. Defaults to `false`.
+   */
+  localizeMeta?: boolean
+}
+
+/**
  * This is the central configuration
  *
  * @see https://payloadcms.com/docs/configuration/overview
@@ -1087,6 +1098,12 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
+  /**
+   * Configure experimental features for Payload.
+   *
+   * These features may be unstable and may change or be removed in future releases.
+   */
+  experimental?: ExperimentalConfig
   /**
    * Options for folder view within the admin panel
    *

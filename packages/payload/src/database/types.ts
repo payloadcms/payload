@@ -279,7 +279,7 @@ export type FindVersionsArgs = {
   collection: CollectionSlug
 } & BaseVersionArgs
 
-export type FindVersions = <T = JsonObject>(
+export type FindVersions = <T extends JsonObject = JsonObject>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
@@ -379,7 +379,7 @@ export type UpdateGlobal = <T extends Record<string, unknown> = any>(
 ) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-export type FindGlobalVersions = <T = JsonObject>(
+export type FindGlobalVersions = <T extends JsonObject = JsonObject>(
   args: FindGlobalVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 

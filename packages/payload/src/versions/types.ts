@@ -1,3 +1,4 @@
+import type { JsonObject, TypeWithTimestamps } from '../index.js'
 export type Autosave = {
   /**
    * Define an `interval` in milliseconds to automatically save progress while documents are edited.
@@ -119,12 +120,15 @@ export type SanitizedGlobalVersions = {
   max: number
 }
 
-export type TypeWithVersion<T> = {
+export type TypeWithVersion<T extends JsonObject = JsonObject> = {
   createdAt: string
   id: string
   parent: number | string
   publishedLocale?: string
   snapshot?: boolean
   updatedAt: string
-  version: T
+  version: {
+    _status: 'draft' | 'published'
+  } & T &
+    TypeWithTimestamps
 }

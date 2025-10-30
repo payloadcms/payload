@@ -48,6 +48,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   defaultDepth: 2,
   defaultMaxTextLength: 40000,
   endpoints: [],
+  experimental: {},
   globals: [],
   graphQL: {
     disablePlaygroundInProduction: true,
@@ -125,6 +126,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.defaultDepth = config.defaultDepth ?? 2
   config.defaultMaxTextLength = config.defaultMaxTextLength ?? 40000
   config.endpoints = config.endpoints ?? []
+  config.experimental = config.experimental || {}
   config.globals = config.globals ?? []
   config.graphQL = {
     disableIntrospectionInProduction: true,
