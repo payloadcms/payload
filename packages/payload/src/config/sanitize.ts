@@ -395,14 +395,23 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ),
   )
 
-  configWithDefaults.collections!.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      migrationsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
+  const migrations = await sanitizeCollection(
+    config as unknown as Config,
+    migrationsCollection,
+    richTextSanitizationPromises,
+    validRelationships,
   )
+
+  // @ts-expect-error indexSortableFields is only valid for @payloadcms/db-mongodb
+  if (config?.db?.indexSortableFields) {
+    migrations.indexes = [
+      {
+        fields: ['batch', 'name'],
+        unique: false,
+      },
+    ]
+  }
+  configWithDefaults.collections!.push(migrations)
 
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(
