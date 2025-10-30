@@ -24,3 +24,17 @@ export async function openNav(page: Page): Promise<void> {
   await expect(page.locator('.nav--nav-animate[inert], .nav--nav-hydrated[inert]')).toBeHidden()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
+
+export async function closeNav(page: Page): Promise<void> {
+  // wait for the preferences/media queries to either open or close the nav
+  await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+
+  // check to see if the nav is already closed and if so, return early
+  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) {
+    return
+  }
+
+  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
+  await page.locator('.nav-toggler >> visible=true').click()
+  await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+}

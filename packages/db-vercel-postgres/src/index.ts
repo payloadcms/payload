@@ -21,7 +21,6 @@ import {
   findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -56,7 +55,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, VercelPostgresAdapter } from './types.js'
@@ -111,6 +110,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       },
       fieldConstraints: {},
       forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
+      foreignKeys: new Set(),
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -178,8 +178,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       findDistinct,
       findGlobal,
       findGlobalVersions,
-      readReplicaOptions: args.readReplicas,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       init,
@@ -194,6 +192,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,
+      readReplicaOptions: args.readReplicas,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,

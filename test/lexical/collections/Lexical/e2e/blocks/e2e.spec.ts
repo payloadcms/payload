@@ -98,7 +98,7 @@ describe('lexicalBlocks', () => {
     // Now double-click to select entire line
     await richTextField.locator('p').getByText('123').first().click({ clickCount: 2 })
 
-    const editButton = newRSCBlock.locator('.lexical-block__editButton').first()
+    const editButton = newRSCBlock.locator('.LexicalEditorTheme__block__editButton').first()
     await editButton.click()
 
     await wait(500)
@@ -476,7 +476,7 @@ describe('lexicalBlocks', () => {
     test('should type and save typed text', async () => {
       const { richTextField } = await navigateToLexicalFields()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.LexicalEditorTheme__block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -515,7 +515,7 @@ describe('lexicalBlocks', () => {
       // Reproduces https://github.com/payloadcms/payload/issues/4025
       const { richTextField } = await navigateToLexicalFields()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.LexicalEditorTheme__block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -648,7 +648,7 @@ describe('lexicalBlocks', () => {
       // This test makes sure there are no z-index issues here
       const { richTextField } = await navigateToLexicalFields()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.LexicalEditorTheme__block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -722,7 +722,7 @@ describe('lexicalBlocks', () => {
     test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
       const { richTextField } = await navigateToLexicalFields()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(3) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      const lexicalBlock = richTextField.locator('.LexicalEditorTheme__block').nth(3) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -801,7 +801,9 @@ describe('lexicalBlocks', () => {
       await expect(slashMenuPopover).toBeHidden()
 
       // Ensure that sub-editor is created
-      const newSubLexicalAndUploadBlock = newRichTextBlock.locator('.lexical-block').first()
+      const newSubLexicalAndUploadBlock = newRichTextBlock
+        .locator('.LexicalEditorTheme__block')
+        .first()
       await newSubLexicalAndUploadBlock.scrollIntoViewIfNeeded()
       await expect(newSubLexicalAndUploadBlock).toBeVisible()
 
@@ -944,9 +946,9 @@ describe('lexicalBlocks', () => {
       const { richTextField } = await navigateToLexicalFields()
       await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
-      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(5)
+      const radioButtonBlock1 = richTextField.locator('.LexicalEditorTheme__block').nth(5)
 
-      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(6)
+      const radioButtonBlock2 = richTextField.locator('.LexicalEditorTheme__block').nth(6)
       await radioButtonBlock2.scrollIntoViewIfNeeded()
       await expect(radioButtonBlock1).toBeVisible()
       await expect(radioButtonBlock2).toBeVisible()
@@ -1009,7 +1011,7 @@ describe('lexicalBlocks', () => {
 
       await parentEditorParagraph.click() // Click works better than focus
 
-      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      const blockWithRichTextEditor = richTextField.locator('.LexicalEditorTheme__block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await blockWithRichTextEditor.scrollIntoViewIfNeeded()
       await expect(blockWithRichTextEditor).toBeVisible()
 
@@ -1040,10 +1042,10 @@ describe('lexicalBlocks', () => {
       const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
-      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
       await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
-      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+      const conditionalArrayBlock = richTextField.locator('.LexicalEditorTheme__block').nth(7)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
       await expect(conditionalArrayBlock).toBeVisible()
@@ -1096,7 +1098,7 @@ describe('lexicalBlocks', () => {
       const { richTextField } = await navigateToLexicalFields()
       await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
-      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+      const conditionalArrayBlock = richTextField.locator('.LexicalEditorTheme__block').nth(7)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
       await expect(conditionalArrayBlock).toBeVisible()
@@ -1120,9 +1122,9 @@ describe('lexicalBlocks', () => {
       await uploadBlock.scrollIntoViewIfNeeded()
       await expect(uploadBlock).toBeVisible()
 
-      await expect(uploadBlock.locator('.lexical-upload__doc-drawer-toggler strong')).toHaveText(
-        'payload.jpg',
-      )
+      await expect(
+        uploadBlock.locator('.LexicalEditorTheme__upload__doc-drawer-toggler strong'),
+      ).toHaveText('payload.jpg')
     })
 
     test('should respect required error state in deeply nested text field', async () => {
@@ -1130,7 +1132,7 @@ describe('lexicalBlocks', () => {
 
       await wait(300)
 
-      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+      const conditionalArrayBlock = richTextField.locator('.LexicalEditorTheme__block').nth(7)
       await wait(300)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
@@ -1174,7 +1176,7 @@ describe('lexicalBlocks', () => {
     test('ensure tabs field within lexical block correctly loads and saves data', async () => {
       const { richTextField } = await navigateToLexicalFields()
 
-      const tabsBlock = richTextField.locator('.lexical-block').nth(8)
+      const tabsBlock = richTextField.locator('.LexicalEditorTheme__block').nth(8)
       await wait(300)
 
       await tabsBlock.scrollIntoViewIfNeeded()
@@ -1257,14 +1259,14 @@ describe('lexicalBlocks', () => {
       await page.waitForURL(`**/collections/LexicalInBlock/**`)
 
       await expect(
-        page.locator('.lexical-block-blockInLexical .render-fields label.field-label'),
+        page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields label.field-label'),
       ).toHaveText('My Label*')
       await expect(
-        page.locator('.lexical-block-blockInLexical .render-fields .required'),
+        page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields .required'),
       ).toHaveText('*')
       await expect(
         page.locator(
-          '.lexical-block-blockInLexical .render-fields .field-description-lexicalInBlock',
+          '.LexicalEditorTheme__block-blockInLexical .render-fields .field-description-lexicalInBlock',
         ),
       ).toHaveText('Some Description')
     })
@@ -1280,7 +1282,7 @@ describe('lexicalBlocks', () => {
           await page.waitForURL(`**/collections/LexicalInBlock/**`)
 
           await expect(
-            page.locator('.inline-block:has-text("Inline Block In Lexical")'),
+            page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
           ).toHaveCount(20)
         },
         { allowedNumberOfRequests: 1 },
@@ -1440,16 +1442,26 @@ describe('lexicalBlocks', () => {
       // Wait for the specific row to be visible and have its content loaded
       const row2 = page.locator('#blocks-row-2')
       await expect(row2).toBeVisible()
+      await row2.scrollIntoViewIfNeeded()
+
+      // Wait for shimmer effect to be hidden
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+      const secondRow = page.locator('#blocks-row-2')
+      await expect(secondRow).toBeVisible()
 
       // Get initial count and ensure it's stable
-      const inlineBlocks = page.locator('#blocks-row-2 .inline-block-container')
+      const inlineBlocks = secondRow.locator('.LexicalEditorTheme__inlineBlock__container')
       const inlineBlockCount = await inlineBlocks.count()
       await expect(() => {
         expect(inlineBlockCount).toBeGreaterThan(0)
       }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
-      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+      await inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__editButton')
+        .first()
+        .click()
 
       await page.locator('.drawer--is-open #field-text').fill('value1')
       await page.locator('.drawer--is-open button[type="submit"]').first().click()
@@ -1472,7 +1484,10 @@ describe('lexicalBlocks', () => {
       await expect(inlineBlocks).toHaveCount(inlineBlockCount)
 
       // Open the drawer again
-      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+      await inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__editButton')
+        .first()
+        .click()
 
       // Check if the text field still contains 'value1'
       await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
@@ -1509,7 +1524,7 @@ async function navigateToLexicalFields(
   await richTextField.scrollIntoViewIfNeeded()
   await expect(richTextField).toBeVisible()
   // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-  await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+  await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
 
   return {
     richTextField,
@@ -1569,8 +1584,8 @@ async function createInlineBlock({
       await inlineBlockDrawer.locator('button').getByText('Save changes').click()
       await expect(inlineBlockDrawer).toBeHidden()
 
-      const inlineBlock = richTextField.locator('.inline-block').nth(0)
-      const editButton = inlineBlock.locator('.inline-block__editButton').first()
+      const inlineBlock = richTextField.locator('.LexicalEditorTheme__inlineBlock').nth(0)
+      const editButton = inlineBlock.locator('.LexicalEditorTheme__inlineBlock__editButton').first()
 
       return {
         inlineBlock,
@@ -1634,7 +1649,11 @@ async function createBlock({
   await blockSelectButton.click()
   await expect(slashMenuPopover).toBeHidden()
 
-  const newBlock = richTextField.locator('.lexical-block:not(.lexical-block .lexical-block)').nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+  const newBlock = richTextField
+    .locator(
+      '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
+    )
+    .nth(8) // The :not(.LexicalEditorTheme__block .LexicalEditorTheme__block) makes sure this does not select sub-blocks
   await newBlock.scrollIntoViewIfNeeded()
   return { newBlock, slashMenuPopover }
 }

@@ -6,15 +6,21 @@ import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../..
 import { getSelectMode } from '../../../utilities/getSelectMode.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args<T extends JsonObject> = {
+export type AfterReadArgs<T extends JsonObject> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth?: number
   depth: number
   doc: T
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   findMany?: boolean
+  /**
+   * Controls whether locales should be flattened into the requested locale.
+   * E.g.: { [locale]: fields } -> fields
+   *
+   * @default true
+   */
   flattenLocales?: boolean
   global: null | SanitizedGlobalConfig
   locale: string
@@ -35,7 +41,7 @@ type Args<T extends JsonObject> = {
  * - Populate relationships
  */
 
-export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T> {
+export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): Promise<T> {
   const {
     collection,
     context,

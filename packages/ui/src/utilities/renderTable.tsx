@@ -3,7 +3,6 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
-  CollectionPreferences,
   Column,
   ColumnPreference,
   Field,
@@ -11,12 +10,14 @@ import type {
   ListQuery,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   ViewTypes,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled } from 'payload/shared'
 import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
@@ -35,9 +36,8 @@ import {
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
-import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
-import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -69,10 +69,11 @@ export const renderTable = ({
   clientConfig,
   collectionConfig,
   collections,
-  columns: columnsFromArgs,
+  columns,
   customCellProps,
   data,
   enableRowSelections,
+  fieldPermissions,
   groupByFieldPath,
   groupByValue,
   heading,
@@ -82,6 +83,7 @@ export const renderTable = ({
   payload,
   query,
   renderRowTypes,
+  req,
   tableAppearance,
   useAsTitle,
   viewType,
@@ -90,11 +92,12 @@ export const renderTable = ({
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columns?: CollectionPreferences['columns']
+  columns: ColumnPreference[]
   customCellProps?: Record<string, unknown>
   data?: PaginatedDocs | undefined
   drawerSlug?: string
   enableRowSelections: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   groupByFieldPath?: string
   groupByValue?: string
   heading?: string
@@ -104,6 +107,7 @@ export const renderTable = ({
   payload: Payload
   query?: ListQuery
   renderRowTypes?: boolean
+  req?: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
   viewType?: ViewTypes
@@ -123,11 +127,16 @@ export const renderTable = ({
   if (isPolymorphic) {
     clientFields = []
     serverFields = []
+
     for (const collection of collections) {
       const clientCollectionConfig = clientConfig.collections.find(
         (each) => each.slug === collection,
       )
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+
+      for (const field of filterFieldsWithPermissions({
+        fieldPermissions,
+        fields: clientCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -138,7 +147,11 @@ export const renderTable = ({
       }
 
       const serverCollectionConfig = payload.collections[collection].config
-      for (const field of filterFields(serverCollectionConfig.fields)) {
+
+      for (const field of filterFieldsWithPermissions<Field>({
+        fieldPermissions,
+        fields: serverCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -150,32 +163,16 @@ export const renderTable = ({
     }
   }
 
-  const columns: ColumnPreference[] = columnsFromArgs
-    ? columnsFromArgs?.filter((column) =>
-        flattenTopLevelFields(clientFields, {
-          i18n,
-          keepPresentationalFields: true,
-          moveSubFieldsToTop: true,
-        })?.some((field) => {
-          const accessor =
-            'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
-          return accessor === column.accessor
-        }),
-      )
-    : getInitialColumns(
-        isPolymorphic ? clientFields : filterFields(clientFields),
-        useAsTitle,
-        isPolymorphic ? [] : clientCollectionConfig?.admin?.defaultColumns,
-      )
-
   const sharedArgs: Pick<
     BuildColumnStateArgs,
     | 'clientFields'
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
+    | 'fieldPermissions'
     | 'i18n'
     | 'payload'
+    | 'req'
     | 'serverFields'
     | 'useAsTitle'
     | 'viewType'
@@ -183,10 +180,12 @@ export const renderTable = ({
     clientFields,
     columns,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     // sortColumnProps,
     customCellProps,
     payload,
+    req,
     serverFields,
     useAsTitle,
     viewType,

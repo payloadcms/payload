@@ -134,7 +134,7 @@ export interface Page {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  title: string;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;

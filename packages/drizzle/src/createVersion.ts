@@ -1,4 +1,4 @@
-import type { CreateVersionArgs, TypeWithID, TypeWithVersion } from 'payload'
+import type { CreateVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
@@ -9,13 +9,12 @@ import type { DrizzleAdapter } from './types.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function createVersion<T extends TypeWithID>(
+export async function createVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     autosave,
     collectionSlug,
     createdAt,
-    localeStatus,
     parent,
     publishedLocale,
     req,
@@ -25,7 +24,7 @@ export async function createVersion<T extends TypeWithID>(
     updatedAt,
     versionData,
   }: CreateVersionArgs<T>,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
@@ -41,7 +40,6 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     createdAt,
     latest: true,
-    localeStatus,
     parent,
     publishedLocale,
     snapshot,

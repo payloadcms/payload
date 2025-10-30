@@ -2,9 +2,8 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const azTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'Siz <0>{{fromTenant}}</0>-dən <0>{{toTenant}}</0>-a mülkiyyəti dəyişməyə hazırlaşırsınız',
-    'confirm-modal-tenant-switch--heading': '{{tenantLabel}} dəyişikliyini təsdiqləyin',
+    'assign-tenant-button-label': 'Kirayəçiyə təyin et',
+    'assign-tenant-modal-title': '"{{title}}" təyin edin',
     'field-assignedTenant-label': 'Təyin edilmiş İcarəçi',
     'nav-tenantSelector-label': 'Kirayəçi',
   },

@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Rendezetlen lista',
   },
+  is: {
+    label: 'Óraðaður listi',
+  },
   it: {
     label: 'Elenco non ordinato',
   },
@@ -87,6 +90,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Oordnad lista',
+  },
+  ta: {
+    label: 'வரிசைப்படுத்தப்படாத பட்டியல்',
   },
   th: {
     label: 'รายการที่ไม่ได้เรียงลำดับ',

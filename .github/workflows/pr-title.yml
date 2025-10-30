@@ -35,11 +35,14 @@ jobs:
             test
           scopes: |
             cpa
+            claude
             db-\*
+            db-d1-sqlite
             db-mongodb
             db-postgres
             db-vercel-postgres
             db-sqlite
+            db-d1-sqlite
             drizzle
             email-\*
             email-nodemailer
@@ -52,6 +55,7 @@ jobs:
             payload-cloud
             plugin-cloud
             plugin-cloud-storage
+            plugin-ecommerce
             plugin-form-builder
             plugin-import-export
             plugin-multi-tenant
@@ -64,9 +68,11 @@ jobs:
             richtext-\*
             richtext-lexical
             richtext-slate
+            sdk
             storage-\*
             storage-azure
             storage-gcs
+            storage-r2
             storage-uploadthing
             storage-vercel-blob
             storage-s3

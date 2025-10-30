@@ -32,6 +32,14 @@ export type AzureStorageOptions = {
   baseURL: string
 
   /**
+   * Optional cache key to identify the Azure Blob storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `azure:containerName`
+   */
+  clientCacheKey?: string
+
+  /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
    */
   clientUploads?: ClientUploadsConfig

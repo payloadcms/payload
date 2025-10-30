@@ -1,5 +1,7 @@
 'use client'
 
+import type { SanitizedFieldPermissions } from 'payload'
+
 import { getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -16,8 +18,8 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { APIKey } from './APIKey.js'
 import './index.scss'
+import { APIKey } from './APIKey.js'
 
 const baseClass = 'auth-fields'
 
@@ -52,7 +54,7 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  let showPasswordFields = true
+  let showPasswordFields: SanitizedFieldPermissions = true
   let showUnlock = true
   const hasPasswordFieldOverride =
     typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
@@ -71,11 +73,13 @@ export const Auth: React.FC<Props> = (props) => {
     if (operation === 'create') {
       showPasswordFields =
         passwordPermissions === true ||
-        (typeof passwordPermissions === 'object' && passwordPermissions.create)
+        ((typeof passwordPermissions === 'object' &&
+          passwordPermissions.create) as SanitizedFieldPermissions)
     } else {
       showPasswordFields =
         passwordPermissions === true ||
-        (typeof passwordPermissions === 'object' && passwordPermissions.update)
+        ((typeof passwordPermissions === 'object' &&
+          passwordPermissions.update) as SanitizedFieldPermissions)
     }
   }
 
@@ -233,6 +237,7 @@ export const Auth: React.FC<Props> = (props) => {
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
+                id="cancel-change-password"
                 onClick={() => handleChangePassword(false)}
                 size="medium"
               >
@@ -253,10 +258,11 @@ export const Auth: React.FC<Props> = (props) => {
                   {t('authentication:changePassword')}
                 </Button>
               )}
-            {operation === 'update' && hasPermissionToUnlock && (
+            {!changingPassword && operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled || !showUnlock}
+                id="force-unlock"
                 onClick={() => void unlock()}
                 size="medium"
               >

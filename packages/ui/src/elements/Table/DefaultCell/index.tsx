@@ -22,6 +22,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     field,
     field: { admin },
     link,
+    linkURL,
     onClick: onClickFromProps,
     rowData,
     viewType,
@@ -62,12 +63,18 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   if (link) {
     wrapElementProps.prefetch = false
     WrapElement = Link
-    wrapElementProps.href = collectionConfig?.slug
-      ? formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
-        })
-      : ''
+
+    // Use custom linkURL if provided, otherwise use default URL generation
+    if (linkURL) {
+      wrapElementProps.href = linkURL
+    } else {
+      wrapElementProps.href = collectionConfig?.slug
+        ? formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
+          })
+        : ''
+    }
   }
 
   if (typeof onClick === 'function') {

@@ -49,8 +49,8 @@ export const addSessionToUser = async ({
       user.sessions.push(session)
     }
 
-    // Ensure updatedAt date is always updated
-    user.updatedAt = new Date().toISOString()
+    // Prevent updatedAt from being updated when only adding a session
+    user.updatedAt = null
 
     await payload.db.updateOne({
       id: user.id,

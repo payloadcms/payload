@@ -1,6 +1,8 @@
 'use client'
-import type { TypeWithID } from 'payload'
+import type { SelectType, TypeWithID } from 'payload'
 
+import { appendUploadSelectFields } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -38,6 +40,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
 
   const {
     config: {
+      collections,
       routes: { api },
       serverURL,
     },
@@ -62,20 +65,29 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           const url = `${serverURL}${api}/${slug}`
 
           const params = new URLSearchParams()
+          const select: SelectType = {}
 
           params.append('depth', '0')
           params.append('limit', '250')
+
+          const collection = collections.find((c) => c.slug === slug)
+          if (collection.admin.enableListViewSelectAPI) {
+            const fieldToSelect = collection.admin.useAsTitle ?? 'id'
+            select[fieldToSelect] = true
+
+            if (collection.upload) {
+              appendUploadSelectFields({ collectionConfig: collection, select })
+            }
+          }
 
           if (locale) {
             params.append('locale', locale)
           }
 
-          if (idsToLoad && idsToLoad.length > 0) {
-            const idsToString = idsToLoad.map((id) => String(id))
-            params.append('where[id][in]', idsToString.join(','))
-          }
+          const idsToString = idsToLoad.map((id) => String(id))
+          params.append('where[id][in]', idsToString.join(','))
 
-          const query = `?${params.toString()}`
+          const query = `?${params.toString()}&${qs.stringify({ select })}`
 
           const result = await fetch(`${url}${query}`, {
             credentials: 'include',
@@ -100,7 +112,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         }
       })
     },
-    [debouncedDocuments, serverURL, api, i18n, locale],
+    [debouncedDocuments, serverURL, api, i18n, locale, collections],
   )
 
   useEffect(() => {

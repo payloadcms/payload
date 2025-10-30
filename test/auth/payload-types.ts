@@ -247,7 +247,7 @@ export interface User {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -275,6 +275,7 @@ export interface User {
   unnamedTabSaveToJWTString?: string | null;
   unnamedTabSaveToJWTFalse?: string | null;
   custom?: string | null;
+  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -544,6 +545,7 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
+  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;

@@ -93,12 +93,12 @@ The locale codes do not need to be in any specific format. It's up to you to def
 
 #### Locale Object
 
-| Option               | Description                                                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                     |
-| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use. |
-| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                      |
-| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present.                                       |
+| Option               | Description                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                                |
+| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use.            |
+| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                                 |
+| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present. This can be a single locale or array of locales. |
 
 _\* An asterisk denotes that a property is required._
 
@@ -130,29 +130,6 @@ localization: {
 ```
 
 Since the filtering happens at the root level of the application and its result is not calculated every time you navigate to a new page, you may want to call `router.refresh` in a custom component that watches when values that affect the result change. In the example above, you would want to do this when `supportedLocales` changes on the tenant document.
-
-## Experimental Options
-
-Experimental options are features that may not be fully stable and may change or be removed in future releases.
-
-These options can be enabled in your Payload Config under the `experimental` key. You can set them like this:
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  experimental: {
-    localizeStatus: true,
-  },
-})
-```
-
-The following experimental options are available related to localization:
-
-| Option               | Description                                                                                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`localizeStatus`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
 
 ## Field Localization
 
@@ -222,7 +199,7 @@ The `locale` arg will only accept valid locales, but locales will be formatted a
 values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious
 to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
 
-The `fallbackLocale` arg will accept valid locales as well as `none` to disable falling back.
+The `fallbackLocale` arg will accept valid locales, an array of locales, as well as `none` to disable falling back.
 
 **Example:**
 
@@ -247,7 +224,7 @@ query {
 
 You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options`
 argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid
-locale as well as `'null'`, `'false'`, `false`, and `'none'`.
+locale, array of locales, as well as `'null'`, `'false'`, `false`, and `'none'`.
 
 **Example:**
 

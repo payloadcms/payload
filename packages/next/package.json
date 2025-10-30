@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.54.0",
+  "version": "3.62.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -64,6 +64,16 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
     }
   },
   "main": "./src/index.js",
@@ -81,7 +91,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -120,10 +130,10 @@
     "@next/eslint-plugin-next": "15.4.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.1.8",
-    "@types/react-dom": "19.1.6",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.1.0-rc.2",
+    "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
@@ -177,6 +187,16 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
       }
     },
     "main": "./dist/index.js",

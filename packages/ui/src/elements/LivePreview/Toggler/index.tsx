@@ -8,8 +8,12 @@ import './index.scss'
 const baseClass = 'live-preview-toggler'
 
 export const LivePreviewToggler: React.FC = () => {
-  const { isLivePreviewing, setIsLivePreviewing } = useLivePreviewContext()
+  const { isLivePreviewing, setIsLivePreviewing, url: livePreviewURL } = useLivePreviewContext()
   const { t } = useTranslation()
+
+  if (!livePreviewURL) {
+    return null
+  }
 
   return (
     <button

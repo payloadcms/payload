@@ -31,7 +31,7 @@ export type AfterReadRichTextHookArgs<
 
   draft?: boolean
 
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -203,7 +203,17 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /**
+   * Provide a function that can be used to add items to the import map. This is useful for
+   * making modules available to the client.
+   */
   generateImportMap?: ImportMapGenerators[0]
+  /**
+   * Provide a function that can be used to add items to the schema map. This is useful for
+   * richtext sub-fields the server needs to "know" about in order to do things like calculate form state.
+   *
+   * This function is run within `buildFieldSchemaMap`.
+   */
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
@@ -235,7 +245,16 @@ type RichTextAdapterBase<
     siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
+  /**
+   * @deprecated - manually merge i18n translations into the config.i18n.translations object within the adapter provider instead.
+   * This property will be removed in v4.
+   */
   i18n?: Partial<GenericLanguages>
+  /**
+   * Return the JSON schema for the field value. The JSON schema is read by
+   * `json-schema-to-typescript` which is used to generate types for this richtext field
+   * payload-types.ts)
+   */
   outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
@@ -247,6 +266,10 @@ type RichTextAdapterBase<
     interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
+  /**
+   * Provide validation function for the richText field. This function is run the same way
+   * as other field validation functions.
+   */
   validate: Validate<
     Value,
     Value,
@@ -260,6 +283,10 @@ export type RichTextAdapter<
   AdapterProps = any,
   ExtraFieldProperties = any,
 > = {
+  /**
+   * Component that will be displayed in the list view. Can be typed as
+   * `DefaultCellComponentProps` or `DefaultServerCellComponentProps`.
+   */
   CellComponent: PayloadComponent<never>
   /**
    * Component that will be displayed in the version diff view.
@@ -269,6 +296,9 @@ export type RichTextAdapter<
     FieldDiffServerProps<RichTextField, RichTextFieldClient>,
     FieldDiffClientProps<RichTextFieldClient>
   >
+  /**
+   * Component that will be displayed in the edit view.
+   */
   FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
@@ -283,7 +313,8 @@ export type RichTextAdapterProvider<
 }: {
   config: SanitizedConfig
   /**
-   * Whether or not this is the root richText editor, defined in the payload.config.ts.
+   * Whether or not this is the root richText editor, defined in the top-level `editor` property
+   * of the Payload Config.
    *
    * @default false
    */

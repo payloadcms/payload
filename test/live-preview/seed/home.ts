@@ -9,6 +9,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     description: 'This is an example of live preview on a page.',
   },
   tenant: '{{TENANT_1_ID}}',
+  localizedTitle: 'Localized Title',
   hero: {
     type: 'highImpact',
     richText: [
@@ -147,6 +148,35 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
             id: '{{POST_1_ID}}',
           },
         },
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'upload',
+          version: 1,
+          fields: null,
+          relationTo: 'media',
+          value: {
+            id: '{{MEDIA_ID}}',
+          },
+        },
+      ],
+      direction: null,
+    },
+  },
+  richTextLexicalLocalized: {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
         {
           children: [],
           direction: null,

@@ -13,6 +13,9 @@ type NavContextType = {
   shouldAnimate: boolean
 }
 
+/**
+ * @internal
+ */
 export const NavContext = React.createContext<NavContextType>({
   hydrated: false,
   navOpen: true,
@@ -33,6 +36,9 @@ const getNavPreference = async (getPreference): Promise<boolean> => {
   }
 }
 
+/**
+ * @internal
+ */
 export const NavProvider: React.FC<{
   children: React.ReactNode
   initialIsOpen?: boolean

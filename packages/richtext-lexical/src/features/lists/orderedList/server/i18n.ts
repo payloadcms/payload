@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Rendelt lista',
   },
+  is: {
+    label: 'Raðaður listi',
+  },
   it: {
     label: 'Elenco ordinato',
   },
@@ -87,6 +90,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Ordnad Lista',
+  },
+  ta: {
+    label: 'வரிசைப்படுத்தப்பட்ட பட்டியல்',
   },
   th: {
     label: 'รายการที่ถูกจัดลำดับ',

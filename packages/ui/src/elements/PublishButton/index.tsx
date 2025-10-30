@@ -170,11 +170,12 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       }
 
       const params = qs.stringify({
+        depth: 0,
         publishSpecificLocale: locale,
       })
 
       const action = `${serverURL}${api}${
-        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
+        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
       }${params ? '?' + params : ''}`
 
       const result = await submit({

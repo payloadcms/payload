@@ -213,7 +213,12 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config: payload.config, i18n, importMap: payload.importMap }),
+    config: getClientConfig({
+      config: payload.config,
+      i18n,
+      importMap: payload.importMap,
+      user,
+    }),
     globalSlug,
     i18n,
     payload,
@@ -223,8 +228,8 @@ export async function VersionView(props: DocumentViewServerProps) {
     clientSchemaMap,
     customDiffComponents: {},
     entitySlug: collectionSlug || globalSlug,
-    fieldPermissions: docPermissions?.fields,
     fields: (collectionConfig || globalConfig)?.fields,
+    fieldsPermissions: docPermissions?.fields,
     i18n,
     modifiedOnly,
     parentIndexPath: '',

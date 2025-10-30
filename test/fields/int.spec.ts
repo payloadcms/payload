@@ -165,6 +165,43 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query multiple hasMany fields', async () => {
+      await payload.delete({ collection: 'text-fields', where: {} })
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['1', '2', '3'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['6'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: { equals: '3' },
+          hasManySecond: {
+            equals: '4',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
     it('should query like on value', async () => {
       const miss = await payload.create({
         collection: 'text-fields',
