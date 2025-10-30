@@ -3,6 +3,7 @@ import type { CollectionPreferences, ListQuery, ServerFunction, VisibleEntities 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderListView } from './index.js'
 
@@ -61,6 +62,7 @@ export const renderListHandler: ServerFunction<
     importMap: payload.importMap,
     user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   const preferencesKey = `collection-${collectionSlug}`
 

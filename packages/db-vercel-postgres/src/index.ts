@@ -21,7 +21,6 @@ import {
   findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -56,7 +55,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, VercelPostgresAdapter } from './types.js'

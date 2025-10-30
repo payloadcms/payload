@@ -4,6 +4,7 @@ import type { DocumentPreferences, VisibleEntities } from 'payload'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderDocument } from './index.js'
 
@@ -43,6 +44,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     importMap: req.payload.importMap,
     user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let preferences: DocumentPreferences
 

@@ -10,15 +10,15 @@ import path from 'path'
  * - `dist/migrations`
  * - `migrations`
  *
- * Defaults to `src/migrations`
- *
  * @param migrationDir
+ * @default src/migrations`, if the src folder does not exists - migrations.
  * @returns
  */
-export function findMigrationDir(migrationDir?: string): string {
+export const findMigrationDir = (migrationDir?: string): string => {
   const cwd = process.cwd()
-  const srcDir = path.resolve(cwd, 'src/migrations')
-  const distDir = path.resolve(cwd, 'dist/migrations')
+
+  const srcMigrationsDir = path.resolve(cwd, 'src/migrations')
+  const distMigrationsDir = path.resolve(cwd, 'dist/migrations')
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
@@ -27,17 +27,21 @@ export function findMigrationDir(migrationDir?: string): string {
   }
 
   // Check other common locations
-  if (fs.existsSync(srcDir)) {
-    return srcDir
+  if (fs.existsSync(srcMigrationsDir)) {
+    return srcMigrationsDir
   }
 
-  if (fs.existsSync(distDir)) {
-    return distDir
+  if (fs.existsSync(distMigrationsDir)) {
+    return distMigrationsDir
   }
 
   if (fs.existsSync(relativeMigrations)) {
     return relativeMigrations
   }
 
-  return srcDir
+  if (fs.existsSync(path.resolve(cwd, 'src'))) {
+    return srcMigrationsDir
+  }
+
+  return relativeMigrations
 }
