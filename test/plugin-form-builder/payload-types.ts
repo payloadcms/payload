@@ -76,6 +76,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    forms: FormLocalized;
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -89,6 +92,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -470,6 +474,393 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms_localized".
+ */
+export interface FormLocalized {
+  id: string;
+  title: string;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            message?: {
+              en?: {
+                root: {
+                  type: string;
+                  children: {
+                    type: any;
+                    version: number;
+                    [k: string]: unknown;
+                  }[];
+                  direction: ('ltr' | 'rtl') | null;
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                  indent: number;
+                  version: number;
+                };
+                [k: string]: unknown;
+              } | null;
+              es?: {
+                root: {
+                  type: string;
+                  children: {
+                    type: any;
+                    version: number;
+                    [k: string]: unknown;
+                  }[];
+                  direction: ('ltr' | 'rtl') | null;
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                  indent: number;
+                  version: number;
+                };
+                [k: string]: unknown;
+              } | null;
+              de?: {
+                root: {
+                  type: string;
+                  children: {
+                    type: any;
+                    version: number;
+                    [k: string]: unknown;
+                  }[];
+                  direction: ('ltr' | 'rtl') | null;
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                  indent: number;
+                  version: number;
+                };
+                [k: string]: unknown;
+              } | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            basePrice?: number | null;
+            priceConditions?:
+              | {
+                  fieldToUse?: string | null;
+                  condition?: ('hasValue' | 'equals' | 'notEquals') | null;
+                  valueForCondition?: string | null;
+                  operator?: ('add' | 'subtract' | 'multiply' | 'divide') | null;
+                  valueType?: ('static' | 'valueOfField') | null;
+                  valueForOperator?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'payment';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            defaultValue?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: {
+                    en?: string;
+                    es?: string;
+                    de?: string;
+                  };
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            defaultValue?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            defaultValue?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+        | {
+            value?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'color';
+          }
+        | {
+            name: string;
+            label?: {
+              en?: string | null;
+              es?: string | null;
+              de?: string | null;
+            };
+            width?: number | null;
+            required?: boolean | null;
+            /**
+             * This is a date field
+             */
+            defaultValue?: string | null;
+            defaultValue_tz?: SupportedTimezones;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'date';
+          }
+      )[]
+    | null;
+  submitButtonLabel?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
+  confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: {
+    en?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    es?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    de?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  redirect?: {
+    type?: ('reference' | 'custom') | null;
+    reference?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
+    url?: string | null;
+  };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
+  emails?:
+    | {
+        emailTo?: string | null;
+        cc?: string | null;
+        bcc?: string | null;
+        replyTo?: string | null;
+        emailFrom?: string | null;
+        subject: {
+          en?: string;
+          es?: string;
+          de?: string;
+        };
+        message?: {
+          /**
+           * Enter the message that should be sent in this email.
+           */
+          en?: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          /**
+           * Enter the message that should be sent in this email.
+           */
+          es?: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          /**
+           * Enter the message that should be sent in this email.
+           */
+          de?: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  custom?: string | null;
   updatedAt: string;
   createdAt: string;
 }

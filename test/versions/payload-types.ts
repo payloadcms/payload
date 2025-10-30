@@ -92,6 +92,16 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    'autosave-posts': AutosavePostLocalized;
+    'autosave-multi-select-posts': AutosaveMultiSelectPostLocalized;
+    'draft-posts': DraftPostLocalized;
+    'draft-with-max-posts': DraftWithMaxPostLocalized;
+    'draft-posts-with-change-hook': DraftPostsWithChangeHookLocalized;
+    'localized-posts': LocalizedPostLocalized;
+    'version-posts': VersionPostLocalized;
+    diff: DiffLocalized;
+  };
   collectionsSelect: {
     'disable-publish': DisablePublishSelect<false> | DisablePublishSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -129,6 +139,14 @@ export interface Config {
     'localized-global': LocalizedGlobal;
     'max-versions': MaxVersion;
     'draft-unlimited-global': DraftUnlimitedGlobal;
+  };
+  globalsLocalized: {
+    'autosave-global': AutosaveGlobalLocalized;
+    'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobalLocalized;
+    'draft-global': DraftGlobalLocalized;
+    'draft-with-max-global': DraftWithMaxGlobalLocalized;
+    'localized-global': LocalizedGlobalLocalized;
+    'draft-unlimited-global': DraftUnlimitedGlobalLocalized;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -209,7 +227,7 @@ export interface AutosavePost {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -514,7 +532,7 @@ export interface Diff {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -529,7 +547,7 @@ export interface Diff {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -849,6 +867,383 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-posts_localized".
+ */
+export interface AutosavePostLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  relationship?: (string | null) | Post;
+  computedTitle?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  description: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-multi-select-posts_localized".
+ */
+export interface AutosaveMultiSelectPostLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  tag?: ('blog' | 'essay' | 'portfolio')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts_localized".
+ */
+export interface DraftPostLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  description: string;
+  radio?: 'test' | null;
+  select?: ('test1' | 'test2')[] | null;
+  blocksField?:
+    | {
+        text?: string | null;
+        localized?: {
+          en?: string | null;
+          es?: string | null;
+          de?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  relation?: (string | null) | DraftPost;
+  restrictedToUpdate?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-max-posts_localized".
+ */
+export interface DraftWithMaxPostLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  description: string;
+  radio?: 'test' | null;
+  select?: ('test1' | 'test2')[] | null;
+  blocksField?:
+    | {
+        text?: string | null;
+        localized?: {
+          en?: string | null;
+          es?: string | null;
+          de?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  relation?: (string | null) | DraftWithMaxPost;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts-with-change-hook_localized".
+ */
+export interface DraftPostsWithChangeHookLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  description: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_localized".
+ */
+export interface LocalizedPostLocalized {
+  id: string;
+  text?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  description?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  blocks?:
+    | {
+        array?: {
+          en?:
+            | {
+                relationship?: (string | null) | Post;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                relationship?: (string | null) | Post;
+                id?: string | null;
+              }[]
+            | null;
+          de?:
+            | {
+                relationship?: (string | null) | Post;
+                id?: string | null;
+              }[]
+            | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "version-posts_localized".
+ */
+export interface VersionPostLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  description: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "diff_localized".
+ */
+export interface DiffLocalized {
+  id: string;
+  array?:
+    | {
+        textInArray?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayLocalized?: {
+    en?:
+      | {
+          textInArrayLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          textInArrayLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    de?:
+      | {
+          textInArrayLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  blocks?:
+    | (
+        | {
+            textInBlock?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'TextBlock';
+          }
+        | {
+            textInCollapsibleInCollapsibleBlock?: string | null;
+            textInRowInCollapsibleBlock?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'CollapsibleBlock';
+          }
+        | {
+            namedTab1InBlock?: {
+              textInNamedTab1InBlock?: string | null;
+            };
+            textInUnnamedTab2InBlock?: string | null;
+            textInUnnamedTab2InBlockAccessFalse?: string | null;
+            textInRowInUnnamedTab2InBlock?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'TabsBlock';
+          }
+      )[]
+    | null;
+  checkbox?: boolean | null;
+  code?: string | null;
+  textInCollapsible?: string | null;
+  date?: string | null;
+  email?: string | null;
+  group?: {
+    textInGroup?: string | null;
+  };
+  textInUnnamedGroup?: string | null;
+  textInUnnamedLabeledGroup?: string | null;
+  number?: number | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  radio?: ('option1' | 'option2') | null;
+  relationship?: (string | null) | DraftPost;
+  relationshipHasMany?: (string | DraftPost)[] | null;
+  relationshipPolymorphic?:
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
+      } | null)
+    | ({
+        relationTo: 'text';
+        value: string | Text;
+      } | null);
+  relationshipHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'draft-posts';
+            value: string | DraftPost;
+          }
+        | {
+            relationTo: 'text';
+            value: string | Text;
+          }
+      )[]
+    | null;
+  relationshipHasManyPolymorphic2?:
+    | (
+        | {
+            relationTo: 'draft-posts';
+            value: string | DraftPost;
+          }
+        | {
+            relationTo: 'text';
+            value: string | Text;
+          }
+      )[]
+    | null;
+  richtext?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richtextWithCustomDiff?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  textInRow?: string | null;
+  textCannotRead?: string | null;
+  select?: ('option1' | 'option2') | null;
+  namedTab1?: {
+    textInNamedTab1?: string | null;
+    textInNamedTab1ReadFalse?: string | null;
+    textInNamedTab1UpdateFalse?: string | null;
+  };
+  textInUnnamedTab2?: string | null;
+  textInRowInUnnamedTab?: string | null;
+  textInRowInUnnamedTabUpdateFalse?: string | null;
+  text?: string | null;
+  textArea?: string | null;
+  upload?: (string | null) | Media;
+  uploadHasMany?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1361,6 +1756,101 @@ export interface MaxVersion {
 export interface DraftUnlimitedGlobal {
   id: string;
   title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global_localized".
+ */
+export interface AutosaveGlobalLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-draft-button-global_localized".
+ */
+export interface AutosaveWithDraftButtonGlobalLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-global_localized".
+ */
+export interface DraftGlobalLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-max-global_localized".
+ */
+export interface DraftWithMaxGlobalLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global_localized".
+ */
+export interface LocalizedGlobalLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  content?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-unlimited-global_localized".
+ */
+export interface DraftUnlimitedGlobalLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;

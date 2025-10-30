@@ -87,6 +87,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {};
   collectionsSelect: {
     'fields-relationship': FieldsRelationshipSelect<false> | FieldsRelationshipSelect<true>;
     'relation-filter-false': RelationFilterFalseSelect<false> | RelationFilterFalseSelect<true>;
@@ -111,6 +112,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en';
   user: User & {

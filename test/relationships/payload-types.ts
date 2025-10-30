@@ -98,6 +98,11 @@ export interface Config {
       relation: 'relations';
     };
   };
+  collectionsLocalized: {
+    postsLocalized: PostsLocalizedLocalized;
+    directors: DirectorLocalized;
+    'polymorphic-relationships': PolymorphicRelationshipLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     postsLocalized: PostsLocalizedSelect<false> | PostsLocalizedSelect<true>;
@@ -129,6 +134,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'de';
   user: User & {
@@ -640,6 +646,80 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "postsLocalized_localized".
+ */
+export interface PostsLocalizedLocalized {
+  id: string;
+  title?: string | null;
+  relationField?: {
+    en?: (string | null) | Relation;
+    de?: (string | null) | Relation;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "directors_localized".
+ */
+export interface DirectorLocalized {
+  id: string;
+  name?: string | null;
+  localized?: {
+    en?: string | null;
+    de?: string | null;
+  };
+  movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
+  directors?: (string | Director)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polymorphic-relationships_localized".
+ */
+export interface PolymorphicRelationshipLocalized {
+  id: string;
+  polymorphic?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  polymorphicLocalized?: {
+    en?: {
+      relationTo: 'movies';
+      value: string | Movie;
+    } | null;
+    de?: {
+      relationTo: 'movies';
+      value: string | Movie;
+    } | null;
+  };
+  polymorphicMany?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  polymorphicManyLocalized?: {
+    en?:
+      | {
+          relationTo: 'movies';
+          value: string | Movie;
+        }[]
+      | null;
+    de?:
+      | {
+          relationTo: 'movies';
+          value: string | Movie;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }

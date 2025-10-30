@@ -75,6 +75,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    pages: PageLocalized;
+    categories: CategoryLocalized;
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -87,6 +91,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -245,6 +250,102 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_localized".
+ */
+export interface PageLocalized {
+  id: string;
+  title: string;
+  slug: string;
+  fullTitle?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  parent?: (string | null) | Page;
+  breadcrumbs?: {
+    en?:
+      | {
+          doc?: (string | null) | Page;
+          url?: string | null;
+          label?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          doc?: (string | null) | Page;
+          url?: string | null;
+          label?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    de?:
+      | {
+          doc?: (string | null) | Page;
+          url?: string | null;
+          label?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_localized".
+ */
+export interface CategoryLocalized {
+  id: string;
+  name: string;
+  categorization?: {
+    /**
+     * custom
+     */
+    en?:
+      | {
+          doc?: (string | null) | Category;
+          url?: string | null;
+          label?: string | null;
+          test?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * custom
+     */
+    es?:
+      | {
+          doc?: (string | null) | Category;
+          url?: string | null;
+          label?: string | null;
+          test?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * custom
+     */
+    de?:
+      | {
+          doc?: (string | null) | Category;
+          url?: string | null;
+          label?: string | null;
+          test?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * custom
+   */
+  owner?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }

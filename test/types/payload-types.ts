@@ -79,6 +79,7 @@ export interface Config {
   collections: {
     posts: Post;
     pages: Page;
+    'pages-localized': PagesLocalized;
     'pages-categories': PagesCategory;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -90,9 +91,13 @@ export interface Config {
       relatedPages: 'pages';
     };
   };
+  collectionsLocalized: {
+    'pages-localized': PagesLocalizedLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'pages-localized': PagesLocalizedSelect<false> | PagesLocalizedSelect<true>;
     'pages-categories': PagesCategoriesSelect<false> | PagesCategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -105,10 +110,11 @@ export interface Config {
   globals: {
     menu: Menu;
   };
+  globalsLocalized: {};
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
@@ -195,6 +201,24 @@ export interface PagesCategory {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized".
+ */
+export interface PagesLocalized {
+  id: string;
+  title?: string | null;
+  number?: number | null;
+  textNonLocalized?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -231,6 +255,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'pages-localized';
+        value: string | PagesLocalized;
       } | null)
     | ({
         relationTo: 'pages-categories';
@@ -284,6 +312,33 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized_localized".
+ */
+export interface PagesLocalizedLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  number?: {
+    en?: number | null;
+    es?: number | null;
+  };
+  textNonLocalized?: string | null;
+  array?:
+    | {
+        title?: {
+          en?: string | null;
+          es?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -308,6 +363,23 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized_select".
+ */
+export interface PagesLocalizedSelect<T extends boolean = true> {
+  title?: T;
+  number?: T;
+  textNonLocalized?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -405,6 +477,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

@@ -103,6 +103,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {};
   collectionsSelect: {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'uploads-two': UploadsTwoSelect<false> | UploadsTwoSelect<true>;
@@ -153,6 +154,7 @@ export interface Config {
     'group-globals-two': GroupGlobalsTwo;
     settings: Setting;
   };
+  globalsLocalized: {};
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
     'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
