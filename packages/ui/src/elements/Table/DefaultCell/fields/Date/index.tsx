@@ -13,7 +13,7 @@ export const DateCell: React.FC<
 > = (props) => {
   const {
     cellData,
-    field: { accessor, admin: { date } = {}, timezone: timezoneFromField },
+    field: { name, accessor, admin: { date } = {}, timezone: timezoneFromField },
     rowData,
   } = props
 
@@ -24,7 +24,9 @@ export const DateCell: React.FC<
   } = useConfig()
   const { i18n } = useTranslation()
 
-  const timezoneFieldName = `${accessor}_tz`
+  const fieldPath = accessor || name
+
+  const timezoneFieldName = `${fieldPath}_tz`
   const timezone =
     Boolean(timezoneFromField) && rowData
       ? getObjectDotNotation(rowData, timezoneFieldName, undefined)
