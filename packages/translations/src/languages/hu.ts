@@ -290,6 +290,8 @@ export const huTranslations: DefaultTranslationsObject = {
     deleted: 'Törölt',
     deletedAt: 'Törölve Ekkor',
     deletedCountSuccessfully: '{{count}} {{label}} sikeresen törölve.',
+    deletedInLocale:
+      'Sikeresen eltávolított minden {{locale}} adatot. A dokumentum maga nem lett törölve.',
     deletedSuccessfully: 'Sikeresen törölve.',
     deleteLabel: 'Törölje a {{label}}-t',
     deletePermanently: 'Hagyja ki a kukát és törölje véglegesen',
@@ -330,6 +332,7 @@ export const huTranslations: DefaultTranslationsObject = {
     goBack: 'Vissza',
     groupByLabel: 'Csoportosítás {{label}} szerint',
     import: 'Behozatal',
+    in: 'ban',
     isEditing: 'szerkeszt',
     item: 'Tétel',
     items: 'tételek',

@@ -13,5 +13,9 @@ export const LocalizedDrafts: CollectionConfig = {
       name: 'title',
       localized: true,
     },
+    {
+      type: 'text',
+      name: 'sharedField',
+    },
   ],
 }

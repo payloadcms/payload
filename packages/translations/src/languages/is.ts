@@ -284,6 +284,8 @@ export const isTranslations: DefaultTranslationsObject = {
     deleted: 'Eytt',
     deletedAt: 'Eytt',
     deletedCountSuccessfully: 'Eyddi {{count}} {{label}}.',
+    deletedInLocale:
+      'All gögn {{locale}} voru með góðum árangri fjarlægð. Dokumentið sjálft var ekki eytt.',
     deletedSuccessfully: 'Eyðing tókst.',
     deleteLabel: 'Eyða {{label}}',
     deletePermanently: 'Sleppa rusli og eyða varanlega',
@@ -324,6 +326,7 @@ export const isTranslations: DefaultTranslationsObject = {
     goBack: 'Til baka',
     groupByLabel: 'Flokka eftir {{label}}',
     import: 'Flytja inn',
+    in: 'í',
     isEditing: 'er að breyta',
     item: 'hlutur',
     items: 'hlutir',
