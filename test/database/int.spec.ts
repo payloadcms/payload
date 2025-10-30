@@ -1426,18 +1426,11 @@ describe('database', () => {
     })
 
     it('should run migrate', async () => {
-      let error
-      try {
-        await payload.db.migrate()
-      } catch (e) {
-        console.error(e)
-        error = e
-      }
+      await payload.db.migrate()
       const { docs } = await payload.find({
         collection: 'payload-migrations',
       })
       const migration = docs[0]
-      expect(error).toBeUndefined()
       expect(migration?.name).toContain('_test')
       expect(migration?.batch).toStrictEqual(1)
     })

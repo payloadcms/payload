@@ -15,7 +15,7 @@ const clearMigrations = () => {
   }
 }
 
-describe('SQL migrations', () => {
+describeToUse('SQL migrations', () => {
   // If something fails - an error will be thrown.
   it('should up and down migration successfully', async () => {
     clearMigrations()
