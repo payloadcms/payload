@@ -116,6 +116,8 @@ import type {
   LabelFunction,
   PayloadComponent,
   StaticLabel,
+  Timezone,
+  TimezonesConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -723,6 +725,14 @@ export type CheckboxFieldClient = {
 } & FieldBaseClient &
   Pick<CheckboxField, 'type'>
 
+type DateFieldTimezoneConfig = {
+  /**
+   * Make only the timezone required in the admin interface. This means a timezone is always required to be selected.
+   */
+  required?: boolean
+  supportedTimezones?: Timezone[]
+} & Pick<TimezonesConfig, 'defaultTimezone'>
+
 export type DateField = {
   admin?: {
     components?: {
@@ -737,7 +747,7 @@ export type DateField = {
   /**
    * Enable timezone selection in the admin interface.
    */
-  timezone?: true
+  timezone?: DateFieldTimezoneConfig | true
   type: 'date'
   validate?: DateFieldValidation
 } & Omit<FieldBase, 'validate'>

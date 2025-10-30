@@ -42,6 +42,14 @@ export type S3StorageOptions = {
   cacheControl?: string
 
   /**
+   * Optional cache key to identify the S3 storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `s3:containerName`
+   */
+  clientCacheKey?: string
+
+  /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
    */
   clientUploads?: ClientUploadsConfig
@@ -85,7 +93,7 @@ export type S3StorageOptions = {
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
-let storageClient: AWS.S3 | null = null
+const s3Clients = new Map<string, AWS.S3>()
 
 const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
   httpAgent: {
@@ -101,16 +109,22 @@ const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
+    const cacheKey = s3StorageOptions.clientCacheKey || `s3:${s3StorageOptions.bucket}`
+
     const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) {
-        return storageClient
+      if (s3Clients.has(cacheKey)) {
+        return s3Clients.get(cacheKey)!
       }
 
-      storageClient = new AWS.S3({
-        requestHandler: defaultRequestHandlerOpts,
-        ...(s3StorageOptions.config ?? {}),
-      })
-      return storageClient
+      s3Clients.set(
+        cacheKey,
+        new AWS.S3({
+          requestHandler: defaultRequestHandlerOpts,
+          ...(s3StorageOptions.config ?? {}),
+        }),
+      )
+
+      return s3Clients.get(cacheKey)!
     }
 
     const isPluginDisabled = s3StorageOptions.enabled === false
