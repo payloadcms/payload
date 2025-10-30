@@ -1,9 +1,6 @@
 ---
 name: payload-cms
 description: Use when working with Payload CMS projects, payload.config.ts, collections, fields, hooks, access control, or Payload API. Provides TypeScript patterns and examples for Payload 3.x development.
-version: '2.0.0'
-payload-version: '3.x'
-last-updated: '2025-01-27'
 ---
 
 # Payload CMS Application Development
