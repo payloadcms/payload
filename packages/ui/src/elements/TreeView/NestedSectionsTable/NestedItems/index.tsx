@@ -10,7 +10,7 @@ interface ItemWithChildrenProps {
   firstCellRef?: React.RefObject<HTMLDivElement>
   firstCellWidth: number
   firstCellXOffset: number
-  focusedItemIndex?: number
+  focusedItemKey?: ItemKey | null
   hasSelectedAncestor?: boolean
   hoveredItemKey: ItemKey | null
   isDragging: boolean
@@ -23,10 +23,8 @@ interface ItemWithChildrenProps {
     placement?: string
     targetItem: null | SectionItem
   }) => void
-  onFocusChange: (focusedIndex: number) => void
-  onItemDrag: (params: { event: PointerEvent; item: null | SectionItem }) => void
-  onItemKeyPress: (params: { event: React.KeyboardEvent; item: SectionItem }) => void
-  onSelectionChange: ({
+  onFocusChange: (indexPath: number[]) => void
+  onItemClick: ({
     itemKey,
     options,
   }: {
@@ -37,8 +35,11 @@ interface ItemWithChildrenProps {
       shiftKey: boolean
     }
   }) => void
+  onItemDrag: (params: { event: PointerEvent; item: null | SectionItem }) => void
+  onItemKeyDown: (params: { event: React.KeyboardEvent; item: SectionItem }) => void
   openItemKeys?: Set<ItemKey>
   parentIndex?: number
+  parentIndexPath: number[]
   parentItems?: SectionItem[]
   segmentWidth: number
   selectedItemKeys?: Set<ItemKey>
@@ -52,7 +53,7 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
   firstCellRef,
   firstCellWidth,
   firstCellXOffset,
-  focusedItemIndex,
+  focusedItemKey,
   hasSelectedAncestor = false,
   hoveredItemKey,
   isDragging,
@@ -62,11 +63,12 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
   loadingItemKeys,
   onDroppableHover,
   onFocusChange,
+  onItemClick,
   onItemDrag,
-  onItemKeyPress,
-  onSelectionChange,
+  onItemKeyDown,
   openItemKeys,
   parentIndex = 0,
+  parentIndexPath = [],
   parentItems = [],
   segmentWidth,
   selectedItemKeys = new Set<ItemKey>(),
@@ -97,15 +99,14 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
   return (
     <>
       {items.map((sectionItem, sectionItemIndex: number) => {
+        const itemIndexPath = [...parentIndexPath, sectionItemIndex]
         const absoluteItemIndex = getAbsoluteItemIndex(sectionItemIndex)
         const isLastSiblingItem = items.length - 1 === sectionItemIndex
         const hasNestedItems =
           Boolean(sectionItem?.rows?.length) && openItemKeys?.has(sectionItem.itemKey)
 
         const isItemSelected = selectedItemKeys.has(sectionItem.itemKey)
-        const isInvalidTarget = hasSelectedAncestor || isItemSelected
         const isItemAtRootLevel = level === 0 || (isLastSiblingItem && isLastItemOfRoot)
-        const isFirstItemAtRootLevel = level === 0 && sectionItemIndex === 0
 
         // Calculate drop target items based on position in hierarchy
         let targetItems: (null | SectionItem)[] = []
@@ -144,20 +145,20 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
               firstCellWidth={firstCellWidth}
               firstCellXOffset={firstCellXOffset}
               hasSelectedAncestor={hasSelectedAncestor}
+              indexPath={itemIndexPath}
               isDragging={isDragging}
-              isFirstRootItem={isFirstItemAtRootLevel}
-              isFocused={focusedItemIndex !== undefined && focusedItemIndex === absoluteItemIndex}
+              isFocused={focusedItemKey !== undefined && focusedItemKey === sectionItem.itemKey}
               isHovered={hoveredItemKey === sectionItem.itemKey}
-              isInvalidTarget={isInvalidTarget}
+              isInvalidTarget={hasSelectedAncestor || isItemSelected}
               isSelected={isItemSelected}
               item={sectionItem}
               level={level}
               loadingItemKeys={loadingItemKeys}
-              onClick={onSelectionChange}
+              onClick={onItemClick}
               onDrag={onItemDrag}
               onDroppableHover={onDroppableHover}
               onFocusChange={onFocusChange}
-              onKeyPress={onItemKeyPress}
+              onKeyDown={onItemKeyDown}
               openItemKeys={openItemKeys}
               segmentWidth={segmentWidth}
               selectedItemKeys={selectedItemKeys}
@@ -165,6 +166,8 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
               targetItems={targetItems}
               targetParentItemKey={targetParentItemKey}
               toggleExpand={toggleItemExpand}
+              // isFirstSiblingItem={isFirstSiblingItem}
+              // isLastSiblingItem={isLastSiblingItem}
             />
 
             {hasNestedItems && sectionItem.rows && (
@@ -173,7 +176,7 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
                 dropContextName={dropContextName}
                 firstCellWidth={firstCellWidth}
                 firstCellXOffset={firstCellXOffset}
-                focusedItemIndex={focusedItemIndex}
+                focusedItemKey={focusedItemKey}
                 hasSelectedAncestor={hasSelectedAncestor || isItemSelected}
                 hoveredItemKey={hoveredItemKey}
                 isDragging={isDragging}
@@ -183,11 +186,12 @@ export const NestedItems: React.FC<ItemWithChildrenProps> = ({
                 loadingItemKeys={loadingItemKeys}
                 onDroppableHover={onDroppableHover}
                 onFocusChange={onFocusChange}
+                onItemClick={onItemClick}
                 onItemDrag={onItemDrag}
-                onItemKeyPress={onItemKeyPress}
-                onSelectionChange={onSelectionChange}
+                onItemKeyDown={onItemKeyDown}
                 openItemKeys={openItemKeys}
                 parentIndex={absoluteItemIndex + 1}
+                parentIndexPath={itemIndexPath}
                 parentItems={[...parentItems, sectionItem]}
                 segmentWidth={segmentWidth}
                 selectedItemKeys={selectedItemKeys}

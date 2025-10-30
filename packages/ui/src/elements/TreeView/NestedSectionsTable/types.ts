@@ -11,7 +11,6 @@ export type Column = {
 }
 
 export type NestedSectionsTableProps = {
-  canFocusItem: (item: SectionItem) => boolean
   className?: string
   columns?: Column[]
   dropContextName: string

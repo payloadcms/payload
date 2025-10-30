@@ -26,8 +26,8 @@ interface DivTableRowProps {
   firstCellWidth: number
   firstCellXOffset: number
   hasSelectedAncestor: boolean
+  indexPath: number[]
   isDragging: boolean
-  isFirstRootItem: boolean
   isFocused: boolean
   isHovered: boolean
   isInvalidTarget: boolean
@@ -45,8 +45,12 @@ interface DivTableRowProps {
   }) => void
   onDrag: (params: { event: PointerEvent; item: null | SectionItem }) => void
   onDroppableHover: (params: { hoveredItemKey?: ItemKey; targetItem: null | SectionItem }) => void
-  onFocusChange: (focusedIndex: number) => void
-  onKeyPress: (params: { event: React.KeyboardEvent; item: SectionItem }) => void
+  onFocusChange: (indexPath: number[]) => void
+  onKeyDown: (params: {
+    event: React.KeyboardEvent
+    indexPath: number[]
+    item: SectionItem
+  }) => void
   openItemKeys: Set<ItemKey>
   segmentWidth: number
   selectedItemKeys: Set<ItemKey>
@@ -64,8 +68,8 @@ export const Row: React.FC<DivTableRowProps> = ({
   firstCellWidth,
   firstCellXOffset,
   hasSelectedAncestor,
+  indexPath,
   isDragging,
-  isFirstRootItem,
   isFocused,
   isHovered,
   isInvalidTarget,
@@ -77,7 +81,7 @@ export const Row: React.FC<DivTableRowProps> = ({
   onDrag,
   onDroppableHover,
   onFocusChange,
-  onKeyPress,
+  onKeyDown,
   openItemKeys,
   segmentWidth,
   selectedItemKeys,
@@ -131,12 +135,12 @@ export const Row: React.FC<DivTableRowProps> = ({
         onClick={handleClick}
         onFocus={(e) => {
           if (e.target === e.currentTarget && !isFocused) {
-            onFocusChange(absoluteIndex)
+            onFocusChange(indexPath)
           }
         }}
         onKeyDown={(event) => {
           if (event.target === event.currentTarget) {
-            onKeyPress({ event, item })
+            onKeyDown({ event, indexPath, item })
           }
         }}
         onMouseDown={(e) => {
@@ -235,7 +239,7 @@ export const Row: React.FC<DivTableRowProps> = ({
 
           <div>
             {/* Add split-top drop area for first root-level row */}
-            {isFirstRootItem && (
+            {absoluteIndex === 0 && (
               <RowDropArea
                 disabled={isInvalidTarget}
                 dropContextName={dropContextName}

@@ -6,6 +6,12 @@ import React from 'react'
 import type { ItemKey, NestedSectionsTableProps, SectionItem } from './types.js'
 
 import { Header } from './Header/index.js'
+import {
+  getItemByPath,
+  getItemKeysBetween,
+  getNextVisibleItem,
+  getPreviousVisibleItem,
+} from './navigationUtils.js'
 import { NestedItems } from './NestedItems/index.js'
 import './index.scss'
 
@@ -13,7 +19,6 @@ const baseClass = 'nested-sections-table'
 const DEFAULT_SEGMENT_WIDTH = 30
 
 export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
-  canFocusItem,
   className = '',
   columns = [{ name: 'name', label: 'Name' }],
   dropContextName,
@@ -36,74 +41,17 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   const [firstCellWidth, setFirstCellWidth] = React.useState(0)
   const firstCellRef = React.useRef<HTMLDivElement>(null)
 
-  const totalVisibleItems = React.useMemo(() => {
-    if (!rootItems) {
-      return 0
-    }
-
-    const countVisibleItems = (items: SectionItem[]): number => {
-      let count = 0
-      for (const item of items) {
-        count++
-        if (item.rows && openItemKeys?.has(item.itemKey)) {
-          count += countVisibleItems(item.rows)
-        }
-      }
-      return count
-    }
-
-    return countVisibleItems(rootItems)
-  }, [rootItems, openItemKeys])
-
-  // Get row at a specific visible index
-  const getItemFromIndex = React.useCallback(
-    (targetIndex: number): SectionItem | undefined => {
-      if (!rootItems) {
-        return undefined
-      }
-
-      const findItemAtIndex = ({
-        currentIndex,
-        items,
-        targetIndex,
-      }: {
-        currentIndex: number
-        items: SectionItem[]
-        targetIndex: number
-      }): SectionItem | undefined => {
-        for (const item of items) {
-          if (currentIndex === targetIndex) {
-            return item
-          }
-          currentIndex++
-          if (item.rows && openItemKeys?.has(item.itemKey)) {
-            const found = findItemAtIndex({ currentIndex, items: item.rows, targetIndex })
-            if (found) {
-              return found
-            }
-          }
-        }
-        return undefined
-      }
-
-      return findItemAtIndex({ currentIndex: 0, items: rootItems, targetIndex })
-    },
-    [rootItems, openItemKeys],
-  )
-
-  // Get visual index from row ID
   const getIndexFromItemKey = React.useCallback(
     (itemKey: ItemKey | null): number => {
       if (itemKey === null) {
         return -1
       }
 
+      let currentIndex = 0
       const findIndex = ({
-        currentIndex,
         items,
         targetItemKey,
       }: {
-        currentIndex: number
         items: SectionItem[]
         targetItemKey: ItemKey | null
       }): number => {
@@ -113,7 +61,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           }
           currentIndex++
           if (item.rows && openItemKeys?.has(item.itemKey)) {
-            const found = findIndex({ currentIndex, items: item.rows, targetItemKey })
+            const found = findIndex({ items: item.rows, targetItemKey })
             if (found !== -1) {
               return found
             }
@@ -122,9 +70,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         return -1
       }
 
-      return rootItems
-        ? findIndex({ currentIndex: 0, items: rootItems, targetItemKey: itemKey })
-        : -1
+      return rootItems ? findIndex({ items: rootItems, targetItemKey: itemKey }) : -1
     },
     [rootItems, openItemKeys],
   )
@@ -135,7 +81,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
     [focusedItemKey, getIndexFromItemKey],
   )
 
-  const onSelectionChange = React.useCallback(
+  const onItemClick = React.useCallback(
     ({
       itemKey,
       options,
@@ -152,65 +98,42 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       if (shiftKey) {
         // Shift selection: select range from anchor to current item
         // Set anchor if not set
-        if (selectionAnchorItemKey === null) {
-          setSelectionAnchorItemKey(itemKey)
-          // Just select this item as the starting point
-          updateSelections({ itemKeys: [itemKey] })
-          return
+        const anchorItemKey = selectionAnchorItemKey || itemKey
+        if (!selectionAnchorItemKey) {
+          setSelectionAnchorItemKey(anchorItemKey)
         }
 
-        // Find indexes for anchor and current item
-        const anchorIndex = getIndexFromItemKey(selectionAnchorItemKey)
-        const currentIndex = getIndexFromItemKey(itemKey)
+        const itemKeysInRange = getItemKeysBetween({
+          itemKeyA: itemKey,
+          itemKeyB: anchorItemKey,
+          openItemKeys,
+          rootItems,
+        })
 
-        if (anchorIndex === -1 || currentIndex === -1) {
-          // Fallback to simple selection if indexes not found
-          updateSelections({ itemKeys: [itemKey] })
-          return
-        }
-
-        // Collect all focusable items in the range
-        const startIndex = Math.min(anchorIndex, currentIndex)
-        const endIndex = Math.max(anchorIndex, currentIndex)
-        const rangeItemKeys: Array<`${string}-${number | string}`> = []
-
-        for (let i = startIndex; i <= endIndex; i++) {
-          const item = getItemFromIndex(i)
-          if (item && canFocusItem(item)) {
-            rangeItemKeys.push(item.itemKey)
-          }
-        }
-
-        updateSelections({ itemKeys: rangeItemKeys })
+        updateSelections({ itemKeys: itemKeysInRange })
       } else {
         // Normal selection: toggle single item
         // Reset anchor for next shift selection
         setSelectionAnchorItemKey(itemKey)
-
-        const isCurrentlySelected = selectedItemKeys.has(itemKey)
-        if (isCurrentlySelected) {
-          const newItemKeys = new Set(selectedItemKeys)
-          newItemKeys.delete(itemKey)
-          updateSelections({ itemKeys: newItemKeys })
-        } else {
-          updateSelections({ itemKeys: [itemKey] })
-        }
+        setFocusedItemKey(itemKey)
+        updateSelections({ itemKeys: selectedItemKeys.has(itemKey) ? [] : [itemKey] })
       }
     },
-    [
-      updateSelections,
-      selectedItemKeys,
-      selectionAnchorItemKey,
-      getIndexFromItemKey,
-      getItemFromIndex,
-      canFocusItem,
-    ],
+    [selectionAnchorItemKey, rootItems, openItemKeys, updateSelections, selectedItemKeys],
   )
 
   // Handle keyboard navigation
-  const handleRowKeyPress = React.useCallback(
-    ({ event, item }: { event: React.KeyboardEvent; item: SectionItem }) => {
-      const { code, ctrlKey, metaKey, shiftKey } = event
+  const onItemKeyDown = React.useCallback(
+    ({
+      event,
+      indexPath,
+      item,
+    }: {
+      event: React.KeyboardEvent
+      indexPath: number[]
+      item: SectionItem
+    }) => {
+      const { code, ctrlKey, metaKey, shiftKey: isShiftPressed } = event
       const isCtrlPressed = ctrlKey || metaKey
 
       switch (code) {
@@ -218,31 +141,39 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         case 'ArrowUp': {
           event.preventDefault()
 
-          const direction: -1 | 1 = code === 'ArrowUp' ? -1 : 1
-          const currentIndex = getIndexFromItemKey(item.itemKey)
-          let nextIndex = currentIndex + direction
+          const nextItem =
+            code === 'ArrowDown'
+              ? getNextVisibleItem({ indexPath, openItemKeys, rootItems })
+              : getPreviousVisibleItem({ indexPath, openItemKeys, rootItems })
 
-          // Find next focusable row
-          while (nextIndex >= 0 && nextIndex < totalVisibleItems) {
-            const nextItem = getItemFromIndex(nextIndex)
-            if (nextItem && canFocusItem(nextItem)) {
-              setFocusedItemKey(nextItem.itemKey)
+          if (nextItem) {
+            setFocusedItemKey(nextItem.itemKey)
 
-              // Handle shift+arrow for range selection
-              if (shiftKey) {
-                // Pass the selection event with shiftKey to the next row
-                // The parent's selection logic should handle range selection
-                onSelectionChange({
-                  itemKey: nextItem.itemKey,
-                  options: { ctrlKey, metaKey, shiftKey },
-                })
+            // Handle selection with shift key (incremental selection)
+            if (isShiftPressed) {
+              if (!selectionAnchorItemKey) {
+                setSelectionAnchorItemKey(nextItem.itemKey)
               }
 
-              break
-            }
-            nextIndex += direction
-          }
+              // Check if next item is already selected
+              const isTargetSelected = selectedItemKeys.has(nextItem.itemKey)
+              const newSelections = new Set(selectedItemKeys)
 
+              if (isTargetSelected) {
+                // Remove from selection (contracting)
+                newSelections.delete(item.itemKey)
+              } else {
+                if (!selectedItemKeys.has(item.itemKey)) {
+                  newSelections.add(item.itemKey)
+                }
+                newSelections.add(nextItem.itemKey)
+              }
+
+              updateSelections({ itemKeys: newSelections })
+            } else {
+              setSelectionAnchorItemKey(nextItem.itemKey)
+            }
+          }
           break
         }
 
@@ -265,6 +196,8 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         case 'Escape': {
           event.preventDefault()
           setFocusedItemKey(null)
+          setHoveredItemKey(null)
+          setSelectionAnchorItemKey(null)
           onEscape()
           break
         }
@@ -279,24 +212,28 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
 
         case 'Space': {
           event.preventDefault()
-          onSelectionChange({
-            itemKey: item.itemKey,
-            options: { ctrlKey, metaKey, shiftKey },
-          })
+          const newSelections = new Set(selectedItemKeys)
+
+          if (selectedItemKeys.has(item.itemKey)) {
+            newSelections.delete(item.itemKey)
+          } else {
+            newSelections.add(item.itemKey)
+          }
+
+          updateSelections({ itemKeys: newSelections })
           break
         }
       }
     },
     [
-      getIndexFromItemKey,
-      totalVisibleItems,
-      getItemFromIndex,
-      canFocusItem,
-      // onEnter,
       onEscape,
       onSelectAll,
+      openItemKeys,
+      rootItems,
+      selectedItemKeys,
+      selectionAnchorItemKey,
       toggleItemExpand,
-      onSelectionChange,
+      updateSelections,
     ],
   )
 
@@ -345,7 +282,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       setIsDragging(false)
       setHoveredItemKey(null)
       setTargetParentItemKey(null)
-      // eslint-disable-next-line react-compiler/react-compiler
+
       document.body.style.cursor = ''
     },
     onDragEnd(event) {
@@ -412,24 +349,28 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           firstCellRef={firstCellRef}
           firstCellWidth={firstCellWidth}
           firstCellXOffset={firstCellXOffset}
-          focusedItemIndex={focusedRowIndex}
+          focusedItemKey={focusedItemKey}
           hoveredItemKey={hoveredItemKey}
           isDragging={isDragging}
           items={rootItems}
           loadingItemKeys={loadingItemKeys}
           onDroppableHover={onDroppableHover}
-          onFocusChange={(index) => {
+          onFocusChange={(indexPath: number[]) => {
             // Convert index back to row ID
-            const row = getItemFromIndex(index)
+            const row = getItemByPath({
+              indexPath,
+              rootItems,
+            })
             if (row) {
               setFocusedItemKey(row.itemKey)
             }
           }}
+          onItemClick={onItemClick}
           onItemDrag={onItemDrag}
-          onItemKeyPress={handleRowKeyPress}
-          onSelectionChange={onSelectionChange}
+          onItemKeyDown={onItemKeyDown}
           openItemKeys={openItemKeys}
           parentIndex={0}
+          parentIndexPath={[]}
           parentItems={[]}
           segmentWidth={segmentWidth}
           selectedItemKeys={selectedItemKeys}

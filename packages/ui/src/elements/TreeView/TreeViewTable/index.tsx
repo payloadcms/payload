@@ -12,7 +12,6 @@ const dropContextName = 'tree-view-table'
 
 export function TreeViewTable() {
   const {
-    canFocusItem,
     clearSelections,
     collectionSlug,
     loadingItemKeys,
@@ -31,7 +30,6 @@ export function TreeViewTable() {
       {/* TODO: remove this button */}
       <SeedDataButton collectionSlug={collectionSlug} />
       <NestedSectionsTable
-        canFocusItem={canFocusItem}
         className={baseClass}
         dropContextName={dropContextName}
         loadingItemKeys={loadingItemKeys}

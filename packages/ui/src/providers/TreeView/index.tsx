@@ -27,7 +27,6 @@ type TreeViewQueryParams = {
 }
 
 export type TreeViewContextValue = {
-  canFocusItem: (item: SectionItem) => boolean
   clearSelections: () => void
   collectionSlug: CollectionSlug
   loadingItemKeys: Set<ItemKey>
@@ -52,7 +51,6 @@ export type TreeViewContextValue = {
 }
 
 const Context = React.createContext<TreeViewContextValue>({
-  canFocusItem: () => true,
   clearSelections: () => {},
   collectionSlug: '' as CollectionSlug,
   loadingItemKeys: new Set<ItemKey>(),
@@ -379,14 +377,6 @@ export function TreeViewProvider({
     [moveItems, getSelectedItems, items, t],
   )
 
-  const canFocusItem = React.useCallback(
-    (item: SectionItem) => {
-      const unfocusableIDs = getAllDescendantIDs({ itemKeys: selectedItemKeys, items })
-      return !unfocusableIDs.has(item.itemKey)
-    },
-    [selectedItemKeys, items],
-  )
-
   const rootItems: TreeViewContextValue['rootItems'] = React.useMemo(
     () => buildItemHierarchy({ i18nLanguage: i18n.language, items }),
     [items, i18n.language],
@@ -401,7 +391,6 @@ export function TreeViewProvider({
   return (
     <Context
       value={{
-        canFocusItem,
         clearSelections,
         collectionSlug,
         loadingItemKeys,
