@@ -2678,7 +2678,10 @@ describe('database', () => {
     : describe
 
   describeSQL('Schema generation', () => {
-    if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
+    if (
+      process.env.PAYLOAD_DATABASE.includes('postgres') ||
+      process.env.PAYLOAD_DATABASE === 'supabase'
+    ) {
       it('should generate Drizzle Postgres schema', async () => {
         const generatedAdapterName = process.env.PAYLOAD_DATABASE
 
