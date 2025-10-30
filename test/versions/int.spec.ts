@@ -2567,16 +2567,15 @@ describe('Versions', () => {
 
       expect(draft._status).toStrictEqual('draft')
 
-      // Read with a custom req that has no user (simulating unauthenticated request)
+      // Create a request without a user (simulating unauthenticated request)
       // Access control on draftGlobalSlug requires published status when no user
+      const req = await createLocalReq({}, payload)
+      req.user = null
+
       const result = await payload.findGlobal({
         slug: draftGlobalSlug,
         overrideAccess: false,
-        req: {
-          ...payload.config,
-          user: null,
-          payload,
-        } as any,
+        req,
       })
 
       // Should return empty object, not {_status: 'draft'}
