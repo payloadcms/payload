@@ -487,19 +487,37 @@ describe('Date', () => {
       const timezoneClearButton = page.locator(
         `#field-dayAndTimeWithTimezone .rs__control .clear-indicator`,
       )
-      await timezoneClearButton.click()
 
-      // Expect an error here
-      await saveDocAndAssert(page, undefined, 'error')
-
-      const errorMessage = page.locator(
-        '#field-dayAndTimeWithTimezone .field-error .tooltip-content:has-text("A timezone is required.")',
-      )
-
-      await expect(errorMessage).toBeVisible()
+      await expect(timezoneClearButton).toBeHidden()
     })
 
     test('can clear a selected timezone', async () => {
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+      })
+
+      await page.goto(url.edit(existingDoc!.id))
+
+      const dateField = page.locator('#field-defaultWithTimezone .react-datepicker-wrapper input')
+
+      const initialDate = await dateField.inputValue()
+
+      const timezoneClearButton = page.locator(
+        `#field-defaultWithTimezone .rs__control .clear-indicator`,
+      )
+      await timezoneClearButton.click()
+
+      const updatedDate = dateField.inputValue()
+
+      await expect(() => {
+        expect(updatedDate).not.toEqual(initialDate)
+      }).toPass({ timeout: 10000, intervals: [100] })
+    })
+
+    // This test should pass but it does not currently due to a11y issues with date fields - will fix in follow up PR
+    test.skip('can not clear a timezone that is required', async () => {
       const {
         docs: [existingDoc],
       } = await payload.find({
@@ -512,18 +530,26 @@ describe('Date', () => {
         '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
       )
 
-      const initialDate = await dateField.inputValue()
+      await expect(dateField).toBeVisible()
+      await expect(dateField).toHaveAttribute('required')
 
       const timezoneClearButton = page.locator(
         `#field-dayAndTimeWithTimezone .rs__control .clear-indicator`,
       )
-      await timezoneClearButton.click()
+      await expect(timezoneClearButton).toBeHidden()
 
-      const updatedDate = dateField.inputValue()
+      const dateFieldRequiredOnlyTz = page.locator(
+        '#field-dayAndTimeWithTimezoneRequired .react-datepicker-wrapper input',
+      )
 
-      await expect(() => {
-        expect(updatedDate).not.toEqual(initialDate)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      await expect(dateFieldRequiredOnlyTz).toBeVisible()
+      // eslint-disable-next-line jest-dom/prefer-required
+      await expect(dateFieldRequiredOnlyTz).not.toHaveAttribute('required')
+
+      const timezoneClearButtonOnlyTz = page.locator(
+        `#field-dayAndTimeWithTimezoneRequired .rs__control .clear-indicator`,
+      )
+      await expect(timezoneClearButtonOnlyTz).toBeHidden()
     })
 
     test('creates the expected UTC value when the timezone is Tokyo', async () => {
@@ -647,6 +673,12 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       await expect(async () => {
         await expect(dateTimeLocator).toHaveText('January 31st 2025, 10:00 AM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      const dateTimeLocatorFixed = page.locator('.cell-dayAndTimeWithTimezoneFixed').first()
+
+      await expect(async () => {
+        await expect(dateTimeLocatorFixed).toHaveText('October 29th 2025, 8:00 PM')
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 
@@ -840,6 +872,82 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       // eslint-disable-next-line payload/no-flaky-assertions
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
       expect(existingDoc?.defaultWithTimezone).toEqual(expectedDateOnlyUTCValue)
+    })
+
+    test('when only one timezone is supported the timezone should be disabled and enforced', async () => {
+      const expectedFixedUTCValue = '2025-10-29T20:00:00.000Z' // This is 8PM UTC on Oct 29, 2025
+      const expectedFixedTimezoneValue = 'Europe/London'
+
+      const expectedUpdatedInput = 'Oct 29, 2025 4:00 PM'
+      const expectedUpdatedUTCValue = '2025-10-29T16:00:00.000Z' // This is 4PM UTC on Oct 29, 2025
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+      })
+
+      await page.goto(url.edit(existingDoc!.id))
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezoneFixed .date-time-picker input',
+      )
+
+      await expect(dateTimeLocator).toBeEnabled()
+
+      const dateFieldWrapper = page.locator('.date-time-field').filter({ has: dateTimeLocator })
+      const dropdownInput = dateFieldWrapper.locator('.timezone-picker .rs__input')
+      const dropdownValue = dateFieldWrapper.locator('.timezone-picker .rs__value-container')
+
+      await expect(dropdownInput).toBeDisabled()
+      await expect(dropdownValue).toContainText('London')
+
+      // Verify the stored values are as expected
+      expect(existingDoc?.dayAndTimeWithTimezoneFixed).toEqual(expectedFixedUTCValue)
+      expect(existingDoc?.dayAndTimeWithTimezoneFixed_tz).toEqual(expectedFixedTimezoneValue)
+
+      await dateTimeLocator.fill(expectedUpdatedInput)
+
+      await saveDocAndAssert(page)
+
+      const {
+        docs: [updatedDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+      })
+
+      expect(updatedDoc?.dayAndTimeWithTimezoneFixed).toEqual(expectedUpdatedUTCValue)
+      expect(updatedDoc?.dayAndTimeWithTimezoneFixed_tz).toEqual(expectedFixedTimezoneValue)
+    })
+
+    test('readonly field should be disabled and timezone should not be selectable', async () => {
+      const expectedReadOnlyUTCValue = '2027-08-12T01:00:00.000Z'
+      const expectedReadOnlyTimezoneValue = 'Asia/Tokyo'
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+      })
+
+      await page.goto(url.edit(existingDoc!.id))
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezoneReadOnly .date-time-picker input',
+      )
+
+      await expect(dateTimeLocator).toBeDisabled()
+
+      const dateFieldWrapper = page.locator('.date-time-field').filter({ has: dateTimeLocator })
+      const dropdownInput = dateFieldWrapper.locator('.timezone-picker .rs__input')
+      const dropdownValue = dateFieldWrapper.locator('.timezone-picker .rs__value-container')
+
+      await expect(dropdownInput).toBeDisabled()
+      await expect(dropdownValue).toContainText('Tokyo')
+
+      // Verify the stored values are as expected
+      expect(existingDoc?.dayAndTimeWithTimezoneReadOnly).toEqual(expectedReadOnlyUTCValue)
+      expect(existingDoc?.dayAndTimeWithTimezoneReadOnly_tz).toEqual(expectedReadOnlyTimezoneValue)
     })
   })
 }

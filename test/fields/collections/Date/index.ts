@@ -8,7 +8,13 @@ const DateFields: CollectionConfig = {
   slug: dateFieldsSlug,
   admin: {
     useAsTitle: 'default',
-    defaultColumns: ['default', 'timeOnly', 'dayAndTimeWithTimezone', 'timezoneGroup.dayAndTime'],
+    defaultColumns: [
+      'default',
+      'timeOnly',
+      'dayAndTimeWithTimezone',
+      'timezoneGroup.dayAndTime',
+      'dayAndTimeWithTimezoneFixed',
+    ],
   },
   fields: [
     {
@@ -86,6 +92,43 @@ const DateFields: CollectionConfig = {
           pickerAppearance: 'dayAndTime',
         },
         description: 'This date here should be required.',
+      },
+      timezone: true,
+    },
+    {
+      name: 'dayAndTimeWithTimezoneFixed',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        defaultTimezone: 'Europe/London',
+        supportedTimezones: [{ label: 'London', value: 'Europe/London' }],
+      },
+    },
+    {
+      name: 'dayAndTimeWithTimezoneRequired',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        defaultTimezone: 'America/New_York',
+        required: true,
+      },
+    },
+    {
+      name: 'dayAndTimeWithTimezoneReadOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        readOnly: true,
       },
       timezone: true,
     },
