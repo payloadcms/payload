@@ -62,12 +62,6 @@ skills/payload/
 - [Examples](https://github.com/payloadcms/payload/tree/main/examples)
 - [Templates](https://github.com/payloadcms/payload/tree/main/templates)
 
-## Version
-
-**Skill Version**: 0.0.1
-**Payload Version**: 3.x
-**Last Updated**: 2025-01-27
-
 ## License
 
 MIT
