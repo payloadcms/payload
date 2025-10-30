@@ -440,7 +440,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezonesConfig = {
+export type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
