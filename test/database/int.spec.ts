@@ -36,7 +36,7 @@ import type { Global2, Post } from './payload-types.js'
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
+import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
@@ -2673,7 +2673,11 @@ describe('database', () => {
     })
   })
 
-  describe('Schema generation', () => {
+  const describeSQL = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
+    ? describe.skip
+    : describe
+
+  describeSQL('Schema generation', () => {
     if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
       it('should generate Drizzle Postgres schema', async () => {
         const generatedAdapterName = process.env.PAYLOAD_DATABASE
@@ -5105,7 +5109,6 @@ describe('database', () => {
   })
 
   it('ensure mongodb query sanitization does not duplicate IDs', () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (!isMongoose(payload)) {
       return
     }
