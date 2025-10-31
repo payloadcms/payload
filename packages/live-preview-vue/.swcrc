@@ -10,6 +10,6 @@
     }
   },
   "module": {
-    "type": "commonjs"
+    "type": "es6"
   }
 }
