@@ -9,6 +9,7 @@ import path from 'path'
 interface Args {
   acl?: 'private' | 'public-read'
   bucket: string
+  cacheControl?: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
   prefix?: string
@@ -19,6 +20,7 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export const getHandleUpload = ({
   acl,
   bucket,
+  cacheControl,
   getStorageClient,
   prefix = '',
 }: Args): HandleUpload => {
@@ -34,6 +36,7 @@ export const getHandleUpload = ({
         ACL: acl,
         Body: fileBufferOrStream,
         Bucket: bucket,
+        CacheControl: cacheControl,
         ContentType: file.mimeType,
         Key: fileKey,
       })
@@ -47,6 +50,7 @@ export const getHandleUpload = ({
         ACL: acl,
         Body: fileBufferOrStream,
         Bucket: bucket,
+        CacheControl: cacheControl,
         ContentType: file.mimeType,
         Key: fileKey,
       },
