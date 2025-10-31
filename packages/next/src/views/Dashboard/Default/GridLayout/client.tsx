@@ -4,8 +4,6 @@ import type { Widget } from 'payload'
 
 import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { Button } from '@payloadcms/ui/elements/Button'
-import { DraggableSortable } from '@payloadcms/ui/elements/DraggableSortable'
-import { DraggableSortableItem } from '@payloadcms/ui/elements/DraggableSortable/DraggableSortableItem'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { useStepNav } from '@payloadcms/ui/elements/StepNav'
@@ -40,7 +38,6 @@ export function GridLayoutDashboardClient({
     cancel,
     currentLayout,
     deleteWidget,
-    handleDragOver,
     isEditing,
     resetLayout,
     saveLayout,
@@ -75,7 +72,34 @@ export function GridLayoutDashboardClient({
 
   return (
     <div>
-      <div className={`grid-layout ${isEditing ? 'editing' : ''}`}>
+      <div
+        className={`grid-layout ${isEditing ? 'editing' : ''}`}
+        onDragOver={(_ev) => {
+          // STEP 1: get the center of all widgets
+          const widgets = document.querySelectorAll('.widget')
+          const widgetCenters = Array.from(widgets).map((widget) => {
+            const rect = widget.getBoundingClientRect()
+            return {
+              x: rect.left + rect.width / 2 + window.scrollX,
+              y: rect.top + rect.height / 2 + window.scrollY,
+            }
+          })
+
+          // STEP 2: render a red dot in the center of each widget
+          widgetCenters.forEach((center) => {
+            const dot = document.createElement('div')
+            dot.className = 'widget-center'
+            dot.style.position = 'absolute'
+            dot.style.left = `${center.x}px`
+            dot.style.top = `${center.y}px`
+            dot.style.width = '10px'
+            dot.style.height = '10px'
+            dot.style.backgroundColor = 'red'
+            dot.style.borderRadius = '50%'
+            document.body.appendChild(dot)
+          })
+        }}
+      >
         <div
           style={{
             display: 'flex',
@@ -89,7 +113,15 @@ export function GridLayoutDashboardClient({
                 className="widget"
                 data-columns={widget.item.w}
                 data-slug={widget.item.i}
+                draggable={isEditing}
                 key={widget.item.i}
+                onDragEnd={(_ev) => {
+                  // STEP 3: remove the red dot
+                  const dots = document.querySelectorAll('.widget-center')
+                  dots.forEach((dot) => {
+                    dot.remove()
+                  })
+                }}
                 style={{
                   width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
                 }}
