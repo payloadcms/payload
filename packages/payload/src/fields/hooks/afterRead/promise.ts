@@ -373,12 +373,19 @@ export const promise = async ({
     }
 
     // Set defaultValue on the field for globals being returned without being first created
-    // or collection documents created prior to having a default
+    // or collection documents created prior to having a default.
+
+    // Skip setting defaults when: global has no ID (never created or filtered by access)
+    // AND access control is active (not overriding). This prevents default values like
+    // `_status: 'draft'` from appearing when access control filters out the document.
+    const shouldSkipDefaults = global && !doc.id && !overrideAccess
+
     if (
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
-      typeof field.defaultValue !== 'undefined'
+      typeof field.defaultValue !== 'undefined' &&
+      !shouldSkipDefaults
     ) {
       siblingDoc[field.name!] = await getDefaultValue({
         defaultValue: field.defaultValue,

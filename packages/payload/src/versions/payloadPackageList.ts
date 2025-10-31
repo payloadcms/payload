@@ -15,6 +15,7 @@ export const PAYLOAD_PACKAGE_LIST = [
   '@payloadcms/live-preview',
   '@payloadcms/live-preview-react',
   '@payloadcms/live-preview-vue',
+  '@payloadcms/kv-redis',
   '@payloadcms/next/utilities',
   '@payloadcms/payload-cloud',
   '@payloadcms/plugin-cloud-storage',

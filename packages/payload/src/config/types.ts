@@ -45,6 +45,7 @@ import type {
   Block,
   FlattenedBlock,
   JobsConfig,
+  KVAdapterResult,
   Payload,
   RequestContext,
   SelectField,
@@ -439,7 +440,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezonesConfig = {
+export type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
@@ -1158,6 +1159,15 @@ export type Config = {
    * @experimental There may be frequent breaking changes to this API
    */
   jobs?: JobsConfig
+  /**
+   * Pass in a KV adapter for use on this project.
+   * @default `DatabaseKVAdapter` from:
+   * ```ts
+   * import { createDatabaseKVAdapter } from 'payload'
+   * createDatabaseKVAdapter()
+   * ```
+   */
+  kv?: KVAdapterResult
   /**
    * Translate your content to different languages/locales.
    *

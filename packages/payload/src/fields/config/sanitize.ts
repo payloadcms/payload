@@ -407,9 +407,20 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin?.timezones?.defaultTimezone
 
-      const supportedTimezones = config.admin?.timezones?.supportedTimezones
+      const defaultTimezone =
+        field.timezone && typeof field.timezone === 'object'
+          ? field.timezone.defaultTimezone
+          : config.admin?.timezones?.defaultTimezone
+
+      const required =
+        field.required ||
+        (field.timezone && typeof field.timezone === 'object' && field.timezone.required)
+
+      const supportedTimezones =
+        field.timezone && typeof field.timezone === 'object' && field.timezone.supportedTimezones
+          ? field.timezone.supportedTimezones
+          : config.admin?.timezones?.supportedTimezones
 
       const options =
         typeof supportedTimezones === 'function'
@@ -422,7 +433,7 @@ export const sanitizeFields = async ({
         name,
         defaultValue: defaultTimezone,
         options,
-        required: field.required,
+        required,
       })
 
       fields.splice(++i, 0, timezoneField)
