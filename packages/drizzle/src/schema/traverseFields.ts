@@ -450,8 +450,13 @@ export const traverseFields = ({
               },
             }
 
-            const baseForeignKeys: Record<string, RawForeignKey> = {
-              _parentIdFk: {
+            // Skip creating a parent_id foreign key for blocks that are shared across collections (have a custom dbName)
+            const hasCustomDbName = block.dbName !== undefined && block.dbName !== null
+            const shouldSkipForeignKey = hasCustomDbName
+
+            const baseForeignKeys: Record<string, RawForeignKey> = {}
+            if (!shouldSkipForeignKey) {
+              baseForeignKeys._parentIdFk = {
                 name: `${blockTableName}_parent_id_fk`,
                 columns: ['_parentID'],
                 foreignColumns: [
@@ -461,7 +466,7 @@ export const traverseFields = ({
                   },
                 ],
                 onDelete: 'cascade',
-              },
+              }
             }
 
             const isLocalized =
