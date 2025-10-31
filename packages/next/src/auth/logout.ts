@@ -36,10 +36,12 @@ export async function logout({
     return { message: 'Logout failed', success: false }
   }
 
+  const authConfig = collection?.config.auth
+
   const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
   if (existingCookie) {
     const cookies = await getCookies()
-    cookies.delete(existingCookie.name)
+    cookies.delete({ name: existingCookie.name, domain: authConfig?.cookies?.domain || undefined })
   }
 
   return { message: 'User logged out successfully', success: true }
