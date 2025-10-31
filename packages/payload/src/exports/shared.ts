@@ -88,7 +88,6 @@ export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
-
 export { getSelectMode } from '../utilities/getSelectMode.js'
 
 export { getSiblingData } from '../utilities/getSiblingData.js'
@@ -128,6 +127,8 @@ export {
 } from '../utilities/transformColumnPreferences.js'
 
 export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
+
+export { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 
 export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'

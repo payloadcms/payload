@@ -562,6 +562,8 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de rétablir les modifications apportées à ce document à la version publiée. Êtes-vous sûr ?',
     aboutToUnpublish:
       'Vous êtes sur le point d’annuler la publication de ce document. Êtes-vous sûr ?',
+    aboutToUnpublishIn:
+      'Vous êtes sur le point de dépublier ce document en {{locale}}. Êtes-vous sûr ?',
     aboutToUnpublishSelection:
       'Vous êtes sur le point de dépublier tous les {{label}} de la sélection. Êtes-vous sûr ?',
     autosave: 'Enregistrement automatique',
@@ -608,6 +610,8 @@ export const frTranslations: DefaultTranslationsObject = {
     restoring: 'Restauration en cours...',
     reverting: 'Republication en cours...',
     revertToPublished: 'Republier',
+    revertUnsuccessful:
+      "Échec de la réinitialisation. Aucune version précédemment publiée n'a été trouvée.",
     saveDraft: 'Enregistrer le brouillon',
     scheduledSuccessfully: 'Programmé avec succès.',
     schedulePublish: 'Programmer la publication',
@@ -618,6 +622,9 @@ export const frTranslations: DefaultTranslationsObject = {
     specificVersion: 'Version spécifique',
     status: 'Statut',
     unpublish: 'Annuler la publication',
+    unpublished: 'Non publié',
+    unpublishedSuccessfully: 'Non publié avec succès.',
+    unpublishIn: 'Dépublier en {{locale}}',
     unpublishing: 'Annulation en cours...',
     version: 'Version',
     versionAgo: 'il y a {{distance}}',

@@ -56,6 +56,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   trash?: boolean
+  unpublishSpecificLocale?: string
   where: Where
 }
 
@@ -114,6 +115,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
+      unpublishSpecificLocale,
       where,
     } = args
 
@@ -261,6 +263,7 @@ export const updateOperation = async <
           req,
           select: select!,
           showHiddenFields: showHiddenFields!,
+          unpublishSpecificLocale,
         })
 
         return updatedDoc

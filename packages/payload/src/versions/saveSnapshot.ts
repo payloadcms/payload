@@ -1,6 +1,11 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, TypeWithVersion } from '../index.js'
+import type {
+  CreateGlobalVersionArgs,
+  CreateVersionArgs,
+  Payload,
+  TypeWithVersion,
+} from '../index.js'
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
@@ -16,6 +21,7 @@ type Args<T extends JsonObject = JsonObject> = {
   publishSpecificLocale?: string
   req?: PayloadRequest
   select?: SelectType
+  unpublishSpecificLocale?: string
 }
 
 export const saveSnapshot = async <T extends JsonObject = JsonObject>({
@@ -28,6 +34,7 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
   publishSpecificLocale,
   req,
   select,
+  unpublishSpecificLocale,
 }: Args<T>): Promise<Omit<TypeWithVersion<T>, 'parent'> | TypeWithVersion<T> | undefined> => {
   const docData: {
     _status?: 'draft'
@@ -40,13 +47,18 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
 
   const snapshotDate = new Date().toISOString()
 
-  const sharedCreateVersionArgs = {
+  const sharedCreateVersionArgs: Omit<
+    CreateGlobalVersionArgs<T> | CreateVersionArgs<T>,
+    'collectionSlug' | 'globalSlug'
+  > = {
     autosave: Boolean(autosave),
     createdAt: snapshotDate,
     publishedLocale: publishSpecificLocale || undefined,
     req,
     returning: false,
     select: getQueryDraftsSelect({ select }),
+    snapshot: true,
+    unpublishedLocale: unpublishSpecificLocale || undefined,
     updatedAt: snapshotDate,
     versionData: docData,
   }
@@ -56,14 +68,12 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
       ...sharedCreateVersionArgs,
       collectionSlug: collection.slug,
       parent: id,
-      snapshot: true,
     })
   }
   if (global) {
     return payload.db.createGlobalVersion<T>({
       ...sharedCreateVersionArgs,
       globalSlug: global.slug,
-      snapshot: true,
     })
   }
 }

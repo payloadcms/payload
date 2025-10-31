@@ -21,7 +21,12 @@ type Args<T extends JsonObject = JsonObject> = {
   publishSpecificLocale?: string
   req?: PayloadRequest
   select?: SelectType
+  /**
+   * If present, this is the latest document which should have
+   * all **draft and published** data.
+   */
   snapshot?: any
+  unpublishSpecificLocale?: string
 }
 
 export const saveVersion = async <TData extends JsonObject = JsonObject>({
@@ -37,6 +42,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   req,
   select,
   snapshot,
+  unpublishSpecificLocale,
 }: Args<TData>): Promise<JsonObject> => {
   let result: JsonObject | undefined
   let createNewVersion = true
@@ -127,27 +133,34 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
     }
 
     if (createNewVersion) {
-      const createVersionArgs = {
+      const createVersionArgs: {
+        collectionSlug: string | undefined
+        globalSlug: string | undefined
+        parent: number | string | undefined
+      } & Omit<CreateVersionArgs<TData>, 'collectionSlug' | 'globalSlug' | 'parent'> = {
         autosave: Boolean(autosave),
-        collectionSlug: undefined as string | undefined,
+        collectionSlug: undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
-        globalSlug: undefined as string | undefined,
+        globalSlug: undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
         select: getQueryDraftsSelect({ select }),
+        unpublishedLocale: unpublishSpecificLocale || undefined,
         updatedAt: now,
         versionData,
       }
 
       if (collection) {
         createVersionArgs.collectionSlug = collection.slug
-        result = await payload.db.createVersion(createVersionArgs as CreateVersionArgs)
+        result = await payload.db.createVersion(createVersionArgs as CreateVersionArgs<TData>)
       }
 
       if (global) {
         createVersionArgs.globalSlug = global.slug
-        result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
+        result = await payload.db.createGlobalVersion(
+          createVersionArgs as CreateGlobalVersionArgs<TData>,
+        )
       }
 
       if (snapshot) {
@@ -161,6 +174,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
           publishSpecificLocale,
           req,
           select,
+          unpublishSpecificLocale,
         })
       }
     }

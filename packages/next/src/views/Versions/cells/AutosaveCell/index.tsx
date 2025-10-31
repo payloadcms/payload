@@ -20,6 +20,7 @@ type AutosaveCellProps = {
     autosave?: boolean
     id: number | string
     publishedLocale?: string
+    unpublishedLocale?: string
     version: {
       _status: string
     }
