@@ -64,7 +64,12 @@ export type FolderContextValue = {
     itemsToMove: FolderOrDocument[]
     toFolderID?: number | string
   }) => Promise<void>
-  onItemClick: (args: { event: React.MouseEvent; index: number; item: FolderOrDocument }) => void
+  onItemClick: (args: {
+    event: React.MouseEvent<HTMLElement>
+    index: number
+    item: FolderOrDocument
+  }) => void
+  onItemDrag?: (args: { event: PointerEvent; item: FolderOrDocument }) => void
   onItemKeyPress: (args: {
     event: React.KeyboardEvent
     index: number
@@ -104,6 +109,7 @@ const Context = React.createContext<FolderContextValue>({
   itemKeysToMove: undefined,
   moveToFolder: () => Promise.resolve(undefined),
   onItemClick: () => undefined,
+  onItemDrag: () => undefined,
   onItemKeyPress: () => undefined,
   refineFolderData: () => undefined,
   search: '',
@@ -224,6 +230,7 @@ export function FolderProvider({
       (collection) => config.folders && collection.slug === config.folders.slug,
     ),
   )
+  const [isDoubleClickEnabled] = React.useState(true)
   const folderCollectionSlug = folderCollectionConfig.slug
 
   const rawSearchParams = useSearchParams()
@@ -583,6 +590,31 @@ export function FolderProvider({
     ],
   )
 
+  const onItemDrag: FolderContextValue['onItemDrag'] = React.useCallback(
+    ({ event, item: dragItem }) => {
+      const isCtrlPressed = event.ctrlKey || event.metaKey
+      const isShiftPressed = event.shiftKey
+      const isCurrentlySelected = selectedItemKeys.has(dragItem.itemKey)
+      const allItems = [...subfolders, ...documents]
+
+      if (!isCurrentlySelected) {
+        updateSelections({
+          indexes: allItems.reduce((acc, item, idx) => {
+            if (item.itemKey === dragItem.itemKey) {
+              acc.push(idx)
+            } else if ((isCtrlPressed || isShiftPressed) && selectedItemKeys.has(item.itemKey)) {
+              acc.push(idx)
+            }
+            return acc
+          }, []),
+        })
+
+        setDragOverlayItem(getItem(dragItem.itemKey))
+      }
+    },
+    [selectedItemKeys, subfolders, documents, getItem, updateSelections],
+  )
+
   const onItemClick: FolderContextValue['onItemClick'] = React.useCallback(
     ({ event, item: clickedItem }) => {
       let doubleClicked: boolean = false
@@ -592,68 +624,74 @@ export function FolderProvider({
       const allItems = [...subfolders, ...documents]
       const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
 
-      if (allowMultiSelection && isCtrlPressed) {
-        event.preventDefault()
-        let overlayItemKey: FolderDocumentItemKey | undefined
-        const indexes = allItems.reduce((acc, item, idx) => {
-          if (item.itemKey === clickedItem.itemKey) {
-            if (isCurrentlySelected && event.type !== 'pointermove') {
-              return acc
-            } else {
+      if (allowMultiSelection && (isCtrlPressed || isShiftPressed)) {
+        if (isCtrlPressed) {
+          event.preventDefault()
+          const indexes = allItems.reduce((acc, item, idx) => {
+            if (item.itemKey === clickedItem.itemKey) {
               acc.push(idx)
-              overlayItemKey = item.itemKey
+              setDragOverlayItem(getItem(clickedItem.itemKey))
+            } else if (selectedItemKeys.has(item.itemKey)) {
+              acc.push(idx)
             }
-          } else if (selectedItemKeys.has(item.itemKey)) {
-            acc.push(idx)
-          }
-          return acc
-        }, [])
+            return acc
+          }, [])
 
-        updateSelections({ indexes })
-
-        if (overlayItemKey) {
-          setDragOverlayItem(getItem(overlayItemKey))
-        }
-      } else if (allowMultiSelection && isShiftPressed) {
-        if (currentItemIndex !== -1) {
+          updateSelections({ indexes })
+        } else if (currentItemIndex !== -1) {
           const selectedIndexes = handleShiftSelection(currentItemIndex)
           updateSelections({ indexes: selectedIndexes })
+          setDragOverlayItem(getItem(clickedItem.itemKey))
         }
-      } else if (allowMultiSelection && event.type === 'pointermove') {
-        // on drag start of an unselected item
-        if (!isCurrentlySelected) {
-          updateSelections({
-            indexes: allItems.reduce((acc, item, idx) => {
-              if (item.itemKey === clickedItem.itemKey) {
-                acc.push(idx)
-              }
-              return acc
-            }, []),
-          })
-        }
-        setDragOverlayItem(getItem(clickedItem.itemKey))
       } else {
         // Normal click - select single item
         const now = Date.now()
         doubleClicked =
           now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === clickedItem.itemKey
         lastClickTime.current = now
-        if (!doubleClicked) {
+        if (!doubleClicked || !isDoubleClickEnabled) {
           updateSelections({
-            indexes: isCurrentlySelected && selectedItemKeys.size === 1 ? [] : [currentItemIndex],
+            indexes: (() => {
+              const indexes: number[] = []
+
+              for (let idx = 0; idx < allItems.length; idx++) {
+                const item = allItems[idx]
+                if (clickedItem.itemKey === item.itemKey) {
+                  if (!selectedItemKeys.has(item.itemKey)) {
+                    indexes.push(idx)
+                  }
+                } else if (selectedItemKeys.has(item.itemKey)) {
+                  indexes.push(idx)
+                }
+              }
+
+              return indexes
+            })(),
           })
         }
-        setDragOverlayItem(getItem(clickedItem.itemKey))
-      }
 
-      if (doubleClicked) {
-        navigateAfterSelection({
-          collectionSlug: clickedItem.relationTo,
-          docID: extractID(clickedItem.value),
-        })
+        if (isCurrentlySelected) {
+          const selectedArray = Array.from(selectedItemKeys)
+          const lastSelectedKey = selectedArray[selectedArray.length - 1]
+          if (lastSelectedKey) {
+            setDragOverlayItem(getItem(lastSelectedKey))
+          } else {
+            setDragOverlayItem(undefined)
+          }
+        } else {
+          setDragOverlayItem(getItem(clickedItem.itemKey))
+        }
+
+        if (isDoubleClickEnabled && doubleClicked) {
+          navigateAfterSelection({
+            collectionSlug: clickedItem.relationTo,
+            docID: extractID(clickedItem.value),
+          })
+        }
       }
     },
     [
+      isDoubleClickEnabled,
       selectedItemKeys,
       subfolders,
       documents,
@@ -861,6 +899,7 @@ export function FolderProvider({
         itemKeysToMove: parentFolderContext.selectedItemKeys,
         moveToFolder,
         onItemClick,
+        onItemDrag,
         onItemKeyPress,
         refineFolderData,
         search,
