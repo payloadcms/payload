@@ -1,5 +1,5 @@
 {
-  "id": "26587b23-7412-4cee-88bc-555f1511ca75",
+  "id": "d9f80f9a-a49d-45f8-bb9c-58b1620a1f3d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -553,8 +553,8 @@
         }
       },
       "foreignKeys": {
-        "payload_locked_documents_rels_parent_fk": {
-          "name": "payload_locked_documents_rels_parent_fk",
+        "payload_locked_documents_rels_parent_1_idx": {
+          "name": "payload_locked_documents_rels_parent_1_idx",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "payload_locked_documents",
           "columnsFrom": ["parent_id"],
@@ -776,8 +776,8 @@
         }
       },
       "foreignKeys": {
-        "payload_preferences_rels_parent_fk": {
-          "name": "payload_preferences_rels_parent_fk",
+        "payload_preferences_rels_parent_1_idx": {
+          "name": "payload_preferences_rels_parent_1_idx",
           "tableFrom": "payload_preferences_rels",
           "tableTo": "payload_preferences",
           "columnsFrom": ["parent_id"],
