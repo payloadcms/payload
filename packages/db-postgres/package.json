@@ -76,20 +76,20 @@
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
-    "@types/pg": "8.10.2",
-    "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.31.5",
-    "drizzle-orm": "0.44.6",
-    "pg": "8.16.3",
-    "prompts": "2.4.2",
-    "to-snake-case": "1.0.0",
+    "@types/pg": "catalog:",
+    "console-table-printer": "catalog:",
+    "drizzle-kit": "catalog:",
+    "drizzle-orm": "catalog:",
+    "pg": "catalog:",
+    "prompts": "catalog:",
+    "to-snake-case": "catalog:",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
+    "@hyrious/esbuild-plugin-commonjs": "catalog:",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.25.5",
+    "@types/to-snake-case": "catalog:",
+    "esbuild": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {

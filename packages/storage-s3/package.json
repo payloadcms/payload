@@ -47,13 +47,13 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@aws-sdk/lib-storage": "^3.614.0",
-    "@aws-sdk/s3-request-presigner": "^3.614.0",
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/lib-storage": "catalog:",
+    "@aws-sdk/s3-request-presigner": "catalog:",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
-    "@smithy/node-http-handler": "4.0.3",
+    "@smithy/node-http-handler": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {

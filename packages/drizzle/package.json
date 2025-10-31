@@ -58,18 +58,19 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "console-table-printer": "2.12.1",
-    "dequal": "2.0.3",
-    "drizzle-orm": "0.44.6",
-    "prompts": "2.4.2",
-    "to-snake-case": "1.0.0",
-    "uuid": "9.0.0"
+    "console-table-printer": "catalog:",
+    "dequal": "catalog:",
+    "drizzle-orm": "catalog:",
+    "prompts": "catalog:",
+    "to-snake-case": "catalog:",
+    "uuid": "catalog:"
   },
   "devDependencies": {
-    "@libsql/client": "0.14.0",
+    "@libsql/client": "catalog:",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.10.2",
-    "@types/to-snake-case": "1.0.0",
+    "@types/pg": "catalog:",
+    "@types/to-snake-case": "catalog:",
+    "@types/uuid": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {
