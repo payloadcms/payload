@@ -100,9 +100,12 @@ export const generateSubmissionCollection = (
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
+      afterChange: [
+        (data) => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
+      ],
       beforeChange: [
         (data) => createCharge(data, formConfig),
-        (data) => sendEmail(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },
