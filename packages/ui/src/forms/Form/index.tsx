@@ -799,7 +799,7 @@ export const Form: React.FC<FormProps> = (props) => {
       isFirstRenderRef.current = false
     },
     [modified, submitted, formState],
-    250,
+    docConfig.admin?.formUpdateDebounceTimeout || 250,
   )
 
   const DocumentFormContextComponent: React.FC<any> = isDocumentForm
