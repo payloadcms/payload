@@ -148,6 +148,7 @@ export async function buildConfigWithDefaults(
       declare: {
         ignoreTSError: true,
       },
+      autoGenerate: databaseAdapter.defaultIDType === 'text',
       ...testConfig?.typescript,
     },
   }
