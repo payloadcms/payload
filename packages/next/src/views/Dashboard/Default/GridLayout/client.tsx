@@ -75,12 +75,7 @@ export function GridLayoutDashboardClient({
 
   return (
     <div>
-      <DraggableSortable
-        className={`grid-layout ${isEditing ? 'editing' : ''}`}
-        ids={currentLayout.map((w) => w.item.i)}
-        onDragEnd={() => void 0} // noop - we use onDragOver instead
-        onDragOver={handleDragOver}
-      >
+      <div className={`grid-layout ${isEditing ? 'editing' : ''}`}>
         <div
           style={{
             display: 'flex',
@@ -90,45 +85,33 @@ export function GridLayoutDashboardClient({
         >
           {currentLayout &&
             currentLayout.map((widget) => (
-              <DraggableSortableItem disabled={!isEditing} id={widget.item.i} key={widget.item.i}>
-                {({ attributes, isDragging, listeners, setNodeRef, transform, transition }) => {
-                  return (
-                    <div
-                      className="widget"
-                      data-columns={widget.item.w}
-                      data-slug={widget.item.i}
-                      ref={setNodeRef}
-                      style={{
-                        opacity: isDragging ? 0.5 : 1,
-                        transform,
-                        transition,
-                        width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
-                      }}
-                    >
-                      <div
-                        {...(isEditing ? { ...attributes, ...listeners } : {})}
-                        className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}
-                      >
-                        <div className="widget-content">{widget.component}</div>
-                        {isEditing && (
-                          <button
-                            className="widget-wrapper__delete-btn"
-                            onClick={() => deleteWidget(widget.item.i)}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            title={`Delete widget ${widget.item.i}`}
-                            type="button"
-                          >
-                            <XIcon />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
+              <div
+                className="widget"
+                data-columns={widget.item.w}
+                data-slug={widget.item.i}
+                key={widget.item.i}
+                style={{
+                  width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
                 }}
-              </DraggableSortableItem>
+              >
+                <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                  <div className="widget-content">{widget.component}</div>
+                  {isEditing && (
+                    <button
+                      className="widget-wrapper__delete-btn"
+                      onClick={() => deleteWidget(widget.item.i)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      title={`Delete widget ${widget.item.i}`}
+                      type="button"
+                    >
+                      <XIcon />
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
         </div>
-      </DraggableSortable>
+      </div>
       {isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}
