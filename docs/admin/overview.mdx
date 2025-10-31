@@ -257,22 +257,64 @@ const config = buildConfig({
 
 The following options are available:
 
-| Option            | Default route        | Description                               |
-| ----------------- | -------------------- | ----------------------------------------- |
-| `account`         | `/account`           | The user's account page.                  |
-| `createFirstUser` | `/create-first-user` | The page to create the first user.        |
-| `forgot`          | `/forgot`            | The password reset page.                  |
-| `inactivity`      | `/logout-inactivity` | The page to redirect to after inactivity. |
-| `login`           | `/login`             | The login page.                           |
-| `logout`          | `/logout`            | The logout page.                          |
-| `reset`           | `/reset`             | The password reset page.                  |
-| `unauthorized`    | `/unauthorized`      | The unauthorized page.                    |
+| Option            | Default route        | Description                                                                               |
+| ----------------- | -------------------- | ----------------------------------------------------------------------------------------- |
+| `account`         | `/account`           | The user's account page.                                                                  |
+| `createFirstUser` | `/create-first-user` | The page to create the first user.                                                        |
+| `forgot`          | `/forgot`            | The password reset page.                                                                  |
+| `inactivity`      | `/logout-inactivity` | The page to redirect to after inactivity.                                                 |
+| `login`           | `/login`             | The login page.                                                                           |
+| `logout`          | `/logout`            | The logout page.                                                                          |
+| `reset`           | `/reset`             | The password reset page.                                                                  |
+| `systemInfo`      | `/system-info`       | The system information page. Set to `false` to disable. [More details](#system-info-page) |
+| `unauthorized`    | `/unauthorized`      | The unauthorized page.                                                                    |
 
 <Banner type="success">
   **Note:** You can also swap out entire _views_ out for your own, using the
   `admin.views` property of the Payload Config. See [Custom
   Views](../custom-components/custom-views) for more information.
 </Banner>
+
+### System Info Page
+
+The System Info page displays important technical information about your Payload installation and runtime environment. This page is accessible from the settings menu (gear icon) in the bottom left corner of the navigation, above the logout button.
+
+The following information is displayed on the System Info page:
+
+**Version Information:**
+
+- Payload version
+- Next.js version
+- Node.js version
+
+**Configuration:**
+
+- Environment (NODE_ENV)
+- Server URL
+- Database Adapter (MongoDB, PostgreSQL, SQLite, or Cloudflare D1 SQLite)
+
+**Current Session:**
+
+- Logged-in user information
+
+#### Disabling the System Info Page
+
+If you want to disable the System Info page entirely, you can set `admin.routes.systemInfo` to `false`:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    routes: {
+      systemInfo: false, // highlight-line
+    },
+  },
+})
+```
+
+When disabled, the System Info page will not be accessible and will not appear in the settings menu.
 
 ## I18n
 

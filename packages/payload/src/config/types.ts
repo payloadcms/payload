@@ -943,6 +943,11 @@ export type Config = {
        * @default '/reset'
        */
       reset?: `/${string}`
+      /** The route for the System Info page. Set to false to disable the System Info page.
+       *
+       * @default '/system-info'
+       */
+      systemInfo?: `/${string}` | false
       /** The route for the unauthorized page.
        *
        * @default '/unauthorized'

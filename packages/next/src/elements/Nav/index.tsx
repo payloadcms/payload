@@ -8,7 +8,9 @@ import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
+import { DefaultSystemInfoItem } from './SettingsMenuButton/DefaultSystemInfoItem.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
+import { SettingsDivider } from './SettingsMenuButton/SettingsDivider.js'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -93,7 +95,13 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
   })
 
-  const renderedSettingsMenu =
+  // Include the default System Info menu item only if not disabled
+  const defaultSystemInfoItem =
+    payload.config.admin.routes.systemInfo !== false ? (
+      <DefaultSystemInfoItem key="default-system-info-item" />
+    ) : null
+
+  const customSettingsMenuItems =
     settingsMenu && Array.isArray(settingsMenu)
       ? settingsMenu.map((item, index) =>
           RenderServerComponent({
@@ -116,6 +124,18 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
           }),
         )
       : []
+
+  // Reorganize settings menu: user-defined items first, then divider (if custom items exist), then System Info
+  const settingsDivider =
+    customSettingsMenuItems.length > 0 && defaultSystemInfoItem ? (
+      <SettingsDivider key="settings-divider" />
+    ) : null
+
+  const renderedSettingsMenu = [
+    ...customSettingsMenuItems,
+    settingsDivider,
+    defaultSystemInfoItem,
+  ].filter(Boolean)
 
   return (
     <NavWrapper baseClass={baseClass}>
