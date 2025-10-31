@@ -78,6 +78,15 @@ export const getDuplicateDocumentData = async ({
     delete duplicatedFromDocWithLocales.id
   }
 
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      configBlockReferences: payload.config.blocks,
+      docWithLocales: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
+  }
+
   duplicatedFromDocWithLocales = await beforeDuplicate({
     id,
     collection: collectionConfig,
