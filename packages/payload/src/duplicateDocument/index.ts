@@ -62,15 +62,6 @@ export const getDuplicateDocumentData = async ({
     req,
   })
 
-  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
-    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
-      configBlockReferences: payload.config.blocks,
-      docWithLocales: duplicatedFromDocWithLocales,
-      fields: collectionConfig.fields,
-      selectedLocales,
-    })
-  }
-
   if (!duplicatedFromDocWithLocales && !hasWherePolicy) {
     throw new NotFound(req.t)
   }
@@ -114,6 +105,15 @@ export const getDuplicateDocumentData = async ({
     req,
     showHiddenFields: true,
   })
+
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      configBlockReferences: payload.config.blocks,
+      docWithLocales: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
+  }
 
   return { duplicatedFromDoc, duplicatedFromDocWithLocales }
 }
