@@ -133,11 +133,15 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
     }
 
     if (createNewVersion) {
-      const createVersionArgs = {
+      const createVersionArgs: {
+        collectionSlug: string | undefined
+        globalSlug: string | undefined
+        parent: number | string | undefined
+      } & Omit<CreateVersionArgs<TData>, 'collectionSlug' | 'globalSlug' | 'parent'> = {
         autosave: Boolean(autosave),
-        collectionSlug: undefined as string | undefined,
+        collectionSlug: undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
-        globalSlug: undefined as string | undefined,
+        globalSlug: undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
@@ -149,12 +153,14 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
 
       if (collection) {
         createVersionArgs.collectionSlug = collection.slug
-        result = await payload.db.createVersion(createVersionArgs as CreateVersionArgs)
+        result = await payload.db.createVersion(createVersionArgs as CreateVersionArgs<TData>)
       }
 
       if (global) {
         createVersionArgs.globalSlug = global.slug
-        result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
+        result = await payload.db.createGlobalVersion(
+          createVersionArgs as CreateGlobalVersionArgs<TData>,
+        )
       }
 
       if (snapshot) {
@@ -168,6 +174,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
           publishSpecificLocale,
           req,
           select,
+          unpublishSpecificLocale,
         })
       }
     }
