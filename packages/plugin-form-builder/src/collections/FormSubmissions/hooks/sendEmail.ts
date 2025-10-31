@@ -16,12 +16,11 @@ export const sendEmail = async (
 
   if (operation === 'create') {
     const {
-      data: { id: formSubmissionID },
+      doc: { id: formSubmissionID },
       req: { locale, payload },
     } = beforeChangeParameters
 
-    const { form: formID, submissionData } = data || {}
-
+    const { form: formID, submissionData: submissionDataFromProps } = data || {}
     const { beforeEmail, defaultToEmail, formOverrides } = formConfig || {}
 
     try {
@@ -33,6 +32,14 @@ export const sendEmail = async (
       })
 
       const emails = form.emails as Email[]
+
+      const submissionData = [
+        ...submissionDataFromProps,
+        {
+          field: 'formSubmissionID',
+          value: String(formSubmissionID),
+        },
+      ]
 
       if (emails && emails.length) {
         const formattedEmails: FormattedEmail[] = await Promise.all(
