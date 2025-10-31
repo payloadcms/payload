@@ -460,7 +460,9 @@ export const huTranslations: DefaultTranslationsObject = {
     copyTo: 'Másolja ide',
     copyToLocale: 'Másolás a helyi verzióba',
     localeToPublish: 'Közzététel helye',
+    selectedLocales: 'Kiválasztott helyi beállítások',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
+    selectLocaleToDuplicate: 'Válassza ki a másolandó helyszínekent.',
   },
   operators: {
     contains: 'tartalmaz',
