@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook } from 'payload'
+import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Email, FormattedEmail, FormBuilderPluginConfig } from '../../../types.js'
 
@@ -6,19 +6,19 @@ import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
 import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
-type BeforeChangeParams = Parameters<CollectionBeforeChangeHook>[0]
+type AfterChangeParams = Parameters<CollectionAfterChangeHook>[0]
 
 export const sendEmail = async (
-  beforeChangeParameters: BeforeChangeParams,
+  afterChangeParameters: AfterChangeParams,
   formConfig: FormBuilderPluginConfig,
-): Promise<BeforeChangeParams['data']> => {
-  const { data, operation, req } = beforeChangeParameters
+): Promise<AfterChangeParams['data']> => {
+  const { data, operation, req } = afterChangeParameters
 
   if (operation === 'create') {
     const {
       doc: { id: formSubmissionID },
       req: { locale, payload },
-    } = beforeChangeParameters
+    } = afterChangeParameters
 
     const { form: formID, submissionData: submissionDataFromProps } = data || {}
     const { beforeEmail, defaultToEmail, formOverrides } = formConfig || {}
