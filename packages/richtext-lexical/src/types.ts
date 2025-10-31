@@ -121,7 +121,9 @@ export type NodeMapValue<
       | ({
           isEditor: true
           isJSXConverter: false
-          node: DecoratorNode
+          node: {
+            _originalDecorate?: (editor: LexicalEditor, config: EditorConfig) => React.ReactNode
+          } & DecoratorNode<React.ReactNode>
         } & Omit<WithinEditorArgs, 'node'>),
   ) => JSX.Element
   /**
