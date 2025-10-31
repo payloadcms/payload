@@ -2,6 +2,8 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
 import type { PayloadRequest, TypedUser } from 'payload'
 
+import { z } from 'zod'
+
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
@@ -18,6 +20,8 @@ export const createResourceTool = (
 ) => {
   const tool = async (
     data: string,
+    locale?: string,
+    fallbackLocale?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -27,7 +31,9 @@ export const createResourceTool = (
     const payload = req.payload
 
     if (verboseLogs) {
-      payload.logger.info(`[payload-mcp] Creating resource in collection: ${collectionSlug}`)
+      payload.logger.info(
+        `[payload-mcp] Creating resource in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
+      )
     }
 
     try {
@@ -53,6 +59,8 @@ export const createResourceTool = (
         // TODO: Move the override to a `beforeChange` hook and extend the payloadAPI context req to include MCP request info.
         data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
         user,
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
       })
 
       if (verboseLogs) {
@@ -108,13 +116,29 @@ ${JSON.stringify(result, null, 2)}
   if (collections?.[collectionSlug]?.enabled) {
     const convertedFields = convertCollectionSchemaToZod(schema)
 
+    // Create a new schema that combines the converted fields with create-specific parameters
+    const createResourceSchema = z.object({
+      ...convertedFields.shape,
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
+    })
+
     server.tool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
-      convertedFields.shape,
+      createResourceSchema.shape,
       async (params: Record<string, unknown>) => {
-        const data = JSON.stringify(params)
-        return await tool(data)
+        const { fallbackLocale, locale, ...fieldData } = params
+        const data = JSON.stringify(fieldData)
+        return await tool(data, locale as string | undefined, fallbackLocale as string | undefined)
       },
     )
   }
