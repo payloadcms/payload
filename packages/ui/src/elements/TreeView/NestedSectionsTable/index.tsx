@@ -275,7 +275,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
 
   return (
     <div
-      className={[`${baseClass}__wrapper`, isDragging && `${baseClass}--dragging`, className]
+      className={[baseClass, isDragging && `${baseClass}--dragging`, className]
         .filter(Boolean)
         .join(' ')}
       onBlur={(e) => {
@@ -298,43 +298,41 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
       role="table"
       tabIndex={-1}
     >
-      <div className={baseClass}>
-        <Header columns={columns} />
+      <Header columns={columns} />
 
-        <NestedItems
-          columns={columns}
-          dropContextName={dropContextName}
-          firstCellRef={firstCellRef}
-          firstCellWidth={firstCellWidth}
-          firstCellXOffset={firstCellXOffset}
-          focusedItemKey={focusedItemKey}
-          hoveredItemKey={hoveredItemKey}
-          isDragging={isDragging}
-          items={rootItems}
-          loadingItemKeys={loadingItemKeys}
-          onDroppableHover={onDroppableHover}
-          onFocusChange={(indexPath: number[]) => {
-            const row = getItemByPath({
-              indexPath,
-              rootItems,
-            })
-            if (row) {
-              setFocusedItemKey(row.itemKey)
-            }
-          }}
-          onItemClick={onItemClick}
-          onItemDrag={onItemDrag}
-          onItemKeyDown={onItemKeyDown}
-          openItemKeys={openItemKeys}
-          parentIndex={0}
-          parentIndexPath={[]}
-          parentItems={[]}
-          segmentWidth={segmentWidth}
-          selectedItemKeys={selectedItemKeys}
-          targetParentItemKey={targetParentItemKey}
-          toggleItemExpand={toggleItemExpand}
-        />
-      </div>
+      <NestedItems
+        columns={columns}
+        dropContextName={dropContextName}
+        firstCellRef={firstCellRef}
+        firstCellWidth={firstCellWidth}
+        firstCellXOffset={firstCellXOffset}
+        focusedItemKey={focusedItemKey}
+        hoveredItemKey={hoveredItemKey}
+        isDragging={isDragging}
+        items={rootItems}
+        loadingItemKeys={loadingItemKeys}
+        onDroppableHover={onDroppableHover}
+        onFocusChange={(indexPath: number[]) => {
+          const row = getItemByPath({
+            indexPath,
+            rootItems,
+          })
+          if (row) {
+            setFocusedItemKey(row.itemKey)
+          }
+        }}
+        onItemClick={onItemClick}
+        onItemDrag={onItemDrag}
+        onItemKeyDown={onItemKeyDown}
+        openItemKeys={openItemKeys}
+        parentIndex={0}
+        parentIndexPath={[]}
+        parentItems={[]}
+        segmentWidth={segmentWidth}
+        selectedItemKeys={selectedItemKeys}
+        targetParentItemKey={targetParentItemKey}
+        toggleItemExpand={toggleItemExpand}
+      />
     </div>
   )
 }
