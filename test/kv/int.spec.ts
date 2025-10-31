@@ -4,6 +4,7 @@ import { RedisKVAdapter, redisKVAdapter } from '@payloadcms/kv-redis'
 import path from 'path'
 import { inMemoryKVAdapter } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 

@@ -6,9 +6,10 @@ import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { AutosaveMultiSelectPost } from './payload-types.js'
+import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
