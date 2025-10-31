@@ -11,5 +11,10 @@ export class FileUploadError extends APIError {
       t ? t('error:problemUploadingFile') : en.translations.error.problemUploadingFile,
       httpStatus.BAD_REQUEST,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'FileUploadError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, FileUploadError.prototype)
   }
 }

@@ -28,6 +28,11 @@ export class TaskError extends Error {
   constructor(args: TaskErrorArgs) {
     super(args.message)
     this.args = args
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'TaskError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, TaskError.prototype)
   }
 }
 export class WorkflowError extends Error {
@@ -36,6 +41,11 @@ export class WorkflowError extends Error {
   constructor(args: WorkflowErrorArgs) {
     super(args.message)
     this.args = args
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'WorkflowError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, WorkflowError.prototype)
   }
 }
 
@@ -47,5 +57,10 @@ export class JobCancelledError extends Error {
   constructor(args: { job: Job }) {
     super(`Job ${args.job.id} was cancelled`)
     this.args = args
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'JobCancelledError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, JobCancelledError.prototype)
   }
 }

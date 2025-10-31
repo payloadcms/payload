@@ -5,5 +5,10 @@ import { APIError } from './APIError.js'
 export class DuplicateGlobal extends APIError {
   constructor(config: GlobalConfig) {
     super(`Global label "${config.label}" is already in use`)
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'DuplicateGlobal'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, DuplicateGlobal.prototype)
   }
 }
