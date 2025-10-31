@@ -62,6 +62,15 @@ export const getDuplicateDocumentData = async ({
     req,
   })
 
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      configBlockReferences: payload.config.blocks,
+      docWithLocales: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
+  }
+
   if (!duplicatedFromDocWithLocales && !hasWherePolicy) {
     throw new NotFound(req.t)
   }
@@ -78,15 +87,6 @@ export const getDuplicateDocumentData = async ({
     delete duplicatedFromDocWithLocales.id
   }
 
-  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
-    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
-      configBlockReferences: payload.config.blocks,
-      docWithLocales: duplicatedFromDocWithLocales,
-      fields: collectionConfig.fields,
-      selectedLocales,
-    })
-  }
-
   duplicatedFromDocWithLocales = await beforeDuplicate({
     id,
     collection: collectionConfig,
@@ -95,15 +95,6 @@ export const getDuplicateDocumentData = async ({
     overrideAccess: overrideAccess!,
     req,
   })
-
-  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
-    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
-      configBlockReferences: payload.config.blocks,
-      docWithLocales: duplicatedFromDocWithLocales,
-      fields: collectionConfig.fields,
-      selectedLocales,
-    })
-  }
 
   // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
   if (isSavingDraft) {
