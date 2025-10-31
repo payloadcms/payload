@@ -87,6 +87,15 @@ export const getDuplicateDocumentData = async ({
     req,
   })
 
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      configBlockReferences: payload.config.blocks,
+      docWithLocales: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
+  }
+
   // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
   if (isSavingDraft) {
     duplicatedFromDocWithLocales._status = 'draft'
@@ -105,15 +114,6 @@ export const getDuplicateDocumentData = async ({
     req,
     showHiddenFields: true,
   })
-
-  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
-    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
-      configBlockReferences: payload.config.blocks,
-      docWithLocales: duplicatedFromDocWithLocales,
-      fields: collectionConfig.fields,
-      selectedLocales,
-    })
-  }
 
   return { duplicatedFromDoc, duplicatedFromDocWithLocales }
 }
