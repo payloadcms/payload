@@ -17,7 +17,7 @@ const baseClass = 'sort-header'
 function useSort() {
   const { handleSortChange, orderableFieldName, query } = useListQuery()
   const querySort = Array.isArray(query.sort) ? query.sort[0] : query.sort
-  const isActive = querySort === `-${orderableFieldName}` || querySort === orderableFieldName
+  const isActive = querySort === orderableFieldName
 
   const handleSortPress = () => {
     // If it's already sorted by the "_order" field, do nothing
