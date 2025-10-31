@@ -125,7 +125,7 @@ export type NodeMapValue<
             _originalDecorate?: (editor: LexicalEditor, config: EditorConfig) => React.ReactNode
           } & DecoratorNode<React.ReactNode>
         } & Omit<WithinEditorArgs, 'node'>),
-  ) => JSX.Element
+  ) => React.ReactNode
   /**
    * Provide a function to create the DOM element for the node.
    *
