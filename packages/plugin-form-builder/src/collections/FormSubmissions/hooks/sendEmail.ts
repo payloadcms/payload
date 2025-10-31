@@ -83,7 +83,7 @@ export const sendEmail = async (
         let emailsToSend = formattedEmails
 
         if (typeof beforeEmail === 'function') {
-          emailsToSend = await beforeEmail(formattedEmails, beforeChangeParameters)
+          emailsToSend = await beforeEmail(formattedEmails, afterChangeParameters)
         }
 
         await Promise.all(
