@@ -1,51 +1,18 @@
-@keyframes spinner-bar--1 {
-  0% {
-    transform: translateY(-1px);
-  }
-  50% {
-    transform: translateY(1px);
-  }
-  100% {
-    transform: translateY(-1px);
-  }
-}
-
-@keyframes spinner-bar--2 {
-  0% {
-    transform: translateY(1px);
-  }
-  50% {
-    transform: translateY(-1px);
-  }
-  100% {
-    transform: translateY(1px);
-  }
-}
-
-@keyframes spinner-bar--3 {
-  0% {
-    transform: translateY(-1px);
-  }
-  50% {
-    transform: translateY(1px);
-  }
-  100% {
-    transform: translateY(-1px);
-  }
-}
-
-.nested-sections-table-row-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.nested-sections-table-row {
+.nested-sections-table-row-group {
   --cell-inline-padding-start: calc(var(--base) * 0.6);
   --cell-inline-padding-end: calc(var(--base) * 0.6);
+  --cell-bg-color: var(--theme-elevation-50);
+  --cell-border-color: transparent;
 
-  display: table-row;
-  min-width: 100%;
-  border-collapse: collapse;
+  position: relative;
+  display: table-row-group;
+  outline: 1px solid transparent;
+
+  &__row {
+    display: table-row;
+    min-width: 100%;
+    border-collapse: collapse;
+  }
 
   &__drag-handler {
     cursor: grab;
@@ -133,11 +100,11 @@
   }
 
   // When a selected section is followed by another selected section
-  &__section--selected + &__section--selected &__cell,
-  &__section--selected + &__section--selected-descendant &__cell,
-  &__section--selected-descendant + &__section--selected &__cell,
-  &__section--selected-descendant + &__section--selected-descendant &__cell {
-    border-top-color: transparent;
+  &--selected + &--selected &__cell,
+  &--selected + &--selected-descendant &__cell,
+  &--selected-descendant + &--selected &__cell,
+  &--selected-descendant + &--selected-descendant &__cell {
+    z-index: 1;
 
     &:first-child {
       border-top-left-radius: 0;
@@ -148,8 +115,11 @@
   }
 
   // Selected section followed by another selected section - remove bottom radius
-  &__section--selected:has(+ &__section--selected) {
-    .nested-sections-table-row__cell {
+  &--selected:has(+ &--selected),
+  &--selected:has(+ &--selected-descendant),
+  &--selected-descendant:has(+ &--selected),
+  &--selected-descendant:has(+ &--selected-descendant) {
+    .nested-sections-table-row-group__cell {
       &:first-child {
         border-bottom-left-radius: 0;
       }
@@ -159,78 +129,54 @@
     }
   }
 
-  &__section--selected:has(+ &__section--selected-descendant),
-  &__section--selected-descendant:has(+ &__section--selected),
-  &__section--selected-descendant:has(+ &__section--selected-descendant) {
-    .nested-sections-table-row__cell {
-      &:first-child {
-        border-bottom-left-radius: 0;
-      }
-      &:nth-last-child(2) {
-        border-bottom-right-radius: 0;
-      }
-    }
-  }
-
-  &__section {
-    position: relative;
-    display: table-row-group;
-    outline: 1px solid transparent;
-    --cell-bg-color: var(--theme-elevation-50);
-    --cell-border-color: transparent;
-  }
-
-  &__section--odd {
+  &--odd {
     --cell-bg-color: var(--theme-elevation-0);
-    --cell-border-color: transparent;
   }
 
-  &__section--target {
-    outline: 1px solid var(--theme-success-400);
+  &--target {
+    --cell-border-color: var(--theme-success-400);
     border-radius: var(--style-radius-s);
     z-index: 1;
   }
 
-  &__section--hovered {
-    z-index: 1;
-    outline: 1px solid var(--theme-elevation-200);
-    transition:
-      background-color 0.2s ease-in-out,
-      outline 0.2s ease-in-out;
+  &:hover:not(.nested-sections-table-row-group--dragging) {
+    --cell-border-color: var(--theme-elevation-200);
+    z-index: 2;
+    cursor: pointer;
+
+    &.nested-sections-table-row-group--selected,
+    &.nested-sections-table-row-group--selected-descendant {
+      --cell-border-color: var(--theme-success-400);
+    }
   }
 
-  &__section--selected {
+  &--selected,
+  &--selected-descendant {
     --cell-bg-color: var(--theme-success-100);
     --cell-border-color: var(--theme-success-200);
+
+    &.nested-sections-table-row-group--dragging {
+      z-index: 2;
+    }
   }
 
-  &__section--selected-descendant {
+  &--selected-descendant {
     --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
-    --cell-border-color: var(--theme-success-200);
   }
 
-  &__section--selected-descendant.nested-sections-table-row__section--odd {
-    --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
-  }
-
-  &__section--focused {
-    // --cell-border-color: var(--theme-elevation-400);
+  &--focused {
     --cell-bg-color: var(--theme-elevation-200);
+
+    &.nested-sections-table-row-group--focused {
+      --cell-bg-color: var(--theme-success-150);
+    }
   }
 
-  &__section--focused.nested-sections-table-row__section--odd {
-    --cell-bg-color: var(--theme-elevation-200);
-  }
-
-  &__section--selected.nested-sections-table-row__section--dragging {
+  &--selected.nested-sections-table-row-group--dragging {
     opacity: 0.4;
   }
 
-  &__section--selected.nested-sections-table-row__section--focused {
-    --cell-bg-color: var(--theme-success-150);
-  }
-
-  &__section--invalid-target {
+  &--invalid-target {
     opacity: 0.4;
   }
 
@@ -239,37 +185,40 @@
     pointer-events: none;
     height: 36px;
   }
+}
 
-  &__placeholder-row {
-    .nested-sections-table-row__cell {
-      padding: 0;
-
-      &:first-child {
-        .nested-sections-table-row__placeholder-cell-bg {
-          border-radius: var(--style-radius-s) 0 0 var(--style-radius-s);
-          // border-left: 1px solid var(--theme-elevation-150);
-        }
-      }
-      &:last-child {
-        .nested-sections-table-row__placeholder-cell-bg {
-          right: 0px;
-          border-radius: 0 var(--style-radius-s) var(--style-radius-s) 0;
-          // border-right: 1px solid var(--theme-elevation-150);
-        }
-      }
-    }
+@keyframes spinner-bar--1 {
+  0% {
+    transform: translateY(-1px);
   }
+  50% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(-1px);
+  }
+}
 
-  &__placeholder-cell-bg {
-    // border: 1px solid var(--theme-elevation-100);
-    height: calc(100% - 10px);
-    border-right: none;
-    border-left: none;
-    position: absolute;
-    top: 50%;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
+@keyframes spinner-bar--2 {
+  0% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes spinner-bar--3 {
+  0% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(-1px);
   }
 }

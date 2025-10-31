@@ -11,7 +11,7 @@ import { RowDropArea } from '../RowDropArea/index.js'
 import { useActionDelegation } from '../useActionDelegation.js'
 import './index.scss'
 
-const baseClass = 'nested-sections-table-row'
+const baseClass = 'nested-sections-table-row-group'
 
 interface Column {
   label?: string
@@ -121,14 +121,14 @@ export const Row: React.FC<DivTableRowProps> = ({
     <>
       <div
         className={[
-          `${baseClass}__section`,
-          isDragging && `${baseClass}__section--dragging`,
-          isDragging && isInvalidTarget && `${baseClass}__section--invalid-target`,
-          isOdd && `${baseClass}__section--odd`,
-          targetParentItemKey === item.itemKey && `${baseClass}__section--target`,
-          isSelected && `${baseClass}__section--selected`,
-          hasSelectedAncestor && `${baseClass}__section--selected-descendant`,
-          isFocused && `${baseClass}__section--focused`,
+          `${baseClass}`,
+          isDragging && `${baseClass}--dragging`,
+          isDragging && isInvalidTarget && `${baseClass}--invalid-target`,
+          isOdd && `${baseClass}--odd`,
+          targetParentItemKey === item.itemKey && `${baseClass}--target`,
+          isSelected && `${baseClass}--selected`,
+          hasSelectedAncestor && `${baseClass}--selected-descendant`,
+          isFocused && `${baseClass}--focused`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -148,9 +148,12 @@ export const Row: React.FC<DivTableRowProps> = ({
         }}
         ref={rowRef}
         role="button"
+        style={{
+          top: -1 * absoluteIndex,
+        }}
         tabIndex={hasSelectedAncestor ? -1 : 0}
       >
-        <div className={baseClass}>
+        <div className={`${baseClass}__row`} {...{ [dataAttributeName]: actionNames.onClick }}>
           <div className={`${baseClass}__cell`} ref={firstCellRef}>
             <div className={`${baseClass}__actions`}>
               {!hasSelectedAncestor ? (
@@ -180,7 +183,6 @@ export const Row: React.FC<DivTableRowProps> = ({
           {columns.map((col) => (
             <div
               className={`${baseClass}__cell`}
-              {...{ [dataAttributeName]: actionNames.onClick }}
               key={col.name}
               style={
                 // TODO: temporary - will need to know title field name of document
@@ -295,17 +297,7 @@ export const Row: React.FC<DivTableRowProps> = ({
       </div>
 
       {/* Render placeholder row below the hovered row */}
-      {isDragging && isHovered && (
-        <div className={`${baseClass}__placeholder-section`}>
-          <div className={`${baseClass}__placeholder-row`}>
-            {columns.map((col) => (
-              <div className={`${baseClass}__cell`} key={col.name}>
-                <div className={`${baseClass}__placeholder-cell-bg`} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {isDragging && isHovered && <div className={`${baseClass}__placeholder-section`} />}
     </>
   )
 }
