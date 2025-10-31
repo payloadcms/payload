@@ -103,11 +103,13 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
       const newBlocks: Block[] = []
       ;(newField.blockReferences ?? newField.blocks).forEach((_block) => {
         let block: Block | undefined
+        let isReference = false
 
         if (typeof _block === 'string') {
           if (blockReferencesWithFilters.includes(_block)) {
             return
           }
+          isReference = true
           block = config?.blocks?.find((b) => b.slug === _block)
           blockReferencesWithFilters.push(_block)
         } else {
@@ -130,7 +132,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           })
         }
 
-        if (block) {
+        if (block && !isReference) {
           newBlocks.push(block)
         }
       })

@@ -41,6 +41,9 @@ export const packagePublishList = [
   'storage-vercel-blob',
   'storage-uploadthing',
 
+  // KV
+  'kv-redis',
+
   // Plugins
   'payload-cloud',
   'plugin-cloud',
@@ -48,6 +51,7 @@ export const packagePublishList = [
   'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
+  'plugin-mcp',
   'plugin-multi-tenant',
   'plugin-nested-docs',
   'plugin-redirects',
