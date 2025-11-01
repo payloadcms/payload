@@ -344,3 +344,6 @@ test/azurestoragedata/
 
 
 licenses.csv
+
+*storybook.log
+storybook-static
