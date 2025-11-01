@@ -5,7 +5,11 @@ import React from 'react'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
+import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
+
+// Import the actual Payload JSON field styles
+import '../../../packages/ui/src/fields/JSON/index.scss'
 
 // Mock JSON Field component that simulates the real MockJSONField behavior
 interface MockJSONFieldProps {
@@ -22,7 +26,7 @@ interface MockJSONFieldProps {
   value?: object | string
 }
 
-const MockJSONField: React.FC<JSONFieldProps> = ({
+const MockJSONField: React.FC<MockJSONFieldProps> = ({
   name,
   admin = {},
   label,
@@ -63,26 +67,23 @@ const MockJSONField: React.FC<JSONFieldProps> = ({
   }, [jsonValue, required])
 
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div
+      className={[fieldBaseClass, 'field-type', 'json', error && 'error', disabled && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <FieldLabel label={label} required={required} />
       {description && <FieldDescription description={description} />}
-      <textarea
-        disabled={disabled}
-        name={name}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder="Enter valid JSON..."
-        style={{
-          border: error ? '1px solid #e53e3e' : '1px solid #e2e8f0',
-          borderRadius: '4px',
-          fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-          fontSize: '13px',
-          minHeight: '120px',
-          padding: '12px',
-          resize: 'vertical',
-          width: '100%',
-        }}
-        value={jsonValue}
-      />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <textarea
+          className="json__input"
+          disabled={disabled}
+          name={name}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder="Enter valid JSON..."
+          value={jsonValue}
+        />
+      </div>
       {error && <FieldError message={error} />}
     </div>
   )

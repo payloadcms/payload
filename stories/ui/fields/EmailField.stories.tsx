@@ -5,7 +5,11 @@ import React from 'react'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
+import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
+
+// Import the actual Payload Email field styles
+import '../../../packages/ui/src/fields/Email/index.scss'
 
 interface MockEmailFieldProps {
   admin?: {
@@ -61,7 +65,7 @@ const MockEmailField: React.FC<EmailFieldProps> = ({
   }, [emailValue, required])
 
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div className={`${fieldBaseClass} email${error ? ' error' : ''}`}>
       <FieldLabel label={label} required={required} />
       {description && <FieldDescription description={description} />}
       <input
@@ -69,13 +73,6 @@ const MockEmailField: React.FC<EmailFieldProps> = ({
         name={name}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder || 'Enter email address...'}
-        style={{
-          border: error ? '1px solid #e53e3e' : '1px solid #e2e8f0',
-          borderRadius: '4px',
-          fontSize: '14px',
-          padding: '8px 12px',
-          width: '100%',
-        }}
         type="email"
         value={emailValue}
       />

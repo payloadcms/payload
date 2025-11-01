@@ -5,7 +5,11 @@ import React from 'react'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
+import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
+
+// Import the actual Payload Password field styles
+import '../../../packages/ui/src/fields/Password/index.scss'
 
 interface MockPasswordFieldProps {
   admin?: {
@@ -22,7 +26,7 @@ interface MockPasswordFieldProps {
   value?: string
 }
 
-const MockPasswordField: React.FC<PasswordFieldProps> = ({
+const MockPasswordField: React.FC<MockPasswordFieldProps> = ({
   name,
   admin = {},
   label,
@@ -42,24 +46,27 @@ const MockPasswordField: React.FC<PasswordFieldProps> = ({
   }
 
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div
+      className={[
+        fieldBaseClass,
+        'field-type',
+        'password',
+        required && !passwordValue && 'error',
+        disabled && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <FieldLabel label={label} required={required} />
       {description && <FieldDescription description={description} />}
-      <div style={{ position: 'relative' }}>
+      <div className={`${fieldBaseClass}__wrap`}>
         <input
           autoComplete={autoComplete}
           disabled={disabled}
           name={name}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={placeholder || 'Enter password...'}
-          style={{
-            border: '1px solid #e2e8f0',
-            borderRadius: '4px',
-            fontSize: '14px',
-            padding: '8px 12px',
-            paddingRight: '40px',
-            width: '100%',
-          }}
+          style={{ paddingRight: '40px' }}
           type={showPassword ? 'text' : 'password'}
           value={passwordValue}
         />

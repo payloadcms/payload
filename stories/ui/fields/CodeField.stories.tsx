@@ -5,7 +5,11 @@ import React from 'react'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
+import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
+
+// Import the actual Payload Code field styles
+import '../../../packages/ui/src/fields/Code/index.scss'
 
 // Mock Code Field component that simulates the real MockCodeField behavior
 interface MockCodeFieldProps {
@@ -22,7 +26,7 @@ interface MockCodeFieldProps {
   value?: string
 }
 
-const MockCodeField: React.FC<CodeFieldProps> = ({
+const MockCodeField: React.FC<MockCodeFieldProps> = ({
   name,
   admin = {},
   label,
@@ -41,39 +45,32 @@ const MockCodeField: React.FC<CodeFieldProps> = ({
   }
 
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div
+      className={[
+        fieldBaseClass,
+        'field-type',
+        'code',
+        required && !codeValue && 'error',
+        disabled && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <FieldLabel label={label} required={required} />
       {description && <FieldDescription description={description} />}
-      <div
-        style={{
-          border: '1px solid #e2e8f0',
-          borderRadius: '4px',
-          fontSize: '12px',
-          marginBottom: '4px',
-          padding: '4px 8px',
-        }}
-      >
+      <div className="code-field__language-label">
         Language: <strong>{language.charAt(0).toUpperCase() + language.slice(1)}</strong>
       </div>
-      <textarea
-        disabled={disabled}
-        name={name}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder={`Enter ${language} code...`}
-        style={{
-          backgroundColor: '#1e1e1e',
-          border: '1px solid #e2e8f0',
-          borderRadius: '4px',
-          color: '#d4d4d4',
-          fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-          fontSize: '13px',
-          minHeight: '120px',
-          padding: '12px',
-          resize: 'vertical',
-          width: '100%',
-        }}
-        value={codeValue}
-      />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <textarea
+          className="code-field__textarea"
+          disabled={disabled}
+          name={name}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder={`Enter ${language} code...`}
+          value={codeValue}
+        />
+      </div>
       {required && !codeValue && <FieldError message="This field is required" />}
     </div>
   )

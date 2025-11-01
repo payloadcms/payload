@@ -5,7 +5,12 @@ import React from 'react'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
+import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
+
+// Import the actual Payload RadioGroup field styles
+import '../../../packages/ui/src/fields/RadioGroup/index.scss'
+import '../../../packages/ui/src/fields/RadioGroup/Radio/index.scss'
 
 interface Option {
   label: string
@@ -39,38 +44,40 @@ const MockRadioGroupField: React.FC<RadioGroupProps> = ({
   const { description, disabled, layout = 'vertical' } = admin
 
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div
+      className={[
+        fieldBaseClass,
+        'radio-group',
+        `radio-group--layout-${layout}`,
+        required && !value && 'error',
+        disabled && 'radio-group--read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <FieldLabel label={label} required={required} />
       {description && <FieldDescription description={description} />}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: layout === 'horizontal' ? 'row' : 'column',
-          gap: '8px',
-        }}
-      >
-        {options.map((option) => (
-          <label
-            key={option.value}
-            style={{
-              alignItems: 'center',
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              gap: '8px',
-              opacity: disabled ? 0.6 : 1,
-            }}
-          >
-            <input
-              checked={value === option.value}
-              disabled={disabled}
-              name={name}
-              onChange={() => onChange?.(option.value)}
-              type="radio"
-              value={option.value}
-            />
-            <span>{option.label}</span>
-          </label>
-        ))}
+      <div className={`${fieldBaseClass}__wrap`}>
+        <ul className="radio-group--group">
+          {options.map((option) => (
+            <li key={option.value}>
+              <label
+                className={`radio-input${value === option.value ? ' radio-input--is-selected' : ''}`}
+              >
+                <input
+                  checked={value === option.value}
+                  disabled={disabled}
+                  name={name}
+                  onChange={() => onChange?.(option.value)}
+                  type="radio"
+                  value={option.value}
+                />
+                <span className="radio-input__styled-radio" />
+                <span className="radio-input__label">{option.label}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
       </div>
       {required && !value && <FieldError message="Please select an option" />}
     </div>

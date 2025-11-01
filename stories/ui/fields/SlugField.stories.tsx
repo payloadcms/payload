@@ -5,7 +5,11 @@ import React from 'react'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
+import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
+
+// Import the actual Payload Slug field styles
+import '../../../packages/ui/src/fields/Slug/index.scss'
 
 interface MockSlugFieldProps {
   admin?: {
@@ -22,7 +26,7 @@ interface MockSlugFieldProps {
   value?: string
 }
 
-const MockSlugField: React.FC<SlugFieldProps> = ({
+const MockSlugField: React.FC<MockSlugFieldProps> = ({
   name,
   admin = {},
   label,
@@ -49,23 +53,26 @@ const MockSlugField: React.FC<SlugFieldProps> = ({
   }
 
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div
+      className={[
+        fieldBaseClass,
+        'field-type',
+        'slug',
+        required && !slugValue && 'error',
+        disabled && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <FieldLabel label={label} required={required} />
       {description && <FieldDescription description={description} />}
-      <div style={{ position: 'relative' }}>
+      <div className={`${fieldBaseClass}__wrap`}>
         <input
           disabled={disabled}
           name={name}
           onChange={(e) => handleChange(e.target.value)}
           placeholder="url-friendly-slug"
-          style={{
-            border: '1px solid #e2e8f0',
-            borderRadius: '4px',
-            fontFamily: 'Monaco, Menlo, monospace',
-            fontSize: '14px',
-            padding: '8px 12px',
-            width: '100%',
-          }}
+          style={{ fontFamily: 'Monaco, Menlo, monospace' }}
           type="text"
           value={slugValue}
         />
