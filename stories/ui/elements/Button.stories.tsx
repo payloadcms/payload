@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import { Button } from '../../../packages/ui/src/elements/Button'
+import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
 const meta = {
   argTypes: {
@@ -24,6 +25,15 @@ const meta = {
     },
   },
   component: Button,
+  decorators: [
+    (Story) => (
+      <PayloadMockProviders>
+        <div style={{ padding: '20px' }}>
+          <Story />
+        </div>
+      </PayloadMockProviders>
+    ),
+  ],
   parameters: {
     docs: {
       description: {

@@ -4,6 +4,7 @@ import React from 'react'
 
 import { Button } from '../../../packages/ui/src/elements/Button'
 import { Card } from '../../../packages/ui/src/elements/Card'
+import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
 const meta = {
   argTypes: {
@@ -20,9 +21,11 @@ const meta = {
   component: Card,
   decorators: [
     (Story) => (
-      <div style={{ maxWidth: '600px', padding: '20px' }}>
-        <Story />
-      </div>
+      <PayloadMockProviders>
+        <div style={{ maxWidth: '600px', padding: '20px' }}>
+          <Story />
+        </div>
+      </PayloadMockProviders>
     ),
   ],
   parameters: {
