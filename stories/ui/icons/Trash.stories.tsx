@@ -25,18 +25,39 @@ export const Default: Story = {
 
 export const Large: Story = {
   args: {
-    style: { height: '32px', width: '32px' },
+    className: 'icon-large',
   },
+  decorators: [
+    (Story) => (
+      <div style={{ transform: 'scale(1.6)', transformOrigin: 'center' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const Small: Story = {
   args: {
-    style: { height: '16px', width: '16px' },
+    className: 'icon-small',
   },
+  decorators: [
+    (Story) => (
+      <div style={{ transform: 'scale(0.8)', transformOrigin: 'center' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const Danger: Story = {
   args: {
-    style: { color: '#dc3545', height: '24px', width: '24px' },
+    className: 'icon-danger',
   },
+  decorators: [
+    (Story) => (
+      <div style={{ color: '#dc3545', transform: 'scale(1.2)', transformOrigin: 'center' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }

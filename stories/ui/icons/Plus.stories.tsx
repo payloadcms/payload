@@ -30,19 +30,31 @@ export const Default: Story = {
 }
 
 export const Large: Story = {
-  args: {
-    style: { height: '32px', width: '32px' },
-  },
+  decorators: [
+    (Story) => (
+      <div style={{ transform: 'scale(1.6)', transformOrigin: 'center' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const Small: Story = {
-  args: {
-    style: { height: '16px', width: '16px' },
-  },
+  decorators: [
+    (Story) => (
+      <div style={{ transform: 'scale(0.8)', transformOrigin: 'center' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const Colored: Story = {
-  args: {
-    style: { color: '#007acc', height: '24px', width: '24px' },
-  },
+  decorators: [
+    (Story) => (
+      <div style={{ color: '#007acc', transform: 'scale(1.2)', transformOrigin: 'center' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }

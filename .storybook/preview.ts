@@ -4,6 +4,12 @@ import React from 'react'
 // Import Payload styles
 import '../packages/ui/src/scss/app.scss'
 
+// Import specific field component styles to ensure they load
+import '../packages/ui/src/fields/FieldLabel/index.scss'
+import '../packages/ui/src/fields/FieldError/index.scss'
+import '../packages/ui/src/fields/FieldDescription/index.scss'
+import '../packages/ui/src/fields/Checkbox/index.scss'
+
 // Create a mock Next.js AppRouterContext
 const MockAppRouterContext = React.createContext({
   tree: {},
@@ -22,15 +28,19 @@ const MockRouterProvider = ({ children }) => {
     forward: () => console.log('Mock router.forward'),
     prefetch: () => Promise.resolve(),
   }
-  
-  return React.createElement(MockAppRouterContext.Provider, {
-    value: {
-      tree: {},
-      focusAndScrollRef: { apply: false },
-      changeByServerResponse: () => {},
-      nextUrl: null,
-    }
-  }, children)
+
+  return React.createElement(
+    MockAppRouterContext.Provider,
+    {
+      value: {
+        tree: {},
+        focusAndScrollRef: { apply: false },
+        changeByServerResponse: () => {},
+        nextUrl: null,
+      },
+    },
+    children,
+  )
 }
 
 // Global decorator to provide router context
@@ -55,7 +65,7 @@ const preview: Preview = {
           value: '#fafafa',
         },
         {
-          name: 'payload-dark', 
+          name: 'payload-dark',
           value: '#1a1a1a',
         },
         {
