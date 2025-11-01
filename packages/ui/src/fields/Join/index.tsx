@@ -22,7 +22,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../index.js'
+import { fieldBaseClass } from '../shared/index.js'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 

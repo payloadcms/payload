@@ -59,6 +59,7 @@ export const rootEslintConfig = [
       'payload/no-imports-from-exports-dir': 'error',
       'payload/no-imports-from-self': 'error',
       'payload/proper-payload-logger-usage': 'error',
+      'import-x/no-cycle': ['error', { maxDepth: 3, ignoreExternal: true }],
     },
   },
   {
