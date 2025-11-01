@@ -37,7 +37,7 @@
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-perfectionist": "3.9.1",
     "eslint-plugin-react-compiler": "19.1.0-rc.2",
-    "eslint-plugin-react-hooks": "6.1.1",
+    "eslint-plugin-react-hooks": "7.0.1",
     "eslint-plugin-regexp": "2.7.0",
     "globals": "16.0.0",
     "typescript": "5.7.3",
