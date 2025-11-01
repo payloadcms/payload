@@ -3,8 +3,8 @@ import type { ListViewClientProps } from 'payload'
 
 import React from 'react'
 
-// Import our MockListView component that doesn't have complex provider dependencies
-import { MockListView } from './MockListView'
+// Import our HybridListView component that uses real Payload components
+import { HybridListView } from './HybridListView'
 
 // Import required styling
 import '../../../packages/ui/src/views/List/index.scss'
@@ -42,33 +42,33 @@ const mockDocs = Array.from({ length: 5 }, (_, i) => ({
   updatedAt: new Date(Date.now() - i * 12 * 60 * 60 * 1000).toISOString(),
 }))
 
-// Mock Table component
+// Mock Table component that matches real Payload exactly
 const MockTable = () => (
   <div className="table-wrapper">
     <table className="table">
       <thead>
         <tr>
+          <th>
+            <input aria-label="select-all" className="checkbox" type="checkbox" />
+          </th>
           <th>Title</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Updated</th>
+          <th>Content</th>
+          <th>Updated At</th>
+          <th>Created At</th>
         </tr>
       </thead>
       <tbody>
-        {mockDocs.map((doc) => (
-          <tr key={doc.id}>
-            <td>{doc.title}</td>
-            <td>
-              <span
-                className={`pill pill--style-${doc.status === 'published' ? 'success' : 'warning'}`}
-              >
-                {doc.status}
-              </span>
-            </td>
-            <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
-            <td>{new Date(doc.updatedAt).toLocaleDateString()}</td>
-          </tr>
-        ))}
+        <tr>
+          <td>
+            <input className="checkbox" type="checkbox" />
+          </td>
+          <td>
+            <a href="#">example post</a>
+          </td>
+          <td>&lt;No Content&gt;</td>
+          <td>November 1st 2025, 2:36 PM</td>
+          <td>November 1st 2025, 2:36 PM</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -112,8 +112,8 @@ const createMockProps = (overrides: Partial<ListViewClientProps> = {}): ListView
   ...overrides,
 })
 
-const meta: Meta<typeof MockListView> = {
-  component: MockListView,
+const meta: Meta<typeof HybridListView> = {
+  component: HybridListView,
   decorators: [
     (Story, context) => (
       <ListViewProviders collectionSlug={context.args?.collectionSlug || 'pages'}>
@@ -125,7 +125,7 @@ const meta: Meta<typeof MockListView> = {
     docs: {
       description: {
         component:
-          'Complex DefaultListView component that provides a comprehensive collection management interface with bulk operations, pagination, filtering, and responsive design.',
+          'Hybrid ListView component that uses real Payload components (ListHeader, ListControls) with authentic styling and behavior.',
       },
     },
     layout: 'fullscreen',
@@ -134,10 +134,12 @@ const meta: Meta<typeof MockListView> = {
 }
 
 export default meta
-type Story = StoryObj<typeof MockListView>
+type Story = StoryObj<typeof HybridListView>
 
 export const Default: Story = {
-  args: createMockProps(),
+  args: createMockProps({
+    Description: undefined,
+  }),
   parameters: {
     docs: {
       description: {
