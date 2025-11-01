@@ -20,6 +20,8 @@ export const mcpPlugin =
 
     // Collections
     const collections = pluginOptions.collections || {}
+    // Globals
+    const globals = pluginOptions.globals || {}
     // Extract custom tools for the global config
     const customTools =
       pluginOptions.mcp?.tools?.map((tool) => ({
@@ -39,10 +41,16 @@ export const mcpPlugin =
      * For example:
      *  - If a collection has all of its capabilities enabled, admins can allow or disallow the create, update, delete, and find capabilities on that collection.
      *  - If a collection only has the find capability enabled, admins can only allow or disallow the find capability on that collection.
+     *  - If a global has all of its capabilities enabled, admins can allow or disallow the find and update capabilities on that global.
      *  - If a custom tool has gone haywire, admins can disallow that tool.
      *
      */
-    const apiKeyCollection = createAPIKeysCollection(collections, customTools, experimentalTools)
+    const apiKeyCollection = createAPIKeysCollection(
+      collections,
+      globals,
+      customTools,
+      experimentalTools,
+    )
     if (pluginOptions.overrideApiKeyCollection) {
       config.collections.push(pluginOptions.overrideApiKeyCollection(apiKeyCollection))
     } else {

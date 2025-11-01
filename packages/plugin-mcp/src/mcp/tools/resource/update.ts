@@ -250,9 +250,14 @@ ${JSON.stringify(errors, null, 2)}
   if (collections?.[collectionSlug]?.enabled) {
     const convertedFields = convertCollectionSchemaToZod(schema)
 
+    // Make all fields optional for partial updates (PATCH-style)
+    const optionalFields = Object.fromEntries(
+      Object.entries(convertedFields.shape).map(([key, value]) => [key, (value as any).optional()]),
+    )
+
     // Create a new schema that combines the converted fields with update-specific parameters
     const updateResourceSchema = z.object({
-      ...convertedFields.shape,
+      ...optionalFields,
       id: z.string().optional().describe('The ID of the document to update'),
       depth: z
         .number()
