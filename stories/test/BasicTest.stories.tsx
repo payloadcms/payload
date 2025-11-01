@@ -1,26 +1,29 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React from 'react'
 
 const SimpleTestComponent = () => {
   return (
-    <div style={{ 
-      padding: '20px', 
-      border: '2px solid green', 
-      borderRadius: '8px',
-      backgroundColor: '#f0f8ff'
-    }}>
+    <div
+      style={{
+        backgroundColor: '#f0f8ff',
+        border: '2px solid green',
+        borderRadius: '8px',
+        padding: '20px',
+      }}
+    >
       <h2>✅ Storybook is Working!</h2>
       <p>This is a simple test component to verify Storybook is functioning correctly.</p>
-      <button 
-        style={{ 
-          padding: '10px 20px', 
-          backgroundColor: '#007acc', 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
+      <button
         onClick={() => alert('Button clicked!')}
+        style={{
+          backgroundColor: '#007acc',
+          border: 'none',
+          borderRadius: '4px',
+          color: 'white',
+          cursor: 'pointer',
+          padding: '10px 20px',
+        }}
       >
         Test Button
       </button>
@@ -29,11 +32,11 @@ const SimpleTestComponent = () => {
 }
 
 const meta = {
-  title: 'Test/Basic Test',
   component: SimpleTestComponent,
   parameters: {
     layout: 'centered',
   },
+  title: 'Test/Basic Test',
 } satisfies Meta<typeof SimpleTestComponent>
 
 export default meta

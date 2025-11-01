@@ -95,5 +95,8 @@
     "${configDir}/src",
     ".next/types/**/*.ts",
     "./scripts/**/*.ts",
+    "./stories/**/*.ts",
+    "./stories/**/*.tsx",
+    "./.storybook/**/*.ts"
   ]
 }

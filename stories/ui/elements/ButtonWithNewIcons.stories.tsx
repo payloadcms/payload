@@ -1,28 +1,30 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React from 'react'
+
 import { Button } from '../../../packages/ui/src/elements/Button'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
 const meta = {
-  title: 'UI/Elements/Button with New Icons',
   component: Button,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Button component showcasing the newly added icons: gear and trash.',
-      },
-    },
-  },
   decorators: [
     (Story) => (
       <PayloadMockProviders>
-        <div style={{ padding: '20px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', padding: '20px' }}>
           <Story />
         </div>
       </PayloadMockProviders>
     ),
   ],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Button component showcasing the newly added icons: gear and trash.',
+      },
+    },
+    layout: 'centered',
+  },
+  title: 'UI/Elements/Button with New Icons',
 } satisfies Meta<typeof Button>
 
 export default meta
@@ -30,29 +32,29 @@ type Story = StoryObj<typeof meta>
 
 export const AllIcons: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-      <Button icon="chevron" buttonStyle="secondary">
+    <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+      <Button buttonStyle="secondary" icon="chevron">
         Chevron
       </Button>
-      <Button icon="edit" buttonStyle="secondary">
+      <Button buttonStyle="secondary" icon="edit">
         Edit
       </Button>
-      <Button icon="gear" buttonStyle="secondary">
+      <Button buttonStyle="secondary" icon="gear">
         Gear (New)
       </Button>
-      <Button icon="link" buttonStyle="secondary">
+      <Button buttonStyle="secondary" icon="link">
         Link
       </Button>
-      <Button icon="plus" buttonStyle="primary">
+      <Button buttonStyle="primary" icon="plus">
         Plus
       </Button>
-      <Button icon="swap" buttonStyle="secondary">
+      <Button buttonStyle="secondary" icon="swap">
         Swap
       </Button>
-      <Button icon="trash" buttonStyle="error">
+      <Button buttonStyle="error" icon="trash">
         Trash (New)
       </Button>
-      <Button icon="x" buttonStyle="secondary">
+      <Button buttonStyle="secondary" icon="x">
         X
       </Button>
     </div>
@@ -61,28 +63,30 @@ export const AllIcons: Story = {
 
 export const NewIconsOnly: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '16px', flexDirection: 'column', alignItems: 'flex-start' }}>
+    <div
+      style={{ alignItems: 'flex-start', display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <h3>Newly Added Icons</h3>
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-        <Button icon="gear" buttonStyle="secondary" size="small">
+      <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
+        <Button buttonStyle="secondary" icon="gear" size="small">
           Settings
         </Button>
-        <Button icon="gear" buttonStyle="secondary">
+        <Button buttonStyle="secondary" icon="gear">
           Configure
         </Button>
-        <Button icon="gear" buttonStyle="secondary" size="large">
+        <Button buttonStyle="secondary" icon="gear" size="large">
           Gear Large
         </Button>
       </div>
-      
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-        <Button icon="trash" buttonStyle="error" size="small">
+
+      <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
+        <Button buttonStyle="error" icon="trash" size="small">
           Delete
         </Button>
-        <Button icon="trash" buttonStyle="error">
+        <Button buttonStyle="error" icon="trash">
           Remove
         </Button>
-        <Button icon="trash" buttonStyle="error" size="large">
+        <Button buttonStyle="error" icon="trash" size="large">
           Trash Large
         </Button>
       </div>
@@ -92,19 +96,21 @@ export const NewIconsOnly: Story = {
 
 export const IconPositions: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '16px', flexDirection: 'column', alignItems: 'flex-start' }}>
+    <div
+      style={{ alignItems: 'flex-start', display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <h3>Icon Positions</h3>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <Button icon="gear" iconPosition="left" buttonStyle="secondary">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+        <Button buttonStyle="secondary" icon="gear" iconPosition="left">
           Left Gear
         </Button>
-        <Button icon="gear" iconPosition="right" buttonStyle="secondary">
+        <Button buttonStyle="secondary" icon="gear" iconPosition="right">
           Right Gear
         </Button>
-        <Button icon="trash" iconPosition="left" buttonStyle="error">
+        <Button buttonStyle="error" icon="trash" iconPosition="left">
           Left Trash
         </Button>
-        <Button icon="trash" iconPosition="right" buttonStyle="error">
+        <Button buttonStyle="error" icon="trash" iconPosition="right">
           Right Trash
         </Button>
       </div>
@@ -114,11 +120,11 @@ export const IconPositions: Story = {
 
 export const IconOnlyButtons: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-      <Button icon="gear" buttonStyle="icon-label" aria-label="Settings" />
-      <Button icon="trash" buttonStyle="icon-label" aria-label="Delete" />
-      <Button icon="edit" buttonStyle="icon-label" aria-label="Edit" />
-      <Button icon="plus" buttonStyle="icon-label" aria-label="Add" />
+    <div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
+      <Button aria-label="Settings" buttonStyle="icon-label" icon="gear" />
+      <Button aria-label="Delete" buttonStyle="icon-label" icon="trash" />
+      <Button aria-label="Edit" buttonStyle="icon-label" icon="edit" />
+      <Button aria-label="Add" buttonStyle="icon-label" icon="plus" />
     </div>
   ),
 }

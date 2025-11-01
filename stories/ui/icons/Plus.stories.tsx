@@ -1,24 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import { PlusIcon } from '../../../packages/ui/src/icons/Plus'
 
 const meta = {
-  title: 'UI/Icons/Plus',
-  component: PlusIcon,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Plus icon used throughout Payload CMS for adding new items.',
-      },
-    },
-  },
-  tags: ['autodocs'],
   argTypes: {
     className: {
       control: 'text',
       description: 'Additional CSS class names',
     },
   },
+  component: PlusIcon,
+  parameters: {
+    docs: {
+      description: {
+        component: 'Plus icon used throughout Payload CMS for adding new items.',
+      },
+    },
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  title: 'UI/Icons/Plus',
 } satisfies Meta<typeof PlusIcon>
 
 export default meta
@@ -30,18 +31,18 @@ export const Default: Story = {
 
 export const Large: Story = {
   args: {
-    style: { width: '32px', height: '32px' }
+    style: { height: '32px', width: '32px' },
   },
 }
 
 export const Small: Story = {
   args: {
-    style: { width: '16px', height: '16px' }
+    style: { height: '16px', width: '16px' },
   },
 }
 
 export const Colored: Story = {
   args: {
-    style: { color: '#007acc', width: '24px', height: '24px' }
+    style: { color: '#007acc', height: '24px', width: '24px' },
   },
 }

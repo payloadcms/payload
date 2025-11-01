@@ -1,68 +1,69 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React, { useState } from 'react'
 
 // Simple component interfaces to avoid complex imports
 interface TextInputProps {
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  placeholder?: string
-  type?: string
-  required?: boolean
   disabled?: boolean
-  readOnly?: boolean
   hasError?: boolean
-  path: string
   id?: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  path: string
+  placeholder?: string
+  readOnly?: boolean
+  required?: boolean
+  type?: string
+  value: string
 }
 
 // Mock TextInput component
 const TextInput: React.FC<TextInputProps> = ({
-  value,
+  type = 'text',
+  disabled,
+  hasError,
   onChange,
   placeholder,
-  type = 'text',
-  required,
-  disabled,
   readOnly,
-  hasError,
+  required,
+  value,
   ...props
 }) => (
   <input
     {...props}
-    type={type}
-    value={value}
+    disabled={disabled}
     onChange={onChange}
     placeholder={placeholder}
-    required={required}
-    disabled={disabled}
     readOnly={readOnly}
+    required={required}
     style={{
-      padding: '8px 12px',
+      backgroundColor: disabled ? '#f7fafc' : readOnly ? '#f8f9fa' : 'white',
       border: hasError ? '1px solid #e53e3e' : '1px solid #e2e8f0',
       borderRadius: '4px',
       fontSize: '14px',
-      outline: 'none',
-      backgroundColor: disabled ? '#f7fafc' : readOnly ? '#f8f9fa' : 'white',
-      width: '100%',
       maxWidth: '300px',
+      outline: 'none',
+      padding: '8px 12px',
+      width: '100%',
     }}
+    type={type}
+    value={value}
   />
 )
 
 // Simple field helper components
-const FieldLabel: React.FC<{ label: string; required?: boolean; htmlFor?: string }> = ({ 
-  label, 
-  required, 
-  htmlFor 
+const FieldLabel: React.FC<{ htmlFor?: string; label: string; required?: boolean }> = ({
+  htmlFor,
+  label,
+  required,
 }) => (
-  <label 
+  <label
     htmlFor={htmlFor}
-    style={{ 
-      fontSize: '14px', 
-      fontWeight: '500', 
+    style={{
       color: '#2d3748',
+      display: 'block',
+      fontSize: '14px',
+      fontWeight: '500',
       marginBottom: '4px',
-      display: 'block' 
     }}
   >
     {label}
@@ -71,18 +72,22 @@ const FieldLabel: React.FC<{ label: string; required?: boolean; htmlFor?: string
 )
 
 const FieldError: React.FC<{ message: string | string[] }> = ({ message }) => (
-  <div style={{ 
-    color: '#e53e3e', 
-    fontSize: '12px', 
-    marginTop: '4px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px'
-  }}>
+  <div
+    style={{
+      alignItems: 'center',
+      color: '#e53e3e',
+      display: 'flex',
+      fontSize: '12px',
+      gap: '4px',
+      marginTop: '4px',
+    }}
+  >
     <span>⚠</span>
     {Array.isArray(message) ? (
       <div>
-        {message.map((msg, idx) => <div key={idx}>{msg}</div>)}
+        {message.map((msg, idx) => (
+          <div key={idx}>{msg}</div>
+        ))}
       </div>
     ) : (
       message
@@ -91,34 +96,51 @@ const FieldError: React.FC<{ message: string | string[] }> = ({ message }) => (
 )
 
 const FieldDescription: React.FC<{ description: string }> = ({ description }) => (
-  <div style={{ 
-    color: '#718096', 
-    fontSize: '12px', 
-    marginTop: '4px',
-    lineHeight: '1.4'
-  }}>
+  <div
+    style={{
+      color: '#718096',
+      fontSize: '12px',
+      lineHeight: '1.4',
+      marginTop: '4px',
+    }}
+  >
     {description}
   </div>
 )
 
 // Simple provider wrapper
 const SimpleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{ fontFamily: 'system-ui, sans-serif' }}>
-    {children}
-  </div>
+  <div style={{ fontFamily: 'system-ui, sans-serif' }}>{children}</div>
 )
 
 const meta = {
-  title: 'UI/Fields/Text Input',
-  component: TextInput,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Text input components for forms - includes basic TextInput and complete TextField with label, description, and error handling.',
-      },
+  argTypes: {
+    disabled: {
+      control: 'boolean',
+      description: 'Whether the field is disabled',
+    },
+    hasError: {
+      control: 'boolean',
+      description: 'Whether the field has validation errors',
+    },
+    placeholder: {
+      control: 'text',
+      description: 'Placeholder text when empty',
+    },
+    readOnly: {
+      control: 'boolean',
+      description: 'Whether the field is read-only',
+    },
+    required: {
+      control: 'boolean',
+      description: 'Whether the field is required',
+    },
+    value: {
+      control: 'text',
+      description: 'Current input value',
     },
   },
+  component: TextInput,
   decorators: [
     (Story) => (
       <SimpleProvider>
@@ -128,32 +150,16 @@ const meta = {
       </SimpleProvider>
     ),
   ],
-  argTypes: {
-    value: {
-      control: 'text',
-      description: 'Current input value',
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Text input components for forms - includes basic TextInput and complete TextField with label, description, and error handling.',
+      },
     },
-    placeholder: {
-      control: 'text',
-      description: 'Placeholder text when empty',
-    },
-    required: {
-      control: 'boolean',
-      description: 'Whether the field is required',
-    },
-    readOnly: {
-      control: 'boolean',
-      description: 'Whether the field is read-only',
-    },
-    disabled: {
-      control: 'boolean',
-      description: 'Whether the field is disabled',
-    },
-    hasError: {
-      control: 'boolean',
-      description: 'Whether the field has validation errors',
-    },
+    layout: 'centered',
   },
+  title: 'UI/Fields/Text Input',
 } satisfies Meta<typeof TextInput>
 
 export default meta
@@ -161,24 +167,24 @@ type Story = StoryObj<typeof meta>
 
 // Basic TextInput stories
 export const BasicTextInput: Story = {
+  args: {
+    disabled: false,
+    hasError: false,
+    placeholder: 'Enter text here...',
+    readOnly: false,
+    required: false,
+  },
   render: (args) => {
     const [value, setValue] = useState(args.value || '')
-    
+
     return (
       <TextInput
         {...args}
-        value={value}
         onChange={(e) => setValue(e.target.value)}
         path="example-field"
+        value={value}
       />
     )
-  },
-  args: {
-    placeholder: 'Enter text here...',
-    required: false,
-    readOnly: false,
-    disabled: false,
-    hasError: false,
   },
 }
 
@@ -186,70 +192,70 @@ export const TextInputVariants: Story = {
   render: () => {
     const [values, setValues] = useState({
       basic: '',
-      required: '',
-      readOnly: 'This is read-only text',
       disabled: '',
       error: 'Invalid input',
+      readOnly: 'This is read-only text',
+      required: '',
     })
-    
+
     const handleChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValues(prev => ({ ...prev, [key]: e.target.value }))
+      setValues((prev) => ({ ...prev, [key]: e.target.value }))
     }
-    
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <h3>TextInput Variants</h3>
-        
+
         <div>
           <h4>Basic Input</h4>
           <TextInput
-            value={values.basic}
             onChange={handleChange('basic')}
-            placeholder="Basic text input"
             path="basic-input"
+            placeholder="Basic text input"
+            value={values.basic}
           />
         </div>
-        
+
         <div>
           <h4>Required Input</h4>
           <TextInput
-            value={values.required}
             onChange={handleChange('required')}
+            path="required-input"
             placeholder="Required field"
             required={true}
-            path="required-input"
+            value={values.required}
           />
         </div>
-        
+
         <div>
           <h4>Read-Only Input</h4>
           <TextInput
-            value={values.readOnly}
             onChange={handleChange('readOnly')}
-            readOnly={true}
             path="readonly-input"
+            readOnly={true}
+            value={values.readOnly}
           />
         </div>
-        
+
         <div>
           <h4>Disabled Input</h4>
           <TextInput
-            value={values.disabled}
-            onChange={handleChange('disabled')}
-            placeholder="Disabled input"
             disabled={true}
+            onChange={handleChange('disabled')}
             path="disabled-input"
+            placeholder="Disabled input"
+            value={values.disabled}
           />
         </div>
-        
+
         <div>
           <h4>Input with Error</h4>
           <TextInput
-            value={values.error}
-            onChange={handleChange('error')}
-            placeholder="Input with error"
             hasError={true}
+            onChange={handleChange('error')}
             path="error-input"
+            placeholder="Input with error"
+            value={values.error}
           />
         </div>
       </div>
@@ -260,84 +266,84 @@ export const TextInputVariants: Story = {
 export const TextInputTypes: Story = {
   render: () => {
     const [values, setValues] = useState({
-      text: '',
       email: '',
       password: '',
-      url: '',
-      tel: '',
       search: '',
+      tel: '',
+      text: '',
+      url: '',
     })
-    
+
     const handleChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValues(prev => ({ ...prev, [key]: e.target.value }))
+      setValues((prev) => ({ ...prev, [key]: e.target.value }))
     }
-    
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <h3>Input Types</h3>
-        
+
         <div>
           <h4>Text (default)</h4>
           <TextInput
-            value={values.text}
             onChange={handleChange('text')}
-            placeholder="Regular text input"
             path="text-type"
+            placeholder="Regular text input"
+            value={values.text}
           />
         </div>
-        
+
         <div>
           <h4>Email</h4>
           <TextInput
-            value={values.email}
             onChange={handleChange('email')}
-            type="email"
-            placeholder="Enter email address"
             path="email-type"
+            placeholder="Enter email address"
+            type="email"
+            value={values.email}
           />
         </div>
-        
+
         <div>
           <h4>Password</h4>
           <TextInput
-            value={values.password}
             onChange={handleChange('password')}
-            type="password"
-            placeholder="Enter password"
             path="password-type"
+            placeholder="Enter password"
+            type="password"
+            value={values.password}
           />
         </div>
-        
+
         <div>
           <h4>URL</h4>
           <TextInput
-            value={values.url}
             onChange={handleChange('url')}
-            type="url"
-            placeholder="https://example.com"
             path="url-type"
+            placeholder="https://example.com"
+            type="url"
+            value={values.url}
           />
         </div>
-        
+
         <div>
           <h4>Telephone</h4>
           <TextInput
-            value={values.tel}
             onChange={handleChange('tel')}
-            type="tel"
-            placeholder="+1 (555) 123-4567"
             path="tel-type"
+            placeholder="+1 (555) 123-4567"
+            type="tel"
+            value={values.tel}
           />
         </div>
-        
+
         <div>
           <h4>Search</h4>
           <TextInput
-            value={values.search}
             onChange={handleChange('search')}
-            type="search"
-            placeholder="Search for something..."
             path="search-type"
+            placeholder="Search for something..."
+            type="search"
+            value={values.search}
           />
         </div>
       </div>
@@ -349,55 +355,53 @@ export const TextInputTypes: Story = {
 export const CompleteTextField: Story = {
   render: () => {
     const [value, setValue] = useState('')
-    const [error, setError] = useState<string | null>(null)
-    
+    const [error, setError] = useState<null | string>(null)
+
     const validateEmail = (val: string) => {
       if (!val) {
         setError('Email is required')
-      } else if (!/\S+@\S+\.\S+/.test(val)) {
+      } else if (!/\S[^\s@]*@\S+\.\S+/.test(val)) {
         setError('Please enter a valid email address')
       } else {
         setError(null)
       }
     }
-    
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <h3>Complete TextField Example</h3>
-        
-        <FieldLabel 
-          label="Email Address" 
-          required={true}
-          htmlFor="email-field"
-        />
-        
+
+        <FieldLabel htmlFor="email-field" label="Email Address" required={true} />
+
         <TextInput
+          hasError={!!error}
           id="email-field"
-          value={value}
           onChange={(e) => {
             setValue(e.target.value)
             validateEmail(e.target.value)
           }}
-          type="email"
-          placeholder="Enter your email address"
-          hasError={!!error}
-          required={true}
           path="email-field"
+          placeholder="Enter your email address"
+          required={true}
+          type="email"
+          value={value}
         />
-        
+
         <FieldDescription description="We'll use this email to send you important updates about your account." />
-        
+
         {error && <FieldError message={error} />}
-        
+
         {value && !error && (
-          <div style={{ 
-            padding: '8px 12px', 
-            backgroundColor: '#d4edda', 
-            border: '1px solid #c3e6cb',
-            borderRadius: '4px',
-            color: '#155724',
-            fontSize: '14px'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#d4edda',
+              border: '1px solid #c3e6cb',
+              borderRadius: '4px',
+              color: '#155724',
+              fontSize: '14px',
+              padding: '8px 12px',
+            }}
+          >
             ✓ Valid email address
           </div>
         )}
@@ -409,43 +413,47 @@ export const CompleteTextField: Story = {
 export const FormIntegrationExample: Story = {
   render: () => {
     const [formData, setFormData] = useState({
+      company: '',
+      email: '',
       firstName: '',
       lastName: '',
-      email: '',
-      company: '',
       website: '',
     })
-    
+
     const [errors, setErrors] = useState<Record<string, string>>({})
-    
+
     const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData(prev => ({ ...prev, [field]: e.target.value }))
-      
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+
       // Clear error when user starts typing
       if (errors[field]) {
-        setErrors(prev => ({ ...prev, [field]: '' }))
+        setErrors((prev) => ({ ...prev, [field]: '' }))
       }
     }
-    
+
     const validate = () => {
       const newErrors: Record<string, string> = {}
-      
-      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required'
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required'
+
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = 'First name is required'
+      }
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = 'Last name is required'
+      }
       if (!formData.email.trim()) {
         newErrors.email = 'Email is required'
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      } else if (!/\S[^\s@]*@\S+\.\S+/.test(formData.email)) {
         newErrors.email = 'Please enter a valid email address'
       }
-      
+
       if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
         newErrors.website = 'Website must start with http:// or https://'
       }
-      
+
       setErrors(newErrors)
       return Object.keys(newErrors).length === 0
     }
-    
+
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault()
       if (validate()) {
@@ -453,120 +461,128 @@ export const FormIntegrationExample: Story = {
         alert('Form submitted successfully! Check console for data.')
       }
     }
-    
+
     return (
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+      >
         <h3>User Registration Form</h3>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+
+        <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: '1fr 1fr' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <FieldLabel label="First Name" required={true} htmlFor="first-name" />
+            <FieldLabel htmlFor="first-name" label="First Name" required={true} />
             <TextInput
-              id="first-name"
-              value={formData.firstName}
-              onChange={handleChange('firstName')}
-              placeholder="Enter first name"
               hasError={!!errors.firstName}
-              required={true}
+              id="first-name"
+              onChange={handleChange('firstName')}
               path="first-name"
+              placeholder="Enter first name"
+              required={true}
+              value={formData.firstName}
             />
             {errors.firstName && <FieldError message={errors.firstName} />}
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <FieldLabel label="Last Name" required={true} htmlFor="last-name" />
+            <FieldLabel htmlFor="last-name" label="Last Name" required={true} />
             <TextInput
-              id="last-name"
-              value={formData.lastName}
-              onChange={handleChange('lastName')}
-              placeholder="Enter last name"
               hasError={!!errors.lastName}
-              required={true}
+              id="last-name"
+              onChange={handleChange('lastName')}
               path="last-name"
+              placeholder="Enter last name"
+              required={true}
+              value={formData.lastName}
             />
             {errors.lastName && <FieldError message={errors.lastName} />}
           </div>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <FieldLabel label="Email Address" required={true} htmlFor="email" />
+          <FieldLabel htmlFor="email" label="Email Address" required={true} />
           <TextInput
-            id="email"
-            value={formData.email}
-            onChange={handleChange('email')}
-            type="email"
-            placeholder="Enter email address"
             hasError={!!errors.email}
-            required={true}
+            id="email"
+            onChange={handleChange('email')}
             path="email"
+            placeholder="Enter email address"
+            required={true}
+            type="email"
+            value={formData.email}
           />
           {errors.email && <FieldError message={errors.email} />}
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <FieldLabel label="Company" htmlFor="company" />
+          <FieldLabel htmlFor="company" label="Company" />
           <TextInput
             id="company"
-            value={formData.company}
             onChange={handleChange('company')}
-            placeholder="Enter company name (optional)"
             path="company"
+            placeholder="Enter company name (optional)"
+            value={formData.company}
           />
           <FieldDescription description="Your current company or organization" />
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <FieldLabel label="Website" htmlFor="website" />
+          <FieldLabel htmlFor="website" label="Website" />
           <TextInput
-            id="website"
-            value={formData.website}
-            onChange={handleChange('website')}
-            type="url"
-            placeholder="https://your-website.com"
             hasError={!!errors.website}
+            id="website"
+            onChange={handleChange('website')}
             path="website"
+            placeholder="https://your-website.com"
+            type="url"
+            value={formData.website}
           />
           {errors.website && <FieldError message={errors.website} />}
         </div>
-        
+
         <div style={{ marginTop: '16px' }}>
           <button
-            type="submit"
             style={{
-              padding: '12px 24px',
               backgroundColor: '#007acc',
-              color: 'white',
               border: 'none',
               borderRadius: '4px',
-              fontSize: '16px',
+              color: 'white',
               cursor: 'pointer',
+              fontSize: '16px',
+              padding: '12px 24px',
             }}
+            type="submit"
           >
             Create Account
           </button>
         </div>
-        
+
         {/* Debug Info - Toggle visibility */}
         <details style={{ marginTop: '20px' }}>
-          <summary style={{ 
-            cursor: 'pointer',
-            padding: '8px 0',
-            fontSize: '14px',
-            color: '#666',
-            userSelect: 'none'
-          }}>
+          <summary
+            style={{
+              color: '#666',
+              cursor: 'pointer',
+              fontSize: '14px',
+              padding: '8px 0',
+              userSelect: 'none',
+            }}
+          >
             🔍 Show Form Data (Debug)
           </summary>
-          <div style={{ 
-            marginTop: '8px',
-            padding: '12px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontFamily: 'monospace',
-            border: '1px solid #dee2e6'
-          }}>
-            <strong>Form Data:</strong><br />
+          <div
+            style={{
+              backgroundColor: '#f8f9fa',
+              border: '1px solid #dee2e6',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '12px',
+              marginTop: '8px',
+              padding: '12px',
+            }}
+          >
+            <strong>Form Data:</strong>
+            <br />
             {JSON.stringify(formData, null, 2)}
           </div>
         </details>

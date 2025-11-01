@@ -1,41 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React from 'react'
+
 import { Banner } from '../../../packages/ui/src/elements/Banner'
 import { CheckIcon } from '../../../packages/ui/src/icons/Check'
-import { XIcon } from '../../../packages/ui/src/icons/X'
 import { EditIcon } from '../../../packages/ui/src/icons/Edit'
+import { XIcon } from '../../../packages/ui/src/icons/X'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
 const meta = {
-  title: 'UI/Elements/Banner',
-  component: Banner,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Banner component for displaying notifications, alerts, and status messages in Payload CMS.',
-      },
-    },
-  },
-  decorators: [
-    (Story) => (
-      <PayloadMockProviders>
-        <div style={{ maxWidth: '600px', width: '100%', padding: '20px' }}>
-          <Story />
-        </div>
-      </PayloadMockProviders>
-    ),
-  ],
   argTypes: {
     type: {
       control: 'select',
-      options: ['default', 'error', 'info', 'success'],
       description: 'Visual style type of the banner',
+      options: ['default', 'error', 'info', 'success'],
     },
     alignIcon: {
       control: 'select',
-      options: ['left', 'right'],
       description: 'Alignment of the icon within the banner',
+      options: ['left', 'right'],
     },
     children: {
       control: 'text',
@@ -50,6 +33,26 @@ const meta = {
       description: 'URL to navigate to when banner is clicked',
     },
   },
+  component: Banner,
+  decorators: [
+    (Story) => (
+      <PayloadMockProviders>
+        <div style={{ maxWidth: '600px', padding: '20px', width: '100%' }}>
+          <Story />
+        </div>
+      </PayloadMockProviders>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Banner component for displaying notifications, alerts, and status messages in Payload CMS.',
+      },
+    },
+    layout: 'centered',
+  },
+  title: 'UI/Elements/Banner',
 } satisfies Meta<typeof Banner>
 
 export default meta
@@ -57,57 +60,57 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    children: 'This is a default banner message',
     type: 'default',
+    children: 'This is a default banner message',
   },
 }
 
 export const Success: Story = {
   args: {
-    children: 'Operation completed successfully!',
     type: 'success',
+    children: 'Operation completed successfully!',
     icon: <CheckIcon />,
   },
 }
 
 export const Error: Story = {
   args: {
-    children: 'An error occurred while processing your request',
     type: 'error',
+    children: 'An error occurred while processing your request',
     icon: <XIcon />,
   },
 }
 
 export const Info: Story = {
   args: {
-    children: 'Here is some helpful information for you',
     type: 'info',
+    children: 'Here is some helpful information for you',
     icon: <EditIcon />,
   },
 }
 
 export const WithLeftIcon: Story = {
   args: {
-    children: 'Banner with icon on the left side',
     type: 'info',
-    icon: <CheckIcon />,
     alignIcon: 'left',
+    children: 'Banner with icon on the left side',
+    icon: <CheckIcon />,
   },
 }
 
 export const WithRightIcon: Story = {
   args: {
-    children: 'Banner with icon on the right side (default)',
     type: 'success',
-    icon: <CheckIcon />,
     alignIcon: 'right',
+    children: 'Banner with icon on the right side (default)',
+    icon: <CheckIcon />,
   },
 }
 
 export const Clickable: Story = {
   args: {
-    children: 'Click this banner to trigger an action',
     type: 'info',
+    children: 'Click this banner to trigger an action',
     icon: <EditIcon />,
     onClick: () => alert('Banner clicked!'),
   },
@@ -115,8 +118,8 @@ export const Clickable: Story = {
 
 export const WithLink: Story = {
   args: {
-    children: 'This banner links to another page',
     type: 'default',
+    children: 'This banner links to another page',
     icon: <EditIcon />,
     to: '#example-link',
   },
@@ -147,7 +150,7 @@ export const BannerTypes: Story = {
         icon: <XIcon />,
       },
     ]
-    
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <h3>Banner Types</h3>
@@ -164,49 +167,51 @@ export const InteractiveBanners: Story = {
   render: () => {
     const [clickCount, setClickCount] = React.useState(0)
     const [lastAction, setLastAction] = React.useState('')
-    
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <h3>Interactive Banners</h3>
-        
+
         <Banner
-          type="info"
           icon={<EditIcon />}
           onClick={() => {
-            setClickCount(prev => prev + 1)
+            setClickCount((prev) => prev + 1)
             setLastAction('Clicked info banner')
           }}
+          type="info"
         >
           Clickable banner (clicked {clickCount} times)
         </Banner>
-        
+
         <Banner
-          type="success"
           icon={<CheckIcon />}
-          to="#success-link"
           onClick={() => setLastAction('Navigated via success banner')}
+          to="#success-link"
+          type="success"
         >
           Banner with link navigation
         </Banner>
-        
+
         <Banner
-          type="default"
-          icon={<EditIcon />}
           alignIcon="left"
+          icon={<EditIcon />}
           onClick={() => {
             setLastAction('Left-aligned icon banner clicked')
           }}
+          type="default"
         >
           Left-aligned icon with click action
         </Banner>
-        
+
         {lastAction && (
-          <div style={{ 
-            padding: '12px', 
-            backgroundColor: '#f7fafc', 
-            borderRadius: '4px',
-            fontSize: '14px'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#f7fafc',
+              borderRadius: '4px',
+              fontSize: '14px',
+              padding: '12px',
+            }}
+          >
             <strong>Last Action:</strong> {lastAction}
           </div>
         )}
@@ -220,18 +225,17 @@ export const ContentExamples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <h3>Content Examples</h3>
-      
-      <Banner type="info" icon={<EditIcon />}>
+
+      <Banner icon={<EditIcon />} type="info">
         Short message
       </Banner>
-      
-      <Banner type="success" icon={<CheckIcon />}>
-        This is a longer banner message that demonstrates how the banner 
-        component handles multi-line content and maintains its styling 
-        across different content lengths.
+
+      <Banner icon={<CheckIcon />} type="success">
+        This is a longer banner message that demonstrates how the banner component handles
+        multi-line content and maintains its styling across different content lengths.
       </Banner>
-      
-      <Banner type="error" icon={<XIcon />}>
+
+      <Banner icon={<XIcon />} type="error">
         <div>
           <strong>Error Details:</strong>
           <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
@@ -241,10 +245,8 @@ export const ContentExamples: Story = {
           </ul>
         </div>
       </Banner>
-      
-      <Banner type="default">
-        Banner without icon
-      </Banner>
+
+      <Banner type="default">Banner without icon</Banner>
     </div>
   ),
 }
@@ -254,35 +256,31 @@ export const UsageExamples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <h3>Real-world Usage Examples</h3>
-      
+
       <div>
         <h4>Document Save Status</h4>
-        <Banner type="success" icon={<CheckIcon />}>
+        <Banner icon={<CheckIcon />} type="success">
           Document saved successfully at {new Date().toLocaleTimeString()}
         </Banner>
       </div>
-      
+
       <div>
         <h4>Validation Error</h4>
-        <Banner type="error" icon={<XIcon />}>
+        <Banner icon={<XIcon />} type="error">
           Please fix the following errors before saving: Required fields missing
         </Banner>
       </div>
-      
+
       <div>
         <h4>Feature Information</h4>
-        <Banner 
-          type="info" 
-          icon={<EditIcon />}
-          to="#learn-more"
-        >
+        <Banner icon={<EditIcon />} to="#learn-more" type="info">
           New feature available! Click here to learn more about advanced search.
         </Banner>
       </div>
-      
+
       <div>
         <h4>System Maintenance</h4>
-        <Banner type="default" icon={<EditIcon />} alignIcon="left">
+        <Banner alignIcon="left" icon={<EditIcon />} type="default">
           Scheduled maintenance will occur tonight from 11 PM to 2 AM EST
         </Banner>
       </div>

@@ -1,18 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import { EditIcon } from '../../../packages/ui/src/icons/Edit'
 
 const meta = {
-  title: 'UI/Icons/Edit',
   component: EditIcon,
   parameters: {
-    layout: 'centered',
     docs: {
       description: {
         component: 'Edit icon used for edit actions throughout Payload CMS.',
       },
     },
+    layout: 'centered',
   },
   tags: ['autodocs'],
+  title: 'UI/Icons/Edit',
 } satisfies Meta<typeof EditIcon>
 
 export default meta
@@ -24,18 +25,18 @@ export const Default: Story = {
 
 export const Large: Story = {
   args: {
-    style: { width: '32px', height: '32px' }
+    style: { height: '32px', width: '32px' },
   },
 }
 
 export const Small: Story = {
   args: {
-    style: { width: '16px', height: '16px' }
+    style: { height: '16px', width: '16px' },
   },
 }
 
 export const Colored: Story = {
   args: {
-    style: { color: '#007acc', width: '24px', height: '24px' }
+    style: { color: '#007acc', height: '24px', width: '24px' },
   },
 }

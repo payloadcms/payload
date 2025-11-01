@@ -1,39 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React from 'react'
-import { Card } from '../../packages/ui/src/elements/Card'
+
 import { Button } from '../../packages/ui/src/elements/Button'
+import { Card } from '../../packages/ui/src/elements/Card'
 
 const CardTest = () => {
   return (
-    <div style={{ padding: '20px', maxWidth: '400px' }}>
+    <div style={{ maxWidth: '400px', padding: '20px' }}>
       <h3>Card Component Tests</h3>
-      
+
       {/* Basic Card - no onClick or href */}
       <div style={{ marginBottom: '20px' }}>
         <h4>Basic Card (no link functionality)</h4>
         <Card title="Simple Card Title" />
       </div>
-      
+
       {/* Card with actions but no link */}
       <div style={{ marginBottom: '20px' }}>
         <h4>Card with Actions (no link)</h4>
-        <Card 
-          title="Card with Actions" 
+        <Card
           actions={
             <Button buttonStyle="primary" size="small">
               Action Button
             </Button>
           }
+          title="Card with Actions"
         />
       </div>
-      
+
       {/* Test Card with onClick - this might fail */}
       <div style={{ marginBottom: '20px' }}>
         <h4>Card with onClick (might fail)</h4>
-        <Card 
-          title="Clickable Card" 
-          onClick={() => alert('Card clicked!')}
+        <Card
           buttonAriaLabel="Click to test"
+          onClick={() => alert('Card clicked!')}
+          title="Clickable Card"
         />
       </div>
     </div>
@@ -41,11 +43,11 @@ const CardTest = () => {
 }
 
 const meta = {
-  title: 'Test/Card Test',
   component: CardTest,
   parameters: {
     layout: 'centered',
   },
+  title: 'Test/Card Test',
 } satisfies Meta<typeof CardTest>
 
 export default meta

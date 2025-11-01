@@ -1,26 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React from 'react'
-import { Card } from '../../../packages/ui/src/elements/Card'
+
 import { Button } from '../../../packages/ui/src/elements/Button'
+import { Card } from '../../../packages/ui/src/elements/Card'
 
 const meta = {
-  title: 'UI/Elements/Card (Simple)',
-  component: Card,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Card component - showcasing non-link functionality to avoid Next.js router issues in Storybook.',
-      },
-    },
-  },
-  decorators: [
-    (Story) => (
-      <div style={{ maxWidth: '600px', padding: '20px' }}>
-        <Story />
-      </div>
-    ),
-  ],
   argTypes: {
     title: {
       control: 'text',
@@ -28,10 +13,28 @@ const meta = {
     },
     titleAs: {
       control: 'select',
-      options: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
       description: 'HTML tag to use for the title',
+      options: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
     },
   },
+  component: Card,
+  decorators: [
+    (Story) => (
+      <div style={{ maxWidth: '600px', padding: '20px' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Card component - showcasing non-link functionality to avoid Next.js router issues in Storybook.',
+      },
+    },
+    layout: 'centered',
+  },
+  title: 'UI/Elements/Card (Simple)',
 } satisfies Meta<typeof Card>
 
 export default meta
@@ -52,58 +55,70 @@ export const WithHeading: Story = {
 
 export const WithActions: Story = {
   args: {
-    title: 'Card with Action Buttons',
     actions: (
       <div style={{ display: 'flex', gap: '8px' }}>
-        <Button buttonStyle="secondary" size="small">Edit</Button>
-        <Button buttonStyle="primary" size="small">View</Button>
+        <Button buttonStyle="secondary" size="small">
+          Edit
+        </Button>
+        <Button buttonStyle="primary" size="small">
+          View
+        </Button>
       </div>
     ),
+    title: 'Card with Action Buttons',
   },
 }
 
 export const WithComplexActions: Story = {
   args: {
-    title: 'Card with Multiple Actions',
-    titleAs: 'h3',
     actions: (
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
         <Button buttonStyle="none" icon="edit" size="small" />
         <Button buttonStyle="none" icon="trash" size="small" />
-        <Button buttonStyle="primary" size="small">View Details</Button>
+        <Button buttonStyle="primary" size="small">
+          View Details
+        </Button>
       </div>
     ),
+    title: 'Card with Multiple Actions',
+    titleAs: 'h3',
   },
 }
 
 export const CardGrid: Story = {
   render: () => {
     const cards = [
-      { title: 'Pages Collection', id: 'pages' },
-      { title: 'Users Collection', id: 'users' },
-      { title: 'Media Collection', id: 'media' },
-      { title: 'Settings', id: 'settings', titleAs: 'h3' as const },
+      { id: 'pages', title: 'Pages Collection' },
+      { id: 'users', title: 'Users Collection' },
+      { id: 'media', title: 'Media Collection' },
+      { id: 'settings', title: 'Settings', titleAs: 'h3' as const },
     ]
-    
+
     return (
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-        gap: '16px',
-        padding: '20px',
-        maxWidth: '800px'
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gap: '16px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          maxWidth: '800px',
+          padding: '20px',
+        }}
+      >
         {cards.map((card) => (
           <Card
+            actions={
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button buttonStyle="secondary" size="small">
+                  Edit
+                </Button>
+                <Button buttonStyle="primary" size="small">
+                  View
+                </Button>
+              </div>
+            }
             key={card.id}
             title={card.title}
             titleAs={card.titleAs}
-            actions={
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <Button buttonStyle="secondary" size="small">Edit</Button>
-                <Button buttonStyle="primary" size="small">View</Button>
-              </div>
-            }
           />
         ))}
       </div>
@@ -115,34 +130,48 @@ export const VariousSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
       <Card
+        actions={
+          <Button buttonStyle="primary" size="small">
+            Action
+          </Button>
+        }
         title="Small Card"
         titleAs="h4"
-        actions={<Button buttonStyle="primary" size="small">Action</Button>}
       />
-      
+
       <Card
-        title="Medium Card with Longer Title"
-        titleAs="h3"
         actions={
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button buttonStyle="secondary" size="small">Cancel</Button>
-            <Button buttonStyle="primary" size="small">Continue</Button>
+            <Button buttonStyle="secondary" size="small">
+              Cancel
+            </Button>
+            <Button buttonStyle="primary" size="small">
+              Continue
+            </Button>
           </div>
         }
+        title="Medium Card with Longer Title"
+        titleAs="h3"
       />
-      
+
       <Card
-        title="Large Card with Multiple Action Types"
-        titleAs="h2"
         actions={
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             <Button buttonStyle="none" icon="edit" size="small" />
             <Button buttonStyle="none" icon="trash" size="small" />
-            <Button buttonStyle="pill" size="small">Tag</Button>
-            <Button buttonStyle="secondary" size="small">Draft</Button>
-            <Button buttonStyle="primary" size="small">Publish</Button>
+            <Button buttonStyle="pill" size="small">
+              Tag
+            </Button>
+            <Button buttonStyle="secondary" size="small">
+              Draft
+            </Button>
+            <Button buttonStyle="primary" size="small">
+              Publish
+            </Button>
           </div>
         }
+        title="Large Card with Multiple Action Types"
+        titleAs="h2"
       />
     </div>
   ),

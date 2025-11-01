@@ -1,28 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import { Button } from '../../../packages/ui/src/elements/Button'
 
 const meta = {
-  title: 'UI/Elements/Button',
-  component: Button,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Payload CMS Button component - the primary button component used throughout the admin interface.',
-      },
-    },
-  },
-  tags: ['autodocs'],
   argTypes: {
     buttonStyle: {
       control: 'select',
-      options: ['primary', 'secondary', 'pill', 'none'],
       description: 'The visual style of the button',
-    },
-    size: {
-      control: 'select', 
-      options: ['small', 'medium', 'large'],
-      description: 'The size of the button',
+      options: ['primary', 'secondary', 'pill', 'none'],
     },
     disabled: {
       control: 'boolean',
@@ -32,7 +17,24 @@ const meta = {
       control: 'text',
       description: 'Icon to display in the button',
     },
+    size: {
+      control: 'select',
+      description: 'The size of the button',
+      options: ['small', 'medium', 'large'],
+    },
   },
+  component: Button,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Payload CMS Button component - the primary button component used throughout the admin interface.',
+      },
+    },
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  title: 'UI/Elements/Button',
 } satisfies Meta<typeof Button>
 
 export default meta
@@ -47,7 +49,7 @@ export const Primary: Story = {
 
 export const Secondary: Story = {
   args: {
-    buttonStyle: 'secondary', 
+    buttonStyle: 'secondary',
     children: 'Secondary Button',
   },
 }
@@ -62,24 +64,24 @@ export const Pill: Story = {
 export const Small: Story = {
   args: {
     buttonStyle: 'primary',
-    size: 'small',
     children: 'Small Button',
+    size: 'small',
   },
 }
 
 export const Large: Story = {
   args: {
     buttonStyle: 'primary',
-    size: 'large',
     children: 'Large Button',
+    size: 'large',
   },
 }
 
 export const Disabled: Story = {
   args: {
     buttonStyle: 'primary',
-    disabled: true,
     children: 'Disabled Button',
+    disabled: true,
   },
 }
 

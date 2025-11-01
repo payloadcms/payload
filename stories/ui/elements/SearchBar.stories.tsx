@@ -1,30 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
 import React, { useState } from 'react'
-import { SearchBar } from '../../../packages/ui/src/elements/SearchBar'
+
 import { Button } from '../../../packages/ui/src/elements/Button'
+import { SearchBar } from '../../../packages/ui/src/elements/SearchBar'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
 const meta = {
-  title: 'UI/Elements/SearchBar',
-  component: SearchBar,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'SearchBar component for filtering and searching content in Payload CMS.',
-      },
-    },
-  },
-  decorators: [
-    (Story) => (
-      <PayloadMockProviders>
-        <div style={{ maxWidth: '600px', width: '100%', padding: '20px' }}>
-          <Story />
-        </div>
-      </PayloadMockProviders>
-    ),
-  ],
   argTypes: {
+    className: {
+      control: 'text',
+      description: 'Additional CSS class names',
+    },
     label: {
       control: 'text',
       description: 'Placeholder text for the search input',
@@ -33,11 +20,26 @@ const meta = {
       action: 'search changed',
       description: 'Function called when search value changes',
     },
-    className: {
-      control: 'text',
-      description: 'Additional CSS class names',
-    },
   },
+  component: SearchBar,
+  decorators: [
+    (Story) => (
+      <PayloadMockProviders>
+        <div style={{ maxWidth: '600px', padding: '20px', width: '100%' }}>
+          <Story />
+        </div>
+      </PayloadMockProviders>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        component: 'SearchBar component for filtering and searching content in Payload CMS.',
+      },
+    },
+    layout: 'centered',
+  },
+  title: 'UI/Elements/SearchBar',
 } satisfies Meta<typeof SearchBar>
 
 export default meta
@@ -59,16 +61,16 @@ export const CustomPlaceholder: Story = {
 
 export const WithActions: Story = {
   args: {
-    label: 'Search with actions...',
-    onSearchChange: (search: string) => console.log('Search:', search),
     Actions: [
-      <Button key="filter" buttonStyle="secondary" size="small">
+      <Button buttonStyle="secondary" key="filter" size="small">
         Filter
       </Button>,
-      <Button key="sort" buttonStyle="secondary" size="small">
+      <Button buttonStyle="secondary" key="sort" size="small">
         Sort
       </Button>,
     ],
+    label: 'Search with actions...',
+    onSearchChange: (search: string) => console.log('Search:', search),
   },
 }
 
@@ -77,7 +79,7 @@ export const LiveSearch: Story = {
   render: () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [results, setResults] = useState<string[]>([])
-    
+
     // Mock data for search
     const mockData = [
       'Home Page',
@@ -91,43 +93,44 @@ export const LiveSearch: Story = {
       'Documentation',
       'Help Center',
     ]
-    
+
     const handleSearchChange = (search: string) => {
       setSearchTerm(search)
-      
+
       if (search.length > 0) {
-        const filtered = mockData.filter(item =>
-          item.toLowerCase().includes(search.toLowerCase())
+        const filtered = mockData.filter((item) =>
+          item.toLowerCase().includes(search.toLowerCase()),
         )
         setResults(filtered)
       } else {
         setResults([])
       }
     }
-    
+
     return (
       <div style={{ width: '100%' }}>
-        <SearchBar
-          label="Search documents..."
-          onSearchChange={handleSearchChange}
-        />
-        
+        <SearchBar label="Search documents..." onSearchChange={handleSearchChange} />
+
         {searchTerm && (
-          <div style={{ 
-            marginTop: '16px', 
-            padding: '12px', 
-            backgroundColor: '#f8f9fa',
-            borderRadius: '4px'
-          }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
+          <div
+            style={{
+              backgroundColor: '#f8f9fa',
+              borderRadius: '4px',
+              marginTop: '16px',
+              padding: '12px',
+            }}
+          >
+            <h4 style={{ fontSize: '14px', margin: '0 0 8px 0' }}>
               Search Results for "{searchTerm}" ({results.length} found):
             </h4>
             {results.length > 0 ? (
-              <ul style={{ 
-                margin: 0, 
-                paddingLeft: '20px',
-                fontSize: '14px'
-              }}>
+              <ul
+                style={{
+                  fontSize: '14px',
+                  margin: 0,
+                  paddingLeft: '20px',
+                }}
+              >
                 {results.map((result, index) => (
                   <li key={index} style={{ marginBottom: '4px' }}>
                     {result}
@@ -135,9 +138,7 @@ export const LiveSearch: Story = {
                 ))}
               </ul>
             ) : (
-              <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-                No results found
-              </p>
+              <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>No results found</p>
             )}
           </div>
         )}
@@ -150,64 +151,64 @@ export const LiveSearch: Story = {
 export const VariousActions: Story = {
   render: () => {
     const [searchResults, setSearchResults] = useState('')
-    
+
     const configurations = [
       {
-        title: 'No Actions',
         Actions: undefined,
-        label: 'Basic search...'
+        label: 'Basic search...',
+        title: 'No Actions',
       },
       {
-        title: 'Single Action',
         Actions: [
-          <Button key="filter" buttonStyle="primary" size="small">
-            Filter
-          </Button>
-        ],
-        label: 'Search with filter...'
-      },
-      {
-        title: 'Multiple Actions',
-        Actions: [
-          <Button key="filter" buttonStyle="secondary" size="small">
+          <Button buttonStyle="primary" key="filter" size="small">
             Filter
           </Button>,
-          <Button key="sort" buttonStyle="secondary" size="small">
+        ],
+        label: 'Search with filter...',
+        title: 'Single Action',
+      },
+      {
+        Actions: [
+          <Button buttonStyle="secondary" key="filter" size="small">
+            Filter
+          </Button>,
+          <Button buttonStyle="secondary" key="sort" size="small">
             Sort
           </Button>,
-          <Button key="export" buttonStyle="primary" size="small">
+          <Button buttonStyle="primary" key="export" size="small">
             Export
           </Button>,
         ],
-        label: 'Search with multiple actions...'
+        label: 'Search with multiple actions...',
+        title: 'Multiple Actions',
       },
     ]
-    
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {configurations.map((config, index) => (
           <div key={index}>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>
-              {config.title}
-            </h4>
+            <h4 style={{ fontSize: '16px', margin: '0 0 12px 0' }}>{config.title}</h4>
             <SearchBar
-              label={config.label}
               Actions={config.Actions}
-              onSearchChange={(search) => 
+              label={config.label}
+              onSearchChange={(search) =>
                 setSearchResults(`Last search in ${config.title}: "${search}"`)
               }
             />
           </div>
         ))}
-        
+
         {searchResults && (
-          <div style={{ 
-            marginTop: '16px', 
-            padding: '12px', 
-            backgroundColor: '#e7f3ff',
-            borderRadius: '4px',
-            fontSize: '14px'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#e7f3ff',
+              borderRadius: '4px',
+              fontSize: '14px',
+              marginTop: '16px',
+              padding: '12px',
+            }}
+          >
             {searchResults}
           </div>
         )}
@@ -219,14 +220,14 @@ export const VariousActions: Story = {
 // Search bar with custom styling
 export const CustomStyling: Story = {
   args: {
-    label: 'Styled search bar...',
-    className: 'custom-search-bar',
-    onSearchChange: (search: string) => console.log('Custom styled search:', search),
     Actions: [
-      <Button key="advanced" buttonStyle="pill" size="small">
+      <Button buttonStyle="pill" key="advanced" size="small">
         Advanced
       </Button>,
     ],
+    className: 'custom-search-bar',
+    label: 'Styled search bar...',
+    onSearchChange: (search: string) => console.log('Custom styled search:', search),
   },
 }
 
@@ -235,14 +236,14 @@ export const CollectionSearch: Story = {
   render: () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCollection, setSelectedCollection] = useState('pages')
-    
+
     const collections = [
       { id: 'pages', name: 'Pages', count: 24 },
       { id: 'posts', name: 'Blog Posts', count: 156 },
       { id: 'users', name: 'Users', count: 89 },
       { id: 'media', name: 'Media', count: 342 },
     ]
-    
+
     return (
       <div style={{ width: '100%' }}>
         <div style={{ marginBottom: '16px' }}>
@@ -250,39 +251,42 @@ export const CollectionSearch: Story = {
           <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
             {collections.map((collection) => (
               <Button
-                key={collection.id}
                 buttonStyle={selectedCollection === collection.id ? 'primary' : 'secondary'}
-                size="small"
+                key={collection.id}
                 onClick={() => setSelectedCollection(collection.id)}
+                size="small"
               >
                 {collection.name} ({collection.count})
               </Button>
             ))}
           </div>
         </div>
-        
+
         <SearchBar
-          label={`Search ${collections.find(c => c.id === selectedCollection)?.name.toLowerCase()}...`}
-          onSearchChange={setSearchTerm}
           Actions={[
-            <Button key="create" buttonStyle="primary" size="small">
+            <Button buttonStyle="primary" key="create" size="small">
               Create New
             </Button>,
-            <Button key="bulk" buttonStyle="secondary" size="small">
+            <Button buttonStyle="secondary" key="bulk" size="small">
               Bulk Actions
             </Button>,
           ]}
+          label={`Search ${collections.find((c) => c.id === selectedCollection)?.name.toLowerCase()}...`}
+          onSearchChange={setSearchTerm}
         />
-        
-        <div style={{ 
-          marginTop: '16px', 
-          padding: '16px', 
-          backgroundColor: '#f8f9fa',
-          borderRadius: '4px',
-          fontSize: '14px'
-        }}>
+
+        <div
+          style={{
+            backgroundColor: '#f8f9fa',
+            borderRadius: '4px',
+            fontSize: '14px',
+            marginTop: '16px',
+            padding: '16px',
+          }}
+        >
           <p style={{ margin: '0 0 8px 0' }}>
-            <strong>Active Collection:</strong> {collections.find(c => c.id === selectedCollection)?.name}
+            <strong>Active Collection:</strong>{' '}
+            {collections.find((c) => c.id === selectedCollection)?.name}
           </p>
           {searchTerm && (
             <p style={{ margin: 0 }}>
