@@ -25,7 +25,14 @@ const meta = {
   decorators: [
     (Story) => (
       <PayloadMockProviders>
-        <div style={{ maxWidth: '600px', padding: '20px', width: '100%' }}>
+        <div
+          style={{
+            background: 'var(--theme-bg)',
+            maxWidth: '600px',
+            padding: '4px',
+            width: '100%',
+          }}
+        >
           <Story />
         </div>
       </PayloadMockProviders>
@@ -50,6 +57,22 @@ export const Default: Story = {
     label: 'Search...',
     onSearchChange: (search: string) => console.log('Search:', search),
   },
+}
+
+export const MinimalPadding: Story = {
+  args: {
+    label: 'Search with minimal padding...',
+    onSearchChange: (search: string) => console.log('Search:', search),
+  },
+  decorators: [
+    (Story) => (
+      <PayloadMockProviders>
+        <div style={{ background: 'var(--theme-bg)', maxWidth: '600px', width: '100%' }}>
+          <Story />
+        </div>
+      </PayloadMockProviders>
+    ),
+  ],
 }
 
 export const CustomPlaceholder: Story = {
@@ -297,4 +320,72 @@ export const CollectionSearch: Story = {
       </div>
     )
   },
+}
+
+// Payload-style collection header context
+export const InCollectionHeader: Story = {
+  render: () => (
+    <div
+      style={{
+        background: 'var(--theme-bg)',
+        border: '1px solid var(--theme-border-color)',
+        borderRadius: '8px',
+        padding: '0',
+        width: '100%',
+      }}
+    >
+      {/* Mock collection header */}
+      <div
+        style={{
+          alignItems: 'center',
+          borderBottom: '1px solid var(--theme-border-color)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          padding: '16px 20px',
+        }}
+      >
+        <h2 style={{ fontSize: '18px', margin: 0 }}>Pages Collection</h2>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button buttonStyle="primary" size="small">
+            Create New
+          </Button>
+        </div>
+      </div>
+
+      {/* Search bar in typical context */}
+      <div style={{ padding: '16px 20px' }}>
+        <SearchBar
+          Actions={[
+            <Button buttonStyle="secondary" key="filter" size="small">
+              Filter
+            </Button>,
+            <Button buttonStyle="secondary" key="sort" size="small">
+              Sort
+            </Button>,
+          ]}
+          label="Search pages..."
+          onSearchChange={(search) => console.log('Collection search:', search)}
+        />
+      </div>
+
+      {/* Mock table header to show context */}
+      <div
+        style={{
+          background: 'var(--theme-elevation-100)',
+          borderTop: '1px solid var(--theme-border-color)',
+          display: 'grid',
+          fontSize: '12px',
+          fontWeight: '600',
+          gridTemplateColumns: '40px 1fr 120px 100px',
+          padding: '12px 20px',
+          textTransform: 'uppercase',
+        }}
+      >
+        <div>ID</div>
+        <div>Title</div>
+        <div>Status</div>
+        <div>Updated</div>
+      </div>
+    </div>
+  ),
 }
