@@ -32,6 +32,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     field: { admin: { allowCreate } = {}, label, localized, relationTo, required },
     hasGenerateImageFn,
     readOnly,
+    allowCreate=true,
   } = props
 
   const {
@@ -202,6 +203,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
           }}
           path={path}
           readOnly={readOnly}
+          allowCreate={allowCreate}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}
