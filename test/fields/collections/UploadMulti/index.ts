@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { uploadsMulti, uploadsSlug } from '../../slugs.js'
+import { uploads2Slug, uploadsMulti, uploadsSlug } from '../../slugs.js'
 
 const Uploads: CollectionConfig = {
   slug: uploadsMulti,
@@ -13,7 +13,7 @@ const Uploads: CollectionConfig = {
       name: 'media',
       type: 'upload',
       hasMany: true,
-      relationTo: uploadsSlug,
+      relationTo: [uploadsSlug, uploads2Slug],
     },
   ],
 }
