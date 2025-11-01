@@ -466,7 +466,9 @@ export const deTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopieren nach',
     copyToLocale: 'In Sprachvariante kopieren',
     localeToPublish: 'Zu veröffentlichende Sprache',
+    selectedLocales: 'Ausgewählte Sprachen',
     selectLocaleToCopy: 'Sprache zum Kopieren auswählen',
+    selectLocaleToDuplicate: 'Sprachen zum Duplizieren auswählen',
   },
   operators: {
     contains: 'enthält',
