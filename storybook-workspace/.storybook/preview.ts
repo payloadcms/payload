@@ -2,13 +2,13 @@ import type { Preview } from '@storybook/nextjs-vite'
 import React from 'react'
 
 // Import Payload styles
-import '../packages/ui/src/scss/app.scss'
+import '../../packages/ui/src/scss/app.scss'
 
 // Import specific field component styles to ensure they load
-import '../packages/ui/src/fields/FieldLabel/index.scss'
-import '../packages/ui/src/fields/FieldError/index.scss'  
-import '../packages/ui/src/fields/FieldDescription/index.scss'
-import '../packages/ui/src/fields/Checkbox/index.scss'
+import '../../packages/ui/src/fields/FieldLabel/index.scss'
+import '../../packages/ui/src/fields/FieldError/index.scss'  
+import '../../packages/ui/src/fields/FieldDescription/index.scss'
+import '../../packages/ui/src/fields/Checkbox/index.scss'
 
 // Create a mock Next.js AppRouterContext
 const MockAppRouterContext = React.createContext({

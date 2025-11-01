@@ -37,6 +37,9 @@ const config: StorybookConfig = {
     "name": getAbsolutePath("@storybook/nextjs-vite"),
     "options": {}
   },
+  "staticDirs": [
+    "./public"
+  ],
   "viteFinal": async (config) => {
     // Disable react-docgen on problematic files to avoid string length errors
     config.plugins = config.plugins?.map((plugin: any) => {
@@ -60,11 +63,11 @@ const config: StorybookConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      // Basic aliases
-      "@payloadcms/ui": resolve(__dirname, "../packages/ui/src/exports/client/index.ts"),
-      "@payloadcms/ui/elements/*": resolve(__dirname, "../packages/ui/src/elements/*/index.tsx"),
-      "@payloadcms/ui/icons/*": resolve(__dirname, "../packages/ui/src/icons/*/index.tsx"),
-      "@payloadcms/ui/fields/*": resolve(__dirname, "../packages/ui/src/fields/*/index.tsx"),
+      // Basic aliases (updated paths for workspace)
+      "@payloadcms/ui": resolve(__dirname, "../../packages/ui/src/exports/client/index.ts"),
+      "@payloadcms/ui/elements/*": resolve(__dirname, "../../packages/ui/src/elements/*/index.tsx"),
+      "@payloadcms/ui/icons/*": resolve(__dirname, "../../packages/ui/src/icons/*/index.tsx"),
+      "@payloadcms/ui/fields/*": resolve(__dirname, "../../packages/ui/src/fields/*/index.tsx"),
       // Mock Next.js modules for Storybook - these MUST come first to override
       "next/navigation": resolve(__dirname, "../stories/_mocks/next-navigation.jsx"),
       "next/navigation.js": resolve(__dirname, "../stories/_mocks/next-navigation.jsx"),
@@ -106,9 +109,9 @@ const config: StorybookConfig = {
               debug: () => {},
             },
             additionalData: `
-              @import "${resolve(__dirname, '../packages/ui/src/scss/vars.scss')}";
-              @import "${resolve(__dirname, '../packages/ui/src/scss/colors.scss')}";
-              @import "${resolve(__dirname, '../packages/ui/src/scss/queries.scss')}";
+              @import "${resolve(__dirname, '../../packages/ui/src/scss/vars.scss')}";
+              @import "${resolve(__dirname, '../../packages/ui/src/scss/colors.scss')}";
+              @import "${resolve(__dirname, '../../packages/ui/src/scss/queries.scss')}";
             `,
           },
         },
