@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { PlusIcon } from '../../../packages/ui/src/icons/Plus'
+import { PlusIcon } from '@payloadcms/ui'
 
 const meta = {
   argTypes: {

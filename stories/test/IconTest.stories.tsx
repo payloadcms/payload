@@ -1,14 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
+import { CheckIcon, EditIcon, PlusIcon, SearchIcon, XIcon } from '@payloadcms/ui'
 import React from 'react'
-
-import { CheckIcon } from '../../packages/ui/src/icons/Check'
-import { EditIcon } from '../../packages/ui/src/icons/Edit'
-// Try direct imports
-import { PlusIcon } from '../../packages/ui/src/icons/Plus'
-import { SearchIcon } from '../../packages/ui/src/icons/Search'
+// Keep TrashIcon as direct import since it's not exported from main package
 import { TrashIcon } from '../../packages/ui/src/icons/Trash'
-import { XIcon } from '../../packages/ui/src/icons/X'
 
 const IconTest = () => {
   return (

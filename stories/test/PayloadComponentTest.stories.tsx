@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
 // Direct ES import instead of require
-import { PlusIcon } from '../../packages/ui/src/icons/Plus'
+import { PlusIcon } from '@payloadcms/ui'
 
 const PayloadComponentTest = () => {
   return (

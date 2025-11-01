@@ -2,39 +2,42 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import React from 'react'
 
-// Import all available icons
-import { CalendarIcon } from '../../../packages/ui/src/icons/Calendar'
-import { CheckIcon } from '../../../packages/ui/src/icons/Check'
-import { ChevronIcon } from '../../../packages/ui/src/icons/Chevron'
-import { CloseMenuIcon } from '../../../packages/ui/src/icons/CloseMenu'
-import { CodeBlockIcon } from '../../../packages/ui/src/icons/CodeBlock'
-import { CopyIcon } from '../../../packages/ui/src/icons/Copy'
-import { DocumentIcon } from '../../../packages/ui/src/icons/Document'
+// Icons exported from @payloadcms/ui package
+import {
+  CalendarIcon,
+  CheckIcon,
+  ChevronIcon,
+  CloseMenuIcon,
+  CodeBlockIcon,
+  CopyIcon,
+  DocumentIcon,
+  DragHandleIcon,
+  EditIcon,
+  ExternalLinkIcon,
+  FolderIcon,
+  GearIcon,
+  GridViewIcon,
+  LineIcon,
+  LinkIcon,
+  ListViewIcon,
+  LogOutIcon,
+  MenuIcon,
+  MinimizeMaximizeIcon,
+  MoreIcon,
+  MoveFolderIcon,
+  PlusIcon,
+  SearchIcon,
+  SwapIcon,
+  XIcon,
+} from '@payloadcms/ui'
+// Icons NOT exported from main package - using direct imports
 import { Dots as DotsIcon } from '../../../packages/ui/src/icons/Dots'
-import { DragHandleIcon } from '../../../packages/ui/src/icons/DragHandle'
-import { EditIcon } from '../../../packages/ui/src/icons/Edit'
-import { ExternalLinkIcon } from '../../../packages/ui/src/icons/ExternalLink'
 import { EyeIcon } from '../../../packages/ui/src/icons/Eye'
-import { FolderIcon } from '../../../packages/ui/src/icons/Folder'
-import { GearIcon } from '../../../packages/ui/src/icons/Gear'
-import { GridViewIcon } from '../../../packages/ui/src/icons/GridView'
-import { LineIcon } from '../../../packages/ui/src/icons/Line'
-import { LinkIcon } from '../../../packages/ui/src/icons/Link'
-import { ListViewIcon } from '../../../packages/ui/src/icons/ListView'
 import { LockIcon } from '../../../packages/ui/src/icons/Lock'
-import { LogOutIcon } from '../../../packages/ui/src/icons/LogOut'
-import { MenuIcon } from '../../../packages/ui/src/icons/Menu'
-import { MinimizeMaximizeIcon } from '../../../packages/ui/src/icons/MinimizeMaximize'
-import { MoreIcon } from '../../../packages/ui/src/icons/More'
-import { MoveFolderIcon } from '../../../packages/ui/src/icons/MoveFolder'
 import { PeopleIcon } from '../../../packages/ui/src/icons/People'
-import { PlusIcon } from '../../../packages/ui/src/icons/Plus'
-import { SearchIcon } from '../../../packages/ui/src/icons/Search'
 import { SortDownIcon as SortIcon } from '../../../packages/ui/src/icons/Sort'
-import { SwapIcon } from '../../../packages/ui/src/icons/Swap'
 import { ThreeDotsIcon } from '../../../packages/ui/src/icons/ThreeDots'
 import { TrashIcon } from '../../../packages/ui/src/icons/Trash'
-import { XIcon } from '../../../packages/ui/src/icons/X'
 
 const iconComponents = [
   { name: 'Calendar', category: 'General', component: CalendarIcon },

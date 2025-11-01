@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { EditIcon } from '../../../packages/ui/src/icons/Edit'
+import { EditIcon } from '@payloadcms/ui'
 
 const meta = {
   component: EditIcon,

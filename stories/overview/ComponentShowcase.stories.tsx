@@ -17,13 +17,9 @@ import { FieldError } from '../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../packages/ui/src/fields/FieldLabel'
 // Note: TextInput, TextareaInput, SelectInput, NumberField, DateTimeField have full story suites
 
-import { CheckIcon } from '../../packages/ui/src/icons/Check'
-import { EditIcon } from '../../packages/ui/src/icons/Edit'
-// Import icons
-import { PlusIcon } from '../../packages/ui/src/icons/Plus'
-import { SearchIcon } from '../../packages/ui/src/icons/Search'
+import { CheckIcon, EditIcon, PlusIcon, SearchIcon, XIcon } from '@payloadcms/ui'
+// Import icons - keep TrashIcon as direct import since it's not exported from main package
 import { TrashIcon } from '../../packages/ui/src/icons/Trash'
-import { XIcon } from '../../packages/ui/src/icons/X'
 import { PayloadMockProviders } from '../_mocks/MockProviders'
 
 const meta = {

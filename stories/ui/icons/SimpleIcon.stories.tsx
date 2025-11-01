@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
+import { EditIcon, PlusIcon } from '@payloadcms/ui'
 import React from 'react'
-
-import { EditIcon } from '../../../packages/ui/src/icons/Edit'
-import { PlusIcon } from '../../../packages/ui/src/icons/Plus'
+// Keep TrashIcon as direct import since it's not exported from main package
 import { TrashIcon } from '../../../packages/ui/src/icons/Trash'
 
 const meta = {

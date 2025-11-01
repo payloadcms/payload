@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
+import { CheckIcon, EditIcon, XIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { Banner } from '../../../packages/ui/src/elements/Banner'
-import { CheckIcon } from '../../../packages/ui/src/icons/Check'
-import { EditIcon } from '../../../packages/ui/src/icons/Edit'
-import { XIcon } from '../../../packages/ui/src/icons/X'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
 const meta = {
