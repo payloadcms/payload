@@ -11,7 +11,7 @@ import { PayloadMockProviders } from '../../_mocks/MockProviders'
 // Import the actual Payload Password field styles
 import '../../../packages/ui/src/fields/Password/index.scss'
 
-interface MockPasswordFieldProps {
+interface PasswordFieldProps {
   admin?: {
     autoComplete?: string
     description?: string
@@ -26,7 +26,7 @@ interface MockPasswordFieldProps {
   value?: string
 }
 
-const MockPasswordField: React.FC<MockPasswordFieldProps> = ({
+const PasswordField: React.FC<PasswordFieldProps> = ({
   name,
   admin = {},
   label,
@@ -115,7 +115,7 @@ const meta = {
       description: 'Whether the field is required',
     },
   },
-  component: MockPasswordField,
+  component: PasswordField,
   decorators: [
     (Story) => (
       <PayloadMockProviders>
@@ -129,13 +129,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'MockPasswordField provides secure password input with show/hide toggle and validation features.',
+          'PasswordField provides secure password input with show/hide toggle and validation features.',
       },
     },
     layout: 'centered',
   },
-  title: 'UI/Fields/MockPasswordField',
-} satisfies Meta<typeof MockPasswordField>
+  title: 'UI/Fields/PasswordField',
+} satisfies Meta<typeof PasswordField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -279,7 +279,7 @@ export const Interactive: Story = {
           <p>Type in the password field below to see real-time strength analysis.</p>
         </div>
 
-        <MockPasswordField
+        <PasswordField
           admin={{
             description: 'Password strength will be shown below as you type.',
             placeholder: 'Try: MySecure123!',
@@ -340,7 +340,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid Strong Password</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             placeholder: 'Strong password example',
           }}
@@ -354,7 +354,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Weak Password</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             placeholder: 'Weak password example',
           }}
@@ -368,7 +368,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Required but Empty</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             description: 'This field is required but currently empty.',
             placeholder: 'Required password...',
@@ -383,7 +383,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Disabled State</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             description: 'This password field is disabled.',
             disabled: true,
@@ -405,7 +405,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>User Registration</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             autoComplete: 'new-password',
             description:
@@ -421,7 +421,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Login Form</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             autoComplete: 'current-password',
             placeholder: 'Enter your password',
@@ -436,7 +436,7 @@ export const RealWorldExamples: Story = {
       <div>
         <h4>Password Change</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <MockPasswordField
+          <PasswordField
             admin={{
               autoComplete: 'current-password',
               placeholder: 'Current password',
@@ -446,7 +446,7 @@ export const RealWorldExamples: Story = {
             path="currentPassword"
             required={true}
           />
-          <MockPasswordField
+          <PasswordField
             admin={{
               autoComplete: 'new-password',
               description: 'New password must be different from your current password.',
@@ -457,7 +457,7 @@ export const RealWorldExamples: Story = {
             path="newPassword"
             required={true}
           />
-          <MockPasswordField
+          <PasswordField
             admin={{
               autoComplete: 'new-password',
               placeholder: 'Confirm new password',
@@ -472,7 +472,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Admin User Creation</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             autoComplete: 'new-password',
             description:
@@ -488,7 +488,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>API Key Authentication</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             description: 'Enter your API secret key. This will be encrypted and stored securely.',
             placeholder: 'API secret key',
@@ -502,7 +502,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Database Connection</h4>
-        <MockPasswordField
+        <PasswordField
           admin={{
             description: 'Database password for connecting to your database server.',
             placeholder: 'Database password',

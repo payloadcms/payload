@@ -11,8 +11,8 @@ import { PayloadMockProviders } from '../../_mocks/MockProviders'
 // Import the actual Payload JSON field styles
 import '../../../packages/ui/src/fields/JSON/index.scss'
 
-// Mock JSON Field component that simulates the real MockJSONField behavior
-interface MockJSONFieldProps {
+// Mock JSON Field component that simulates the real JSONField behavior
+interface JSONFieldProps {
   admin?: {
     description?: string
     disabled?: boolean
@@ -26,7 +26,7 @@ interface MockJSONFieldProps {
   value?: object | string
 }
 
-const MockJSONField: React.FC<MockJSONFieldProps> = ({
+const JSONField: React.FC<JSONFieldProps> = ({
   name,
   admin = {},
   label,
@@ -108,7 +108,7 @@ const meta = {
       description: 'Whether the field is required',
     },
   },
-  component: MockJSONField,
+  component: JSONField,
   decorators: [
     (Story) => (
       <PayloadMockProviders>
@@ -122,13 +122,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'MockJSONField provides JSON editing with syntax highlighting, validation, and formatting capabilities.',
+          'JSONField provides JSON editing with syntax highlighting, validation, and formatting capabilities.',
       },
     },
     layout: 'centered',
   },
-  title: 'UI/Fields/MockJSONField',
-} satisfies Meta<typeof MockJSONField>
+  title: 'UI/Fields/JSONField',
+} satisfies Meta<typeof JSONField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -311,7 +311,7 @@ export const Interactive: Story = {
           </div>
         </div>
 
-        <MockJSONField
+        <JSONField
           admin={{
             description: 'JSON validation status is shown below the editor.',
           }}
@@ -360,7 +360,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid JSON Object</h4>
-        <MockJSONField
+        <JSONField
           label="Valid JSON Configuration"
           name="validJson"
           path="validJson"
@@ -380,7 +380,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid JSON Array</h4>
-        <MockJSONField
+        <JSONField
           label="Valid JSON Array"
           name="validArray"
           path="validArray"
@@ -399,7 +399,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Invalid JSON Syntax</h4>
-        <MockJSONField
+        <JSONField
           admin={{
             description: 'This example shows invalid JSON with missing quotes and trailing comma.',
           }}
@@ -417,7 +417,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Required but Empty</h4>
-        <MockJSONField
+        <JSONField
           admin={{
             description: 'This field is required but currently empty.',
           }}
@@ -522,7 +522,7 @@ export const JSONExamples: Story = {
           <div key={index}>
             <h4>{title}</h4>
             <p style={{ color: '#6b7280', marginBottom: '16px' }}>{description}</p>
-            <MockJSONField
+            <JSONField
               label={`${title} JSON`}
               name={`example${index}`}
               path={`example${index}`}
@@ -543,7 +543,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Website Meta Tags</h4>
-        <MockJSONField
+        <JSONField
           admin={{
             description: 'SEO meta tags and social media configuration for this page.',
           }}
@@ -576,7 +576,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Form Field Configuration</h4>
-        <MockJSONField
+        <JSONField
           admin={{
             description:
               'Dynamic form field configuration that defines field types, validation rules, and display options.',
@@ -627,7 +627,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>API Integration Settings</h4>
-        <MockJSONField
+        <JSONField
           admin={{
             description:
               'Third-party API integration configuration including endpoints, authentication, and retry policies.',
@@ -675,7 +675,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Content Layout Configuration</h4>
-        <MockJSONField
+        <JSONField
           admin={{
             description:
               'Page layout configuration that defines sections, components, and styling options.',

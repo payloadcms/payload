@@ -17,7 +17,7 @@ interface Option {
   value: string
 }
 
-interface RadioGroupProps {
+interface RadioGroupFieldProps {
   admin?: {
     description?: string
     disabled?: boolean
@@ -32,7 +32,7 @@ interface RadioGroupProps {
   value?: string
 }
 
-const MockRadioGroupField: React.FC<RadioGroupProps> = ({
+const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
   name,
   admin = {},
   label,
@@ -108,7 +108,7 @@ const meta = {
       description: 'Whether the field is required',
     },
   },
-  component: MockRadioGroupField,
+  component: RadioGroupField,
   decorators: [
     (Story) => (
       <PayloadMockProviders>
@@ -122,13 +122,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'MockRadioGroupField provides single-selection radio button groups with flexible layout options and validation.',
+          'RadioGroupField provides single-selection radio button groups with flexible layout options and validation.',
       },
     },
     layout: 'centered',
   },
-  title: 'UI/Fields/MockRadioGroupField',
-} satisfies Meta<typeof MockRadioGroupField>
+  title: 'UI/Fields/RadioGroupField',
+} satisfies Meta<typeof RadioGroupField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -278,7 +278,7 @@ export const Interactive: Story = {
           </label>
         </div>
 
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description: `Layout: ${layout}. Selection will be shown above.`,
             layout,
@@ -320,7 +320,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid Selection</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           label="Valid Choice"
           name="validChoice"
           options={[
@@ -336,7 +336,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Required but Empty</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description: 'This field is required but no option has been selected.',
           }}
@@ -355,7 +355,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Disabled State</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description: 'This radio group is disabled and cannot be changed.',
             disabled: true,
@@ -382,7 +382,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>User Role Selection</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description:
               "Select the role that best describes this user's permissions and access level.",
@@ -403,7 +403,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Notification Preferences</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description: 'How would you like to receive notifications about important updates?',
             layout: 'vertical',
@@ -423,7 +423,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Content Type</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description:
               'What type of content are you creating? This affects available fields and templates.',
@@ -444,7 +444,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Pricing Plan</h4>
-        <MockRadioGroupField
+        <RadioGroupField
           admin={{
             description: 'Choose your subscription plan. You can upgrade or downgrade at any time.',
             layout: 'vertical',

@@ -11,8 +11,8 @@ import { PayloadMockProviders } from '../../_mocks/MockProviders'
 // Import the actual Payload Code field styles
 import '../../../packages/ui/src/fields/Code/index.scss'
 
-// Mock Code Field component that simulates the real MockCodeField behavior
-interface MockCodeFieldProps {
+// Mock Code Field component that simulates the real CodeField behavior
+interface CodeFieldProps {
   admin?: {
     description?: string
     disabled?: boolean
@@ -26,7 +26,7 @@ interface MockCodeFieldProps {
   value?: string
 }
 
-const MockCodeField: React.FC<MockCodeFieldProps> = ({
+const CodeField: React.FC<CodeFieldProps> = ({
   name,
   admin = {},
   label,
@@ -100,7 +100,7 @@ const meta = {
       description: 'Whether the field is required',
     },
   },
-  component: MockCodeField,
+  component: CodeField,
   decorators: [
     (Story) => (
       <PayloadMockProviders>
@@ -114,13 +114,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'MockCodeField provides syntax-highlighted code editing capabilities with language detection and validation.',
+          'CodeField provides syntax-highlighted code editing capabilities with language detection and validation.',
       },
     },
     layout: 'centered',
   },
-  title: 'UI/Fields/MockCodeField',
-} satisfies Meta<typeof MockCodeField>
+  title: 'UI/Fields/CodeField',
+} satisfies Meta<typeof CodeField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -341,7 +341,7 @@ const createUser = (userData: Partial<User>): User => {
             </button>
           </div>
 
-          <MockCodeField
+          <CodeField
             admin={{
               description: `Currently editing ${language.toUpperCase()} code. Use the button above to load sample code.`,
               language,
@@ -377,7 +377,7 @@ export const AllLanguages: Story = {
         <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: '1fr 1fr' }}>
           {languages.map(({ key, label, sample }) => (
             <div key={key}>
-              <MockCodeField
+              <CodeField
                 admin={{
                   language: key,
                 }}
@@ -401,7 +401,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid State</h4>
-        <MockCodeField
+        <CodeField
           admin={{
             language: 'javascript',
           }}
@@ -414,7 +414,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Required Field (Empty)</h4>
-        <MockCodeField
+        <CodeField
           admin={{
             language: 'json',
           }}
@@ -428,7 +428,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>With Custom Validation Message</h4>
-        <MockCodeField
+        <CodeField
           admin={{
             description: 'Enter valid CSS rules for the component styling.',
             language: 'css',

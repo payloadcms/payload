@@ -11,7 +11,7 @@ import { PayloadMockProviders } from '../../_mocks/MockProviders'
 // Import the actual Payload Email field styles
 import '../../../packages/ui/src/fields/Email/index.scss'
 
-interface MockEmailFieldProps {
+interface EmailFieldProps {
   admin?: {
     description?: string
     disabled?: boolean
@@ -26,7 +26,7 @@ interface MockEmailFieldProps {
   value?: string
 }
 
-const MockEmailField: React.FC<EmailFieldProps> = ({
+const EmailField: React.FC<EmailFieldProps> = ({
   name,
   admin = {},
   defaultValue,
@@ -104,7 +104,7 @@ const meta = {
       description: 'Whether the field is required',
     },
   },
-  component: MockEmailField,
+  component: EmailField,
   decorators: [
     (Story) => (
       <PayloadMockProviders>
@@ -118,13 +118,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'MockEmailField provides email input with built-in format validation and accessibility features.',
+          'EmailField provides email input with built-in format validation and accessibility features.',
       },
     },
     layout: 'centered',
   },
-  title: 'UI/Fields/MockEmailField',
-} satisfies Meta<typeof MockEmailField>
+  title: 'UI/Fields/EmailField',
+} satisfies Meta<typeof EmailField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -219,7 +219,7 @@ export const Interactive: Story = {
           <p>Type in the email field below to see real-time validation feedback.</p>
         </div>
 
-        <MockEmailField
+        <EmailField
           admin={{
             description: 'This field validates email format as you type.',
             placeholder: 'try typing: user@domain.com',
@@ -269,7 +269,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid Email</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             placeholder: 'user@example.com',
           }}
@@ -283,7 +283,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Invalid Email Format</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             placeholder: 'user@example.com',
           }}
@@ -297,7 +297,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Required but Empty</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description: 'This field is required but currently empty.',
             placeholder: 'Required email address...',
@@ -312,7 +312,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Long Email Address</h4>
-        <MockEmailField
+        <EmailField
           label="Very Long Email Address"
           name="longEmail"
           path="longEmail"
@@ -338,11 +338,11 @@ export const CommonEmailExamples: Story = {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <h3>Common Email Format Examples</h3>
-        <p>These examples show various valid email formats that the MockEmailField accepts:</p>
+        <p>These examples show various valid email formats that the EmailField accepts:</p>
 
         <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: '1fr 1fr' }}>
           {commonEmails.map((email, index) => (
-            <MockEmailField
+            <EmailField
               key={index}
               label={`Example ${index + 1}`}
               name={`example${index + 1}`}
@@ -364,7 +364,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>User Registration</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description:
               "We'll use this email to send you account confirmation and important updates.",
@@ -379,7 +379,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Newsletter Subscription</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description: 'Subscribe to our weekly newsletter for the latest updates and insights.',
             placeholder: 'your.email@example.com',
@@ -393,7 +393,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Contact Information</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description: 'Primary contact email for this account. Used for billing and support.',
             placeholder: 'billing@company.com',
@@ -407,7 +407,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Team Member Invitation</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description: 'Enter the email address of the person you want to invite to your team.',
             placeholder: 'teammate@company.com',
@@ -421,7 +421,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Support Contact</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description:
               "If you need help, we'll send updates about your support ticket to this email.",
@@ -436,7 +436,7 @@ export const RealWorldExamples: Story = {
 
       <div>
         <h4>Notification Settings</h4>
-        <MockEmailField
+        <EmailField
           admin={{
             description:
               'Email address for system notifications and alerts. Leave blank to use your primary email.',

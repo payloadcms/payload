@@ -11,7 +11,7 @@ import { PayloadMockProviders } from '../../_mocks/MockProviders'
 // Import the actual Payload Slug field styles
 import '../../../packages/ui/src/fields/Slug/index.scss'
 
-interface MockSlugFieldProps {
+interface SlugFieldProps {
   admin?: {
     checkAvailability?: boolean
     description?: string
@@ -26,7 +26,7 @@ interface MockSlugFieldProps {
   value?: string
 }
 
-const MockSlugField: React.FC<MockSlugFieldProps> = ({
+const SlugField: React.FC<SlugFieldProps> = ({
   name,
   admin = {},
   label,
@@ -106,7 +106,7 @@ const meta = {
       description: 'Whether the field is required',
     },
   },
-  component: MockSlugField,
+  component: SlugField,
   decorators: [
     (Story) => (
       <PayloadMockProviders>
@@ -120,13 +120,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'MockSlugField provides URL-friendly slug generation from other fields, with auto-generation and manual editing capabilities.',
+          'SlugField provides URL-friendly slug generation from other fields, with auto-generation and manual editing capabilities.',
       },
     },
     layout: 'centered',
   },
-  title: 'UI/Fields/MockSlugField',
-} satisfies Meta<typeof MockSlugField>
+  title: 'UI/Fields/SlugField',
+} satisfies Meta<typeof SlugField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -236,7 +236,7 @@ export const Interactive: Story = {
           />
         </div>
 
-        <MockSlugField
+        <SlugField
           admin={{
             description:
               'Generated automatically from the title above, but you can edit it manually.',
@@ -293,7 +293,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Valid Slug</h4>
-        <MockSlugField
+        <SlugField
           admin={{
             useAsTitle: 'title',
           }}
@@ -307,7 +307,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Slug with Numbers</h4>
-        <MockSlugField
+        <SlugField
           admin={{
             useAsTitle: 'title',
           }}
@@ -321,7 +321,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Required but Empty</h4>
-        <MockSlugField
+        <SlugField
           admin={{
             description: 'This slug field is required but currently empty.',
             useAsTitle: 'title',
@@ -336,7 +336,7 @@ export const ValidationStates: Story = {
 
       <div>
         <h4>Long Slug</h4>
-        <MockSlugField
+        <SlugField
           admin={{
             useAsTitle: 'title',
           }}
@@ -375,7 +375,7 @@ export const SlugGenerationExamples: Story = {
               <div style={{ marginBottom: '8px' }}>
                 <strong>Title:</strong> "{title}"
               </div>
-              <MockSlugField
+              <SlugField
                 admin={{
                   useAsTitle: 'title',
                 }}
@@ -403,7 +403,7 @@ export const RealWorldExamples: Story = {
         <div style={{ marginBottom: '12px' }}>
           <strong>Post Title:</strong> "Building Better APIs with Payload CMS"
         </div>
-        <MockSlugField
+        <SlugField
           admin={{
             description: 'This slug will be used in the blog post URL: /blog/[slug]',
             useAsTitle: 'title',
@@ -421,7 +421,7 @@ export const RealWorldExamples: Story = {
         <div style={{ marginBottom: '12px' }}>
           <strong>Product Name:</strong> "Premium WordPress Hosting Plan"
         </div>
-        <MockSlugField
+        <SlugField
           admin={{
             description: 'Product URL: /products/[slug]. Keep it short and descriptive.',
             useAsTitle: 'name',
@@ -439,7 +439,7 @@ export const RealWorldExamples: Story = {
         <div style={{ marginBottom: '12px' }}>
           <strong>Team Member:</strong> "Sarah Johnson - Lead Developer"
         </div>
-        <MockSlugField
+        <SlugField
           admin={{
             description: 'Team member profile URL: /team/[slug]',
             useAsTitle: 'fullName',
@@ -457,7 +457,7 @@ export const RealWorldExamples: Story = {
         <div style={{ marginBottom: '12px' }}>
           <strong>Section Title:</strong> "Authentication & Security"
         </div>
-        <MockSlugField
+        <SlugField
           admin={{
             description: 'Documentation URL: /docs/[slug]. Should be clear and hierarchical.',
             useAsTitle: 'sectionTitle',
@@ -475,7 +475,7 @@ export const RealWorldExamples: Story = {
         <div style={{ marginBottom: '12px' }}>
           <strong>Event:</strong> "React Conference 2024 - San Francisco"
         </div>
-        <MockSlugField
+        <SlugField
           admin={{
             description: 'Event page URL: /events/[slug]. Include year and location if relevant.',
             useAsTitle: 'eventTitle',
@@ -493,7 +493,7 @@ export const RealWorldExamples: Story = {
         <div style={{ marginBottom: '12px' }}>
           <strong>Category:</strong> "Web Development & Design"
         </div>
-        <MockSlugField
+        <SlugField
           admin={{
             description:
               'Category archive URL: /category/[slug]. Keep consistent with site structure.',
