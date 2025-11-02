@@ -38,18 +38,18 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 ## Build Commands
 
 - `pnpm install` - Install all dependencies (pnpm required - run `corepack enable` first)
-- `pnpm build` or `pnpm build:core` - Build core packages (excludes plugins and storage adapters)
-- `pnpm build:all` - Build all packages
-- `pnpm build:<directory_name>` - Build specific package (e.g. `pnpm build:db-mongodb`, `pnpm build:ui`)
+- `pnpm run build` or `pnpm run build:core` - Build core packages (excludes plugins and storage adapters)
+- `pnpm run build:all` - Build all packages
+- `pnpm run build:<directory_name>` - Build specific package (e.g. `pnpm run build:db-mongodb`, `pnpm run build:ui`)
 
 ## Development
 
 ### Running Dev Server
 
-- `pnpm dev` - Start dev server with default config (`test/_community/config.ts`)
-- `pnpm dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm dev fields` loads `test/fields/config.ts`)
-- `pnpm dev:postgres` - Run dev server with Postgres
-- `pnpm dev:memorydb` - Run dev server with in-memory MongoDB
+- `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
+- `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
+- `pnpm run dev:postgres` - Run dev server with Postgres
+- `pnpm run dev:memorydb` - Run dev server with in-memory MongoDB
 
 ### Development Environment
 
@@ -62,17 +62,17 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ### Running Tests
 
-- `pnpm test` - Run all tests (integration + components + e2e)
-- `pnpm test:int` - Run integration tests (MongoDB, recommended for verifying local changes)
-- `pnpm test:int <directory_name>` - Run specific integration test suite (e.g. `pnpm test:int fields`)
-- `pnpm test:int:postgres` - Run integration tests with Postgres
-- `pnpm test:int:sqlite` - Run integration tests with SQLite
-- `pnpm test:unit` - Run unit tests
-- `pnpm test:e2e` - Run end-to-end tests (Playwright)
-- `pnpm test:e2e:headed` - Run e2e tests in headed mode
-- `pnpm test:e2e:debug` - Run e2e tests in debug mode
-- `pnpm test:components` - Run component tests (Jest)
-- `pnpm test:types` - Run type tests (tstyche)
+- `pnpm run test` - Run all tests (integration + components + e2e)
+- `pnpm run test:int` - Run integration tests (MongoDB, recommended for verifying local changes)
+- `pnpm run test:int <directory_name>` - Run specific integration test suite (e.g. `pnpm run test:int fields`)
+- `pnpm run test:int:postgres` - Run integration tests with Postgres
+- `pnpm run test:int:sqlite` - Run integration tests with SQLite
+- `pnpm run test:unit` - Run unit tests
+- `pnpm run test:e2e` - Run end-to-end tests (Playwright)
+- `pnpm run test:e2e:headed` - Run e2e tests in headed mode
+- `pnpm run test:e2e:debug` - Run e2e tests in debug mode
+- `pnpm run test:components` - Run component tests (Jest)
+- `pnpm run test:types` - Run type tests (tstyche)
 
 ### Test Structure
 
@@ -86,19 +86,19 @@ test/<feature-name>/
 └── payload-types.ts # Generated types
 ```
 
-Generate types for a test directory: `pnpm dev:generate-types <directory_name>`
+Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
 
 ## Linting & Formatting
 
-- `pnpm lint` - Run linter across all packages
-- `pnpm lint:fix` - Fix linting issues
+- `pnpm run lint` - Run linter across all packages
+- `pnpm run lint:fix` - Fix linting issues
 
 ## Internationalization
 
 - Translation files are in `packages/translations/src/languages/`
 - Add new strings to English locale first, then translate to other languages
-- Run `pnpm translateNewKeys` to auto-translate new keys (requires `OPENAI_KEY` in `.env`)
-- Lexical translations: `cd packages/richtext-lexical && pnpm translateNewKeys`
+- Run `pnpm run translateNewKeys` to auto-translate new keys (requires `OPENAI_KEY` in `.env`)
+- Lexical translations: `cd packages/richtext-lexical && pnpm run translateNewKeys`
 
 ## Commit & PR Guidelines
 
