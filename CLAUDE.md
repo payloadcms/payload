@@ -36,6 +36,12 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Source files are in `src/`, compiled outputs go to `dist/`
 - Monorepo uses pnpm workspaces and Turbo for builds
 
+## Quick Start
+
+1. `pnpm install`
+2. `pnpm run build:core`
+3. `pnpm run dev` (MongoDB) or `pnpm run dev:postgres`
+
 ## Build Commands
 
 - `pnpm install` - Install all dependencies
@@ -62,19 +68,12 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ## Testing
 
-### Running Tests
-
 - `pnpm run test` - Run all tests (integration + components + e2e)
-- `pnpm run test:int` - Run integration tests (MongoDB, recommended for verifying local changes)
-- `pnpm run test:int <directory_name>` - Run specific integration test suite (e.g. `pnpm run test:int fields`)
-- `pnpm run test:int:postgres` - Run integration tests with Postgres
-- `pnpm run test:int:sqlite` - Run integration tests with SQLite
-- `pnpm run test:unit` - Run unit tests
-- `pnpm run test:e2e` - Run end-to-end tests (Playwright)
-- `pnpm run test:e2e:headed` - Run e2e tests in headed mode
-- `pnpm run test:e2e:debug` - Run e2e tests in debug mode
-- `pnpm run test:components` - Run component tests (Jest)
-- `pnpm run test:types` - Run type tests (tstyche)
+- `pnpm run test:int` - Integration tests (MongoDB, recommended)
+- `pnpm run test:int <dir>` - Specific test suite (e.g. `fields`)
+- `pnpm run test:int:postgres|sqlite` - Integration tests with other databases
+- `pnpm run test:e2e` - Playwright tests (add `:headed` or `:debug` suffix)
+- `pnpm run test:unit|components|types` - Other test suites
 
 ### Test Structure
 
