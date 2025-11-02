@@ -36,7 +36,7 @@
       "Bash(pwd)",
       "Bash(which:*)",
       "WebFetch(domain:*)",
-      "WebSearch(*)"
+      "WebSearch"
     ]
   }
 }
