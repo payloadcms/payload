@@ -14,8 +14,9 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/next` - Next.js integration layer
   - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
   - `packages/drizzle` - Drizzle ORM integration
+  - `packages/kv-redis` - Redis key-value store adapter
   - `packages/richtext-*` - Rich text editors (Lexical, Slate)
-  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob)
+  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
   - `packages/graphql` - GraphQL API layer
@@ -37,7 +38,8 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ## Build Commands
 
-- `pnpm install` - Install all dependencies (pnpm required - run `corepack enable` first)
+- `pnpm install` - Install all dependencies
+- `pnpm turbo` - All Turbo commands should be run from root with pnpm - not with `turbo` directly
 - `pnpm run build` or `pnpm run build:core` - Build core packages (excludes plugins and storage adapters)
 - `pnpm run build:all` - Build all packages
 - `pnpm run build:<directory_name>` - Build specific package (e.g. `pnpm run build:db-mongodb`, `pnpm run build:ui`)
