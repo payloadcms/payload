@@ -35,7 +35,14 @@
       "Bash(pnpm why:*)",
       "Bash(pwd)",
       "Bash(which:*)",
-      "WebFetch(domain:*)",
+      "WebFetch(domain:docs.aws.amazon.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:payloadcms.com)",
+      "WebFetch(domain:pure.md)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:www.npmjs.com)",
       "WebSearch"
     ]
   }
