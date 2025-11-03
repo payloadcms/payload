@@ -28,6 +28,7 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
+      build_cache_key: ${{ steps.cache-key.outputs.key }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -58,6 +59,14 @@ jobs:
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
+
+      - name: Compute build cache key
+        id: cache-key
+        run: |
+          LOCKFILE_HASH="${{ hashFiles('**/pnpm-lock.yaml') }}"
+          CACHE_KEY="build-${{ github.sha }}-${LOCKFILE_HASH}"
+          echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+          echo "Build cache key: ${CACHE_KEY}"
 
   lint:
     runs-on: ubuntu-24.04
@@ -91,7 +100,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
+          restore-keys: |
+            build-${{ github.sha }}-
 
   tests-unit:
     runs-on: ubuntu-24.04
@@ -110,7 +121,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -134,7 +145,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
@@ -205,7 +216,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -340,7 +351,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -484,7 +495,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -587,7 +598,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -684,7 +695,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -743,7 +754,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ needs.changes.outputs.build_cache_key }}
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
