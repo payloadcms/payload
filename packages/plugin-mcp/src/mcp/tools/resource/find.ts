@@ -64,6 +64,7 @@ export const findResourceTool = (
           const doc = await payload.findByID({
             id,
             collection: collectionSlug,
+            overrideAccess: false,
             user,
           })
 
@@ -114,6 +115,7 @@ ${JSON.stringify(doc, null, 2)}`,
       const findOptions: Parameters<typeof payload.find>[0] = {
         collection: collectionSlug,
         limit,
+        overrideAccess: false,
         page,
         user,
       }

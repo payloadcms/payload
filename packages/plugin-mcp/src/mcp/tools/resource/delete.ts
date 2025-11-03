@@ -77,6 +77,7 @@ export const deleteResourceTool = (
       const deleteOptions: Record<string, unknown> = {
         collection: collectionSlug,
         depth,
+        overrideAccess: false,
         user,
       }
 

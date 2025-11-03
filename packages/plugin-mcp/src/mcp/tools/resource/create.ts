@@ -52,6 +52,7 @@ export const createResourceTool = (
         collection: collectionSlug,
         // TODO: Move the override to a `beforeChange` hook and extend the payloadAPI context req to include MCP request info.
         data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+        overrideAccess: false,
         user,
       })
 
