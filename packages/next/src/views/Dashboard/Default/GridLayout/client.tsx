@@ -1,14 +1,15 @@
 'use client'
 
+import type { DragStartEvent } from '@dnd-kit/core'
 import type { Widget } from 'payload'
 
-import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import React, { useEffect, useId } from 'react'
+import React, { useEffect, useId, useState } from 'react'
 
 import { useDashboardLayout } from './useDashboardLayout.js'
 
@@ -48,6 +49,7 @@ export function GridLayoutDashboardClient({
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
   const { setStepNav } = useStepNav()
+  const [activeId, setActiveId] = useState<null | string>(null)
 
   // Set step nav directly with minimal dependencies to avoid infinite loops
   useEffect(() => {
@@ -73,81 +75,30 @@ export function GridLayoutDashboardClient({
 
   return (
     <div>
-      <DndContext
-        autoScroll={{
-          enabled: true,
-          threshold: {
-            x: 0, // No horizontal scroll
-            y: 0.2, // Allow vertical scroll at 20% from edge
-          },
-        }}
-      >
-        <Droppable
-          className={`grid-layout ${isEditing ? 'editing' : ''}`}
-          onDragOver={(_ev) => {
-            // STEP 1: get the center of all widgets
-            const widgets = document.querySelectorAll('.widget')
-            const widgetCenters = Array.from(widgets).map((widget) => {
-              const rect = widget.getBoundingClientRect()
-              return {
-                x: rect.left + rect.width / 2 + window.scrollX,
-                y: rect.top + rect.height / 2 + window.scrollY,
-              }
-            })
-
-            // STEP 2: render a red dot in the center of each widget
-            widgetCenters.forEach((center) => {
-              const dot = document.createElement('div')
-              dot.className = 'widget-center'
-              dot.style.position = 'absolute'
-              dot.style.left = `${center.x}px`
-              dot.style.top = `${center.y}px`
-              dot.style.width = '10px'
-              dot.style.height = '10px'
-              dot.style.backgroundColor = 'red'
-              dot.style.borderRadius = '50%'
-              document.body.appendChild(dot)
-            })
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-            }}
-          >
-            {currentLayout &&
-              currentLayout.map((widget) => (
-                <Draggable
-                  className="widget"
-                  data-columns={widget.item.w}
-                  data-slug={widget.item.i}
-                  id={widget.item.i}
-                  key={widget.item.i}
-                  style={{
-                    width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
-                  }}
-                >
-                  <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                    <div className="widget-content">{widget.component}</div>
-                    {isEditing && (
-                      <button
-                        className="widget-wrapper__delete-btn"
-                        onClick={() => deleteWidget(widget.item.i)}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        title={`Delete widget ${widget.item.i}`}
-                        type="button"
-                      >
-                        <XIcon />
-                      </button>
-                    )}
-                  </div>
-                </Draggable>
-              ))}
+      <SortableFlex
+        activeId={activeId}
+        className={`grid-layout ${isEditing ? 'editing' : ''}`}
+        currentLayout={currentLayout}
+        isEditing={isEditing}
+        onDragEnd={() => setActiveId(null)}
+        onDragStart={(event) => setActiveId(String(event.active.id))}
+        renderItem={(widget) => (
+          <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+            <div className="widget-content">{widget.component}</div>
+            {isEditing && (
+              <button
+                className="widget-wrapper__delete-btn"
+                onClick={() => deleteWidget(widget.item.i)}
+                onMouseDown={(e) => e.stopPropagation()}
+                title={`Delete widget ${widget.item.i}`}
+                type="button"
+              >
+                <XIcon />
+              </button>
+            )}
           </div>
-        </Droppable>
-      </DndContext>
+        )}
+      />
       {isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}
@@ -222,37 +173,105 @@ export function DashboardBreadcrumbDropdown(props: {
   )
 }
 
-function Droppable(props) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: 'droppable',
-  })
-  const style = {
-    color: isOver ? 'green' : undefined,
+function SortableFlex({
+  activeId,
+  className,
+  currentLayout,
+  isEditing,
+  onDragEnd,
+  onDragStart,
+  renderItem,
+}: {
+  activeId: null | string
+  className?: string
+  currentLayout: undefined | WidgetInstanceClient[]
+  isEditing: boolean
+  onDragEnd: () => void
+  onDragStart: (event: DragStartEvent) => void
+  renderItem: (widget: WidgetInstanceClient) => React.ReactNode
+}) {
+  const { isOver, setNodeRef } = useDroppable({ id: 'droppable' })
+  const [activeWidth, setActiveWidth] = useState<null | number>(null)
+  const activeWidget = activeId ? currentLayout?.find((w) => w.item.i === activeId) : null
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const element = document.querySelector(`[id="${event.active.id}"]`)
+    if (element instanceof HTMLElement) {
+      setActiveWidth(element.offsetWidth)
+    }
+    onDragStart(event)
+  }
+
+  const handleDragEnd = () => {
+    setActiveWidth(null)
+    onDragEnd()
   }
 
   return (
-    <div ref={setNodeRef} style={style}>
-      {props.children}
-    </div>
+    <DndContext
+      autoScroll={{
+        enabled: true,
+        threshold: { x: 0, y: 0.2 },
+      }}
+      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+    >
+      <div
+        className={className}
+        ref={setNodeRef}
+        style={{
+          color: isOver ? 'green' : undefined,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
+        {currentLayout?.map((widget) => (
+          <SortableItem
+            key={widget.item.i}
+            className="widget"
+            data-columns={widget.item.w}
+            data-slug={widget.item.i}
+            id={widget.item.i}
+            style={{
+              width: `calc(${(widget.item.w / GRID_COLUMNS) * 100}% - 1rem)`,
+            }}
+          >
+            {renderItem(widget)}
+          </SortableItem>
+        ))}
+        <DragOverlay style={{ width: activeWidth ? `${activeWidth}px` : undefined }}>
+          {activeWidget && (
+            <WidgetItem
+              component={activeWidget.component}
+              isEditing={isEditing}
+              onDelete={() => {}}
+              widgetId={activeWidget.item.i}
+            />
+          )}
+        </DragOverlay>
+      </div>
+    </DndContext>
   )
 }
 
-interface DraggableProps extends React.HTMLAttributes<HTMLDivElement> {
+function SortableItem({
+  children,
+  id,
+  ...props
+}: {
+  children: React.ReactNode
+  className?: string
+  'data-columns'?: number
+  'data-slug'?: string
   id: string
-}
-
-function Draggable(props: DraggableProps) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: props.id,
-  })
-  const style = {
-    ...props.style,
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-  }
+  style?: React.CSSProperties
+}) {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id })
 
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes} {...props} style={style}>
-      {props.children}
+    <div ref={setNodeRef} {...listeners} {...attributes} {...props}>
+      {children}
     </div>
   )
 }
