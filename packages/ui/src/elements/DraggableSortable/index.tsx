@@ -76,12 +76,17 @@ export const DraggableSortable: React.FC<Props> = (props) => {
   return (
     <DndContext
       collisionDetection={closestCenter}
+      // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
       id={id}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       sensors={sensors}
     >
-      <SortableContext items={ids}>
+      <SortableContext
+        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+        id={id}
+        items={ids}
+      >
         <div className={className} ref={setNodeRef}>
           {children}
         </div>
