@@ -101,8 +101,6 @@ jobs:
         with:
           path: ./*
           key: ${{ needs.changes.outputs.build_cache_key }}
-          restore-keys: |
-            build-${{ github.sha }}-
 
   tests-unit:
     runs-on: ubuntu-24.04
