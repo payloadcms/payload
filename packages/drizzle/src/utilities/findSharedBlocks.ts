@@ -1,4 +1,4 @@
-import type { Block, FlattenedField, Payload } from 'payload'
+import type { Block, Field, FlattenedField, Payload } from 'payload'
 
 /**
  * Helper function to find all shared blocks across collections and globals.
@@ -15,7 +15,7 @@ export const findSharedBlocks = (payload: Payload): Set<Block> => {
      * @param fields - Array of field configurations
      * @param parentSlug - The slug of the parent collection/global
      */
-    const traverseFieldsForBlocks = (fields: FlattenedField[], parentSlug: string): void => {
+    const traverseFieldsForBlocks = (fields: FlattenedField[] | Field[], parentSlug: string): void => {
         fields.forEach((field) => {
             if (field.type === 'blocks') {
                 const blockRefs = field.blockReferences ?? field.blocks;
