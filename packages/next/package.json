@@ -127,11 +127,11 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "15.4.4",
+    "@next/eslint-plugin-next": "16.0.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.25.5",
@@ -141,7 +141,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.2.3",
+    "next": "^15.2.3 || ^16.0.1",
     "payload": "workspace:*"
   },
   "engines": {
