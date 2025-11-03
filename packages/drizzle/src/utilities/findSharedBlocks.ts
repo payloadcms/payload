@@ -15,7 +15,7 @@ export const findSharedBlocks = (payload: Payload): Set<Block> => {
      * @param fields - Array of field configurations
      * @param parentSlug - The slug of the parent collection/global
      */
-    const traverseFieldsForBlocks = (fields: FlattenedField[] | Field[], parentSlug: string): void => {
+    const traverseFieldsForBlocks = (fields: Field[] | FlattenedField[], parentSlug: string): void => {
         fields.forEach((field) => {
             if (field.type === 'blocks') {
                 const blockRefs = field.blockReferences ?? field.blocks;
@@ -26,7 +26,10 @@ export const findSharedBlocks = (payload: Payload): Set<Block> => {
                         if (!blockReferencesMap.has(block)) {
                             blockReferencesMap.set(block, new Set<string>());
                         }
-                        blockReferencesMap.get(block)!.add(parentSlug);
+                        const blockSet = blockReferencesMap.get(block)
+                        if (blockSet) {
+                            blockSet.add(parentSlug);
+                        }
                     });
                 }
             }

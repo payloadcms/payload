@@ -9,8 +9,8 @@ import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { findSharedBlocks } from '../utilities/findSharedBlocks.js'
 import { buildTable } from './build.js'
-import { findSharedBlocks } from '../utilities/findSharedBlocks.js';
 
 /**
  * Builds abstract Payload SQL schema

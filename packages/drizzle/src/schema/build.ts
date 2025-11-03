@@ -1,4 +1,4 @@
-import type { FlattenedField, SanitizedCompoundIndex, Block } from 'payload'
+import type { Block, FlattenedField, SanitizedCompoundIndex } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import toSnakeCase from 'to-snake-case'

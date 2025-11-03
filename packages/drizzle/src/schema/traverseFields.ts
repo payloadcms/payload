@@ -1,4 +1,4 @@
-import type { FlattenedField, Block } from 'payload'
+import type { Block, FlattenedField } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import {
