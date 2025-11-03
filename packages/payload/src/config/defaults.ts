@@ -172,7 +172,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.kv = config.kv ?? databaseKVAdapter()
 
   if (config.kv?.kvCollection) {
-    config.kv.kvCollection.lockDocuments = false
     config.collections.push(config.kv.kvCollection)
   }
 

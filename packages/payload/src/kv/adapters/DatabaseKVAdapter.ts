@@ -122,6 +122,7 @@ export const databaseKVAdapter = (options: DatabaseKVAdapterOptions = {}): KVAda
           required: true,
         },
       ],
+      lockDocuments: false,
       timestamps: false,
       ...options.kvCollectionOverrides,
     },
