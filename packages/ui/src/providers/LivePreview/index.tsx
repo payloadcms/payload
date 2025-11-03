@@ -248,7 +248,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     )
   }, [isLivePreviewing, setPreference, collectionSlug, globalSlug])
 
-  const id = useId()
+  const dndContextID = useId()
 
   return (
     <LivePreviewContext
@@ -291,7 +291,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       <DndContext
         collisionDetection={customCollisionDetection}
         // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-        id={id}
+        id={dndContextID}
         onDragEnd={handleDragEnd}
       >
         {children}
