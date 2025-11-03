@@ -1,4 +1,4 @@
-import type { FlattenedField, SanitizedCompoundIndex } from 'payload'
+import type { FlattenedField, SanitizedCompoundIndex, Block } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -48,6 +48,7 @@ type Args = {
   rootTableName?: string
   rootUniqueRelationships?: Set<string>
   setColumnID: SetColumnID
+  sharedBlocks?: Set<Block>
   tableName: string
   timestamps?: boolean
   versions: boolean
@@ -85,6 +86,7 @@ export const buildTable = ({
   rootTableName: incomingRootTableName,
   rootUniqueRelationships,
   setColumnID,
+  sharedBlocks,
   tableName,
   timestamps,
   versions,
@@ -141,6 +143,7 @@ export const buildTable = ({
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     setColumnID,
+    sharedBlocks,
     uniqueRelationships,
     versions,
     withinLocalizedArrayOrBlock,

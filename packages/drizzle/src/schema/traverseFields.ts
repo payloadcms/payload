@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { FlattenedField, Block } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import {
@@ -56,6 +56,7 @@ type Args = {
   rootTableIDColType: IDType
   rootTableName: string
   setColumnID: SetColumnID
+  sharedBlocks?: Set<Block>
   uniqueRelationships: Set<string>
   versions: boolean
   /**
@@ -97,6 +98,7 @@ export const traverseFields = ({
   rootTableIDColType,
   rootTableName,
   setColumnID,
+  sharedBlocks,
   uniqueRelationships,
   versions,
   withinLocalizedArrayOrBlock,
@@ -450,12 +452,10 @@ export const traverseFields = ({
               },
             }
 
-            // Skip creating a parent_id foreign key for blocks that are shared across collections (have a custom dbName)
-            const hasCustomDbName = block.dbName !== undefined && block.dbName !== null
-            const shouldSkipForeignKey = hasCustomDbName
 
+            const isSharedBlock = sharedBlocks && sharedBlocks.has(block);
             const baseForeignKeys: Record<string, RawForeignKey> = {}
-            if (!shouldSkipForeignKey) {
+            if (!isSharedBlock) {
               baseForeignKeys._parentIdFk = {
                 name: `${blockTableName}_parent_id_fk`,
                 columns: ['_parentID'],

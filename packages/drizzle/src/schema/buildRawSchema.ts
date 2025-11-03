@@ -10,6 +10,7 @@ import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
 import { buildTable } from './build.js'
+import { findSharedBlocks } from '../utilities/findSharedBlocks.js';
 
 /**
  * Builds abstract Payload SQL schema
@@ -23,6 +24,8 @@ export const buildRawSchema = ({
 }) => {
   adapter.indexes = new Set()
   adapter.foreignKeys = new Set()
+
+  const sharedBlocks = findSharedBlocks(adapter.payload);
 
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({
@@ -65,6 +68,7 @@ export const buildRawSchema = ({
       fields: collection.flattenedFields,
       parentIsLocalized: false,
       setColumnID,
+      sharedBlocks,
       tableName,
       timestamps: collection.timestamps,
       versions: false,
@@ -85,6 +89,7 @@ export const buildRawSchema = ({
         fields: versionFields,
         parentIsLocalized: false,
         setColumnID,
+        sharedBlocks,
         tableName: versionsTableName,
         timestamps: true,
         versions: true,
@@ -106,6 +111,7 @@ export const buildRawSchema = ({
       fields: global.flattenedFields,
       parentIsLocalized: false,
       setColumnID,
+      sharedBlocks,
       tableName,
       timestamps: false,
       versions: false,
@@ -129,6 +135,7 @@ export const buildRawSchema = ({
         fields: versionFields,
         parentIsLocalized: false,
         setColumnID,
+        sharedBlocks,
         tableName: versionsTableName,
         timestamps: true,
         versions: true,
