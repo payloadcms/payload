@@ -253,34 +253,37 @@ export const updateDocument = async <
       // snapshot will have full data before publishing/unpublishing
       snapshotToSave = deepCopyObjectSimple(result)
 
-      // result will contain only published localized data
-      result = await beforeChange({
-        ...beforeChangeArgs,
-        data: unpublishSpecificLocale ? { id } : beforeChangeArgs.data,
-        docWithLocales:
-          (await getLatestCollectionVersion({
-            id,
-            config: collectionConfig,
-            payload,
-            published: true,
-            query: {
-              collection: collectionConfig.slug,
-              locale,
-              req,
-              where: combineQueries({ id: { equals: id } }, accessResults),
-            },
-            req,
-          })) || {},
-        skipValidation: unpublishSpecificLocale ? true : false,
+      const currentPublishedDocWithLocales = await getLatestCollectionVersion<
+        DataFromCollectionSlug<TSlug>
+      >({
+        id,
+        config: collectionConfig,
+        payload,
+        published: true,
+        query: {
+          collection: collectionConfig.slug,
+          locale,
+          req,
+          where: combineQueries({ id: { equals: id } }, accessResults),
+        },
+        req,
       })
 
-      if (
-        unpublishSpecificLocale &&
-        snapshotToSave &&
-        Object.keys(result).length <= 1 &&
-        result.id
-      ) {
+      if (unpublishSpecificLocale && !currentPublishedDocWithLocales) {
+        // doc has never been published and is not being published now
         result = snapshotToSave
+      } else {
+        // result will contain only published localized data
+        result = await beforeChange({
+          ...beforeChangeArgs,
+          docWithLocales: currentPublishedDocWithLocales || {},
+          ...(unpublishSpecificLocale
+            ? {
+                data: {},
+                skipValidation: true,
+              }
+            : {}),
+        })
       }
     }
   }

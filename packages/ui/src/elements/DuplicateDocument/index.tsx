@@ -5,7 +5,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, traverseForLocalizedFields } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -18,7 +18,6 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { SelectLocalesDrawer } from './SelectLocalesDrawer/index.js'
@@ -48,6 +47,7 @@ export const DuplicateDocument: React.FC<Props> = ({
   const { startRouteTransition } = useRouteTransition()
 
   const {
+    config,
     config: {
       localization,
       routes: { admin: adminRoute, api: apiRoute },
@@ -65,10 +65,10 @@ export const DuplicateDocument: React.FC<Props> = ({
 
   const isDuplicateByLocaleEnabled = useMemo(() => {
     if (selectLocales && collectionConfig) {
-      return traverseForLocalizedFields(collectionConfig.fields)
+      return traverseForLocalizedFields({ config, fields: collectionConfig.fields })
     }
     return false
-  }, [collectionConfig, selectLocales])
+  }, [collectionConfig, selectLocales, config])
 
   const handleDuplicate = useCallback(
     async (args?: { selectedLocales?: string[] }) => {

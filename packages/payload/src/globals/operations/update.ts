@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, JsonObject, TypeWithID } from '../../index.js'
+import type { GlobalSlug, JsonObject } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
@@ -247,26 +247,32 @@ export const updateOperation = async <
         // snapshot will have full data before publishing/unpublishing
         snapshotToSave = deepCopyObjectSimple(result)
 
-        // result will contain only published localized data
-        result = await beforeChange({
-          ...beforeChangeArgs,
-          data: unpublishSpecificLocale ? {} : beforeChangeArgs.data,
-          docWithLocales:
-            (
-              await getLatestGlobalVersion({
-                slug,
-                config: globalConfig,
-                payload,
-                published: true,
-                req,
-                where: query,
-              })
-            )?.global || {},
-          skipValidation: unpublishSpecificLocale ? true : false,
-        })
+        const currentPublishedDocWithLocales = (
+          await getLatestGlobalVersion({
+            slug,
+            config: globalConfig,
+            payload,
+            published: true,
+            req,
+            where: query,
+          })
+        )?.global
 
-        if (unpublishSpecificLocale && snapshotToSave && Object.keys(result).length === 0) {
+        if (unpublishSpecificLocale && !currentPublishedDocWithLocales) {
+          // doc has never been published and is not being published now
           result = snapshotToSave
+        } else {
+          // result will contain only published localized data
+          result = await beforeChange({
+            ...beforeChangeArgs,
+            docWithLocales: currentPublishedDocWithLocales || {},
+            ...(unpublishSpecificLocale
+              ? {
+                  data: {},
+                  skipValidation: true,
+                }
+              : {}),
+          })
         }
       }
     }
