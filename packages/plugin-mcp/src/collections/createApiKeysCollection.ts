@@ -116,6 +116,7 @@ export const createAPIKeysCollection = (
   collections: PluginMCPServerConfig['collections'],
   customTools: Array<{ description: string; name: string }> = [],
   experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] = {},
+  pluginOptions: PluginMCPServerConfig,
 ): CollectionConfig => {
   const customToolsFields = customTools.map((tool) => {
     const camelCasedName = toCamelCase(tool.name)
@@ -147,7 +148,10 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        relationTo: 'users',
+        relationTo:
+          typeof pluginOptions.userCollection === 'string'
+            ? pluginOptions.userCollection
+            : pluginOptions.userCollection?.slug || 'users',
         required: true,
       },
       {
