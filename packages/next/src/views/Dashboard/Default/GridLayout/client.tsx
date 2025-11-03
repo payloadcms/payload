@@ -173,15 +173,7 @@ export function DashboardBreadcrumbDropdown(props: {
   )
 }
 
-function SortableFlex({
-  activeId,
-  className,
-  currentLayout,
-  isEditing,
-  onDragEnd,
-  onDragStart,
-  renderItem,
-}: {
+function SortableFlex(props: {
   activeId: null | string
   className?: string
   currentLayout: undefined | WidgetInstanceClient[]
@@ -190,34 +182,42 @@ function SortableFlex({
   onDragStart: (event: DragStartEvent) => void
   renderItem: (widget: WidgetInstanceClient) => React.ReactNode
 }) {
-  const { isOver, setNodeRef } = useDroppable({ id: 'droppable' })
+  const { isOver, setNodeRef } = useDroppable({
+    id: 'droppable',
+  })
   const [activeWidth, setActiveWidth] = useState<null | number>(null)
-  const activeWidget = activeId ? currentLayout?.find((w) => w.item.i === activeId) : null
+  const activeWidget = props.activeId
+    ? props.currentLayout?.find((w) => w.item.i === props.activeId)
+    : null
 
   const handleDragStart = (event: DragStartEvent) => {
+    // Get the actual width of the dragged element
     const element = document.querySelector(`[id="${event.active.id}"]`)
     if (element instanceof HTMLElement) {
       setActiveWidth(element.offsetWidth)
     }
-    onDragStart(event)
+    props.onDragStart(event)
   }
 
   const handleDragEnd = () => {
     setActiveWidth(null)
-    onDragEnd()
+    props.onDragEnd()
   }
 
   return (
     <DndContext
       autoScroll={{
         enabled: true,
-        threshold: { x: 0, y: 0.2 },
+        threshold: {
+          x: 0, // No horizontal scroll
+          y: 0.2, // Allow vertical scroll at 20% from edge
+        },
       }}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
     >
       <div
-        className={className}
+        className={props.className}
         ref={setNodeRef}
         style={{
           color: isOver ? 'green' : undefined,
@@ -226,40 +226,37 @@ function SortableFlex({
           gap: '1rem',
         }}
       >
-        {currentLayout?.map((widget) => (
+        {props.currentLayout?.map((widget) => (
           <SortableItem
-            key={widget.item.i}
             className="widget"
             data-columns={widget.item.w}
             data-slug={widget.item.i}
             id={widget.item.i}
+            key={widget.item.i}
             style={{
-              width: `calc(${(widget.item.w / GRID_COLUMNS) * 100}% - 1rem)`,
+              width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
             }}
           >
-            {renderItem(widget)}
+            {props.renderItem(widget)}
           </SortableItem>
         ))}
-        <DragOverlay style={{ width: activeWidth ? `${activeWidth}px` : undefined }}>
-          {activeWidget && (
-            <WidgetItem
-              component={activeWidget.component}
-              isEditing={isEditing}
-              onDelete={() => {}}
-              widgetId={activeWidget.item.i}
-            />
-          )}
+        <DragOverlay
+          style={{
+            width: activeWidth ? `${activeWidth}px` : undefined,
+          }}
+        >
+          {activeWidget ? (
+            <div className={`widget-wrapper ${props.isEditing ? 'widget-wrapper--editing' : ''}`}>
+              <div className="widget-content">{activeWidget.component}</div>
+            </div>
+          ) : null}
         </DragOverlay>
       </div>
     </DndContext>
   )
 }
 
-function SortableItem({
-  children,
-  id,
-  ...props
-}: {
+function SortableItem(props: {
   children: React.ReactNode
   className?: string
   'data-columns'?: number
@@ -267,11 +264,13 @@ function SortableItem({
   id: string
   style?: React.CSSProperties
 }) {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id })
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: props.id,
+  })
 
   return (
     <div ref={setNodeRef} {...listeners} {...attributes} {...props}>
-      {children}
+      {props.children}
     </div>
   )
 }
