@@ -456,7 +456,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
     localeToPublish: 'Lokacija za objavu',
+    selectedLocales: 'Odabrane lokalizacije',
     selectLocaleToCopy: 'Odaberite mjesto za kopiranje',
+    selectLocaleToDuplicate: 'Odaberite lokacije za duplikaciju',
   },
   operators: {
     contains: 'sadrži',
