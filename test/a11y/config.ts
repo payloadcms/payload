@@ -18,6 +18,14 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      views: {
+        FocusIndicatorsView: {
+          path: '/focus-indicators',
+          Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
+        },
+      },
+    },
   },
   editor: lexicalEditor({}),
   globals: [

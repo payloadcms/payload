@@ -128,21 +128,10 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  /**
+   * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
+   */
+  subtitle?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -302,7 +291,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  content?: T;
+  subtitle?: T;
   updatedAt?: T;
   createdAt?: T;
 }

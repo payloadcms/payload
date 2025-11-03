@@ -16,11 +16,12 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'content',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
-      }),
+      name: 'subtitle',
+      type: 'text',
+      admin: {
+        description:
+          'A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.',
+      },
     },
   ],
 }
