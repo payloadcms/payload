@@ -30,6 +30,11 @@ export type Props = {
  * If `draggable` is true, the pills can be reordered by dragging.
  */
 export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => {
+  // IMPORTANT: Do NOT wrap DraggableSortable in a dynamic component function using useMemo.
+  // BAD: useMemo(() => ({ children }) => <DraggableSortable>...</DraggableSortable>, [deps])
+  // This creates a new function reference on each recomputation, causing React to treat it as a
+  // different component type, triggering unmount/mount cycles instead of just updating props.
+  // GOOD: Use conditional rendering directly: draggable ? <DraggableSortable /> : <div />
   const pillElements = React.useMemo(() => {
     return pills.map((pill, i) => {
       return (
