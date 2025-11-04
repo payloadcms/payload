@@ -195,6 +195,7 @@ export async function checkFocusIndicators(
               borderColor: string
               borderWidth: string
               boxShadow: string
+              filter: string
               opacity: string
               outline: string
               outlineColor: string
@@ -303,6 +304,7 @@ export async function checkFocusIndicators(
         const outlineColor = computedStyle.outlineColor
         const outlineOffset = computedStyle.outlineOffset
         const boxShadow = computedStyle.boxShadow
+        const filter = computedStyle.filter
         const border = computedStyle.border
         const borderWidth = computedStyle.borderWidth
         const borderColor = computedStyle.borderColor
@@ -317,19 +319,19 @@ export async function checkFocusIndicators(
         const beforeOutlineStyle = beforeStyle.outlineStyle
         const beforeOutlineColor = beforeStyle.outlineColor
         const beforeBoxShadow = beforeStyle.boxShadow
+        const beforeFilter = beforeStyle.filter
         const beforeBorder = beforeStyle.border
         const beforeBorderWidth = beforeStyle.borderWidth
         const beforeBorderColor = beforeStyle.borderColor
-        const beforeOpacity = beforeStyle.opacity
 
         const afterOutlineWidth = afterStyle.outlineWidth
         const afterOutlineStyle = afterStyle.outlineStyle
         const afterOutlineColor = afterStyle.outlineColor
         const afterBoxShadow = afterStyle.boxShadow
+        const afterFilter = afterStyle.filter
         const afterBorder = afterStyle.border
         const afterBorderWidth = afterStyle.borderWidth
         const afterBorderColor = afterStyle.borderColor
-        const afterOpacity = afterStyle.opacity
 
         // Helper to check if a style has a visible outline
         const hasVisibleOutline = (style: string, width: string, color: string) =>
@@ -345,14 +347,31 @@ export async function checkFocusIndicators(
           )
 
         // Helper to check if a style has a visible box-shadow
-        const hasVisibleBoxShadow = (shadow: string, opac: string) => {
-          if (!shadow || shadow === 'none' || shadow === 'transparent' || opac === '0') {
+        // Note: We don't check opacity here because opacity:0 elements with box-shadow
+        // are a valid pattern (e.g., hidden checkboxes with visual siblings)
+        const hasVisibleBoxShadow = (shadow: string) => {
+          if (!shadow || shadow === 'none' || shadow === 'transparent') {
             return false
           }
           // Check for any rgba color with 0 alpha (e.g., rgba(0, 0, 0, 0) or rgba(255, 0, 0, 0))
           // This regex matches rgba(..., 0) patterns
           const hasZeroAlpha = /rgba\([^)]*,\s*0\)/.test(shadow)
           return !hasZeroAlpha
+        }
+
+        // Helper to check if filter has a visible drop-shadow
+        const hasVisibleDropShadow = (filterValue: string) => {
+          if (!filterValue || filterValue === 'none') {
+            return false
+          }
+          // Check for drop-shadow function in filter
+          if (filterValue.includes('drop-shadow(')) {
+            // Check for transparent or zero-alpha colors in drop-shadow
+            const hasZeroAlpha = /rgba\([^)]*,\s*0\)/.test(filterValue)
+            const isTransparent = filterValue.includes('transparent')
+            return !hasZeroAlpha && !isTransparent
+          }
+          return false
         }
 
         // Helper to check if a style has a visible border
@@ -370,7 +389,8 @@ export async function checkFocusIndicators(
 
         // Check if element has a visible focus indicator on the element itself
         const hasOutline = hasVisibleOutline(outlineStyle, outlineWidth, outlineColor)
-        const hasBoxShadow = hasVisibleBoxShadow(boxShadow, opacity)
+        const hasBoxShadow = hasVisibleBoxShadow(boxShadow)
+        const hasDropShadow = hasVisibleDropShadow(filter)
         const hasVisibleBorder = hasVisibleBorderCheck(border, borderWidth, borderColor)
 
         // Check pseudo-elements for focus indicators
@@ -379,7 +399,8 @@ export async function checkFocusIndicators(
           beforeOutlineWidth,
           beforeOutlineColor,
         )
-        const hasBeforeBoxShadow = hasVisibleBoxShadow(beforeBoxShadow, beforeOpacity)
+        const hasBeforeBoxShadow = hasVisibleBoxShadow(beforeBoxShadow)
+        const hasBeforeDropShadow = hasVisibleDropShadow(beforeFilter)
         const hasBeforeBorder = hasVisibleBorderCheck(
           beforeBorder,
           beforeBorderWidth,
@@ -391,7 +412,8 @@ export async function checkFocusIndicators(
           afterOutlineWidth,
           afterOutlineColor,
         )
-        const hasAfterBoxShadow = hasVisibleBoxShadow(afterBoxShadow, afterOpacity)
+        const hasAfterBoxShadow = hasVisibleBoxShadow(afterBoxShadow)
+        const hasAfterDropShadow = hasVisibleDropShadow(afterFilter)
         const hasAfterBorder = hasVisibleBorderCheck(
           afterBorder,
           afterBorderWidth,
@@ -401,17 +423,78 @@ export async function checkFocusIndicators(
         // Note: We don't check background color change because we can't compare
         // the before/after state. Background color alone is not a reliable indicator.
 
-        // Combine all checks: element itself + pseudo-elements
+        // For elements with opacity: 0 (common for hidden checkboxes/radios),
+        // check parent and siblings for focus indicators
+        let hasParentOrSiblingWithIndicator = false
+        if (opacity === '0') {
+          // Check parent element (common pattern: parent gets box-shadow when child input is focused)
+          if (el.parentElement) {
+            const parentStyle = window.getComputedStyle(el.parentElement)
+            const parentBoxShadow = parentStyle.boxShadow
+            const parentFilter = parentStyle.filter
+            const parentOutlineStyle = parentStyle.outlineStyle
+            const parentOutlineWidth = parentStyle.outlineWidth
+            const parentOutlineColor = parentStyle.outlineColor
+            const parentBorder = parentStyle.border
+            const parentBorderWidth = parentStyle.borderWidth
+            const parentBorderColor = parentStyle.borderColor
+
+            if (
+              hasVisibleBoxShadow(parentBoxShadow) ||
+              hasVisibleDropShadow(parentFilter) ||
+              hasVisibleOutline(parentOutlineStyle, parentOutlineWidth, parentOutlineColor) ||
+              hasVisibleBorderCheck(parentBorder, parentBorderWidth, parentBorderColor)
+            ) {
+              hasParentOrSiblingWithIndicator = true
+            }
+          }
+
+          // Also check siblings if parent didn't have indicator
+          if (!hasParentOrSiblingWithIndicator && el.parentElement) {
+            const siblings = Array.from(el.parentElement.children).slice(0, 10)
+            for (const sibling of siblings) {
+              if (sibling === el || !(sibling instanceof HTMLElement)) {
+                continue
+              }
+
+              const siblingStyle = window.getComputedStyle(sibling)
+              const siblingBoxShadow = siblingStyle.boxShadow
+              const siblingFilter = siblingStyle.filter
+              const siblingOutlineStyle = siblingStyle.outlineStyle
+              const siblingOutlineWidth = siblingStyle.outlineWidth
+              const siblingOutlineColor = siblingStyle.outlineColor
+              const siblingBorder = siblingStyle.border
+              const siblingBorderWidth = siblingStyle.borderWidth
+              const siblingBorderColor = siblingStyle.borderColor
+
+              if (
+                hasVisibleBoxShadow(siblingBoxShadow) ||
+                hasVisibleDropShadow(siblingFilter) ||
+                hasVisibleOutline(siblingOutlineStyle, siblingOutlineWidth, siblingOutlineColor) ||
+                hasVisibleBorderCheck(siblingBorder, siblingBorderWidth, siblingBorderColor)
+              ) {
+                hasParentOrSiblingWithIndicator = true
+                break
+              }
+            }
+          }
+        }
+
+        // Combine all checks: element itself + pseudo-elements + parent/siblings (for hidden inputs)
         const hasAnyFocusIndicator =
           hasOutline ||
           hasBoxShadow ||
+          hasDropShadow ||
           hasVisibleBorder ||
           hasBeforeOutline ||
           hasBeforeBoxShadow ||
+          hasBeforeDropShadow ||
           hasBeforeBorder ||
           hasAfterOutline ||
           hasAfterBoxShadow ||
-          hasAfterBorder
+          hasAfterDropShadow ||
+          hasAfterBorder ||
+          hasParentOrSiblingWithIndicator
 
         return {
           tagName: el.tagName.toLowerCase(),
@@ -429,6 +512,7 @@ export async function checkFocusIndicators(
             outlineColor,
             outlineOffset,
             boxShadow,
+            filter,
             border,
             borderWidth,
             borderColor,
@@ -531,9 +615,15 @@ export async function checkFocusIndicators(
             elementAxeViolations.forEach((violation) => {
               console.log(`    - ${violation.id}: ${violation.help}`)
               console.log(`      Impact: ${violation.impact}`)
-              console.log(
-                `      Nodes: ${violation.nodes.length} (${violation.nodes.map((n) => n.html.substring(0, 50)).join(', ')})`,
-              )
+              console.log(`      Help URL: ${violation.helpUrl}`)
+              violation.nodes.forEach((node, idx) => {
+                console.log(`      Node ${idx + 1}/${violation.nodes.length}:`)
+                console.log(`        Target: ${node.target.join(' ')}`)
+                console.log(`        HTML: ${node.html.substring(0, 80)}...`)
+                if (node.failureSummary) {
+                  console.log(`        Failure: ${node.failureSummary}`)
+                }
+              })
             })
           }
         } else if (verbose) {

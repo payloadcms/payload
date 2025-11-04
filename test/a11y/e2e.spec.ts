@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { checkFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
+import { checkHorizontalOverflow } from '../helpers/e2e/checkHorizontalOverflow.js'
 import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -19,6 +20,8 @@ test.describe('A11y', () => {
   let postsUrl: AdminUrlUtil
   let mediaUrl: AdminUrlUtil
   let serverURL: string
+
+  const DEFAULT_VIEWPORT = { width: 1280, height: 720 }
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -34,12 +37,17 @@ test.describe('A11y', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  // Reset viewport before each test to ensure consistent starting state
+  test.beforeEach(async () => {
+    await page.setViewportSize(DEFAULT_VIEWPORT)
+  })
+
   test('Dashboard', async ({}, testInfo) => {
     await page.goto(postsUrl.admin)
 
     await page.locator('.dashboard').waitFor()
 
-    const accessibilityScanResults = await runAxeScan(page, testInfo)
+    const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
     expect.soft(accessibilityScanResults.violations.length).toEqual(0)
   })
@@ -49,7 +57,7 @@ test.describe('A11y', () => {
 
     await page.locator('.account').waitFor()
 
-    const accessibilityScanResults = await runAxeScan(page, testInfo)
+    const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
     expect.soft(accessibilityScanResults.violations.length).toBe(0)
   })
@@ -60,7 +68,7 @@ test.describe('A11y', () => {
 
       await page.locator('.list-controls').waitFor()
 
-      const accessibilityScanResults = await runAxeScan(page, testInfo)
+      const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
       expect.soft(accessibilityScanResults.violations.length).toBe(0)
     })
@@ -70,7 +78,7 @@ test.describe('A11y', () => {
 
       await page.locator('#field-title').waitFor()
 
-      const accessibilityScanResults = await runAxeScan(page, testInfo)
+      const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
       expect.soft(accessibilityScanResults.violations.length).toBe(0)
     })
@@ -81,7 +89,7 @@ test.describe('A11y', () => {
       await page.locator('.table a').first().click()
       await page.locator('#field-title').waitFor()
 
-      const accessibilityScanResults = await runAxeScan(page, testInfo)
+      const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
       expect.soft(accessibilityScanResults.violations.length).toBe(0)
     })
@@ -93,7 +101,7 @@ test.describe('A11y', () => {
 
       await page.locator('.list-controls').waitFor()
 
-      const accessibilityScanResults = await runAxeScan(page, testInfo)
+      const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
       expect.soft(accessibilityScanResults.violations.length).toBe(0)
     })
@@ -103,7 +111,7 @@ test.describe('A11y', () => {
 
       await page.locator('input[type="file"]').waitFor()
 
-      const accessibilityScanResults = await runAxeScan(page, testInfo)
+      const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
       expect.soft(accessibilityScanResults.violations.length).toBe(0)
     })
@@ -183,6 +191,256 @@ test.describe('A11y', () => {
 
       expect.soft(result.totalFocusableElements).toBeGreaterThan(0)
       expect.soft(result.elementsWithoutIndicators).toBe(0)
+    })
+  })
+
+  test.describe('WCAG 2.1 - Reflow (320px width)', () => {
+    test('Dashboard - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(postsUrl.admin)
+      await page.locator('.dashboard').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Account page - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(postsUrl.account)
+      await page.locator('.account').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Posts list view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(postsUrl.list)
+      await page.locator('.list-controls').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Posts create view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Posts edit view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(postsUrl.list)
+      await page.locator('.table a').first().click()
+      await page.locator('#field-title').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Media list view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(mediaUrl.list)
+      await page.locator('.list-controls').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Media create view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(mediaUrl.create)
+      await page.locator('input[type="file"]').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+
+    test('Navigation sidebar - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 568 })
+      await page.goto(postsUrl.admin)
+      await page.locator('.nav').waitFor()
+
+      const result = await checkHorizontalOverflow(page, testInfo)
+
+      expect(result.hasHorizontalOverflow).toBe(false)
+      expect(result.overflowingElements.length).toBe(0)
+    })
+  })
+
+  test.describe('WCAG 2.1 - Resize Text (Zoom Levels)', () => {
+    const zoomLevels = [
+      { level: 100, scale: 1 },
+      { level: 200, scale: 2 },
+      { level: 300, scale: 3 },
+      { level: 400, scale: 4 },
+    ]
+
+    test.describe('Dashboard', () => {
+      for (const { level, scale } of zoomLevels) {
+        test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
+          await page.goto(postsUrl.admin)
+          await page.locator('.dashboard').waitFor()
+
+          // Simulate zoom by setting device scale factor
+          await page.evaluate((zoomScale) => {
+            document.body.style.zoom = String(zoomScale)
+          }, scale)
+
+          // Check for horizontal overflow after zoom
+          const overflowResult = await checkHorizontalOverflow(page, testInfo)
+
+          // At high zoom levels, some horizontal overflow might be acceptable
+          // but we should at least verify the page is still functional
+          if (level <= 200) {
+            // At 200% or less, should not have overflow
+            expect(overflowResult.hasHorizontalOverflow).toBe(false)
+          }
+
+          // Run axe scan at this zoom level
+          const axeResults = await runAxeScan({ page, testInfo })
+          expect(axeResults.violations.length).toBe(0)
+        })
+      }
+    })
+
+    test.describe('Posts create view', () => {
+      for (const { level, scale } of zoomLevels) {
+        test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
+          await page.goto(postsUrl.create)
+          await page.locator('#field-title').waitFor()
+
+          await page.evaluate((zoomScale) => {
+            document.body.style.zoom = String(zoomScale)
+          }, scale)
+
+          const overflowResult = await checkHorizontalOverflow(page, testInfo)
+
+          if (level <= 200) {
+            expect(overflowResult.hasHorizontalOverflow).toBe(false)
+          }
+
+          // Verify title field is still accessible
+          const titleField = page.locator('#field-title')
+          await expect(titleField).toBeVisible()
+
+          const axeResults = await runAxeScan({ page, testInfo })
+          expect(axeResults.violations.length).toBe(0)
+        })
+      }
+    })
+
+    test.describe('Posts list view', () => {
+      for (const { level, scale } of zoomLevels) {
+        test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
+          await page.goto(postsUrl.list)
+          await page.locator('.list-controls').waitFor()
+
+          await page.evaluate((zoomScale) => {
+            document.body.style.zoom = String(zoomScale)
+          }, scale)
+
+          const overflowResult = await checkHorizontalOverflow(page, testInfo)
+
+          if (level <= 200) {
+            expect(overflowResult.hasHorizontalOverflow).toBe(false)
+          }
+
+          // Verify list controls are still accessible
+          const listControls = page.locator('.list-controls')
+          await expect(listControls).toBeVisible()
+
+          const axeResults = await runAxeScan({ page, testInfo })
+          expect(axeResults.violations.length).toBe(0)
+        })
+      }
+    })
+
+    test.describe('Account page', () => {
+      for (const { level, scale } of zoomLevels) {
+        test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
+          await page.goto(postsUrl.account)
+          await page.locator('.account').waitFor()
+
+          await page.evaluate((zoomScale) => {
+            document.body.style.zoom = String(zoomScale)
+          }, scale)
+
+          const overflowResult = await checkHorizontalOverflow(page, testInfo)
+
+          if (level <= 200) {
+            expect(overflowResult.hasHorizontalOverflow).toBe(false)
+          }
+
+          const axeResults = await runAxeScan({ page, testInfo })
+          expect(axeResults.violations.length).toBe(0)
+        })
+      }
+    })
+
+    test.describe('Media collection', () => {
+      for (const { level, scale } of zoomLevels) {
+        test(`Media list view should be usable at ${level}% zoom`, async ({}, testInfo) => {
+          await page.goto(mediaUrl.list)
+          await page.locator('.list-controls').waitFor()
+
+          await page.evaluate((zoomScale) => {
+            document.body.style.zoom = String(zoomScale)
+          }, scale)
+
+          const overflowResult = await checkHorizontalOverflow(page, testInfo)
+
+          if (level <= 200) {
+            expect(overflowResult.hasHorizontalOverflow).toBe(false)
+          }
+
+          const axeResults = await runAxeScan({ page, testInfo })
+          expect(axeResults.violations.length).toBe(0)
+        })
+      }
+    })
+
+    test.describe('Navigation sidebar', () => {
+      for (const { level, scale } of zoomLevels) {
+        test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
+          await page.goto(postsUrl.admin)
+          await page.locator('.nav').waitFor()
+
+          await page.evaluate((zoomScale) => {
+            document.body.style.zoom = String(zoomScale)
+          }, scale)
+
+          const overflowResult = await checkHorizontalOverflow(page, testInfo)
+
+          if (level <= 200) {
+            expect(overflowResult.hasHorizontalOverflow).toBe(false)
+          }
+
+          // Verify navigation is still accessible
+          const nav = page.locator('.nav')
+          await expect(nav).toBeVisible()
+
+          const axeResults = await runAxeScan({ page, testInfo })
+          expect(axeResults.violations.length).toBe(0)
+        })
+      }
     })
   })
 })

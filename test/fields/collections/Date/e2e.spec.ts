@@ -2,6 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { TZDateMini } from '@date-fns/tz/date/mini'
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -594,6 +596,22 @@ describe('Date', () => {
 
       // eslint-disable-next-line payload/no-flaky-assertions
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+  })
+
+  describe('A11y', () => {
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-default').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed
+      })
+
+      expect(scanResults.violations.length).toBe(0)
     })
   })
 })
