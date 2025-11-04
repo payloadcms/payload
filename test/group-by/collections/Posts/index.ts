@@ -26,6 +26,12 @@ export const PostsCollection: CollectionConfig = {
       name: 'virtualTitleFromCategory',
       type: 'text',
       virtual: 'category.title',
+    },
+    {
+      name: 'disabledVirtualRelationshipFromCategory',
+      type: 'relationship',
+      relationTo: categoriesSlug,
+      virtual: 'category',
       admin: {
         disableGroupBy: true,
       },

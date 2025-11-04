@@ -71,6 +71,7 @@ export interface Config {
     categories: Category;
     media: Media;
     relationships: Relationship;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -128,6 +130,7 @@ export interface Post {
   title?: string | null;
   category?: (string | null) | Category;
   virtualTitleFromCategory?: string | null;
+  disabledVirtualRelationshipFromCategory?: (string | null) | Category;
   checkbox?: boolean | null;
   date?: string | null;
   tab1Field?: string | null;
@@ -221,6 +224,23 @@ export interface Relationship {
   MonoHasManyRelationship?: (string | Category)[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -323,6 +343,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
   virtualTitleFromCategory?: T;
+  disabledVirtualRelationshipFromCategory?: T;
   checkbox?: T;
   date?: T;
   tab1Field?: T;
@@ -402,6 +423,14 @@ export interface RelationshipsSelect<T extends boolean = true> {
   MonoHasManyRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

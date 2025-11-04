@@ -21,46 +21,45 @@ export const seed = async (_payload: Payload) => {
           overrideAccess: true,
         }),
       async () => {
-        const [category1, category2] = await Promise.all([
-          _payload.create({
-            collection: categoriesSlug,
-            data: {
-              title: 'Category 1',
-            },
-          }),
-          _payload.create({
-            collection: categoriesSlug,
-            data: {
-              title: 'Category 2',
-            },
-          }),
-        ])
-
-        await Promise.all(
+        // Create 30 categories, one for each post
+        const categories = await Promise.all(
           Array.from({ length: 30 }).map(async (_, index) =>
             _payload.create({
-              collection: postsSlug,
+              collection: categoriesSlug,
               data: {
-                title: `Post ${index + 1}`,
-                category: index < 15 ? category1.id : category2.id,
+                title: `Category ${index + 1}`,
               },
             }),
           ),
         )
 
+        // Create 30 posts, each associated with its corresponding category
+        await Promise.all(
+          Array.from({ length: 30 }).map(async (_, index) =>
+            _payload.create({
+              collection: postsSlug,
+              data: {
+                category: categories[index]!.id,
+                title: `Post ${index + 1}`,
+              },
+            }),
+          ),
+        )
+
+        // Create "Find me" posts associated with first two categories
         await _payload.create({
           collection: 'posts',
           data: {
+            category: categories[0]!.id,
             title: 'Find me',
-            category: category1.id,
           },
         })
 
         await _payload.create({
           collection: 'posts',
           data: {
+            category: categories[1]!.id,
             title: 'Find me',
-            category: category2.id,
           },
         })
 
@@ -76,11 +75,11 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Poly HasOne (Category)',
               PolyHasOneRelationship: {
                 relationTo: categoriesSlug,
-                value: category1.id,
+                value: categories[0]!.id,
               },
+              title: 'Poly HasOne (Category)',
             },
           }),
 
@@ -88,11 +87,11 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Poly HasOne (Post)',
               PolyHasOneRelationship: {
                 relationTo: postsSlug,
                 value: firstPost.docs[0]?.id ?? '',
               },
+              title: 'Poly HasOne (Post)',
             },
           }),
 
@@ -100,11 +99,10 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Poly HasMany (Mixed)',
               PolyHasManyRelationship: [
                 {
                   relationTo: categoriesSlug,
-                  value: category1.id,
+                  value: categories[0]!.id,
                 },
                 {
                   relationTo: postsSlug,
@@ -112,9 +110,10 @@ export const seed = async (_payload: Payload) => {
                 },
                 {
                   relationTo: categoriesSlug,
-                  value: category2.id,
+                  value: categories[1]!.id,
                 },
               ],
+              title: 'Poly HasMany (Mixed)',
             },
           }),
 
@@ -122,8 +121,8 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
+              MonoHasOneRelationship: categories[0]!.id,
               title: 'Mono HasOne',
-              MonoHasOneRelationship: category1.id,
             },
           }),
 
@@ -131,8 +130,8 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
+              MonoHasManyRelationship: [categories[0]!.id, categories[1]!.id],
               title: 'Mono HasMany',
-              MonoHasManyRelationship: [category1.id, category2.id],
             },
           }),
 
