@@ -326,11 +326,12 @@ export const promise = async ({
               parentSchemaPath: schemaPath,
               req,
               siblingData: row as JsonObject,
-              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
-              siblingDocWithLocales: getExistingRowDoc(
-                row as JsonObject,
-                siblingDocWithLocales?.[field.name],
-              ),
+              siblingDoc:
+                // getExistingRowDoc(row as JsonObject, siblingDoc[field.name]) ||
+                siblingDoc[field.name]?.[rowIndex] || {},
+              siblingDocWithLocales:
+                // getExistingRowDoc(row as JsonObject, siblingDocWithLocales?.[field.name]) ||
+                siblingDocWithLocales ? siblingDocWithLocales[field.name]?.[rowIndex] || {} : {},
               skipValidation: skipValidationFromHere,
             }),
           )
