@@ -1144,7 +1144,11 @@ export const getPayload = async (
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
-            if ('action' in data && data.action === 'serverComponentChanges') {
+            if (
+              // On Next.js 15, we need to check for data.action. On Next.js 16, we need to check for data.type.
+              data.type === 'serverComponentChanges' ||
+              data.action === 'serverComponentChanges'
+            ) {
               cached.reload = true
             }
           }
