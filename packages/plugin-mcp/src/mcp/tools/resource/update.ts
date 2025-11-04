@@ -264,8 +264,9 @@ ${JSON.stringify(errors, null, 2)}
     const convertedFields = convertCollectionSchemaToZod(schema)
 
     // Create a new schema that combines the converted fields with update-specific parameters
+    // Use .partial() to make all fields optional for partial updates
     const updateResourceSchema = z.object({
-      ...convertedFields.shape,
+      ...convertedFields.partial().shape,
       id: z.union([z.string(), z.number()]).optional().describe('The ID of the document to update'),
       depth: z
         .number()
