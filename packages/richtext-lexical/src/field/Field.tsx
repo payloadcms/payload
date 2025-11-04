@@ -182,18 +182,16 @@ const RichTextComponent: React.FC<
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          <BulkUploadProvider drawerSlugPrefix={path}>
-            <LexicalProvider
-              composerKey={pathWithEditDepth}
-              editorConfig={editorConfig}
-              fieldProps={props}
-              isSmallWidthViewport={isSmallWidthViewport}
-              key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-              onChange={handleChange}
-              readOnly={disabled}
-              value={value}
-            />
-          </BulkUploadProvider>
+          <LexicalProvider
+            composerKey={pathWithEditDepth}
+            editorConfig={editorConfig}
+            fieldProps={props}
+            isSmallWidthViewport={isSmallWidthViewport}
+            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+            onChange={handleChange}
+            readOnly={disabled}
+            value={value}
+          />
           {AfterInput}
         </ErrorBoundary>
         <RenderCustomComponent
