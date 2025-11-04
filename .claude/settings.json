@@ -2,11 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Write",
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/post-edit.sh"
+            "command": ".claude/hooks/post-write-format.sh"
           }
         ]
       }

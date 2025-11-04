@@ -39,6 +39,12 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"focal_y" numeric
   );
   
+  CREATE TABLE "payload_kv" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"key" varchar NOT NULL,
+  	"data" jsonb NOT NULL
+  );
+  
   CREATE TABLE "payload_locked_documents" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"global_slug" varchar,
@@ -93,6 +99,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "media_updated_at_idx" ON "media" USING btree ("updated_at");
   CREATE INDEX "media_created_at_idx" ON "media" USING btree ("created_at");
   CREATE UNIQUE INDEX "media_filename_idx" ON "media" USING btree ("filename");
+  CREATE UNIQUE INDEX "payload_kv_key_idx" ON "payload_kv" USING btree ("key");
   CREATE INDEX "payload_locked_documents_global_slug_idx" ON "payload_locked_documents" USING btree ("global_slug");
   CREATE INDEX "payload_locked_documents_updated_at_idx" ON "payload_locked_documents" USING btree ("updated_at");
   CREATE INDEX "payload_locked_documents_created_at_idx" ON "payload_locked_documents" USING btree ("created_at");
@@ -117,6 +124,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
    DROP TABLE "users_sessions" CASCADE;
   DROP TABLE "users" CASCADE;
   DROP TABLE "media" CASCADE;
+  DROP TABLE "payload_kv" CASCADE;
   DROP TABLE "payload_locked_documents" CASCADE;
   DROP TABLE "payload_locked_documents_rels" CASCADE;
   DROP TABLE "payload_preferences" CASCADE;

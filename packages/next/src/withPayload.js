@@ -44,6 +44,9 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const toReturn = {
     ...nextConfig,
     env,
+    turbopack: {
+      ...(nextConfig?.turbopack || {}),
+    },
     outputFileTracingExcludes: {
       ...(nextConfig?.outputFileTracingExcludes || {}),
       '**/*': [
