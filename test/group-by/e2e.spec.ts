@@ -490,25 +490,23 @@ test.describe('Group By', () => {
     await field.click()
     await field
       .locator('.rs__option', {
-        hasText: exactText('Virtual Title From Category'),
+        hasText: exactText('Virtual Title From Page'),
       })
       .click()
 
     // Wait for the field to be selected
-    await expect(field.locator('.react-select--single-value')).toHaveText(
-      'Virtual Title From Category',
-    )
+    await expect(field.locator('.react-select--single-value')).toHaveText('Virtual Title From Page')
 
-    // Virtual fields get transformed to their resolved path in the URL (category.title)
-    await expect(page).toHaveURL(/&groupBy=category\.title/)
+    // Virtual fields get transformed to their resolved path in the URL (page.title)
+    await expect(page).toHaveURL(/&groupBy=page\.title/)
 
-    // Should show sticky toolbar when there are 30+ distinct category titles
+    // Should show sticky toolbar when there are 30 distinct page titles
     await expect(page.locator('.sticky-toolbar')).toBeVisible()
 
     // Verify the pagination controls are present
     await expect(page.locator('.sticky-toolbar .page-controls')).toBeVisible()
 
-    // Verify we have multiple pages (30 categories with default limit of 10 = 3 pages)
+    // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
     const pageInfo = page.locator('.sticky-toolbar .page-controls .page-controls__page-info')
     await expect(pageInfo).toBeVisible()
     await expect(pageInfo).toContainText('of 30')
