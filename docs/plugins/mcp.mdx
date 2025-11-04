@@ -1,7 +1,7 @@
 ---
 title: MCP Plugin
 label: MCP
-order: 120
+order: 49
 desc: MCP (Model Context Protocol) capabilities with Payload
 keywords: plugins, mcp, ai, model context protocol, plugin, payload, cms
 ---
@@ -86,18 +86,18 @@ export default config
 | `disabled`                             | `boolean`           | Disable the MCP plugin while keeping database schema consistent.                                        |
 | `overrideApiKeyCollection`             | `function`          | A function that allows you to override the automatically generated API Keys collection.                 |
 | `mcp`                                  | `object`            | MCP options that allow you to customize the MCP server.                                                 |
-| `mcp.tools`                            | `array`             | An array of custom tools to add to the MCP server.                                                      |
+| `mcp.tools`                            | `array`             | An array of tools to add to the MCP server.                                                             |
 | `mcp.tools.name`                       | `string`            | The name of the tool.                                                                                   |
 | `mcp.tools.description`                | `string`            | The description of the tool.                                                                            |
 | `mcp.tools.handler`                    | `function`          | The handler function for the tool.                                                                      |
 | `mcp.tools.parameters`                 | `object`            | The parameters for the tool (Zod schema).                                                               |
-| `mcp.prompts`                          | `array`             | An array of custom prompts to add to the MCP server.                                                    |
+| `mcp.prompts`                          | `array`             | An array of prompts to add to the MCP server.                                                           |
 | `mcp.prompts.name`                     | `string`            | The name of the prompt.                                                                                 |
 | `mcp.prompts.title`                    | `string`            | The title of the prompt (used by LLMs to determine when to use it).                                     |
 | `mcp.prompts.description`              | `string`            | The description of the prompt.                                                                          |
 | `mcp.prompts.handler`                  | `function`          | The handler function for the prompt.                                                                    |
 | `mcp.prompts.argsSchema`               | `object`            | The arguments schema for the prompt (Zod schema).                                                       |
-| `mcp.resources`                        | `array`             | An array of custom resources to add to the MCP server.                                                  |
+| `mcp.resources`                        | `array`             | An array of resources to add to the MCP server.                                                         |
 | `mcp.resources.name`                   | `string`            | The name of the resource.                                                                               |
 | `mcp.resources.title`                  | `string`            | The title of the resource (used by LLMs to determine when to use it).                                   |
 | `mcp.resources.description`            | `string`            | The description of the resource.                                                                        |
@@ -120,14 +120,14 @@ The plugin automatically creates an **API Keys** collection that provides high-r
 - Create API keys for MCP clients
 - Allow or disallow specific MCP capabilities in real-time
 - Control which collections can be accessed via MCP
-- Enable or disable custom tools
+- Enable or disable tools
 
 You can customize this collection using the `overrideApiKeyCollection` option:
 
 ```ts
 mcpPlugin({
   overrideApiKeyCollection: (collection) => {
-    // Add custom fields to the API Keys collection
+    // Add fields to the API Keys collection
     collection.fields.push({
       name: 'department',
       type: 'select',
@@ -142,7 +142,7 @@ mcpPlugin({
 })
 ```
 
-## Custom Prompts
+## Prompts
 
 Prompts allow LLMs to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
 
@@ -171,7 +171,7 @@ prompts: [
 ]
 ```
 
-## Custom Resources
+## Resources
 
 Resources provide access to data or content that LLMs can read. They can be static or dynamic with parameterized URIs:
 
@@ -259,15 +259,15 @@ collections: {
 }
 ```
 
-### Custom Tool with Database Access
+### Example Tool with Database Access
 
-Custom tools allow you to extend MCP capabilities beyond basic CRUD operations. Use them when you need to perform complex queries, aggregations, or business logic that isn't covered by the standard collection operations.
+Tools allow you to extend MCP capabilities beyond basic CRUD operations. Use them when you need to perform complex queries, aggregations, or business logic that isn't covered by the standard collection operations.
 
 ```ts
 tools: [
   {
-    name: 'getPostStats',
-    description: 'Get statistics about posts in the system',
+    name: 'getPostScores',
+    description: 'Get useful scores about content in posts',
     handler: async (args, { payload }) => {
       const stats = await payload.find({
         collection: 'posts',
@@ -328,7 +328,7 @@ const config = buildConfig({
       collections: {
         posts: {
           enabled: true,
-          description: 'My posts',
+          description: 'Posts with content about science and nature',
         },
       },
     }),
