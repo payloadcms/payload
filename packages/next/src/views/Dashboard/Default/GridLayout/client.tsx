@@ -1,10 +1,17 @@
 'use client'
 
-import type { DragStartEvent } from '@dnd-kit/core'
 import type { Widget } from 'payload'
 
-import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+  useDroppable,
+} from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
+import { useSortable } from '@dnd-kit/sortable'
 import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
@@ -41,6 +48,7 @@ export function GridLayoutDashboardClient({
     cancel,
     currentLayout,
     deleteWidget,
+    handleDragOver,
     isEditing,
     resetLayout,
     saveLayout,
@@ -81,7 +89,11 @@ export function GridLayoutDashboardClient({
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         currentLayout={currentLayout}
         isEditing={isEditing}
-        onDragEnd={() => setActiveId(null)}
+        onDragEnd={(ev) => {
+          console.log('over.id', ev.over?.id)
+          setActiveId(null)
+        }}
+        onDragOver={handleDragOver}
         onDragStart={(event) => setActiveId(String(event.active.id))}
         renderItem={(widget) => (
           <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
@@ -179,7 +191,14 @@ function SortableFlex(props: {
   className?: string
   currentLayout: undefined | WidgetInstanceClient[]
   isEditing: boolean
-  onDragEnd: () => void
+  onDragEnd: (event: DragEndEvent) => void
+  onDragOver: ({
+    moveFromIndex,
+    moveToIndex,
+  }: {
+    moveFromIndex: number
+    moveToIndex: number
+  }) => void
   onDragStart: (event: DragStartEvent) => void
   renderItem: (widget: WidgetInstanceClient) => React.ReactNode
 }) {
@@ -204,9 +223,9 @@ function SortableFlex(props: {
     props.onDragStart(event)
   }
 
-  const handleDragEnd = () => {
+  const handleDragEnd = (event: DragEndEvent) => {
     setActiveWidth(null)
-    props.onDragEnd()
+    props.onDragEnd(event)
   }
 
   return (
@@ -218,7 +237,15 @@ function SortableFlex(props: {
           y: 0.2, // Allow vertical scroll at 20% from edge
         },
       }}
+      collisionDetection={closestCenter}
+      id="sortable"
       onDragEnd={handleDragEnd}
+      onDragMove={(ev) => {
+        props.onDragOver({
+          moveFromIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.active.id),
+          moveToIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
+        })
+      }}
       onDragStart={handleDragStart}
     >
       <div
@@ -281,7 +308,7 @@ function SortableItem(props: {
   id: string
   style?: React.CSSProperties
 }) {
-  const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
+  const { attributes, isDragging, listeners, setNodeRef } = useSortable({
     id: props.id,
     disabled: props.disabled,
   })
