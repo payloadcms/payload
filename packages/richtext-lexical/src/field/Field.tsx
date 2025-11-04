@@ -2,7 +2,6 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 
 import {
-  BulkUploadProvider,
   FieldDescription,
   FieldError,
   FieldLabel,
