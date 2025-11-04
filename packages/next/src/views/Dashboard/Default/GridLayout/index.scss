@@ -13,6 +13,11 @@
         pointer-events: none;
       }
     }
+
+    .drag-overlay {
+      pointer-events: none;
+      user-select: none;
+    }
   }
 
   .widget-wrapper {

@@ -143,6 +143,7 @@ export default function Revenue(_props: WidgetServerProps) {
             <Area
               dataKey="amount"
               fill="url(#revenueGradient)"
+              isAnimationActive={false}
               stroke="#3B82F6"
               strokeWidth={2}
               type="monotone"

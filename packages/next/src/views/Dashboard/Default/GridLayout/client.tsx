@@ -4,6 +4,7 @@ import type { DragStartEvent } from '@dnd-kit/core'
 import type { Widget } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
+import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
@@ -241,13 +242,21 @@ function SortableFlex(props: {
           </SortableItem>
         ))}
         <DragOverlay
+          className="drag-overlay"
+          modifiers={[snapCenterToCursor]}
           style={{
             width: activeWidth ? `${activeWidth}px` : undefined,
           }}
         >
           {activeWidget ? (
-            <div className={`widget-wrapper ${props.isEditing ? 'widget-wrapper--editing' : ''}`}>
-              <div className="widget-content">{activeWidget.component}</div>
+            <div
+              style={{
+                transform: 'scale(0.25)',
+              }}
+            >
+              <div className={`widget-wrapper ${props.isEditing ? 'widget-wrapper--editing' : ''}`}>
+                <div className="widget-content">{activeWidget.component}</div>
+              </div>
             </div>
           ) : null}
         </DragOverlay>
@@ -264,12 +273,17 @@ function SortableItem(props: {
   id: string
   style?: React.CSSProperties
 }) {
-  const { attributes, listeners, setNodeRef } = useDraggable({
+  const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
     id: props.id,
   })
 
+  const mergedStyles = {
+    ...props.style,
+    opacity: isDragging ? 0.3 : 1,
+  }
+
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes} {...props}>
+    <div ref={setNodeRef} {...listeners} {...attributes} {...props} style={mergedStyles}>
       {props.children}
     </div>
   )
