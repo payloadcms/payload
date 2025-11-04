@@ -1405,14 +1405,21 @@ describe('database', () => {
     const intersection = page1Values.filter((v) => page2Values.includes(v))
     expect(intersection).toHaveLength(0)
 
-    // Clean up created documents
-    await Promise.all([
-      ...virtualRelations.map((doc) =>
+    // Clean up created documents in order (child -> parent to avoid FK issues)
+    // Delete virtual-relations first (references posts)
+    await Promise.all(
+      virtualRelations.map((doc) =>
         payload.delete({ id: doc.id, collection: 'virtual-relations' }),
       ),
-      ...posts.map((doc) => payload.delete({ id: doc.id, collection: 'posts' })),
-      ...categories.map((doc) => payload.delete({ id: doc.id, collection: 'categories' })),
-    ])
+    )
+
+    // Delete posts second (references categories)
+    await Promise.all(posts.map((doc) => payload.delete({ id: doc.id, collection: 'posts' })))
+
+    // Delete categories last
+    await Promise.all(
+      categories.map((doc) => payload.delete({ id: doc.id, collection: 'categories' })),
+    )
   })
 
   describe('Compound Indexes', () => {
