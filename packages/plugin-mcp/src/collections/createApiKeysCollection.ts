@@ -131,6 +131,12 @@ export const createAPIKeysCollection = (
     }
   })
 
+  const userCollection = pluginOptions.userCollection
+    ? typeof pluginOptions.userCollection === 'string'
+      ? pluginOptions.userCollection
+      : pluginOptions.userCollection.slug
+    : 'users'
+
   return {
     slug: 'payload-mcp-api-keys',
     admin: {
@@ -148,10 +154,7 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        relationTo:
-          typeof pluginOptions.userCollection === 'string'
-            ? pluginOptions.userCollection
-            : pluginOptions.userCollection?.slug || 'users',
+        relationTo: userCollection,
         required: true,
       },
       {
