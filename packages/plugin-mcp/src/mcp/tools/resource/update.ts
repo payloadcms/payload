@@ -20,7 +20,7 @@ export const updateResourceTool = (
 ) => {
   const tool = async (
     data: string,
-    id?: string,
+    id?: number | string,
     where?: string,
     draft: boolean = false,
     depth: number = 0,
@@ -37,9 +37,12 @@ export const updateResourceTool = (
   }> => {
     const payload = req.payload
 
+    // Convert ID to string if it's a number (for PostgreSQL compatibility)
+    const idString = id !== undefined ? String(id) : undefined
+
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+        `[payload-mcp] Updating resource in collection: ${collectionSlug}${idString ? ` with ID: ${idString}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -68,7 +71,7 @@ export const updateResourceTool = (
       }
 
       // Validate that either id or where is provided
-      if (!id && !where) {
+      if (!idString && !where) {
         payload.logger.error('[payload-mcp] Either id or where clause must be provided')
         const response = {
           content: [
@@ -108,10 +111,10 @@ export const updateResourceTool = (
       }
 
       // Update by ID or where clause
-      if (id) {
+      if (idString) {
         // Single document update
         const updateOptions = {
-          id,
+          id: idString,
           collection: collectionSlug,
           data: parsedData,
           depth,
@@ -127,7 +130,7 @@ export const updateResourceTool = (
         }
 
         if (verboseLogs) {
-          payload.logger.info(`[payload-mcp] Updating single document with ID: ${id}`)
+          payload.logger.info(`[payload-mcp] Updating single document with ID: ${idString}`)
         }
         const result = await payload.update({
           ...updateOptions,
@@ -135,7 +138,7 @@ export const updateResourceTool = (
         } as any)
 
         if (verboseLogs) {
-          payload.logger.info(`[payload-mcp] Successfully updated document with ID: ${id}`)
+          payload.logger.info(`[payload-mcp] Successfully updated document with ID: ${idString}`)
         }
 
         const response = {
@@ -263,7 +266,7 @@ ${JSON.stringify(errors, null, 2)}
     // Create a new schema that combines the converted fields with update-specific parameters
     const updateResourceSchema = z.object({
       ...convertedFields.shape,
-      id: z.string().optional().describe('The ID of the document to update'),
+      id: z.union([z.string(), z.number()]).optional().describe('The ID of the document to update'),
       depth: z
         .number()
         .optional()
@@ -322,7 +325,7 @@ ${JSON.stringify(errors, null, 2)}
         const data = JSON.stringify(fieldData)
         return await tool(
           data,
-          id as string | undefined,
+          id as number | string | undefined,
           where as string | undefined,
           draft as boolean,
           depth as number,

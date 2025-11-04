@@ -15,7 +15,7 @@ export const findResourceTool = (
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    id?: string,
+    id?: number | string,
     limit: number = 10,
     page: number = 1,
     sort?: string,
@@ -30,9 +30,12 @@ export const findResourceTool = (
   }> => {
     const payload = req.payload
 
+    // Convert ID to string if it's a number (for PostgreSQL compatibility)
+    const idString = id !== undefined ? String(id) : undefined
+
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
+        `[payload-mcp] Reading resource from collection: ${collectionSlug}${idString ? ` with ID: ${idString}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -61,10 +64,10 @@ export const findResourceTool = (
       }
 
       // If ID is provided, use findByID
-      if (id) {
+      if (idString) {
         try {
           const doc = await payload.findByID({
-            id,
+            id: idString,
             collection: collectionSlug,
             overrideAccess: false,
             req,
@@ -74,7 +77,7 @@ export const findResourceTool = (
           })
 
           if (verboseLogs) {
-            payload.logger.info(`[payload-mcp] Found document with ID: ${id}`)
+            payload.logger.info(`[payload-mcp] Found document with ID: ${idString}`)
           }
 
           const response = {
@@ -96,13 +99,13 @@ ${JSON.stringify(doc, null, 2)}`,
           }
         } catch (_findError) {
           payload.logger.warn(
-            `[payload-mcp] Document not found with ID: ${id} in collection: ${collectionSlug}`,
+            `[payload-mcp] Document not found with ID: ${idString} in collection: ${collectionSlug}`,
           )
           const response = {
             content: [
               {
                 type: 'text' as const,
-                text: `Error: Document with ID "${id}" not found in collection "${collectionSlug}"`,
+                text: `Error: Document with ID "${idString}" not found in collection "${collectionSlug}"`,
               },
             ],
           }

@@ -5,7 +5,7 @@ export const toolSchemas = {
     description: 'Find documents in a collection by ID or where clause using Find or FindByID.',
     parameters: z.object({
       id: z
-        .string()
+        .union([z.string(), z.number()])
         .optional()
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
@@ -73,7 +73,10 @@ export const toolSchemas = {
   updateResource: {
     description: 'Update documents in a collection by ID or where clause.',
     parameters: z.object({
-      id: z.string().optional().describe('Optional: specific document ID to update'),
+      id: z
+        .union([z.string(), z.number()])
+        .optional()
+        .describe('Optional: specific document ID to update'),
       data: z.string().describe('JSON string containing the data to update'),
       depth: z
         .number()
@@ -115,7 +118,10 @@ export const toolSchemas = {
   deleteResource: {
     description: 'Delete documents in a collection by ID or where clause.',
     parameters: z.object({
-      id: z.string().optional().describe('Optional: specific document ID to delete'),
+      id: z
+        .union([z.string(), z.number()])
+        .optional()
+        .describe('Optional: specific document ID to delete'),
       depth: z
         .number()
         .int()
