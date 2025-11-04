@@ -7,9 +7,12 @@ import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } fro
 import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
+import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
 import { registerTool } from './registerTool.js'
 
 // Tools
+import { findGlobalTool } from './tools/global/find.js'
+import { updateGlobalTool } from './tools/global/update.js'
 import { createResourceTool } from './tools/resource/create.js'
 import { deleteResourceTool } from './tools/resource/delete.js'
 import { findResourceTool } from './tools/resource/find.js'
@@ -57,6 +60,7 @@ export const getMCPHandler = (
   const experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] =
     pluginOptions?.experimental?.tools || {}
   const collectionsPluginConfig = pluginOptions.collections || {}
+  const globalsPluginConfig = pluginOptions.globals || {}
   const collectionsDirPath =
     experimentalTools && experimentalTools.collections?.collectionsDirPath
       ? experimentalTools.collections.collectionsDirPath
@@ -73,32 +77,13 @@ export const getMCPHandler = (
   try {
     return createMcpHandler(
       (server) => {
-        const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
-          (collection) => {
-            const fullyEnabled =
-              typeof collectionsPluginConfig?.[collection]?.enabled === 'boolean' &&
-              collectionsPluginConfig?.[collection]?.enabled
-
-            if (fullyEnabled) {
-              return true
-            }
-
-            const partiallyEnabled =
-              typeof collectionsPluginConfig?.[collection]?.enabled !== 'boolean' &&
-              ((typeof collectionsPluginConfig?.[collection]?.enabled?.find === 'boolean' &&
-                collectionsPluginConfig?.[collection]?.enabled?.find === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.create === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.create === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.update === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.update === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.delete === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.delete === true))
-
-            if (partiallyEnabled) {
-              return true
-            }
-          },
-        )
+        // Get enabled collections
+        const enabledCollectionSlugs = getEnabledSlugs(collectionsPluginConfig, [
+          'find',
+          'create',
+          'update',
+          'delete',
+        ])
 
         // Collection Operation Tools
         enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
@@ -186,6 +171,63 @@ export const getMCPHandler = (
           } catch (error) {
             throw new APIError(
               `Error registering tools for collection ${enabledCollectionSlug}: ${String(error)}`,
+              500,
+            )
+          }
+        })
+
+        // Global Operation Tools
+        const enabledGlobalSlugs = getEnabledSlugs(globalsPluginConfig, ['find', 'update'])
+
+        enabledGlobalSlugs.forEach((enabledGlobalSlug) => {
+          try {
+            const schema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+
+            const toolCapabilities = toolSettings?.[`${toCamelCase(enabledGlobalSlug)}`] as Record<
+              string,
+              unknown
+            >
+            const allowFind: boolean | undefined = toolCapabilities['find'] as boolean
+            const allowUpdate: boolean | undefined = toolCapabilities['update'] as boolean
+
+            if (allowFind) {
+              registerTool(
+                allowFind,
+                `Find ${enabledGlobalSlug}`,
+                () =>
+                  findGlobalTool(
+                    server,
+                    req,
+                    user,
+                    useVerboseLogs,
+                    enabledGlobalSlug,
+                    globalsPluginConfig,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+            if (allowUpdate) {
+              registerTool(
+                allowUpdate,
+                `Update ${enabledGlobalSlug}`,
+                () =>
+                  updateGlobalTool(
+                    server,
+                    req,
+                    user,
+                    useVerboseLogs,
+                    enabledGlobalSlug,
+                    globalsPluginConfig,
+                    schema,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+          } catch (error) {
+            throw new APIError(
+              `Error registering tools for global ${enabledGlobalSlug}: ${String(error)}`,
               500,
             )
           }
