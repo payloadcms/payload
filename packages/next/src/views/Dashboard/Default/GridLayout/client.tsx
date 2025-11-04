@@ -11,14 +11,11 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import { useSortable } from '@dnd-kit/sortable'
-import { ItemsDrawer, XIcon } from '@payloadcms/ui'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
-import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
-import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import React, { useEffect, useId, useState } from 'react'
+import { SortableContext, useSortable } from '@dnd-kit/sortable'
+import { XIcon } from '@payloadcms/ui'
+import React, { useState } from 'react'
 
+import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 
 export type WidgetItem = {
@@ -55,32 +52,7 @@ export function GridLayoutDashboardClient({
     setIsEditing,
   } = useDashboardLayout(initialLayout)
 
-  const uuid = useId()
-  const drawerSlug = `widgets-drawer-${uuid}`
-  const { setStepNav } = useStepNav()
   const [activeId, setActiveId] = useState<null | string>(null)
-
-  // Set step nav directly with minimal dependencies to avoid infinite loops
-  useEffect(() => {
-    setStepNav([
-      {
-        label: (
-          <DashboardBreadcrumbDropdown
-            isEditing={isEditing}
-            onCancel={cancel}
-            onEditClick={() => setIsEditing(true)}
-            onResetLayout={resetLayout}
-            onSaveChanges={saveLayout}
-            widgetsDrawerSlug={drawerSlug}
-          />
-        ),
-      },
-    ])
-    // TODO: useEffectEvent
-    // Only depend on isEditing and drawerSlug - the functions are stable enough
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, drawerSlug])
 
   return (
     <div>
@@ -112,77 +84,16 @@ export function GridLayoutDashboardClient({
           </div>
         )}
       />
-      {isEditing && (
-        <ItemsDrawer
-          drawerSlug={drawerSlug}
-          items={widgets}
-          onItemClick={(widget) => addWidget(widget.slug)}
-          searchPlaceholder="Search widgets..."
-          title="Add Widget"
-        />
-      )}
+      <DashboardStepNav
+        addWidget={addWidget}
+        cancel={cancel}
+        isEditing={isEditing}
+        resetLayout={resetLayout}
+        saveLayout={saveLayout}
+        setIsEditing={setIsEditing}
+        widgets={widgets}
+      />
     </div>
-  )
-}
-
-export function DashboardBreadcrumbDropdown(props: {
-  isEditing: boolean
-  onCancel: () => void
-  onEditClick: () => void
-  onResetLayout: () => void
-  onSaveChanges: () => void
-  widgetsDrawerSlug: string
-}) {
-  const { isEditing, onCancel, onEditClick, onResetLayout, onSaveChanges, widgetsDrawerSlug } =
-    props
-  if (isEditing) {
-    return (
-      <div className="dashboard-breadcrumb-dropdown__editing">
-        <span>Editing Dashboard</span>
-        <div className="dashboard-breadcrumb-dropdown__actions">
-          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
-            <Button buttonStyle="pill" el="span" size="small">
-              Add +
-            </Button>
-          </DrawerToggler>
-          <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
-            Save Changes
-          </Button>
-          <Button buttonStyle="pill" onClick={onCancel} size="small">
-            Cancel
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  const options = [
-    { label: 'Edit Dashboard', value: 'edit' },
-    { label: 'Reset Layout', value: 'reset' },
-  ]
-
-  const handleChange = (selectedOption: Option | Option[]) => {
-    // Since isMulti is false, we expect a single Option
-    const option = Array.isArray(selectedOption) ? selectedOption[0] : selectedOption
-
-    if (option?.value === 'edit') {
-      onEditClick()
-    } else if (option?.value === 'reset') {
-      onResetLayout()
-    }
-  }
-
-  return (
-    <ReactSelect
-      className="dashboard-breadcrumb-select"
-      isClearable={false}
-      isSearchable={false}
-      menuIsOpen={undefined} // Let ReactSelect handle open/close
-      onChange={handleChange}
-      options={options}
-      placeholder="Dashboard"
-      value={{ label: 'Dashboard', value: 'dashboard' }}
-    />
   )
 }
 
@@ -241,60 +152,64 @@ function SortableFlex(props: {
       id="sortable"
       onDragEnd={handleDragEnd}
       onDragMove={(ev) => {
-        props.onDragOver({
-          moveFromIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.active.id),
-          moveToIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
-        })
+        // props.onDragOver({
+        //   moveFromIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.active.id),
+        //   moveToIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
+        // })
       }}
       onDragStart={handleDragStart}
     >
-      <div
-        className={props.className}
-        ref={setNodeRef}
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        {props.currentLayout?.map((widget) => (
-          <SortableItem
-            className="widget"
-            data-columns={widget.item.w}
-            data-slug={widget.item.i}
-            disabled={!props.isEditing}
-            id={widget.item.i}
-            key={widget.item.i}
-            style={{
-              width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
-            }}
-          >
-            {props.renderItem(widget)}
-          </SortableItem>
-        ))}
-        <DragOverlay
-          className="drag-overlay"
-          dropAnimation={{
-            duration: 100,
-          }}
-          modifiers={[snapCenterToCursor]}
+      <SortableContext items={props.currentLayout?.map((w) => w.item.i)}>
+        <div
+          className={props.className}
+          ref={setNodeRef}
           style={{
-            width: activeWidth ? `${activeWidth}px` : undefined,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '1rem',
           }}
         >
-          {activeWidget ? (
-            <div
+          {props.currentLayout?.map((widget) => (
+            <SortableItem
+              className="widget"
+              data-columns={widget.item.w}
+              data-slug={widget.item.i}
+              disabled={!props.isEditing}
+              id={widget.item.i}
+              key={widget.item.i}
               style={{
-                transform: 'scale(0.25)',
+                width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
               }}
             >
-              <div className={`widget-wrapper ${props.isEditing ? 'widget-wrapper--editing' : ''}`}>
-                <div className="widget-content">{activeWidget.component}</div>
+              {props.renderItem(widget)}
+            </SortableItem>
+          ))}
+          <DragOverlay
+            className="drag-overlay"
+            dropAnimation={{
+              duration: 100,
+            }}
+            modifiers={[snapCenterToCursor]}
+            style={{
+              width: activeWidth ? `${activeWidth}px` : undefined,
+            }}
+          >
+            {activeWidget ? (
+              <div
+                style={{
+                  transform: 'scale(0.25)',
+                }}
+              >
+                <div
+                  className={`widget-wrapper ${props.isEditing ? 'widget-wrapper--editing' : ''}`}
+                >
+                  <div className="widget-content">{activeWidget.component}</div>
+                </div>
               </div>
-            </div>
-          ) : null}
-        </DragOverlay>
-      </div>
+            ) : null}
+          </DragOverlay>
+        </div>
+      </SortableContext>
     </DndContext>
   )
 }
@@ -308,13 +223,14 @@ function SortableItem(props: {
   id: string
   style?: React.CSSProperties
 }) {
-  const { attributes, isDragging, listeners, setNodeRef } = useSortable({
+  const { attributes, isDragging, isOver, listeners, setNodeRef } = useSortable({
     id: props.id,
     disabled: props.disabled,
   })
 
   const mergedStyles = {
     ...props.style,
+    borderRight: isOver ? '2px solid #3B82F6' : 'none',
     opacity: isDragging ? 0.3 : 1,
   }
 
