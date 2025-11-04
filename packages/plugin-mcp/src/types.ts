@@ -271,7 +271,7 @@ export type MCPServerOptions = {
   }
 }
 
-export type ToolSettings = {
+export type MCPAccessSettings = {
   auth?: {
     auth?: boolean
     forgotPassword?: boolean
