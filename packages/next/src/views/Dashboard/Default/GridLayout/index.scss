@@ -12,12 +12,21 @@
         -webkit-user-select: none;
         pointer-events: none;
       }
+
+      .widget {
+        cursor: grab;
+      }
     }
 
     .drag-overlay {
       pointer-events: none;
       user-select: none;
     }
+  }
+
+  // Apply grabbing cursor to body when drag-overlay is present
+  body:has(.drag-overlay) * {
+    cursor: grabbing;
   }
 
   .widget-wrapper {

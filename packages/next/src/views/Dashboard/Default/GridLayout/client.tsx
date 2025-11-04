@@ -183,7 +183,7 @@ function SortableFlex(props: {
   onDragStart: (event: DragStartEvent) => void
   renderItem: (widget: WidgetInstanceClient) => React.ReactNode
 }) {
-  const { isOver, setNodeRef } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: 'droppable',
   })
   const [activeWidth, setActiveWidth] = useState<null | number>(null)
@@ -192,6 +192,10 @@ function SortableFlex(props: {
     : null
 
   const handleDragStart = (event: DragStartEvent) => {
+    // Only allow drag when editing
+    if (!props.isEditing) {
+      return
+    }
     // Get the actual width of the dragged element
     const element = document.querySelector(`[id="${event.active.id}"]`)
     if (element instanceof HTMLElement) {
@@ -221,7 +225,6 @@ function SortableFlex(props: {
         className={props.className}
         ref={setNodeRef}
         style={{
-          color: isOver ? 'green' : undefined,
           display: 'flex',
           flexWrap: 'wrap',
           gap: '1rem',
@@ -232,6 +235,7 @@ function SortableFlex(props: {
             className="widget"
             data-columns={widget.item.w}
             data-slug={widget.item.i}
+            disabled={!props.isEditing}
             id={widget.item.i}
             key={widget.item.i}
             style={{
@@ -243,6 +247,9 @@ function SortableFlex(props: {
         ))}
         <DragOverlay
           className="drag-overlay"
+          dropAnimation={{
+            duration: 100,
+          }}
           modifiers={[snapCenterToCursor]}
           style={{
             width: activeWidth ? `${activeWidth}px` : undefined,
@@ -270,11 +277,13 @@ function SortableItem(props: {
   className?: string
   'data-columns'?: number
   'data-slug'?: string
+  disabled?: boolean
   id: string
   style?: React.CSSProperties
 }) {
   const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
     id: props.id,
+    disabled: props.disabled,
   })
 
   const mergedStyles = {
@@ -282,8 +291,11 @@ function SortableItem(props: {
     opacity: isDragging ? 0.3 : 1,
   }
 
+  // Only apply drag listeners when not disabled
+  const dragProps = props.disabled ? {} : { ...listeners, ...attributes }
+
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes} {...props} style={mergedStyles}>
+    <div ref={setNodeRef} {...dragProps} {...props} style={mergedStyles}>
       {props.children}
     </div>
   )
