@@ -16,17 +16,17 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../../config/types.js'
-import type { SharedOperationArgs } from '../types.js'
+import type { CachedDocument, SharedOperationArgs } from '../types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
+import { formatCacheKey } from '../../../cache/formatKey.js'
 import { combineQueries } from '../../../database/combineQueries.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
-import { formatCacheKey } from '../../../kv/cacheKey.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
@@ -327,13 +327,22 @@ export const updateDocument = async <
   // Cache result
   // /////////////////////////////////////
 
-  if (cache) {
-    const key = formatCacheKey({
-      id: result.id,
-      collectionSlug: collectionConfig.slug,
-    })
+  const key = formatCacheKey({
+    id: result.id,
+    collectionSlug: collectionConfig.slug,
+  })
 
-    await payload.kv.set(key, result)
+  if (cache) {
+    const cachedDocument: CachedDocument<JsonObject> = {
+      doc: result,
+      updatedAt: new Date().toISOString(),
+    }
+
+    await payload.kv.set(key, cachedDocument)
+  } else {
+    // Delete the cache entry if one exists on this key
+    // This way it can be re-created on the next read
+    await payload.kv.delete(key)
   }
 
   // /////////////////////////////////////

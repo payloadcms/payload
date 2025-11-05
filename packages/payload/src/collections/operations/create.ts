@@ -14,18 +14,19 @@ import type {
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import { formatCacheKey } from '../../cache/formatKey.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
-import { formatCacheKey } from '../../kv/cacheKey.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
@@ -53,7 +54,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   select?: SelectType
   selectedLocales?: string[]
   showHiddenFields?: boolean
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 export const createOperation = async <
   TSlug extends CollectionSlug,
@@ -97,6 +98,7 @@ export const createOperation = async <
 
     const {
       autosave = false,
+      cache = false,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -289,7 +291,13 @@ export const createOperation = async <
       collectionSlug: collectionConfig.slug,
     })
 
-    await req.payload.kv?.set(cacheKey, doc)
+    if (cache) {
+      await req.payload.kv?.set(cacheKey, doc)
+    } else {
+      // Delete the cache entry if one exists on this key
+      // This way it can be re-created on the next read
+      await req.payload.kv?.delete(cacheKey)
+    }
 
     const verificationToken = doc._verificationToken
     let result: Document = sanitizeInternalFields(doc)

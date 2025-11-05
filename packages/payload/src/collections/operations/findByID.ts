@@ -14,9 +14,10 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../config/types.js'
-import type { SharedOperationArgs } from './types.js'
+import type { CachedDocument, SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { formatCacheKey } from '../../cache/formatKey.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -155,7 +156,7 @@ export const findByIDOperation = async <
       where: fullWhere,
     }
 
-    // execute only if there's a custom ID and potentially overwriten access on id
+    // execute only if there's a custom ID and potentially overwritten access on id
     if (req.payload.collections[collectionConfig.slug]!.customIDType) {
       await validateQueryPaths({
         collectionConfig,
@@ -173,8 +174,38 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
+    let result: DataFromCollectionSlug<TSlug> | null = null
+
+    /**
+     * There are three potential sources for the document data:
+     * 1. Direct data from args, if provided
+     * 2. Cached data in the KV store
+     * 3. The database
+     */
+    if (args.data) {
+      result = args.data as DataFromCollectionSlug<TSlug>
+    } else if (cache) {
+      const cacheKey = formatCacheKey({
+        id,
+        collectionSlug: collectionConfig.slug,
+      })
+
+      const cachedDoc =
+        await req.payload.kv?.get<CachedDocument<DataFromCollectionSlug<TSlug>>>(cacheKey)
+
+      if (cachedDoc) {
+        const hasExpired = cachedDoc.expiresAt && cachedDoc.expiresAt < new Date().toISOString()
+
+        if (hasExpired) {
+          await req.payload.kv?.delete(cacheKey)
+          result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)
+        } else {
+          result = cachedDoc.doc
+        }
+      }
+    } else {
+      result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)
+    }
 
     if (!result) {
       if (!disableErrors) {
@@ -276,12 +307,12 @@ export const findByIDOperation = async <
     // afterRead - Fields
     // /////////////////////////////////////
 
-    result = await afterRead({
+    result = (await afterRead({
       collection: collectionConfig,
       context: req.context,
       currentDepth,
       depth: depth!,
-      doc: result,
+      doc: result as JsonObject,
       draft: draftEnabled,
       fallbackLocale: fallbackLocale!,
       flattenLocales,
@@ -292,7 +323,7 @@ export const findByIDOperation = async <
       req,
       select,
       showHiddenFields: showHiddenFields!,
-    })
+    })) as DataFromCollectionSlug<TSlug>
 
     // /////////////////////////////////////
     // afterRead - Collection

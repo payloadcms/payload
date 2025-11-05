@@ -26,10 +26,9 @@ export class DatabaseKVAdapter implements KVAdapter {
       where: { key: { equals: key } },
     })
   }
-
-  async get(key: string): Promise<KVStoreValue | null> {
+  async get<T extends KVStoreValue>(key: string): Promise<null | T> {
     const doc = await this.payload.db.findOne<{
-      data: KVStoreValue
+      data: T
       id: number | string
     }>({
       collection: this.collectionSlug,
