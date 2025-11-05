@@ -1713,7 +1713,7 @@ export type JoinFieldClient = {
 
 export type FlattenedBlock = {
   flattenedFields: FlattenedField[]
-  originalRef: Block
+  originalRef?: Block
 } & Block
 
 export type FlattenedBlocksField = {
