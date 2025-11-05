@@ -42,10 +42,10 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "nodemailer": "7.0.9"
+    "nodemailer": "catalog:"
   },
   "devDependencies": {
-    "@types/nodemailer": "7.0.2",
+    "@types/nodemailer": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {

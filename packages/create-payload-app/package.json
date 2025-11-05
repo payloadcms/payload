@@ -59,24 +59,24 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
-    "@sindresorhus/slugify": "^1.1.0",
-    "@swc/core": "1.11.29",
-    "arg": "^5.0.0",
+    "@clack/prompts": "catalog:",
+    "@sindresorhus/slugify": "catalog:",
+    "@swc/core": "catalog:",
+    "arg": "catalog:",
     "chalk": "^4.1.0",
-    "comment-json": "^4.2.3",
-    "esprima-next": "^6.0.3",
+    "comment-json": "catalog:",
+    "esprima-next": "catalog:",
     "execa": "^5.0.0",
-    "figures": "^6.1.0",
+    "figures": "catalog:",
     "fs-extra": "^9.0.1",
-    "globby": "11.1.0",
-    "tar": "^7.4.3",
-    "terminal-link": "^2.1.1"
+    "globby": "catalog:",
+    "tar": "catalog:",
+    "terminal-link": "catalog:"
   },
   "devDependencies": {
-    "@types/esprima": "^4.0.6",
+    "@types/esprima": "catalog:",
     "@types/fs-extra": "^9.0.12",
-    "@types/jest": "29.5.12",
+    "@types/jest": "catalog:",
     "@types/node": "22.15.30"
   },
   "engines": {
