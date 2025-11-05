@@ -16,6 +16,7 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { formatCacheKey } from '../../kv/cacheKey.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -220,6 +221,17 @@ export const deleteOperation = async <
             },
           },
         })
+
+        // /////////////////////////////////////
+        // Delete cache
+        // /////////////////////////////////////
+
+        const key = formatCacheKey({
+          id,
+          collectionSlug: collectionConfig.slug,
+        })
+
+        await req.payload.kv?.delete(key)
 
         // /////////////////////////////////////
         // afterRead - Fields

@@ -16,6 +16,7 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../../config/types.js'
+import type { SharedOperationArgs } from '../types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
@@ -25,6 +26,7 @@ import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
+import { formatCacheKey } from '../../../kv/cacheKey.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
@@ -51,7 +53,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 /**
  * This function is used to update a document in the DB and return the result.
@@ -73,6 +75,7 @@ export const updateDocument = async <
   id,
   accessResults,
   autosave,
+  cache,
   collectionConfig,
   config,
   data,
@@ -291,6 +294,7 @@ export const updateDocument = async <
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
+
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
@@ -317,6 +321,19 @@ export const updateDocument = async <
       req,
       snapshot: snapshotToSave,
     })
+  }
+
+  // /////////////////////////////////////
+  // Cache result
+  // /////////////////////////////////////
+
+  if (cache) {
+    const key = formatCacheKey({
+      id: result.id,
+      collectionSlug: collectionConfig.slug,
+    })
+
+    await payload.kv.set(key, result)
   }
 
   // /////////////////////////////////////

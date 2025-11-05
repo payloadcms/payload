@@ -14,6 +14,7 @@ import type {
   DataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -51,7 +52,7 @@ export type Arguments = {
   sort?: Sort
   trash?: boolean
   where?: Where
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds
 

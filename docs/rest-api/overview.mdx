@@ -19,15 +19,16 @@ To enhance DX, you can use [Payload SDK](#payload-rest-api-sdk) to query your RE
 **REST query parameters:**
 
 - [depth](../queries/depth) - automatically populates relationships and uploads
-- [locale](/docs/configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
-- [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
+- [locale](../configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
+- [fallback-locale](../configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
 - [select](../queries/select) - specifies which fields to include in the result
 - [populate](../queries/select#populate) - specifies which fields to include in the result from populated documents
 - [limit](../queries/pagination#pagination-controls) - limits the number of documents returned
 - [page](../queries/pagination#pagination-controls) - specifies which page to get documents from when used with a limit
 - [sort](../queries/sort#rest-api) - specifies the field(s) to use to sort the returned documents by
 - [where](../queries/overview) - specifies advanced filters to use to query documents
-- [joins](/docs/fields/join#rest-api) - specifies the custom request for each join field by name of the field
+- [joins](../fields/join#rest-api) - specifies the custom request for each join field by name of the field
+- [cache](../database/cache) - enables caching of the result in a key-value store
 
 ## Collections
 

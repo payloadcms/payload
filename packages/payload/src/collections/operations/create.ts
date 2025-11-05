@@ -25,6 +25,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
+import { formatCacheKey } from '../../kv/cacheKey.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
@@ -278,6 +279,17 @@ export const createOperation = async <
         req,
       })
     }
+
+    // /////////////////////////////////////
+    // Create cache
+    // /////////////////////////////////////
+
+    const cacheKey = formatCacheKey({
+      id: doc.id,
+      collectionSlug: collectionConfig.slug,
+    })
+
+    await req.payload.kv?.set(cacheKey, doc)
 
     const verificationToken = doc._verificationToken
     let result: Document = sanitizeInternalFields(doc)

@@ -17,6 +17,7 @@ import type {
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type { SharedOperationArgs } from '../types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -131,7 +132,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 export async function findLocal<
   TSlug extends CollectionSlug,
@@ -141,6 +142,7 @@ export async function findLocal<
   options: Options<TSlug, TSelect>,
 ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
   const {
+    cache,
     collection: collectionSlug,
     currentDepth,
     depth,
@@ -169,6 +171,7 @@ export async function findLocal<
   }
 
   return findOperation<TSlug, TSelect>({
+    cache,
     collection,
     currentDepth,
     depth,

@@ -14,6 +14,7 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -49,7 +50,8 @@ export type FindByIDArgs = {
   select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<SharedOperationArgs, 'cache'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -80,6 +82,7 @@ export const findByIDOperation = async <
 
     const {
       id,
+      cache,
       collection: { config: collectionConfig },
       currentDepth,
       depth,
@@ -161,6 +164,7 @@ export const findByIDOperation = async <
         where,
       })
     }
+
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
