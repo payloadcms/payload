@@ -55,7 +55,6 @@ export function GridLayoutDashboardClient({
   const { setNodeRef } = useDroppable({
     id: 'droppable',
   })
-  const [activeWidth, setActiveWidth] = useState<null | number>(null)
   const activeWidget = dropTargetWidget?.widgetId
     ? currentLayout?.find((w) => w.item.i === dropTargetWidget?.widgetId)
     : null
@@ -72,7 +71,6 @@ export function GridLayoutDashboardClient({
         }}
         id="sortable"
         onDragEnd={(event) => {
-          setActiveWidth(null)
           moveWidget({
             moveFromIndex: currentLayout?.findIndex((w) => w.item.i === event.active.id),
             moveToIndex: currentLayout?.findIndex((w) => w.item.i === event.over?.id),
@@ -80,11 +78,6 @@ export function GridLayoutDashboardClient({
           setDropTargetWidget(null)
         }}
         onDragStart={(event) => {
-          // Get the actual width of the dragged element
-          const element = document.querySelector(`[id="${event.active.id}"]`)
-          if (element instanceof HTMLElement) {
-            setActiveWidth(element.offsetWidth)
-          }
           setDropTargetWidget({
             position: 'after',
             widgetId: String(event.active.id),
@@ -135,9 +128,6 @@ export function GridLayoutDashboardClient({
                 duration: 100,
               }}
               modifiers={[snapCenterToCursor]}
-              style={{
-                width: activeWidth ? `${activeWidth}px` : undefined,
-              }}
             >
               {activeWidget ? (
                 <div
