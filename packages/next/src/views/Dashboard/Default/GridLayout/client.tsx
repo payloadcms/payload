@@ -39,7 +39,7 @@ const WIDTH_TO_PERCENTAGE = {
   'x-small': 25,
   small: 33,
   medium: 50,
-  large: 75,
+  large: 66,
   'x-large': 75,
   full: 100,
 } as const
