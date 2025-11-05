@@ -6,7 +6,7 @@
  * @returns {import('next').NextConfig}
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const env = nextConfig?.env || {}
+  const env = nextConfig.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
@@ -45,22 +45,22 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     ...nextConfig,
     env,
     turbopack: {
-      ...(nextConfig?.turbopack || {}),
+      ...(nextConfig.turbopack || {}),
     },
     outputFileTracingExcludes: {
-      ...(nextConfig?.outputFileTracingExcludes || {}),
+      ...(nextConfig.outputFileTracingExcludes || {}),
       '**/*': [
-        ...(nextConfig?.outputFileTracingExcludes?.['**/*'] || []),
+        ...(nextConfig.outputFileTracingExcludes?.['**/*'] || []),
         'drizzle-kit',
         'drizzle-kit/api',
       ],
     },
     outputFileTracingIncludes: {
-      ...(nextConfig?.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
+      ...(nextConfig.outputFileTracingIncludes || {}),
+      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
     // We disable the poweredByHeader here because we add it manually in the headers function below
-    ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
+    ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
@@ -81,13 +81,13 @@ export const withPayload = (nextConfig = {}, options = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
-            ...(nextConfig?.poweredByHeader !== false ? [poweredByHeader] : []),
+            ...(nextConfig.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
         },
       ]
     },
     serverExternalPackages: [
-      ...(nextConfig?.serverExternalPackages || []),
+      ...(nextConfig.serverExternalPackages || []),
       'drizzle-kit',
       'drizzle-kit/api',
       'pino',
