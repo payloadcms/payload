@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Post-edit hook to format files after creating/editing
+# Post-write hook to format files after creating
 # This is the bash equivalent of lint-staged in package.json
 
 # To test this file directly via cli:
-# echo '{"tool_input": {"file_path": "path/to/your/file"}}' | .claude/hooks/post-edit.sh
+# echo '{"tool_input": {"file_path": "path/to/your/file"}}' | .claude/hooks/post-write-format.sh
 
 # Read JSON from stdin and extract file path
 FILE=$(jq -r '.tool_input.file_path' 2>/dev/null)

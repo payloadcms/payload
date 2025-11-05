@@ -1834,9 +1834,6 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../../packages/next
-      '@payloadcms/payload-cloud':
-        specifier: workspace:*
-        version: link:../../packages/payload-cloud
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
@@ -2148,9 +2145,6 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../../packages/next
-      '@payloadcms/payload-cloud':
-        specifier: workspace:*
-        version: link:../../packages/payload-cloud
       '@payloadcms/plugin-form-builder':
         specifier: workspace:*
         version: link:../../packages/plugin-form-builder
@@ -27391,6 +27385,32 @@ snapshots:
       - babel-plugin-macros
 
   next@15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4):
+    dependencies:
+      '@next/env': 15.4.4
+      '@swc/helpers': 0.5.15
+      caniuse-lite: 1.0.30001720
+      postcss: 8.4.31
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+      styled-jsx: 5.1.6(@babel/core@7.27.4)(babel-plugin-macros@3.1.0)(react@19.1.1)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 15.4.4
+      '@next/swc-darwin-x64': 15.4.4
+      '@next/swc-linux-arm64-gnu': 15.4.4
+      '@next/swc-linux-arm64-musl': 15.4.4
+      '@next/swc-linux-x64-gnu': 15.4.4
+      '@next/swc-linux-x64-musl': 15.4.4
+      '@next/swc-win32-arm64-msvc': 15.4.4
+      '@next/swc-win32-x64-msvc': 15.4.4
+      '@opentelemetry/api': 1.9.0
+      '@playwright/test': 1.54.1
+      sass: 1.77.4
+      sharp: 0.34.3
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
+  next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4):
     dependencies:
       '@next/env': 15.4.4
       '@swc/helpers': 0.5.15

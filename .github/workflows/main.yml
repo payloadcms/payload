@@ -549,9 +549,6 @@ jobs:
           - template: website
             database: mongodb
 
-          - template: with-payload-cloud
-            database: mongodb
-
           - template: with-vercel-mongodb
             database: mongodb
 
