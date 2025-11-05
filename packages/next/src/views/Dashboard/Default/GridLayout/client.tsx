@@ -28,7 +28,7 @@ export type WidgetInstanceClient = {
 
 type DropTargetWidget = {
   position: 'after' | 'before'
-  widgetId: string
+  widget: WidgetInstanceClient
 } | null
 
 export function GridLayoutDashboardClient({
@@ -51,13 +51,7 @@ export function GridLayoutDashboardClient({
   } = useDashboardLayout(initialLayout)
 
   const [dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
-
-  const { setNodeRef } = useDroppable({
-    id: 'droppable',
-  })
-  const activeWidget = dropTargetWidget?.widgetId
-    ? currentLayout?.find((w) => w.item.i === dropTargetWidget?.widgetId)
-    : null
+  const { setNodeRef } = useDroppable({ id: 'droppable' })
 
   return (
     <div>
@@ -80,7 +74,7 @@ export function GridLayoutDashboardClient({
         onDragStart={(event) => {
           setDropTargetWidget({
             position: 'after',
-            widgetId: String(event.active.id),
+            widget: currentLayout?.find((w) => w.item.i === event.active.id),
           })
         }}
       >
@@ -129,14 +123,14 @@ export function GridLayoutDashboardClient({
               }}
               modifiers={[snapCenterToCursor]}
             >
-              {activeWidget ? (
+              {dropTargetWidget ? (
                 <div
                   style={{
                     transform: 'scale(0.25)',
                   }}
                 >
                   <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                    <div className="widget-content">{activeWidget.component}</div>
+                    <div className="widget-content">{dropTargetWidget.widget.component}</div>
                   </div>
                 </div>
               ) : null}
