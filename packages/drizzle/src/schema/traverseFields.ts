@@ -454,7 +454,10 @@ export const traverseFields = ({
 
             const isSharedBlock = sharedBlocks && sharedBlocks.has(block.originalRef)
             const baseForeignKeys: Record<string, RawForeignKey> = {}
-            if (!isSharedBlock) {
+
+            const skipForeignKey = isSharedBlock && block.dbName
+
+            if (!skipForeignKey) {
               baseForeignKeys._parentIdFk = {
                 name: `${blockTableName}_parent_id_fk`,
                 columns: ['_parentID'],
