@@ -79,6 +79,7 @@ export interface Config {
     'draft-with-validate-posts': DraftWithValidatePost;
     'error-on-unpublish': ErrorOnUnpublish;
     'localized-posts': LocalizedPost;
+    'all-field-types-localized': AllFieldTypesLocalized;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
     diff: Diff;
@@ -106,6 +107,7 @@ export interface Config {
     'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
     'error-on-unpublish': ErrorOnUnpublishSelect<false> | ErrorOnUnpublishSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'all-field-types-localized': AllFieldTypesLocalizedSelect<false> | AllFieldTypesLocalizedSelect<true>;
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
@@ -378,6 +380,16 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   description?: string | null;
+  textddd?: string | null;
+  groupd?: {
+    text?: string | null;
+  };
+  localizedArray?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   blocks?:
     | {
         array?:
@@ -391,6 +403,92 @@ export interface LocalizedPost {
         blockType: 'block';
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-field-types-localized".
+ */
+export interface AllFieldTypesLocalized {
+  id: string;
+  text?: string | null;
+  textarea?: string | null;
+  number?: number | null;
+  email?: string | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  select?: ('option1' | 'option2' | 'option3') | null;
+  radio?: ('radio1' | 'radio2') | null;
+  checkbox?: boolean | null;
+  date?: string | null;
+  localizedGroup?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  nonLocalizedGroup?: {
+    localizedText?: string | null;
+    nonLocalizedText?: string | null;
+  };
+  localizedArray?:
+    | {
+        item?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  nonLocalizedArray?:
+    | {
+        localizedItem?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'localizedTextBlock';
+          }
+        | {
+            nestedArray?:
+              | {
+                  item?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'nestedBlock';
+          }
+      )[]
+    | null;
+  localizedTab?: {
+    tabText?: string | null;
+  };
+  nonLocalizedTab?: {
+    localizedInNonLocalizedTab?: string | null;
+  };
+  unnamedTabLocalizedText?: string | null;
+  deeplyNested?: {
+    innerGroup?: {
+      innerArray?:
+        | {
+            text?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -796,6 +894,10 @@ export interface PayloadLockedDocument {
         value: string | LocalizedPost;
       } | null)
     | ({
+        relationTo: 'all-field-types-localized';
+        value: string | AllFieldTypesLocalized;
+      } | null)
+    | ({
         relationTo: 'version-posts';
         value: string | VersionPost;
       } | null)
@@ -1037,6 +1139,18 @@ export interface ErrorOnUnpublishSelect<T extends boolean = true> {
 export interface LocalizedPostsSelect<T extends boolean = true> {
   text?: T;
   description?: T;
+  textddd?: T;
+  groupd?:
+    | T
+    | {
+        text?: T;
+      };
+  localizedArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   blocks?:
     | T
     | {
@@ -1051,6 +1165,97 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
                   };
               id?: T;
               blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-field-types-localized_select".
+ */
+export interface AllFieldTypesLocalizedSelect<T extends boolean = true> {
+  text?: T;
+  textarea?: T;
+  number?: T;
+  email?: T;
+  code?: T;
+  json?: T;
+  select?: T;
+  radio?: T;
+  checkbox?: T;
+  date?: T;
+  localizedGroup?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  nonLocalizedGroup?:
+    | T
+    | {
+        localizedText?: T;
+        nonLocalizedText?: T;
+      };
+  localizedArray?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  nonLocalizedArray?:
+    | T
+    | {
+        localizedItem?: T;
+        id?: T;
+      };
+  localizedBlocks?:
+    | T
+    | {
+        localizedTextBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nestedBlock?:
+          | T
+          | {
+              nestedArray?:
+                | T
+                | {
+                    item?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  localizedTab?:
+    | T
+    | {
+        tabText?: T;
+      };
+  nonLocalizedTab?:
+    | T
+    | {
+        localizedInNonLocalizedTab?: T;
+      };
+  unnamedTabLocalizedText?: T;
+  deeplyNested?:
+    | T
+    | {
+        innerGroup?:
+          | T
+          | {
+              innerArray?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
             };
       };
   updatedAt?: T;

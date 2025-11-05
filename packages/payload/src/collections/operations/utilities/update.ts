@@ -28,6 +28,8 @@ import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { filterDataToSelectedLocales } from '../../../utilities/filterDataToSelectedLocales.js'
+import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -269,20 +271,22 @@ export const updateDocument = async <
         req,
       })
 
-      if (unpublishSpecificLocale && !currentPublishedDocWithLocales) {
-        // doc has never been published and is not being published now
-        result = snapshotToSave
-      } else {
-        // result will contain only published localized data
-        result = await beforeChange({
-          ...beforeChangeArgs,
+      if (unpublishSpecificLocale) {
+        result = filterDataToSelectedLocales({
+          configBlockReferences: payload.config.blocks,
+          docWithLocales: {},
+          fields: collectionConfig.fields,
+          selectedLocales: payload.config.localization.localeCodes.filter(
+            (locale) => locale !== unpublishSpecificLocale,
+          ),
+        })
+      } else if (publishSpecificLocale) {
+        result = mergeLocalizedData({
+          configBlockReferences: payload.config.blocks,
+          dataWithLocales: snapshotToSave,
           docWithLocales: currentPublishedDocWithLocales || {},
-          ...(unpublishSpecificLocale
-            ? {
-                data: {},
-                skipValidation: true,
-              }
-            : {}),
+          fields: collectionConfig.fields,
+          selectedLocales: [publishSpecificLocale],
         })
       }
     }

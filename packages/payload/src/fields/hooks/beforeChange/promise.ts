@@ -326,11 +326,14 @@ export const promise = async ({
               parentSchemaPath: schemaPath,
               req,
               siblingData: row as JsonObject,
-              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
-              siblingDocWithLocales: getExistingRowDoc(
-                row as JsonObject,
-                siblingDocWithLocales?.[field.name],
-              ),
+              siblingDoc:
+                getExistingRowDoc(row as JsonObject, siblingDoc[field.name]) ||
+                siblingDoc?.[field.name]?.[rowIndex] ||
+                {},
+              siblingDocWithLocales:
+                getExistingRowDoc(row as JsonObject, siblingDocWithLocales?.[field.name]) ||
+                siblingDocWithLocales?.[field.name]?.[rowIndex] ||
+                {},
               skipValidation: skipValidationFromHere,
             }),
           )
@@ -348,12 +351,18 @@ export const promise = async ({
         const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
-          const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
+          const rowSiblingDoc =
+            getExistingRowDoc(row as JsonObject, siblingDoc[field.name]) ||
+            siblingDoc?.[field.name]?.[rowIndex] ||
+            {}
 
-          const rowSiblingDocWithLocales = getExistingRowDoc(
-            row as JsonObject,
-            siblingDocWithLocales ? siblingDocWithLocales[field.name] : {},
-          )
+          const rowSiblingDocWithLocales =
+            getExistingRowDoc(
+              row as JsonObject,
+              siblingDocWithLocales ? siblingDocWithLocales[field.name] : {},
+            ) ||
+            siblingDocWithLocales?.[field.name]?.[rowIndex] ||
+            {}
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
@@ -383,7 +392,6 @@ export const promise = async ({
                 docWithLocales,
                 errors,
                 fieldLabelPath: blockLabelPath,
-
                 fields: block.fields,
                 global,
                 mergeLocaleActions,

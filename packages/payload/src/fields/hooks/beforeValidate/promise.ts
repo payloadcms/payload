@@ -368,7 +368,10 @@ export const promise = async <T>({
               parentSchemaPath: schemaPath,
               req,
               siblingData: row as JsonObject,
-              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
+              siblingDoc:
+                getExistingRowDoc(row as JsonObject, siblingDoc[field.name]) ||
+                siblingDoc?.[field.name]?.[rowIndex] ||
+                {},
             }),
           )
         })
@@ -385,7 +388,10 @@ export const promise = async <T>({
         const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
-          const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
+          const rowSiblingDoc =
+            getExistingRowDoc(row as JsonObject, siblingDoc[field.name]) ||
+            siblingDoc?.[field.name]?.[rowIndex] ||
+            {}
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
           const block: Block | undefined =

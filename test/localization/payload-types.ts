@@ -129,10 +129,12 @@ export interface Config {
   globals: {
     'global-array': GlobalArray;
     'global-text': GlobalText;
+    'global-drafts': GlobalDraft;
   };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
+    'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
@@ -941,10 +943,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1705,6 +1703,17 @@ export interface GlobalText {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-drafts".
+ */
+export interface GlobalDraft {
+  id: string;
+  title?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1724,6 +1733,17 @@ export interface GlobalArraySelect<T extends boolean = true> {
  */
 export interface GlobalTextSelect<T extends boolean = true> {
   text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-drafts_select".
+ */
+export interface GlobalDraftsSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

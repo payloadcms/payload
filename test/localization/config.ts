@@ -8,7 +8,7 @@ import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AllFieldTypesLocalized } from '../versions/collections/AllFieldTypesLocalized.js'
+import { AllFieldTypesLocalized } from './collections/AllFields/index.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
@@ -22,6 +22,7 @@ import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index
 import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/index.js'
 import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
+import { GlobalDrafts } from './globals/GlobalDrafts.js'
 import {
   blocksWithLocalizedSameName,
   cannotCreateDefaultLocale,
@@ -429,6 +430,7 @@ export default buildConfigWithDefaults({
       ],
       slug: 'global-text',
     },
+    GlobalDrafts,
   ],
   localization: {
     filterAvailableLocales: ({ locales }) => {

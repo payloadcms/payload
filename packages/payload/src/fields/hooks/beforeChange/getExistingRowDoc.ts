@@ -2,11 +2,14 @@
  * If there is an incoming row id,
  * and it matches the existing sibling doc id,
  * this is an existing row, so it should be merged.
- * Otherwise, return an empty object.
+ * Otherwise, return undefined.
  */
 import type { JsonObject } from '../../../types/index.js'
 
-export const getExistingRowDoc = (incomingRow: JsonObject, existingRows?: unknown): JsonObject => {
+export const getExistingRowDoc = (
+  incomingRow: JsonObject,
+  existingRows?: unknown,
+): JsonObject | undefined => {
   if (incomingRow.id && Array.isArray(existingRows)) {
     const matchedExistingRow = existingRows.find((existingRow) => {
       if (typeof existingRow === 'object' && 'id' in existingRow) {
@@ -23,5 +26,5 @@ export const getExistingRowDoc = (incomingRow: JsonObject, existingRows?: unknow
     }
   }
 
-  return {}
+  return undefined
 }

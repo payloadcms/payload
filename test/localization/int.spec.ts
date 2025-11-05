@@ -3541,6 +3541,386 @@ describe('Localization', () => {
       expect((allLocalesDoc.deeplyNested as any).es).toBeUndefined()
     })
   })
+  describe('specific locales', () => {
+    const collection = 'all-field-types-localized'
+    let docID: string
+
+    beforeEach(async () => {
+      // Clean up any existing docs
+      const existing = await payload.find({ collection, limit: 100 })
+      for (const doc of existing.docs) {
+        await payload.delete({ id: doc.id, collection })
+      }
+    })
+
+    describe('publish specific locales', () => {
+      describe('collections', () => {
+        it('should publish only the specified locale with correct nesting structure', async () => {
+          // Create draft with all field types in multiple locales
+          const draft = await payload.create({
+            collection,
+            data: {
+              _status: 'draft',
+              deeplyNested: {
+                innerGroup: {
+                  innerArray: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
+                },
+              },
+              localizedArray: [{ item: 'EN Item 1' }, { item: 'EN Item 2' }],
+              localizedBlocks: [
+                { blockType: 'localizedTextBlock', text: 'EN Text' },
+                { blockType: 'nestedBlock', nestedArray: [{ item: 'EN Nested' }] },
+              ],
+              localizedGroup: {
+                description: 'EN Description',
+                title: 'EN Title',
+              },
+              localizedTab: {
+                tabText: 'EN Tab Text',
+              },
+              nonLocalizedArray: [{ localizedItem: 'EN Item 1' }, { localizedItem: 'EN Item 2' }],
+              nonLocalizedGroup: {
+                localizedText: 'EN Localized',
+                nonLocalizedText: 'Shared Text',
+              },
+              number: 100,
+              select: 'option1',
+              text: 'English text',
+            },
+            draft: true,
+            locale: 'en',
+          })
+
+          await payload.update({
+            id: draft.id,
+            collection,
+            data: {
+              deeplyNested: {
+                innerGroup: {
+                  innerArray: [{ text: 'ES Deep 1' }, { text: 'ES Deep 2' }],
+                },
+              },
+              localizedArray: [{ item: 'ES Item 1' }, { item: 'ES Item 2' }],
+              localizedBlocks: [
+                { blockType: 'localizedTextBlock', text: 'ES Text' },
+                { blockType: 'nestedBlock', nestedArray: [{ item: 'ES Nested' }] },
+              ],
+              localizedGroup: {
+                description: 'ES Description',
+                title: 'ES Title',
+              },
+              localizedTab: {
+                tabText: 'ES Tab Text',
+              },
+              nonLocalizedArray: [{ localizedItem: 'ES Item 1' }, { localizedItem: 'ES Item 2' }],
+              nonLocalizedGroup: {
+                localizedText: 'ES Localized',
+              },
+              number: 200,
+              select: 'option2',
+              text: 'Spanish text',
+            },
+            draft: true,
+            locale: 'es',
+          })
+
+          // Publish only English
+          await payload.update({
+            id: draft.id,
+            collection,
+            data: {
+              _status: 'published',
+            },
+            locale: 'en',
+            publishSpecificLocale: 'en',
+          })
+
+          const published = await payload.findByID({
+            id: draft.id,
+            collection,
+            draft: false,
+            locale: 'all',
+          })
+
+          // Verify simple localized fields have locale keys at top level
+          expect((published.text as any).en).toBe('English text')
+          expect((published.text as any).es).toBeUndefined()
+          expect((published.number as any).en).toBe(100)
+          expect((published.select as any).en).toBe('option1')
+
+          // Verify localized group has locale keys at top level, children do not
+          expect((published.localizedGroup as any).en).toBeDefined()
+          expect((published.localizedGroup as any).en.title).toBe('EN Title')
+          expect((published.localizedGroup as any).en.description).toBe('EN Description')
+          expect((published.localizedGroup as any).es).toBeUndefined()
+
+          // Verify non-localized group with localized children
+          expect(published.nonLocalizedGroup?.nonLocalizedText).toBe('Shared Text')
+          expect((published.nonLocalizedGroup?.localizedText as any).en).toBe('EN Localized')
+          expect((published.nonLocalizedGroup?.localizedText as any).es).toBeUndefined()
+
+          // Verify localized array has locale keys at top level, items do not
+          expect((published.localizedArray as any).en).toHaveLength(2)
+          expect((published.localizedArray as any).en[0].item).toBe('EN Item 1')
+          expect((published.localizedArray as any).en[1].item).toBe('EN Item 2')
+          expect((published.localizedArray as any).es).toBeUndefined()
+
+          // Verify non-localized array with localized children
+          expect(published.nonLocalizedArray).toHaveLength(2)
+          expect((published.nonLocalizedArray?.[0]?.localizedItem as any).en).toBe('EN Item 1')
+          expect((published.nonLocalizedArray?.[0]?.localizedItem as any).es).toBeUndefined()
+
+          // Verify localized blocks have locale keys at top level, nested fields do not
+          expect((published.localizedBlocks as any).en).toHaveLength(2)
+          expect((published.localizedBlocks as any).en[0].text).toBe('EN Text')
+          expect((published.localizedBlocks as any).en[1].nestedArray[0].item).toBe('EN Nested')
+          expect((published.localizedBlocks as any).es).toHaveLength(0)
+
+          // Verify localized named tabs have locale keys at top level
+          expect((published.localizedTab as any).en).toBeDefined()
+          expect((published.localizedTab as any).en.tabText).toBe('EN Tab Text')
+          expect((published.localizedTab as any).es).toBeUndefined()
+
+          // Verify deeply nested localization has locale keys only at topmost localized field
+          expect((published.deeplyNested as any).en).toBeDefined()
+          expect((published.deeplyNested as any).en.innerGroup.innerArray).toHaveLength(2)
+          expect((published.deeplyNested as any).en.innerGroup.innerArray[0].text).toBe('EN Deep 1')
+          expect((published.deeplyNested as any).es).toBeUndefined()
+
+          // Verify draft still has Spanish
+          const draftDoc = await payload.findByID({
+            id: draft.id,
+            collection,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect((draftDoc.text as any).es).toBe('Spanish text')
+          expect((draftDoc.localizedGroup as any).es.title).toBe('ES Title')
+        })
+      })
+    })
+
+    describe('unpublish specific locales', () => {
+      describe('collections', () => {
+        it('should unpublish only the specified locale', async () => {
+          // Create and publish multiple locales
+          const doc = await payload.create({
+            collection,
+            data: {
+              _status: 'published',
+              text: 'EN Text',
+            },
+            locale: 'en',
+          })
+
+          docID = doc.id
+
+          await payload.update({
+            id: docID,
+            collection,
+            data: {
+              _status: 'published',
+              text: 'ES Text',
+            },
+            locale: 'es',
+          })
+
+          await payload.update({
+            id: docID,
+            collection,
+            data: {
+              _status: 'published',
+              text: 'PT Text',
+            },
+            locale: 'pt',
+          })
+
+          // Unpublish only English
+          await payload.update({
+            id: docID,
+            collection,
+            data: {},
+            unpublishSpecificLocale: 'en',
+          })
+
+          const published = await payload.findByID({
+            id: docID,
+            collection,
+            locale: 'all',
+          })
+
+          // English should be unpublished
+          expect((published.text as any).en).toBeUndefined()
+
+          // Other locales should remain published
+          expect((published.text as any).es).toBe('ES Text')
+          expect((published.text as any).pt).toBe('PT Text')
+
+          // Draft should still have English
+          const draftDoc = await payload.findByID({
+            id: docID,
+            collection,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(draftDoc._status).toBe('draft')
+          expect((draftDoc.text as any).en).toBe('EN Text')
+          expect((draftDoc.text as any).es).toBe('ES Text')
+          expect((draftDoc.text as any).pt).toBe('PT Text')
+        })
+
+        it('should unpublish only the specified locale from multiple published locales', async () => {
+          // Create and publish Spanish
+          const doc = await payload.create({
+            collection,
+            data: {
+              _status: 'published',
+              text: 'Spanish',
+            },
+            locale: 'es',
+          })
+
+          const docID = doc.id
+
+          // Publish English
+          await payload.update({
+            id: docID,
+            collection,
+            data: {
+              _status: 'published',
+              text: 'English',
+            },
+            locale: 'en',
+          })
+
+          // Publish Hungarian
+          await payload.update({
+            id: docID,
+            collection,
+            data: {
+              _status: 'published',
+              text: 'Hungarian',
+            },
+            locale: 'hu',
+          })
+
+          const publishedDoc = await payload.findByID({
+            id: docID,
+            collection,
+            locale: 'all',
+          })
+
+          expect((publishedDoc?.text as any)?.es).toStrictEqual('Spanish')
+          expect((publishedDoc?.text as any)?.en).toStrictEqual('English')
+          expect((publishedDoc?.text as any)?.hu).toStrictEqual('Hungarian')
+
+          // Unpublish only English
+          await payload.update({
+            id: docID,
+            collection,
+            data: {},
+            unpublishSpecificLocale: 'en',
+          })
+
+          const latestPublishedDoc = await payload.findByID({
+            id: docID,
+            collection,
+            locale: 'all',
+          })
+
+          expect((latestPublishedDoc?.text as any)?.es).toStrictEqual('Spanish')
+          expect((latestPublishedDoc?.text as any)?.en).toBeUndefined()
+          expect((latestPublishedDoc?.text as any)?.hu).toStrictEqual('Hungarian')
+
+          const latestDraft = await payload.findByID({
+            id: docID,
+            collection,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(latestDraft._status).toBe('draft')
+          expect((latestDraft?.text as any)?.es).toStrictEqual('Spanish')
+          expect((latestDraft?.text as any)?.en).toStrictEqual('English')
+          expect((latestDraft?.text as any)?.hu).toStrictEqual('Hungarian')
+        })
+      })
+
+      describe('globals', () => {
+        const globalSlug = 'global-drafts' as any
+
+        it('should unpublish only the specified locale', async () => {
+          // Publish Hungarian
+          await payload.updateGlobal({
+            slug: globalSlug,
+            data: {
+              _status: 'published',
+              title: 'Hungarian',
+            } as any,
+            locale: 'hu',
+          })
+
+          // Publish Spanish
+          await payload.updateGlobal({
+            slug: globalSlug,
+            data: {
+              _status: 'published',
+              title: 'Spanish',
+            } as any,
+            locale: 'es',
+          })
+
+          // Publish English
+          await payload.updateGlobal({
+            slug: globalSlug,
+            data: {
+              _status: 'published',
+              title: 'English',
+            } as any,
+            locale: 'en',
+          })
+
+          const globalData = await payload.findGlobal({
+            slug: globalSlug,
+            locale: 'all',
+          })
+
+          expect(globalData?.title?.es).toStrictEqual('Spanish')
+          expect(globalData?.title?.en).toStrictEqual('English')
+          expect(globalData?.title?.hu).toStrictEqual('Hungarian')
+
+          // Unpublish only English
+          await payload.updateGlobal({
+            slug: globalSlug,
+            data: {},
+            unpublishSpecificLocale: 'en',
+          })
+
+          const latestGlobal = await payload.findGlobal({
+            slug: globalSlug,
+            locale: 'all',
+          })
+
+          expect(latestGlobal?.title?.es).toStrictEqual('Spanish')
+          expect(latestGlobal?.title?.en).toBeUndefined()
+          expect(latestGlobal?.title?.hu).toStrictEqual('Hungarian')
+
+          const latestDraft = await payload.findGlobal({
+            slug: globalSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(latestDraft._status).toBe('draft')
+          expect(latestDraft?.title?.es).toStrictEqual('Spanish')
+          expect(latestDraft?.title?.en).toStrictEqual('English')
+          expect(latestDraft?.title?.hu).toStrictEqual('Hungarian')
+        })
+      })
+    })
+  })
 })
 
 async function createLocalizedPost(data: {

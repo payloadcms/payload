@@ -15,8 +15,8 @@ type FilterDataToSelectedLocalesArgs = {
 /**
  * Filters localized field data to only include specified locales.
  * For non-localized fields, returns all data as-is.
- * For localized fields, if selectedLocales is provided, returns only those locales.
- * If selectedLocales is not provided and field is localized, returns all locales.
+ * If selectedLocales array is not empty, returns only those locales.
+ * If selectedLocales array is empty, return all locales.
  */
 export function filterDataToSelectedLocales({
   configBlockReferences,
@@ -25,7 +25,12 @@ export function filterDataToSelectedLocales({
   parentIsLocalized = false,
   selectedLocales,
 }: FilterDataToSelectedLocalesArgs): JsonObject {
-  if (!docWithLocales || typeof docWithLocales !== 'object') {
+  if (
+    docWithLocales &&
+    typeof docWithLocales === 'object' &&
+    Array.isArray(selectedLocales) &&
+    selectedLocales.length === 0
+  ) {
     return docWithLocales
   }
 
@@ -37,76 +42,124 @@ export function filterDataToSelectedLocales({
 
       switch (field.type) {
         case 'array': {
-          if (Array.isArray(docWithLocales[field.name])) {
-            result[field.name] = docWithLocales[field.name].map((item: JsonObject) =>
-              filterDataToSelectedLocales({
-                configBlockReferences,
-                docWithLocales: item,
-                fields: field.fields,
-                parentIsLocalized: fieldIsLocalized,
-                selectedLocales,
-              }),
-            )
+          if (field.name in docWithLocales) {
+            const value = docWithLocales[field.name]
+
+            if (fieldIsLocalized && value && typeof value === 'object' && !Array.isArray(value)) {
+              const filtered: Record<string, unknown> = {}
+              for (const locale of selectedLocales) {
+                if (locale in value && Array.isArray(value[locale])) {
+                  filtered[locale] = value[locale]
+                }
+              }
+              if (Object.keys(filtered).length > 0) {
+                result[field.name] = filtered
+              }
+            } else if (Array.isArray(value)) {
+              // Non-localized array
+              result[field.name] = value.map((item: JsonObject) => {
+                const filtered = filterDataToSelectedLocales({
+                  configBlockReferences,
+                  docWithLocales: item,
+                  fields: field.fields,
+                  parentIsLocalized: fieldIsLocalized,
+                  selectedLocales,
+                })
+
+                if ('id' in item && !('id' in filtered)) {
+                  filtered.id = item.id
+                }
+
+                return filtered
+              })
+            }
           }
           break
         }
 
         case 'blocks': {
-          if (field.name in docWithLocales && Array.isArray(docWithLocales[field.name])) {
-            result[field.name] = docWithLocales[field.name].map((blockData: JsonObject) => {
-              let block: Block | FlattenedBlock | undefined
-              if (configBlockReferences && field.blockReferences) {
-                for (const blockOrReference of field.blockReferences) {
-                  if (typeof blockOrReference === 'string') {
-                    block = configBlockReferences.find((b) => b.slug === blockData.blockType)
-                  } else {
-                    block = blockOrReference
-                  }
-                }
-              } else if (field.blocks) {
-                block = field.blocks.find((b) => b.slug === blockData.blockType)
-              }
+          if (field.name in docWithLocales) {
+            const value = docWithLocales[field.name]
 
-              if (block) {
-                return filterDataToSelectedLocales({
+            if (fieldIsLocalized && value && typeof value === 'object' && !Array.isArray(value)) {
+              const filtered: Record<string, unknown> = {}
+              for (const locale of selectedLocales) {
+                if (locale in value && Array.isArray(value[locale])) {
+                  filtered[locale] = value[locale]
+                }
+              }
+              result[field.name] = filtered
+            } else if (Array.isArray(value)) {
+              // Non-localized blocks
+              result[field.name] = value.map((blockData: JsonObject) => {
+                let block: Block | FlattenedBlock | undefined
+                if (configBlockReferences && field.blockReferences) {
+                  for (const blockOrReference of field.blockReferences) {
+                    if (typeof blockOrReference === 'string') {
+                      block = configBlockReferences.find((b) => b.slug === blockData.blockType)
+                    } else {
+                      block = blockOrReference
+                    }
+                  }
+                } else if (field.blocks) {
+                  block = field.blocks.find((b) => b.slug === blockData.blockType)
+                }
+
+                if (!block) {
+                  return blockData
+                }
+
+                const filterd = filterDataToSelectedLocales({
                   configBlockReferences,
                   docWithLocales: blockData,
                   fields: block?.fields || [],
                   parentIsLocalized: fieldIsLocalized,
                   selectedLocales,
                 })
-              }
 
-              return blockData
-            })
+                if ('id' in blockData && !('id' in filterd)) {
+                  filterd.id = blockData.id
+                }
+                if ('blockType' in blockData && !('blockType' in filterd)) {
+                  filterd.blockType = blockData.blockType
+                }
+                if ('blockName' in blockData && !('blockName' in filterd)) {
+                  filterd.blockName = blockData.blockName
+                }
+
+                return filterd
+              })
+            }
           }
           break
         }
 
         case 'group': {
-          // Named groups create a nested data structure
           if (
-            fieldAffectsData(field) &&
+            field?.name &&
             field.name in docWithLocales &&
             typeof docWithLocales[field.name] === 'object'
           ) {
-            result[field.name] = filterDataToSelectedLocales({
-              configBlockReferences,
-              docWithLocales: docWithLocales[field.name] as JsonObject,
-              fields: field.fields,
-              parentIsLocalized: fieldIsLocalized,
-              selectedLocales,
-            })
-          } else {
-            // Unnamed groups pass through the same data level
-            const nestedResult = filterDataToSelectedLocales({
-              configBlockReferences,
-              docWithLocales,
-              fields: field.fields,
-              parentIsLocalized,
-              selectedLocales,
-            })
-            Object.assign(result, nestedResult)
+            const value = docWithLocales[field.name]
+
+            if (fieldIsLocalized && !Array.isArray(value)) {
+              const filtered: Record<string, unknown> = {}
+              for (const locale of selectedLocales) {
+                if (locale in value) {
+                  filtered[locale] = value[locale]
+                }
+              }
+              result[field.name] = filtered
+            } else {
+              // Non-localized group
+              result[field.name] = filterDataToSelectedLocales({
+                configBlockReferences,
+                docWithLocales: value as JsonObject,
+                fields: field.fields,
+                parentIsLocalized: fieldIsLocalized,
+                selectedLocales,
+              })
+            }
           }
           break
         }
@@ -116,25 +169,16 @@ export function filterDataToSelectedLocales({
           if (field.name in docWithLocales) {
             const value = docWithLocales[field.name]
 
-            // If the field is localized and has locale data
-            if (fieldIsLocalized && value && typeof value === 'object' && !Array.isArray(value)) {
-              // If selectedLocales is provided, filter to only those locales
-              if (selectedLocales && selectedLocales.length > 0) {
-                const filtered: Record<string, unknown> = {}
-                for (const locale of selectedLocales) {
-                  if (locale in value) {
-                    filtered[locale] = value[locale]
-                  }
+            if (fieldIsLocalized) {
+              const filtered: Record<string, unknown> = {}
+              for (const locale of selectedLocales) {
+                if (locale in value) {
+                  filtered[locale] = value[locale]
                 }
-                if (Object.keys(filtered).length > 0) {
-                  result[field.name] = filtered
-                }
-              } else {
-                // If no selectedLocales, include all locales
-                result[field.name] = value
               }
+              result[field.name] = filtered
             } else {
-              // Non-localized field or non-object value
+              // Non-localized field
               result[field.name] = value
             }
           }
@@ -145,8 +189,8 @@ export function filterDataToSelectedLocales({
       // Layout-only fields that don't affect data structure
       switch (field.type) {
         case 'collapsible':
+        case 'group':
         case 'row': {
-          // These pass through the same data level
           const nestedResult = filterDataToSelectedLocales({
             configBlockReferences,
             docWithLocales,
@@ -161,15 +205,28 @@ export function filterDataToSelectedLocales({
         case 'tabs': {
           for (const tab of field.tabs) {
             if (tabHasName(tab)) {
-              // Named tabs create a nested data structure
               if (tab.name in docWithLocales && typeof docWithLocales[tab.name] === 'object') {
-                result[tab.name] = filterDataToSelectedLocales({
-                  configBlockReferences,
-                  docWithLocales: docWithLocales[tab.name],
-                  fields: tab.fields,
-                  parentIsLocalized,
-                  selectedLocales,
-                })
+                const value = docWithLocales[tab.name]
+                const tabIsLocalized = fieldShouldBeLocalized({ field: tab, parentIsLocalized })
+
+                if (tabIsLocalized) {
+                  const filtered: Record<string, unknown> = {}
+                  for (const locale of selectedLocales) {
+                    if (locale in value) {
+                      filtered[locale] = value[locale]
+                    }
+                  }
+                  result[tab.name] = filtered
+                } else {
+                  // Non-localized tab
+                  result[tab.name] = filterDataToSelectedLocales({
+                    configBlockReferences,
+                    docWithLocales: value as JsonObject,
+                    fields: tab.fields,
+                    parentIsLocalized: tabIsLocalized,
+                    selectedLocales,
+                  })
+                }
               }
             } else {
               // Unnamed tabs pass through the same data level
