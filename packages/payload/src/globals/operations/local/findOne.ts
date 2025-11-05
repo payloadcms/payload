@@ -8,6 +8,7 @@ import type {
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromGlobalSlug } from '../../config/types.js'
+import type { SharedOperationArgs } from '../types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -78,7 +79,8 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<GlobalFindOneArgs, 'flattenLocales'>
+} & Pick<GlobalFindOneArgs, 'flattenLocales'> &
+  Pick<SharedOperationArgs, 'cache'>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,

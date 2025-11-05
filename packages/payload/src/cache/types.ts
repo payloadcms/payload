@@ -1,9 +1,11 @@
-import type { CollectionSlug } from '../index.js'
+import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type { JsonObject, Payload } from '../types/index.js'
 
 export type CacheArgs = {
   collection?: CollectionSlug
   doc: JsonObject
+  expiresAt?: CachedDocument<any>['expiresAt']
+  global?: GlobalSlug
   payload: Payload
 }
 

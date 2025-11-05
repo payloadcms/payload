@@ -185,17 +185,13 @@ export const findByIDOperation = async <
     if (args.data) {
       result = args.data as DataFromCollectionSlug<TSlug>
     } else if (cache) {
-      const documentCache = await getDocumentCache({
-        id,
-        collection: collectionConfig.slug,
-        payload: req.payload,
-      })
-
-      if (documentCache) {
-        result = documentCache.doc as DataFromCollectionSlug<TSlug>
-      } else {
-        result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)
-      }
+      result =
+        (await getDocumentCache({
+          id,
+          collection: collectionConfig.slug,
+          payload: req.payload,
+        })?.then((r) => r?.doc as DataFromCollectionSlug<TSlug>)) ||
+        (await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs))
     } else {
       result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)
     }

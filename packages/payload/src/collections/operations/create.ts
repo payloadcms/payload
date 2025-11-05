@@ -21,6 +21,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { formatCacheKey } from '../../cache/formatKey.js'
+import { cacheDocument } from '../../cache/index.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -282,23 +283,6 @@ export const createOperation = async <
       })
     }
 
-    // /////////////////////////////////////
-    // Create cache
-    // /////////////////////////////////////
-
-    const cacheKey = formatCacheKey({
-      id: doc.id,
-      collectionSlug: collectionConfig.slug,
-    })
-
-    if (cache) {
-      await req.payload.kv?.set(cacheKey, doc)
-    } else {
-      // Delete the cache entry if one exists on this key
-      // This way it can be re-created on the next read
-      await req.payload.kv?.delete(cacheKey)
-    }
-
     const verificationToken = doc._verificationToken
     let result: Document = sanitizeInternalFields(doc)
 
@@ -417,6 +401,12 @@ export const createOperation = async <
     })
 
     await unlinkTempFiles({ collectionConfig, config, req })
+
+    // /////////////////////////////////////
+    // Manage cache
+    // /////////////////////////////////////
+
+    await cacheDocument({ collection: collectionConfig.slug, doc: result, payload })
 
     // /////////////////////////////////////
     // Return results

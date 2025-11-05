@@ -197,7 +197,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     })
 
     // /////////////////////////////////////
-    // Delete cache
+    // Manage cache
     // /////////////////////////////////////
 
     await deleteDocumentCache({

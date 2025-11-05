@@ -223,7 +223,7 @@ export const deleteOperation = async <
         })
 
         // /////////////////////////////////////
-        // Delete cache
+        // Manage cache
         // /////////////////////////////////////
 
         await deleteDocumentCache({

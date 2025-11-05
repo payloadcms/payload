@@ -394,11 +394,11 @@ export const updateDocument = async <
   }
 
   // /////////////////////////////////////
-  // Cache result
+  // Manage cache
   // /////////////////////////////////////
 
   if (cache) {
-    await cacheDocument({ doc: result, payload })
+    await cacheDocument({ collection: collectionConfig.slug, doc: result, payload })
   }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>
