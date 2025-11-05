@@ -56,10 +56,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
     slug: 'collection-cards',
     ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
+    minWidth: 12,
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
     {
-      height: 3,
       widgetSlug: 'collection-cards',
       width: 12,
     } satisfies WidgetInstance,

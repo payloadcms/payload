@@ -35,24 +35,37 @@
     width: 100%;
 
     &--editing {
-      .widget-wrapper__delete-btn {
+      .widget-wrapper__controls {
         opacity: 0;
         transition: opacity 0.2s ease;
       }
 
       &:hover {
-        .widget-wrapper__delete-btn {
+        .widget-wrapper__controls {
           opacity: 1;
         }
       }
     }
 
-    &__delete-btn {
+    &__controls {
       position: absolute;
       top: 16px;
       right: 16px;
       z-index: 10;
 
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .popup-button-list__button {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+
+    &__size-btn,
+    &__delete-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -85,9 +98,24 @@
         background: var(--theme-elevation-900);
       }
 
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover {
+          background: var(--theme-text);
+        }
+      }
+
       svg {
         pointer-events: none;
       }
+    }
+
+    &__size-btn-percentage {
+      font-size: 12px;
+      margin-left: auto;
+      color: var(--theme-elevation-500);
     }
   }
 

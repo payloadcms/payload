@@ -95,6 +95,28 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     [isEditing],
   )
 
+  const resizeWidget = useCallback(
+    (widgetId: string, newWidth: number) => {
+      if (!isEditing) {
+        return
+      }
+      setCurrentLayout((prev) =>
+        prev.map((item) =>
+          item.item.i === widgetId
+            ? {
+                ...item,
+                item: {
+                  ...item.item,
+                  w: newWidth,
+                },
+              }
+            : item,
+        ),
+      )
+    },
+    [isEditing],
+  )
+
   return {
     addWidget,
     cancel,
@@ -103,6 +125,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     isEditing,
     moveWidget,
     resetLayout,
+    resizeWidget,
     saveLayout,
     setIsEditing,
   }

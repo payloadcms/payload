@@ -11,8 +11,8 @@ import {
 } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable } from '@dnd-kit/sortable'
-import { XIcon } from '@payloadcms/ui'
-import React, { useState } from 'react'
+import { ChevronIcon, Popup, PopupList, XIcon } from '@payloadcms/ui'
+import React, { useMemo, useState } from 'react'
 
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
@@ -52,6 +52,7 @@ export function GridLayoutDashboardClient({
     isEditing,
     moveWidget,
     resetLayout,
+    resizeWidget,
     saveLayout,
     setIsEditing,
   } = useDashboardLayout(initialLayout)
@@ -131,15 +132,25 @@ export function GridLayoutDashboardClient({
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
                   <div className="widget-content">{widget.component}</div>
                   {isEditing && (
-                    <button
-                      className="widget-wrapper__delete-btn"
-                      onClick={() => deleteWidget(widget.item.i)}
+                    <div
+                      className="widget-wrapper__controls"
                       onPointerDown={(e) => e.stopPropagation()}
-                      title={`Delete widget ${widget.item.i}`}
-                      type="button"
                     >
-                      <XIcon />
-                    </button>
+                      <WidgetSizeDropdown
+                        currentWidth={widget.item.w}
+                        maxW={widget.item.maxW}
+                        minW={widget.item.minW}
+                        onResize={(width) => resizeWidget(widget.item.i, width)}
+                      />
+                      <button
+                        className="widget-wrapper__delete-btn"
+                        onClick={() => deleteWidget(widget.item.i)}
+                        title={`Delete widget ${widget.item.i}`}
+                        type="button"
+                      >
+                        <XIcon />
+                      </button>
+                    </div>
                   )}
                 </div>
               </SortableItem>
@@ -178,6 +189,79 @@ export function GridLayoutDashboardClient({
         widgets={widgets}
       />
     </div>
+  )
+}
+
+type SizeOption = {
+  label: string
+  percentage: string
+  value: number // columns out of 12
+}
+
+const SIZE_OPTIONS: SizeOption[] = [
+  { label: 'x-small', percentage: '25%', value: 3 },
+  { label: 'small', percentage: '33%', value: 4 },
+  { label: 'medium', percentage: '50%', value: 6 },
+  { label: 'large', percentage: '66%', value: 8 },
+  { label: 'x-large', percentage: '75%', value: 9 },
+  { label: 'full', percentage: '100%', value: 12 },
+]
+
+function WidgetSizeDropdown({
+  currentWidth,
+  maxW,
+  minW,
+  onResize,
+}: {
+  currentWidth: number
+  maxW: number
+  minW: number
+  onResize: (width: number) => void
+}) {
+  // Filter options based on minW and maxW
+  const validOptions = useMemo(() => {
+    return SIZE_OPTIONS.filter((option) => option.value >= minW && option.value <= maxW)
+  }, [minW, maxW])
+
+  const isDisabled = validOptions.length <= 1
+
+  return (
+    <Popup
+      button={
+        <button
+          className="widget-wrapper__size-btn"
+          disabled={isDisabled}
+          onPointerDown={(e) => e.stopPropagation()}
+          type="button"
+        >
+          <ChevronIcon />
+        </button>
+      }
+      buttonType="custom"
+      disabled={isDisabled}
+      render={({ close }) => (
+        <PopupList.ButtonGroup>
+          {validOptions.map((option) => {
+            const isSelected = option.value === currentWidth
+            return (
+              <PopupList.Button
+                active={isSelected}
+                key={option.value}
+                onClick={() => {
+                  onResize(option.value)
+                  close()
+                }}
+              >
+                <span className="widget-wrapper__size-btn-label">{option.label}</span>
+                <span className="widget-wrapper__size-btn-percentage">{option.percentage}</span>
+              </PopupList.Button>
+            )
+          })}
+        </PopupList.ButtonGroup>
+      )}
+      size="small"
+      verticalAlign="bottom"
+    />
   )
 }
 
