@@ -13,6 +13,7 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   return {
     ...block,
     flattenedFields: flattenAllFields({ fields: block.fields }),
+    originalRef: block,
   }
 }
 

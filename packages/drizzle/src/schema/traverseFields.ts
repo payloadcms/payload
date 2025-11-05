@@ -452,8 +452,7 @@ export const traverseFields = ({
               },
             }
 
-
-            const isSharedBlock = sharedBlocks && sharedBlocks.has(block);
+            const isSharedBlock = sharedBlocks && sharedBlocks.has(block.originalRef)
             const baseForeignKeys: Record<string, RawForeignKey> = {}
             if (!isSharedBlock) {
               baseForeignKeys._parentIdFk = {
