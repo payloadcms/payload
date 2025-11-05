@@ -1,4 +1,9 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(__filename)
 
 import redirects from './redirects.js'
 
@@ -31,6 +36,9 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  turbopack: {
+    root: path.resolve(dirname),
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
