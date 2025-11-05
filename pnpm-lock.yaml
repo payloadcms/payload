@@ -1837,9 +1837,6 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../../packages/next
-      '@payloadcms/payload-cloud':
-        specifier: workspace:*
-        version: link:../../packages/payload-cloud
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
@@ -2151,9 +2148,6 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../../packages/next
-      '@payloadcms/payload-cloud':
-        specifier: workspace:*
-        version: link:../../packages/payload-cloud
       '@payloadcms/plugin-form-builder':
         specifier: workspace:*
         version: link:../../packages/plugin-form-builder
