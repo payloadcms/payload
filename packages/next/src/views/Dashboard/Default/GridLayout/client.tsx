@@ -234,7 +234,11 @@ function WidgetSizeDropdown({
           onPointerDown={(e) => e.stopPropagation()}
           type="button"
         >
-          <ChevronIcon />
+          <span className="widget-wrapper__size-btn-text">
+            {SIZE_OPTIONS.find((option) => option.value === currentWidth)?.label ||
+              `${currentWidth}/12`}
+          </span>
+          <ChevronIcon className="widget-wrapper__size-btn-icon" />
         </button>
       }
       buttonType="custom"
