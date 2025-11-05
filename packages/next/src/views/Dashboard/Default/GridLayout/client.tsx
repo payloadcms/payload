@@ -125,24 +125,6 @@ function SortableFlex(props: {
     ? props.currentLayout?.find((w) => w.item.i === props.dropTargetWidget?.widgetId)
     : null
 
-  const handleDragStart = (event: DragStartEvent) => {
-    // Only allow drag when editing
-    if (!props.isEditing) {
-      return
-    }
-    // Get the actual width of the dragged element
-    const element = document.querySelector(`[id="${event.active.id}"]`)
-    if (element instanceof HTMLElement) {
-      setActiveWidth(element.offsetWidth)
-    }
-    props.onDragStart(event)
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveWidth(null)
-    props.onDragEnd(event)
-  }
-
   return (
     <DndContext
       autoScroll={{
@@ -154,8 +136,18 @@ function SortableFlex(props: {
       }}
       // collisionDetection={closestCenter}
       id="sortable"
-      onDragEnd={handleDragEnd}
-      onDragStart={handleDragStart}
+      onDragEnd={(event) => {
+        setActiveWidth(null)
+        props.onDragEnd(event)
+      }}
+      onDragStart={(event) => {
+        // Get the actual width of the dragged element
+        const element = document.querySelector(`[id="${event.active.id}"]`)
+        if (element instanceof HTMLElement) {
+          setActiveWidth(element.offsetWidth)
+        }
+        props.onDragStart(event)
+      }}
     >
       <SortableContext items={props.currentLayout?.map((w) => w.item.i)}>
         <div
