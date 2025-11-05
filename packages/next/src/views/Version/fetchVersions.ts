@@ -163,12 +163,26 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
   user?: TypedUser
   where?: Where
 }): Promise<null | TypeWithVersion<TVersionData>> => {
+  // Get the entity config to check if drafts are enabled
+  const entityConfig = collectionSlug
+    ? req.payload.collections[collectionSlug]?.config
+    : globalSlug
+      ? req.payload.globals[globalSlug]?.config
+      : undefined
+
+  // Only query by _status if drafts are enabled (since _status field only exists with drafts)
+  const draftsEnabled = entityConfig?.versions?.drafts
+
   const and: Where[] = [
-    {
-      'version._status': {
-        equals: status,
-      },
-    },
+    ...(draftsEnabled
+      ? [
+          {
+            'version._status': {
+              equals: status,
+            },
+          },
+        ]
+      : []),
     ...(where ? [where] : []),
   ]
 
