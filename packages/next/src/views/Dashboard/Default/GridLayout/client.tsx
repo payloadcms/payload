@@ -56,27 +56,27 @@ export function GridLayoutDashboardClient({
     setIsEditing,
   } = useDashboardLayout(initialLayout)
 
-  const dropTargetWidget = useRef<DropTargetWidget>(null)
+  const [dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
 
   return (
     <div>
       <SortableFlex
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         currentLayout={currentLayout}
-        dropTargetWidget={dropTargetWidget.current}
+        dropTargetWidget={dropTargetWidget}
         isEditing={isEditing}
         onDragEnd={(ev) => {
           moveWidget({
             moveFromIndex: currentLayout?.findIndex((w) => w.item.i === ev.active.id),
             moveToIndex: currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
           })
-          dropTargetWidget.current = null
+          setDropTargetWidget(null)
         }}
         onDragStart={(event) => {
-          dropTargetWidget.current = {
+          setDropTargetWidget({
             position: 'after',
             widgetId: String(event.active.id),
-          }
+          })
         }}
         renderItem={(widget) => (
           <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
