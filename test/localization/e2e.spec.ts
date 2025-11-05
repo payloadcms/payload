@@ -7,6 +7,7 @@ import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
@@ -720,6 +721,21 @@ describe('Localization', () => {
     await expect(page.locator('#publish-locale')).toHaveCount(1)
     await page.goto(noLocalizedFieldsURL.create)
     await expect(page.locator('#publish-locale')).toHaveCount(0)
+  })
+
+  describe('A11y', () => {
+    test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.localizer'],
+        exclude: ['main'],
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })
 

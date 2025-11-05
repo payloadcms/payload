@@ -53,6 +53,18 @@ test.describe('A11y', () => {
     expect.soft(accessibilityScanResults.violations.length).toEqual(0)
   })
 
+  test.fixme('Collection API tab', async ({}, testInfo) => {
+    await page.goto(postsUrl.list)
+
+    await page.locator('.cell-title a').first().click()
+
+    await page.locator('.doc-tabs__tabs a', { hasText: 'API' }).click()
+
+    const accessibilityScanResults = await runAxeScan({ page, testInfo })
+
+    expect.soft(accessibilityScanResults.violations.length).toEqual(0)
+  })
+
   test.fixme('Account page', async ({}, testInfo) => {
     await page.goto(postsUrl.account)
 
