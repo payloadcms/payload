@@ -1455,12 +1455,12 @@ describe('List View', () => {
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
-      // delete button should be present
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
+      const deleteBtn = page.locator('.delete-documents__toggle')
+      await expect(deleteBtn).toBeVisible()
 
       await page.locator('.row-2 .cell-_select input').check()
 
-      await page.locator('.delete-documents__toggle').click()
+      await deleteBtn.click()
       await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })

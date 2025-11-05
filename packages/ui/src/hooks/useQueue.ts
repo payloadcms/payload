@@ -30,12 +30,12 @@ type QueueTask = (fn: QueuedFunction, options?: QueuedTaskOptions) => void
  *   3. All remaining tasks will be discarded
  * @returns {queueTask} A function used to queue a function.
  * @example
- * const { queueTask } = useQueues()
+ * const { queueTask } = useQueue()
  * queueTask(async () => {
  *   await fetch('https://api.example.com')
  * })
  */
-export function useQueues(): {
+export function useQueue(): {
   queueTask: QueueTask
 } {
   const queue = useRef<QueuedFunction[]>([])

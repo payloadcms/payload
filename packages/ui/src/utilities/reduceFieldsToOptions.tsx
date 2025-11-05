@@ -79,7 +79,7 @@ export const reduceFieldsToOptions = ({
                   typeof fieldPermissions === 'boolean'
                     ? fieldPermissions
                     : tabHasName(tab) && tab.name
-                      ? fieldPermissions[tab.name]?.fields || fieldPermissions[tab.name]
+                      ? fieldPermissions?.[tab.name]?.fields || fieldPermissions?.[tab.name]
                       : fieldPermissions,
                 fields: tab.fields,
                 i18n,
@@ -148,7 +148,7 @@ export const reduceFieldsToOptions = ({
             fieldPermissions:
               typeof fieldPermissions === 'boolean'
                 ? fieldPermissions
-                : fieldPermissions[field.name]?.fields || fieldPermissions[field.name],
+                : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -191,7 +191,7 @@ export const reduceFieldsToOptions = ({
           fieldPermissions:
             typeof fieldPermissions === 'boolean'
               ? fieldPermissions
-              : fieldPermissions[field.name]?.fields || fieldPermissions[field.name],
+              : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,

@@ -26,7 +26,7 @@ export const MyCollection: CollectionConfig = {
       index: true,
       // highlight-end
     },
-  ]
+  ],
 }
 ```
 
@@ -63,6 +63,7 @@ export const MyCollection: CollectionConfig = {
   ],
 }
 ```
+
 ## Localized fields and MongoDB indexes
 
 When you set `index: true` or `unique: true` on a localized field, MongoDB creates one index **per locale path** (e.g., `slug.en`, `slug.da-dk`, etc.). With many locales and indexed fields, this can quickly approach MongoDB's per-collection index limit.

@@ -454,7 +454,9 @@ export const isTranslations: DefaultTranslationsObject = {
     copyTo: 'Afrita til',
     copyToLocale: 'Afrita í staðfærslu',
     localeToPublish: 'Staðfærsla til að gefa út',
+    selectedLocales: 'Valdar svæði',
     selectLocaleToCopy: 'Veldu staðfærslu til að afrita',
+    selectLocaleToDuplicate: 'Veldu staðföng til að afrita',
   },
   operators: {
     contains: 'inniheldur',
