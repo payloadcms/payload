@@ -1,6 +1,6 @@
 'use client'
 
-import type { Widget } from 'payload'
+import type { Widget, WidgetWidth } from 'payload'
 
 import {
   DndContext,
@@ -19,12 +19,9 @@ import { useDashboardLayout } from './useDashboardLayout.js'
 
 export type WidgetItem = {
   i: string
-  maxW: number
-  minW: number
-  resizeHandles: string[]
-  w: number
-  x: number
-  y: number
+  maxW: WidgetWidth
+  minW: WidgetWidth
+  w: WidgetWidth
 }
 
 export type WidgetInstanceClient = {
@@ -36,6 +33,16 @@ type DropTargetWidget = {
   position: 'after' | 'before'
   widget: WidgetInstanceClient
 } | null
+
+/* eslint-disable perfectionist/sort-objects */
+const WIDTH_TO_PERCENTAGE = {
+  'x-small': 25,
+  small: 33,
+  medium: 50,
+  large: 75,
+  'x-large': 75,
+  full: 100,
+} as const
 
 export function GridLayoutDashboardClient({
   clientLayout: initialLayout,
@@ -116,9 +123,6 @@ export function GridLayoutDashboardClient({
           >
             {currentLayout?.map((widget) => (
               <SortableItem
-                className="widget"
-                data-columns={widget.item.w}
-                data-slug={widget.item.i}
                 disabled={!isEditing}
                 dropTargetWidget={
                   dropTargetWidget?.widget.item.i === widget.item.i ? dropTargetWidget : null
@@ -126,7 +130,7 @@ export function GridLayoutDashboardClient({
                 id={widget.item.i}
                 key={widget.item.i}
                 style={{
-                  width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
+                  width: `calc(${WIDTH_TO_PERCENTAGE[widget.item.w]}% - 1rem)`,
                 }}
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
@@ -136,7 +140,7 @@ export function GridLayoutDashboardClient({
                       className="widget-wrapper__controls"
                       onPointerDown={(e) => e.stopPropagation()}
                     >
-                      <WidgetSizeDropdown
+                      <WidgetWidthDropdown
                         currentWidth={widget.item.w}
                         maxW={widget.item.maxW}
                         minW={widget.item.minW}
@@ -192,35 +196,28 @@ export function GridLayoutDashboardClient({
   )
 }
 
-type SizeOption = {
-  label: string
-  percentage: string
-  value: number // columns out of 12
-}
-
-const SIZE_OPTIONS: SizeOption[] = [
-  { label: 'x-small', percentage: '25%', value: 3 },
-  { label: 'small', percentage: '33%', value: 4 },
-  { label: 'medium', percentage: '50%', value: 6 },
-  { label: 'large', percentage: '66%', value: 8 },
-  { label: 'x-large', percentage: '75%', value: 9 },
-  { label: 'full', percentage: '100%', value: 12 },
-]
-
-function WidgetSizeDropdown({
+function WidgetWidthDropdown({
   currentWidth,
   maxW,
   minW,
   onResize,
 }: {
-  currentWidth: number
-  maxW: number
-  minW: number
-  onResize: (width: number) => void
+  currentWidth: WidgetWidth
+  maxW: WidgetWidth
+  minW: WidgetWidth
+  onResize: (width: WidgetWidth) => void
 }) {
   // Filter options based on minW and maxW
   const validOptions = useMemo(() => {
-    return SIZE_OPTIONS.filter((option) => option.value >= minW && option.value <= maxW)
+    const minPercentage = WIDTH_TO_PERCENTAGE[minW]
+    const maxPercentage = WIDTH_TO_PERCENTAGE[maxW]
+
+    return Object.entries(WIDTH_TO_PERCENTAGE)
+      .map(([key, value]) => ({
+        width: key as WidgetWidth,
+        percentage: value,
+      }))
+      .filter((option) => option.percentage >= minPercentage && option.percentage <= maxPercentage)
   }, [minW, maxW])
 
   const isDisabled = validOptions.length <= 1
@@ -234,10 +231,7 @@ function WidgetSizeDropdown({
           onPointerDown={(e) => e.stopPropagation()}
           type="button"
         >
-          <span className="widget-wrapper__size-btn-text">
-            {SIZE_OPTIONS.find((option) => option.value === currentWidth)?.label ||
-              `${currentWidth}/12`}
-          </span>
+          <span className="widget-wrapper__size-btn-text">{currentWidth}</span>
           <ChevronIcon className="widget-wrapper__size-btn-icon" />
         </button>
       }
@@ -246,18 +240,18 @@ function WidgetSizeDropdown({
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {validOptions.map((option) => {
-            const isSelected = option.value === currentWidth
+            const isSelected = option.width === currentWidth
             return (
               <PopupList.Button
                 active={isSelected}
-                key={option.value}
+                key={option.width}
                 onClick={() => {
-                  onResize(option.value)
+                  onResize(option.width)
                   close()
                 }}
               >
-                <span className="widget-wrapper__size-btn-label">{option.label}</span>
-                <span className="widget-wrapper__size-btn-percentage">{option.percentage}</span>
+                <span className="widget-wrapper__size-btn-label">{option.width}</span>
+                <span className="widget-wrapper__size-btn-percentage">{option.percentage}%</span>
               </PopupList.Button>
             )
           })}
@@ -271,9 +265,6 @@ function WidgetSizeDropdown({
 
 function SortableItem(props: {
   children: React.ReactNode
-  className?: string
-  'data-columns'?: number
-  'data-slug'?: string
   disabled?: boolean
   dropTargetWidget?: DropTargetWidget
   id: string

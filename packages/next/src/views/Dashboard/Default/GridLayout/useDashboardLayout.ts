@@ -1,3 +1,5 @@
+import type { WidgetWidth } from 'payload'
+
 import { arrayMove } from '@dnd-kit/sortable'
 import { toast, useConfig, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
@@ -63,7 +65,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       const widgetId = `${widgetSlug}-${Date.now()}`
       const widget = widgets.find((w) => w.slug === widgetSlug)
 
-      // Create a new widget instance using RenderWidget (Lexical pattern)
+      // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
         component: React.createElement(RenderWidget, {
           widgetId,
@@ -71,10 +73,10 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         }),
         item: {
           i: widgetId,
-          maxW: widget?.maxWidth ?? 12,
-          minW: widget?.minWidth ?? 3,
+          maxW: widget?.maxWidth ?? 'full',
+          minW: widget?.minWidth ?? 'x-small',
           resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
-          w: widget?.minWidth ?? 3,
+          w: widget?.minWidth ?? 'x-small',
           x: 0, // Will be positioned automatically by react-grid-layout
           y: 0, // Will be positioned automatically by react-grid-layout
         },
@@ -96,7 +98,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   )
 
   const resizeWidget = useCallback(
-    (widgetId: string, newWidth: number) => {
+    (widgetId: string, newWidth: WidgetWidth) => {
       if (!isEditing) {
         return
       }

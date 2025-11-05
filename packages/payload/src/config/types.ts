@@ -734,12 +734,12 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
+export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
+
 export type Widget = {
   ComponentPath: string
-  /** If undefined, will be set to 12 */
-  maxWidth?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
-  /** If undefined, will be set to 3 */
-  minWidth?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
   slug: string
   // TODO: Add fields
   // fields?: Field[]
@@ -751,7 +751,7 @@ export type WidgetInstance = {
   // TODO: should be inferred from Widget Fields
   // data: Record<string, any>
   widgetSlug: string
-  width?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+  width?: WidgetWidth
 }
 
 export type DashboardConfig = {

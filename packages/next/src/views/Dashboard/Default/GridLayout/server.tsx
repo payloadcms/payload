@@ -87,31 +87,12 @@ async function getItemsFromConfig(
   }
 
   return widgetInstances.map((widgetInstance, index) => {
-    const colsPerRow = 12
-    let x = 0
-
-    // Simple layout algorithm: place widgets left to right, then wrap to next row
-    let currentX = 0
-    for (let i = 0; i < index; i++) {
-      const prevWidgetInstance = widgetInstances[i]
-      currentX += prevWidgetInstance.width || 3
-      // If we exceed the row width, wrap to next row
-      if (currentX + (widgetInstance.width || 3) > colsPerRow) {
-        currentX = 0
-      }
-    }
-    x = currentX
-
     const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
-
     return {
       i: `${widgetInstance.widgetSlug}-${index}`,
-      maxW: widget?.maxWidth ?? 12,
-      minW: widget?.minWidth ?? 3,
-      resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
-      w: widgetInstance.width || 3,
-      x,
-      y: 0,
+      maxW: widget?.maxWidth ?? 'full',
+      minW: widget?.minWidth ?? 'x-small',
+      w: widgetInstance.width || 'x-small',
     }
   })
 }
