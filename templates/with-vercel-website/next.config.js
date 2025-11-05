@@ -1,11 +1,11 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+
+import redirects from './redirects.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
-
-import redirects from './redirects.js'
 
 const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
@@ -34,11 +34,11 @@ const nextConfig = {
 
     return webpackConfig
   },
-  reactStrictMode: true,
-  redirects,
   turbopack: {
     root: path.resolve(dirname),
   },
+  reactStrictMode: true,
+  redirects,
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
