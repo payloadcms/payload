@@ -1098,7 +1098,18 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, !options.importMap, options)
+
+      // Reload the payload instance after a config change (triggered by HMR in development).
+      // The second parameter (false) forces import map regeneration rather than reusing options.importMap.
+      //
+      // Why we always regenerate import map: getPayload() may be called from multiple sources (admin panel, frontend, etc.)
+      // that share the same cache but may pass different importMap values. Since call order is unpredictable,
+      // we cannot rely on options.importMap to determine if regeneration is needed.
+      //
+      // Example scenario: If the frontend calls getPayload() without importMap first, followed by the admin
+      // panel calling it with importMap, we'd incorrectly skip generation for the admin panel's needs.
+      // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
+      await reload(config, cached.payload, false, options)
 
       resolve()
     }
