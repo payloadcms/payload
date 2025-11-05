@@ -1104,7 +1104,7 @@ export const getPayload = async (
       const config = await options.config
 
       // Reload the payload instance after a config change (triggered by HMR in development).
-      // The second parameter (false) forces import map regeneration rather than reusing options.importMap.
+      // The second parameter (false) forces import map regeneration rather than deciding based on options.importMap.
       //
       // Why we always regenerate import map: getPayload() may be called from multiple sources (admin panel, frontend, etc.)
       // that share the same cache but may pass different importMap values. Since call order is unpredictable,
