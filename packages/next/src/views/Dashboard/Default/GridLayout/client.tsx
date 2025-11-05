@@ -2,17 +2,11 @@
 
 import type { Widget } from 'payload'
 
-import {
-  DndContext,
-  type DragEndEvent,
-  DragOverlay,
-  type DragStartEvent,
-  useDroppable,
-} from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable } from '@dnd-kit/sortable'
 import { XIcon } from '@payloadcms/ui'
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
@@ -58,43 +52,108 @@ export function GridLayoutDashboardClient({
 
   const [dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
 
+  const { setNodeRef } = useDroppable({
+    id: 'droppable',
+  })
+  const [activeWidth, setActiveWidth] = useState<null | number>(null)
+  const activeWidget = dropTargetWidget?.widgetId
+    ? currentLayout?.find((w) => w.item.i === dropTargetWidget?.widgetId)
+    : null
+
   return (
     <div>
-      <SortableFlex
-        className={`grid-layout ${isEditing ? 'editing' : ''}`}
-        currentLayout={currentLayout}
-        dropTargetWidget={dropTargetWidget}
-        isEditing={isEditing}
-        onDragEnd={(ev) => {
+      <DndContext
+        autoScroll={{
+          enabled: true,
+          threshold: {
+            x: 0, // No horizontal scroll
+            y: 0.2, // Allow vertical scroll at 20% from edge
+          },
+        }}
+        id="sortable"
+        onDragEnd={(event) => {
+          setActiveWidth(null)
           moveWidget({
-            moveFromIndex: currentLayout?.findIndex((w) => w.item.i === ev.active.id),
-            moveToIndex: currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
+            moveFromIndex: currentLayout?.findIndex((w) => w.item.i === event.active.id),
+            moveToIndex: currentLayout?.findIndex((w) => w.item.i === event.over?.id),
           })
           setDropTargetWidget(null)
         }}
         onDragStart={(event) => {
+          // Get the actual width of the dragged element
+          const element = document.querySelector(`[id="${event.active.id}"]`)
+          if (element instanceof HTMLElement) {
+            setActiveWidth(element.offsetWidth)
+          }
           setDropTargetWidget({
             position: 'after',
             widgetId: String(event.active.id),
           })
         }}
-        renderItem={(widget) => (
-          <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-            <div className="widget-content">{widget.component}</div>
-            {isEditing && (
-              <button
-                className="widget-wrapper__delete-btn"
-                onClick={() => deleteWidget(widget.item.i)}
-                onMouseDown={(e) => e.stopPropagation()}
-                title={`Delete widget ${widget.item.i}`}
-                type="button"
+      >
+        <SortableContext items={currentLayout?.map((w) => w.item.i)}>
+          <div
+            className={`grid-layout ${isEditing ? 'editing' : ''}`}
+            ref={setNodeRef}
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+            }}
+          >
+            {currentLayout?.map((widget) => (
+              <SortableItem
+                className="widget"
+                data-columns={widget.item.w}
+                data-slug={widget.item.i}
+                disabled={!isEditing}
+                id={widget.item.i}
+                key={widget.item.i}
+                style={{
+                  width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
+                }}
               >
-                <XIcon />
-              </button>
-            )}
+                <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                  <div className="widget-content">{widget.component}</div>
+                  {isEditing && (
+                    <button
+                      className="widget-wrapper__delete-btn"
+                      onClick={() => deleteWidget(widget.item.i)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      title={`Delete widget ${widget.item.i}`}
+                      type="button"
+                    >
+                      <XIcon />
+                    </button>
+                  )}
+                </div>
+              </SortableItem>
+            ))}
+            <DragOverlay
+              className="drag-overlay"
+              dropAnimation={{
+                duration: 100,
+              }}
+              modifiers={[snapCenterToCursor]}
+              style={{
+                width: activeWidth ? `${activeWidth}px` : undefined,
+              }}
+            >
+              {activeWidget ? (
+                <div
+                  style={{
+                    transform: 'scale(0.25)',
+                  }}
+                >
+                  <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                    <div className="widget-content">{activeWidget.component}</div>
+                  </div>
+                </div>
+              ) : null}
+            </DragOverlay>
           </div>
-        )}
-      />
+        </SortableContext>
+      </DndContext>
       <DashboardStepNav
         addWidget={addWidget}
         cancel={cancel}
@@ -105,102 +164,6 @@ export function GridLayoutDashboardClient({
         widgets={widgets}
       />
     </div>
-  )
-}
-
-function SortableFlex(props: {
-  className?: string
-  currentLayout: undefined | WidgetInstanceClient[]
-  dropTargetWidget: DropTargetWidget
-  isEditing: boolean
-  onDragEnd: (event: DragEndEvent) => void
-  onDragStart: (event: DragStartEvent) => void
-  renderItem: (widget: WidgetInstanceClient) => React.ReactNode
-}) {
-  const { setNodeRef } = useDroppable({
-    id: 'droppable',
-  })
-  const [activeWidth, setActiveWidth] = useState<null | number>(null)
-  const activeWidget = props.dropTargetWidget?.widgetId
-    ? props.currentLayout?.find((w) => w.item.i === props.dropTargetWidget?.widgetId)
-    : null
-
-  return (
-    <DndContext
-      autoScroll={{
-        enabled: true,
-        threshold: {
-          x: 0, // No horizontal scroll
-          y: 0.2, // Allow vertical scroll at 20% from edge
-        },
-      }}
-      // collisionDetection={closestCenter}
-      id="sortable"
-      onDragEnd={(event) => {
-        setActiveWidth(null)
-        props.onDragEnd(event)
-      }}
-      onDragStart={(event) => {
-        // Get the actual width of the dragged element
-        const element = document.querySelector(`[id="${event.active.id}"]`)
-        if (element instanceof HTMLElement) {
-          setActiveWidth(element.offsetWidth)
-        }
-        props.onDragStart(event)
-      }}
-    >
-      <SortableContext items={props.currentLayout?.map((w) => w.item.i)}>
-        <div
-          className={props.className}
-          ref={setNodeRef}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          {props.currentLayout?.map((widget) => (
-            <SortableItem
-              className="widget"
-              data-columns={widget.item.w}
-              data-slug={widget.item.i}
-              disabled={!props.isEditing}
-              id={widget.item.i}
-              key={widget.item.i}
-              style={{
-                width: `calc(${(widget.item.w / 12) * 100}% - 1rem)`,
-              }}
-            >
-              {props.renderItem(widget)}
-            </SortableItem>
-          ))}
-          <DragOverlay
-            className="drag-overlay"
-            dropAnimation={{
-              duration: 100,
-            }}
-            modifiers={[snapCenterToCursor]}
-            style={{
-              width: activeWidth ? `${activeWidth}px` : undefined,
-            }}
-          >
-            {activeWidget ? (
-              <div
-                style={{
-                  transform: 'scale(0.25)',
-                }}
-              >
-                <div
-                  className={`widget-wrapper ${props.isEditing ? 'widget-wrapper--editing' : ''}`}
-                >
-                  <div className="widget-content">{activeWidget.component}</div>
-                </div>
-              </div>
-            ) : null}
-          </DragOverlay>
-        </div>
-      </SortableContext>
-    </DndContext>
   )
 }
 
