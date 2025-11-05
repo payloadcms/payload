@@ -1335,98 +1335,6 @@ describe('database', () => {
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
 
-  describe('virtual field pagination', () => {
-    let categories: any[] = []
-    let posts: any[] = []
-    let virtualRelations: any[] = []
-
-    beforeEach(async () => {
-      // Create multiple categories
-      categories = await Promise.all(
-        Array.from({ length: 15 }).map(async (_, i) =>
-          payload.create({
-            collection: 'categories',
-            data: { title: `VirtualFieldTest Category ${i + 1}` },
-          }),
-        ),
-      )
-
-      // Create posts, each with a different category
-      posts = await Promise.all(
-        categories.map(async (category, i) =>
-          payload.create({
-            collection: 'posts',
-            data: {
-              category: category.id,
-              title: `VirtualFieldTest Post ${i + 1}`,
-            },
-          }),
-        ),
-      )
-
-      // Create virtual-relations docs, each pointing to a different post
-      virtualRelations = await Promise.all(
-        posts.map(async (post) =>
-          payload.create({
-            collection: 'virtual-relations',
-            data: { post: post.id },
-          }),
-        ),
-      )
-    })
-
-    afterAll(async () => {
-      // Clean up created documents in order (child -> parent to avoid FK issues)
-      await Promise.all(
-        virtualRelations.map((doc) =>
-          payload.delete({ id: doc.id, collection: 'virtual-relations' }),
-        ),
-      )
-      await Promise.all(posts.map((doc) => payload.delete({ id: doc.id, collection: 'posts' })))
-      await Promise.all(
-        categories.map((doc) => payload.delete({ id: doc.id, collection: 'categories' })),
-      )
-    })
-
-    it('should paginate distinct results for virtual relationship fields', async () => {
-      // Test findDistinct with pagination on a virtual field
-      const page1 = await payload.findDistinct({
-        collection: 'virtual-relations',
-        field: 'postCategoryTitle', // virtual field: post.category.title
-        limit: 10,
-        page: 1,
-      })
-
-      expect(page1.totalDocs).toBe(15)
-      expect(page1.totalPages).toBe(2)
-      expect(page1.limit).toBe(10)
-      expect(page1.page).toBe(1)
-      expect(page1.hasNextPage).toBe(true)
-      expect(page1.hasPrevPage).toBe(false)
-      expect(page1.values).toHaveLength(10)
-
-      const page2 = await payload.findDistinct({
-        collection: 'virtual-relations',
-        field: 'postCategoryTitle',
-        limit: 10,
-        page: 2,
-      })
-
-      expect(page2.totalDocs).toBe(15)
-      expect(page2.totalPages).toBe(2)
-      expect(page2.page).toBe(2)
-      expect(page2.hasNextPage).toBe(false)
-      expect(page2.hasPrevPage).toBe(true)
-      expect(page2.values).toHaveLength(5)
-
-      // Verify no duplicate values between pages
-      const page1Values = page1.values.map((v) => v.postCategoryTitle)
-      const page2Values = page2.values.map((v) => v.postCategoryTitle)
-      const intersection = page1Values.filter((v) => page2Values.includes(v))
-      expect(intersection).toHaveLength(0)
-    })
-  })
-
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -5251,5 +5159,83 @@ describe('database', () => {
     expect(res?.val).toHaveLength(1)
     expect(typeof res?.val?.[0]).toBe('object')
     expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
+  })
+
+  describe('virtual field pagination', () => {
+    let categories: any[] = []
+    let posts: any[] = []
+
+    beforeEach(async () => {
+      // Create multiple categories
+      categories = await Promise.all(
+        Array.from({ length: 15 }).map(async (_, i) =>
+          payload.create({
+            collection: 'categories',
+            data: { title: `VirtualFieldTest Category ${i + 1}` },
+          }),
+        ),
+      )
+
+      // Create posts, each with a different category
+      posts = await Promise.all(
+        categories.map(async (category, i) =>
+          payload.create({
+            collection: 'posts',
+            data: {
+              category: category.id,
+              title: `VirtualFieldTest Post ${i + 1}`,
+            },
+          }),
+        ),
+      )
+
+      // Create virtual-relations docs, each pointing to a different post
+      await Promise.all(
+        posts.map(async (post) =>
+          payload.create({
+            collection: 'virtual-relations',
+            data: { post: post.id },
+          }),
+        ),
+      )
+    })
+
+    it('should paginate distinct results for virtual relationship fields', async () => {
+      // Test findDistinct with pagination on a virtual field
+      const page1 = await payload.findDistinct({
+        collection: 'virtual-relations',
+        field: 'postCategoryTitle', // virtual field: post.category.title
+        limit: 10,
+        page: 1,
+      })
+
+      expect(page1.totalDocs).toBe(15)
+      expect(page1.totalPages).toBe(2)
+      expect(page1.limit).toBe(10)
+      expect(page1.page).toBe(1)
+      expect(page1.hasNextPage).toBe(true)
+      expect(page1.hasPrevPage).toBe(false)
+      expect(page1.values).toHaveLength(10)
+
+      const page2 = await payload.findDistinct({
+        collection: 'virtual-relations',
+        field: 'postCategoryTitle',
+        limit: 10,
+        page: 2,
+      })
+
+      expect(page2.totalDocs).toBe(15)
+      expect(page2.totalPages).toBe(2)
+      expect(page2.page).toBe(2)
+      expect(page2.hasNextPage).toBe(false)
+      expect(page2.hasPrevPage).toBe(true)
+      expect(page2.values).toHaveLength(5)
+
+      // Verify no duplicate values between pages
+      const page1Values = page1.values.map((v) => v.postCategoryTitle)
+      const page2Values = page2.values.map((v) => v.postCategoryTitle)
+      const intersection = page1Values.filter((v) => page2Values.includes(v))
+      expect(intersection).toHaveLength(0)
+    })
   })
 })
