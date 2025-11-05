@@ -1335,52 +1335,59 @@ describe('database', () => {
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
 
-  describe('virtual field pagination', () => {
-    let categories: any[] = []
-    let posts: any[] = []
+  describe('relationship field pagination', () => {
+    let createdCategoryIds: string[] = []
+    let createdPostIds: string[] = []
 
     beforeEach(async () => {
-      // Create multiple categories
-      categories = await Promise.all(
-        Array.from({ length: 15 }).map(async (_, i) =>
-          payload.create({
-            collection: 'categories',
-            data: { title: `VirtualFieldTest Category ${i + 1}` },
-          }),
-        ),
-      )
+      // Create 15 unique categories
+      const categoryPromises = Array.from({ length: 15 }).map(async (_, i) => {
+        const cat = await payload.create({
+          collection: 'categories',
+          data: { title: `DistinctTest-Cat-${i + 1}-${Date.now()}` },
+        })
+        return cat.id
+      })
+      createdCategoryIds = await Promise.all(categoryPromises)
 
-      // Create posts, each with a different category
-      posts = await Promise.all(
-        categories.map(async (category, i) =>
-          payload.create({
-            collection: 'posts',
-            data: {
-              category: category.id,
-              title: `VirtualFieldTest Post ${i + 1}`,
-            },
-          }),
-        ),
-      )
+      // Create 15 posts, each with a unique category
+      const postPromises = createdCategoryIds.map(async (categoryId, i) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            category: categoryId,
+            title: `DistinctTest-Post-${i + 1}-${Date.now()}`,
+          },
+        })
+        return post.id
+      })
+      createdPostIds = await Promise.all(postPromises)
+    })
 
-      // Create virtual-relations docs, each pointing to a different post
+    afterAll(async () => {
+      // Clean up in order: posts first, then categories
       await Promise.all(
-        posts.map(async (post) =>
-          payload.create({
-            collection: 'virtual-relations',
-            data: { post: post.id },
-          }),
+        createdPostIds.map((id) => payload.delete({ id, collection: 'posts' }).catch(() => {})),
+      )
+      await Promise.all(
+        createdCategoryIds.map((id) =>
+          payload.delete({ id, collection: 'categories' }).catch(() => {}),
         ),
       )
     })
 
-    it('should paginate distinct results for virtual relationship fields', async () => {
-      // Test findDistinct with pagination on a virtual field
+    it('should paginate distinct results for relationship field paths', async () => {
+      // Test findDistinct with pagination on category.title path
       const page1 = await payload.findDistinct({
-        collection: 'virtual-relations',
-        field: 'postCategoryTitle', // virtual field: post.category.title
+        collection: 'posts',
+        field: 'category.title',
         limit: 10,
         page: 1,
+        where: {
+          title: {
+            contains: 'DistinctTest-Post',
+          },
+        },
       })
 
       expect(page1.totalDocs).toBe(15)
@@ -1392,10 +1399,15 @@ describe('database', () => {
       expect(page1.values).toHaveLength(10)
 
       const page2 = await payload.findDistinct({
-        collection: 'virtual-relations',
-        field: 'postCategoryTitle',
+        collection: 'posts',
+        field: 'category.title',
         limit: 10,
         page: 2,
+        where: {
+          title: {
+            contains: 'DistinctTest-Post',
+          },
+        },
       })
 
       expect(page2.totalDocs).toBe(15)
@@ -1406,8 +1418,8 @@ describe('database', () => {
       expect(page2.values).toHaveLength(5)
 
       // Verify no duplicate values between pages
-      const page1Values = page1.values.map((v) => v.postCategoryTitle)
-      const page2Values = page2.values.map((v) => v.postCategoryTitle)
+      const page1Values = page1.values.map((v: any) => v['category.title'])
+      const page2Values = page2.values.map((v: any) => v['category.title'])
       const intersection = page1Values.filter((v) => page2Values.includes(v))
       expect(intersection).toHaveLength(0)
     })
