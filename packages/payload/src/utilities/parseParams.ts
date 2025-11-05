@@ -50,6 +50,13 @@ type RawParams = {
   where?: Where
 }
 
+/**
+ * Takes raw query parameters and parses them into the correct types that Payload expects.
+ * Examples:
+ *   a. `draft` provided as a string of "true" is converted to a boolean
+ *   b. `depth` provided as a string of "0" is converted to a number
+ *   c. `sort` provided as a comma-separated string is converted to an array of strings
+ */
 export const parseParams = (params: RawParams): ParsedParams => {
   const knownBooleanParams = [
     'autosave',
