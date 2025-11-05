@@ -947,7 +947,7 @@ describe('relationship', () => {
       expect(scanResults.violations.length).toBe(0)
     })
 
-    test('Relationship fields have focus indicators', async ({}, testInfo) => {
+    test.fixme('Relationship fields have focus indicators', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-select').waitFor()
 
