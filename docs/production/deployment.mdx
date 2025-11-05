@@ -251,7 +251,7 @@ services:
 
   # Ensure your DATABASE_URI uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
   mongo:
-    image: mongo:latest
+    image: mongo:8
     ports:
       - '27017:27017'
     command:
@@ -264,7 +264,7 @@ services:
   # Uncomment the following to use postgres
   # postgres:
   #   restart: always
-  #   image: postgres:latest
+  #   image: postgres:17
   #   volumes:
   #     - pgdata:/var/lib/postgresql/data
   #   ports:
