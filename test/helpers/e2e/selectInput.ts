@@ -15,7 +15,7 @@ type SelectReactOptionsParams = {
     }
   | {
       clear?: never
-      multiSelect: false // Single selection mode
+      multiSelect: false | undefined // Single selection mode
       option: string // Single visible label to select
       options?: never
     }

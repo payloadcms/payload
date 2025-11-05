@@ -33,9 +33,11 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
   let sql = ''
 
   if (['in', 'not_in'].includes(operator) && Array.isArray(value)) {
+    sql = '('
     value.forEach((item, i) => {
       sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, value: item })}${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
     })
+    sql = `${sql})`
   } else if (operator === 'exists') {
     sql = `${value === false ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '${fullPath}')`
   } else if (['not_like'].includes(operator)) {

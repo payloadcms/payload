@@ -459,7 +459,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     copyTo: 'Копировать в',
     copyToLocale: 'Копировать в локаль',
     localeToPublish: 'Локаль для публикации',
+    selectedLocales: 'Выбранные локали',
     selectLocaleToCopy: 'Выберите локаль для копирования',
+    selectLocaleToDuplicate: 'Выберите локали для дублирования',
   },
   operators: {
     contains: 'содержит',
