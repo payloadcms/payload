@@ -1,3 +1,4 @@
+import { arrayMove } from '@dnd-kit/sortable'
 import { toast, useConfig, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
@@ -42,25 +43,12 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 
   const moveWidget = useCallback(
     ({ moveFromIndex, moveToIndex }: { moveFromIndex: number; moveToIndex: number }) => {
-      if (
-        !isEditing ||
-        moveFromIndex === moveToIndex ||
-        moveFromIndex === -1 ||
-        moveToIndex === -1
-      ) {
+      if (moveFromIndex === moveToIndex || moveFromIndex < 0 || moveToIndex < 0) {
         return
       }
 
       setCurrentLayout((prev) => {
-        // Check if this reorder is needed (prevents unnecessary updates)
-        if (prev[moveFromIndex]?.item.i === prev[moveToIndex]?.item.i) {
-          return prev
-        }
-
-        const newLayout = [...prev]
-        const [movedItem] = newLayout.splice(moveFromIndex, 1)
-        newLayout.splice(moveToIndex, 0, movedItem)
-        return newLayout
+        return arrayMove(prev, moveFromIndex, moveToIndex)
       })
     },
     [isEditing],

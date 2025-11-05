@@ -2,7 +2,13 @@
 
 import type { Widget } from 'payload'
 
-import { DndContext, DragOverlay, useDroppable } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragOverlay,
+  pointerWithin,
+  rectIntersection,
+  useDroppable,
+} from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable } from '@dnd-kit/sortable'
 import { XIcon } from '@payloadcms/ui'
@@ -63,15 +69,34 @@ export function GridLayoutDashboardClient({
             y: 0.2, // Allow vertical scroll at 20% from edge
           },
         }}
+        // `pointerWithin` is the collision detector made precisely for
+        // cases like ours, where dragOverlay has a scale(0.25) and we use
+        // snapCenterToCursor. The documentation recommends using it with
+        // `rectIntersection` as a fallback for a11y reasons. See:
+        // https://docs.dndkit.com/api-documentation/context-provider/collision-detection-algorithms#composition-of-existing-algorithms
+        collisionDetection={(args) => {
+          // First, let's see if there are any collisions with the pointer
+          const pointerCollisions = pointerWithin(args)
+
+          // Collision detection algorithms return an array of collisions
+          if (pointerCollisions.length > 0) {
+            return pointerCollisions
+          }
+
+          // If there are no collisions with the pointer, return rectangle intersections
+          return rectIntersection(args)
+        }}
         id="sortable"
         onDragEnd={(event) => {
-          moveWidget({
-            moveFromIndex: currentLayout?.findIndex((w) => w.item.i === event.active.id),
-            moveToIndex: currentLayout?.findIndex((w) => w.item.i === event.over?.id),
-          })
+          const moveFromIndex = currentLayout?.findIndex((w) => w.item.i === event.active.id)
+          let moveToIndex = currentLayout?.findIndex((w) => w.item.i === event.over?.id)
+          if (moveFromIndex < moveToIndex) {
+            moveToIndex--
+          }
+          moveWidget({ moveFromIndex, moveToIndex })
           setDropTargetWidget(null)
         }}
-        onDragStart={(event) => {
+        onDragOver={(event) => {
           setDropTargetWidget({
             position: 'after',
             widget: currentLayout?.find((w) => w.item.i === event.active.id),
@@ -94,6 +119,9 @@ export function GridLayoutDashboardClient({
                 data-columns={widget.item.w}
                 data-slug={widget.item.i}
                 disabled={!isEditing}
+                dropTargetWidget={
+                  dropTargetWidget?.widget.item.i === widget.item.i ? dropTargetWidget : null
+                }
                 id={widget.item.i}
                 key={widget.item.i}
                 style={{
@@ -121,6 +149,8 @@ export function GridLayoutDashboardClient({
               dropAnimation={{
                 duration: 100,
               }}
+              // Needed for the scale(0.25) of the dragOverlay, so there is no offset
+              // between the dragOverlay and the mouse pointer.
               modifiers={[snapCenterToCursor]}
             >
               {dropTargetWidget ? (
@@ -157,6 +187,7 @@ function SortableItem(props: {
   'data-columns'?: number
   'data-slug'?: string
   disabled?: boolean
+  dropTargetWidget?: DropTargetWidget
   id: string
   style?: React.CSSProperties
 }) {
@@ -167,15 +198,12 @@ function SortableItem(props: {
 
   const mergedStyles = {
     ...props.style,
-    borderRight: isOver ? '2px solid #3B82F6' : 'none',
+    boxShadow: isOver ? '-2px 0 0 0 #3B82F6' : 'none',
     opacity: isDragging ? 0.3 : 1,
   }
 
-  // Only apply drag listeners when not disabled
-  const dragProps = props.disabled ? {} : { ...listeners, ...attributes }
-
   return (
-    <div ref={setNodeRef} {...dragProps} {...props} style={mergedStyles}>
+    <div ref={setNodeRef} {...listeners} {...attributes} {...props} style={mergedStyles}>
       {props.children}
     </div>
   )
