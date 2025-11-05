@@ -1000,9 +1000,13 @@ export const reload = async (
     })
   }
 
-  // Generate component map
+  // Generate import map
   if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
+    // We don't want to throw an error in this case, as it would break the user's frontend.
+    // => just skip it => ignoreResolveImportMapFilePathError: true
     await generateImportMap(config, {
+      ignoreResolveError: true,
       log: true,
     })
   }
