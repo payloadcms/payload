@@ -577,6 +577,7 @@ test.describe('Multi Tenant', () => {
         page,
         serverURL,
       })
+      await wait(1000)
 
       await goToListDoc({
         cellClass: '.cell-name',
@@ -584,10 +585,14 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Blue Dog',
         urlUtil: tenantsURL,
       })
+      await wait(1000)
 
       await expect(page.locator('#field-name')).toBeVisible()
       await page.locator('#field-name').fill('Red Dog')
+      await wait(1000)
+
       await saveDocAndAssert(page)
+      await wait(1000)
 
       await page.goto(tenantsURL.list)
       // Wait for backend tenant cache to update after save operation
@@ -599,6 +604,7 @@ test.describe('Multi Tenant', () => {
           return (await getTenantOptions({ page })).sort()
         })
         .toEqual(['Red Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
+      await wait(1000)
 
       await goToListDoc({
         cellClass: '.cell-name',
@@ -606,10 +612,14 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Red Dog',
         urlUtil: tenantsURL,
       })
+      await wait(1000)
 
       // Change the tenant back to the original name
       await page.locator('#field-name').fill('Blue Dog')
+      await wait(1000)
+
       await saveDocAndAssert(page)
+      await wait(1000)
 
       await page.goto(tenantsURL.list)
       // Wait for backend tenant cache to update after save operation
