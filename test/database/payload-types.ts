@@ -260,6 +260,7 @@ export interface Post {
   localized?: string | null;
   text?: string | null;
   number?: number | null;
+  numberDefault?: number | null;
   blocks?:
     | {
         nested?:
@@ -904,6 +905,7 @@ export interface PostsSelect<T extends boolean = true> {
   localized?: T;
   text?: T;
   number?: T;
+  numberDefault?: T;
   blocks?:
     | T
     | {

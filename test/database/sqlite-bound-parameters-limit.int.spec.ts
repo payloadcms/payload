@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
 
-/* eslint-disable jest/require-top-level-describe */
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
@@ -30,7 +30,6 @@ describeSqlite('database - sqlite bound parameters limit', () => {
       const res = await defaultExecute(...args)
       const [{ args: boundParameters }] = args as [{ args: any[] }]
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (boundParameters.length > 100) {
         throw new Error('Exceeded limit of bound parameters!')
       }

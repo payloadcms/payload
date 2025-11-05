@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { TypedPayloadSDK } from '../helpers/getSDK.js'
 import type { Post } from './payload-types.js'
@@ -76,7 +77,6 @@ describe('@payloadcms/sdk', () => {
     const result = await sdk.findByID({
       disableErrors: true,
       collection: 'posts',
-      // eslint-disable-next-line jest/no-conditional-in-test
       id: typeof post.id === 'string' ? randomUUID() : 999,
     })
 
