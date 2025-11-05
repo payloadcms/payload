@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { TZDateMini } from '@date-fns/tz/date/mini'
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
 import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'

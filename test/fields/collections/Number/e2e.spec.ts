@@ -224,7 +224,6 @@ describe('Number', () => {
         page,
         testInfo,
         selector: '.document-fields__main',
-        verbose: true,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

@@ -41,15 +41,30 @@ export async function checkHorizontalOverflow(
   const viewportSize = page.viewportSize()
   const viewportWidth = viewportSize?.width || 0
 
-  // Check if document body has horizontal scrolling
-  const overflowInfo = await page.evaluate(() => {
+  // Check if page has horizontal overflow by actually trying to scroll using mouse wheel
+  // Save original scroll position
+  const originalScrollX = await page.evaluate(() => window.scrollX)
+
+  // Try to scroll horizontally using mouse wheel (deltaX = 1000px to the right)
+  await page.mouse.wheel(1000, 0)
+
+  // Wait a bit for scroll to complete
+  await page.waitForTimeout(100)
+
+  // Check if we actually scrolled
+  const newScrollX = await page.evaluate(() => window.scrollX)
+  const hasHorizontalScroll = newScrollX > originalScrollX
+
+  // Restore original scroll position
+  if (hasHorizontalScroll) {
+    await page.evaluate((x) => window.scrollTo(x, window.scrollY), originalScrollX)
+  }
+
+  // If we can scroll horizontally, find elements causing the overflow
+  const overflowInfo = await page.evaluate((canScroll: boolean) => {
     const body = document.body
     const html = document.documentElement
 
-    // Check if horizontal scrollbar is present
-    const hasHorizontalScroll = body.scrollWidth > body.clientWidth
-
-    // Find elements that are wider than the viewport
     const overflowingElements: Array<{
       className: string
       computedWidth: number
@@ -60,58 +75,62 @@ export async function checkHorizontalOverflow(
       tagName: string
     }> = []
 
-    // Get all elements
-    const allElements = document.querySelectorAll('*')
+    if (canScroll) {
+      // Get all elements
+      const allElements = document.querySelectorAll('*')
 
-    allElements.forEach((el) => {
-      if (!(el instanceof HTMLElement)) {return}
-
-      const rect = el.getBoundingClientRect()
-      const computedStyle = window.getComputedStyle(el)
-
-      // Check if element extends beyond viewport
-      // We check both scrollWidth and bounding rect
-      const exceedsViewportRight = rect.right > document.documentElement.clientWidth
-      const hasScrollWidth = el.scrollWidth > el.offsetWidth
-
-      if (exceedsViewportRight || hasScrollWidth) {
-        // Generate a selector for this element
-        const generateSelector = (): string => {
-          if (el.id) {return `#${el.id}`}
-
-          let selector = el.tagName.toLowerCase()
-
-          if (el.className && typeof el.className === 'string') {
-            const classes = el.className.trim().split(/\s+/).filter(Boolean)
-            if (classes.length > 0) {
-              selector += '.' + classes.slice(0, 2).join('.')
-            }
-          }
-
-          return selector
+      allElements.forEach((el) => {
+        if (!(el instanceof HTMLElement)) {
+          return
         }
 
-        overflowingElements.push({
-          tagName: el.tagName.toLowerCase(),
-          id: el.id,
-          className: typeof el.className === 'string' ? el.className : '',
-          selector: generateSelector(),
-          offsetWidth: el.offsetWidth,
-          scrollWidth: el.scrollWidth,
-          computedWidth: parseFloat(computedStyle.width),
-        })
-      }
-    })
+        const computedStyle = window.getComputedStyle(el)
+
+        // Only report elements that have content overflow
+        // (scrollWidth > offsetWidth means content is wider than the element's box)
+        const hasContentOverflow = el.scrollWidth > el.offsetWidth
+
+        if (hasContentOverflow) {
+          // Generate a selector for this element
+          const generateSelector = (): string => {
+            if (el.id) {
+              return `#${el.id}`
+            }
+
+            let selector = el.tagName.toLowerCase()
+
+            if (el.className && typeof el.className === 'string') {
+              const classes = el.className.trim().split(/\s+/).filter(Boolean)
+              if (classes.length > 0) {
+                selector += '.' + classes.slice(0, 2).join('.')
+              }
+            }
+
+            return selector
+          }
+
+          overflowingElements.push({
+            tagName: el.tagName.toLowerCase(),
+            id: el.id,
+            className: typeof el.className === 'string' ? el.className : '',
+            selector: generateSelector(),
+            offsetWidth: el.offsetWidth,
+            scrollWidth: el.scrollWidth,
+            computedWidth: parseFloat(computedStyle.width),
+          })
+        }
+      })
+    }
 
     return {
-      hasHorizontalScroll,
+      hasHorizontalScroll: canScroll,
       bodyScrollWidth: body.scrollWidth,
       bodyClientWidth: body.clientWidth,
       htmlScrollWidth: html.scrollWidth,
       htmlClientWidth: html.clientWidth,
       overflowingElements,
     }
-  })
+  }, hasHorizontalScroll)
 
   const result: HorizontalOverflowResult = {
     hasHorizontalOverflow:

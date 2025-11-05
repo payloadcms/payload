@@ -213,6 +213,11 @@ export async function checkFocusIndicators(
           return null
         }
 
+        // Skip Next.js portal elements (dev mode only)
+        if (el.closest('nextjs-portal')) {
+          return null
+        }
+
         // If we have a scope selector, check if the focused element is within scope
         if (scopeSelector) {
           const scopeElement = document.querySelector(scopeSelector)

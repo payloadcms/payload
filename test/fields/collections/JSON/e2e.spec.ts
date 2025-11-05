@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
 import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
