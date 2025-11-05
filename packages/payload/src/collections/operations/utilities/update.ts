@@ -274,7 +274,7 @@ export const updateDocument = async <
       if (unpublishSpecificLocale) {
         result = filterDataToSelectedLocales({
           configBlockReferences: payload.config.blocks,
-          docWithLocales: {},
+          docWithLocales: currentPublishedDocWithLocales || {},
           fields: collectionConfig.fields,
           selectedLocales: payload.config.localization.localeCodes.filter(
             (locale) => locale !== unpublishSpecificLocale,

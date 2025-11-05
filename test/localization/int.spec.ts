@@ -3612,7 +3612,10 @@ describe('Localization', () => {
               localizedTab: {
                 tabText: 'ES Tab Text',
               },
-              nonLocalizedArray: [{ localizedItem: 'ES Item 1' }, { localizedItem: 'ES Item 2' }],
+              nonLocalizedArray: [
+                { localizedItem: 'ES Item 1', id: draft.nonLocalizedArray?.[0]?.id },
+                { localizedItem: 'ES Item 2', id: draft.nonLocalizedArray?.[1]?.id },
+              ],
               nonLocalizedGroup: {
                 localizedText: 'ES Localized',
               },

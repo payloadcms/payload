@@ -26,9 +26,7 @@ export function filterDataToSelectedLocales({
   selectedLocales,
 }: FilterDataToSelectedLocalesArgs): JsonObject {
   if (
-    docWithLocales &&
-    typeof docWithLocales === 'object' &&
-    Array.isArray(selectedLocales) &&
+    (docWithLocales && typeof docWithLocales === 'object' && Array.isArray(docWithLocales)) ||
     selectedLocales.length === 0
   ) {
     return docWithLocales
