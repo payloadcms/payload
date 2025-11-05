@@ -9,7 +9,7 @@ import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
-import { formatCacheKey } from '../../cache/formatKey.js'
+import { deleteDocumentCache } from '../../cache/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -200,12 +200,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // Delete cache
     // /////////////////////////////////////
 
-    const key = formatCacheKey({
+    await deleteDocumentCache({
       id,
-      collectionSlug: collectionConfig.slug,
+      collection: collectionConfig.slug,
+      payload,
     })
-
-    await req.payload.kv?.delete(key)
 
     // /////////////////////////////////////
     // Delete Preferences

@@ -14,10 +14,10 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../config/types.js'
-import type { CachedDocument, SharedOperationArgs } from './types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { formatCacheKey } from '../../cache/formatKey.js'
+import { getDocumentCache } from '../../cache/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -185,23 +185,16 @@ export const findByIDOperation = async <
     if (args.data) {
       result = args.data as DataFromCollectionSlug<TSlug>
     } else if (cache) {
-      const cacheKey = formatCacheKey({
+      const documentCache = await getDocumentCache({
         id,
-        collectionSlug: collectionConfig.slug,
+        collection: collectionConfig.slug,
+        payload: req.payload,
       })
 
-      const cachedDoc =
-        await req.payload.kv?.get<CachedDocument<DataFromCollectionSlug<TSlug>>>(cacheKey)
-
-      if (cachedDoc) {
-        const hasExpired = cachedDoc.expiresAt && cachedDoc.expiresAt < new Date().toISOString()
-
-        if (hasExpired) {
-          await req.payload.kv?.delete(cacheKey)
-          result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)
-        } else {
-          result = cachedDoc.doc
-        }
+      if (documentCache) {
+        result = documentCache.doc as DataFromCollectionSlug<TSlug>
+      } else {
+        result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)
       }
     } else {
       result = await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs)

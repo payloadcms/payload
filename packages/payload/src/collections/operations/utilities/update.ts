@@ -16,11 +16,11 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../../config/types.js'
-import type { CachedDocument, SharedOperationArgs } from '../types.js'
+import type { SharedOperationArgs } from '../types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
-import { formatCacheKey } from '../../../cache/formatKey.js'
+import { cacheDocument } from '../../../cache/index.js'
 import { combineQueries } from '../../../database/combineQueries.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -324,28 +324,6 @@ export const updateDocument = async <
   }
 
   // /////////////////////////////////////
-  // Cache result
-  // /////////////////////////////////////
-
-  const key = formatCacheKey({
-    id: result.id,
-    collectionSlug: collectionConfig.slug,
-  })
-
-  if (cache) {
-    const cachedDocument: CachedDocument<JsonObject> = {
-      doc: result,
-      updatedAt: new Date().toISOString(),
-    }
-
-    await payload.kv.set(key, cachedDocument)
-  } else {
-    // Delete the cache entry if one exists on this key
-    // This way it can be re-created on the next read
-    await payload.kv.delete(key)
-  }
-
-  // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
@@ -413,6 +391,14 @@ export const updateDocument = async <
           req,
         })) || result
     }
+  }
+
+  // /////////////////////////////////////
+  // Cache result
+  // /////////////////////////////////////
+
+  if (cache) {
+    await cacheDocument({ doc: result, payload })
   }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>

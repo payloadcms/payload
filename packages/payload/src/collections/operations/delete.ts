@@ -11,7 +11,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { formatCacheKey } from '../../cache/formatKey.js'
+import { deleteDocumentCache } from '../../cache/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -226,12 +226,11 @@ export const deleteOperation = async <
         // Delete cache
         // /////////////////////////////////////
 
-        const key = formatCacheKey({
+        await deleteDocumentCache({
           id,
-          collectionSlug: collectionConfig.slug,
+          collection: collectionConfig.slug,
+          payload,
         })
-
-        await req.payload.kv?.delete(key)
 
         // /////////////////////////////////////
         // afterRead - Fields
