@@ -40,7 +40,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     setIsEditing(false)
   }, [initialLayout])
 
-  const handleDragOver = useCallback(
+  const moveWidget = useCallback(
     ({ moveFromIndex, moveToIndex }: { moveFromIndex: number; moveToIndex: number }) => {
       if (
         !isEditing ||
@@ -112,8 +112,8 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     cancel,
     currentLayout,
     deleteWidget,
-    handleDragOver,
     isEditing,
+    moveWidget,
     resetLayout,
     saveLayout,
     setIsEditing,

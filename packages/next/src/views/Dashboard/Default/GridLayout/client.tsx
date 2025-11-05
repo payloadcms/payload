@@ -45,8 +45,8 @@ export function GridLayoutDashboardClient({
     cancel,
     currentLayout,
     deleteWidget,
-    handleDragOver,
     isEditing,
+    moveWidget,
     resetLayout,
     saveLayout,
     setIsEditing,
@@ -62,10 +62,13 @@ export function GridLayoutDashboardClient({
         currentLayout={currentLayout}
         isEditing={isEditing}
         onDragEnd={(ev) => {
-          console.log('over.id', ev.over?.id)
+          moveWidget({
+            moveFromIndex: currentLayout?.findIndex((w) => w.item.i === ev.active.id),
+            moveToIndex: currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
+          })
           setActiveId(null)
         }}
-        onDragOver={handleDragOver}
+        onDragOver={moveWidget}
         onDragStart={(event) => setActiveId(String(event.active.id))}
         renderItem={(widget) => (
           <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
@@ -148,15 +151,9 @@ function SortableFlex(props: {
           y: 0.2, // Allow vertical scroll at 20% from edge
         },
       }}
-      collisionDetection={closestCenter}
+      // collisionDetection={closestCenter}
       id="sortable"
       onDragEnd={handleDragEnd}
-      onDragMove={(ev) => {
-        // props.onDragOver({
-        //   moveFromIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.active.id),
-        //   moveToIndex: props.currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
-        // })
-      }}
       onDragStart={handleDragStart}
     >
       <SortableContext items={props.currentLayout?.map((w) => w.item.i)}>
