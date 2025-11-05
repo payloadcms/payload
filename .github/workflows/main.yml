@@ -549,9 +549,6 @@ jobs:
           - template: website
             database: mongodb
 
-          - template: with-payload-cloud
-            database: mongodb
-
           - template: with-vercel-mongodb
             database: mongodb
 
@@ -592,7 +589,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -754,4 +751,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
+          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"

@@ -23,7 +23,6 @@ export const tgzToPkgNameMap = {
   '@payloadcms/live-preview-react': 'payloadcms-live-preview-react-*',
   '@payloadcms/kv-redis': 'payloadcms-kv-redis-*',
   '@payloadcms/next': 'payloadcms-next-*',
-  '@payloadcms/payload-cloud': 'payloadcms-payload-cloud-*',
   '@payloadcms/plugin-cloud-storage': 'payloadcms-plugin-cloud-storage-*',
   '@payloadcms/plugin-form-builder': 'payloadcms-plugin-form-builder-*',
   '@payloadcms/plugin-ecommerce': 'payloadcms-plugin-ecommerce-*',
