@@ -11,7 +11,6 @@ import type {
 } from 'payload'
 
 import {
-  BulkUploadProvider,
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,
@@ -421,14 +420,12 @@ export const renderDocument = async ({
           )}
           <HydrateAuthProvider permissions={permissions} />
           <EditDepthProvider>
-            <BulkUploadProvider drawerSlugPrefix={drawerSlug}>
-              {RenderServerComponent({
-                clientProps,
-                Component: View,
-                importMap,
-                serverProps: documentViewServerProps,
-              })}
-            </BulkUploadProvider>
+            {RenderServerComponent({
+              clientProps,
+              Component: View,
+              importMap,
+              serverProps: documentViewServerProps,
+            })}
           </EditDepthProvider>
         </LivePreviewProvider>
       </DocumentInfoProvider>
