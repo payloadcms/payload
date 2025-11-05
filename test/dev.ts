@@ -114,7 +114,6 @@ const app = nextImport({
   hostname: 'localhost',
   port: availablePort,
   dir: rootDir,
-  turbo: enableTurbo,
   turbopack: enableTurbo,
 })
 
