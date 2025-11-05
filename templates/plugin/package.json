@@ -32,7 +32,7 @@
     "build:types": "tsc --outDir dist --rootDir ./src",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "dev": "next dev dev --turbo",
+    "dev": "next dev --turbo",
     "dev:generate-importmap": "pnpm dev:payload generate:importmap",
     "dev:generate-types": "pnpm dev:payload generate:types",
     "dev:payload": "cross-env PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
