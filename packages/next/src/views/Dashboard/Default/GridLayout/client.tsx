@@ -3,7 +3,6 @@
 import type { Widget } from 'payload'
 
 import {
-  closestCenter,
   DndContext,
   type DragEndEvent,
   DragOverlay,
@@ -13,7 +12,7 @@ import {
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable } from '@dnd-kit/sortable'
 import { XIcon } from '@payloadcms/ui'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
@@ -32,6 +31,11 @@ export type WidgetInstanceClient = {
   component: React.ReactNode
   item: WidgetItem
 }
+
+type DropTargetWidget = {
+  position: 'after' | 'before'
+  widgetId: string
+} | null
 
 export function GridLayoutDashboardClient({
   clientLayout: initialLayout,
@@ -52,24 +56,28 @@ export function GridLayoutDashboardClient({
     setIsEditing,
   } = useDashboardLayout(initialLayout)
 
-  const [activeId, setActiveId] = useState<null | string>(null)
+  const dropTargetWidget = useRef<DropTargetWidget>(null)
 
   return (
     <div>
       <SortableFlex
-        activeId={activeId}
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         currentLayout={currentLayout}
+        dropTargetWidget={dropTargetWidget.current}
         isEditing={isEditing}
         onDragEnd={(ev) => {
           moveWidget({
             moveFromIndex: currentLayout?.findIndex((w) => w.item.i === ev.active.id),
             moveToIndex: currentLayout?.findIndex((w) => w.item.i === ev.over?.id),
           })
-          setActiveId(null)
+          dropTargetWidget.current = null
         }}
-        onDragOver={moveWidget}
-        onDragStart={(event) => setActiveId(String(event.active.id))}
+        onDragStart={(event) => {
+          dropTargetWidget.current = {
+            position: 'after',
+            widgetId: String(event.active.id),
+          }
+        }}
         renderItem={(widget) => (
           <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
             <div className="widget-content">{widget.component}</div>
@@ -101,18 +109,11 @@ export function GridLayoutDashboardClient({
 }
 
 function SortableFlex(props: {
-  activeId: null | string
   className?: string
   currentLayout: undefined | WidgetInstanceClient[]
+  dropTargetWidget: DropTargetWidget
   isEditing: boolean
   onDragEnd: (event: DragEndEvent) => void
-  onDragOver: ({
-    moveFromIndex,
-    moveToIndex,
-  }: {
-    moveFromIndex: number
-    moveToIndex: number
-  }) => void
   onDragStart: (event: DragStartEvent) => void
   renderItem: (widget: WidgetInstanceClient) => React.ReactNode
 }) {
@@ -120,8 +121,8 @@ function SortableFlex(props: {
     id: 'droppable',
   })
   const [activeWidth, setActiveWidth] = useState<null | number>(null)
-  const activeWidget = props.activeId
-    ? props.currentLayout?.find((w) => w.item.i === props.activeId)
+  const activeWidget = props.dropTargetWidget?.widgetId
+    ? props.currentLayout?.find((w) => w.item.i === props.dropTargetWidget?.widgetId)
     : null
 
   const handleDragStart = (event: DragStartEvent) => {
