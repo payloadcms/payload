@@ -134,7 +134,7 @@ export function GridLayoutDashboardClient({
                     <button
                       className="widget-wrapper__delete-btn"
                       onClick={() => deleteWidget(widget.item.i)}
-                      onMouseDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                       title={`Delete widget ${widget.item.i}`}
                       type="button"
                     >
