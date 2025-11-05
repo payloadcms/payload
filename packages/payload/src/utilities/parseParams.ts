@@ -66,9 +66,10 @@ export const parseParams = (params: RawParams): ParsedParams => {
     'pagination',
     'flattenLocales',
   ]
+
   const knownNumberParams = ['depth', 'limit', 'page']
 
-  const parsedParams: ParsedParams = {}
+  const parsedParams = (params || {}) as ParsedParams
 
   // iterate through known params to make this very fast
   for (const key of knownBooleanParams) {
