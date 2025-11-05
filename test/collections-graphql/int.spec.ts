@@ -112,14 +112,13 @@ describe('collections-graphql', () => {
     })
 
     it('should sort by multiple fields', async () => {
-      await payload.delete({ collection: 'posts', where: {} })
-      const doc1 = await createPost({ title: 'a', number: 1 })
-      const doc2 = await createPost({ title: 'b', number: 1 })
-      const doc3 = await createPost({ title: 'a', number: 2 })
-      const doc4 = await createPost({ title: 'b', number: 3 })
+      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
+      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
+      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
+      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 } })
 
       const query = `query {
-        Posts(sort: "title, number") {
+        Sorts(sort: "title, number") {
           docs {
             id
             title
@@ -131,7 +130,7 @@ describe('collections-graphql', () => {
       const { data } = await restClient
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
-      const { docs } = data.Posts
+      const { docs } = data.Sorts
 
       expect(docs.map((doc) => doc.id)).toEqual([doc3.id, doc1.id, doc4.id, doc2.id])
     })
