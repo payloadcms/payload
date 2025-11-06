@@ -4,39 +4,29 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { type JoinParams, sanitizeJoinParams } from '../../utilities/sanitizeJoinParams.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { findByIDOperation } from '../operations/findByID.js'
 
 export const findByIDHandler: PayloadHandler = async (req) => {
-  const { data, searchParams } = req
+  const { data: dataArg } = req
   const { id, collection } = getRequestCollectionWithID(req)
-  const depth = data ? data.depth : searchParams.get('depth')
-  const trash = data ? data.trash : searchParams.get('trash') === 'true'
-  const flattenLocales = data
-    ? data.flattenLocales
-    : searchParams.has('flattenLocales')
-      ? searchParams.get('flattenLocales') === 'true'
-      : // flattenLocales should be undefined if not provided, so that the default (true) is applied in the operation
-        undefined
+
+  const { data, depth, draft, flattenLocales, joins, populate, select, trash } = parseParams({
+    ...req.query,
+    ...dataArg,
+  })
 
   const result = await findByIDOperation({
     id,
     collection,
-    data: data
-      ? data?.data
-      : searchParams.get('data')
-        ? JSON.parse(searchParams.get('data') as string)
-        : undefined,
-    depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: data ? data.draft : searchParams.get('draft') === 'true',
+    data,
+    depth,
+    draft,
     flattenLocales,
-    joins: sanitizeJoinParams(req.query.joins as JoinParams),
-    populate: sanitizePopulateParam(req.query.populate),
+    joins,
+    populate,
     req,
-    select: sanitizeSelectParam(req.query.select),
+    select,
     trash,
   })
 

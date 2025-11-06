@@ -6,7 +6,7 @@ keywords: database, cache, kv store
 desc: Cache database query results in a key-value store.
 ---
 
-Cache documents in a key-value store to improve read performance for frequently accessed data.
+Cache documents in the KV Store to improve read performance for frequently accessed data.
 
 To enable caching for database queries, pass `cache: true` as an argument to your operation:
 
@@ -16,11 +16,3 @@ const cachedDocs = await payload.find({
   cache: true,
 })
 ```
-
-Important:
-
-Cached documents are considered fully formed, meaning any hooks that would normally run on read operations (e.g., `afterRead`) will not be executed when retrieving documents from the cache.
-
-<Banner type="warning">
-  The `draft` arg is not respected when using cache.
-</Banner>

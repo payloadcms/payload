@@ -31,6 +31,16 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'page',
+      type: 'relationship',
+      relationTo: 'pages',
+    },
+    {
+      name: 'virtualTitleFromPage',
+      type: 'text',
+      virtual: 'page.title',
+    },
+    {
       name: 'checkbox',
       type: 'checkbox',
     },

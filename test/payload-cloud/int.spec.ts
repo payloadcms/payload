@@ -10,7 +10,7 @@ let payload: Payload
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('@payloadcms/plugin-cloud', () => {
+describe('@payloadcms/payload--cloud', () => {
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
   })
@@ -20,6 +20,6 @@ describe('@payloadcms/plugin-cloud', () => {
   })
 
   describe('tests', () => {
-    it.todo('plugin-cloud tests')
+    it.todo('payload-cloud tests')
   })
 })
