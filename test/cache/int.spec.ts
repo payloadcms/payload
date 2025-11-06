@@ -30,7 +30,7 @@ describe('cache', () => {
   })
 
   describe('Local API', () => {
-    it('should cache doc on create', async () => {
+    it('should create cache on document create', async () => {
       const post = await createPost({ title: 'Cached Post' })
 
       // check the KV store directly to ensure it's cached
@@ -48,7 +48,7 @@ describe('cache', () => {
       })
     })
 
-    it('should return cached doc on find', async () => {
+    it('should return cached doc in findByID', async () => {
       const title = 'Cached Post'
 
       const post = await createPost({ title })
@@ -85,6 +85,84 @@ describe('cache', () => {
       expect(cachedDoc).toMatchObject({
         id: post.id,
         title: cacheTitle,
+      })
+    })
+
+    it('should delete cache on document delete', async () => {
+      const post = await createPost({ title: 'Cached Post' })
+
+      // ensure it's cached
+      const cacheBeforeDelete = await getCache<Post>({
+        id: post.id,
+        collection: postsSlug,
+        payload,
+      })
+
+      expect(cacheBeforeDelete).toBeDefined()
+
+      // delete the post
+      await payload.delete({
+        collection: postsSlug,
+        id: post.id,
+      })
+
+      // check cache again
+      const cacheAfterDelete = await getCache<Post>({
+        id: post.id,
+        collection: postsSlug,
+        payload,
+      })
+
+      expect(cacheAfterDelete).toBeNull()
+    })
+
+    it('should populate relations from cache', async () => {
+      // update the related doc in the bg, then get the parent doc's cache again
+      // the relation should be populated from cache as well
+      const relatedPost = await createPost({ title: 'Related Post' })
+      const post = await createPost({ title: 'Parent Post', relationship: relatedPost.id })
+
+      const cachedDoc = await payload.findByID({
+        collection: postsSlug,
+        id: post.id,
+        cache: true,
+        overrideAccess: true,
+        depth: 1,
+      })
+
+      expect(cachedDoc).toMatchObject({
+        id: post.id,
+        title: 'Parent Post',
+        relationship: {
+          id: relatedPost.id,
+          title: 'Related Post',
+        },
+      })
+
+      await updateCache<Post>({
+        collection: postsSlug,
+        payload,
+        doc: {
+          ...relatedPost,
+          title: 'Related Post (Updated)',
+        },
+      })
+
+      const updatedCache = await payload.findByID({
+        collection: postsSlug,
+        id: post.id,
+        cache: true,
+        overrideAccess: true,
+        depth: 1,
+      })
+
+      expect(updatedCache).toMatchObject({
+        id: post.id,
+        title: 'Parent Post',
+        relationship: {
+          id: relatedPost.id,
+          title: 'Related Post (Updated)',
+        },
       })
     })
   })

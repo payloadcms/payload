@@ -9,6 +9,7 @@ import type {
   SelectType,
 } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
+import type { AfterReadArgs } from './index.js'
 
 import { promise } from './promise.js'
 
@@ -30,7 +31,7 @@ type Args = {
   fieldPromises: Promise<void>[]
   fields: (Field | TabAsField)[]
   findMany: boolean
-  flattenLocales: boolean
+  flattenLocales: boolean | undefined
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
@@ -50,10 +51,11 @@ type Args = {
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-}
+} & Pick<AfterReadArgs<JsonObject>, 'cache'>
 
 export const traverseFields = ({
   blockData,
+  cache,
   collection,
   context,
   currentDepth,
@@ -86,6 +88,7 @@ export const traverseFields = ({
     fieldPromises.push(
       promise({
         blockData,
+        cache,
         collection,
         context,
         currentDepth,

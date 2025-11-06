@@ -62,6 +62,7 @@ const batchAndLoadDocs =
         draft,
         select,
         populate,
+        cache,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -76,6 +77,7 @@ const batchAndLoadDocs =
         draft,
         select,
         populate,
+        cache,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -103,11 +105,13 @@ const batchAndLoadDocs =
         draft,
         select,
         populate,
+        cache,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
 
       const result = await payload.find({
+        cache,
         collection,
         currentDepth,
         depth,
@@ -132,6 +136,7 @@ const batchAndLoadDocs =
       // Inject doc within docs array if index exists
       for (const doc of result.docs) {
         const docKey = createDataloaderCacheKey({
+          cache,
           collectionSlug: collection,
           currentDepth,
           depth,
@@ -145,6 +150,7 @@ const batchAndLoadDocs =
           showHiddenFields,
           transactionID: req.transactionID!,
         })
+
         const docsIndex = keys.findIndex((key) => key === docKey)
 
         if (docsIndex > -1) {
@@ -166,9 +172,11 @@ export const getDataLoader = (req: PayloadRequest) => {
   dataLoader.find = ((args: FindArgs) => {
     const key = createFindDataloaderCacheKey(args)
     const cached = findQueries.get(key)
+
     if (cached) {
       return cached
     }
+
     const request = req.payload.find(args)
     findQueries.set(key, request)
     return request
@@ -178,6 +186,7 @@ export const getDataLoader = (req: PayloadRequest) => {
 }
 
 const createFindDataloaderCacheKey = ({
+  cache,
   collection,
   currentDepth,
   depth,
@@ -217,9 +226,11 @@ const createFindDataloaderCacheKey = ({
     showHiddenFields,
     sort,
     where,
+    cache,
   ])
 
 type CreateCacheKeyArgs = {
+  cache?: boolean
   collectionSlug: string
   currentDepth: number
   depth: number
@@ -233,7 +244,9 @@ type CreateCacheKeyArgs = {
   showHiddenFields: boolean
   transactionID: number | Promise<number | string> | string
 }
+
 export const createDataloaderCacheKey = ({
+  cache,
   collectionSlug,
   currentDepth,
   depth,
@@ -260,4 +273,5 @@ export const createDataloaderCacheKey = ({
     draft,
     select,
     populate,
+    cache,
   ])

@@ -12,5 +12,10 @@ export const Posts: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: postsSlug,
+    },
   ],
 }
