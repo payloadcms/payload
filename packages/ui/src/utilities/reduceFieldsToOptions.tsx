@@ -44,12 +44,13 @@ export const reduceFieldsToOptions = ({
       return reduced
     }
 
-    // Handle virtual:string fields (virtual relationships, e.g. "post.title")
     // IMPORTANT: We DON'T mutate field.name here because the field object is shared across
     // multiple components (WhereBuilder, GroupByBuilder, etc.). Mutating it would break
     // permission checks and cause issues in other components that need the field name.
     // Instead, we use a flag to determine whether to include the field name in the path.
     let shouldIgnoreFieldName = false
+
+    // Handle virtual:string fields (virtual relationships, e.g. "post.title")
     if ('virtual' in field && typeof field.virtual === 'string') {
       pathPrefix = pathPrefix ? pathPrefix + '.' + field.virtual : field.virtual
       if (fieldAffectsData(field)) {
@@ -244,11 +245,14 @@ export const reduceFieldsToOptions = ({
 
         // For virtual fields, we use just the pathPrefix (the virtual path) without appending the field name
         // For regular fields, we use createNestedClientFieldPath which appends the field name to the path
-        const fieldPath = shouldIgnoreFieldName
-          ? pathPrefix
-          : pathPrefix
-            ? createNestedClientFieldPath(pathPrefix, field)
-            : field.name
+        let fieldPath: string
+        if (shouldIgnoreFieldName) {
+          fieldPath = pathPrefix
+        } else if (pathPrefix) {
+          fieldPath = createNestedClientFieldPath(pathPrefix, field)
+        } else {
+          fieldPath = field.name
+        }
 
         const formattedField: ReducedField = {
           label: formattedLabel,
