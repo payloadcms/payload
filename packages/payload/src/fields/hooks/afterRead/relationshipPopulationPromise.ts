@@ -39,6 +39,10 @@ const populate = async ({
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference
+  const inline =
+    typeof data === 'object' &&
+    (field.type === 'relationship' || field.type === 'upload') &&
+    field.inline
   let relation
   if (field.type === 'join') {
     relation = Array.isArray(field.collection) ? data.relationTo : field.collection
@@ -56,12 +60,14 @@ const populate = async ({
       id = data.value
     } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
       id = data.value
+    } else if (inline != true && data.id) {
+      id = data.id
     } else {
       id = data
     }
 
     let relationshipValue
-    const shouldPopulate = depth && currentDepth <= depth
+    const shouldPopulate = depth && currentDepth <= depth && !inline
 
     if (
       typeof id !== 'string' &&
@@ -208,10 +214,7 @@ export const relationshipPopulationPromise = async ({
           if (relatedDoc) {
             await populate({
               currentDepth,
-              data:
-                !(field.type === 'join' && Array.isArray(field.collection)) && relatedDoc?.id
-                  ? relatedDoc.id
-                  : relatedDoc,
+              data: relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth!,
               draft,

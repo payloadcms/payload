@@ -1,12 +1,28 @@
 import type { RelationshipField, UploadField } from 'payload'
 
+import toSnakeCase from 'to-snake-case'
+
+import type { TransformArgs } from './index.js'
+
+import { transform } from './index.js'
+
 type Args = {
   field: RelationshipField | UploadField
   locale?: string
   ref: Record<string, unknown>
   relations: Record<string, unknown>[]
   withinArrayOrBlockLocale?: string
-}
+} & TransformArgsRecurve
+
+type ArgsRecursive = {
+  data: unknown
+  relationTo: string
+} & TransformArgsRecurve
+
+type TransformArgsRecurve = Pick<
+  TransformArgs,
+  'adapter' | 'config' | 'joinQuery' | 'parentIsLocalized'
+>
 
 export const transformRelationship = ({
   field,
@@ -14,6 +30,7 @@ export const transformRelationship = ({
   ref,
   relations,
   withinArrayOrBlockLocale,
+  ...args
 }: Args) => {
   let result: unknown
 
@@ -36,7 +53,11 @@ export const transformRelationship = ({
 
           result = {
             relationTo,
-            value: matchedRelation[1],
+            value: transformRecursive({
+              ...args,
+              data: matchedRelation[1],
+              relationTo,
+            }),
           }
         }
       }
@@ -54,9 +75,16 @@ export const transformRelationship = ({
       // Handle hasMany
       if (!Array.isArray(field.relationTo)) {
         const relatedData = relation[`${field.relationTo}ID`]
+        const relationTo = field.relationTo
 
         if (relatedData && matchedLocale) {
-          transformedRelations.push(relatedData)
+          transformedRelations.push(
+            transformRecursive({
+              ...args,
+              data: relatedData,
+              relationTo,
+            }),
+          )
         }
       } else {
         // Handle hasMany Poly
@@ -72,7 +100,11 @@ export const transformRelationship = ({
 
           transformedRelations.push({
             relationTo,
-            value: matchedRelation[1],
+            value: transformRecursive({
+              ...args,
+              data: matchedRelation[1],
+              relationTo,
+            }),
           })
         }
       }
@@ -86,4 +118,30 @@ export const transformRelationship = ({
   } else {
     ref[field.name] = result
   }
+}
+
+const transformRecursive = ({
+  adapter,
+  config,
+  data,
+  joinQuery,
+  parentIsLocalized,
+  relationTo,
+}: ArgsRecursive) => {
+  if (typeof data !== 'object') {
+    return data
+  }
+
+  const relationshipConfig = adapter.payload.collections[relationTo].config
+  const relationshipTableName = toSnakeCase(relationTo)
+
+  return transform({
+    adapter,
+    config,
+    data: data as Record<string, unknown>,
+    fields: relationshipConfig.flattenedFields,
+    joinQuery,
+    parentIsLocalized,
+    tableName: relationshipTableName,
+  })
 }

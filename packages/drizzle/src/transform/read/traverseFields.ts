@@ -409,15 +409,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
         Object.entries(relationsByLocale).forEach(([locale, relations]) => {
           transformRelationship({
+            adapter,
+            config,
             field,
+            joinQuery,
             locale,
+            parentIsLocalized,
             ref: result,
             relations,
           })
         })
       } else {
         transformRelationship({
+          adapter,
+          config,
           field,
+          joinQuery,
+          parentIsLocalized,
           ref: result,
           relations: relationPathMatch,
           withinArrayOrBlockLocale,
@@ -690,6 +698,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           if (
             val &&
             typeof field.relationTo === 'string' &&
+            !field.inline &&
             adapter.payload.collections[field.relationTo].customIDType === 'number'
           ) {
             val = Number(val)

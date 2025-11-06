@@ -969,6 +969,7 @@ type SharedUploadProperties = {
    */
   displayPreview?: boolean
   filterOptions?: FilterOptions
+  inline?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -1175,6 +1176,7 @@ export type SelectFieldClient = {
 
 type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
+  inline?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
