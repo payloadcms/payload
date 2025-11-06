@@ -85,8 +85,20 @@ export const checkFileRestrictions = async ({
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
-    if (detected && !passesMimeTypeCheck) {
-      errors.push(`Invalid MIME type: ${detected.mime}.`)
+    if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
+      // Additional PDF validation: fileTypeFromBuffer only looks at the header
+      // so a file manipulated to start with %PDF- could pass as a PDF even if corrupted.
+      // A real PDF should contain a %%EOF marker, so reject it if that's missing
+
+      const innerPDF = file.data.toString('latin1')
+      const isValidPDF = innerPDF.includes('%%EOF')
+      if (!isValidPDF) {
+        errors.push(`Invalid PDF: ${file.name} is not a valid PDF file or has been corrupted.`)
+      }
+    }
+
+    if ((detected && !passesMimeTypeCheck) || !detected) {
+      errors.push(`Invalid MIME type: ${detected?.mime}.`)
     }
   } else {
     const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
