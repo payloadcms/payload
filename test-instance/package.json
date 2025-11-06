@@ -1,0 +1,41 @@
+{
+  "name": "payload-test-instance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Payload CMS test instance with GCS and MCP server",
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "generate:importmap": "payload generate:importmap",
+    "generate:types": "payload generate:types",
+    "migrate": "payload migrate",
+    "migrate:create": "payload migrate:create",
+    "payload": "payload",
+    "seed": "tsx ./src/seed.ts",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/storage-gcs": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "graphql": "^16.8.1",
+    "next": "15.1.0",
+    "payload": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "0.33.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.2",
+    "tsx": "^4.19.2",
+    "typescript": "5.7.2"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  }
+}

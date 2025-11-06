@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js
+.next
+out
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+dist
+build
+
+# Payload
+payload-types.ts
+generated-schema.graphql
+
+# GCP
+*.json
+!package.json
+!tsconfig.json
+
+# Misc
+.DS_Store
+*.log
+.cache
