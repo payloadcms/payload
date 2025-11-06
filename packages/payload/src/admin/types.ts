@@ -58,6 +58,11 @@ export type {
   EditMenuItemsServerProps,
   EditMenuItemsServerPropsOnly,
 } from './elements/EditMenuItems.js'
+export type {
+  LivePreviewTogglerClientProps,
+  LivePreviewTogglerServerProps,
+  LivePreviewTogglerServerPropsOnly,
+} from './elements/LivePreviewToggler.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
 export type {
   PreviewButtonClientProps,
@@ -562,6 +567,7 @@ export type DocumentSlots = {
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
   LivePreview?: React.ReactNode
+  LivePreviewToggler?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode

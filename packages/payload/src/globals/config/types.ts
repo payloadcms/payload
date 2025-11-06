@@ -3,12 +3,6 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
-  CustomPreviewButton,
-  CustomPublishButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-} from '../../admin/types.js'
-import type {
   Access,
   CustomComponent,
   EditConfig,
@@ -105,25 +99,29 @@ export type GlobalAdminOptions = {
       beforeDocumentControls?: CustomComponent[]
       Description?: EntityDescriptionComponent
       /**
+       * Replaces the "LivePreviewToggler" button
+       */
+      LivePreviewToggler?: CustomComponent
+      /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButton
+      PreviewButton?: CustomComponent
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: CustomComponent
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButton
+      SaveButton?: CustomComponent
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButton
+      SaveDraftButton?: CustomComponent
     }
     views?: {
       /**
