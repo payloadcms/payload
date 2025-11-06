@@ -14,6 +14,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import AutosavePosts from './collections/Autosave.js'
 import AutosaveGlobal from './globals/Autosave.js'
+import { cleanupDocuments, createDocumentWithManyVersions, createDraftDocument } from './helpers.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
@@ -22,6 +23,7 @@ import {
   draftGlobalSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
+  versionCollectionSlug,
 } from './slugs.js'
 
 let payload: Payload
@@ -48,13 +50,18 @@ describe('Versions', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
 
-    user = await payload.create({
+    const newUser = await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
     })
+
+    user = {
+      ...newUser,
+      collection: 'users',
+    }
 
     // sets token on rest client
     await restClient.login({
@@ -130,25 +137,6 @@ describe('Versions', () => {
         expect(updatedPost.title).toBe(updatedTitle)
         expect(updatedPost._status).toStrictEqual('draft')
         expect(versions.docs[0].id).toBeDefined()
-      })
-
-      it('should paginate versions', async () => {
-        const versions = await payload.findVersions({
-          collection: draftCollectionSlug,
-          limit: 5,
-        })
-        const versionsPage2 = await payload.findVersions({
-          collection: draftCollectionSlug,
-          limit: 5,
-          page: 2,
-        })
-
-        expect(versions.docs).toHaveLength(5)
-        expect(versions.page).toBe(1)
-        expect(versionsPage2.docs).toHaveLength(5)
-        expect(versionsPage2.page).toBe(2)
-
-        expect(versions.docs[0].id).not.toBe(versionsPage2.docs[0].id)
       })
 
       it('should allow saving multiple versions of models with unique fields', async () => {
@@ -276,26 +264,6 @@ describe('Versions', () => {
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle)
       })
 
-      it('should query drafts with sort', async () => {
-        const draftsAscending = await payload.find({
-          collection: draftCollectionSlug,
-          draft: true,
-          sort: 'title',
-        })
-
-        const draftsDescending = await payload.find({
-          collection: draftCollectionSlug,
-          draft: true,
-          sort: '-title',
-        })
-
-        expect(draftsAscending).toBeDefined()
-        expect(draftsDescending).toBeDefined()
-        expect(draftsAscending.docs[0]).toMatchObject(
-          draftsDescending.docs[draftsDescending.docs.length - 1],
-        )
-      })
-
       // https://github.com/payloadcms/payload/issues/4827
       it('should query drafts with relation', async () => {
         const draftPost = await payload.create({
@@ -328,28 +296,6 @@ describe('Versions', () => {
 
         expect(all.docs).toHaveLength(1)
         expect(drafts.docs).toHaveLength(1)
-      })
-
-      it('should `findVersions` with sort', async () => {
-        const draftsAscending = await payload.findVersions({
-          collection: draftCollectionSlug,
-          draft: true,
-          limit: 100,
-          sort: 'createdAt',
-        })
-
-        const draftsDescending = await payload.findVersions({
-          collection: draftCollectionSlug,
-          draft: true,
-          limit: 100,
-          sort: '-createdAt',
-        })
-
-        expect(draftsAscending).toBeDefined()
-        expect(draftsDescending).toBeDefined()
-        expect(draftsAscending.docs[0]).toMatchObject(
-          draftsDescending.docs[draftsDescending.docs.length - 1],
-        )
       })
 
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
@@ -484,7 +430,115 @@ describe('Versions', () => {
       })
     })
 
+    describe('Query operations', () => {
+      beforeAll(async () => {
+        // Create test data for query-only tests (pagination, sorting)
+
+        // Create a document with many versions for pagination testing
+        await createDocumentWithManyVersions({
+          collection: draftCollectionSlug,
+          draft: true,
+          initialData: {
+            description: 'Description',
+            radio: 'test',
+            title: 'Title With Many Versions',
+          },
+          payload,
+          updateField: 'title',
+          updateValue: (i) => `Title With Many Versions ${i + 1}`,
+          versionCount: 11,
+        })
+
+        // Create multiple drafts for sort testing
+        await createDraftDocument({
+          collection: draftCollectionSlug,
+          payload,
+          title: 'AAA First Draft',
+        })
+
+        await createDraftDocument({
+          collection: draftCollectionSlug,
+          payload,
+          title: 'ZZZ Last Draft',
+        })
+
+        await createDraftDocument({
+          collection: draftCollectionSlug,
+          payload,
+          title: 'MMM Middle Draft',
+        })
+      })
+
+      it('should paginate versions', async () => {
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          limit: 5,
+        })
+        const versionsPage2 = await payload.findVersions({
+          collection: draftCollectionSlug,
+          limit: 5,
+          page: 2,
+        })
+
+        expect(versions.docs).toHaveLength(5)
+        expect(versions.page).toBe(1)
+        expect(versionsPage2.docs).toHaveLength(5)
+        expect(versionsPage2.page).toBe(2)
+
+        expect(versions.docs[0].id).not.toBe(versionsPage2.docs[0].id)
+      })
+
+      it('should query drafts with sort', async () => {
+        const draftsAscending = await payload.find({
+          collection: draftCollectionSlug,
+          draft: true,
+          sort: 'title',
+        })
+
+        const draftsDescending = await payload.find({
+          collection: draftCollectionSlug,
+          draft: true,
+          sort: '-title',
+        })
+
+        expect(draftsAscending).toBeDefined()
+        expect(draftsDescending).toBeDefined()
+        expect(draftsAscending.docs[0]).toMatchObject(
+          draftsDescending.docs[draftsDescending.docs.length - 1],
+        )
+      })
+
+      it('should `findVersions` with sort', async () => {
+        const draftsAscending = await payload.findVersions({
+          collection: draftCollectionSlug,
+          draft: true,
+          limit: 100,
+          sort: 'createdAt',
+        })
+
+        const draftsDescending = await payload.findVersions({
+          collection: draftCollectionSlug,
+          draft: true,
+          limit: 100,
+          sort: '-createdAt',
+        })
+
+        expect(draftsAscending).toBeDefined()
+        expect(draftsDescending).toBeDefined()
+        expect(draftsAscending.docs[0]).toMatchObject(
+          draftsDescending.docs[draftsDescending.docs.length - 1],
+        )
+      })
+    })
+
     describe('Restore', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
       it('should return `findVersions` in correct order', async () => {
         const somePost = await payload.create({
           collection: draftCollectionSlug,
@@ -662,34 +716,29 @@ describe('Versions', () => {
 
     it('findVersions - pagination should work correctly', async () => {
       const post = await payload.create({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         data: { description: 'a', title: 'title' },
       })
       for (let i = 0; i < 100; i++) {
-        await payload.update({ id: post.id, collection: 'draft-posts', data: {} })
+        await payload.update({ id: post.id, collection: draftCollectionSlug, data: {} })
       }
       const res = await payload.findVersions({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         where: { parent: { equals: post.id } },
       })
       expect(res.totalDocs).toBe(101)
       expect(res.docs).toHaveLength(10)
       const resPaginationFalse = await payload.findVersions({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         pagination: false,
         where: { parent: { equals: post.id } },
-      })
-      const resPaginationFalse2 = await payload.find({
-        collection: 'draft-posts',
-        // where: { parent: { equals: post.id } },
-        pagination: false,
       })
 
       expect(resPaginationFalse.docs).toHaveLength(101)
       expect(resPaginationFalse.totalDocs).toBe(101)
 
       const resPaginationFalseLimit0 = await payload.findVersions({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         limit: 0,
         pagination: false,
         where: { parent: { equals: post.id } },
@@ -699,11 +748,18 @@ describe('Versions', () => {
     })
 
     describe('Update', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug, autosaveCollectionSlug],
+          payload,
+        })
+      })
+
       it('should allow a draft to be patched', async () => {
         const originalTitle = 'Here is a published post'
 
         const originalPublishedPost = await payload.create({
-          collection,
+          collection: autosaveCollectionSlug,
           data: {
             _status: 'published',
             description: 'kjnjyhbbdsfseankuhsjsfghb',
@@ -715,7 +771,7 @@ describe('Versions', () => {
 
         await payload.update({
           id: originalPublishedPost.id,
-          collection,
+          collection: autosaveCollectionSlug,
           data: {
             _status: 'draft',
             title: patchedTitle,
@@ -729,7 +785,7 @@ describe('Versions', () => {
         // second update to existing draft
         await payload.update({
           id: originalPublishedPost.id,
-          collection,
+          collection: autosaveCollectionSlug,
           data: {
             _status: 'draft',
             title: spanishTitle,
@@ -740,12 +796,12 @@ describe('Versions', () => {
 
         const publishedPost = await payload.findByID({
           id: originalPublishedPost.id,
-          collection,
+          collection: autosaveCollectionSlug,
         })
 
         const draftPost = await payload.findByID({
           id: originalPublishedPost.id,
-          collection,
+          collection: autosaveCollectionSlug,
           draft: true,
           locale: 'all',
         })
@@ -873,6 +929,11 @@ describe('Versions', () => {
           },
         })
         expect(lastDocVersion.docs[0]?.version.tag).toEqual(firstDocTag)
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveWithMultiSelectCollectionSlug],
+          payload,
+        })
       })
 
       it('should validate when publishing with the draft arg', async () => {
@@ -965,10 +1026,22 @@ describe('Versions', () => {
 
         expect(updated2.id).toBe(id)
         expect(updated2.title).toBe('new-title-2')
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
       })
     })
 
     describe('Update Many', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
       it('should update many using drafts', async () => {
         const doc = await payload.create({
           collection: draftCollectionSlug,
@@ -1023,20 +1096,18 @@ describe('Versions', () => {
     })
 
     describe('Delete', () => {
-      let postToDelete
-      beforeEach(async () => {
-        postToDelete = await payload.create({
-          collection,
+      it('should delete drafts', async () => {
+        const postToDelete = await payload.create({
+          collection: autosaveCollectionSlug,
           data: {
             _status: 'draft',
             description: 'description',
             title: 'title to delete',
           },
         })
-      })
-      it('should delete drafts', async () => {
+
         const drafts = await payload.db.queryDrafts({
-          collection,
+          collection: autosaveCollectionSlug,
           where: {
             parent: {
               equals: postToDelete.id,
@@ -1045,14 +1116,14 @@ describe('Versions', () => {
         })
 
         await payload.delete({
-          collection,
+          collection: autosaveCollectionSlug,
           where: {
             id: { equals: postToDelete.id },
           },
         })
 
         const result = await payload.db.queryDrafts({
-          collection,
+          collection: autosaveCollectionSlug,
           where: {
             parent: {
               in: drafts.docs.map(({ id }) => id),
@@ -1062,13 +1133,25 @@ describe('Versions', () => {
         })
 
         expect(result.docs).toHaveLength(0)
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
       })
     })
 
     describe('Draft Count', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
       it('creates proper number of drafts', async () => {
         const originalDraft = await payload.create({
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           data: {
             _status: 'draft',
             description: 'A',
@@ -1079,7 +1162,7 @@ describe('Versions', () => {
 
         await payload.update({
           id: originalDraft.id,
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           data: {
             _status: 'draft',
             description: 'B',
@@ -1090,7 +1173,7 @@ describe('Versions', () => {
 
         await payload.update({
           id: originalDraft.id,
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           data: {
             _status: 'draft',
             description: 'C',
@@ -1101,14 +1184,14 @@ describe('Versions', () => {
 
         const mostRecentDraft = await payload.findByID({
           id: originalDraft.id,
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           draft: true,
         })
 
         expect(mostRecentDraft.title).toStrictEqual('C')
 
         const versions = await payload.findVersions({
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           where: {
             parent: {
               equals: originalDraft.id,
@@ -1121,11 +1204,18 @@ describe('Versions', () => {
     })
 
     describe('Draft Types', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
       it('should allow creating drafts without required fields', async () => {
         // This test validates that when draft: true is set, required fields become optional
         // TypeScript should not complain about missing 'description' field even though it's required
         const draft = await payload.create({
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           data: {
             title: 'Draft without description',
             // description is required but omitted - should work with draft: true
@@ -1144,7 +1234,7 @@ describe('Versions', () => {
         await expect(
           // @ts-expect-error - description is required when not creating a draft
           payload.create({
-            collection: 'draft-posts',
+            collection: draftCollectionSlug,
             data: {
               title: 'Published without description',
             },
@@ -1158,7 +1248,7 @@ describe('Versions', () => {
         await expect(
           // @ts-expect-error - description is required when draft option is not specified
           payload.create({
-            collection: 'draft-posts',
+            collection: draftCollectionSlug,
             data: {
               title: 'Post without description',
             },
@@ -1169,7 +1259,7 @@ describe('Versions', () => {
       it('should allow all fields to be optional with draft: true', async () => {
         // Test that even fields nested in groups can be omitted
         const draft = await payload.create({
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           data: {
             // Both title and description are required but omitted
           },
@@ -1187,59 +1277,54 @@ describe('Versions', () => {
       // create 2 documents with 3 versions each
       // expect 2 documents with 2 versions each
       it('retains correct versions', async () => {
+        // doc1 - v1
         const doc1 = await payload.create({
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           data: {
             description: 'A',
             title: 'A',
           },
         })
-
+        // v2
         await payload.update({
           id: doc1.id,
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           data: {
             description: 'B',
             title: 'B',
           },
         })
-
-        const result = await payload.find({
-          collection: 'version-posts',
-          where: {
-            updatedAt: { less_than_equal: '2027-01-01T00:00:00.000Z' },
-          },
-        })
-
+        // v3
         await payload.update({
           id: doc1.id,
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           data: {
             description: 'C',
             title: 'C',
           },
         })
 
+        // doc2 - v1
         const doc2 = await payload.create({
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           data: {
             description: 'D',
             title: 'D',
           },
         })
-
+        // v2
         await payload.update({
           id: doc2.id,
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           data: {
             description: 'E',
             title: 'E',
           },
         })
-
+        // v3
         await payload.update({
           id: doc2.id,
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           data: {
             description: 'F',
             title: 'F',
@@ -1247,7 +1332,7 @@ describe('Versions', () => {
         })
 
         const doc1Versions = await payload.findVersions({
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           sort: '-updatedAt',
           where: {
             parent: {
@@ -1257,7 +1342,7 @@ describe('Versions', () => {
         })
 
         const doc2Versions = await payload.findVersions({
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
           sort: '-updatedAt',
           where: {
             parent: {
@@ -1277,18 +1362,23 @@ describe('Versions', () => {
         expect(doc2Versions.docs[1].version.title).toStrictEqual('E')
 
         const docs = await payload.find({
-          collection: 'version-posts',
+          collection: versionCollectionSlug,
         })
 
         // correctly retains 2 documents in the actual collection
         expect(docs.totalDocs).toStrictEqual(2)
+
+        await cleanupDocuments({
+          collectionSlugs: [versionCollectionSlug],
+          payload,
+        })
       })
     })
 
     describe('Race conditions', () => {
       it('should keep latest true with parallel writes', async () => {
         const doc = await payload.create({
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           data: {
             description: 'A',
             title: 'A',
@@ -1304,7 +1394,7 @@ describe('Versions', () => {
               payload
                 .update({
                   id: doc.id,
-                  collection: 'draft-posts',
+                  collection: draftCollectionSlug,
                   data: {},
                   draft: true,
                 })
@@ -1317,7 +1407,7 @@ describe('Versions', () => {
         await Promise.all(promises)
 
         const { docs } = await payload.findVersions({
-          collection: 'draft-posts',
+          collection: draftCollectionSlug,
           where: {
             and: [
               {
@@ -1335,6 +1425,11 @@ describe('Versions', () => {
         })
 
         expect(docs[0]).toBeDefined()
+
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
       })
     })
   })
@@ -1345,21 +1440,20 @@ describe('Versions', () => {
     const updatedTitle2 = 'new title 2'
     let firstDraft
 
-    beforeEach(async () => {
-      // This will be created in the `draft-posts` collection
+    async function createPostWithVersions(args?: { title?: string }) {
       firstDraft = await payload.create({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         data: {
           description: 'my description',
           radio: 'test',
-          title: originalTitle,
+          title: args?.title || originalTitle,
         },
       })
 
       // This will be created in the `_draft-posts_versions` collection
       await payload.update({
         id: firstDraft.id,
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         data: {
           title: updatedTitle1,
         },
@@ -1370,17 +1464,28 @@ describe('Versions', () => {
       // and will be the newest draft, able to be queried on
       await payload.update({
         id: firstDraft.id,
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         data: {
           title: updatedTitle2,
         },
         draft: true,
       })
+    }
+
+    beforeEach(async () => {
+      await createPostWithVersions()
+    })
+
+    afterEach(async () => {
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug],
+        payload,
+      })
     })
 
     it('should allow querying a draft doc from main collection', async () => {
       const findResults = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         where: {
           title: {
             equals: originalTitle,
@@ -1393,7 +1498,7 @@ describe('Versions', () => {
 
     it('should return more than 10 `totalDocs`', async () => {
       const { id } = await payload.create({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         data: {
           description: 'Description',
           title: 'Title',
@@ -1404,7 +1509,7 @@ describe('Versions', () => {
         for (let i = 0; i < int; i++) {
           await payload.update({
             id,
-            collection: 'draft-posts',
+            collection: draftCollectionSlug,
             data: {
               title: `Title ${i}`,
             },
@@ -1415,7 +1520,7 @@ describe('Versions', () => {
       await createVersions(10)
 
       const findResults = await payload.findVersions({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         where: {
           parent: {
             equals: id,
@@ -1424,11 +1529,16 @@ describe('Versions', () => {
       })
 
       expect(findResults.totalDocs).toBe(11)
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug],
+        payload,
+      })
     })
 
     it('should not be able to query an old draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
         where: {
           title: {
@@ -1442,7 +1552,7 @@ describe('Versions', () => {
 
     it('should be able to query the newest draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
         where: {
           title: {
@@ -1456,7 +1566,7 @@ describe('Versions', () => {
 
     it("should not be able to query old drafts that don't match with draft=true", async () => {
       const draftFindResults = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
         where: {
           title: {
@@ -1469,19 +1579,20 @@ describe('Versions', () => {
     })
 
     it('should be able to query by id with draft=true', async () => {
+      await createPostWithVersions({ title: 'different document' })
       const allDocs = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
       })
 
-      expect(allDocs.docs.length).toBeGreaterThan(1)
+      expect(allDocs.docs).toHaveLength(2)
 
       const byID = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
         where: {
           id: {
-            equals: allDocs.docs[0].id,
+            equals: firstDraft.id,
           },
         },
       })
@@ -1490,8 +1601,9 @@ describe('Versions', () => {
     })
 
     it('should be able to query by id AND any other field with draft=true', async () => {
+      await createPostWithVersions({ title: 'title document 2' })
       const allDocs = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
         where: {
           title: {
@@ -1500,10 +1612,10 @@ describe('Versions', () => {
         },
       })
 
-      expect(allDocs.docs.length).toBeGreaterThan(1)
+      expect(allDocs.docs).toHaveLength(2)
 
       const results = await payload.find({
-        collection: 'draft-posts',
+        collection: draftCollectionSlug,
         draft: true,
         where: {
           and: [
@@ -1521,14 +1633,14 @@ describe('Versions', () => {
         },
       })
 
-      expect(results.docs).toHaveLength(allDocs.docs.length - 1)
+      expect(results.docs).toHaveLength(1)
     })
   })
 
   describe('Collections - GraphQL', () => {
     async function createAutoSavePostHelper({
-      title,
       description,
+      title,
     }: {
       description: string
       title: string
@@ -1656,8 +1768,8 @@ describe('Versions', () => {
     describe('Create', () => {
       it('should allow a new doc to be created with draft status', async () => {
         const autosavePost = await createAutoSavePostHelper({
-          title: 'Some other title 2',
           description: 'other autosave description 2',
+          title: 'Some other title 2',
         })
 
         expect(autosavePost._status).toStrictEqual('draft')
@@ -1670,13 +1782,24 @@ describe('Versions', () => {
 
       beforeAll(async () => {
         const post = await createAutoSavePostHelper({
-          title: collectionGraphQLOriginalTitle,
           description: 'local autosave description',
+          title: collectionGraphQLOriginalTitle,
         })
         localPostID = post.id
       })
 
+      afterAll(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
+      })
+
       it('should allow read of versions by version id', async () => {
+        await updateAutoSavePostHelper({
+          id: localPostID,
+          title: updatedTitle2,
+        })
         const latestVersion = await getLatestVersionByParentIDHelper({
           parentID: localPostID,
         })
@@ -1724,11 +1847,12 @@ describe('Versions', () => {
       let versionID: number | string
       beforeAll(async () => {
         const autosavePost = await createAutoSavePostHelper({
-          title: collectionGraphQLOriginalTitle,
           description: 'autosave description for restore',
+          title: collectionGraphQLOriginalTitle,
         })
         postID = autosavePost.id
       })
+
       beforeEach(async () => {
         // modify the post to create a new version
         // language=graphQL
@@ -1762,6 +1886,14 @@ describe('Versions', () => {
 
         versionID = data.versionsAutosavePosts.docs[0].id
       })
+
+      afterAll(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
+      })
+
       it('should allow a version to be restored', async () => {
         // Update it
         const update = `mutation {
@@ -2236,8 +2368,7 @@ describe('Versions', () => {
   describe('Globals - GraphQL', () => {
     let autosaveGlobalVersionID: number | string
 
-    beforeEach(async () => {
-      // language=graphql
+    async function createAndSetVersionID() {
       const update = `mutation {
         updateAutosaveGlobal(draft: true, data: {
           title: "${globalGraphQLOriginalTitle}"
@@ -2269,6 +2400,10 @@ describe('Versions', () => {
         .then((res) => res.json())
 
       autosaveGlobalVersionID = data.versionsAutosaveGlobal.docs[0].id
+    }
+
+    beforeEach(async () => {
+      await createAndSetVersionID()
     })
     describe('Read', () => {
       it('should allow read of versions by version id', async () => {
@@ -2396,6 +2531,11 @@ describe('Versions', () => {
       })
 
       expect(retrieved._status).toStrictEqual('published')
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
     })
 
     it('should restrict scheduled publish based on user', async () => {
@@ -2437,6 +2577,11 @@ describe('Versions', () => {
       })
 
       expect(retrieved._status).toStrictEqual('draft')
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
     })
 
     it('should allow collection scheduled unpublish', async () => {
@@ -2476,6 +2621,11 @@ describe('Versions', () => {
       })
 
       expect(retrieved._status).toStrictEqual('draft')
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
     })
 
     it('should delete scheduled jobs after a document is deleted', async () => {
@@ -2521,6 +2671,11 @@ describe('Versions', () => {
       })
 
       expect(docs[0]).toBeUndefined()
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
     })
 
     it('should delete scheduled jobs after a document is deleted by ID', async () => {
@@ -2564,6 +2719,11 @@ describe('Versions', () => {
       })
 
       expect(docs[0]).toBeUndefined()
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
     })
 
     it('should allow global scheduled publish', async () => {
@@ -2668,7 +2828,7 @@ describe('Versions', () => {
       let draftDoc
       let event
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         draftDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
@@ -2676,6 +2836,13 @@ describe('Versions', () => {
             description: 'hello',
             title: 'my doc',
           },
+        })
+      })
+
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: ['payload-jobs', draftCollectionSlug],
+          payload,
         })
       })
 
@@ -2708,10 +2875,6 @@ describe('Versions', () => {
             },
           })
         ).docs
-        await payload.delete({
-          collection: 'payload-jobs',
-          where: {},
-        })
         expect(event).toBeDefined()
       })
 
@@ -2764,11 +2927,12 @@ describe('Versions', () => {
           })
         ).docs
 
-        await payload.delete({
-          collection: 'payload-jobs',
-          where: {},
-        })
         expect(event).toBeUndefined()
+
+        await cleanupDocuments({
+          collectionSlugs: ['payload-jobs', draftCollectionSlug],
+          payload,
+        })
       })
     })
   })
@@ -2779,9 +2943,9 @@ describe('Versions', () => {
 
     describe('Collections', () => {
       beforeEach(async () => {
-        await payload.delete({
-          collection,
-          where: {},
+        await cleanupDocuments({
+          collectionSlugs: [collection],
+          payload,
         })
       })
 
@@ -3132,6 +3296,22 @@ describe('Versions', () => {
     })
 
     describe('Globals', () => {
+      beforeEach(async () => {
+        // Clear global data by resetting to empty values
+        await payload.db.updateGlobal({
+          slug: global,
+          data: {
+            title: {},
+            content: {},
+          },
+        })
+
+        // Delete all versions for the global
+        await payload.db.deleteVersions({
+          globalSlug: global,
+          where: {},
+        })
+      })
       it('should save correct global data when publishing individual locale', async () => {
         // publish german
         await payload.updateGlobal({
