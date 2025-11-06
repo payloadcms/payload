@@ -296,6 +296,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - fields__collections__UploadPoly
+          - fields__collections__UploadMultiPoly
           - group-by
           - folders
           - hooks

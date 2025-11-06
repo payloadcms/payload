@@ -205,6 +205,20 @@ export default buildConfigWithDefaults(
             type: 'text',
           },
           {
+            name: 'info',
+            type: 'group',
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+              },
+              {
+                name: 'description',
+                type: 'textarea',
+              },
+            ],
+          },
+          {
             name: 'userRestrictedDocs',
             type: 'relationship',
             hasMany: true,
