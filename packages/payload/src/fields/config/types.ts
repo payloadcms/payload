@@ -201,7 +201,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: TData
   /** The sibling data of the document before changes being applied, only in `beforeChange`, `beforeValidate`, `beforeDuplicate` and `afterChange` field hooks. */
-  previousSiblingDoc?: TData
+  previousSiblingDoc?: TSiblingData
   /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
