@@ -338,7 +338,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           const fileField = form.formState?.file
           const file = fileField?.value as File | undefined
 
-          if (!file || !file.name || file.name === '') {
+          if (!file || !file.name) {
             // Add client-side validation error for missing filename
             currentForms[i] = {
               errorCount: 1,
