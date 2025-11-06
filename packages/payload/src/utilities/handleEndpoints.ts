@@ -77,7 +77,7 @@ export const handleEndpoints = async ({
 
   // This can be used against GET request search params size limit.
   // Instead you can do POST request with a text body as search params.
-  // We use this interally for relationships querying on the frontend
+  // We use this internally for relationships querying on the frontend
   // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
@@ -86,6 +86,7 @@ export const handleEndpoints = async ({
   ) {
     let url = request.url
     let data: any = undefined
+
     if (request.headers.get('Content-Type') === 'application/x-www-form-urlencoded') {
       const search = await request.text()
       url = `${request.url}?${search}`
