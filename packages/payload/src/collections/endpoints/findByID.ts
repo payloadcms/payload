@@ -22,7 +22,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
     data,
     depth,
     draft,
-    flattenLocales,
+    flattenLocales: flattenLocales ?? false,
     joins,
     populate,
     req,
