@@ -15,7 +15,7 @@ They're most helpful when you have multiple tasks in a row, and you want to conf
 
 If a task within a workflow fails, the Workflow will automatically "pick back up" on the task where it failed and **not re-execute any prior tasks that have already been executed**.
 
-### Why Use Workflows?
+### Why use Workflows?
 
 **Single Task vs Workflow:**
 
@@ -175,7 +175,7 @@ export default buildConfig({
 })
 ```
 
-### Understanding Workflow Failure & Recovery
+### Understanding Workflow failure & recovery
 
 One of the most powerful features of workflows is how they handle failures. Let's walk through what actually happens:
 
@@ -210,7 +210,7 @@ Second execution attempt (automatic retry):
   results immediately without re-executing their logic.
 </Banner>
 
-### Accessing Task Outputs
+### Accessing Task outputs
 
 Tasks can pass data to subsequent tasks through their outputs:
 
@@ -261,7 +261,7 @@ job.taskStatus = {
 }
 ```
 
-### Workflow Best Practices
+### Workflow best practices
 
 **Use descriptive task IDs**
 

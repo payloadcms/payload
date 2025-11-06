@@ -17,7 +17,7 @@ You might wonder: "Why not just send the email directly in the `afterChange` hoo
 
 Now let's build this example step by step.
 
-**Step 1: Define a Task**
+### Step 1: Define a Task
 
 First, create a task in your `payload.config.ts`:
 
@@ -64,7 +64,9 @@ export default buildConfig({
 })
 ```
 
-**Step 2: Queue the Job Trigger the job from a collection hook:**
+This defines a reusable task with a unique `slug`, an `inputSchema` that validates and types the input data, and a `handler` function containing the work to be performed. The `retries` option ensures the task will automatically retry up to 3 times if it fails. Learn more about [Tasks](/docs/jobs-queue/tasks).
+
+### Step 2: Queue the Job trigger
 
 ```ts
 {
@@ -89,7 +91,9 @@ export default buildConfig({
 }
 ```
 
-**Step 3: Run the Jobs Configure automatic job execution:**
+This uses [`payload.jobs.queue()`](/docs/jobs-queue/jobs#queuing-a-new-job) to create a job instance from the task definition. The job is added to the queue immediately but runs asynchronously, so the API response returns right away without waiting for the email to send. Jobs are stored in the database as documents in the `payload-jobs` collection.
+
+### Step 3: Run the Jobs
 
 ```ts
 export default buildConfig({
@@ -101,12 +105,12 @@ export default buildConfig({
     autoRun: [
       {
         cron: '*/5 * * * *', // Run every 5 minutes
-        limit: 50,
-        queue: 'default',
       },
     ],
   },
 })
 ```
+
+The [`autoRun`](/docs/jobs-queue/workflows#autorun) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/workflows#manual-run) with `payload.jobs.run()` or run jobs in [separate worker processes](/docs/jobs-queue/workflows#inline-vs-workers) for better scalability.
 
 That's it! Now when users sign up, a job is queued and will be processed within 5 minutes without blocking the API response.

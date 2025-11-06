@@ -272,6 +272,12 @@ await payload.jobs.queue({
 })
 ```
 
+<Banner type="warning">
+  It is not recommended to modify the `payload-jobs` collection's access control
+  directly, as that pattern may be deprecated in future versions. Instead—use
+  the `access` property in your Jobs Config to control job operations.
+</Banner>
+
 #### Cancelling Jobs
 
 Payload allows you to cancel jobs that are either queued or currently running. When cancelling a running job, the current task will finish executing, but no subsequent tasks will run. This happens because the job checks its cancellation status between tasks.
