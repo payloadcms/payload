@@ -285,7 +285,7 @@ ${JSON.stringify(errors, null, 2)}
 
     server.tool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
       updateResourceSchema.shape,
       async (params: Record<string, unknown>) => {
         const {

@@ -111,7 +111,7 @@ ${JSON.stringify(result, null, 2)}
 
     server.tool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
       convertedFields.shape,
       async (params: Record<string, unknown>) => {
         const data = JSON.stringify(params)

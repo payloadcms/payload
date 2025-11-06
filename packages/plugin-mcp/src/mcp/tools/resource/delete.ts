@@ -201,7 +201,7 @@ ${JSON.stringify(errors, null, 2)}
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
       `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
       toolSchemas.deleteResource.parameters.shape,
       async ({ id, depth, where }) => {
         return await tool(id, where, depth)

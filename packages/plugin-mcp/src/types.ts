@@ -14,7 +14,7 @@ export type PluginMCPServerConfig = {
         /**
          * Set the description of the collection. This is used by MCP clients to determine when to use the collecton as a resource.
          */
-        description: string
+        description?: string
         /**
          * Set the enabled capabilities of the collection. Admins can then allow or disallow the use of the capability by MCP clients.
          */
