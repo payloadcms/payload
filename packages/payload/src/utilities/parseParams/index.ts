@@ -1,11 +1,11 @@
-import type { JoinQuery, PopulateType, SelectType, Where } from '../types/index.js'
-import type { JoinParams } from './sanitizeJoinParams.js'
+import type { JoinQuery, PopulateType, SelectType, Where } from '../../types/index.js'
+import type { JoinParams } from '../sanitizeJoinParams.js'
 
-import { isNumber } from './isNumber.js'
-import { parseBooleanString } from './parseBooleanString.js'
-import { sanitizeJoinParams } from './sanitizeJoinParams.js'
-import { sanitizePopulateParam } from './sanitizePopulateParam.js'
-import { sanitizeSelectParam } from './sanitizeSelectParam.js'
+import { isNumber } from '../isNumber.js'
+import { parseBooleanString } from '../parseBooleanString.js'
+import { sanitizeJoinParams } from '../sanitizeJoinParams.js'
+import { sanitizePopulateParam } from '../sanitizePopulateParam.js'
+import { sanitizeSelectParam } from '../sanitizeSelectParam.js'
 
 type ParsedParams = {
   autosave?: boolean
@@ -50,6 +50,17 @@ type RawParams = {
   where?: Where
 }
 
+export const booleanParams = [
+  'autosave',
+  'draft',
+  'trash',
+  'overrideLock',
+  'pagination',
+  'flattenLocales',
+]
+
+export const numberParams = ['depth', 'limit', 'page']
+
 /**
  * Takes raw query parameters and parses them into the correct types that Payload expects.
  * Examples:
@@ -58,27 +69,16 @@ type RawParams = {
  *   c. `sort` provided as a comma-separated string is converted to an array of strings
  */
 export const parseParams = (params: RawParams): ParsedParams => {
-  const knownBooleanParams = [
-    'autosave',
-    'draft',
-    'trash',
-    'overrideLock',
-    'pagination',
-    'flattenLocales',
-  ]
-
-  const knownNumberParams = ['depth', 'limit', 'page']
-
   const parsedParams = (params || {}) as ParsedParams
 
   // iterate through known params to make this very fast
-  for (const key of knownBooleanParams) {
+  for (const key of booleanParams) {
     if (key in params) {
       parsedParams[key] = parseBooleanString(params[key] as boolean | string)
     }
   }
 
-  for (const key of knownNumberParams) {
+  for (const key of numberParams) {
     if (key in params) {
       if (isNumber(params[key])) {
         parsedParams[key] = Number(params[key])

@@ -4,7 +4,7 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { parseParams } from '../../utilities/parseParams.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { findVersionByIDOperation } from '../operations/findVersionByID.js'
 
 export const findVersionByIDHandler: PayloadHandler = async (req) => {

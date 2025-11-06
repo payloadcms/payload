@@ -4,7 +4,7 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { parseParams } from '../../utilities/parseParams.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { deleteByIDOperation } from '../operations/deleteByID.js'
 
 export const deleteByIDHandler: PayloadHandler = async (req) => {
