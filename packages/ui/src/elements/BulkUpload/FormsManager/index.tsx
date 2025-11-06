@@ -334,6 +334,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         try {
           const form = currentForms[i]
 
+          // Validate filename before upload
+          const fileField = form.formState?.file
+          const file = fileField?.value as File | undefined
+
+          if (!file || !file.name || file.name === '') {
+            // Add client-side validation error for missing filename
+            currentForms[i] = {
+              errorCount: 1,
+              formID: currentForms[i].formID,
+              formState: fieldReducer(currentForms[i].formState, {
+                type: 'ADD_SERVER_ERRORS',
+                errors: [
+                  {
+                    message: 'A file name is required.',
+                    path: 'file',
+                  },
+                ],
+              }),
+            }
+            continue // Skip upload for this form
+          }
+
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
@@ -405,7 +427,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           }
 
           if (req.status === 413 || req.status === 400) {
-            // file too large
+            // file too large or validation error
             currentForms[i] = {
               ...currentForms[i],
               errorCount: currentForms[i].errorCount + 1,
@@ -413,8 +435,21 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
             toast.error(nonFieldErrors[0]?.message)
           }
-        } catch (_) {
-          // swallow
+        } catch (error) {
+          // Handle unexpected errors (network errors, etc.)
+          currentForms[i] = {
+            errorCount: 1,
+            formID: currentForms[i].formID,
+            formState: fieldReducer(currentForms[i].formState, {
+              type: 'ADD_SERVER_ERRORS',
+              errors: [
+                {
+                  message: 'An unexpected error occurred.',
+                  path: 'file',
+                },
+              ],
+            }),
+          }
         }
       }
 
