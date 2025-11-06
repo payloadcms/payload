@@ -133,12 +133,9 @@ export function UploadInput(props: UploadInputProps) {
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for
   const collectionSlugsWithCreatePermission = useMemo(() => {
     if (Array.isArray(relationTo)) {
-      return relationTo.filter((relation) => {
-        if (permissions?.collections && permissions.collections?.[relation]?.create) {
-          return true
-        }
-        return false
-      })
+      return relationTo.filter(
+        (relation) => permissions?.collections && permissions.collections?.[relation]?.create,
+      )
     }
     return []
   }, [relationTo, permissions])
@@ -537,12 +534,9 @@ export function UploadInput(props: UploadInputProps) {
   useEffect(() => {
     async function loadInitialDocs() {
       if (value) {
-        const isPoly = Array.isArray(relationTo)
-        const collectionSlug = relationTo as string
-
         let itemsToLoad: ValueWithRelation[]
         if (
-          isPoly &&
+          Array.isArray(relationTo) &&
           ((typeof value === 'object' && 'relationTo' in value) ||
             (Array.isArray(value) &&
               value.length > 0 &&
@@ -555,15 +549,18 @@ export function UploadInput(props: UploadInputProps) {
             (v): v is ValueWithRelation => typeof v === 'object' && 'relationTo' in v,
           )
         } else {
-          // For single collection uploads, we need to wrap the IDs
-          const ids = Array.isArray(value) ? value : [value]
-          itemsToLoad = ids.map((id): ValueWithRelation => {
-            const idValue = typeof id === 'object' && 'value' in id ? id.value : id
-            return {
-              relationTo: collectionSlug,
-              value: idValue,
-            }
-          })
+          // This check is here to satisfy TypeScript that relationTo is a string
+          if (!Array.isArray(relationTo)) {
+            // For single collection uploads, we need to wrap the IDs
+            const ids = Array.isArray(value) ? value : [value]
+            itemsToLoad = ids.map((id): ValueWithRelation => {
+              const idValue = typeof id === 'object' && 'value' in id ? id.value : id
+              return {
+                relationTo,
+                value: idValue,
+              }
+            })
+          }
         }
 
         const loadedDocs = await populateDocs(itemsToLoad)
