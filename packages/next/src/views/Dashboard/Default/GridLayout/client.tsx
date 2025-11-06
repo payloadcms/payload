@@ -267,7 +267,14 @@ function SortableItem(props: {
   }
 
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes} {...props} style={mergedStyles}>
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      {...props}
+      className="widget"
+      style={mergedStyles}
+    >
       {props.children}
     </div>
   )
