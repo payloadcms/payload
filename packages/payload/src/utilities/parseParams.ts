@@ -74,7 +74,7 @@ export const parseParams = (params: RawParams): ParsedParams => {
   // iterate through known params to make this very fast
   for (const key of knownBooleanParams) {
     if (key in params) {
-      parsedParams[key] = parseBooleanString(params[key] as string)
+      parsedParams[key] = parseBooleanString(params[key] as boolean | string)
     }
   }
 
