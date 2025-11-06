@@ -1,0 +1,19 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": true
+    },
+    "target": "es2022",
+    "loose": false,
+    "minify": {
+      "compress": false,
+      "mangle": false
+    },
+    "keepClassNames": true
+  },
+  "module": {
+    "type": "es6"
+  }
+}

@@ -1,0 +1,56 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+build
+.next
+.cache
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Test
+coverage
+.nyc_output
+
+# Misc
+.husky
+docs
+examples
+test
+templates
+tools
+
+# GCP credentials
+*.json
+!package.json
+!tsconfig.json
+
+# Terraform
+terraform
+*.tf
+*.tfvars
+.terraform

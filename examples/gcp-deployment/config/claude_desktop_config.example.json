@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "payload-assets": {
+      "command": "node",
+      "args": ["/absolute/path/to/packages/mcp-server-assets/dist/index.js"],
+      "env": {
+        "GCS_BUCKET_NAME": "your-bucket-name",
+        "GCP_PROJECT_ID": "your-project-id",
+        "GCP_KEY_FILE": "/path/to/service-account-key.json",
+        "PAYLOAD_API_URL": "https://your-payload-instance.com",
+        "PAYLOAD_API_KEY": "your-api-key"
+      }
+    }
+  }
+}

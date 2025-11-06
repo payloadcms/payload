@@ -1,0 +1,37 @@
+{
+  "name": "payload-gcp-deployment-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Example Payload CMS deployment on Google Cloud Platform",
+  "scripts": {
+    "build": "next build",
+    "deploy:cloud-run": "cd scripts && ./deploy-cloud-run.sh",
+    "dev": "next dev",
+    "generate:types": "payload generate:types",
+    "payload": "payload",
+    "setup:gcp": "cd scripts && ./setup.sh",
+    "start": "next start",
+    "test:mcp": "cd scripts && ./test-mcp-server.sh"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.17.2",
+    "@payloadcms/db-postgres": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/storage-gcs": "workspace:*",
+    "next": "15.1.0",
+    "payload": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9.7.0"
+  }
+}

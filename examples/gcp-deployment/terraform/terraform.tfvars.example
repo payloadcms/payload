@@ -1,0 +1,25 @@
+project_id   = "your-gcp-project-id"
+region       = "us-central1"
+environment  = "dev"
+
+# GCS Configuration
+enable_versioning = true
+cors_origins      = ["https://yourdomain.com", "http://localhost:3000"]
+
+# Cloud SQL Configuration
+use_cloud_sql       = true
+db_tier             = "db-f1-micro"
+db_availability_type = "ZONAL"
+db_disk_size        = 10
+db_password         = "your-secure-password-here"
+
+# Cloud Run Configuration
+deploy_cloud_run    = true
+payload_image       = "gcr.io/your-project/payload-cms:latest"
+payload_secret      = "your-payload-secret-key"
+min_instances       = 0
+max_instances       = 10
+allow_public_access = true
+
+# CDN
+enable_cdn = true
