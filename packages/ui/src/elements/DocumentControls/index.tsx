@@ -45,6 +45,7 @@ export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly BeforeDocumentControls?: React.ReactNode
   readonly customComponents?: {
+    readonly LivePreviewToggler?: React.ReactNode
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
@@ -81,6 +82,7 @@ export const DocumentControls: React.FC<{
     slug,
     BeforeDocumentControls,
     customComponents: {
+      LivePreviewToggler: CustomLivePreviewToggler,
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
       SaveButton: CustomSaveButton,
@@ -262,7 +264,12 @@ export const DocumentControls: React.FC<{
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {BeforeDocumentControls}
-            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
+            {isLivePreviewEnabled && !isInDrawer && (
+              <RenderCustomComponent
+                CustomComponent={CustomLivePreviewToggler}
+                Fallback={<LivePreviewToggler />}
+              />
+            )}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
