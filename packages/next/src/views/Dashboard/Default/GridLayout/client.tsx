@@ -8,9 +8,10 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable'
 import { ChevronIcon, Popup, PopupList, XIcon } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
-import { customCollision } from './collisionDetection.js'
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
+import { customCollision } from './utils/collisionDetection.js'
+import { useDashboardSensors } from './utils/sensors.js'
 
 export type WidgetItem = {
   i: string
@@ -61,6 +62,7 @@ export function GridLayoutDashboardClient({
 
   const [dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
   const { setNodeRef } = useDroppable({ id: 'droppable' })
+  const sensors = useDashboardSensors()
 
   // Create custom collision detection that considers left/right halves
   const collisionDetection = useMemo(() => customCollision(currentLayout), [currentLayout])
@@ -92,6 +94,7 @@ export function GridLayoutDashboardClient({
             widget: currentLayout?.find((w) => w.item.i === event.active.id),
           })
         }}
+        sensors={sensors}
       >
         <SortableContext items={currentLayout?.map((w) => w.item.i)}>
           <div

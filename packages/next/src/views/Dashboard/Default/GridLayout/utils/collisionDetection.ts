@@ -2,7 +2,7 @@ import type { CollisionDetection } from '@dnd-kit/core'
 
 import { pointerWithin, rectIntersection } from '@dnd-kit/core'
 
-import type { WidgetInstanceClient } from './client.js'
+import type { WidgetInstanceClient } from '../client.js'
 
 /**
  * Check if a point is in the left half of a rectangle
