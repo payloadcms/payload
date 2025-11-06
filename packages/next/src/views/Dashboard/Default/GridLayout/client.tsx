@@ -2,18 +2,13 @@
 
 import type { Widget, WidgetWidth } from 'payload'
 
-import {
-  DndContext,
-  DragOverlay,
-  pointerWithin,
-  rectIntersection,
-  useDroppable,
-} from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable } from '@dnd-kit/sortable'
 import { ChevronIcon, Popup, PopupList, XIcon } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
+import { customCollision } from './collisionDetection.js'
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 
@@ -67,6 +62,9 @@ export function GridLayoutDashboardClient({
   const [dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
   const { setNodeRef } = useDroppable({ id: 'droppable' })
 
+  // Create custom collision detection that considers left/right halves
+  const collisionDetection = useMemo(() => customCollision(currentLayout), [currentLayout])
+
   return (
     <div>
       <DndContext
@@ -77,23 +75,7 @@ export function GridLayoutDashboardClient({
             y: 0.2, // Allow vertical scroll at 20% from edge
           },
         }}
-        // `pointerWithin` is the collision detector made precisely for
-        // cases like ours, where dragOverlay has a scale(0.25) and we use
-        // snapCenterToCursor. The documentation recommends using it with
-        // `rectIntersection` as a fallback for a11y reasons. See:
-        // https://docs.dndkit.com/api-documentation/context-provider/collision-detection-algorithms#composition-of-existing-algorithms
-        collisionDetection={(args) => {
-          // First, let's see if there are any collisions with the pointer
-          const pointerCollisions = pointerWithin(args)
-
-          // Collision detection algorithms return an array of collisions
-          if (pointerCollisions.length > 0) {
-            return pointerCollisions
-          }
-
-          // If there are no collisions with the pointer, return rectangle intersections
-          return rectIntersection(args)
-        }}
+        collisionDetection={collisionDetection}
         id="sortable"
         onDragEnd={(event) => {
           const moveFromIndex = currentLayout?.findIndex((w) => w.item.i === event.active.id)
