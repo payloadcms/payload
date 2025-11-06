@@ -131,6 +131,34 @@ export const createAPIKeysCollection = (
     }
   })
 
+  const customResourceFields =
+    pluginOptions.mcp?.resources?.map((resource) => {
+      const camelCasedName = toCamelCase(resource.name)
+      return {
+        name: camelCasedName,
+        type: 'checkbox' as const,
+        admin: {
+          description: resource.description,
+        },
+        defaultValue: true,
+        label: camelCasedName,
+      }
+    }) || []
+
+  const customPromptFields =
+    pluginOptions.mcp?.prompts?.map((prompt) => {
+      const camelCasedName = toCamelCase(prompt.name)
+      return {
+        name: camelCasedName,
+        type: 'checkbox' as const,
+        admin: {
+          description: prompt.description,
+        },
+        defaultValue: true,
+        label: camelCasedName,
+      }
+    }) || []
+
   const userCollection = pluginOptions.userCollection
     ? typeof pluginOptions.userCollection === 'string'
       ? pluginOptions.userCollection
@@ -183,12 +211,53 @@ export const createAPIKeysCollection = (
               },
               fields: [
                 {
-                  name: 'custom',
+                  name: 'payload-mcp-tool',
                   type: 'group' as const,
                   fields: customToolsFields,
+                  label: ' ',
                 },
               ],
-              label: 'Custom Tools',
+              label: 'Tools',
+            },
+          ]
+        : []),
+
+      ...(pluginOptions.mcp?.resources && pluginOptions.mcp?.resources.length > 0
+        ? [
+            {
+              type: 'collapsible' as const,
+              admin: {
+                position: 'sidebar' as const,
+              },
+              fields: [
+                {
+                  name: 'payload-mcp-resource',
+                  type: 'group' as const,
+                  fields: customResourceFields,
+                  label: ' ',
+                },
+              ],
+              label: 'Resources',
+            },
+          ]
+        : []),
+
+      ...(pluginOptions.mcp?.prompts && pluginOptions.mcp?.prompts.length > 0
+        ? [
+            {
+              type: 'collapsible' as const,
+              admin: {
+                position: 'sidebar' as const,
+              },
+              fields: [
+                {
+                  name: 'payload-mcp-prompt',
+                  type: 'group' as const,
+                  fields: customPromptFields,
+                  label: ' ',
+                },
+              ],
+              label: 'Prompts',
             },
           ]
         : []),

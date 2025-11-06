@@ -279,11 +279,27 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
-  custom?: {
+  'payload-mcp-tool'?: {
     /**
      * Rolls a virtual dice with a specified number of sides
      */
     diceRoll?: boolean | null;
+  };
+  'payload-mcp-resource'?: {
+    /**
+     * Data is a resource that contains special data.
+     */
+    data?: boolean | null;
+    /**
+     * Data is a resource that contains special data.
+     */
+    dataByID?: boolean | null;
+  };
+  'payload-mcp-prompt'?: {
+    /**
+     * Creates a prompt to process a message
+     */
+    echo?: boolean | null;
   };
   collections?: {
     /**
@@ -552,10 +568,21 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         update?: T;
       };
-  custom?:
+  'payload-mcp-tool'?:
     | T
     | {
         diceRoll?: T;
+      };
+  'payload-mcp-resource'?:
+    | T
+    | {
+        data?: T;
+        dataByID?: T;
+      };
+  'payload-mcp-prompt'?:
+    | T
+    | {
+        echo?: T;
       };
   collections?:
     | T

@@ -290,12 +290,14 @@ export type MCPAccessSettings = {
     find?: boolean
     update?: boolean
   }
-  custom?: Record<string, boolean>
   jobs?: {
     create?: boolean
     run?: boolean
     update?: boolean
   }
+  'payload-mcp-prompt'?: Record<string, boolean>
+  'payload-mcp-resource'?: Record<string, boolean>
+  'payload-mcp-tool'?: Record<string, boolean>
 } & Record<string, unknown>
 
 export type FieldDefinition = {

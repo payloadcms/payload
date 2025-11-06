@@ -194,7 +194,7 @@ export const getMCPHandler = (
         // Custom tools
         customMCPTools.forEach((tool) => {
           const camelCasedToolName = toCamelCase(tool.name)
-          const isToolEnabled = mcpAccessSettings.custom?.[camelCasedToolName] ?? true
+          const isToolEnabled = mcpAccessSettings['payload-mcp-tool']?.[camelCasedToolName] ?? true
 
           registerTool(
             isToolEnabled,
@@ -207,36 +207,52 @@ export const getMCPHandler = (
 
         // Custom prompts
         customMCPPrompts.forEach((prompt) => {
-          server.registerPrompt(
-            prompt.name,
-            {
-              argsSchema: prompt.argsSchema,
-              description: prompt.description,
-              title: prompt.title,
-            },
-            prompt.handler,
-          )
-          if (useVerboseLogs) {
-            payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
+          const camelCasedPromptName = toCamelCase(prompt.name)
+          const isPromptEnabled =
+            mcpAccessSettings['payload-mcp-prompt']?.[camelCasedPromptName] ?? true
+
+          if (isPromptEnabled) {
+            server.registerPrompt(
+              prompt.name,
+              {
+                argsSchema: prompt.argsSchema,
+                description: prompt.description,
+                title: prompt.title,
+              },
+              prompt.handler,
+            )
+            if (useVerboseLogs) {
+              payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
+            }
+          } else if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ⏭️ Prompt: ${prompt.title} Skipped.`)
           }
         })
 
         // Custom resources
         customMCPResources.forEach((resource) => {
-          server.registerResource(
-            resource.name,
-            // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
-            resource.uri,
-            {
-              description: resource.description,
-              mimeType: resource.mimeType,
-              title: resource.title,
-            },
-            resource.handler,
-          )
+          const camelCasedResourceName = toCamelCase(resource.name)
+          const isResourceEnabled =
+            mcpAccessSettings['payload-mcp-resource']?.[camelCasedResourceName] ?? true
 
-          if (useVerboseLogs) {
-            payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
+          if (isResourceEnabled) {
+            server.registerResource(
+              resource.name,
+              // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
+              resource.uri,
+              {
+                description: resource.description,
+                mimeType: resource.mimeType,
+                title: resource.title,
+              },
+              resource.handler,
+            )
+
+            if (useVerboseLogs) {
+              payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
+            }
+          } else if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ⏭️ Resource: ${resource.title} Skipped.`)
           }
         })
 
