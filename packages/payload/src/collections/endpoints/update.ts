@@ -21,7 +21,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     depth,
     draft,
     limit,
-    overrideLock,
+    overrideLock: overrideLock ?? false,
     populate,
     req,
     select,
