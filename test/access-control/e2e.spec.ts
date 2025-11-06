@@ -1317,6 +1317,223 @@ describe('Access Control', () => {
       })
     })
 
+    describe('virtual fields', () => {
+      test('should show virtual field in filter dropdown when collection has field with access control', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field should be visible in the filter dropdown
+        const virtualFieldOption = initialField.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Field Name',
+        })
+        await expect(virtualFieldOption).toBeVisible()
+      })
+
+      test('should show virtual field in groupBy dropdown when collection has field with access control', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field should be visible in the groupBy dropdown
+        const virtualFieldOption = field.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Field Name',
+        })
+        await expect(virtualFieldOption).toBeVisible()
+      })
+
+      test('should show nested fields within virtual group field in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Nested fields within the virtual group should be visible
+        const virtualGroupTitleOption = initialField.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Title',
+        })
+        await expect(virtualGroupTitleOption).toBeVisible()
+
+        const virtualGroupDescriptionOption = initialField.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Description',
+        })
+        await expect(virtualGroupDescriptionOption).toBeVisible()
+      })
+
+      test('should show nested fields within virtual group field in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Nested fields within the virtual group should be visible
+        const virtualGroupTitleOption = field.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Title',
+        })
+        await expect(virtualGroupTitleOption).toBeVisible()
+
+        const virtualGroupDescriptionOption = field.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Description',
+        })
+        await expect(virtualGroupDescriptionOption).toBeVisible()
+      })
+
+      test('should show virtual field nested inside group in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field nested inside contactInfo group should be visible
+        const nestedVirtualFieldOption = initialField.locator('.rs__option', {
+          hasText: 'Contact Info > Virtual Contact Name',
+        })
+        await expect(nestedVirtualFieldOption).toBeVisible()
+      })
+
+      test('should show virtual field nested inside group in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field nested inside contactInfo group should be visible
+        const nestedVirtualFieldOption = field.locator('.rs__option', {
+          hasText: 'Contact Info > Virtual Contact Name',
+        })
+        await expect(nestedVirtualFieldOption).toBeVisible()
+      })
+
+      test('should hide top-level virtual field with read: false in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
+        await expect(
+          initialField.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+        ).toBeHidden()
+      })
+
+      test('should hide top-level virtual field with read: false in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
+        await expect(
+          field.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+        ).toBeHidden()
+      })
+
+      test('should hide nested virtual field with read: false in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field nested in contactInfo should be hidden
+        await expect(
+          initialField.locator('.rs__option', {
+            hasText: 'Contact Info > Restricted Virtual Contact Info',
+          }),
+        ).toBeHidden()
+      })
+
+      test('should hide nested virtual field with read: false in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field nested in contactInfo should be hidden
+        await expect(
+          field.locator('.rs__option', {
+            hasText: 'Contact Info > Restricted Virtual Contact Info',
+          }),
+        ).toBeHidden()
+      })
+    })
+
     describe('default list view columns', () => {
       test('should not render column for top-level field with read: false by default', async () => {
         await page.goto(readRestrictedUrl.list)

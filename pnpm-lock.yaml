@@ -40,8 +40,8 @@ importers:
         specifier: workspace:*
         version: link:packages/live-preview-react
       '@playwright/test':
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       '@sentry/nextjs':
         specifier: ^8.33.1
         version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.0.1(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.93.3))(react@19.2.0)(webpack@5.102.1(@swc/core@1.11.29))
@@ -148,11 +148,11 @@ importers:
         specifier: 8.16.3
         version: 8.16.3
       playwright:
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       playwright-core:
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -1869,8 +1869,8 @@ importers:
         version: 0.34.2
     devDependencies:
       '@playwright/test':
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       '@testing-library/react':
         specifier: 16.3.0
         version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1896,11 +1896,11 @@ importers:
         specifier: 26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       playwright:
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       playwright-core:
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       prettier:
         specifier: ^3.4.2
         version: 3.5.3
@@ -2237,8 +2237,8 @@ importers:
         specifier: ^3.2.0
         version: 3.3.1
       '@playwright/test':
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       '@tailwindcss/typography':
         specifier: ^0.5.13
         version: 0.5.19(tailwindcss@3.4.18(tsx@4.20.6)(yaml@2.8.1))
@@ -2276,11 +2276,11 @@ importers:
         specifier: 26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       playwright:
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       playwright-core:
-        specifier: 1.54.1
-        version: 1.54.1
+        specifier: 1.56.1
+        version: 1.56.1
       postcss:
         specifier: ^8.4.38
         version: 8.5.6
@@ -5971,8 +5971,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@playwright/test@1.54.1':
-    resolution: {integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==}
+  '@playwright/test@1.56.1':
+    resolution: {integrity: sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -9455,9 +9455,9 @@ packages:
       vue-eslint-parser:
         optional: true
 
-  eslint-plugin-playwright@2.2.0:
-    resolution: {integrity: sha512-qSQpAw7RcSzE3zPp8FMGkthaCWovHZ/BsXtpmnGax9vQLIovlh1bsZHEa2+j2lv9DWhnyeLM/qZmp7ffQZfQvg==}
-    engines: {node: '>=16.6.0'}
+  eslint-plugin-playwright@2.3.0:
+    resolution: {integrity: sha512-7UeUuIb5SZrNkrUGb2F+iwHM97kn33/huajcVtAaQFCSMUYGNFvjzRPil5C0OIppslPfuOV68M/zsisXx+/ZvQ==}
+    engines: {node: '>=16.9.0'}
     peerDependencies:
       eslint: '>=8.40.0'
 
@@ -11940,8 +11940,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright-core@1.54.1:
-    resolution: {integrity: sha512-Nbjs2zjj0htNhzgiy5wu+3w09YetDx5pkrpI/kZotDlDUaYk0HVA5xrBVPdow4SAUIlhgKcJeJg4GRKW6xHusA==}
+  playwright-core@1.56.1:
+    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -11950,8 +11950,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.54.1:
-    resolution: {integrity: sha512-peWpSwIBmSLi6aW2auvrUtf2DqY16YYcCMO8rTVx486jKmDTJg7UAhyrraP98GB8BoPURZP8+nxO7TSd4cPr5g==}
+  playwright@1.56.1:
+    resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -13527,10 +13527,6 @@ packages:
 
   type-fest@0.16.0:
     resolution: {integrity: sha512-eaBzG6MxNzEn9kiwvtre90cXaNLkmadMWa1zQMs3XORCXNbsH/OewwbxC5ia9dCxIxnTAsSxXJaa/p5y8DlvJg==}
-    engines: {node: '>=10'}
-
-  type-fest@0.20.2:
-    resolution: {integrity: sha512-Ne+eE4r0/iWnpAxD852z3A+N0Bt5RN//NjJwRd2VFHEmrywxf5vsZlh4R6lixl6B+wz/8d+maTSAkN1FIkI3LQ==}
     engines: {node: '>=10'}
 
   type-fest@0.21.3:
@@ -18449,9 +18445,9 @@ snapshots:
     dependencies:
       playwright: 1.50.0
 
-  '@playwright/test@1.54.1':
+  '@playwright/test@1.56.1':
     dependencies:
-      playwright: 1.54.1
+      playwright: 1.56.1
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -25446,7 +25442,7 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 16.0.1
       '@next/swc-win32-x64-msvc': 16.0.1
       '@opentelemetry/api': 1.9.0
-      '@playwright/test': 1.54.1
+      '@playwright/test': 1.56.1
       babel-plugin-react-compiler: 19.1.0-rc.3
       sass: 1.77.4
       sharp: 0.34.4
@@ -25473,7 +25469,7 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 16.0.1
       '@next/swc-win32-x64-msvc': 16.0.1
       '@opentelemetry/api': 1.9.0
-      '@playwright/test': 1.54.1
+      '@playwright/test': 1.56.1
       babel-plugin-react-compiler: 19.1.0-rc.3
       sass: 1.93.3
       sharp: 0.34.4
@@ -25989,7 +25985,7 @@ snapshots:
 
   playwright-core@1.50.0: {}
 
-  playwright-core@1.54.1: {}
+  playwright-core@1.56.1: {}
 
   playwright@1.50.0:
     dependencies:
@@ -25997,9 +25993,9 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
-  playwright@1.54.1:
+  playwright@1.56.1:
     dependencies:
-      playwright-core: 1.54.1
+      playwright-core: 1.56.1
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -27723,8 +27719,6 @@ snapshots:
   type-detect@4.0.8: {}
 
   type-fest@0.16.0: {}
-
-  type-fest@0.20.2: {}
 
   type-fest@0.21.3: {}
 

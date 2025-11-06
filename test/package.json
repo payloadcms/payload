@@ -87,7 +87,7 @@
     "drizzle-kit": "0.31.5",
     "drizzle-orm": "0.44.6",
     "escape-html": "1.0.3",
-    "eslint-plugin-playwright": "2.2.0",
+    "eslint-plugin-playwright": "2.3.0",
     "execa": "5.1.1",
     "file-type": "19.3.0",
     "http-status": "2.1.0",
