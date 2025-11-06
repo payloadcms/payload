@@ -2,7 +2,7 @@ import type { CollisionDetection } from '@dnd-kit/core'
 
 import { pointerWithin, rectIntersection } from '@dnd-kit/core'
 
-import type { WidgetInstanceClient } from '../client.js'
+import type { DropTargetWidget, WidgetInstanceClient } from '../client.js'
 
 /**
  * Check if a point is in the left half of a rectangle
@@ -17,115 +17,67 @@ function isPointInLeftHalf(
 
 /**
  * Custom collision detection that checks if pointer is in left or right half
- * of a widget. If in right half, returns collision with next widget instead.
+ * of a widget. Falls back to rectIntersection for a11y reasons.
  */
-function createPointerWithinWithHalfDetection(
+export function customCollision(
   currentLayout: undefined | WidgetInstanceClient[],
+  setDropTargetWidget: (widget: DropTargetWidget) => void,
 ): CollisionDetection {
+  let lastTargetKey: null | string = null
+
   return (args) => {
-    if (!currentLayout) {
-      return pointerWithin(args)
-    }
+    const { droppableRects, pointerCoordinates } = args
 
-    const pointerCollisions = pointerWithin(args)
+    // Try pointer collision detection first
+    if (pointerCoordinates) {
+      const pointerCollisions = pointerWithin(args)
 
-    if (pointerCollisions.length === 0) {
-      return []
-    }
+      if (pointerCollisions.length > 0 && currentLayout) {
+        const firstCollision = pointerCollisions[0]
+        const widgetId = firstCollision.id as string
+        const rect = droppableRects.get(widgetId)
 
-    const { droppableContainers, droppableRects, pointerCoordinates } = args
+        if (rect) {
+          // Determine if pointer is in first half (before) or second half (after)
+          const position = isPointInLeftHalf(pointerCoordinates, rect) ? 'before' : 'after'
+          const targetKey = `${widgetId}-${position}`
 
-    if (!pointerCoordinates) {
-      return []
-    }
-
-    const modifiedCollisions = []
-
-    for (const collision of pointerCollisions) {
-      const { id } = collision
-      const rect = droppableRects.get(id)
-
-      if (!rect) {
-        modifiedCollisions.push(collision)
-        continue
-      }
-
-      // Check if pointer is in left or right half
-      if (isPointInLeftHalf(pointerCoordinates, rect)) {
-        // Left half: return collision with current widget
-        modifiedCollisions.push(collision)
-      } else {
-        // Right half: find next widget and return collision with it
-        const currentIndex = currentLayout.findIndex((w) => w.item.i === id)
-        const nextIndex = currentIndex + 1
-
-        if (nextIndex < currentLayout.length) {
-          const nextWidgetId = currentLayout[nextIndex].item.i
-          const nextContainer = droppableContainers.find((c) => c.id === nextWidgetId)
-
-          if (nextContainer) {
-            const nextRect = droppableRects.get(nextWidgetId)
-            if (nextRect) {
-              // Calculate distance to next widget's corners for sorting
-              const corners = [
-                { x: nextRect.left, y: nextRect.top },
-                { x: nextRect.right, y: nextRect.top },
-                { x: nextRect.left, y: nextRect.bottom },
-                { x: nextRect.right, y: nextRect.bottom },
-              ]
-              const distances = corners.reduce(
-                (accumulator, corner) =>
-                  accumulator +
-                  Math.sqrt(
-                    Math.pow(pointerCoordinates.x - corner.x, 2) +
-                      Math.pow(pointerCoordinates.y - corner.y, 2),
-                  ),
-                0,
-              )
-              const effectiveDistance = Number((distances / 4).toFixed(4))
-
-              modifiedCollisions.push({
-                id: nextWidgetId,
-                data: { droppableContainer: nextContainer, value: effectiveDistance },
-              })
+          // Only update if target changed
+          if (targetKey !== lastTargetKey) {
+            lastTargetKey = targetKey
+            const targetWidget = currentLayout.find((w) => w.item.i === widgetId)
+            if (targetWidget) {
+              setDropTargetWidget({ position, widget: targetWidget })
             }
           }
-        } else {
-          // No next widget, return collision with current widget
-          modifiedCollisions.push(collision)
+
+          return pointerCollisions
         }
       }
     }
 
-    // Sort collisions by distance value (ascending)
-    return modifiedCollisions.sort((a, b) => {
-      const aValue = a.data?.value ?? Infinity
-      const bValue = b.data?.value ?? Infinity
-      return aValue - bValue
-    })
-  }
-}
+    // Fallback to rectangle intersection
+    const rectCollisions = rectIntersection(args)
+    if (rectCollisions.length > 0 && currentLayout) {
+      const firstCollision = rectCollisions[0]
+      const widgetId = firstCollision.id as string
+      const targetKey = `${widgetId}-after`
 
-/**
- * Custom collision detection that checks if pointer is in left or right half
- * of a widget. If in right half, returns collision with next widget instead.
- * Falls back to rectIntersection for a11y reasons.
- */
-export function customCollision(
-  currentLayout: undefined | WidgetInstanceClient[],
-): CollisionDetection {
-  const pointerCollisionDetection = createPointerWithinWithHalfDetection(currentLayout)
-
-  return (args) => {
-    // First, use our custom pointer collision detection
-    const pointerCollisions = pointerCollisionDetection(args)
-
-    // Collision detection algorithms return an array of collisions
-    if (pointerCollisions.length > 0) {
-      return pointerCollisions
+      if (targetKey !== lastTargetKey) {
+        lastTargetKey = targetKey
+        const targetWidget = currentLayout.find((w) => w.item.i === widgetId)
+        if (targetWidget) {
+          setDropTargetWidget({ position: 'after', widget: targetWidget })
+        }
+      }
+    } else {
+      // Reset when there are no collisions
+      if (lastTargetKey !== null) {
+        lastTargetKey = null
+        setDropTargetWidget(null)
+      }
     }
 
-    // If there are no collisions with the pointer, return rectangle intersections
-    return rectIntersection(args)
+    return rectCollisions
   }
 }

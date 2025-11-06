@@ -25,7 +25,7 @@ export type WidgetInstanceClient = {
   item: WidgetItem
 }
 
-type DropTargetWidget = {
+export type DropTargetWidget = {
   position: 'after' | 'before'
   widget: WidgetInstanceClient
 } | null
@@ -65,7 +65,11 @@ export function GridLayoutDashboardClient({
   const sensors = useDashboardSensors()
 
   // Create custom collision detection that considers left/right halves
-  const collisionDetection = useMemo(() => customCollision(currentLayout), [currentLayout])
+  // Note: setDropTargetWidget is stable, so we don't need it in dependencies
+  const collisionDetection = useMemo(
+    () => customCollision(currentLayout, setDropTargetWidget),
+    [currentLayout, setDropTargetWidget],
+  )
 
   return (
     <div>
@@ -87,12 +91,6 @@ export function GridLayoutDashboardClient({
           }
           moveWidget({ moveFromIndex, moveToIndex })
           setDropTargetWidget(null)
-        }}
-        onDragOver={(event) => {
-          setDropTargetWidget({
-            position: 'after',
-            widget: currentLayout?.find((w) => w.item.i === event.active.id),
-          })
         }}
         sensors={sensors}
       >
@@ -255,16 +253,18 @@ function SortableItem(props: {
   id: string
   style?: React.CSSProperties
 }) {
-  const { attributes, isDragging, isOver, listeners, setNodeRef } = useSortable({
+  const { attributes, isDragging, listeners, setNodeRef } = useSortable({
     id: props.id,
     disabled: props.disabled,
   })
 
-  const mergedStyles = {
+  const mergedStyles: React.CSSProperties = {
     ...props.style,
-    boxShadow: isOver ? '-2px 0 0 0 #3B82F6' : 'none',
     opacity: isDragging ? 0.3 : 1,
+    position: 'relative',
   }
+
+  const showIndicator = props.dropTargetWidget !== null
 
   return (
     <div
@@ -276,6 +276,36 @@ function SortableItem(props: {
       style={mergedStyles}
     >
       {props.children}
+      {showIndicator && props.dropTargetWidget?.position === 'before' && (
+        <div
+          className="widget-drop-indicator"
+          style={{
+            position: 'absolute',
+            left: '-0.5rem',
+            top: 0,
+            bottom: 0,
+            width: '4px',
+            backgroundColor: '#3B82F6',
+            pointerEvents: 'none',
+            zIndex: 1000,
+          }}
+        />
+      )}
+      {showIndicator && props.dropTargetWidget?.position === 'after' && (
+        <div
+          className="widget-drop-indicator"
+          style={{
+            position: 'absolute',
+            right: '-0.5rem',
+            top: 0,
+            bottom: 0,
+            width: '4px',
+            backgroundColor: '#3B82F6',
+            pointerEvents: 'none',
+            zIndex: 1000,
+          }}
+        />
+      )}
     </div>
   )
 }
