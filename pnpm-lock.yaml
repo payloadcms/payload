@@ -1844,7 +1844,7 @@ importers:
         version: 16.9.0
       next:
         specifier: 15.4.4
-        version: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
+        version: 15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -1986,7 +1986,7 @@ importers:
         version: 8.6.0(react@19.1.1)
       geist:
         specifier: ^1.3.0
-        version: 1.4.2(next@15.5.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4))
+        version: 1.4.2(next@15.5.4(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4))
       graphql:
         specifier: ^16.8.1
         version: 16.9.0
@@ -1998,7 +1998,7 @@ importers:
         version: 0.477.0(react@19.1.1)
       next:
         specifier: ^15.5.4
-        version: 15.5.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
+        version: 15.5.4(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -2202,8 +2202,8 @@ importers:
         specifier: ^4.2.3
         version: 4.2.3(next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4))
       payload:
-        specifier: workspace:*
-        version: link:../../packages/payload
+        specifier: 3.61.1
+        version: 3.61.1(bufferutil@4.0.8)(graphql@16.9.0)(typescript@5.7.3)(utf-8-validate@6.0.5)
       prism-react-renderer:
         specifier: ^2.3.1
         version: 2.4.1(react@19.1.1)
@@ -6170,6 +6170,9 @@ packages:
     resolution: {integrity: sha512-LT9eOPPUqfZscQRd5mc08RBeDWOQf+dnOrKnanMallTGPe6g7+rcAlFTA8SWoJbcD45PV8yArFtCmSQSpzHZmg==}
     cpu: [x64]
     os: [win32]
+
+  '@payloadcms/translations@3.61.1':
+    resolution: {integrity: sha512-pLx2+WMgzIaKZ8+6tdHIHFcKdXZMyzvKj5AxzZygtt9OZWK7tVX7Q7d08/ineeiuEdt4V1kyf0FXHN9OY1Alsg==}
 
   '@petamoriken/float16@3.9.2':
     resolution: {integrity: sha512-VgffxawQde93xKxT3qap3OH+meZf7VaSB5Sqd4Rqc+FP5alWbpOyan/7tRbOAvynjpG3GpdtAuGU/NdhQpmrog==}
@@ -12531,6 +12534,13 @@ packages:
   pathval@2.0.0:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
+
+  payload@3.61.1:
+    resolution: {integrity: sha512-S6zTeSlH3KduGvbLu8hCLzoleA8fGuB5XlriilpvQeo4vHBqDiNUzJIV1RMckI8qhu7K6biQhOv6QMKq7ciBZg==}
+    engines: {node: ^18.20.2 || >=20.9.0}
+    hasBin: true
+    peerDependencies:
+      graphql: ^16.8.1
 
   peek-readable@5.3.1:
     resolution: {integrity: sha512-GVlENSDW6KHaXcd9zkZltB7tCLosKB/4Hg0fqBJkAoBgYG2Tn1xtMgXtSUuMU9AK/gCm/tTdT8mgAeF4YNeeqw==}
@@ -19712,6 +19722,10 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@5.3.0':
     optional: true
 
+  '@payloadcms/translations@3.61.1':
+    dependencies:
+      date-fns: 4.1.0
+
   '@petamoriken/float16@3.9.2':
     optional: true
 
@@ -25314,9 +25328,9 @@ snapshots:
     dependencies:
       next: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
 
-  geist@1.4.2(next@15.5.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)):
+  geist@1.4.2(next@15.5.4(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)):
     dependencies:
-      next: 15.5.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
+      next: 15.5.4(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
 
   gel@2.0.1:
     dependencies:
@@ -27314,6 +27328,32 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+  next@15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4):
+    dependencies:
+      '@next/env': 15.4.4
+      '@swc/helpers': 0.5.15
+      caniuse-lite: 1.0.30001720
+      postcss: 8.4.31
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+      styled-jsx: 5.1.6(@babel/core@7.27.4)(babel-plugin-macros@3.1.0)(react@19.1.1)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 15.4.4
+      '@next/swc-darwin-x64': 15.4.4
+      '@next/swc-linux-arm64-gnu': 15.4.4
+      '@next/swc-linux-arm64-musl': 15.4.4
+      '@next/swc-linux-x64-gnu': 15.4.4
+      '@next/swc-linux-x64-musl': 15.4.4
+      '@next/swc-win32-arm64-msvc': 15.4.4
+      '@next/swc-win32-x64-msvc': 15.4.4
+      '@opentelemetry/api': 1.9.0
+      '@playwright/test': 1.54.1
+      sass: 1.77.4
+      sharp: 0.34.3
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
   next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4):
     dependencies:
       '@next/env': 15.4.4
@@ -27341,7 +27381,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.5.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4):
+  next@15.5.4(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4):
     dependencies:
       '@next/env': 15.5.4
       '@swc/helpers': 0.5.15
@@ -27715,6 +27755,45 @@ snapshots:
   pathe@2.0.3: {}
 
   pathval@2.0.0: {}
+
+  payload@3.61.1(bufferutil@4.0.8)(graphql@16.9.0)(typescript@5.7.3)(utf-8-validate@6.0.5):
+    dependencies:
+      '@next/env': 15.4.4
+      '@payloadcms/translations': 3.61.1
+      '@types/busboy': 1.5.4
+      ajv: 8.17.1
+      bson-objectid: 2.0.4
+      busboy: 1.6.0
+      ci-info: 4.1.0
+      console-table-printer: 2.12.1
+      croner: 9.1.0
+      dataloader: 2.2.3
+      deepmerge: 4.3.1
+      file-type: 19.3.0
+      get-tsconfig: 4.8.1
+      graphql: 16.9.0
+      http-status: 2.1.0
+      image-size: 2.0.2
+      ipaddr.js: 2.2.0
+      jose: 5.9.6
+      json-schema-to-typescript: 15.0.3
+      minimist: 1.2.8
+      path-to-regexp: 6.3.0
+      pino: 9.14.0
+      pino-pretty: 13.1.2
+      pluralize: 8.0.0
+      qs-esm: 7.0.2
+      sanitize-filename: 1.6.3
+      scmp: 2.1.0
+      ts-essentials: 10.0.3(typescript@5.7.3)
+      tsx: 4.20.3
+      undici: 7.10.0
+      uuid: 10.0.0
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
 
   peek-readable@5.3.1: {}
 
