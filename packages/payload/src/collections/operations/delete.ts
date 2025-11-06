@@ -11,7 +11,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { deleteDocumentCache } from '../../cache/index.js'
+import { deleteCache } from '../../cache/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -226,7 +226,7 @@ export const deleteOperation = async <
         // Manage cache
         // /////////////////////////////////////
 
-        await deleteDocumentCache({
+        await deleteCache({
           id,
           collection: collectionConfig.slug,
           payload,

@@ -4,7 +4,19 @@ import type { CacheArgs, CachedDocument } from './types.js'
 
 import { formatCacheKey } from './formatKey.js'
 
-export const cacheDocument = async ({ collection, doc, expiresAt, global, payload }: CacheArgs) => {
+export { formatCacheKey }
+export { parseCacheKey } from './parseKey.js'
+
+/**
+ * Creates a cache entry for a document.
+ */
+export const createCache = async <T extends JsonObject>({
+  collection,
+  doc,
+  expiresAt,
+  global,
+  payload,
+}: CacheArgs<T>) => {
   const key = formatCacheKey({
     id: doc.id,
     collectionSlug: collection,
@@ -20,7 +32,10 @@ export const cacheDocument = async ({ collection, doc, expiresAt, global, payloa
   await payload.kv.set(key, cachedDocument)
 }
 
-export const getDocumentCache = async <T extends any>({
+/**
+ * Retrieves a cached document.
+ */
+export const getCache = async <T extends JsonObject>({
   id,
   collection,
   global,
@@ -53,7 +68,75 @@ export const getDocumentCache = async <T extends any>({
   return cache
 }
 
-export const deleteDocumentCache = async ({
+export const updateCache = async <T extends JsonObject>({
+  collection,
+  doc,
+  expiresAt,
+  global,
+  payload,
+}: CacheArgs<T>) => {
+  const cacheKey = formatCacheKey({
+    id: doc.id,
+    collectionSlug: collection,
+    globalSlug: global,
+  })
+
+  let existingCache
+
+  if (collection) {
+    existingCache = await getCache<JsonObject>({
+      id: doc.id,
+      collection,
+      payload,
+    })
+  } else if (global) {
+    existingCache = await getCache<JsonObject>({
+      global,
+      payload,
+    })
+  }
+
+  if (!existingCache) {
+    throw new Error('No existing cache to update')
+  }
+
+  const updatedCache: CachedDocument<JsonObject> = {
+    ...existingCache,
+    doc: {
+      ...existingCache.doc,
+      ...doc,
+    },
+    expiresAt,
+    updatedAt: new Date().toISOString(),
+  }
+
+  await payload.kv?.set(cacheKey, updatedCache)
+}
+
+/**
+ * Upserts a cached document (updates or creates).
+ */
+export const upsertCache = async <T extends JsonObject>({
+  collection,
+  doc,
+  expiresAt,
+  global,
+  payload,
+}: CacheArgs<T>) => {
+  try {
+    await updateCache<T>({ collection, doc, expiresAt, global, payload })
+    return
+  } catch (_err) {
+    // No existing cache, proceed to create
+  }
+
+  await createCache<T>({ collection, doc, expiresAt, global, payload })
+}
+
+/**
+ * Deletes a cached document.
+ */
+export const deleteCache = async ({
   id,
   collection,
   global,

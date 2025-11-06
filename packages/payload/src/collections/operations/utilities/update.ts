@@ -20,7 +20,7 @@ import type { SharedOperationArgs } from '../types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
-import { cacheDocument } from '../../../cache/index.js'
+import { createCache } from '../../../cache/index.js'
 import { combineQueries } from '../../../database/combineQueries.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -398,7 +398,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (cache) {
-    await cacheDocument({ collection: collectionConfig.slug, doc: result, payload })
+    await createCache({ collection: collectionConfig.slug, doc: result, payload })
   }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>

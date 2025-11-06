@@ -11,7 +11,7 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { getDocumentCache } from '../../cache/index.js'
+import { getCache } from '../../cache/index.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -115,7 +115,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       doc = args.data
     } else if (cache) {
       doc =
-        (await getDocumentCache({
+        (await getCache({
           global: slug,
           payload: req.payload,
         })?.then((r) => r?.doc)) || (await req.payload.db.findGlobal(findArgs))

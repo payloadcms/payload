@@ -20,8 +20,7 @@ import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
-import { formatCacheKey } from '../../cache/formatKey.js'
-import { cacheDocument } from '../../cache/index.js'
+import { createCache } from '../../cache/index.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -406,7 +405,7 @@ export const createOperation = async <
     // Manage cache
     // /////////////////////////////////////
 
-    await cacheDocument({ collection: collectionConfig.slug, doc: result, payload })
+    await createCache({ collection: collectionConfig.slug, doc: result, payload })
 
     // /////////////////////////////////////
     // Return results

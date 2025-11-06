@@ -17,7 +17,7 @@ import type {
 import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { getDocumentCache } from '../../cache/index.js'
+import { getCache } from '../../cache/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -186,7 +186,7 @@ export const findByIDOperation = async <
       result = args.data as DataFromCollectionSlug<TSlug>
     } else if (cache) {
       result =
-        (await getDocumentCache({
+        (await getCache({
           id,
           collection: collectionConfig.slug,
           payload: req.payload,
