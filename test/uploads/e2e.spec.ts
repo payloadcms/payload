@@ -142,7 +142,7 @@ describe('Uploads', () => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     page = await context.newPage()
 
-    const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
+    const { collectErrors, consoleErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
       ignoreCORS: true,
     })
 
@@ -534,8 +534,8 @@ describe('Uploads', () => {
       // save the document and expect an error
       await page.locator('button#action-save').click()
       await assertToastErrors({
-        page,
         errors: ['Audio'],
+        page,
       })
     })
 
@@ -1269,6 +1269,39 @@ describe('Uploads', () => {
       // should show add files dropzone view
       await expect(fieldBulkUploadDrawer.locator('.bulk-upload--add-files')).toBeVisible()
     })
+
+    test('should show error when filename is deleted before saving', async () => {
+      await page.goto(uploadsTwo.list)
+      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      // Upload multiple files
+      await page.setInputFiles('.dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      // Clear the filename of the first file
+      const filenameInput = page.locator('.file-field__filename').first()
+      await filenameInput.clear()
+
+      // Try to save
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show error count for the file without filename
+      const errorCount = page.locator('.file-selections .error-pill__count').first()
+      await expect(errorCount).toHaveText('1')
+
+      // Should show error toast for failed files
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Failed to save 1 files',
+      )
+
+      // The file with filename should be saved successfully
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+    })
   })
 
   describe('remote url fetching', () => {
@@ -1630,7 +1663,7 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
     await saveDocAndAssert(page)
     const imageID = page.url().split('/').pop()!
-    const { doc } = await client.findByID({ slug: mediaSlug, id: imageID, auth: true })
+    const { doc } = await client.findByID({ id: imageID, slug: mediaSlug, auth: true })
     const filename = doc.filename as string
     const filePath = path.resolve(dirname, 'media', filename)
     const before = statSync(filePath)
