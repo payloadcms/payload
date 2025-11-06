@@ -102,8 +102,8 @@ export const parseParams = (params: RawParams): ParsedParams => {
     parsedParams.sort = typeof params.sort === 'string' ? params.sort.split(',') : undefined
   }
 
-  if ('data' in params) {
-    parsedParams.data = JSON.parse(params.data || '')
+  if ('data' in params && typeof params.data === 'string' && params.data.length > 0) {
+    parsedParams.data = JSON.parse(params.data)
   }
 
   return parsedParams
