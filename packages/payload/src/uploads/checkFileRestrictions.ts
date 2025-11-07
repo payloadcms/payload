@@ -4,6 +4,7 @@ import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
+import { validatePDF } from '../utilities/validatePDF.js'
 import { detectSvgFromXml } from './detectSvgFromXml.js'
 
 /**
@@ -84,6 +85,13 @@ export const checkFileRestrictions = async ({
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
+
+    if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
+      const isValidPDF = validatePDF(file?.data)
+      if (!isValidPDF) {
+        errors.push('Invalid PDF file.')
+      }
+    }
 
     if (detected && !passesMimeTypeCheck) {
       errors.push(`Invalid MIME type: ${detected.mime}.`)
