@@ -310,6 +310,7 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
         right: position === 'after' ? -2 : 'auto',
         top: 0,
         bottom: 0,
+        borderRadius: '1000px',
         width: '4px',
         backgroundColor: isOver ? 'var(--theme-success-400)' : 'transparent',
         marginBottom: '10px',
