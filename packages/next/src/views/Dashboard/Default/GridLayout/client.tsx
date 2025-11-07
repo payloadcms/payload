@@ -247,7 +247,9 @@ function WidgetWidthDropdown({
                 }}
               >
                 <span className="widget-wrapper__size-btn-label">{option.width}</span>
-                <span className="widget-wrapper__size-btn-percentage">{option.percentage}%</span>
+                <span className="widget-wrapper__size-btn-percentage">
+                  {option.percentage.toFixed(0)}%
+                </span>
               </PopupList.Button>
             )
           })}
