@@ -41,6 +41,7 @@ type Args = {
    */
   fieldPromises: Promise<void>[]
   findMany: boolean
+  flattenLocales: AfterReadArgs<JsonObject>['flattenLocales']
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
@@ -61,7 +62,7 @@ type Args = {
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-} & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
+} & Pick<AfterReadArgs<JsonObject>, 'cache'>
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
@@ -73,6 +74,7 @@ type Args = {
 
 export const promise = async ({
   blockData,
+  cache,
   collection,
   context,
   currentDepth,
@@ -399,6 +401,7 @@ export const promise = async ({
     if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
       populationPromises.push(
         relationshipPopulationPromise({
+          cache,
           currentDepth,
           depth,
           draft,
@@ -433,6 +436,7 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           traverseFields({
             blockData,
+            cache,
             collection,
             context,
             currentDepth,
@@ -468,6 +472,7 @@ export const promise = async ({
             localeRows.forEach((row, rowIndex) => {
               traverseFields({
                 blockData,
+                cache,
                 collection,
                 context,
                 currentDepth,
@@ -529,6 +534,7 @@ export const promise = async ({
           if (block) {
             traverseFields({
               blockData: row,
+              cache,
               collection,
               context,
               currentDepth,
@@ -574,6 +580,7 @@ export const promise = async ({
               if (block) {
                 traverseFields({
                   blockData: row,
+                  cache,
                   collection,
                   context,
                   currentDepth,
@@ -617,6 +624,7 @@ export const promise = async ({
     case 'row': {
       traverseFields({
         blockData,
+        cache,
         collection,
         context,
         currentDepth,
@@ -661,6 +669,7 @@ export const promise = async ({
 
         traverseFields({
           blockData,
+          cache,
           collection,
           context,
           currentDepth,
@@ -692,6 +701,7 @@ export const promise = async ({
       } else {
         traverseFields({
           blockData,
+          cache,
           collection,
           context,
           currentDepth,
@@ -842,6 +852,7 @@ export const promise = async ({
 
       traverseFields({
         blockData,
+        cache,
         collection,
         context,
         currentDepth,
@@ -877,6 +888,7 @@ export const promise = async ({
     case 'tabs': {
       traverseFields({
         blockData,
+        cache,
         collection,
         context,
         currentDepth,

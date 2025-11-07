@@ -11,6 +11,7 @@ import type {
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -57,7 +58,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   sort?: Sort
   trash?: boolean
   where: Where
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 export const updateOperation = async <
   TSlug extends CollectionSlug,
@@ -93,6 +94,7 @@ export const updateOperation = async <
 
     const {
       autosave = false,
+      cache,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -240,10 +242,12 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
+
         const updatedDoc = await updateDocument({
           id,
           accessResults: accessResult,
           autosave,
+          cache,
           collectionConfig,
           config,
           data: deepCopyObjectSimple(data),

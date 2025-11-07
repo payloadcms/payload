@@ -1,5 +1,6 @@
-import type { PayloadRequest, PopulateType } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
+import type { AfterReadArgs } from './index.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 import { fieldHasMaxDepth, fieldShouldBeLocalized, fieldSupportsMany } from '../../config/types.js'
@@ -19,10 +20,11 @@ type PopulateArgs = {
   populateArg?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
-}
+} & Pick<AfterReadArgs<JsonObject>, 'cache'>
 
 // TODO: this function is mess, refactor logic
 const populate = async ({
+  cache,
   currentDepth,
   data,
   dataReference,
@@ -39,7 +41,9 @@ const populate = async ({
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference
+
   let relation
+
   if (field.type === 'join') {
     relation = Array.isArray(field.collection) ? data.relationTo : field.collection
   } else {
@@ -61,6 +65,7 @@ const populate = async ({
     }
 
     let relationshipValue
+
     const shouldPopulate = depth && currentDepth <= depth
 
     if (
@@ -75,6 +80,7 @@ const populate = async ({
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(
         createDataloaderCacheKey({
+          cache,
           collectionSlug: relatedCollection.config.slug,
           currentDepth: currentDepth + 1,
           depth,
@@ -97,6 +103,7 @@ const populate = async ({
       // ids are visible regardless of access controls
       relationshipValue = id
     }
+
     if (typeof index === 'number' && typeof key === 'string') {
       if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][key][index].value = relationshipValue
@@ -144,9 +151,10 @@ type PromiseArgs = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
-}
+} & Pick<AfterReadArgs<JsonObject>, 'cache'>
 
 export const relationshipPopulationPromise = async ({
+  cache,
   currentDepth,
   depth,
   draft,
@@ -176,6 +184,7 @@ export const relationshipPopulationPromise = async ({
           siblingDoc[field.name][localeKey].forEach((_relatedDoc: any, index: number) => {
             const rowPromise = async () => {
               await populate({
+                cache,
                 currentDepth,
                 data: siblingDoc[field.name][localeKey][index],
                 dataReference: resultingDoc,
@@ -207,6 +216,7 @@ export const relationshipPopulationPromise = async ({
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
+              cache,
               currentDepth,
               data:
                 !(field.type === 'join' && Array.isArray(field.collection)) && relatedDoc?.id
@@ -239,6 +249,7 @@ export const relationshipPopulationPromise = async ({
     Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
       const rowPromise = async () => {
         await populate({
+          cache,
           currentDepth,
           data: siblingDoc[field.name][localeKey],
           dataReference: resultingDoc,
@@ -260,6 +271,7 @@ export const relationshipPopulationPromise = async ({
     await Promise.all(rowPromises)
   } else if (siblingDoc[field.name]) {
     await populate({
+      cache,
       currentDepth,
       data: siblingDoc[field.name],
       dataReference: resultingDoc,

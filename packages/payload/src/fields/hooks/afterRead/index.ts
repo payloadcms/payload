@@ -7,6 +7,10 @@ import { getSelectMode } from '../../../utilities/getSelectMode.js'
 import { traverseFields } from './traverseFields.js'
 
 export type AfterReadArgs<T extends JsonObject> = {
+  /**
+   * When true, will populate relationships from the cache (if available) instead of making new database requests.
+   */
+  cache?: boolean
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth?: number
@@ -43,6 +47,7 @@ export type AfterReadArgs<T extends JsonObject> = {
 
 export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): Promise<T> {
   const {
+    cache,
     collection,
     context,
     currentDepth: incomingCurrentDepth,
@@ -68,6 +73,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     incomingDepth || incomingDepth === 0
       ? parseInt(String(incomingDepth), 10)
       : req.payload.config.defaultDepth
+
   if (depth > req.payload.config.maxDepth) {
     depth = req.payload.config.maxDepth
   }
@@ -75,6 +81,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
   const currentDepth = incomingCurrentDepth || 1
 
   traverseFields({
+    cache,
     collection,
     context,
     currentDepth,
@@ -109,6 +116,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
    * This is why we need to loop again to process the new field promises, until there are no more field promises left.
    */
   let iterations = 0
+
   while (fieldPromises.length > 0 || populationPromises.length > 0) {
     const currentFieldPromises = fieldPromises.splice(0, fieldPromises.length)
     const currentPopulationPromises = populationPromises.splice(0, populationPromises.length)

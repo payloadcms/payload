@@ -1,4 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
+import type { FindGlobalArgs } from '../../database/types.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -7,8 +8,10 @@ import type {
   Where,
 } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { getCache } from '../../cache/index.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -32,13 +35,15 @@ export type GlobalFindOneArgs = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: string
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<SharedOperationArgs, 'cache'>
 
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,
 ): Promise<T> => {
   const {
     slug,
+    cache,
     depth,
     draft: draftEnabled = false,
     flattenLocales,
@@ -90,15 +95,34 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc =
-      (args.data as any) ??
-      (await req.payload.db.findGlobal({
-        slug,
-        locale: locale!,
-        req,
-        select,
-        where: overrideAccess ? undefined : (accessResult as Where),
-      }))
+    let doc = undefined
+
+    const findArgs: FindGlobalArgs = {
+      slug,
+      locale: locale!,
+      req,
+      select,
+      where: overrideAccess ? undefined : (accessResult as Where),
+    }
+
+    /**
+     * There are three potential sources for the document data:
+     * 1. Direct data from args, if provided
+     * 2. Cached data in the KV store
+     * 3. The database
+     */
+    if (args.data) {
+      doc = args.data
+    } else if (cache) {
+      doc =
+        (await getCache({
+          global: slug,
+          payload: req.payload,
+        })?.then((r) => r?.doc)) || (await req.payload.db.findGlobal(findArgs))
+    } else {
+      doc = await req.payload.db.findGlobal(findArgs)
+    }
+
     if (!doc) {
       doc = {}
     }

@@ -15,6 +15,7 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -50,7 +51,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -87,6 +88,7 @@ export const updateByIDOperation = async <
     const {
       id,
       autosave = false,
+      cache,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -205,6 +207,7 @@ export const updateByIDOperation = async <
       id,
       accessResults,
       autosave,
+      cache,
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),

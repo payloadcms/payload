@@ -15,6 +15,7 @@ import type {
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type { SharedOperationArgs } from '../types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -117,7 +118,8 @@ export type Options<
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindByIDArgs, 'flattenLocales'>
+} & Pick<FindByIDArgs, 'flattenLocales'> &
+  Pick<SharedOperationArgs, 'cache'>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,
@@ -129,6 +131,7 @@ export async function findByIDLocal<
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
   const {
     id,
+    cache,
     collection: collectionSlug,
     currentDepth,
     data,
@@ -155,6 +158,7 @@ export async function findByIDLocal<
 
   return findByIDOperation<TSlug, TDisableErrors, TSelect>({
     id,
+    cache,
     collection,
     currentDepth,
     data,

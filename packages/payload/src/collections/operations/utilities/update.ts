@@ -16,9 +16,11 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from '../../config/types.js'
+import type { SharedOperationArgs } from '../types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
+import { createCache } from '../../../cache/index.js'
 import { combineQueries } from '../../../database/combineQueries.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -51,7 +53,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 /**
  * This function is used to update a document in the DB and return the result.
@@ -73,6 +75,7 @@ export const updateDocument = async <
   id,
   accessResults,
   autosave,
+  cache,
   collectionConfig,
   config,
   data,
@@ -291,6 +294,7 @@ export const updateDocument = async <
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
+
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
@@ -387,6 +391,14 @@ export const updateDocument = async <
           req,
         })) || result
     }
+  }
+
+  // /////////////////////////////////////
+  // Manage cache
+  // /////////////////////////////////////
+
+  if (cache) {
+    await createCache({ collection: collectionConfig.slug, doc: result, payload })
   }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>

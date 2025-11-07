@@ -14,11 +14,13 @@ import type {
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
+import type { SharedOperationArgs } from './types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import { createCache } from '../../cache/index.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -52,7 +54,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   select?: SelectType
   selectedLocales?: string[]
   showHiddenFields?: boolean
-}
+} & Pick<SharedOperationArgs, 'cache'>
 
 export const createOperation = async <
   TSlug extends CollectionSlug,
@@ -96,6 +98,7 @@ export const createOperation = async <
 
     const {
       autosave = false,
+      cache = false,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -397,6 +400,12 @@ export const createOperation = async <
     })
 
     await unlinkTempFiles({ collectionConfig, config, req })
+
+    // /////////////////////////////////////
+    // Manage cache
+    // /////////////////////////////////////
+
+    await createCache({ collection: collectionConfig.slug, doc: result, payload })
 
     // /////////////////////////////////////
     // Return results

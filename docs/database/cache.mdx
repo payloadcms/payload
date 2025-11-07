@@ -1,0 +1,18 @@
+---
+title: Cache
+label: Cache
+order: 80
+keywords: database, cache, kv store
+desc: Cache database query results in a key-value store.
+---
+
+Cache documents in the KV Store to improve read performance for frequently accessed data.
+
+To enable caching for database queries, pass `cache: true` as an argument to your operation:
+
+```ts
+const cachedDocs = await payload.find({
+  collection: 'posts',
+  cache: true,
+})
+```

@@ -223,6 +223,7 @@ export type FindOneArgs = {
 export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
+  cache?: boolean
   collection: CollectionSlug
   draftsEnabled?: boolean
   joins?: JoinQuery
