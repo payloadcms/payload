@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { allFieldTypesLocalizedSlug } from '../../shared.js'
+import { allFieldsLocalizedSlug } from '../../shared.js'
 
-export const AllFieldTypesLocalized: CollectionConfig = {
-  slug: allFieldTypesLocalizedSlug,
+export const AllFieldsLocalized: CollectionConfig = {
+  slug: allFieldsLocalizedSlug,
   fields: [
     // Simple localized fields
     {

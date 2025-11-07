@@ -25,7 +25,7 @@ import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { tabSlug } from './collections/Tab/index.js'
 import {
-  allFieldTypesLocalizedSlug,
+  allFieldsLocalizedSlug,
   defaultLocale,
   defaultLocale as englishLocale,
   englishTitle,
@@ -3447,7 +3447,7 @@ describe('Localization', () => {
   describe('Localized data shape', () => {
     beforeEach(async () => {
       await payload.delete({
-        collection: allFieldTypesLocalizedSlug,
+        collection: allFieldsLocalizedSlug,
         where: {
           id: {
             exists: true,
@@ -3457,7 +3457,7 @@ describe('Localization', () => {
     })
     it('should only nest the top level localized field values under locale keys', async () => {
       const doc = await payload.create({
-        collection: allFieldTypesLocalizedSlug,
+        collection: allFieldsLocalizedSlug,
         data: {
           deeplyNested: {
             innerGroup: {
@@ -3490,7 +3490,7 @@ describe('Localization', () => {
       })
 
       const allLocalesDoc = await payload.findByID({
-        collection: allFieldTypesLocalizedSlug,
+        collection: allFieldsLocalizedSlug,
         id: doc.id,
         locale: 'all',
       })
