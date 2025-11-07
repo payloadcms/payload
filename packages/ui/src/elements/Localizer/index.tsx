@@ -9,8 +9,8 @@ import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { LocalizerLabel } from './LocalizerLabel/index.js'
 import './index.scss'
+import { LocalizerLabel } from './LocalizerLabel/index.js'
 
 const baseClass = 'localizer'
 
