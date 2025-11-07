@@ -45,7 +45,6 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 
-const collection = localizedPostsSlug
 const global = 'global-text'
 let payload: Payload
 let restClient: NextRESTClient
@@ -68,14 +67,14 @@ describe('Localization', () => {
 
     beforeAll(async () => {
       post1 = await payload.create({
-        collection,
+        collection: localizedPostsSlug,
         data: {
           title: englishTitle,
         },
       })
 
       postWithLocalizedData = await payload.create({
-        collection,
+        collection: localizedPostsSlug,
         data: {
           title: englishTitle,
         },
@@ -83,7 +82,7 @@ describe('Localization', () => {
 
       await payload.update({
         id: postWithLocalizedData.id,
-        collection,
+        collection: localizedPostsSlug,
         data: {
           title: spanishTitle,
         },
@@ -110,7 +109,7 @@ describe('Localization', () => {
     describe('Localized text', () => {
       it('create english', async () => {
         const allDocs = await payload.find({
-          collection,
+          collection: localizedPostsSlug,
           where: {
             title: { equals: post1.title },
           },
@@ -121,7 +120,7 @@ describe('Localization', () => {
       it('add spanish translation', async () => {
         const updated = await payload.update({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           data: {
             title: spanishTitle,
           },
@@ -132,7 +131,7 @@ describe('Localization', () => {
 
         const localized: any = await payload.findByID({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: 'all',
         })
 
@@ -143,7 +142,7 @@ describe('Localization', () => {
       it('should fallback to english translation when empty', async () => {
         await payload.update({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           data: {
             title: '',
           },
@@ -152,14 +151,14 @@ describe('Localization', () => {
 
         const retrievedInEnglish = await payload.findByID({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
         })
 
         expect(retrievedInEnglish.title).toEqual(englishTitle)
 
         const localizedFallback: any = await payload.findByID({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: 'all',
         })
 
@@ -200,7 +199,7 @@ describe('Localization', () => {
       it('should fallback to spanish translation when empty and locale-specific fallback is provided', async () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: portugueseLocale,
         })
 
@@ -210,7 +209,7 @@ describe('Localization', () => {
       it('should respect fallback none', async () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: portugueseLocale,
           // @ts-expect-error - testing fallbackLocale 'none' for backwards compatibility though the correct type here is `false`
           fallbackLocale: 'none',
@@ -269,7 +268,7 @@ describe('Localization', () => {
         let localizedPost: LocalizedPost
         beforeEach(async () => {
           const { id } = await payload.create({
-            collection,
+            collection: localizedPostsSlug,
             data: {
               title: englishTitle,
             },
@@ -277,7 +276,7 @@ describe('Localization', () => {
 
           localizedPost = await payload.update({
             id,
-            collection,
+            collection: localizedPostsSlug,
             data: {
               title: spanishTitle,
             },
@@ -288,7 +287,7 @@ describe('Localization', () => {
         it('unspecified locale returns default', async () => {
           const localized = await payload.findByID({
             id: localizedPost.id,
-            collection,
+            collection: localizedPostsSlug,
           })
 
           expect(localized.title).toEqual(englishTitle)
@@ -297,7 +296,7 @@ describe('Localization', () => {
         it('specific locale - same as default', async () => {
           const localized = await payload.findByID({
             id: localizedPost.id,
-            collection,
+            collection: localizedPostsSlug,
             locale: defaultLocale,
           })
 
@@ -307,7 +306,7 @@ describe('Localization', () => {
         it('specific locale - not default', async () => {
           const localized = await payload.findByID({
             id: localizedPost.id,
-            collection,
+            collection: localizedPostsSlug,
             locale: spanishLocale,
           })
 
@@ -317,7 +316,7 @@ describe('Localization', () => {
         it('all locales', async () => {
           const localized: any = await payload.findByID({
             id: localizedPost.id,
-            collection,
+            collection: localizedPostsSlug,
             locale: 'all',
           })
 
@@ -326,7 +325,7 @@ describe('Localization', () => {
         })
 
         it('rest all locales with all', async () => {
-          const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
+          const response = await restClient.GET(`/${localizedPostsSlug}/${localizedPost.id}`, {
             query: {
               locale: 'all',
             },
@@ -340,7 +339,7 @@ describe('Localization', () => {
         })
 
         it('rest all locales with asterisk', async () => {
-          const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
+          const response = await restClient.GET(`/${localizedPostsSlug}/${localizedPost.id}`, {
             query: {
               locale: '*',
             },
@@ -355,7 +354,7 @@ describe('Localization', () => {
 
         it('by localized field value - default locale', async () => {
           const result = await payload.find({
-            collection,
+            collection: localizedPostsSlug,
             where: {
               title: {
                 equals: englishTitle,
@@ -368,7 +367,7 @@ describe('Localization', () => {
 
         it('by localized field value - alternate locale', async () => {
           const result = await payload.find({
-            collection,
+            collection: localizedPostsSlug,
             locale: spanishLocale,
             where: {
               title: {
@@ -382,7 +381,7 @@ describe('Localization', () => {
 
         it('by localized field value - opposite locale???', async () => {
           const result = await payload.find({
-            collection,
+            collection: localizedPostsSlug,
             locale: 'all',
             where: {
               'title.es': {
@@ -395,14 +394,23 @@ describe('Localization', () => {
         })
 
         it('by localized field value with sorting', async () => {
-          const doc_1 = await payload.create({ collection, data: { title: 'word_b' } })
-          const doc_2 = await payload.create({ collection, data: { title: 'word_a' } })
-          const doc_3 = await payload.create({ collection, data: { title: 'word_c' } })
+          const doc_1 = await payload.create({
+            collection: localizedPostsSlug,
+            data: { title: 'word_b' },
+          })
+          const doc_2 = await payload.create({
+            collection: localizedPostsSlug,
+            data: { title: 'word_a' },
+          })
+          const doc_3 = await payload.create({
+            collection: localizedPostsSlug,
+            data: { title: 'word_c' },
+          })
 
-          await payload.create({ collection, data: { title: 'others_c' } })
+          await payload.create({ collection: localizedPostsSlug, data: { title: 'others_c' } })
 
           const { docs } = await payload.find({
-            collection,
+            collection: localizedPostsSlug,
             sort: 'title',
             where: {
               title: {
@@ -423,7 +431,7 @@ describe('Localization', () => {
             let localizedAccentPostTwo: LocalizedPost
             beforeEach(async () => {
               localizedAccentPostOne = await payload.create({
-                collection,
+                collection: localizedPostsSlug,
                 data: {
                   title: 'non accent post',
                   localizedDescription: 'something',
@@ -432,7 +440,7 @@ describe('Localization', () => {
               })
 
               localizedAccentPostTwo = await payload.create({
-                collection,
+                collection: localizedPostsSlug,
                 data: {
                   title: 'accent post',
                   localizedDescription: 'veterinarian',
@@ -442,7 +450,7 @@ describe('Localization', () => {
 
               await payload.update({
                 id: localizedAccentPostOne.id,
-                collection,
+                collection: localizedPostsSlug,
                 data: {
                   title: 'non accent post',
                   localizedDescription: 'valami',
@@ -452,7 +460,7 @@ describe('Localization', () => {
 
               await payload.update({
                 id: localizedAccentPostTwo.id,
-                collection,
+                collection: localizedPostsSlug,
                 data: {
                   title: 'accent post',
                   localizedDescription: 'állatorvos',
@@ -463,7 +471,7 @@ describe('Localization', () => {
 
             it('should sort alphabetically even with accented letters', async () => {
               const sortByDescriptionQuery = await payload.find({
-                collection,
+                collection: localizedPostsSlug,
                 sort: 'description',
                 where: {
                   title: {
@@ -1308,7 +1316,7 @@ describe('Localization', () => {
       it('should allow querying by non-localized field names ending in a locale', async () => {
         await payload.update({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           data: {
             children: post1.id,
             group: {
@@ -1318,7 +1326,7 @@ describe('Localization', () => {
         })
 
         const { docs: relationshipDocs } = await restClient
-          .GET(`/${collection}`, {
+          .GET(`/${localizedPostsSlug}`, {
             query: {
               where: {
                 children: {
@@ -1332,7 +1340,7 @@ describe('Localization', () => {
         expect(relationshipDocs.map(({ id }) => id)).toContain(post1.id)
 
         const { docs: nestedFieldDocs } = await restClient
-          .GET(`/${collection}`, {
+          .GET(`/${localizedPostsSlug}`, {
             query: {
               where: {
                 'group.children': {
@@ -1615,7 +1623,7 @@ describe('Localization', () => {
 
       it('should retain non-localized fields when duplicating select locales', async () => {
         const post = await payload.create({
-          collection,
+          collection: localizedPostsSlug,
           data: {
             title: englishTitle,
             description: 'keep me',
@@ -1624,7 +1632,7 @@ describe('Localization', () => {
 
         await payload.update({
           id: post.id,
-          collection,
+          collection: localizedPostsSlug,
           data: {
             title: spanishTitle,
           },
@@ -1633,13 +1641,13 @@ describe('Localization', () => {
 
         const duplicated = await payload.duplicate({
           id: post.id,
-          collection,
+          collection: localizedPostsSlug,
           selectedLocales: [spanishLocale],
         })
 
         const allLocales = await payload.findByID({
           id: duplicated.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: 'all',
         })
 
@@ -2022,12 +2030,12 @@ describe('Localization', () => {
     // this monorepo, as this is handled at runtime.
     describe('nested localized field sanitization', () => {
       it('ensure nested localized fields keep localized property in monorepo', () => {
-        const collection = payload.collections['localized-within-localized'].config
+        const collectionConfig = payload.collections['localized-within-localized'].config
 
-        expect(collection.fields[0].tabs[0].fields[0].localized).toBeDefined()
-        expect(collection.fields[1].fields[0].localized).toBeDefined()
-        expect(collection.fields[2].blocks[0].fields[0].localized).toBeDefined()
-        expect(collection.fields[3].fields[0].localized).toBeDefined()
+        expect(collectionConfig.fields[0].tabs[0].fields[0].localized).toBeDefined()
+        expect(collectionConfig.fields[1].fields[0].localized).toBeDefined()
+        expect(collectionConfig.fields[2].blocks[0].fields[0].localized).toBeDefined()
+        expect(collectionConfig.fields[3].fields[0].localized).toBeDefined()
       })
     })
 
@@ -3077,7 +3085,7 @@ describe('Localization', () => {
           it('should allow fallback locale to be an array', async () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
-              collection,
+              collection: localizedPostsSlug,
               locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
             })
@@ -3089,7 +3097,7 @@ describe('Localization', () => {
           it('should pass over fallback locales until it finds one that exists', async () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
-              collection,
+              collection: localizedPostsSlug,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar', spanishLocale],
             })
@@ -3101,7 +3109,7 @@ describe('Localization', () => {
           it('should return undefined if no fallback locales exist', async () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
-              collection,
+              collection: localizedPostsSlug,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
             })
@@ -3150,7 +3158,7 @@ describe('Localization', () => {
         describe('Collections', () => {
           it('should allow fallback locale to be an array', async () => {
             const response = await restClient.GET(
-              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
+              `/${localizedPostsSlug}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
             )
 
             expect(response.status).toBe(200)
@@ -3161,7 +3169,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const response = await restClient.GET(
-              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
+              `/${localizedPostsSlug}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
             )
 
             expect(response.status).toBe(200)
@@ -3172,7 +3180,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const response = await restClient.GET(
-              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
+              `/${localizedPostsSlug}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
             )
 
             expect(response.status).toBe(200)
@@ -3344,14 +3352,14 @@ describe('Localization', () => {
       }
 
       post1 = await payload.create({
-        collection,
+        collection: localizedPostsSlug,
         data: {
           title: englishTitle,
         },
       })
 
       postWithLocalizedData = await payload.create({
-        collection,
+        collection: localizedPostsSlug,
         data: {
           title: englishTitle,
         },
@@ -3359,7 +3367,7 @@ describe('Localization', () => {
 
       await payload.update({
         id: postWithLocalizedData.id,
-        collection,
+        collection: localizedPostsSlug,
         data: {
           title: spanishTitle,
         },
@@ -3370,7 +3378,7 @@ describe('Localization', () => {
     describe('fallback locale', () => {
       it('create english', async () => {
         const allDocs = await payload.find({
-          collection,
+          collection: localizedPostsSlug,
           where: {
             title: { equals: post1.title },
           },
@@ -3381,7 +3389,7 @@ describe('Localization', () => {
       it('add spanish translation', async () => {
         const updated = await payload.update({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           data: {
             title: spanishTitle,
           },
@@ -3392,7 +3400,7 @@ describe('Localization', () => {
 
         const localized: any = await payload.findByID({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: 'all',
         })
 
@@ -3403,7 +3411,7 @@ describe('Localization', () => {
       it('should not fallback to english', async () => {
         const retrievedDoc = await payload.findByID({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: portugueseLocale,
         })
 
@@ -3413,7 +3421,7 @@ describe('Localization', () => {
       it('should fallback to english with explicit fallbackLocale', async () => {
         const fallbackDoc = await payload.findByID({
           id: post1.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: portugueseLocale,
           fallbackLocale: englishLocale,
         })
@@ -3424,7 +3432,7 @@ describe('Localization', () => {
       it('should not fallback to spanish translation and no explicit fallback is provided', async () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: portugueseLocale,
         })
 
@@ -3434,7 +3442,7 @@ describe('Localization', () => {
       it('should respect fallback none', async () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
-          collection,
+          collection: localizedPostsSlug,
           locale: portugueseLocale,
           fallbackLocale: false,
         })
@@ -3542,14 +3550,13 @@ describe('Localization', () => {
     })
   })
   describe('specific locales', () => {
-    const collection = 'all-field-types-localized'
     let docID: string
 
     beforeEach(async () => {
       // Clean up any existing docs
-      const existing = await payload.find({ collection, limit: 100 })
+      const existing = await payload.find({ collection: allFieldsLocalizedSlug, limit: 100 })
       for (const doc of existing.docs) {
-        await payload.delete({ id: doc.id, collection })
+        await payload.delete({ id: doc.id, collection: allFieldsLocalizedSlug })
       }
     })
 
@@ -3558,7 +3565,7 @@ describe('Localization', () => {
         it('should publish only the specified locale with correct nesting structure', async () => {
           // Create draft with all field types in multiple locales
           const draft = await payload.create({
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'draft',
               deeplyNested: {
@@ -3593,7 +3600,7 @@ describe('Localization', () => {
 
           await payload.update({
             id: draft.id,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               deeplyNested: {
                 innerGroup: {
@@ -3630,7 +3637,7 @@ describe('Localization', () => {
           // Publish only English
           await payload.update({
             id: draft.id,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
             },
@@ -3640,7 +3647,7 @@ describe('Localization', () => {
 
           const published = await payload.findByID({
             id: draft.id,
-            collection,
+            collection: allFieldsLocalizedSlug,
             draft: false,
             locale: 'all',
           })
@@ -3693,7 +3700,7 @@ describe('Localization', () => {
           // Verify draft still has Spanish
           const draftDoc = await payload.findByID({
             id: draft.id,
-            collection,
+            collection: allFieldsLocalizedSlug,
             draft: true,
             locale: 'all',
           })
@@ -3709,7 +3716,7 @@ describe('Localization', () => {
         it('should unpublish only the specified locale', async () => {
           // Create and publish multiple locales
           const doc = await payload.create({
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
               text: 'EN Text',
@@ -3721,7 +3728,7 @@ describe('Localization', () => {
 
           await payload.update({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
               text: 'ES Text',
@@ -3731,7 +3738,7 @@ describe('Localization', () => {
 
           await payload.update({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
               text: 'PT Text',
@@ -3742,14 +3749,14 @@ describe('Localization', () => {
           // Unpublish only English
           await payload.update({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {},
             unpublishSpecificLocale: 'en',
           })
 
           const published = await payload.findByID({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             locale: 'all',
           })
 
@@ -3763,7 +3770,7 @@ describe('Localization', () => {
           // Draft should still have English
           const draftDoc = await payload.findByID({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             draft: true,
             locale: 'all',
           })
@@ -3777,7 +3784,7 @@ describe('Localization', () => {
         it('should unpublish only the specified locale from multiple published locales', async () => {
           // Create and publish Spanish
           const doc = await payload.create({
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
               text: 'Spanish',
@@ -3790,7 +3797,7 @@ describe('Localization', () => {
           // Publish English
           await payload.update({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
               text: 'English',
@@ -3801,7 +3808,7 @@ describe('Localization', () => {
           // Publish Hungarian
           await payload.update({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {
               _status: 'published',
               text: 'Hungarian',
@@ -3811,7 +3818,7 @@ describe('Localization', () => {
 
           const publishedDoc = await payload.findByID({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             locale: 'all',
           })
 
@@ -3822,14 +3829,14 @@ describe('Localization', () => {
           // Unpublish only English
           await payload.update({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             data: {},
             unpublishSpecificLocale: 'en',
           })
 
           const latestPublishedDoc = await payload.findByID({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             locale: 'all',
           })
 
@@ -3839,7 +3846,7 @@ describe('Localization', () => {
 
           const latestDraft = await payload.findByID({
             id: docID,
-            collection,
+            collection: allFieldsLocalizedSlug,
             draft: true,
             locale: 'all',
           })
@@ -3933,7 +3940,7 @@ async function createLocalizedPost(data: {
   }
 }): Promise<LocalizedPost> {
   const localizedRelation: any = await payload.create({
-    collection,
+    collection: localizedPostsSlug,
     data: {
       title: data.title.en,
     },
@@ -3941,7 +3948,7 @@ async function createLocalizedPost(data: {
 
   await payload.update({
     id: localizedRelation.id,
-    collection,
+    collection: localizedPostsSlug,
     data: {
       title: data.title.es,
     },
