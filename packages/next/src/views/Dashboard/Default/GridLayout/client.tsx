@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react'
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 import { closestInXAxis } from './utils/collisionDetection.js'
-// import { useDashboardSensors } from './utils/sensors.js'
+import { useDashboardSensors } from './utils/sensors.js'
 
 export type WidgetItem = {
   i: string
@@ -61,7 +61,7 @@ export function GridLayoutDashboardClient({
 
   const [_dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
-  // const sensors = useDashboardSensors()
+  const sensors = useDashboardSensors()
 
   return (
     <div>
@@ -91,7 +91,7 @@ export function GridLayoutDashboardClient({
         onDragStart={(event) => {
           setActiveDragId(event.active.id as string)
         }}
-        // sensors={sensors}
+        sensors={sensors}
       >
         <div
           className={`grid-layout ${isEditing ? 'editing' : ''}`}
