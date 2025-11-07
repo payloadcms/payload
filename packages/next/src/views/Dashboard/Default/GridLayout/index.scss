@@ -6,6 +6,17 @@
       height: 100%;
     }
 
+    // In mobile, make the widget full width and hide the size button.
+    @media (max-width: 768px) {
+      .widget {
+        width: 100% !important;
+      }
+
+      .widget-wrapper__size-btn {
+        display: none;
+      }
+    }
+
     &.editing {
       .widget-content {
         user-select: none;
