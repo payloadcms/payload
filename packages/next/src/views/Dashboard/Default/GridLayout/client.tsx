@@ -2,9 +2,8 @@
 
 import type { Widget, WidgetWidth } from 'payload'
 
-import { DndContext, DragOverlay, useDroppable } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import { SortableContext, useSortable } from '@dnd-kit/sortable'
 import { ChevronIcon, Popup, PopupList, XIcon } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
@@ -60,7 +59,8 @@ export function GridLayoutDashboardClient({
     setIsEditing,
   } = useDashboardLayout(initialLayout)
 
-  const [dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
+  const [_dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
+  const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const { setNodeRef } = useDroppable({ id: 'droppable' })
   const sensors = useDashboardSensors()
 
@@ -83,6 +83,10 @@ export function GridLayoutDashboardClient({
         }}
         collisionDetection={collisionDetection}
         id="sortable"
+        onDragCancel={() => {
+          setDropTargetWidget(null)
+          setActiveDragId(null)
+        }}
         onDragEnd={(event) => {
           const moveFromIndex = currentLayout?.findIndex((w) => w.item.i === event.active.id)
           let moveToIndex = currentLayout?.findIndex((w) => w.item.i === event.over?.id)
@@ -91,90 +95,99 @@ export function GridLayoutDashboardClient({
           }
           moveWidget({ moveFromIndex, moveToIndex })
           setDropTargetWidget(null)
+          setActiveDragId(null)
+        }}
+        onDragStart={(event) => {
+          setActiveDragId(event.active.id as string)
         }}
         sensors={sensors}
       >
-        <SortableContext items={currentLayout?.map((w) => w.item.i)}>
-          <div
-            className={`grid-layout ${isEditing ? 'editing' : ''}`}
-            ref={setNodeRef}
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-            }}
-          >
-            {currentLayout?.map((widget, index) => (
-              <React.Fragment key={widget.item.i}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '-2px',
-                    top: 0,
-                    bottom: 0,
-                    width: '0px',
-                    outline: '2px solid blue',
-                    pointerEvents: 'none',
-                    zIndex: 1000,
-                  }}
-                />
-                <SortableItem
-                  disabled={!isEditing}
-                  id={widget.item.i}
-                  style={{
-                    width: `${WIDTH_TO_PERCENTAGE[widget.item.w]}%`,
-                    padding: '6px',
-                  }}
-                >
-                  <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                    <div className="widget-content">{widget.component}</div>
-                    {isEditing && (
-                      <div
-                        className="widget-wrapper__controls"
-                        onPointerDown={(e) => e.stopPropagation()}
+        <div
+          className={`grid-layout ${isEditing ? 'editing' : ''}`}
+          ref={setNodeRef}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+          }}
+        >
+          {currentLayout?.map((widget, _index) => (
+            <React.Fragment key={widget.item.i}>
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '-2px',
+                  top: 0,
+                  bottom: 0,
+                  width: '0px',
+                  outline: '2px solid blue',
+                  pointerEvents: 'none',
+                  zIndex: 1000,
+                }}
+              />
+              <DraggableItem
+                disabled={!isEditing}
+                id={widget.item.i}
+                style={{
+                  width: `${WIDTH_TO_PERCENTAGE[widget.item.w]}%`,
+                  padding: '6px',
+                }}
+              >
+                <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                  <div className="widget-content">{widget.component}</div>
+                  {isEditing && (
+                    <div
+                      className="widget-wrapper__controls"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <WidgetWidthDropdown
+                        currentWidth={widget.item.w}
+                        maxW={widget.item.maxW}
+                        minW={widget.item.minW}
+                        onResize={(width) => resizeWidget(widget.item.i, width)}
+                      />
+                      <button
+                        className="widget-wrapper__delete-btn"
+                        onClick={() => deleteWidget(widget.item.i)}
+                        title={`Delete widget ${widget.item.i}`}
+                        type="button"
                       >
-                        <WidgetWidthDropdown
-                          currentWidth={widget.item.w}
-                          maxW={widget.item.maxW}
-                          minW={widget.item.minW}
-                          onResize={(width) => resizeWidget(widget.item.i, width)}
-                        />
-                        <button
-                          className="widget-wrapper__delete-btn"
-                          onClick={() => deleteWidget(widget.item.i)}
-                          title={`Delete widget ${widget.item.i}`}
-                          type="button"
-                        >
-                          <XIcon />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </SortableItem>
-              </React.Fragment>
-            ))}
-            <DragOverlay
-              className="drag-overlay"
-              dropAnimation={{
-                duration: 100,
-              }}
-              // Needed for the scale(0.25) of the dragOverlay, so there is no offset
-              // between the dragOverlay and the mouse pointer.
-              modifiers={[snapCenterToCursor]}
-            >
-              {dropTargetWidget ? (
-                <div
-                  style={{
-                    transform: 'scale(0.25)',
-                  }}
-                >
-                  <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                    <div className="widget-content">{dropTargetWidget.widget.component}</div>
-                  </div>
+                        <XIcon />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ) : null}
-            </DragOverlay>
-          </div>
-        </SortableContext>
+              </DraggableItem>
+            </React.Fragment>
+          ))}
+          <DragOverlay
+            className="drag-overlay"
+            dropAnimation={{
+              duration: 100,
+            }}
+            // Needed for the scale(0.25) of the dragOverlay, so there is no offset
+            // between the dragOverlay and the mouse pointer.
+            modifiers={[snapCenterToCursor]}
+          >
+            {activeDragId
+              ? (() => {
+                  const draggedWidget = currentLayout?.find((w) => w.item.i === activeDragId)
+                  return draggedWidget ? (
+                    <div
+                      style={{
+                        transform: 'scale(0.25)',
+                      }}
+                    >
+                      <div
+                        className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}
+                      >
+                        <div className="widget-content">{draggedWidget.component}</div>
+                      </div>
+                    </div>
+                  ) : null
+                })()
+              : null}
+          </DragOverlay>
+        </div>
       </DndContext>
       <DashboardStepNav
         addWidget={addWidget}
@@ -256,13 +269,13 @@ function WidgetWidthDropdown({
   )
 }
 
-function SortableItem(props: {
+function DraggableItem(props: {
   children: React.ReactNode
   disabled?: boolean
   id: string
   style?: React.CSSProperties
 }) {
-  const { attributes, isDragging, listeners, setNodeRef } = useSortable({
+  const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
     id: props.id,
     disabled: props.disabled,
   })
