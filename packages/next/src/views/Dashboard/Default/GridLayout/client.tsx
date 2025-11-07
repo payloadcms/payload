@@ -101,7 +101,6 @@ export function GridLayoutDashboardClient({
             style={{
               display: 'flex',
               flexWrap: 'wrap',
-              gap: '1rem',
             }}
           >
             {currentLayout?.map((widget) => (
@@ -113,7 +112,8 @@ export function GridLayoutDashboardClient({
                 id={widget.item.i}
                 key={widget.item.i}
                 style={{
-                  width: `calc(${WIDTH_TO_PERCENTAGE[widget.item.w]}% - 1rem)`,
+                    width: `${WIDTH_TO_PERCENTAGE[widget.item.w]}%`,
+                    padding: '6px',
                 }}
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
