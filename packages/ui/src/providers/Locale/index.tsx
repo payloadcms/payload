@@ -2,13 +2,14 @@
 
 import type { Locale } from 'payload'
 
-import { useSearchParams } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
+import * as qs from 'qs-esm'
 import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
-import { usePreferences } from '../Preferences/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
@@ -47,10 +48,11 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   } = useConfig()
 
   const { user } = useAuth()
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
 
   const defaultLocale = localization ? localization.defaultLocale : 'en'
 
-  const { getPreference, setPreference } = usePreferences()
   const localeFromParams = useSearchParams().get('locale')
 
   const [locale, setLocale] = React.useState<Locale>(() => {
@@ -70,6 +72,32 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   const [isLoading, setLocaleIsLoading] = useState(false)
 
   const prevLocale = useRef<Locale>(locale)
+  useEffect(() => {
+    if (
+      localization &&
+      locale &&
+      localization.localeCodes.length &&
+      !localization.localeCodes.includes(locale.code)
+    ) {
+      const searchParams = new URLSearchParams(window.location.search)
+      const url = qs.stringify(
+        {
+          ...qs.parse(searchParams.toString(), {
+            depth: 10,
+            ignoreQueryPrefix: true,
+          }),
+          locale: localization.localeCodes.includes(localization.defaultLocale)
+            ? localization.defaultLocale
+            : localization.localeCodes[0],
+        },
+        { addQueryPrefix: true },
+      )
+
+      startRouteTransition(() => {
+        router.push(url)
+      })
+    }
+  }, [locale, localization, router, startRouteTransition])
 
   useEffect(() => {
     /**
@@ -78,6 +106,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
      * This triggers a client-side navigation, which re-renders the page with the new locale
      * In Next.js, local state is persisted during this type of navigation because components are not unmounted
      */
+
     if (locale.code !== prevLocale.current.code) {
       setLocaleIsLoading(false)
     }
@@ -111,7 +140,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, fetchURL, localeFromParams, user?.id])
+  }, [defaultLocale, localization, fetchURL, localeFromParams, user?.id])
 
   return (
     <LocaleContext value={locale}>
