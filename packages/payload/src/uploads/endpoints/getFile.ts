@@ -105,6 +105,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   let headers = new Headers()
   headers.set('Content-Type', mimeType)
   headers.set('Content-Length', stats.size + '')
+  headers.set('Last-Modified', stats.mtime.toUTCString())
   headers = collection.config.upload?.modifyResponseHeaders
     ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
     : headers
