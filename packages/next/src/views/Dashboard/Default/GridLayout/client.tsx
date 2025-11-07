@@ -110,6 +110,8 @@ export function GridLayoutDashboardClient({
           style={{
             display: 'flex',
             flexWrap: 'wrap',
+            // Don't add gap here! We need to use padding on the widgets instead
+            // to make sure all rows have the same width always.
           }}
         >
           {currentLayout?.map((widget, _index) => (
