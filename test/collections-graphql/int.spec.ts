@@ -111,6 +111,30 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should sort by multiple fields', async () => {
+      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
+      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
+      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
+      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 } })
+
+      const query = `query {
+        Sorts(sort: "title, number") {
+          docs {
+            id
+            title
+            number
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs } = data.Sorts
+
+      expect(docs.map((doc) => doc.id)).toEqual([doc3.id, doc1.id, doc4.id, doc2.id])
+    })
+
     it('should count', async () => {
       const query = `query {
         countPosts {
