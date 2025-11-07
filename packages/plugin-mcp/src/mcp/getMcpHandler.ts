@@ -4,7 +4,7 @@ import { createMcpHandler } from '@vercel/mcp-adapter'
 import { join } from 'path'
 import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
-import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
+import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { registerTool } from './registerTool.js'
@@ -34,14 +34,14 @@ import { updateJobTool } from './tools/job/update.js'
 
 export const getMCPHandler = (
   pluginOptions: PluginMCPServerConfig,
-  toolSettings: ToolSettings,
+  mcpAccessSettings: MCPAccessSettings,
   req: PayloadRequest,
 ) => {
   const { payload } = req
   const configSchema = configToJSONSchema(payload.config)
 
   // User
-  const user = toolSettings.user as TypedUser
+  const user = mcpAccessSettings.user as TypedUser
 
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
@@ -105,7 +105,7 @@ export const getMCPHandler = (
           try {
             const schema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
 
-            const toolCapabilities = toolSettings?.[
+            const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledCollectionSlug)}`
             ] as Record<string, unknown>
             const allowCreate: boolean | undefined = toolCapabilities['create'] as boolean
@@ -194,7 +194,7 @@ export const getMCPHandler = (
         // Custom tools
         customMCPTools.forEach((tool) => {
           const camelCasedToolName = toCamelCase(tool.name)
-          const isToolEnabled = toolSettings.custom?.[camelCasedToolName] ?? true
+          const isToolEnabled = mcpAccessSettings['payload-mcp-tool']?.[camelCasedToolName] ?? true
 
           registerTool(
             isToolEnabled,
@@ -207,47 +207,63 @@ export const getMCPHandler = (
 
         // Custom prompts
         customMCPPrompts.forEach((prompt) => {
-          server.registerPrompt(
-            prompt.name,
-            {
-              argsSchema: prompt.argsSchema,
-              description: prompt.description,
-              title: prompt.title,
-            },
-            prompt.handler,
-          )
-          if (useVerboseLogs) {
-            payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
+          const camelCasedPromptName = toCamelCase(prompt.name)
+          const isPromptEnabled =
+            mcpAccessSettings['payload-mcp-prompt']?.[camelCasedPromptName] ?? true
+
+          if (isPromptEnabled) {
+            server.registerPrompt(
+              prompt.name,
+              {
+                argsSchema: prompt.argsSchema,
+                description: prompt.description,
+                title: prompt.title,
+              },
+              prompt.handler,
+            )
+            if (useVerboseLogs) {
+              payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
+            }
+          } else if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ⏭️ Prompt: ${prompt.title} Skipped.`)
           }
         })
 
         // Custom resources
         customMCPResources.forEach((resource) => {
-          server.registerResource(
-            resource.name,
-            // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
-            resource.uri,
-            {
-              description: resource.description,
-              mimeType: resource.mimeType,
-              title: resource.title,
-            },
-            resource.handler,
-          )
+          const camelCasedResourceName = toCamelCase(resource.name)
+          const isResourceEnabled =
+            mcpAccessSettings['payload-mcp-resource']?.[camelCasedResourceName] ?? true
 
-          if (useVerboseLogs) {
-            payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
+          if (isResourceEnabled) {
+            server.registerResource(
+              resource.name,
+              // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
+              resource.uri,
+              {
+                description: resource.description,
+                mimeType: resource.mimeType,
+                title: resource.title,
+              },
+              resource.handler,
+            )
+
+            if (useVerboseLogs) {
+              payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
+            }
+          } else if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ⏭️ Resource: ${resource.title} Skipped.`)
           }
         })
 
         // Experimental - Collection Schema Modfication Tools
         if (
-          toolSettings.collections?.create &&
+          mcpAccessSettings.collections?.create &&
           experimentalTools.collections?.enabled &&
           isDevelopment
         ) {
           registerTool(
-            toolSettings.collections.create,
+            mcpAccessSettings.collections.create,
             'Create Collection',
             () =>
               createCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
@@ -256,12 +272,12 @@ export const getMCPHandler = (
           )
         }
         if (
-          toolSettings.collections?.delete &&
+          mcpAccessSettings.collections?.delete &&
           experimentalTools.collections?.enabled &&
           isDevelopment
         ) {
           registerTool(
-            toolSettings.collections.delete,
+            mcpAccessSettings.collections.delete,
             'Delete Collection',
             () =>
               deleteCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
@@ -271,12 +287,12 @@ export const getMCPHandler = (
         }
 
         if (
-          toolSettings.collections?.find &&
+          mcpAccessSettings.collections?.find &&
           experimentalTools.collections?.enabled &&
           isDevelopment
         ) {
           registerTool(
-            toolSettings.collections.find,
+            mcpAccessSettings.collections.find,
             'Find Collection',
             () => findCollectionTool(server, req, useVerboseLogs, collectionsDirPath),
             payload,
@@ -285,12 +301,12 @@ export const getMCPHandler = (
         }
 
         if (
-          toolSettings.collections?.update &&
+          mcpAccessSettings.collections?.update &&
           experimentalTools.collections?.enabled &&
           isDevelopment
         ) {
           registerTool(
-            toolSettings.collections.update,
+            mcpAccessSettings.collections.update,
             'Update Collection',
             () =>
               updateCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
@@ -300,9 +316,9 @@ export const getMCPHandler = (
         }
 
         // Experimental - Payload Config Modification Tools
-        if (toolSettings.config?.find && experimentalTools.config?.enabled && isDevelopment) {
+        if (mcpAccessSettings.config?.find && experimentalTools.config?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.config.find,
+            mcpAccessSettings.config.find,
             'Find Config',
             () => findConfigTool(server, req, useVerboseLogs, configFilePath),
             payload,
@@ -310,9 +326,13 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.config?.update && experimentalTools.config?.enabled && isDevelopment) {
+        if (
+          mcpAccessSettings.config?.update &&
+          experimentalTools.config?.enabled &&
+          isDevelopment
+        ) {
           registerTool(
-            toolSettings.config.update,
+            mcpAccessSettings.config.update,
             'Update Config',
             () => updateConfigTool(server, req, useVerboseLogs, configFilePath),
             payload,
@@ -321,9 +341,9 @@ export const getMCPHandler = (
         }
 
         // Experimental - Job Modification Tools
-        if (toolSettings.jobs?.create && experimentalTools.jobs?.enabled && isDevelopment) {
+        if (mcpAccessSettings.jobs?.create && experimentalTools.jobs?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.jobs.create,
+            mcpAccessSettings.jobs.create,
             'Create Job',
             () => createJobTool(server, req, useVerboseLogs, jobsDirPath),
             payload,
@@ -331,9 +351,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.jobs?.update && experimentalTools.jobs?.enabled && isDevelopment) {
+        if (mcpAccessSettings.jobs?.update && experimentalTools.jobs?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.jobs.update,
+            mcpAccessSettings.jobs.update,
             'Update Job',
             () => updateJobTool(server, req, useVerboseLogs, jobsDirPath),
             payload,
@@ -341,9 +361,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.jobs?.run && experimentalTools.jobs?.enabled && isDevelopment) {
+        if (mcpAccessSettings.jobs?.run && experimentalTools.jobs?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.jobs.run,
+            mcpAccessSettings.jobs.run,
             'Run Job',
             () => runJobTool(server, req, useVerboseLogs),
             payload,
@@ -352,9 +372,9 @@ export const getMCPHandler = (
         }
 
         // Experimental - Auth Modification Tools
-        if (toolSettings.auth?.auth && experimentalTools.auth?.enabled && isDevelopment) {
+        if (mcpAccessSettings.auth?.auth && experimentalTools.auth?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.auth.auth,
+            mcpAccessSettings.auth.auth,
             'Auth',
             () => authTool(server, req, useVerboseLogs),
             payload,
@@ -362,9 +382,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.auth?.login && experimentalTools.auth?.enabled && isDevelopment) {
+        if (mcpAccessSettings.auth?.login && experimentalTools.auth?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.auth.login,
+            mcpAccessSettings.auth.login,
             'Login',
             () => loginTool(server, req, useVerboseLogs),
             payload,
@@ -372,9 +392,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.auth?.verify && experimentalTools.auth?.enabled && isDevelopment) {
+        if (mcpAccessSettings.auth?.verify && experimentalTools.auth?.enabled && isDevelopment) {
           registerTool(
-            toolSettings.auth.verify,
+            mcpAccessSettings.auth.verify,
             'Verify',
             () => verifyTool(server, req, useVerboseLogs),
             payload,
@@ -382,9 +402,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.auth?.resetPassword && experimentalTools.auth?.enabled) {
+        if (mcpAccessSettings.auth?.resetPassword && experimentalTools.auth?.enabled) {
           registerTool(
-            toolSettings.auth.resetPassword,
+            mcpAccessSettings.auth.resetPassword,
             'Reset Password',
             () => resetPasswordTool(server, req, useVerboseLogs),
             payload,
@@ -392,9 +412,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.auth?.forgotPassword && experimentalTools.auth?.enabled) {
+        if (mcpAccessSettings.auth?.forgotPassword && experimentalTools.auth?.enabled) {
           registerTool(
-            toolSettings.auth.forgotPassword,
+            mcpAccessSettings.auth.forgotPassword,
             'Forgot Password',
             () => forgotPasswordTool(server, req, useVerboseLogs),
             payload,
@@ -402,9 +422,9 @@ export const getMCPHandler = (
           )
         }
 
-        if (toolSettings.auth?.unlock && experimentalTools.auth?.enabled) {
+        if (mcpAccessSettings.auth?.unlock && experimentalTools.auth?.enabled) {
           registerTool(
-            toolSettings.auth.unlock,
+            mcpAccessSettings.auth.unlock,
             'Unlock',
             () => unlockTool(server, req, useVerboseLogs),
             payload,
