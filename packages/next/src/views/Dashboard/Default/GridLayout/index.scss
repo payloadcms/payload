@@ -227,9 +227,21 @@
         left: 0;
         min-width: 150px;
         z-index: 9999;
+        border-radius: 4px;
+        padding: 5px;
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.1),
           0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      .rs__menu-list {
+        padding: 0;
+      }
+
+      .rs__option {
+        padding: 4px 8px;
+        border-radius: 3px;
+        margin: 0;
       }
     }
 
