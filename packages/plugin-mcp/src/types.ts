@@ -215,7 +215,22 @@ export type PluginMCPServerConfig = {
       parameters: z.ZodRawShape
     }[]
   }
+
+  /**
+   * Override the API key collection.
+   * This allows you to add fields to the API key collection or modify the collection in any way you want.
+   * @param collection - The API key collection.
+   * @returns The modified API key collection.
+   */
   overrideApiKeyCollection?: (collection: CollectionConfig) => CollectionConfig
+
+  /**
+   * Override the authentication method.
+   * This allows you to use a custom authentication method instead of the default API key authentication.
+   * @param req - The request object.
+   * @returns The MCP access settings.
+   */
+  overrideAuth?: (req: PayloadRequest) => MCPAccessSettings | Promise<MCPAccessSettings>
 
   /**
    * Set the users collection that API keys should be associated with.

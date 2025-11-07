@@ -108,10 +108,10 @@ export const getMCPHandler = (
             const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledCollectionSlug)}`
             ] as Record<string, unknown>
-            const allowCreate: boolean | undefined = toolCapabilities['create'] as boolean
-            const allowUpdate: boolean | undefined = toolCapabilities['update'] as boolean
-            const allowFind: boolean | undefined = toolCapabilities['find'] as boolean
-            const allowDelete: boolean | undefined = toolCapabilities['delete'] as boolean
+            const allowCreate: boolean | undefined = toolCapabilities?.create as boolean
+            const allowUpdate: boolean | undefined = toolCapabilities?.update as boolean
+            const allowFind: boolean | undefined = toolCapabilities?.find as boolean
+            const allowDelete: boolean | undefined = toolCapabilities?.delete as boolean
 
             if (allowCreate) {
               registerTool(
@@ -194,7 +194,7 @@ export const getMCPHandler = (
         // Custom tools
         customMCPTools.forEach((tool) => {
           const camelCasedToolName = toCamelCase(tool.name)
-          const isToolEnabled = mcpAccessSettings['payload-mcp-tool']?.[camelCasedToolName] ?? true
+          const isToolEnabled = mcpAccessSettings['payload-mcp-tool']?.[camelCasedToolName] ?? false
 
           registerTool(
             isToolEnabled,
@@ -209,7 +209,7 @@ export const getMCPHandler = (
         customMCPPrompts.forEach((prompt) => {
           const camelCasedPromptName = toCamelCase(prompt.name)
           const isPromptEnabled =
-            mcpAccessSettings['payload-mcp-prompt']?.[camelCasedPromptName] ?? true
+            mcpAccessSettings['payload-mcp-prompt']?.[camelCasedPromptName] ?? false
 
           if (isPromptEnabled) {
             server.registerPrompt(
@@ -233,7 +233,7 @@ export const getMCPHandler = (
         customMCPResources.forEach((resource) => {
           const camelCasedResourceName = toCamelCase(resource.name)
           const isResourceEnabled =
-            mcpAccessSettings['payload-mcp-resource']?.[camelCasedResourceName] ?? true
+            mcpAccessSettings['payload-mcp-resource']?.[camelCasedResourceName] ?? false
 
           if (isResourceEnabled) {
             server.registerResource(

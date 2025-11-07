@@ -13,43 +13,60 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
     const MCPHandlerOptions = MCPOptions.handlerOptions || {}
     const useVerboseLogs = MCPHandlerOptions.verboseLogs ?? false
 
-    const apiKey = req.headers.get('Authorization')?.startsWith('Bearer ')
-      ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
-      : null
+    let mcpAccessSettings: MCPAccessSettings
 
-    if (apiKey === null) {
-      throw new APIError('API Key is required', 401)
-    }
+    if (pluginOptions.overrideAuth) {
+      try {
+        mcpAccessSettings = await pluginOptions.overrideAuth(req)
+        if (useVerboseLogs) {
+          payload.logger.info('[payload-mcp] Custom authentication method successful')
+        }
+      } catch (error) {
+        payload.logger.error({
+          err: error,
+          msg: '[payload-mcp] Custom authentication method failed',
+        })
+        throw new APIError('Authentication failed', 401)
+      }
+    } else {
+      const apiKey = req.headers.get('Authorization')?.startsWith('Bearer ')
+        ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
+        : null
 
-    const sha256APIKeyIndex = crypto
-      .createHmac('sha256', payload.secret)
-      .update(apiKey || '')
-      .digest('hex')
+      if (apiKey === null) {
+        throw new APIError('API Key is required', 401)
+      }
 
-    const apiKeyConstraints = [
-      {
-        apiKeyIndex: {
-          equals: sha256APIKeyIndex,
+      const sha256APIKeyIndex = crypto
+        .createHmac('sha256', payload.secret)
+        .update(apiKey || '')
+        .digest('hex')
+
+      const apiKeyConstraints = [
+        {
+          apiKeyIndex: {
+            equals: sha256APIKeyIndex,
+          },
         },
-      },
-    ]
-    const where: Where = {
-      or: apiKeyConstraints,
-    }
+      ]
+      const where: Where = {
+        or: apiKeyConstraints,
+      }
 
-    const { docs } = await payload.find({
-      collection: 'payload-mcp-api-keys',
-      where,
-    })
+      const { docs } = await payload.find({
+        collection: 'payload-mcp-api-keys',
+        where,
+      })
 
-    if (docs.length === 0) {
-      throw new APIError('API Key is invalid', 401)
-    }
+      if (docs.length === 0) {
+        throw new APIError('API Key is invalid', 401)
+      }
 
-    const mcpAccessSettings = docs[0] as MCPAccessSettings
+      mcpAccessSettings = docs[0] as MCPAccessSettings
 
-    if (useVerboseLogs) {
-      payload.logger.info('[payload-mcp] API Key is valid')
+      if (useVerboseLogs) {
+        payload.logger.info('[payload-mcp] API Key is valid')
+      }
     }
 
     const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
