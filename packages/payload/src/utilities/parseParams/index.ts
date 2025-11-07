@@ -25,6 +25,7 @@ type ParsedParams = {
   selectedLocales?: string[]
   sort?: string[]
   trash?: boolean
+  unpublishSpecificLocale?: string
   where?: Where
 } & Record<string, unknown>
 
@@ -47,6 +48,7 @@ type RawParams = {
   selectedLocales?: string
   sort?: string
   trash?: string
+  unpublishSpecificLocale?: string
   where?: Where
 }
 
