@@ -33,9 +33,9 @@ export type DropTargetWidget = {
 /* eslint-disable perfectionist/sort-objects */
 const WIDTH_TO_PERCENTAGE = {
   'x-small': 25,
-  small: 33,
+  small: (1 / 3) * 100,
   medium: 50,
-  large: 66,
+  large: (2 / 3) * 100,
   'x-large': 75,
   full: 100,
 } as const
