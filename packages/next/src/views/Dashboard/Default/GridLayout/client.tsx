@@ -61,7 +61,6 @@ export function GridLayoutDashboardClient({
 
   const [_dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
-  const { setNodeRef } = useDroppable({ id: 'droppable' })
   const sensors = useDashboardSensors()
 
   // Create custom collision detection that considers left/right halves
@@ -82,7 +81,6 @@ export function GridLayoutDashboardClient({
           },
         }}
         collisionDetection={collisionDetection}
-        id="sortable"
         onDragCancel={() => {
           setDropTargetWidget(null)
           setActiveDragId(null)
@@ -104,7 +102,6 @@ export function GridLayoutDashboardClient({
       >
         <div
           className={`grid-layout ${isEditing ? 'editing' : ''}`}
-          ref={setNodeRef}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -112,18 +109,6 @@ export function GridLayoutDashboardClient({
         >
           {currentLayout?.map((widget, _index) => (
             <React.Fragment key={widget.item.i}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '-2px',
-                  top: 0,
-                  bottom: 0,
-                  width: '0px',
-                  outline: '2px solid blue',
-                  pointerEvents: 'none',
-                  zIndex: 1000,
-                }}
-              />
               <DraggableItem
                 disabled={!isEditing}
                 id={widget.item.i}
@@ -287,15 +272,44 @@ function DraggableItem(props: {
   }
 
   return (
-    <div
-      id={props.id}
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className="widget"
-      style={mergedStyles}
-    >
-      {props.children}
+    <div className="widget" style={mergedStyles}>
+      <DroppableItem id={props.id} position="before" />
+      <div
+        id={props.id}
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className="widget"
+        style={{
+          width: '100%',
+        }}
+      >
+        {props.children}
+      </div>
+      <DroppableItem id={props.id} position="after" />
     </div>
+  )
+}
+
+function DroppableItem({ id, position }: { id: string; position: 'after' | 'before' }) {
+  const { setNodeRef } = useDroppable({ id, data: { position } })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        position: 'absolute',
+        left: position === 'before' ? 0 : 'auto',
+        right: position === 'after' ? 0 : 'auto',
+        top: 0,
+        bottom: 0,
+        width: '0px',
+        marginBottom: '10px',
+        marginTop: '10px',
+        outline: '2px solid blue',
+        pointerEvents: 'none',
+        zIndex: 1000,
+      }}
+    />
   )
 }
