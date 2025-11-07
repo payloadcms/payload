@@ -250,7 +250,7 @@ export const updateDocument = async <
   let result: JsonObject = await beforeChange(beforeChangeArgs)
   let snapshotToSave: JsonObject | undefined
 
-  if (payload.config.localization && collectionConfig.versions) {
+  if (config.localization && collectionConfig.versions) {
     if (publishSpecificLocale || unpublishSpecificLocale) {
       // snapshot will have full data before publishing/unpublishing
       snapshotToSave = deepCopyObjectSimple(result)
@@ -273,16 +273,16 @@ export const updateDocument = async <
 
       if (unpublishSpecificLocale) {
         result = filterDataToSelectedLocales({
-          configBlockReferences: payload.config.blocks,
+          configBlockReferences: config.blocks,
           docWithLocales: currentPublishedDocWithLocales || {},
           fields: collectionConfig.fields,
-          selectedLocales: payload.config.localization.localeCodes.filter(
+          selectedLocales: config.localization.localeCodes.filter(
             (locale) => locale !== unpublishSpecificLocale,
           ),
         })
       } else if (publishSpecificLocale) {
         result = mergeLocalizedData({
-          configBlockReferences: payload.config.blocks,
+          configBlockReferences: config.blocks,
           dataWithLocales: snapshotToSave,
           docWithLocales: currentPublishedDocWithLocales || {},
           fields: collectionConfig.fields,
