@@ -11,5 +11,10 @@ export class ErrorDeletingFile extends APIError {
       t ? t('error:deletingFile') : en.translations.error.deletingFile,
       httpStatus.INTERNAL_SERVER_ERROR,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'ErrorDeletingFile'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, ErrorDeletingFile.prototype)
   }
 }

@@ -10,5 +10,10 @@ export class MissingFieldType extends APIError {
         fieldAffectsData(field) ? ` "${field.name}"` : ''
       } is either missing a field type or it does not match an available field type`,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'MissingFieldType'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, MissingFieldType.prototype)
   }
 }

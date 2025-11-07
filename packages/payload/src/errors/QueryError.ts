@@ -11,5 +11,10 @@ export class QueryError extends APIError<{ path: string }[]> {
       httpStatus.BAD_REQUEST,
       results,
     )
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'QueryError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, QueryError.prototype)
   }
 }

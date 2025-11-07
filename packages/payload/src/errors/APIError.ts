@@ -1,7 +1,9 @@
 import { status as httpStatus } from 'http-status'
 
-// This gets dynamically reassigned during compilation
-export let APIErrorName = 'APIError'
+/**
+ * @deprecated Remove this in 4.0 - this is no longer needed as we assign the prototype correctly in the constructor
+ */
+export const APIErrorName = 'APIError'
 
 class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {
   data: TData
@@ -17,13 +19,17 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
       // show data in cause
       cause: data,
     })
-    APIErrorName = this.constructor.name
-    this.name = this.constructor.name
     this.message = message
     this.status = status
     this.data = data
     this.isPublic = isPublic
     this.isOperational = true // This is required since bluebird 4 doesn't append it anymore.
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'ExtendableError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, ExtendableError.prototype)
+
     Error.captureStackTrace(this, this.constructor)
   }
 }
@@ -50,5 +56,10 @@ export class APIError<
     isPublic = false,
   ) {
     super(message, status, data, isPublic)
+
+    // Ensure error name is not lost during swc minification when running next build
+    this.name = 'APIError'
+    // Ensure instanceof works correctly
+    Object.setPrototypeOf(this, APIError.prototype)
   }
 }
