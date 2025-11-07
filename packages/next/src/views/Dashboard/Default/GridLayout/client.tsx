@@ -79,10 +79,22 @@ export function GridLayoutDashboardClient({
           setActiveDragId(null)
         }}
         onDragEnd={(event) => {
+          const droppableId = event.over.id as string
+          const i = droppableId.lastIndexOf('-')
+          const slug = droppableId.slice(0, i)
+          const position = droppableId.slice(i + 1)
+
+          if (slug === event.active.id) {
+            return
+          }
+
           const moveFromIndex = currentLayout?.findIndex((w) => w.item.i === event.active.id)
-          let moveToIndex = currentLayout?.findIndex((w) => w.item.i === event.over?.id)
+          let moveToIndex = currentLayout?.findIndex((w) => w.item.i === slug)
           if (moveFromIndex < moveToIndex) {
             moveToIndex--
+          }
+          if (position === 'after') {
+            moveToIndex++
           }
           moveWidget({ moveFromIndex, moveToIndex })
           setDropTargetWidget(null)
