@@ -6,6 +6,7 @@ const dirname = path.dirname(filename)
 
 import type { Config as ConfigType } from './payload-types.js'
 
+import { getTenantFromCookie } from '../../packages/plugin-multi-tenant/src/utilities/getTenantFromCookie.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
 import { Menu } from './collections/Menu.js'
@@ -63,6 +64,26 @@ export default buildConfigWithDefaults({
       },
     }),
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es', 'fr'],
+    filterAvailableLocales: async ({ locales, req }) => {
+      const tenant = getTenantFromCookie(req.headers, 'text')
+      if (tenant) {
+        const fullTenant = await req.payload.findByID({
+          collection: 'tenants',
+          id: tenant,
+        })
+        if (fullTenant && Array.isArray(fullTenant.locales) && fullTenant.locales.length > 0) {
+          if (fullTenant.locales.includes('allLocales')) {
+            return locales
+          }
+          return locales.filter((locale) => fullTenant.locales?.includes(locale.code as any))
+        }
+      }
+      return locales
+    },
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
