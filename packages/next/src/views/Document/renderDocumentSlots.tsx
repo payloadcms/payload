@@ -38,6 +38,8 @@ export const renderDocumentSlots: (args: {
   const unsavedDraftWithValidations = undefined
 
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
+  const isLivePreviewEnabled =
+    collectionConfig?.admin?.livePreview || globalConfig?.admin?.livePreview
 
   const serverProps: ServerProps = {
     id,
@@ -97,7 +99,7 @@ export const renderDocumentSlots: (args: {
     collectionConfig?.admin?.components?.edit?.LivePreviewToggler ||
     globalConfig?.admin?.components?.elements?.LivePreviewToggler
 
-  if (isPreviewEnabled && CustomLivePreviewToggler) {
+  if (isLivePreviewEnabled && CustomLivePreviewToggler) {
     components.LivePreviewToggler = RenderServerComponent({
       Component: CustomLivePreviewToggler,
       importMap: req.payload.importMap,
