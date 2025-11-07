@@ -9,8 +9,8 @@ import React, { useMemo, useState } from 'react'
 
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
-import { customCollision } from './utils/collisionDetection.js'
-import { useDashboardSensors } from './utils/sensors.js'
+import { closestInXAxis } from './utils/collisionDetection.js'
+// import { useDashboardSensors } from './utils/sensors.js'
 
 export type WidgetItem = {
   i: string
@@ -61,14 +61,7 @@ export function GridLayoutDashboardClient({
 
   const [_dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
-  const sensors = useDashboardSensors()
-
-  // Create custom collision detection that considers left/right halves
-  // Note: setDropTargetWidget is stable, so we don't need it in dependencies
-  const collisionDetection = useMemo(
-    () => customCollision(currentLayout, setDropTargetWidget),
-    [currentLayout, setDropTargetWidget],
-  )
+  // const sensors = useDashboardSensors()
 
   return (
     <div>
@@ -80,7 +73,7 @@ export function GridLayoutDashboardClient({
             y: 0.2, // Allow vertical scroll at 20% from edge
           },
         }}
-        collisionDetection={collisionDetection}
+        collisionDetection={closestInXAxis}
         onDragCancel={() => {
           setDropTargetWidget(null)
           setActiveDragId(null)
@@ -98,7 +91,7 @@ export function GridLayoutDashboardClient({
         onDragStart={(event) => {
           setActiveDragId(event.active.id as string)
         }}
-        sensors={sensors}
+        // sensors={sensors}
       >
         <div
           className={`grid-layout ${isEditing ? 'editing' : ''}`}
@@ -292,21 +285,21 @@ function DraggableItem(props: {
 }
 
 function DroppableItem({ id, position }: { id: string; position: 'after' | 'before' }) {
-  const { setNodeRef } = useDroppable({ id, data: { position } })
+  const { setNodeRef, isOver } = useDroppable({ id: `${id}-${position}`, data: { position } })
 
   return (
     <div
       ref={setNodeRef}
       style={{
         position: 'absolute',
-        left: position === 'before' ? 0 : 'auto',
-        right: position === 'after' ? 0 : 'auto',
+        left: position === 'before' ? -1 : 'auto',
+        right: position === 'after' ? -1 : 'auto',
         top: 0,
         bottom: 0,
-        width: '0px',
+        width: '2px',
+        backgroundColor: isOver ? 'blue' : 'transparent',
         marginBottom: '10px',
         marginTop: '10px',
-        outline: '2px solid blue',
         pointerEvents: 'none',
         zIndex: 1000,
       }}
