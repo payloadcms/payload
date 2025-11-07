@@ -304,12 +304,12 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
       ref={setNodeRef}
       style={{
         position: 'absolute',
-        left: position === 'before' ? -1 : 'auto',
-        right: position === 'after' ? -1 : 'auto',
+        left: position === 'before' ? -2 : 'auto',
+        right: position === 'after' ? -2 : 'auto',
         top: 0,
         bottom: 0,
-        width: '2px',
-        backgroundColor: isOver ? 'blue' : 'transparent',
+        width: '4px',
+        backgroundColor: isOver ? 'var(--theme-success-400)' : 'transparent',
         marginBottom: '10px',
         marginTop: '10px',
         pointerEvents: 'none',
