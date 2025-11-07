@@ -103,44 +103,54 @@ export function GridLayoutDashboardClient({
               flexWrap: 'wrap',
             }}
           >
-            {currentLayout?.map((widget) => (
-              <SortableItem
-                disabled={!isEditing}
-                dropTargetWidget={
-                  dropTargetWidget?.widget.item.i === widget.item.i ? dropTargetWidget : null
-                }
-                id={widget.item.i}
-                key={widget.item.i}
-                style={{
+            {currentLayout?.map((widget, index) => (
+              <React.Fragment key={widget.item.i}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '-2px',
+                    top: 0,
+                    bottom: 0,
+                    width: '0px',
+                    outline: '2px solid blue',
+                    pointerEvents: 'none',
+                    zIndex: 1000,
+                  }}
+                />
+                <SortableItem
+                  disabled={!isEditing}
+                  id={widget.item.i}
+                  style={{
                     width: `${WIDTH_TO_PERCENTAGE[widget.item.w]}%`,
                     padding: '6px',
-                }}
-              >
-                <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                  <div className="widget-content">{widget.component}</div>
-                  {isEditing && (
-                    <div
-                      className="widget-wrapper__controls"
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
-                      <WidgetWidthDropdown
-                        currentWidth={widget.item.w}
-                        maxW={widget.item.maxW}
-                        minW={widget.item.minW}
-                        onResize={(width) => resizeWidget(widget.item.i, width)}
-                      />
-                      <button
-                        className="widget-wrapper__delete-btn"
-                        onClick={() => deleteWidget(widget.item.i)}
-                        title={`Delete widget ${widget.item.i}`}
-                        type="button"
+                  }}
+                >
+                  <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                    <div className="widget-content">{widget.component}</div>
+                    {isEditing && (
+                      <div
+                        className="widget-wrapper__controls"
+                        onPointerDown={(e) => e.stopPropagation()}
                       >
-                        <XIcon />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </SortableItem>
+                        <WidgetWidthDropdown
+                          currentWidth={widget.item.w}
+                          maxW={widget.item.maxW}
+                          minW={widget.item.minW}
+                          onResize={(width) => resizeWidget(widget.item.i, width)}
+                        />
+                        <button
+                          className="widget-wrapper__delete-btn"
+                          onClick={() => deleteWidget(widget.item.i)}
+                          title={`Delete widget ${widget.item.i}`}
+                          type="button"
+                        >
+                          <XIcon />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </SortableItem>
+              </React.Fragment>
             ))}
             <DragOverlay
               className="drag-overlay"
@@ -249,7 +259,6 @@ function WidgetWidthDropdown({
 function SortableItem(props: {
   children: React.ReactNode
   disabled?: boolean
-  dropTargetWidget?: DropTargetWidget
   id: string
   style?: React.CSSProperties
 }) {
@@ -264,48 +273,16 @@ function SortableItem(props: {
     position: 'relative',
   }
 
-  const showIndicator = props.dropTargetWidget !== null
-
   return (
     <div
+      id={props.id}
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      {...props}
       className="widget"
       style={mergedStyles}
     >
       {props.children}
-      {showIndicator && props.dropTargetWidget?.position === 'before' && (
-        <div
-          className="widget-drop-indicator"
-          style={{
-            position: 'absolute',
-            left: '-0.5rem',
-            top: 0,
-            bottom: 0,
-            width: '4px',
-            backgroundColor: '#3B82F6',
-            pointerEvents: 'none',
-            zIndex: 1000,
-          }}
-        />
-      )}
-      {showIndicator && props.dropTargetWidget?.position === 'after' && (
-        <div
-          className="widget-drop-indicator"
-          style={{
-            position: 'absolute',
-            right: '-0.5rem',
-            top: 0,
-            bottom: 0,
-            width: '4px',
-            backgroundColor: '#3B82F6',
-            pointerEvents: 'none',
-            zIndex: 1000,
-          }}
-        />
-      )}
     </div>
   )
 }
