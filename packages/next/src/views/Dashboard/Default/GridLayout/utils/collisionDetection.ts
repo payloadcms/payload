@@ -2,15 +2,25 @@ import type { CollisionDetection } from '@dnd-kit/core'
 
 /**
  * Collision detection that considers the X
- * axis only with respect to the position of the pointer
+ * axis only with respect to the position of the pointer (or collisionRect for keyboard)
  */
 export const closestInXAxis: CollisionDetection = (args) => {
-  if (!args.pointerCoordinates) {
+  const collisions: Array<{ data: { value: number }; id: string }> = []
+
+  // Use pointer coordinates if available (mouse/touch), otherwise use collisionRect center (keyboard)
+  let x: number
+  let y: number
+
+  if (args.pointerCoordinates) {
+    x = args.pointerCoordinates.x
+    y = args.pointerCoordinates.y
+  } else if (args.collisionRect) {
+    // For keyboard navigation, use the center of the collisionRect
+    x = args.collisionRect.left + args.collisionRect.width / 2
+    y = args.collisionRect.top + args.collisionRect.height / 2
+  } else {
     return []
   }
-
-  const { x, y } = args.pointerCoordinates
-  const collisions: Array<{ data: { value: number }; id: string }> = []
 
   for (const container of args.droppableContainers) {
     const rect = args.droppableRects.get(container.id)
