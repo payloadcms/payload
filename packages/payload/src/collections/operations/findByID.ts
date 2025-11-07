@@ -161,6 +161,7 @@ export const findByIDOperation = async <
         where,
       })
     }
+
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////

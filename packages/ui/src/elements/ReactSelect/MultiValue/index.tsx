@@ -12,7 +12,7 @@ import './index.scss'
 const baseClass = 'multi-value'
 
 export function generateMultiValueDraggableID(optionData, valueFunction) {
-  return typeof valueFunction === 'function' ? valueFunction(optionData) : optionData.value
+  return typeof valueFunction === 'function' ? valueFunction(optionData) : optionData?.value
 }
 export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   const {
@@ -24,8 +24,10 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
     selectProps: { customProps: { disableMouseDown } = {}, getOptionValue, isSortable } = {},
   } = props
 
+  const id = generateMultiValueDraggableID(data, getOptionValue)
+
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
-    id: generateMultiValueDraggableID(data, getOptionValue),
+    id,
     disabled: !isSortable,
   })
 
