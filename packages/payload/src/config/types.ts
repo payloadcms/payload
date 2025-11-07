@@ -1407,17 +1407,19 @@ export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 export type EditConfigWithRoot = {
   api?: never
   default?: never
+  livePreview?: never
   root: DefaultDocumentViewConfig
   version?: never
   versions?: never
 }
 
-type KnownEditKeys = 'api' | 'default' | 'root' | 'version' | 'versions'
+type KnownEditKeys = 'api' | 'default' | 'livePreview' | 'root' | 'version' | 'versions'
 
 /**
  * Replace or modify individual nested routes, or add new ones:
  * + `default` - `/admin/collections/:collection/:id`
  * + `api` - `/admin/collections/:collection/:id/api`
+ * + `livePreview` - `/admin/collections/:collection/:id/preview`
  * + `references` - `/admin/collections/:collection/:id/references`
  * + `relationships` - `/admin/collections/:collection/:id/relationships`
  * + `versions` - `/admin/collections/:collection/:id/versions`
@@ -1433,6 +1435,7 @@ export type EditConfigWithoutRoot = {
 } & {
   api?: DefaultDocumentViewConfig
   default?: DefaultDocumentViewConfig
+  livePreview?: DefaultDocumentViewConfig
   root?: never
   version?: DefaultDocumentViewConfig
   versions?: DefaultDocumentViewConfig

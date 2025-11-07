@@ -81,6 +81,18 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  const LivePreview =
+    collectionConfig?.admin?.components?.views?.edit?.livePreview ||
+    globalConfig?.admin?.components?.views?.edit?.livePreview
+
+  if (LivePreview?.Component) {
+    components.LivePreview = RenderServerComponent({
+      Component: LivePreview.Component,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   const CustomLivePreviewToggler =
     collectionConfig?.admin?.components?.edit?.LivePreviewToggler ||
     globalConfig?.admin?.components?.elements?.LivePreviewToggler
