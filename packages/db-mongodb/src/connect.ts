@@ -108,6 +108,5 @@ export const connect: Connect = async function connect(
       err,
       msg,
     })
-    process.exit(1)
   }
 }
