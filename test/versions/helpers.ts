@@ -1,6 +1,10 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug, GlobalSlug, Payload } from 'payload'
+
+import { toSnakeCase } from 'drizzle-orm/casing'
 
 import type { DraftPost } from './payload-types.js'
+
+import { isMongoose } from '../helpers/isMongoose.js'
 
 /**
  * Creates multiple versions of a document by updating it sequentially
@@ -137,4 +141,29 @@ export async function cleanupDocuments({
       overrideAccess: true,
     })
   }
+}
+
+export async function cleanupGlobal({
+  payload,
+  globalSlug,
+}: {
+  globalSlug: GlobalSlug
+  payload: Payload
+}) {
+  if (isMongoose(payload)) {
+    await payload.db.updateGlobal({
+      slug: globalSlug,
+      data: {
+        title: {},
+        content: {},
+      },
+    })
+  } else {
+    await payload.db.drizzle.delete(payload.db.tables[toSnakeCase(globalSlug)])
+  }
+
+  await payload.db.deleteVersions({
+    globalSlug,
+    where: {},
+  })
 }
