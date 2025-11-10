@@ -11,10 +11,9 @@ type AfterChangeParams = Parameters<CollectionAfterChangeHook>[0]
 export const sendEmail = async (
   afterChangeParameters: AfterChangeParams,
   formConfig: FormBuilderPluginConfig,
-): Promise<AfterChangeParams['data']> => {
-  const { data, operation, req } = afterChangeParameters
-
-  if (operation === 'create') {
+) => {
+  if (afterChangeParameters.operation === 'create') {
+    const { data, req } = afterChangeParameters
     const {
       doc: { id: formSubmissionID },
       req: { locale, payload },
@@ -108,6 +107,4 @@ export const sendEmail = async (
       payload.logger.error({ err, msg })
     }
   }
-
-  return data
 }
