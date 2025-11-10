@@ -99,13 +99,16 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       where: overrideAccess ? undefined : (accessResult as Where),
     })
 
-    // Return empty when access control denies
-    if (!docFromDB && !args.data && !overrideAccess && accessResult !== true) {
+    // Check if no document was returned (Postgres returns {} instead of null)
+    const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+
+    // Return empty if access control denies
+    if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
       return {} as any
     }
 
     // Use provided data, queried doc, or empty object for defaults
-    let doc = (args.data as any) ?? docFromDB ?? {}
+    let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
 
     // /////////////////////////////////////
     // Include Lock Status if required
