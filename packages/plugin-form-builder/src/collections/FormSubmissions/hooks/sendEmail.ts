@@ -13,10 +13,11 @@ export const sendEmail = async (
   formConfig: FormBuilderPluginConfig,
 ) => {
   if (afterChangeParameters.operation === 'create') {
-    const { data, req } = afterChangeParameters
     const {
+      data,
       doc: { id: formSubmissionID },
       req: { locale, payload },
+      req,
     } = afterChangeParameters
 
     const { form: formID, submissionData: submissionDataFromProps } = data || {}
