@@ -1230,13 +1230,17 @@ importers:
         version: link:../payload
 
   packages/plugin-redirects:
+    dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      payload:
+        specifier: workspace:*
+        version: link:../payload
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-search:
     dependencies:
