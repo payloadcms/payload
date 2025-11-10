@@ -1,4 +1,4 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages, Language } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
