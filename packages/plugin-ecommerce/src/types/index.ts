@@ -581,8 +581,6 @@ export type CollectionSlugMap = {
  * ```ts
  *  access: {
  *    isAdmin: ({ req }) => checkRole(['admin'], req.user),
- *    isCustomer: ({ req }) => checkRole(['customer'], req.user),
- *    isGuest: ({ req }) => !req.user,
  *    isAuthenticated: ({ req }) => !!req.user,
  *    isDocumentOwner: ({ req }) => {
  *      if (!req.user) return false
@@ -590,6 +588,10 @@ export type CollectionSlugMap = {
  *    },
  *    adminOnlyFieldAccess: ({ req }) => checkRole(['admin'], req.user),
  *    customerOnlyFieldAccess: ({ req }) => !!req.user,
+ *    adminOrPublishedStatus: ({ req }) => {
+ *      if (checkRole(['admin'], req.user)) return true
+ *      return { _status: { equals: 'published' } }
+ *    },
  *  }
  * ```
  */
@@ -616,11 +618,6 @@ export type AccessConfig = {
    * @returns true if authenticated, false otherwise
    */
   isAuthenticated: Access
-  /**
-   * Checks if the user is a customer.
-   * @returns true if customer, false otherwise
-   */
-  isCustomer: Access
   /**
    * Checks if the user owns the document being accessed.
    * Typically returns a Where query to filter by customer field.
