@@ -53,7 +53,7 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field = Clie
             typeof fieldPermissions === 'boolean'
               ? fieldPermissions
               : 'name' in field && field.name
-                ? fieldPermissions[field.name]?.fields || fieldPermissions[field.name]
+                ? fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name]
                 : fieldPermissions,
           fields: field.fields,
         }),
@@ -68,7 +68,7 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field = Clie
     }
 
     if (fieldAffectsData(field)) {
-      const fieldPermission = fieldPermissions[field.name]
+      const fieldPermission = fieldPermissions?.[field.name]
       // Always allow ID fields, or if explicitly granted (true or { read: true })
       // undefined means field is not in permissions object = denied
       if (fieldIsID(field) || fieldPermission === true || fieldPermission?.read === true) {

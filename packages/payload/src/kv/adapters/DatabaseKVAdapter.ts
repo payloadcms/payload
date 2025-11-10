@@ -27,9 +27,9 @@ export class DatabaseKVAdapter implements KVAdapter {
     })
   }
 
-  async get(key: string): Promise<KVStoreValue | null> {
+  async get<T extends KVStoreValue>(key: string): Promise<null | T> {
     const doc = await this.payload.db.findOne<{
-      data: KVStoreValue
+      data: T
       id: number | string
     }>({
       collection: this.collectionSlug,
@@ -122,6 +122,7 @@ export const databaseKVAdapter = (options: DatabaseKVAdapterOptions = {}): KVAda
           required: true,
         },
       ],
+      lockDocuments: false,
       timestamps: false,
       ...options.kvCollectionOverrides,
     },

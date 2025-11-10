@@ -97,6 +97,7 @@ export interface Config {
     hooks: Hook;
     'auth-collection': AuthCollection;
     'read-restricted': ReadRestricted;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -129,6 +130,7 @@ export interface Config {
     hooks: HooksSelect<false> | HooksSelect<true>;
     'auth-collection': AuthCollectionSelect<false> | AuthCollectionSelect<true>;
     'read-restricted': ReadRestrictedSelect<false> | ReadRestrictedSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -301,6 +303,10 @@ export interface Post {
 export interface Unrestricted {
   id: string;
   name?: string | null;
+  info?: {
+    title?: string | null;
+    description?: string | null;
+  };
   userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
   createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null;
   updatedAt: string;
@@ -831,6 +837,8 @@ export interface ReadRestricted {
     email?: string | null;
     secretPhone?: string | null;
     publicPhone?: string | null;
+    virtualContactName?: string | null;
+    restrictedVirtualContactInfo?: string | null;
   };
   visibleInRow?: string | null;
   restrictedInRow?: string | null;
@@ -865,8 +873,32 @@ export interface ReadRestricted {
     visibleAdvanced?: string | null;
     restrictedAdvanced?: string | null;
   };
+  unrestricted?: (string | null) | Unrestricted;
+  unrestrictedVirtualFieldName?: string | null;
+  unrestrictedVirtualGroupInfo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  restrictedVirtualField?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1106,6 +1138,12 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface UnrestrictedSelect<T extends boolean = true> {
   name?: T;
+  info?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   userRestrictedDocs?: T;
   createNotUpdateDocs?: T;
   updatedAt?: T;
@@ -1497,6 +1535,8 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
         email?: T;
         secretPhone?: T;
         publicPhone?: T;
+        virtualContactName?: T;
+        restrictedVirtualContactInfo?: T;
       };
   visibleInRow?: T;
   restrictedInRow?: T;
@@ -1541,8 +1581,25 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
         visibleAdvanced?: T;
         restrictedAdvanced?: T;
       };
+  unrestricted?: T;
+  unrestrictedVirtualFieldName?: T;
+  unrestrictedVirtualGroupInfo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  restrictedVirtualField?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
