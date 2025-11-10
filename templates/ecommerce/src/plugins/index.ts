@@ -15,6 +15,7 @@ import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { adminOnly } from '@/access/adminOnly'
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
+import { isAdmin, isAuthenticated, isCustomer, isDocumentOwner } from '@/access/checkers'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -67,11 +68,19 @@ export const plugins: Plugin[] = [
   }),
   ecommercePlugin({
     access: {
-      adminOnly,
       adminOnlyFieldAccess,
-      adminOrCustomerOwner,
       adminOrPublishedStatus,
       customerOnlyFieldAccess,
+      isAdmin,
+      isAuthenticated,
+      isCustomer,
+      isDocumentOwner,
+    },
+    carts: {
+      // Enable guest cart creation for better user experience
+      // Guests can create carts without logging in, which is useful for
+      // anonymous checkout flows
+      allowGuestCarts: true,
     },
     customers: {
       slug: 'users',
