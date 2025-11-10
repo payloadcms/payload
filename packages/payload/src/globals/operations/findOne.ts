@@ -9,6 +9,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -78,6 +79,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
     if (!overrideAccess) {
       accessResult = await executeAccess({ req }, globalConfig.access.read)
+    }
+
+    if (accessResult === false) {
+      throw new NotFound(req.t)
     }
 
     const select = sanitizeSelect({
