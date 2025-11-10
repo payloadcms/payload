@@ -144,7 +144,7 @@ export const deleteOperation = async <
       try {
         // Each document gets its own transaction when singleTransaction is enabled
         let docShouldCommit = false
-        if (collectionConfig.bulkOperations?.singleTransaction) {
+        if (req.payload.db.bulkOperationsSingleTransaction) {
           docShouldCommit = await initTransaction(req)
         }
 
@@ -288,7 +288,7 @@ export const deleteOperation = async <
       } catch (error) {
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
-        if (collectionConfig.bulkOperations?.singleTransaction) {
+        if (req.payload.db.bulkOperationsSingleTransaction) {
           await killTransaction(req)
         }
         errors.push({
@@ -303,7 +303,7 @@ export const deleteOperation = async <
     // Process sequentially when using single transaction mode to avoid shared state issues
     // Process in parallel when using one transaction for better performance
     let awaitedDocs
-    if (collectionConfig.bulkOperations?.singleTransaction) {
+    if (req.payload.db.bulkOperationsSingleTransaction) {
       awaitedDocs = []
       for (const promise of promises) {
         awaitedDocs.push(await promise)
