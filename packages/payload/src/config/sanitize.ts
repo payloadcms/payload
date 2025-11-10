@@ -176,6 +176,35 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       i18nConfig.translations
   }
 
+  // Inject custom translations from i18n.translations into supportedLanguages
+  // This allows label functions like ({ t }) => t('namespace:key') to work with custom translations
+  // that users define in their config, not just the default translations from @payloadcms/translations
+  if (i18nConfig.translations && typeof i18nConfig.translations === 'object') {
+    Object.keys(i18nConfig.translations).forEach((lang) => {
+      const langKey = lang as AcceptedLanguages
+      const customTranslations = i18nConfig.translations[langKey]
+
+      if (customTranslations && typeof customTranslations === 'object') {
+        const existingLang = i18nConfig.supportedLanguages[langKey]
+
+        if (existingLang) {
+          // Language exists - merge custom translations with existing
+          const merged = deepMergeSimple(existingLang.translations || {}, customTranslations)
+          // @ts-expect-error - merging custom translations into language config
+          i18nConfig.supportedLanguages[langKey] = { ...existingLang, translations: merged }
+        } else {
+          // Language doesn't exist - create it using 'en' as template
+          // Merge en.translations (general, authentication, etc.) with custom translations
+          const mergedTranslations = deepMergeSimple(en.translations, customTranslations)
+          i18nConfig.supportedLanguages[langKey] = {
+            ...en,
+            translations: mergedTranslations,
+          } as any
+        }
+      }
+    })
+  }
+
   config.i18n = i18nConfig
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
