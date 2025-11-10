@@ -3467,9 +3467,9 @@ describe('Localization', () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
-          deeplyNested: {
-            innerGroup: {
-              innerArray: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
+          g1: {
+            g2: {
+              g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
             },
           },
           localizedArray: [{ item: 'EN Item 1' }, { item: 'EN Item 2' }],
@@ -3535,7 +3535,7 @@ describe('Localization', () => {
       expect((allLocalesDoc.localizedBlocks as any).en).toHaveLength(2)
       expect((allLocalesDoc.localizedBlocks as any).en[0].text).toBe('EN Text')
       expect((allLocalesDoc.localizedBlocks as any).en[1].nestedArray[0].item).toBe('EN Nested')
-      expect((allLocalesDoc.localizedBlocks as any).es).toHaveLength(0)
+      expect((allLocalesDoc.localizedBlocks as any).es).toBeUndefined()
 
       // Verify localized named tabs have locale keys at top level
       expect((allLocalesDoc.localizedTab as any).en).toBeDefined()
@@ -3543,10 +3543,10 @@ describe('Localization', () => {
       expect((allLocalesDoc.localizedTab as any).es).toBeUndefined()
 
       // Verify deeply nested localization has locale keys only at topmost localized field
-      expect((allLocalesDoc.deeplyNested as any).en).toBeDefined()
-      expect((allLocalesDoc.deeplyNested as any).en.innerGroup.innerArray).toHaveLength(2)
-      expect((allLocalesDoc.deeplyNested as any).en.innerGroup.innerArray[0].text).toBe('EN Deep 1')
-      expect((allLocalesDoc.deeplyNested as any).es).toBeUndefined()
+      expect((allLocalesDoc.g1 as any).en).toBeDefined()
+      expect((allLocalesDoc.g1 as any).en.g2.g2a1).toHaveLength(2)
+      expect((allLocalesDoc.g1 as any).en.g2.g2a1[0].text).toBe('EN Deep 1')
+      expect((allLocalesDoc.g1 as any).es).toBeUndefined()
     })
   })
   describe('specific locales', () => {

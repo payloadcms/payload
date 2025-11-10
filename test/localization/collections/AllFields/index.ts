@@ -206,15 +206,16 @@ export const AllFieldsLocalized: CollectionConfig = {
 
     // Deeply nested: localized group > non-localized group > localized array
     {
-      name: 'deeplyNested',
+      name: 'g1',
       type: 'group',
+      label: 'Deeply Nested Group',
       fields: [
         {
-          name: 'innerGroup',
+          name: 'g2',
           type: 'group',
           fields: [
             {
-              name: 'innerArray',
+              name: 'g2a1',
               type: 'array',
               fields: [
                 {
