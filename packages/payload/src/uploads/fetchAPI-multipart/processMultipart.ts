@@ -162,7 +162,16 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       request[waitFlushProperty].push(writePromise)
 
       if (filesCompleted === fileCount) {
-        allFilesHaveResolved()
+        // Wait for files to be fully written.
+        Promise.all(request[waitFlushProperty])
+          .then(() => {
+            delete request[waitFlushProperty]
+            allFilesHaveResolved()
+          })
+          .catch((err) => {
+            debugLog(options, `Error waiting for file write promises: ${err}`)
+            failedResolvingFiles(err)
+          })
       }
     })
 
@@ -178,21 +187,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     uploadTimer.set()
   })
 
-  busboy.on('finish', async () => {
+  busboy.on('finish', () => {
     debugLog(options, `Busboy finished parsing request.`)
     if (options.parseNested) {
       result.fields = processNested(result.fields)
       result.files = processNested(result.files)
-    }
-
-    if (request[waitFlushProperty]) {
-      try {
-        await Promise.all(request[waitFlushProperty]).then(() => {
-          delete request[waitFlushProperty]
-        })
-      } catch (err) {
-        debugLog(options, `Error waiting for file write promises: ${err}`)
-      }
     }
 
     return result
