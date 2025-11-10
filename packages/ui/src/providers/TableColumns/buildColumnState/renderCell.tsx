@@ -104,9 +104,17 @@ export function renderCell({
     }
   }
 
+  // For _status field, use _displayStatus if available (for showing "changed" status in list view)
+  const cellData =
+    'name' in clientField && accessor === '_status' && '_displayStatus' in doc
+      ? doc._displayStatus
+      : 'name' in clientField
+        ? findValueFromPath(doc, accessor)
+        : undefined
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
+    cellData,
     link: shouldLink,
     linkURL: customLinkURL,
     rowData: doc,

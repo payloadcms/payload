@@ -10,6 +10,10 @@ export const statuses: Option[] = [
     label: ({ t }) => t('version:published'),
     value: 'published',
   },
+  {
+    label: ({ t }) => t('version:changed'),
+    value: 'changed',
+  },
 ]
 
 export const baseVersionFields: Field[] = [
