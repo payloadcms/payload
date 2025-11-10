@@ -45,7 +45,7 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       name: 'Anchor Bar',
       domain: 'anchorbar.com',
-      locales: ['en'],
+      selectedLocales: ['en'],
     },
   })
   const publicTenant = await payload.create({

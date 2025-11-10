@@ -141,7 +141,7 @@ export interface Tenant {
     totalDocs?: number;
   };
   isPublic?: boolean | null;
-  locales?: ('allLocales' | 'en' | 'es' | 'fr')[] | null;
+  selectedLocales?: ('allLocales' | 'en' | 'es' | 'fr')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -349,7 +349,7 @@ export interface TenantsSelect<T extends boolean = true> {
   domain?: T;
   users?: T;
   isPublic?: T;
-  locales?: T;
+  selectedLocales?: T;
   updatedAt?: T;
   createdAt?: T;
 }

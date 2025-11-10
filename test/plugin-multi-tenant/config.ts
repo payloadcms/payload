@@ -74,11 +74,17 @@ export default buildConfigWithDefaults({
           collection: 'tenants',
           id: tenant,
         })
-        if (fullTenant && Array.isArray(fullTenant.locales) && fullTenant.locales.length > 0) {
-          if (fullTenant.locales.includes('allLocales')) {
+        if (
+          fullTenant &&
+          Array.isArray(fullTenant.selectedLocales) &&
+          fullTenant.selectedLocales.length > 0
+        ) {
+          if (fullTenant.selectedLocales.includes('allLocales')) {
             return locales
           }
-          return locales.filter((locale) => fullTenant.locales?.includes(locale.code as any))
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
         }
       }
       return locales

@@ -83,7 +83,7 @@ export const Tenants: CollectionConfig = {
       label: 'Public Tenant',
     },
     {
-      name: 'locales',
+      name: 'selectedLocales',
       type: 'select',
       hasMany: true,
       defaultValue: ['allLocales'],
