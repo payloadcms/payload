@@ -173,8 +173,8 @@ export const findByIDOperation = async <
     // Query the document first
     const docFromDB = await req.payload.db.findOne(findOneArgs)
 
-    // Return NotFound when access control denies
-    if (!docFromDB && !args.data && !overrideAccess && accessResult !== true) {
+    // Return NotFound if no document and no data provided
+    if (!docFromDB && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
@@ -184,14 +184,6 @@ export const findByIDOperation = async <
     // Use provided data or queried doc
     let result: DataFromCollectionSlug<TSlug> =
       (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
-
-    if (!result) {
-      if (!disableErrors) {
-        throw new NotFound(req.t)
-      }
-
-      return null!
-    }
 
     // /////////////////////////////////////
     // Include Lock Status if required
