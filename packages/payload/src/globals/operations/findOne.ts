@@ -99,6 +99,15 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         select,
         where: overrideAccess ? undefined : (accessResult as Where),
       }))
+
+    // Track if the global was filtered out by access control.
+    // This happens when:
+    // 1. Access control explicitly returned false
+    // 2. Access control returned a Where constraint and the query returned no document
+    // This is different from a global that was never created, where accessResult would be true.
+    const globalAccessDenied =
+      !overrideAccess && (accessResult === false || (!doc && accessResult !== true))
+
     if (!doc) {
       doc = {}
     }
@@ -209,6 +218,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       fallbackLocale: fallbackLocale!,
       flattenLocales,
       global: globalConfig,
+      globalAccessDenied,
       locale: locale!,
       overrideAccess,
       populate,

@@ -32,6 +32,7 @@ type Args = {
   findMany: boolean
   flattenLocales: boolean
   global: null | SanitizedGlobalConfig
+  globalAccessDenied?: boolean
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
@@ -66,6 +67,7 @@ export const traverseFields = ({
   findMany,
   flattenLocales,
   global,
+  globalAccessDenied = false,
   locale,
   overrideAccess,
   parentIndexPath,
@@ -99,6 +101,7 @@ export const traverseFields = ({
         findMany,
         flattenLocales,
         global,
+        globalAccessDenied,
         locale,
         overrideAccess,
         parentIndexPath,
