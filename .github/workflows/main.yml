@@ -322,6 +322,7 @@ jobs:
           - plugin-import-export
           - plugin-multi-tenant
           - plugin-nested-docs
+          - plugin-redirects
           - plugin-seo
           - sort
           - trash
