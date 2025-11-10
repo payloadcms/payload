@@ -263,7 +263,7 @@ job.taskStatus = {
 
 ### Workflow best practices
 
-**Use descriptive task IDs**
+#### Use descriptive task IDs
 
 ```ts
 // Hard to debug
@@ -275,7 +275,7 @@ await tasks.sendEmail('send-welcome-email', { input })
 await tasks.updateUser('mark-onboarding-complete', { input })
 ```
 
-**Keep tasks small and focused**
+#### Keep tasks small and focused
 
 ```ts
 // Task does too much
@@ -295,7 +295,7 @@ await tasks.sendEmail('send-email', { input }) // Can retry independently
 await tasks.addToMailingList('add-to-list', { input })
 ```
 
-**Pass IDs, not entire objects**
+#### Pass IDs, not entire objects
 
 ```ts
 // Passing large objects
@@ -316,14 +316,14 @@ await tasks.processUser('process', {
 // Task fetches what it needs: await req.payload.findByID(...)
 ```
 
-**Set appropriate retry counts**
+#### Set appropriate retry counts
 
 - **External APIs** (email, payment processors): Higher retries (3-5) - services can be temporarily unavailable
 - **Database operations**: Lower retries (1-2) - usually succeed or fail permanently
 - **Idempotent operations** (safe to run multiple times): Higher retries are safe
 - **Non-idempotent operations** (creates, charges, sends): Lower retries to avoid duplicates
 
-**Handle errors with context**
+#### Handle errors with context
 
 ```ts
 handler: async ({ input, req }) => {
