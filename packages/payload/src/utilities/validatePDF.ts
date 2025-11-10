@@ -1,21 +1,15 @@
 export function validatePDF(buffer: Buffer) {
-  const text = buffer.toString('latin1')
-
-  // Header must exist at start
-  if (!text.startsWith('%PDF-1.')) {
+  // Check for PDF header
+  const header = buffer.subarray(0, 8).toString('latin1')
+  if (!header.startsWith('%PDF-')) {
     return false
   }
 
-  // EOF marker must exist near end of file
-  if (!text.includes('%%EOF')) {
-    return false
-  }
+  // Check for EOF marker and xref table
+  const endSize = Math.min(1024, buffer.length)
+  const end = buffer.subarray(buffer.length - endSize).toString('latin1')
 
-  // Must contain at least one object and endobj pair
-  if (!text.match(/\d+\s+\d+\s+obj/)) {
-    return false
-  }
-  if (!text.includes('endobj')) {
+  if (!end.includes('%%EOF') || !end.includes('xref')) {
     return false
   }
 
