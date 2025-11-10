@@ -994,6 +994,12 @@ export interface DateField {
    */
   dayAndTimeWithTimezone: string;
   dayAndTimeWithTimezone_tz: SupportedTimezones;
+  dayAndTimeWithTimezoneFixed?: string | null;
+  dayAndTimeWithTimezoneFixed_tz?: SupportedTimezones;
+  dayAndTimeWithTimezoneRequired?: string | null;
+  dayAndTimeWithTimezoneRequired_tz: SupportedTimezones;
+  dayAndTimeWithTimezoneReadOnly?: string | null;
+  dayAndTimeWithTimezoneReadOnly_tz?: SupportedTimezones;
   timezoneBlocks?:
     | {
         dayAndTime?: string | null;
@@ -1010,6 +1016,10 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  timezoneGroup?: {
+    dayAndTime?: string | null;
+    dayAndTime_tz?: SupportedTimezones;
+  };
   array?:
     | {
         date?: string | null;
@@ -1707,7 +1717,18 @@ export interface Uploads3 {
 export interface UploadsMulti {
   id: string;
   text?: string | null;
-  media?: (string | Upload)[] | null;
+  media?:
+    | (
+        | {
+            relationTo: 'uploads';
+            value: string | Upload;
+          }
+        | {
+            relationTo: 'uploads2';
+            value: string | Uploads2;
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2715,6 +2736,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
   defaultWithTimezone_tz?: T;
   dayAndTimeWithTimezone?: T;
   dayAndTimeWithTimezone_tz?: T;
+  dayAndTimeWithTimezoneFixed?: T;
+  dayAndTimeWithTimezoneFixed_tz?: T;
+  dayAndTimeWithTimezoneRequired?: T;
+  dayAndTimeWithTimezoneRequired_tz?: T;
+  dayAndTimeWithTimezoneReadOnly?: T;
+  dayAndTimeWithTimezoneReadOnly_tz?: T;
   timezoneBlocks?:
     | T
     | {
@@ -2733,6 +2760,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
         dayAndTime?: T;
         dayAndTime_tz?: T;
         id?: T;
+      };
+  timezoneGroup?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_tz?: T;
       };
   array?:
     | T

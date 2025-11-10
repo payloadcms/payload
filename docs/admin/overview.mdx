@@ -312,19 +312,19 @@ const config = buildConfig({
     timezones: {
       supportedTimezones: [
         {
-          label: "Europe/Dublin",
-          value: "Europe/Dublin",
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
         },
         {
-          label: "Europe/Amsterdam",
-          value: "Europe/Amsterdam",
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
         },
         {
-          label: "Europe/Bucharest",
-          value: "Europe/Bucharest",
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
         },
       ],
-      defaultTimezone: "Europe/Amsterdam",
+      defaultTimezone: 'Europe/Amsterdam',
     },
   },
 })
@@ -341,8 +341,9 @@ The `admin.toast` configuration allows you to customize the handling of toast me
 
 The following options are available for the `admin.toast` configuration:
 
-| Option     | Description                                                                                                      | Default |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
-| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`  |
-| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false` |
-| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`     |
+| Option     | Description                                                                                                      | Default        |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | -------------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`         |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false`        |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`            |
+| `position` | The position of the toast on the screen.                                                                         | `bottom-right` |

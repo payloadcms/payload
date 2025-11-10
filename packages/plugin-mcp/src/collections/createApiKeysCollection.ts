@@ -106,6 +106,7 @@ const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collectio
               ]
             : []),
         ],
+        label: false as const,
       },
     ],
     label: `${enabledCollectionSlug.charAt(0).toUpperCase() + toCamelCase(enabledCollectionSlug).slice(1)}`,
@@ -116,6 +117,7 @@ export const createAPIKeysCollection = (
   collections: PluginMCPServerConfig['collections'],
   customTools: Array<{ description: string; name: string }> = [],
   experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] = {},
+  pluginOptions: PluginMCPServerConfig,
 ): CollectionConfig => {
   const customToolsFields = customTools.map((tool) => {
     const camelCasedName = toCamelCase(tool.name)
@@ -129,6 +131,40 @@ export const createAPIKeysCollection = (
       label: camelCasedName,
     }
   })
+
+  const customResourceFields =
+    pluginOptions.mcp?.resources?.map((resource) => {
+      const camelCasedName = toCamelCase(resource.name)
+      return {
+        name: camelCasedName,
+        type: 'checkbox' as const,
+        admin: {
+          description: resource.description,
+        },
+        defaultValue: true,
+        label: camelCasedName,
+      }
+    }) || []
+
+  const customPromptFields =
+    pluginOptions.mcp?.prompts?.map((prompt) => {
+      const camelCasedName = toCamelCase(prompt.name)
+      return {
+        name: camelCasedName,
+        type: 'checkbox' as const,
+        admin: {
+          description: prompt.description,
+        },
+        defaultValue: true,
+        label: camelCasedName,
+      }
+    }) || []
+
+  const userCollection = pluginOptions.userCollection
+    ? typeof pluginOptions.userCollection === 'string'
+      ? pluginOptions.userCollection
+      : pluginOptions.userCollection.slug
+    : 'users'
 
   return {
     slug: 'payload-mcp-api-keys',
@@ -147,7 +183,7 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        relationTo: 'users',
+        relationTo: userCollection,
         required: true,
       },
       {
@@ -176,12 +212,53 @@ export const createAPIKeysCollection = (
               },
               fields: [
                 {
-                  name: 'custom',
+                  name: 'payload-mcp-tool',
                   type: 'group' as const,
                   fields: customToolsFields,
+                  label: false as const,
                 },
               ],
-              label: 'Custom Tools',
+              label: 'Tools',
+            },
+          ]
+        : []),
+
+      ...(pluginOptions.mcp?.resources && pluginOptions.mcp?.resources.length > 0
+        ? [
+            {
+              type: 'collapsible' as const,
+              admin: {
+                position: 'sidebar' as const,
+              },
+              fields: [
+                {
+                  name: 'payload-mcp-resource',
+                  type: 'group' as const,
+                  fields: customResourceFields,
+                  label: false as const,
+                },
+              ],
+              label: 'Resources',
+            },
+          ]
+        : []),
+
+      ...(pluginOptions.mcp?.prompts && pluginOptions.mcp?.prompts.length > 0
+        ? [
+            {
+              type: 'collapsible' as const,
+              admin: {
+                position: 'sidebar' as const,
+              },
+              fields: [
+                {
+                  name: 'payload-mcp-prompt',
+                  type: 'group' as const,
+                  fields: customPromptFields,
+                  label: false as const,
+                },
+              ],
+              label: 'Prompts',
             },
           ]
         : []),
