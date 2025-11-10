@@ -455,7 +455,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     copyTo: 'Копирай в',
     copyToLocale: 'Копирайте в местното',
     localeToPublish: 'Местоположение за публикуване',
+    selectedLocales: 'Избрани локали',
     selectLocaleToCopy: 'Изберете място за копиране',
+    selectLocaleToDuplicate: 'Изберете локации за дублиране',
   },
   operators: {
     contains: 'съдържа',

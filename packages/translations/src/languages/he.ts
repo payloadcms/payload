@@ -444,7 +444,9 @@ export const heTranslations: DefaultTranslationsObject = {
     copyTo: 'העתק אל',
     copyToLocale: 'העתק למקום',
     localeToPublish: 'מיקום לפרסום',
+    selectedLocales: 'אזורים נבחרים',
     selectLocaleToCopy: 'בחר מיקום להעתקה',
+    selectLocaleToDuplicate: 'בחר שפות לשכפול',
   },
   operators: {
     contains: 'מכיל',

@@ -56,6 +56,7 @@ const getApiKey = async (): Promise<string> => {
       enableAPIKey: true,
       label: 'Test API Key',
       posts: { find: true, create: true },
+      products: { find: true },
       apiKey: randomUUID(),
       user: userId,
     },
@@ -93,6 +94,7 @@ describe('@payloadcms/plugin-mcp', () => {
         enableAPIKey: true,
         label: 'Test API Key',
         posts: { find: true, create: true },
+        products: { find: true },
         apiKey: randomUUID(),
         user: userId,
       },
@@ -105,8 +107,11 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(doc.label).toBe('Test API Key')
     expect(doc.posts?.find).toBe(true)
     expect(doc.posts?.create).toBe(true)
-    expect(doc.custom?.diceRoll).toBe(true)
-    expect(doc.products?.find).toBe(false)
+    expect(doc['payload-mcp-tool']?.['diceRoll']).toBe(true)
+    expect(doc['payload-mcp-resource']?.['data']).toBe(true)
+    expect(doc['payload-mcp-resource']?.['dataByID']).toBe(true)
+    expect(doc['payload-mcp-prompt']?.['echo']).toBe(true)
+    expect(doc.products?.find).toBe(true)
     expect(doc.products?.create).toBe(false)
     expect(doc.products?.update).toBe(false)
     expect(doc.products?.delete).toBe(false)
@@ -171,32 +176,32 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     const json = await parseStreamResponse(response)
-
     expect(json).toBeDefined()
     expect(json.id).toBe(1)
     expect(json.jsonrpc).toBe('2.0')
     expect(json.result).toBeDefined()
     expect(json.result.tools).toBeDefined()
-    expect(json.result.tools).toHaveLength(3)
-    expect(json.result.tools[0].name).toBe('createPosts')
-    expect(json.result.tools[0].description).toContain('Create a document in a Payload collection.')
+    expect(json.result.tools).toHaveLength(4)
+    expect(json.result.tools[0].name).toBe('findProducts')
     expect(json.result.tools[0].description).toContain(
-      'This is a Payload collection with Post documents.',
+      'Find documents in a collection by ID or where clause using Find or FindByID.',
     )
     expect(json.result.tools[0].inputSchema).toBeDefined()
-    expect(json.result.tools[1].name).toBe('findPosts')
-    expect(json.result.tools[1].description).toContain(
-      'Find documents in a Payload collection using Find or FindByID.',
-    )
+    expect(json.result.tools[1].name).toBe('createPosts')
     expect(json.result.tools[1].description).toContain(
       'This is a Payload collection with Post documents.',
     )
     expect(json.result.tools[1].inputSchema).toBeDefined()
-    expect(json.result.tools[2].name).toBe('diceRoll')
+    expect(json.result.tools[2].name).toBe('findPosts')
     expect(json.result.tools[2].description).toContain(
-      'Rolls a virtual dice with a specified number of sides',
+      'This is a Payload collection with Post documents.',
     )
     expect(json.result.tools[2].inputSchema).toBeDefined()
+    expect(json.result.tools[3].name).toBe('diceRoll')
+    expect(json.result.tools[3].description).toContain(
+      'Rolls a virtual dice with a specified number of sides',
+    )
+    expect(json.result.tools[3].inputSchema).toBeDefined()
   })
 
   it('should list resources', async () => {

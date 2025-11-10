@@ -46,7 +46,6 @@ export const packagePublishList = [
 
   // Plugins
   'payload-cloud',
-  'plugin-cloud',
   'plugin-cloud-storage',
   'plugin-ecommerce',
   'plugin-form-builder',

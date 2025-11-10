@@ -143,33 +143,36 @@ export async function VersionView(props: DocumentViewServerProps) {
         })
       : Promise.resolve(null),
     // Previous published version
-    fetchVersions({
-      collectionSlug,
-      depth: 0,
-      draft: true,
-      globalSlug,
-      limit: 1,
-      locale: 'all',
-      overrideAccess: false,
-      parentID: id,
-      req,
-      sort: '-updatedAt',
-      user,
-      where: {
-        and: [
-          {
-            updatedAt: {
-              less_than: versionTo.updatedAt,
-            },
+    // Only query for published versions if drafts are enabled (since _status field only exists with drafts)
+    draftsEnabled
+      ? fetchVersions({
+          collectionSlug,
+          depth: 0,
+          draft: true,
+          globalSlug,
+          limit: 1,
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
+          req,
+          sort: '-updatedAt',
+          user,
+          where: {
+            and: [
+              {
+                updatedAt: {
+                  less_than: versionTo.updatedAt,
+                },
+              },
+              {
+                'version._status': {
+                  equals: 'published',
+                },
+              },
+            ],
           },
-          {
-            'version._status': {
-              equals: 'published',
-            },
-          },
-        ],
-      },
-    }),
+        })
+      : Promise.resolve(null),
   ])
 
   const previousVersion: null | TypeWithVersion<object> = previousVersionResult?.docs?.[0] ?? null
