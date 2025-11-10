@@ -94,7 +94,7 @@ export default buildConfig({
 
 ### Common Task Patterns
 
-**Database Operations**
+#### Database Operations
 
 Creating or updating documents based on other document changes:
 
@@ -140,7 +140,7 @@ Creating or updating documents based on other document changes:
 }
 ```
 
-**External API Calls**
+#### External API Calls
 
 Calling third-party services without blocking your API:
 
@@ -182,7 +182,7 @@ Calling third-party services without blocking your API:
 }
 ```
 
-**Conditional Failure**
+#### Conditional Failure
 
 Sometimes you want to fail a task based on business logic:
 
@@ -222,7 +222,7 @@ Sometimes you want to fail a task based on business logic:
 
 ### Understanding Task Execution
 
-**When a task runs:**
+#### When a task runs
 
 1. The job is picked up from the queue by a worker
 2. The handler function executes with the provided input
@@ -357,7 +357,7 @@ export default buildConfig({
 })
 ```
 
-## Nested tasks
+### Nested tasks
 
 You can run sub-tasks within an existing task, by using the `tasks` or `inlineTask` arguments passed to the task `handler` function:
 

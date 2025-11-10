@@ -17,7 +17,7 @@ If a task within a workflow fails, the Workflow will automatically "pick back up
 
 ### Why use Workflows?
 
-**Single Task vs Workflow:**
+#### Single Task vs Workflow
 
 If you only need to run one operation, use a single [Task](/docs/jobs-queue/tasks). But if you need multiple steps that depend on each other, use a Workflow.
 
@@ -189,7 +189,7 @@ handler: async ({ job, tasks }) => {
 }
 ```
 
-**Scenario: Email service is down**
+#### Scenario: Email service is down
 
 First execution attempt:
 
