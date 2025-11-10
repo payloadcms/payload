@@ -25,6 +25,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
   args: MarkOptional<
     T,
     | 'allowIDOnCreate'
+    | 'bulkOperationsSingleTransaction'
     | 'createMigration'
     | 'migrate'
     | 'migrateDown'
@@ -56,5 +57,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     ...args,
     // Ensure migrationDir is set
     migrationDir: args.migrationDir || 'migrations',
+    // Set default for bulkOperationsSingleTransaction if not provided
+    bulkOperationsSingleTransaction: args.bulkOperationsSingleTransaction ?? false,
   } as T
 }
