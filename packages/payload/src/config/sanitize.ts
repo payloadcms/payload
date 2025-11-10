@@ -199,7 +199,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
           i18nConfig.supportedLanguages[langKey] = {
             ...en,
             translations: mergedTranslations,
-          } as any
+          } as Language<typeof en.translations>
         }
       }
     })
