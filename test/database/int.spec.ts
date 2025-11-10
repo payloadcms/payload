@@ -2011,13 +2011,9 @@ describe('database', () => {
       expect(worldDocs).toHaveLength(5)
     })
 
-    it('should bulk update with singleTransaction: true', async () => {
-      const collectionConfig = payload.config.collections.find((c) => c.slug === collection)
-
-      assert(collectionConfig)
-
-      const originalConfig = collectionConfig.bulkOperations
-      collectionConfig.bulkOperations = { singleTransaction: true }
+    it('should bulk update with bulkOperationsSingleTransaction: true', async () => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      payload.db.bulkOperationsSingleTransaction = true
 
       try {
         const posts = await Promise.all([
@@ -2035,17 +2031,13 @@ describe('database', () => {
         expect(result.docs).toHaveLength(3)
         expect(result.errors).toHaveLength(0)
       } finally {
-        collectionConfig.bulkOperations = originalConfig
+        payload.db.bulkOperationsSingleTransaction = originalValue
       }
     })
 
-    it('should bulk delete with singleTransaction: true', async () => {
-      const collectionConfig = payload.config.collections.find((c) => c.slug === collection)
-
-      assert(collectionConfig)
-
-      const originalConfig = collectionConfig.bulkOperations
-      collectionConfig.bulkOperations = { singleTransaction: true }
+    it('should bulk delete with bulkOperationsSingleTransaction: true', async () => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      payload.db.bulkOperationsSingleTransaction = true
 
       try {
         const posts = await Promise.all([
@@ -2061,7 +2053,7 @@ describe('database', () => {
         expect(result.docs).toHaveLength(2)
         expect(result.errors).toHaveLength(0)
       } finally {
-        collectionConfig.bulkOperations = originalConfig
+        payload.db.bulkOperationsSingleTransaction = originalValue
       }
     })
 
