@@ -90,27 +90,22 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc =
-      (args.data as any) ??
-      (await req.payload.db.findGlobal({
-        slug,
-        locale: locale!,
-        req,
-        select,
-        where: overrideAccess ? undefined : (accessResult as Where),
-      }))
+    // Query the global first
+    const docFromDB = await req.payload.db.findGlobal({
+      slug,
+      locale: locale!,
+      req,
+      select,
+      where: overrideAccess ? undefined : (accessResult as Where),
+    })
 
-    // Track if the global was filtered out by access control.
-    // This happens when:
-    // 1. Access control explicitly returned false
-    // 2. Access control returned a Where constraint and the query returned no document
-    // This is different from a global that was never created, where accessResult would be true.
-    const globalAccessDenied =
-      !overrideAccess && (accessResult === false || (!doc && accessResult !== true))
-
-    if (!doc) {
-      doc = {}
+    // Return empty when access control denies
+    if (!docFromDB && !args.data && !overrideAccess && accessResult !== true) {
+      return {} as any
     }
+
+    // Use provided data, queried doc, or empty object for defaults
+    let doc = (args.data as any) ?? docFromDB ?? {}
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -218,7 +213,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       fallbackLocale: fallbackLocale!,
       flattenLocales,
       global: globalConfig,
-      globalAccessDenied,
       locale: locale!,
       overrideAccess,
       populate,

@@ -42,7 +42,6 @@ type Args = {
   fieldPromises: Promise<void>[]
   findMany: boolean
   global: null | SanitizedGlobalConfig
-  globalAccessDenied?: boolean
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
@@ -87,7 +86,6 @@ export const promise = async ({
   findMany,
   flattenLocales,
   global,
-  globalAccessDenied = false,
   locale,
   overrideAccess,
   parentIndexPath,
@@ -376,17 +374,11 @@ export const promise = async ({
 
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default.
-
-    // Skip setting defaults when access control has explicitly denied access to the global.
-    // This prevents default values like `_status: 'draft'` from appearing when access control
-    // filters out the document. The globalAccessDenied flag is set by the findOne operation
-    // when access control returns false OR when it returns a Where constraint that filters the document.
     if (
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
-      typeof field.defaultValue !== 'undefined' &&
-      !globalAccessDenied
+      typeof field.defaultValue !== 'undefined'
     ) {
       siblingDoc[field.name!] = await getDefaultValue({
         defaultValue: field.defaultValue,
@@ -446,7 +438,6 @@ export const promise = async ({
             findMany,
             flattenLocales,
             global,
-            globalAccessDenied,
             locale,
             overrideAccess,
             parentIndexPath: '',
@@ -482,7 +473,6 @@ export const promise = async ({
                 findMany,
                 flattenLocales,
                 global,
-                globalAccessDenied,
                 locale,
                 overrideAccess,
                 parentIndexPath: '',
@@ -544,7 +534,6 @@ export const promise = async ({
               findMany,
               flattenLocales,
               global,
-              globalAccessDenied,
               locale,
               overrideAccess,
               parentIndexPath: '',
@@ -590,7 +579,6 @@ export const promise = async ({
                   findMany,
                   flattenLocales,
                   global,
-                  globalAccessDenied,
                   locale,
                   overrideAccess,
                   parentIndexPath: '',
@@ -634,7 +622,6 @@ export const promise = async ({
         findMany,
         flattenLocales,
         global,
-        globalAccessDenied,
         locale,
         overrideAccess,
         parentIndexPath: indexPath,
@@ -679,7 +666,6 @@ export const promise = async ({
           findMany,
           flattenLocales,
           global,
-          globalAccessDenied,
           locale,
           overrideAccess,
           parentIndexPath: '',
@@ -711,7 +697,6 @@ export const promise = async ({
           findMany,
           flattenLocales,
           global,
-          globalAccessDenied,
           locale,
           overrideAccess,
           parentIndexPath: indexPath,
@@ -862,7 +847,6 @@ export const promise = async ({
         findMany,
         flattenLocales,
         global,
-        globalAccessDenied,
         locale,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
@@ -898,7 +882,6 @@ export const promise = async ({
         findMany,
         flattenLocales,
         global,
-        globalAccessDenied,
         locale,
         overrideAccess,
         parentIndexPath: indexPath,

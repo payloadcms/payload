@@ -23,12 +23,6 @@ export type AfterReadArgs<T extends JsonObject> = {
    */
   flattenLocales?: boolean
   global: null | SanitizedGlobalConfig
-  /**
-   * Indicates that the global was filtered out by access control.
-   * When true, default values should not be populated to avoid leaking information.
-   * Only applicable to globals.
-   */
-  globalAccessDenied?: boolean
   locale: string
   overrideAccess: boolean
   populate?: PopulateType
@@ -59,7 +53,6 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     findMany,
     flattenLocales = true,
     global,
-    globalAccessDenied = false,
     locale,
     overrideAccess,
     populate,
@@ -94,7 +87,6 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     findMany: findMany!,
     flattenLocales,
     global,
-    globalAccessDenied,
     locale,
     overrideAccess,
     parentIndexPath: '',
