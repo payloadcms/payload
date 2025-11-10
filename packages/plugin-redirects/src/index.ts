@@ -12,6 +12,20 @@ export { translations as redirectsTranslations } from './translations/index.js'
 export const redirectsPlugin =
   (pluginConfig: RedirectsPluginConfig) =>
   (incomingConfig: Config): Config => {
+    // Merge translations FIRST (before building fields)
+    if (!incomingConfig.i18n) {
+      incomingConfig.i18n = {}
+    }
+
+    if (!incomingConfig.i18n?.translations) {
+      incomingConfig.i18n.translations = {}
+    }
+
+    incomingConfig.i18n.translations = deepMergeSimple(
+      translations,
+      incomingConfig.i18n?.translations,
+    )
+
     const redirectSelectField: SelectField = {
       name: 'type',
       type: 'select',
@@ -105,20 +119,6 @@ export const redirectsPlugin =
           ? pluginConfig?.overrides.fields({ defaultFields })
           : defaultFields,
     }
-
-    // Automatically inject translations
-    if (!incomingConfig.i18n) {
-      incomingConfig.i18n = {}
-    }
-
-    if (!incomingConfig.i18n?.translations) {
-      incomingConfig.i18n.translations = {}
-    }
-
-    incomingConfig.i18n.translations = deepMergeSimple(
-      translations,
-      incomingConfig.i18n?.translations,
-    )
 
     return {
       ...incomingConfig,
