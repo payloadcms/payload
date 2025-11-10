@@ -91,7 +91,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
   tests-unit:
     runs-on: ubuntu-24.04
@@ -110,7 +110,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -134,7 +134,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
@@ -205,7 +205,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -342,7 +342,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -486,7 +486,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -586,7 +586,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -683,7 +683,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -742,7 +742,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
