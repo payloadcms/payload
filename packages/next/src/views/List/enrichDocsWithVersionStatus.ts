@@ -42,11 +42,24 @@ export async function enrichDocsWithVersionStatus({
   // 2. A published version (_status='published')
   // These are the documents with "changed" status
   try {
-    // Query for all published versions of the draft documents
+    // TODO: This could be more efficient with a findDistinctVersions() API:
+    // const { values } = await req.payload.findDistinctVersions({
+    //   collection: collectionConfig.slug,
+    //   field: 'parent',
+    //   where: {
+    //     and: [
+    //       { parent: { in: draftDocIds } },
+    //       { 'version._status': { equals: 'published' } },
+    //     ],
+    //   },
+    // })
+    // const hasPublishedVersionSet = new Set(values)
+    //
+    // For now, we query all published versions but only select the 'parent' field
+    // to minimize data transfer, then deduplicate with a Set
     const publishedVersions = await req.payload.findVersions({
       collection: collectionConfig.slug,
       depth: 0,
-      limit: draftDocIds.length,
       pagination: false,
       select: {
         parent: true,
