@@ -230,7 +230,10 @@ export type PluginMCPServerConfig = {
    * @param req - The request object.
    * @returns The MCP access settings.
    */
-  overrideAuth?: (req: PayloadRequest) => MCPAccessSettings | Promise<MCPAccessSettings>
+  overrideAuth?: (
+    req: PayloadRequest,
+    getDefaultMcpAccessSettings: (overrideApiKey?: null | string) => Promise<MCPAccessSettings>,
+  ) => MCPAccessSettings | Promise<MCPAccessSettings>
 
   /**
    * Set the users collection that API keys should be associated with.
