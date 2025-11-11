@@ -255,6 +255,7 @@ export const generateFileData = async <T>({
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
     if (!overwriteExistingFiles) {
+      // Extract prefix if present (added by plugin-cloud-storage)
       const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
       fsSafeName = await getSafeFileName({
         collectionSlug: collectionConfig.slug,
