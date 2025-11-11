@@ -190,13 +190,28 @@ describe('sanitizePluginConfig', () => {
   })
 
   describe('carts', () => {
-    it('should default carts to true when undefined', () => {
+    it('should default carts to object with allowGuestCarts true when undefined', () => {
       const result = sanitizePluginConfig({ pluginConfig: minimalConfig })
 
-      expect(result.carts).toBe(true)
+      expect(result.carts).toEqual({
+        allowGuestCarts: true,
+      })
     })
 
-    it('should preserve carts config', () => {
+    it('should convert carts true to object with allowGuestCarts true', () => {
+      const config: EcommercePluginConfig = {
+        ...minimalConfig,
+        carts: true,
+      }
+
+      const result = sanitizePluginConfig({ pluginConfig: config })
+
+      expect(result.carts).toEqual({
+        allowGuestCarts: true,
+      })
+    })
+
+    it('should preserve carts false', () => {
       const config: EcommercePluginConfig = {
         ...minimalConfig,
         carts: false,
@@ -207,12 +222,10 @@ describe('sanitizePluginConfig', () => {
       expect(result.carts).toBe(false)
     })
 
-    it('should preserve carts object config', () => {
+    it('should default allowGuestCarts to true when carts is object without it', () => {
       const config: EcommercePluginConfig = {
         ...minimalConfig,
-        carts: {
-          allowGuestCarts: true,
-        },
+        carts: {} as any,
       }
 
       const result = sanitizePluginConfig({ pluginConfig: config })
@@ -220,6 +233,36 @@ describe('sanitizePluginConfig', () => {
       expect(result.carts).toEqual({
         allowGuestCarts: true,
       })
+    })
+
+    it('should preserve explicit allowGuestCarts false', () => {
+      const config: EcommercePluginConfig = {
+        ...minimalConfig,
+        carts: {
+          allowGuestCarts: false,
+        },
+      }
+
+      const result = sanitizePluginConfig({ pluginConfig: config })
+
+      expect(result.carts).toEqual({
+        allowGuestCarts: false,
+      })
+    })
+
+    it('should preserve other carts config properties', () => {
+      const config: EcommercePluginConfig = {
+        ...minimalConfig,
+        carts: {
+          allowGuestCarts: false,
+          cartsCollectionOverride: jest.fn() as any,
+        },
+      }
+
+      const result = sanitizePluginConfig({ pluginConfig: config })
+
+      expect(result.carts).toHaveProperty('allowGuestCarts', false)
+      expect(result.carts).toHaveProperty('cartsCollectionOverride')
     })
   })
 
@@ -450,7 +493,7 @@ describe('sanitizePluginConfig', () => {
       expect(result.customers.slug).toBe('customers')
       expect(result.currencies.defaultCurrency).toBe('EUR')
       expect(result.inventory).toEqual({ fieldName: 'stock' })
-      expect(result.carts).toEqual({ allowGuestCarts: true })
+      expect(result.carts).toHaveProperty('allowGuestCarts', true)
       expect(result.orders).toBe(true)
       expect(result.transactions).toBe(true)
       expect(result.products).toEqual({ variants: true })

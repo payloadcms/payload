@@ -243,10 +243,11 @@ import { defaultCountries } from '@payloadcms/plugin-ecommerce/client/react'
 
 ## Carts
 
-The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields. It also takes an object:
+The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields and enable guest carts. It also takes an object:
 
 | Option                    | Type                 | Description                                                                                                                    |
 | ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `allowGuestCarts`         | `boolean`            | Allow unauthenticated users to create carts. Defaults to `true`.                                                               |
 | `cartsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `carts` with a function where you can access the `defaultCollection` as an argument. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
@@ -267,8 +268,21 @@ carts: {
 }
 ```
 
+### Guest Carts
+
+By default, guest carts are enabled (`allowGuestCarts: true`), allowing unauthenticated users to create and manage carts. This is useful for anonymous checkout flows where users can shop without logging in.
+
+To disable guest carts and require authentication:
+
+```ts
+carts: {
+  allowGuestCarts: false,
+}
+```
+
 Carts are created when a customer adds their first item to the cart. The cart is then updated as they add or remove items. The cart is linked to a _Customer_ via the `customer` field. If the user is authenticated, this will be set to their user ID. If the user is not authenticated, this will be `null`.
-If the user is not authenticated, the cart ID is stored in local storage and used to fetch the cart on subsequent requests. Access control by default works so that if the user is not authenticated then they can only access carts that have no customer linked to them.
+
+When guest carts are enabled and the user is not authenticated, the cart ID is stored in local storage and used to fetch the cart on subsequent requests. Access control by default works so that if the user is not authenticated then they can only access carts that have no customer linked to them.
 
 ## Customers
 

@@ -16,7 +16,6 @@ import { adminOnly } from '@/access/adminOnly'
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
 import { isAdmin } from '@/access/isAdmin'
-import { isAuthenticated } from '@/access/isAuthenticated'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
@@ -74,14 +73,7 @@ export const plugins: Plugin[] = [
       adminOrPublishedStatus,
       customerOnlyFieldAccess,
       isAdmin,
-      isAuthenticated,
       isDocumentOwner,
-    },
-    carts: {
-      // Enable guest cart creation for better user experience
-      // Guests can create carts without logging in, which is useful for
-      // anonymous checkout flows
-      allowGuestCarts: true,
     },
     customers: {
       slug: 'users',
