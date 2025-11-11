@@ -112,9 +112,31 @@ export function renderCell({
         ? findValueFromPath(doc, accessor)
         : undefined
 
+  // For _status field, add 'changed' option for display purposes
+  // The 'changed' status is computed at runtime
+  let enrichedClientField = clientField
+  if ('name' in clientField && accessor === '_status' && clientField.type === 'select') {
+    const hasChangedOption = clientField.options?.some(
+      (opt) => (typeof opt === 'object' ? opt.value : opt) === 'changed',
+    )
+    if (!hasChangedOption) {
+      enrichedClientField = {
+        ...clientField,
+        options: [
+          ...(clientField.options || []),
+          {
+            label: i18n.t('version:changed'),
+            value: 'changed',
+          },
+        ],
+      }
+    }
+  }
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
     cellData,
+    field: enrichedClientField,
     link: shouldLink,
     linkURL: customLinkURL,
     rowData: doc,
