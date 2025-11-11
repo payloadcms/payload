@@ -785,6 +785,9 @@ describe('Sort', () => {
       const pageSize = 5
 
       beforeAll(async () => {
+        // Clean up any existing posts from parent suite to ensure exactly 10 posts
+        await payload.delete({ collection: 'posts', where: {} })
+
         // Create 10 posts, each with 3 array items = 30 rows after JOIN
         // With page size 5, LIMIT 5 on 30 rows = incomplete results
         const posts = Array.from({ length: totalDocs }, (_, i) => ({
