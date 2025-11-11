@@ -1,6 +1,6 @@
 import type { Access, AccessArgs, Where } from 'payload'
 
-import { and, conditional, or } from './accessComposition'
+import { accessAND, conditional, accessOR } from './accessComposition'
 
 // Mock access args for testing
 const mockArgs: AccessArgs = {
@@ -27,7 +27,7 @@ describe('Access Composition Utilities', () => {
       const checker1: Access = async () => true
       const checker2: Access = async () => false
 
-      const result = await or(checker1, checker2)(mockArgs)
+      const result = await accessOR(checker1, checker2)(mockArgs)
 
       expect(result).toBe(true)
     })
@@ -37,7 +37,7 @@ describe('Access Composition Utilities', () => {
       const checker2: Access = async () => true
       const checker3: Access = async () => false
 
-      const result = await or(checker1, checker2, checker3)(mockArgs)
+      const result = await accessOR(checker1, checker2, checker3)(mockArgs)
 
       expect(result).toBe(true)
     })
@@ -47,7 +47,7 @@ describe('Access Composition Utilities', () => {
       const checker2: Access = async () => false
       const checker3: Access = async () => false
 
-      const result = await or(checker1, checker2, checker3)(mockArgs)
+      const result = await accessOR(checker1, checker2, checker3)(mockArgs)
 
       expect(result).toBe(false)
     })
@@ -60,7 +60,7 @@ describe('Access Composition Utilities', () => {
         status: { equals: 'published' },
       })
 
-      const result = await or(checker1, checker2)(mockArgs)
+      const result = await accessOR(checker1, checker2)(mockArgs)
 
       expect(result).toEqual({
         or: [{ customer: { equals: '123' } }, { status: { equals: 'published' } }],
@@ -73,7 +73,7 @@ describe('Access Composition Utilities', () => {
       })
       const checker2: Access = async () => true
 
-      const result = await or(checker1, checker2)(mockArgs)
+      const result = await accessOR(checker1, checker2)(mockArgs)
 
       expect(result).toBe(true)
     })
@@ -88,7 +88,7 @@ describe('Access Composition Utilities', () => {
         status: { equals: 'published' },
       })
 
-      const result = await or(checker1, checker2, checker3, checker4)(mockArgs)
+      const result = await accessOR(checker1, checker2, checker3, checker4)(mockArgs)
 
       expect(result).toEqual({
         or: [{ customer: { equals: '123' } }, { status: { equals: 'published' } }],
@@ -102,10 +102,10 @@ describe('Access Composition Utilities', () => {
       })
       const checker3: Access = async () => false
 
-      const result = await or(checker1, checker2, checker3)(mockArgs)
+      const result = await accessOR(checker1, checker2, checker3)(mockArgs)
 
       expect(result).toEqual({
-        customer: { equals: '123' },
+        or: [{ customer: { equals: '123' } }],
       })
     })
 
@@ -118,26 +118,27 @@ describe('Access Composition Utilities', () => {
         return false
       }
 
-      await or(checker1, checker2)(mockArgs)
+      await accessOR(checker1, checker2)(mockArgs)
 
       expect(secondCheckerCalled).toBe(false)
     })
 
     it('should handle empty checkers array', async () => {
-      const result = await or()(mockArgs)
+      const result = await accessOR()(mockArgs)
 
       expect(result).toBe(false)
     })
 
     it('should handle complex nested Where queries', async () => {
-      const checker1: Access = async () => ({
-        and: [{ customer: { equals: '123' } }, { status: { equals: 'active' } }],
-      })
+      const checker1: Access = async () =>
+        ({
+          and: [{ customer: { equals: '123' } }, { status: { equals: 'active' } }],
+        }) as Where
       const checker2: Access = async () => ({
         role: { equals: 'admin' },
       })
 
-      const result = await or(checker1, checker2)(mockArgs)
+      const result = await accessOR(checker1, checker2)(mockArgs)
 
       expect(result).toEqual({
         or: [
@@ -153,7 +154,7 @@ describe('Access Composition Utilities', () => {
       const checker1: Access = async () => true
       const checker2: Access = async () => false
 
-      const result = await and(checker1, checker2)(mockArgs)
+      const result = await accessAND(checker1, checker2)(mockArgs)
 
       expect(result).toBe(false)
     })
@@ -163,7 +164,7 @@ describe('Access Composition Utilities', () => {
       const checker2: Access = async () => true
       const checker3: Access = async () => true
 
-      const result = await and(checker1, checker2, checker3)(mockArgs)
+      const result = await accessAND(checker1, checker2, checker3)(mockArgs)
 
       expect(result).toBe(true)
     })
@@ -176,7 +177,7 @@ describe('Access Composition Utilities', () => {
         status: { equals: 'published' },
       })
 
-      const result = await and(checker1, checker2)(mockArgs)
+      const result = await accessAND(checker1, checker2)(mockArgs)
 
       expect(result).toEqual({
         and: [{ customer: { equals: '123' } }, { status: { equals: 'published' } }],
@@ -189,7 +190,7 @@ describe('Access Composition Utilities', () => {
       })
       const checker2: Access = async () => false
 
-      const result = await and(checker1, checker2)(mockArgs)
+      const result = await accessAND(checker1, checker2)(mockArgs)
 
       expect(result).toBe(false)
     })
@@ -203,7 +204,7 @@ describe('Access Composition Utilities', () => {
         status: { equals: 'published' },
       })
 
-      const result = await and(checker1, checker2, checker3)(mockArgs)
+      const result = await accessAND(checker1, checker2, checker3)(mockArgs)
 
       expect(result).toEqual({
         and: [{ customer: { equals: '123' } }, { status: { equals: 'published' } }],
@@ -219,13 +220,13 @@ describe('Access Composition Utilities', () => {
         return true
       }
 
-      await and(checker1, checker2)(mockArgs)
+      await accessAND(checker1, checker2)(mockArgs)
 
       expect(secondCheckerCalled).toBe(false)
     })
 
     it('should handle empty checkers array', async () => {
-      const result = await and()(mockArgs)
+      const result = await accessAND()(mockArgs)
 
       expect(result).toBe(true)
     })
@@ -237,10 +238,10 @@ describe('Access Composition Utilities', () => {
       })
       const checker3: Access = async () => true
 
-      const result = await and(checker1, checker2, checker3)(mockArgs)
+      const result = await accessAND(checker1, checker2, checker3)(mockArgs)
 
       expect(result).toEqual({
-        customer: { equals: '123' },
+        and: [{ customer: { equals: '123' } }],
       })
     })
 
@@ -252,7 +253,7 @@ describe('Access Composition Utilities', () => {
         status: { equals: 'active' },
       })
 
-      const result = await and(checker1, checker2)(mockArgs)
+      const result = await accessAND(checker1, checker2)(mockArgs)
 
       expect(result).toEqual({
         and: [
@@ -268,7 +269,7 @@ describe('Access Composition Utilities', () => {
         throw new Error('Should not be called')
       }
 
-      const result = await and(checker1, checker2)(mockArgs)
+      const result = await accessAND(checker1, checker2)(mockArgs)
 
       expect(result).toBe(false)
     })
@@ -366,7 +367,7 @@ describe('Access Composition Utilities', () => {
 
       const allowGuestCarts = true
 
-      const access = or(isAdmin, and(isOwner), conditional(allowGuestCarts, isGuest))
+      const access = accessOR(isAdmin, accessAND(isOwner), conditional(allowGuestCarts, isGuest))
 
       // Guest user (no user)
       const guestResult = await access(mockArgs)
@@ -393,7 +394,7 @@ describe('Access Composition Utilities', () => {
         } as any,
       })
       expect(ownerResult).toEqual({
-        customer: { equals: '123' },
+        or: [{ and: [{ customer: { equals: '123' } }] }],
       })
     })
 
@@ -410,7 +411,7 @@ describe('Access Composition Utilities', () => {
       })
 
       // ((published AND public) OR (authenticated AND customer=123))
-      const access = or(and(checker1, checker2), and(checker3, checker4))
+      const access = accessOR(accessAND(checker1, checker2), accessAND(checker3, checker4))
 
       // Without user
       const result1 = await access(mockArgs)
@@ -441,7 +442,7 @@ describe('Access Composition Utilities', () => {
       const isGuest: Access = async () => true
       const allowGuestAccess = true
 
-      const access = or(isAdmin, conditional(allowGuestAccess, isGuest))
+      const access = accessOR(isAdmin, conditional(allowGuestAccess, isGuest))
 
       const result = await access(mockArgs)
       expect(result).toBe(true)
@@ -454,11 +455,11 @@ describe('Access Composition Utilities', () => {
       const isActiveUser: Access = async () => true
       const featureFlagEnabled = true
 
-      const access = and(hasPermission, conditional(featureFlagEnabled, isActiveUser))
+      const access = accessAND(hasPermission, conditional(featureFlagEnabled, isActiveUser))
 
       const result = await access(mockArgs)
       expect(result).toEqual({
-        permissions: { contains: 'read' },
+        and: [{ permissions: { contains: 'read' } }],
       })
     })
 
@@ -469,11 +470,13 @@ describe('Access Composition Utilities', () => {
       const d: Access = async () => ({ field2: { equals: 'value2' } })
 
       // (a AND (b OR (c AND d)))
-      const access = and(a, or(b, and(c, d)))
+      const access = accessAND(a, accessOR(b, accessAND(c, d)))
 
       const result = await access(mockArgs)
       expect(result).toEqual({
-        and: [{ field1: { equals: 'value1' } }, { field2: { equals: 'value2' } }],
+        and: [
+          { or: [{ and: [{ field1: { equals: 'value1' } }, { field2: { equals: 'value2' } }] }] },
+        ],
       })
     })
   })
@@ -485,7 +488,7 @@ describe('Access Composition Utilities', () => {
       }
       const checker2: Access = async () => true
 
-      await expect(or(checker1, checker2)(mockArgs)).rejects.toThrow('Access check failed')
+      await expect(accessOR(checker1, checker2)(mockArgs)).rejects.toThrow('Access check failed')
     })
 
     it('should handle null or undefined returns gracefully', async () => {
@@ -493,38 +496,43 @@ describe('Access Composition Utilities', () => {
       const checker2: Access = async () => undefined as any
       const checker3: Access = async () => true
 
-      const result = await or(checker1, checker2, checker3)(mockArgs)
+      const result = await accessOR(checker1, checker2, checker3)(mockArgs)
       expect(result).toBe(true)
     })
 
     it('should handle deeply nested Where queries', async () => {
-      const checker: Access = async () => ({
-        and: [
-          {
-            or: [
-              { field1: { equals: 'value1' } },
-              {
-                and: [{ field2: { equals: 'value2' } }, { field3: { equals: 'value3' } }],
-              },
-            ],
-          },
-          { field4: { not_equals: 'value4' } },
-        ],
-      })
+      const checker: Access = async () =>
+        ({
+          and: [
+            {
+              or: [
+                { field1: { equals: 'value1' } },
+                {
+                  and: [{ field2: { equals: 'value2' } }, { field3: { equals: 'value3' } }],
+                },
+              ],
+            },
+            { field4: { not_equals: 'value4' } },
+          ],
+        }) as Where
 
-      const result = await or(checker)(mockArgs)
+      const result = await accessOR(checker)(mockArgs)
 
       expect(result).toEqual({
-        and: [
+        or: [
           {
-            or: [
-              { field1: { equals: 'value1' } },
+            and: [
               {
-                and: [{ field2: { equals: 'value2' } }, { field3: { equals: 'value3' } }],
+                or: [
+                  { field1: { equals: 'value1' } },
+                  {
+                    and: [{ field2: { equals: 'value2' } }, { field3: { equals: 'value3' } }],
+                  },
+                ],
               },
+              { field4: { not_equals: 'value4' } },
             ],
           },
-          { field4: { not_equals: 'value4' } },
         ],
       })
     })
@@ -540,7 +548,7 @@ describe('Access Composition Utilities', () => {
       }
 
       const start = Date.now()
-      const result = await or(checker1, checker2)(mockArgs)
+      const result = await accessOR(checker1, checker2)(mockArgs)
       const duration = Date.now() - start
 
       expect(result).toBe(true)
@@ -551,7 +559,7 @@ describe('Access Composition Utilities', () => {
       const checker1: Access = async () => null as any
       const checker2: Access = async () => undefined as any
 
-      const result = await or(checker1, checker2)(mockArgs)
+      const result = await accessOR(checker1, checker2)(mockArgs)
 
       // null and undefined should be treated as false
       expect(result).toBe(false)
@@ -560,14 +568,14 @@ describe('Access Composition Utilities', () => {
     it('should handle Where query with empty object', async () => {
       const checker: Access = async () => ({}) as Where
 
-      const result = await or(checker)(mockArgs)
+      const result = await accessOR(checker)(mockArgs)
 
       expect(result).toEqual({})
     })
 
     it('should handle conditional with complex condition function', async () => {
-      const condition = ({ req }: AccessArgs) => {
-        return req.user && req.user.email && req.user.email.endsWith('@admin.com')
+      const condition = ({ req }: AccessArgs): boolean => {
+        return !!(req.user && req.user.email && req.user.email.endsWith('@admin.com'))
       }
 
       const checker: Access = async () => true
@@ -606,7 +614,7 @@ describe('Access Composition Utilities', () => {
         field: { equals: `value${i}` },
       }))
 
-      const result = await or(...checkers)(mockArgs)
+      const result = await accessOR(...checkers)(mockArgs)
 
       expect(result).toHaveProperty('or')
       expect((result as any).or).toHaveLength(100)
@@ -617,7 +625,7 @@ describe('Access Composition Utilities', () => {
         field: { equals: `value${i}` },
       }))
 
-      const result = await and(...checkers)(mockArgs)
+      const result = await accessAND(...checkers)(mockArgs)
 
       expect(result).toHaveProperty('and')
       expect((result as any).and).toHaveLength(100)
@@ -634,7 +642,7 @@ describe('Access Composition Utilities', () => {
         },
       ]
 
-      const result = await or(...checkers)(mockArgs)
+      const result = await accessOR(...checkers)(mockArgs)
 
       expect(result).toBe(true)
     })
@@ -649,7 +657,7 @@ describe('Access Composition Utilities', () => {
         },
       ]
 
-      const result = await and(...checkers)(mockArgs)
+      const result = await accessAND(...checkers)(mockArgs)
 
       expect(result).toBe(false)
     })

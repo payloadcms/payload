@@ -31,8 +31,8 @@ export const accessOR = (...accessFunctions: Access[]): Access => {
         return true
       }
 
-      // Collect Where queries for combination
-      if (result !== false) {
+      // Collect Where queries for combination (must be an object, not null/undefined/false)
+      if (result && typeof result === 'object') {
         whereQueries.push(result)
       }
     }
@@ -75,8 +75,8 @@ export const accessAND = (...accessFunctions: Access[]): Access => {
         return false
       }
 
-      // Collect Where queries for combination
-      if (result !== true) {
+      // Collect Where queries for combination (must be an object, not null/undefined/true)
+      if (result !== true && result && typeof result === 'object') {
         whereQueries.push(result)
       }
     }
@@ -92,11 +92,11 @@ export const accessAND = (...accessFunctions: Access[]): Access => {
 }
 
 /**
- * Conditionally applies an access function based on a boolean condition.
+ * Conditionally applies an access function based on a boolean condition or function.
  *
  * Useful for feature flags and plugin configuration.
  *
- * @param condition - Boolean to determine which function to use
+ * @param condition - Boolean or function to determine which function to use
  * @param checker - Access function to use if condition is true
  * @param fallback - Access function to use if condition is false (defaults to denying access)
  *
@@ -109,12 +109,13 @@ export const accessAND = (...accessFunctions: Access[]): Access => {
  * ```
  */
 export const conditional = (
-  condition: boolean,
+  condition: ((args: any) => boolean) | boolean,
   accessFunction: Access,
   fallback: Access = () => false,
 ): Access => {
   return async (args) => {
-    if (condition) {
+    const shouldApply = typeof condition === 'function' ? condition(args) : condition
+    if (shouldApply) {
       return accessFunction(args)
     }
     return fallback(args)
