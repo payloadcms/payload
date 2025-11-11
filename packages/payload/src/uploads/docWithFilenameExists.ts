@@ -20,7 +20,7 @@ export const docWithFilenameExists = async ({
     },
   }
 
-  if (prefix !== undefined) {
+  if (prefix) {
     where.prefix = { equals: prefix }
   }
 
