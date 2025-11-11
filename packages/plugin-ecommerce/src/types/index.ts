@@ -876,6 +876,11 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
     paymentMethodID: string,
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
+  /**
+   * Indicates whether any cart operation is currently in progress.
+   * Useful for disabling buttons and preventing race conditions.
+   */
+  isPending: boolean
   paymentMethods: PaymentAdapterClient[]
   /**
    * Remove an item from the cart by its index ID.

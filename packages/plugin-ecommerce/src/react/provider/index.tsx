@@ -3,7 +3,16 @@ import type { DefaultDocumentIDType, TypedUser } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 
 import type {
   AddressesCollection,
@@ -39,6 +48,7 @@ const defaultContext: EcommerceContextType = {
   decrementItem: async () => {},
   incrementItem: async () => {},
   initiatePayment: async () => {},
+  isPending: false,
   paymentMethods: [],
   removeItem: async () => {},
   setCurrency: () => {},
@@ -82,6 +92,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const { apiRoute = '/api', cartsFetchQuery = {}, serverURL = '' } = api || {}
   const baseAPIURL = `${serverURL}${apiRoute}`
+
+  const [isPending, startTransition] = useTransition()
 
   const [user, setUser] = useState<null | TypedUser>(null)
 
@@ -285,181 +297,212 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const addItem: EcommerceContextType['addItem'] = useCallback(
     async (item, quantity = 1) => {
-      if (cartID) {
-        const existingCart = await getCart(cartID, { secret: cartSecret })
+      return new Promise<void>((resolve) => {
+        startTransition(async () => {
+          if (cartID) {
+            const existingCart = await getCart(cartID, { secret: cartSecret })
 
-        if (!existingCart) {
-          // console.error(`Cart with ID "${cartID}" not found`)
+            if (!existingCart) {
+              // console.error(`Cart with ID "${cartID}" not found`)
 
-          setCartID(undefined)
-          setCart(undefined)
-          return
-        }
+              setCartID(undefined)
+              setCart(undefined)
+              return
+            }
 
-        // Check if the item already exists in the cart
-        const existingItemIndex =
-          existingCart.items?.findIndex((cartItem: CartItem) => {
-            const productID =
-              typeof cartItem.product === 'object' ? cartItem.product.id : item.product
-            const variantID =
-              cartItem.variant && typeof cartItem.variant === 'object'
-                ? cartItem.variant.id
-                : item.variant
+            // Check if the item already exists in the cart
+            const existingItemIndex =
+              existingCart.items?.findIndex((cartItem: CartItem) => {
+                const productID =
+                  typeof cartItem.product === 'object' ? cartItem.product.id : item.product
+                const variantID =
+                  cartItem.variant && typeof cartItem.variant === 'object'
+                    ? cartItem.variant.id
+                    : item.variant
 
-            return (
-              productID === item.product &&
-              (item.variant && variantID ? variantID === item.variant : true)
-            )
-          }) ?? -1
+                return (
+                  productID === item.product &&
+                  (item.variant && variantID ? variantID === item.variant : true)
+                )
+              }) ?? -1
 
-        let updatedItems = existingCart.items ? [...existingCart.items] : []
+            let updatedItems = existingCart.items ? [...existingCart.items] : []
 
-        if (existingItemIndex !== -1) {
-          // If the item exists, update its quantity
-          updatedItems[existingItemIndex].quantity =
-            updatedItems[existingItemIndex].quantity + quantity
+            if (existingItemIndex !== -1) {
+              // If the item exists, update its quantity
+              updatedItems[existingItemIndex].quantity =
+                updatedItems[existingItemIndex].quantity + quantity
 
-          // Update the cart with the new items
-          await updateCart(cartID, {
-            items: updatedItems,
-          })
-        } else {
-          // If the item does not exist, add it to the cart
-          updatedItems = [...(existingCart.items ?? []), { ...item, quantity }]
-        }
+              // Update the cart with the new items
+              await updateCart(cartID, {
+                items: updatedItems,
+              })
+            } else {
+              // If the item does not exist, add it to the cart
+              updatedItems = [...(existingCart.items ?? []), { ...item, quantity }]
+            }
 
-        // Update the cart with the new items
-        await updateCart(cartID, {
-          items: updatedItems,
+            // Update the cart with the new items
+            await updateCart(cartID, {
+              items: updatedItems,
+            })
+          } else {
+            // If no cartID exists, create a new cart
+            const newCart = await createCart({ items: [{ ...item, quantity }] })
+
+            setCartID(newCart.id)
+            setCart(newCart)
+          }
+          resolve()
         })
-      } else {
-        // If no cartID exists, create a new cart
-        const newCart = await createCart({ items: [{ ...item, quantity }] })
-
-        setCartID(newCart.id)
-        setCart(newCart)
-      }
+      })
     },
-    [cartID, cartSecret, createCart, getCart, updateCart],
+    [cartID, cartSecret, createCart, getCart, startTransition, updateCart],
   )
 
   const removeItem: EcommerceContextType['removeItem'] = useCallback(
     async (targetID) => {
-      if (!cartID) {
-        return
-      }
+      return new Promise<void>((resolve) => {
+        startTransition(async () => {
+          if (!cartID) {
+            resolve()
+            return
+          }
 
-      const existingCart = await getCart(cartID, { secret: cartSecret })
+          const existingCart = await getCart(cartID, { secret: cartSecret })
 
-      if (!existingCart) {
-        // console.error(`Cart with ID "${cartID}" not found`)
-        setCartID(undefined)
-        setCart(undefined)
-        return
-      }
+          if (!existingCart) {
+            // console.error(`Cart with ID "${cartID}" not found`)
+            setCartID(undefined)
+            setCart(undefined)
+            resolve()
+            return
+          }
 
-      // Check if the item already exists in the cart
-      const existingItemIndex =
-        existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
+          // Check if the item already exists in the cart
+          const existingItemIndex =
+            existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
 
-      if (existingItemIndex !== -1) {
-        // If the item exists, remove it from the cart
-        const updatedItems = existingCart.items ? [...existingCart.items] : []
-        updatedItems.splice(existingItemIndex, 1)
+          if (existingItemIndex !== -1) {
+            // If the item exists, remove it from the cart
+            const updatedItems = existingCart.items ? [...existingCart.items] : []
+            updatedItems.splice(existingItemIndex, 1)
 
-        // Update the cart with the new items
-        await updateCart(cartID, {
-          items: updatedItems,
+            // Update the cart with the new items
+            await updateCart(cartID, {
+              items: updatedItems,
+            })
+          }
+          resolve()
         })
-      }
+      })
     },
-    [cartID, cartSecret, getCart, updateCart],
+    [cartID, cartSecret, getCart, startTransition, updateCart],
   )
 
   const incrementItem: EcommerceContextType['incrementItem'] = useCallback(
     async (targetID) => {
-      if (!cartID) {
-        return
-      }
+      return new Promise<void>((resolve) => {
+        startTransition(async () => {
+          if (!cartID) {
+            resolve()
+            return
+          }
 
-      const existingCart = await getCart(cartID, { secret: cartSecret })
+          const existingCart = await getCart(cartID, { secret: cartSecret })
 
-      if (!existingCart) {
-        // console.error(`Cart with ID "${cartID}" not found`)
-        setCartID(undefined)
-        setCart(undefined)
-        return
-      }
+          if (!existingCart) {
+            // console.error(`Cart with ID "${cartID}" not found`)
+            setCartID(undefined)
+            setCart(undefined)
+            resolve()
+            return
+          }
 
-      // Check if the item already exists in the cart
-      const existingItemIndex =
-        existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
+          // Check if the item already exists in the cart
+          const existingItemIndex =
+            existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
 
-      let updatedItems = existingCart.items ? [...existingCart.items] : []
+          let updatedItems = existingCart.items ? [...existingCart.items] : []
 
-      if (existingItemIndex !== -1) {
-        // If the item exists, increment its quantity
-        updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity + 1 // Increment by 1
-        // Update the cart with the new items
-        await updateCart(cartID, {
-          items: updatedItems,
+          if (existingItemIndex !== -1) {
+            // If the item exists, increment its quantity
+            updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity + 1 // Increment by 1
+            // Update the cart with the new items
+            await updateCart(cartID, {
+              items: updatedItems,
+            })
+          } else {
+            // If the item does not exist, add it to the cart with quantity 1
+            updatedItems = [...(existingCart.items ?? []), { product: targetID, quantity: 1 }]
+            // Update the cart with the new items
+            await updateCart(cartID, {
+              items: updatedItems,
+            })
+          }
+          resolve()
         })
-      } else {
-        // If the item does not exist, add it to the cart with quantity 1
-        updatedItems = [...(existingCart.items ?? []), { product: targetID, quantity: 1 }]
-        // Update the cart with the new items
-        await updateCart(cartID, {
-          items: updatedItems,
-        })
-      }
+      })
     },
-    [cartID, cartSecret, getCart, updateCart],
+    [cartID, cartSecret, getCart, startTransition, updateCart],
   )
 
   const decrementItem: EcommerceContextType['decrementItem'] = useCallback(
     async (targetID) => {
-      if (!cartID) {
-        return
-      }
+      return new Promise<void>((resolve) => {
+        startTransition(async () => {
+          if (!cartID) {
+            resolve()
+            return
+          }
 
-      const existingCart = await getCart(cartID, { secret: cartSecret })
+          const existingCart = await getCart(cartID, { secret: cartSecret })
 
-      if (!existingCart) {
-        // console.error(`Cart with ID "${cartID}" not found`)
-        setCartID(undefined)
-        setCart(undefined)
-        return
-      }
+          if (!existingCart) {
+            // console.error(`Cart with ID "${cartID}" not found`)
+            setCartID(undefined)
+            setCart(undefined)
+            resolve()
+            return
+          }
 
-      // Check if the item already exists in the cart
-      const existingItemIndex =
-        existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
+          // Check if the item already exists in the cart
+          const existingItemIndex =
+            existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
 
-      const updatedItems = existingCart.items ? [...existingCart.items] : []
+          const updatedItems = existingCart.items ? [...existingCart.items] : []
 
-      if (existingItemIndex !== -1) {
-        // If the item exists, decrement its quantity
-        updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity - 1 // Decrement by 1
+          if (existingItemIndex !== -1) {
+            // If the item exists, decrement its quantity
+            updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity - 1 // Decrement by 1
 
-        // If the quantity reaches 0, remove the item from the cart
-        if (updatedItems[existingItemIndex].quantity <= 0) {
-          updatedItems.splice(existingItemIndex, 1)
-        }
+            // If the quantity reaches 0, remove the item from the cart
+            if (updatedItems[existingItemIndex].quantity <= 0) {
+              updatedItems.splice(existingItemIndex, 1)
+            }
 
-        // Update the cart with the new items
-        await updateCart(cartID, {
-          items: updatedItems,
+            // Update the cart with the new items
+            await updateCart(cartID, {
+              items: updatedItems,
+            })
+          }
+          resolve()
         })
-      }
+      })
     },
-    [cartID, cartSecret, getCart, updateCart],
+    [cartID, cartSecret, getCart, startTransition, updateCart],
   )
 
   const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
-    if (cartID) {
-      await deleteCart(cartID)
-    }
-  }, [cartID, deleteCart])
+    return new Promise<void>((resolve) => {
+      startTransition(async () => {
+        if (cartID) {
+          await deleteCart(cartID)
+        }
+        resolve()
+      })
+    })
+  }, [cartID, deleteCart, startTransition])
 
   const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {
@@ -850,6 +893,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         decrementItem,
         incrementItem,
         initiatePayment,
+        isPending,
         paymentMethods,
         removeItem,
         selectedPaymentMethod,
@@ -913,13 +957,22 @@ export const useCurrency = () => {
 }
 
 export function useCart<T extends CartsCollection>() {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } = useEcommerce()
+  const { addItem, cart, clearCart, decrementItem, incrementItem, isPending, removeItem } =
+    useEcommerce()
 
   if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
   }
 
-  return { addItem, cart: cart as T, clearCart, decrementItem, incrementItem, removeItem }
+  return {
+    addItem,
+    cart: cart as T,
+    clearCart,
+    decrementItem,
+    incrementItem,
+    isPending,
+    removeItem,
+  }
 }
 
 export const usePayments = () => {
