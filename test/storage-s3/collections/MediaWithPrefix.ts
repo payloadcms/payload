@@ -4,7 +4,7 @@ export const MediaWithPrefix: CollectionConfig = {
   slug: 'media-with-prefix',
   upload: {
     disableLocalStorage: false,
-    filenameCompoundIndex: true,
+    filenameCompoundIndex: ['filename', 'prefix'],
   },
   fields: [
     {
