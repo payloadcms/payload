@@ -25,11 +25,12 @@ const config = buildConfig({
     ecommercePlugin({
       // You must add your access control functions here
       access: {
-        adminOnly,
         adminOnlyFieldAccess,
-        adminOrCustomerOwner,
         adminOrPublishedStatus,
         customerOnlyFieldAccess,
+        isAdmin,
+        isAuthenticated,
+        isDocumentOwner,
       },
       customers: { slug: 'users' },
     }),
@@ -59,11 +60,12 @@ Note that the fields in overrides take a function that receives the default fiel
 ```ts
 ecommercePlugin({
   access: {
-    adminOnly,
     adminOnlyFieldAccess,
-    adminOrCustomerOwner,
     adminOrPublishedStatus,
     customerOnlyFieldAccess,
+    isAdmin,
+    isAuthenticated,
+    isDocumentOwner,
   },
   customers: {
     slug: 'users',
@@ -88,51 +90,24 @@ ecommercePlugin({
 
 ## Access
 
-The plugin requires access control functions in order to restrict permissions to certain collections or fields. You can override these functions by providing your own in the `access` option.
+The plugin requires access control functions in order to restrict permissions to certain collections or fields. You must provide these functions in the `access` option.
 
 | Option                    | Type          | Description                                                               |
 | ------------------------- | ------------- | ------------------------------------------------------------------------- |
-| `authenticatedOnly`       | `Access`      | Authenticated access only, provided by default.                           |
-| `publicAccess`            | `Access`      | Public access, provided by default.                                       |
-| `adminOnly`               | `Access`      | Limited to only admin users.                                              |
 | `adminOnlyFieldAccess`    | `FieldAccess` | Limited to only admin users, specifically for Field level access control. |
-| `adminOrCustomerOwner`    | `Access`      | Is the owner of the document via the `customer` field or is an admin.     |
 | `adminOrPublishedStatus`  | `Access`      | The document is published or user is admin.                               |
 | `customerOnlyFieldAccess` | `FieldAccess` | Limited to customers only, specifically for Field level access control.   |
+| `isAdmin`                 | `Access`      | Checks if the user is an admin.                                           |
+| `isAuthenticated`         | `Access`      | Checks if the user is authenticated (any role).                           |
+| `isDocumentOwner`         | `Access`      | Checks if the user owns the document being accessed.                      |
+| `publicAccess`            | `Access`      | (Optional) Entirely public access. Defaults to returning true.            |
 
-The default access control functions are:
+The plugin provides default implementations for `publicAccess` only:
 
 ```ts
 access: {
-  authenticatedOnly: ({ req: { user } }) => Boolean(user),
   publicAccess: () => true,
 }
-```
-
-### authenticatedOnly
-
-Access control to check if the user is authenticated. By default the following is provided:
-
-```ts
-authenticatedOnly: ({ req: { user } }) => Boolean(user)
-```
-
-### publicAccess
-
-Access control to allow public access. By default the following is provided:
-
-```ts
-publicAccess: () => true
-```
-
-### adminOnly
-
-Access control to check if the user has `admin` permissions.
-
-Example:
-
-```ts
-adminOnly: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
 ```
 
 ### adminOnlyFieldAccess
@@ -144,30 +119,6 @@ Example:
 ```ts
 adminOnlyFieldAccess: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('admin'))
-```
-
-### adminOrCustomerOwner
-
-Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field.
-
-Example:
-
-```ts
-adminOrCustomerOwner: ({ req: { user } }) => {
-  if (user && Boolean(user?.roles?.includes('admin'))) {
-    return true
-  }
-
-  if (user?.id) {
-    return {
-      customer: {
-        equals: user.id,
-      },
-    }
-  }
-
-  return false
-}
 ```
 
 ### adminOrPublishedStatus
@@ -198,6 +149,58 @@ Example:
 ```ts
 customerOnlyFieldAccess: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('customer'))
+```
+
+### isAdmin
+
+Access control to check if the user has `admin` permissions.
+
+Example:
+
+```ts
+isAdmin: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+```
+
+### isAuthenticated
+
+Access control to check if the user is authenticated (any role).
+
+Example:
+
+```ts
+isAuthenticated: ({ req: { user } }) => Boolean(user)
+```
+
+### isDocumentOwner
+
+Access control to check if the user owns the document being accessed via the `customer` field. Returns a Where query to filter documents by the customer field.
+
+Example:
+
+```ts
+isDocumentOwner: ({ req: { user } }) => {
+  if (user && Boolean(user?.roles?.includes('admin'))) {
+    return true
+  }
+
+  if (user?.id) {
+    return {
+      customer: {
+        equals: user.id,
+      },
+    }
+  }
+
+  return false
+}
+```
+
+### publicAccess
+
+Access control to allow public access. By default the following is provided:
+
+```ts
+publicAccess: () => true
 ```
 
 ## Addresses
