@@ -121,6 +121,8 @@ describe('@payloadcms/storage-s3', () => {
 
   describe('prefix collision detection', () => {
     beforeEach(async () => {
+      // Clear S3 bucket before each test
+      await clearTestBucket()
       // Clear database records before each test
       await payload.delete({
         collection: mediaWithPrefixSlug,
@@ -174,6 +176,31 @@ describe('@payloadcms/storage-s3', () => {
       expect(upload2.filename).toBe('image-1.png')
       expect(upload1.prefix).toBeUndefined()
       expect(upload2.prefix).toBeUndefined()
+    })
+
+    it('allows same filename under different prefixes', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Upload with default prefix from config ('test-prefix')
+      const upload1 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      // Upload with different prefix
+      const upload2 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {
+          prefix: 'different-prefix',
+        },
+        filePath: imageFile,
+      })
+
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image.png') // Should NOT increment
+      expect(upload1.prefix).toBe(prefix) // 'test-prefix'
+      expect(upload2.prefix).toBe('different-prefix')
     })
   })
 
