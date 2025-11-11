@@ -11,7 +11,7 @@ import { hasCartSecretAccess } from './hasCartSecretAccess.js'
 import { statusBeforeRead } from './statusBeforeRead.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<Required<AccessConfig>, 'isAdmin' | 'isAuthenticated' | 'isDocumentOwner'>
   /**
    * Allow guest (unauthenticated) users to create carts.
    * Defaults to false.

@@ -8,7 +8,7 @@ import { currencyField } from '../../fields/currencyField.js'
 import { statusField } from '../../fields/statusField.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<AccessConfig, 'isAdmin'>
   /**
    * Array of fields used for capturing the billing address.
    */

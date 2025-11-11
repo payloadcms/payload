@@ -8,7 +8,7 @@ import { currencyField } from '../../fields/currencyField.js'
 import { accessOR } from '../../utilities/accessComposition.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<AccessConfig, 'adminOnlyFieldAccess' | 'isAdmin' | 'isDocumentOwner'>
   /**
    * Array of fields used for capturing the shipping address data.
    */

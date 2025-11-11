@@ -3,7 +3,7 @@ import type { CollectionConfig, Field } from 'payload'
 import type { AccessConfig } from '../../types/index.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<AccessConfig, 'isAdmin' | 'publicAccess'>
   /**
    * Slug of the variant options collection, defaults to 'variantOptions'.
    */

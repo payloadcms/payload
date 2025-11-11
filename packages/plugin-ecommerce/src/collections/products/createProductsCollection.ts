@@ -7,7 +7,7 @@ import { pricesField } from '../../fields/pricesField.js'
 import { variantsFields } from '../../fields/variantsFields.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<AccessConfig, 'adminOrPublishedStatus' | 'isAdmin'>
   currenciesConfig: CurrenciesConfig
   enableVariants?: boolean
   /**

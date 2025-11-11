@@ -83,7 +83,7 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   }
 
   config.access = {
-    authenticatedOnly: ({ req: { user } }) => Boolean(user),
+    isAuthenticated: ({ req }) => Boolean(req?.user),
     publicAccess: () => true,
     ...pluginConfig.access,
   }

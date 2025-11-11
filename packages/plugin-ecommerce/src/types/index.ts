@@ -617,7 +617,7 @@ export type AccessConfig = {
    * Checks if the user is authenticated (any role).
    * @returns true if authenticated, false otherwise
    */
-  isAuthenticated: Access
+  isAuthenticated?: Access
   /**
    * Checks if the user owns the document being accessed.
    * Typically returns a Where query to filter by customer field.

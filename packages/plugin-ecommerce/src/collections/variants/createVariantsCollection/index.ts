@@ -8,7 +8,7 @@ import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeCh
 import { validateOptions } from './hooks/validateOptions.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<AccessConfig, 'adminOrPublishedStatus' | 'isAdmin'>
   currenciesConfig?: CurrenciesConfig
   /**
    * Enables inventory tracking for variants. Defaults to true.

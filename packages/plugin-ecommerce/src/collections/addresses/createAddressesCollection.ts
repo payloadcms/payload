@@ -7,7 +7,10 @@ import { defaultCountries } from './defaultCountries.js'
 import { beforeChange } from './hooks/beforeChange.js'
 
 type Props = {
-  access: AccessConfig
+  access: Pick<
+    AccessConfig,
+    'customerOnlyFieldAccess' | 'isAdmin' | 'isAuthenticated' | 'isDocumentOwner'
+  >
   /**
    * Array of fields used for capturing the address data. Use this over overrides to customise the fields here as it's reused across the plugin.
    */
