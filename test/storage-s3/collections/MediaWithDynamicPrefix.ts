@@ -31,6 +31,6 @@ export const MediaWithDynamicPrefix: CollectionConfig = {
   },
   upload: {
     disableLocalStorage: false,
-    filenameCompoundIndex: true,
+    filenameCompoundIndex: ['filename', 'prefix'],
   },
 }
