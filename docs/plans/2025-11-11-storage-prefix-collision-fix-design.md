@@ -311,9 +311,33 @@ Run existing test suites to ensure no breakage:
 
 ## Success Criteria
 
-- [ ] Files with same name under different prefixes don't collide
-- [ ] Files with same name under same prefix DO collide (existing behavior)
-- [ ] Collections without prefix field work unchanged
-- [ ] All existing upload tests pass
-- [ ] All storage adapter tests pass
-- [ ] New tests cover prefix collision scenarios
+- [x] Files with same name under different prefixes don't collide
+- [x] Files with same name under same prefix DO collide (existing behavior)
+- [x] Collections without prefix field work unchanged
+- [x] All existing upload tests pass
+- [x] All storage adapter tests pass
+- [x] New tests cover prefix collision scenarios
+
+## Implementation Notes
+
+**Completed:** 2025-11-11
+
+**Changes Made:**
+
+1. `packages/payload/src/uploads/docWithFilenameExists.ts` - Added prefix parameter and conditional WHERE clause
+2. `packages/payload/src/uploads/getSafeFilename.ts` - Added prefix parameter and passed to docWithFilenameExists
+3. `packages/payload/src/uploads/generateFileData.ts` - Extract prefix from data before collision check
+4. `test/storage-s3/int.spec.ts` - Added comprehensive prefix collision tests
+5. `test/storage-s3/collections/MediaWithPrefix.ts` - Added hook to allow prefix override in tests
+
+**Test Results:**
+
+- All new prefix collision tests passing (3/3)
+- All regression tests passing (uploads: 59/59, storage-s3: 8/8)
+- TypeScript compilation successful (build:core passed)
+
+**Verification:**
+
+- Confirmed fix works with static prefix from config
+- Confirmed fix works with dynamic prefix from beforeOperation hooks
+- Confirmed backwards compatibility with collections without prefix field
