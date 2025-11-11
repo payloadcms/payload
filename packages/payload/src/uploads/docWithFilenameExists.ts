@@ -21,7 +21,7 @@ export const docWithFilenameExists = async ({
   }
 
   if (prefix !== undefined) {
-    where.and = [{ filename: { equals: filename } }, { prefix: { equals: prefix } }]
+    where.prefix = { equals: prefix }
   }
 
   const doc = await req.payload.db.findOne({
