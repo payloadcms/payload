@@ -6,6 +6,7 @@ import { wait } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { CaseInsensitiveCollection } from './collections/CaseInsensitive/index.js'
 import { DefaultSortCollection } from './collections/DefaultSort/index.js'
 import { DraftsCollection } from './collections/Drafts/index.js'
 import { LocalizedCollection } from './collections/Localized/index.js'
@@ -25,6 +26,7 @@ export default buildConfigWithDefaults({
     LocalizedCollection,
     OrderableCollection,
     OrderableJoinCollection,
+    CaseInsensitiveCollection,
   ],
   admin: {
     importMap: {
