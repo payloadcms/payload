@@ -119,6 +119,64 @@ describe('@payloadcms/storage-s3', () => {
     it.todo('can upload')
   })
 
+  describe('prefix collision detection', () => {
+    beforeEach(async () => {
+      // Clear database records before each test
+      await payload.delete({
+        collection: mediaWithPrefixSlug,
+        where: {},
+      })
+      await payload.delete({
+        collection: mediaSlug,
+        where: {},
+      })
+    })
+
+    it('detects collision within same prefix', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Upload twice with same prefix
+      const upload1 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      const upload2 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image-1.png')
+      expect(upload1.prefix).toBe(prefix)
+      expect(upload2.prefix).toBe(prefix)
+    })
+
+    it('works normally for collections without prefix', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Upload twice to collection without prefix
+      const upload1 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      const upload2 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image-1.png')
+      expect(upload1.prefix).toBeUndefined()
+      expect(upload2.prefix).toBeUndefined()
+    })
+  })
+
   async function createTestBucket() {
     try {
       const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
