@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
@@ -28,15 +28,15 @@ describe('@payloadcms/storage-s3', () => {
 
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    TEST_BUCKET = process.env.S3_BUCKET
+    TEST_BUCKET = process.env.S3_BUCKET!
 
     client = new AWS.S3({
-      endpoint: process.env.S3_ENDPOINT,
+      endpoint: process.env.S3_ENDPOINT!,
       forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
+      region: process.env.S3_REGION!,
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
       },
     })
 
@@ -180,7 +180,9 @@ describe('@payloadcms/storage-s3', () => {
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image-1.png')
+      // @ts-expect-error prefix should never be set
       expect(upload1.prefix).toBeUndefined()
+      // @ts-expect-error prefix should never be set
       expect(upload2.prefix).toBeUndefined()
     })
 
@@ -259,14 +261,10 @@ describe('@payloadcms/storage-s3', () => {
       return
     }
 
-    const deleteParams = {
+    const deleteParams: AWS.DeleteObjectsCommandInput = {
       Bucket: TEST_BUCKET,
-      Delete: { Objects: [] },
+      Delete: { Objects: listedObjects.Contents.map(({ Key }) => ({ Key })) },
     }
-
-    listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key })
-    })
 
     const deleteResult = await client.send(new AWS.DeleteObjectsCommand(deleteParams))
     if (deleteResult.Errors?.length) {
@@ -284,12 +282,12 @@ describe('@payloadcms/storage-s3', () => {
     uploadId: number | string
   }) {
     const uploadData = (await payload.findByID({
-      collection: collectionSlug,
+      collection: collectionSlug as CollectionSlug,
       id: uploadId,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
+      const rawFilename = uploadData?.sizes?.[key]?.filename
       return prefix ? `${prefix}/${rawFilename}` : rawFilename
     })
 
