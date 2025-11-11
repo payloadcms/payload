@@ -42,7 +42,12 @@ export const mcpPlugin =
      *  - If a custom tool has gone haywire, admins can disallow that tool.
      *
      */
-    const apiKeyCollection = createAPIKeysCollection(collections, customTools, experimentalTools)
+    const apiKeyCollection = createAPIKeysCollection(
+      collections,
+      customTools,
+      experimentalTools,
+      pluginOptions,
+    )
     if (pluginOptions.overrideApiKeyCollection) {
       config.collections.push(pluginOptions.overrideApiKeyCollection(apiKeyCollection))
     } else {
