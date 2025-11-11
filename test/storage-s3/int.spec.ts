@@ -7,7 +7,13 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, mediaWithSignedDownloadsSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithDynamicPrefixSlug,
+  mediaWithPrefixSlug,
+  mediaWithSignedDownloadsSlug,
+  prefix,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -201,6 +207,30 @@ describe('@payloadcms/storage-s3', () => {
       expect(upload2.filename).toBe('image.png') // Should NOT increment
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
       expect(upload2.prefix).toBe('different-prefix')
+    })
+
+    it('supports multi-tenant scenario with dynamic prefix from hook', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Tenant A uploads logo.png
+      const tenantAUpload = await payload.create({
+        collection: mediaWithDynamicPrefixSlug,
+        data: { tenant: 'a' },
+        filePath: imageFile,
+      })
+
+      // Tenant B uploads logo.png
+      const tenantBUpload = await payload.create({
+        collection: mediaWithDynamicPrefixSlug,
+        data: { tenant: 'b' },
+        filePath: imageFile,
+      })
+
+      // Both should keep original filename
+      expect(tenantAUpload.filename).toBe('image.png')
+      expect(tenantBUpload.filename).toBe('image.png')
+      expect(tenantAUpload.prefix).toBe('tenant-a')
+      expect(tenantBUpload.prefix).toBe('tenant-b')
     })
   })
 
