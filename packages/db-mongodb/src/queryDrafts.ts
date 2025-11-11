@@ -51,8 +51,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
   const sortAggregation: PipelineStage[] = []
+  let sortCollation
   if (!hasNearConstraint) {
-    sort = buildSortParam({
+    const sortResult = buildSortParam({
       adapter: this,
       config: this.payload.config,
       fields,
@@ -62,6 +63,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       timestamps: true,
       versions: true,
     })
+    sort = sortResult.sorting
+    sortCollation = sortResult.collation
   }
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
@@ -92,9 +95,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     useEstimatedCount,
   }
 
-  if (this.collation) {
+  // Apply collation - prefer sort-specific collation over global
+  if (sortCollation || this.collation) {
     const defaultLocale = 'en'
-    paginationOptions.collation = {
+    paginationOptions.collation = sortCollation || {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
     }

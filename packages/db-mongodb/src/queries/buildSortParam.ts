@@ -1,3 +1,4 @@
+import type { CollationOptions } from 'mongodb'
 import type { PipelineStage } from 'mongoose'
 
 import {
@@ -152,7 +153,10 @@ export const buildSortParam = ({
   sortAggregation,
   timestamps,
   versions,
-}: Args): Record<string, string> => {
+}: Args): {
+  collation?: CollationOptions
+  sorting: Record<string, string>
+} => {
   if (!sort) {
     if (timestamps) {
       sort = '-createdAt'
@@ -187,6 +191,13 @@ export const buildSortParam = ({
   if (includeFallbackSort) {
     sort.push(fallbackSort)
   }
+
+  // Check if any sorted field has sortCaseInsensitive enabled
+  const hasCaseInsensitiveField = sort.some((item) => {
+    const sortProperty = item.startsWith('-') ? item.substring(1) : item
+    const field = getFieldByPath({ fields, path: sortProperty })
+    return field?.field?.admin?.sortCaseInsensitive === true
+  })
 
   const sorting = sort.reduce<Record<string, string>>((acc, item) => {
     let sortProperty: string
@@ -231,5 +242,23 @@ export const buildSortParam = ({
     return acc
   }, {})
 
-  return sorting
+  // Build collation object if case-insensitive sorting needed
+  let collation: CollationOptions | undefined
+  if (hasCaseInsensitiveField) {
+    const { defaultLocale } = config.localization || {}
+    collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale || 'en',
+      strength: 2, // Case-insensitive: primary and secondary differences only
+    }
+
+    // Merge with adapter collation if present
+    if (adapter.collation) {
+      collation = {
+        ...collation,
+        ...adapter.collation,
+      }
+    }
+  }
+
+  return { collation, sorting }
 }

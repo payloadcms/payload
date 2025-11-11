@@ -46,8 +46,9 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   }
 
   let sort
+  let sortCollation
   if (!hasNearConstraint) {
-    sort = buildSortParam({
+    const sortResult = buildSortParam({
       adapter: this,
       config: this.payload.config,
       fields: versionFields,
@@ -55,6 +56,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
       sort: sortArg || '-updatedAt',
       timestamps: true,
     })
+    sort = sortResult.sorting
+    sortCollation = sortResult.collation
   }
 
   const query = await buildQuery({
@@ -78,9 +81,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     useEstimatedCount,
   }
 
-  if (this.collation) {
+  // Apply collation - prefer sort-specific collation over global
+  if (sortCollation || this.collation) {
     const defaultLocale = 'en'
-    paginationOptions.collation = {
+    paginationOptions.collation = sortCollation || {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
     }

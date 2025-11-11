@@ -22,7 +22,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   let sortAggregation: PipelineStage[] = []
 
-  const sort = buildSortParam({
+  const { sorting: sort } = buildSortParam({
     adapter: this,
     config: this.payload.config,
     fields: collectionConfig.flattenedFields,

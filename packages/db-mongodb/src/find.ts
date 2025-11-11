@@ -46,8 +46,9 @@ export const find: Find = async function find(
   const sortAggregation: PipelineStage[] = []
 
   let sort
+  let sortCollation
   if (!hasNearConstraint) {
-    sort = buildSortParam({
+    const sortResult = buildSortParam({
       adapter: this,
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
@@ -56,6 +57,8 @@ export const find: Find = async function find(
       sortAggregation,
       timestamps: collectionConfig.timestamps || false,
     })
+    sort = sortResult.sorting
+    sortCollation = sortResult.collation
   }
 
   const query = await buildQuery({
@@ -89,9 +92,10 @@ export const find: Find = async function find(
     })
   }
 
-  if (this.collation) {
+  // Apply collation - prefer sort-specific collation over global
+  if (sortCollation || this.collation) {
     const defaultLocale = 'en'
-    paginationOptions.collation = {
+    paginationOptions.collation = sortCollation || {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
     }
