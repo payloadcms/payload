@@ -7,6 +7,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { caseInsensitiveSlug } from './collections/CaseInsensitive/index.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
@@ -913,6 +914,81 @@ describe('Sort', () => {
           'Post 11', // 20, 11
         ])
       })
+    })
+  })
+
+  describe('Case-insensitive sorting', () => {
+    const mixedCaseData = [
+      { filename: 'Apple.png', normalText: 'test' },
+      { filename: 'banana.png', normalText: 'test' },
+      { filename: 'Cherry.png', normalText: 'test' },
+      { filename: 'date.png', normalText: 'test' },
+      { filename: 'Elephant.png', normalText: 'test' },
+      { filename: 'fig.png', normalText: 'test' },
+    ]
+
+    beforeAll(async () => {
+      // Create test data
+      for (const data of mixedCaseData) {
+        await payload.create({
+          collection: 'case-insensitive',
+          data,
+        })
+      }
+    })
+
+    afterAll(async () => {
+      await payload.delete({
+        collection: 'case-insensitive',
+        where: {},
+      })
+    })
+
+    it('should sort case-insensitively when sortCaseInsensitive is true', async () => {
+      const result = await payload.find({
+        collection: 'case-insensitive',
+        sort: 'filename',
+      })
+
+      const filenames = result.docs.map((doc) => doc.filename)
+
+      // Expected: case-insensitive alphabetical order
+      expect(filenames).toEqual([
+        'Apple.png',
+        'banana.png',
+        'Cherry.png',
+        'date.png',
+        'Elephant.png',
+        'fig.png',
+      ])
+    })
+
+    it('should sort case-sensitively for fields without sortCaseInsensitive', async () => {
+      const result = await payload.find({
+        collection: 'case-insensitive',
+        sort: 'normalText',
+      })
+
+      // normalText should use default case-sensitive sorting
+      expect(result.docs).toHaveLength(6)
+    })
+
+    it('should sort case-insensitively in descending order', async () => {
+      const result = await payload.find({
+        collection: 'case-insensitive',
+        sort: '-filename',
+      })
+
+      const filenames = result.docs.map((doc) => doc.filename)
+
+      expect(filenames).toEqual([
+        'fig.png',
+        'Elephant.png',
+        'date.png',
+        'Cherry.png',
+        'banana.png',
+        'Apple.png',
+      ])
     })
   })
 })
