@@ -96,12 +96,17 @@ export const findMany = async function find({
     }
   }
 
+  const hasArrayFieldSort = orderBy?.some((o) => o.isArrayField) ?? false
+
   const selectDistinctResult = await selectDistinct({
     adapter,
     db,
     joins,
+    orderBy,
     query: ({ query }) => {
-      if (orderBy) {
+      // Only apply ORDER BY here if not using array field aggregation
+      // (selectDistinct handles ORDER BY for array field sorts)
+      if (orderBy && !hasArrayFieldSort) {
         query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
       }
       return query.offset(offset).limit(limit)

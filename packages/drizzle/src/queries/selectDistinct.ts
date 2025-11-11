@@ -59,7 +59,9 @@ export const selectDistinct = ({
 
         // For each select field, apply MIN or MAX if it's an array sort column
         for (const [key, column] of Object.entries(selectFields)) {
-          if (key === 'id') {continue} // Already handled
+          if (key === 'id') {
+            continue
+          } // Already handled
 
           const sortInfo = orderBy?.find(
             (o) =>
@@ -99,7 +101,9 @@ export const selectDistinct = ({
         aggregatedFields.id = table.id as SQLiteColumn
 
         for (const [key, column] of Object.entries(selectFields)) {
-          if (key === 'id') {continue}
+          if (key === 'id') {
+            continue
+          }
 
           const sortInfo = orderBy?.find(
             (o) =>
@@ -139,7 +143,44 @@ export const selectDistinct = ({
 
     // NEW: Add GROUP BY when aggregating
     if (hasArrayFieldSort) {
-      query = query.groupBy(table.id)
+      // Group by ID and all non-aggregated columns
+      const groupByColumns = [table.id]
+
+      // Add non-aggregated select fields to GROUP BY
+      for (const [key, column] of Object.entries(selectFields)) {
+        if (key === 'id') {
+          continue
+        }
+
+        const sortInfo = orderBy?.find(
+          (o) =>
+            o.column.name === column.name &&
+            getNameFromDrizzleTable(o.column.table) === getNameFromDrizzleTable(column.table),
+        )
+
+        // Only add to GROUP BY if it's NOT an array field (array fields are aggregated)
+        if (!sortInfo?.isArrayField) {
+          groupByColumns.push(column)
+        }
+      }
+
+      query = query.groupBy(...groupByColumns)
+
+      // Apply ORDER BY before queryModifier when using aggregates
+      // This ensures we order by the aggregated expressions, not the raw columns
+      if (orderBy) {
+        query = query.orderBy(() =>
+          orderBy.map(({ column, isArrayField: isArray, order }) => {
+            if (isArray) {
+              // For array fields, order by the aggregate expression
+              const aggregateFn = order === asc ? min : max
+              return order(aggregateFn(column))
+            }
+            // For non-array fields, use the column directly
+            return order(column)
+          }),
+        )
+      }
     }
 
     return queryModifier({
