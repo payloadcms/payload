@@ -138,6 +138,11 @@ export const getTableColumnFromPath = ({
 
     switch (field.type) {
       case 'array': {
+        // When traversing array field path, mark with isArrayField flag so sorting can
+        // apply MIN/MAX aggregation to handle JOIN row multiplication correctly.
+        // Without aggregation, pagination returns incomplete results.
+        // @see https://github.com/payloadcms/payload/issues/14124
+
         newTableName = adapter.tableNameMap.get(
           `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
         )
@@ -186,7 +191,7 @@ export const getTableColumnFromPath = ({
           value,
         })
 
-        // NEW: Mark this path as involving an array field
+        // Mark result with isArrayField=true to enable aggregation during sort operations
         return {
           ...result,
           isArrayField: true,

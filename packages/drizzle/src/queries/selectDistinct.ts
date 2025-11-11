@@ -30,6 +30,15 @@ type Args = {
 
 /**
  * Selects distinct records from a table only if there are joins that need to be used, otherwise return null
+ *
+ * When sorting by array field columns, uses MIN/MAX aggregation to ensure one row per parent
+ * document before LIMIT is applied. This prevents incomplete pages caused by JOIN row multiplication
+ * (e.g., 10 docs × 3 array items = 30 rows, LIMIT 5 would return ~2 docs instead of 5).
+ *
+ * Strategy: For ascending sorts use MIN (smallest value), for descending sorts use MAX (largest value).
+ * GROUP BY parent ID collapses multiplied rows back to one-per-parent before pagination.
+ *
+ * @see https://github.com/payloadcms/payload/issues/14124
  */
 export const selectDistinct = ({
   adapter,
@@ -51,7 +60,10 @@ export const selectDistinct = ({
 
     if (adapter.name === 'postgres') {
       if (hasArrayFieldSort) {
-        // NEW: Use aggregation for array field sorts
+        // Array field sorts require aggregation to prevent pagination issues.
+        // JOINs with array tables multiply rows (e.g., parent × array items).
+        // Applying LIMIT to multiplied rows returns incomplete pages.
+        // Solution: MIN/MAX aggregation + GROUP BY parent ID = one row per parent before LIMIT.
         const aggregatedFields: Record<string, GenericColumn> = {}
 
         // Always select the ID (no aggregation needed)
@@ -95,7 +107,7 @@ export const selectDistinct = ({
     }
     if (adapter.name === 'sqlite') {
       if (hasArrayFieldSort) {
-        // NEW: Same logic for SQLite
+        // Array field aggregation for SQLite (same logic as Postgres)
         const aggregatedFields: Record<string, GenericColumn> = {}
 
         aggregatedFields.id = table.id as SQLiteColumn
