@@ -40,6 +40,7 @@ type TableColumn = {
   constraints: Constraint[]
   field: FlattenedField
   getNotNullColumnByValue?: (val: unknown) => string
+  isArrayField?: boolean // NEW: tracks if path traversed array field
   pathSegments?: string[]
   rawColumn?: SQL
   table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
@@ -167,7 +168,7 @@ export const getTableColumnFromPath = ({
           })
         }
 
-        return getTableColumnFromPath({
+        const result = getTableColumnFromPath({
           adapter,
           collectionPath,
           constraintPath,
@@ -184,6 +185,12 @@ export const getTableColumnFromPath = ({
           tableName: newTableName,
           value,
         })
+
+        // NEW: Mark this path as involving an array field
+        return {
+          ...result,
+          isArrayField: true,
+        }
       }
       case 'blocks': {
         if (adapter.blocksAsJSON) {
