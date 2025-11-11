@@ -249,7 +249,14 @@ export function UploadInput(props: UploadInputProps) {
         if (!grouped[relationTo]) {
           grouped[relationTo] = []
         }
-        grouped[relationTo].push(value)
+        // Ensure we extract the actual ID value, not an object
+        let idValue: number | string = value
+
+        if (value && typeof value === 'object' && 'value' in (value as any)) {
+          idValue = (value as any).value
+        }
+
+        grouped[relationTo].push(idValue)
       })
 
       // 2. Fetch per collection
@@ -315,6 +322,35 @@ export function UploadInput(props: UploadInputProps) {
     [serverURL, api, code, i18n.language, t],
   )
 
+  const normalizeValue = useCallback(
+    (value: any): any => {
+      const isPoly = Array.isArray(relationTo)
+
+      // If it's already a simple ID (string or number), return as-is for non-poly or wrap for poly
+      if (typeof value === 'string' || typeof value === 'number') {
+        return value
+      }
+
+      // If it's an object with relationTo and value
+      if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
+        // Extract the actual ID value, handling nested objects
+        let idValue: any = value.value
+        while (idValue && typeof idValue === 'object' && idValue !== null && 'value' in idValue) {
+          idValue = idValue.value
+        }
+
+        // Return the normalized structure
+        if (isPoly) {
+          return { relationTo: value.relationTo, value: idValue }
+        }
+        return idValue
+      }
+
+      return value
+    },
+    [relationTo],
+  )
+
   const onUploadSuccess: BulkUploadContext['onSuccess'] = useCallback(
     (uploadedForms) => {
       const isPoly = Array.isArray(relationTo)
@@ -323,7 +359,9 @@ export function UploadInput(props: UploadInputProps) {
         const newValues = uploadedForms.map((form) =>
           isPoly ? { relationTo: form.collectionSlug, value: form.doc.id } : form.doc.id,
         )
-        const mergedValue = [...(Array.isArray(value) ? value : []), ...newValues]
+        // Normalize existing values before merging
+        const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
+        const mergedValue = [...normalizedExisting, ...newValues]
         onChange(mergedValue)
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
@@ -346,7 +384,7 @@ export function UploadInput(props: UploadInputProps) {
         ])
       }
     },
-    [value, onChange, hasMany, relationTo],
+    [value, onChange, hasMany, relationTo, normalizeValue],
   )
 
   const onLocalFileSelection = React.useCallback(
@@ -405,6 +443,7 @@ export function UploadInput(props: UploadInputProps) {
         relationTo: activeRelationTo,
         value: id,
       }))
+
       const loadedDocs = await populateDocs(itemsToLoad)
       if (loadedDocs) {
         setPopulatedDocs((currentDocs) => [...(currentDocs || []), ...loadedDocs])
@@ -413,10 +452,12 @@ export function UploadInput(props: UploadInputProps) {
       const newValues = selectedDocIDs.map((id) =>
         isPoly ? { relationTo: activeRelationTo, value: id } : id,
       )
-      onChange([...(Array.isArray(value) ? value : []), ...newValues])
+      // Normalize existing values before merging
+      const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
+      onChange([...normalizedExisting, ...newValues])
       closeListDrawer()
     },
-    [activeRelationTo, closeListDrawer, onChange, populateDocs, value, relationTo],
+    [activeRelationTo, closeListDrawer, onChange, populateDocs, value, relationTo, normalizeValue],
   )
 
   const onDocCreate = React.useCallback(
@@ -456,10 +497,11 @@ export function UploadInput(props: UploadInputProps) {
         return currentDocs
       })
 
-      const newValue = isPoly ? { relationTo: collectionSlug, value: doc.id } : doc.id
-
       if (hasMany) {
-        const valueToUse = [...(Array.isArray(value) ? value : []), newValue]
+        const newValue = isPoly ? { relationTo: collectionSlug, value: doc.id } : doc.id
+        // Normalize existing values before merging
+        const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
+        const valueToUse = [...normalizedExisting, newValue]
         onChange(valueToUse)
       } else {
         const valueToUse = isPoly ? { relationTo: collectionSlug, value: doc.id } : doc.id
@@ -467,7 +509,7 @@ export function UploadInput(props: UploadInputProps) {
       }
       closeListDrawer()
     },
-    [closeListDrawer, hasMany, populateDocs, onChange, value, relationTo],
+    [closeListDrawer, hasMany, populateDocs, onChange, value, relationTo, normalizeValue],
   )
 
   const reloadDoc = React.useCallback<ReloadDoc>(
@@ -534,7 +576,7 @@ export function UploadInput(props: UploadInputProps) {
   useEffect(() => {
     async function loadInitialDocs() {
       if (value) {
-        let itemsToLoad: ValueWithRelation[]
+        let itemsToLoad: ValueWithRelation[] = []
         if (
           Array.isArray(relationTo) &&
           ((typeof value === 'object' && 'relationTo' in value) ||
@@ -545,29 +587,55 @@ export function UploadInput(props: UploadInputProps) {
         ) {
           // For poly uploads, value should already be in the format { relationTo, value }
           const values = Array.isArray(value) ? value : [value]
-          itemsToLoad = values.filter(
-            (v): v is ValueWithRelation => typeof v === 'object' && 'relationTo' in v,
-          )
+          itemsToLoad = values
+            .filter((v): v is ValueWithRelation => typeof v === 'object' && 'relationTo' in v)
+            .map((v) => {
+              // Ensure the value property is a simple ID, not nested
+              let idValue: any = v.value
+              while (
+                idValue &&
+                typeof idValue === 'object' &&
+                idValue !== null &&
+                'value' in idValue
+              ) {
+                idValue = idValue.value
+              }
+              return {
+                relationTo: v.relationTo,
+                value: idValue as number | string,
+              }
+            })
         } else {
           // This check is here to satisfy TypeScript that relationTo is a string
           if (!Array.isArray(relationTo)) {
             // For single collection uploads, we need to wrap the IDs
             const ids = Array.isArray(value) ? value : [value]
             itemsToLoad = ids.map((id): ValueWithRelation => {
-              const idValue = typeof id === 'object' && 'value' in id ? id.value : id
+              // Extract the actual ID, handling nested objects
+              let idValue: any = id
+              while (
+                idValue &&
+                typeof idValue === 'object' &&
+                idValue !== null &&
+                'value' in idValue
+              ) {
+                idValue = idValue.value
+              }
               return {
                 relationTo,
-                value: idValue,
+                value: idValue as number | string,
               }
             })
           }
         }
 
-        const loadedDocs = await populateDocs(itemsToLoad)
+        if (itemsToLoad.length > 0) {
+          const loadedDocs = await populateDocs(itemsToLoad)
 
-        if (loadedDocs) {
-          setPopulatedDocs(loadedDocs)
-          loadedValueRef.current = value
+          if (loadedDocs) {
+            setPopulatedDocs(loadedDocs)
+            loadedValueRef.current = value
+          }
         }
       } else {
         // Clear populated docs when value is cleared
