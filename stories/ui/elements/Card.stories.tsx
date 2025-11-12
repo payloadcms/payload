@@ -218,7 +218,7 @@ export const InteractiveDemo: Story = {
           title="Interactive Card"
         />
 
-        <p style={{ color: '#666', fontSize: '14px', marginTop: '16px' }}>
+        <p style={{ color: 'var(--theme-elevation-400)', fontSize: '14px', marginTop: '16px' }}>
           Click the card to increment the card counter, or click the action buttons to increment the
           action counter.
         </p>
@@ -277,9 +277,9 @@ export const VariousStates: Story = {
               <Card {...state} />
               <p
                 style={{
-                  backgroundColor: '#f8f9fa',
+                  backgroundColor: 'var(--theme-elevation-50)',
                   borderRadius: '4px',
-                  color: '#666',
+                  color: 'var(--theme-elevation-400)',
                   fontSize: '14px',
                   margin: '8px 0 0 0',
                   padding: '8px',

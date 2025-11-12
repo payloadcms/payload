@@ -67,7 +67,7 @@ export const Default: Story = {
     <div style={{ position: 'relative' }}>
       <div
         style={{
-          backgroundColor: '#f0f0f0',
+          backgroundColor: 'var(--theme-elevation-50)',
           borderRadius: '4px',
           display: 'inline-block',
           padding: '10px',
@@ -92,7 +92,7 @@ export const Bottom: Story = {
     <div style={{ position: 'relative' }}>
       <div
         style={{
-          backgroundColor: '#f0f0f0',
+          backgroundColor: 'var(--theme-elevation-50)',
           borderRadius: '4px',
           display: 'inline-block',
           padding: '10px',
@@ -236,7 +236,7 @@ export const CaretAlignments: Story = {
             <div
               style={{
                 alignItems: 'center',
-                backgroundColor: '#e0e0e0',
+                backgroundColor: 'var(--theme-elevation-150)',
                 borderRadius: '4px',
                 display: 'flex',
                 height: '40px',
@@ -272,9 +272,9 @@ export const PositionComparison: Story = {
           <div
             style={{
               alignItems: 'center',
-              backgroundColor: '#007acc',
+              backgroundColor: 'var(--theme-primary-500)',
               borderRadius: '4px',
-              color: 'white',
+              color: 'var(--theme-elevation-0)',
               display: 'flex',
               height: '40px',
               justifyContent: 'center',
@@ -293,9 +293,9 @@ export const PositionComparison: Story = {
           <div
             style={{
               alignItems: 'center',
-              backgroundColor: '#28a745',
+              backgroundColor: 'var(--theme-success-500)',
               borderRadius: '4px',
-              color: 'white',
+              color: 'var(--theme-elevation-0)',
               display: 'flex',
               height: '40px',
               justifyContent: 'center',

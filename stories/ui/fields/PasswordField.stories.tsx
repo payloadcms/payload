@@ -295,8 +295,8 @@ export const Interactive: Story = {
         {password && (
           <div
             style={{
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '6px',
               padding: '16px',
             }}
@@ -308,7 +308,7 @@ export const Interactive: Story = {
 
             <div
               style={{
-                backgroundColor: '#e5e7eb',
+                backgroundColor: 'var(--theme-elevation-150)',
                 borderRadius: '4px',
                 height: '8px',
                 marginBottom: '8px',
@@ -325,7 +325,9 @@ export const Interactive: Story = {
               />
             </div>
 
-            <div style={{ color: '#6b7280', fontSize: '14px' }}>{strength.feedback}</div>
+            <div style={{ color: 'var(--theme-elevation-400)', fontSize: '14px' }}>
+              {strength.feedback}
+            </div>
           </div>
         )}
       </div>

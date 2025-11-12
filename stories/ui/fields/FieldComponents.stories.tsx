@@ -93,8 +93,8 @@ export const FieldErrors: Story = {
         <h4>Error with Custom Styling</h4>
         <div
           style={{
-            backgroundColor: '#fff5f5',
-            border: '1px solid #fed7d7',
+            backgroundColor: 'var(--theme-error-50)',
+            border: '1px solid var(--theme-error-200)',
             borderRadius: '4px',
             padding: '12px',
           }}
@@ -203,7 +203,11 @@ export const CheckboxInputs: Story = {
               <div style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
                 <span>Custom label with</span>
                 <code
-                  style={{ backgroundColor: '#f1f1f1', borderRadius: '3px', padding: '2px 6px' }}
+                  style={{
+                    backgroundColor: 'var(--theme-elevation-50)',
+                    borderRadius: '3px',
+                    padding: '2px 6px',
+                  }}
                 >
                   code
                 </code>
@@ -249,7 +253,9 @@ export const CompleteFieldExample: Story = {
             }}
             placeholder="Enter your email address"
             style={{
-              border: emailError ? '1px solid #e53e3e' : '1px solid #e2e8f0',
+              border: emailError
+                ? '1px solid var(--theme-error-500)'
+                : '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
               fontSize: '14px',
               outline: 'none',
@@ -281,7 +287,9 @@ export const CompleteFieldExample: Story = {
             disabled={!email || emailError !== null || !agreedToTerms}
             style={{
               backgroundColor:
-                !email || emailError !== null || !agreedToTerms ? '#a0aec0' : '#3182ce',
+                !email || emailError !== null || !agreedToTerms
+                  ? 'var(--theme-elevation-400)'
+                  : 'var(--theme-input-bg)',
               border: 'none',
               borderRadius: '4px',
               color: 'white',
@@ -299,7 +307,7 @@ export const CompleteFieldExample: Story = {
         <details style={{ marginTop: '20px' }}>
           <summary
             style={{
-              color: '#666',
+              color: 'var(--theme-elevation-400)',
               cursor: 'pointer',
               fontSize: '14px',
               padding: '8px 0',
@@ -310,8 +318,8 @@ export const CompleteFieldExample: Story = {
           </summary>
           <div
             style={{
-              backgroundColor: '#f7fafc',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
               fontFamily: 'monospace',
               fontSize: '12px',

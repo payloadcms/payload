@@ -37,7 +37,7 @@ const BasicModalDemo = () => {
           >
             <div
               style={{
-                backgroundColor: 'white',
+                backgroundColor: 'var(--theme-elevation-0)',
                 borderRadius: '8px',
                 maxHeight: '80vh',
                 maxWidth: '500px',
@@ -104,9 +104,11 @@ const ConfirmationModalDemo = () => {
         {result && (
           <div
             style={{
-              backgroundColor: result === 'Confirmed!' ? '#d4edda' : '#f8d7da',
+              backgroundColor:
+                result === 'Confirmed!' ? 'var(--theme-success-100)' : 'var(--theme-error-100)',
               borderRadius: '4px',
-              color: result === 'Confirmed!' ? '#155724' : '#721c24',
+              color:
+                result === 'Confirmed!' ? 'var(--theme-success-700)' : 'var(--theme-error-700)',
               marginTop: '12px',
               padding: '8px 12px',
             }}
@@ -247,9 +249,15 @@ export const VariousConfirmations: Story = {
               {results[config.id] && (
                 <div
                   style={{
-                    backgroundColor: results[config.id] === 'Confirmed' ? '#d4edda' : '#f8d7da',
+                    backgroundColor:
+                      results[config.id] === 'Confirmed'
+                        ? 'var(--theme-success-100)'
+                        : 'var(--theme-error-100)',
                     borderRadius: '4px',
-                    color: results[config.id] === 'Confirmed' ? '#155724' : '#721c24',
+                    color:
+                      results[config.id] === 'Confirmed'
+                        ? 'var(--theme-success-700)'
+                        : 'var(--theme-error-700)',
                     fontSize: '12px',
                     marginTop: '8px',
                     padding: '4px 8px',
@@ -338,7 +346,7 @@ export const ModalSizes: Story = {
           >
             <div
               style={{
-                backgroundColor: 'white',
+                backgroundColor: 'var(--theme-elevation-0)',
                 borderRadius: '8px',
                 maxHeight: '80vh',
                 maxWidth: '90vw',

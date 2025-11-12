@@ -88,8 +88,8 @@ const IconGrid = ({ icons, size = 24 }: { icons: any[]; size?: number }) => (
         key={name}
         style={{
           alignItems: 'center',
-          backgroundColor: '#fafafa',
-          border: '1px solid #e0e0e0',
+          backgroundColor: 'var(--theme-elevation-50)',
+          border: '1px solid var(--theme-elevation-150)',
           borderRadius: '8px',
           display: 'flex',
           flexDirection: 'column',
@@ -142,8 +142,8 @@ export const ByCategory: Story = {
             <div key={category} style={{ marginBottom: '32px' }}>
               <h3
                 style={{
-                  borderBottom: '2px solid #007acc',
-                  color: '#007acc',
+                  borderBottom: '2px solid var(--theme-input-bg)',
+                  color: 'var(--theme-input-bg)',
                   marginBottom: '16px',
                   paddingBottom: '8px',
                 }}
@@ -182,11 +182,11 @@ export const ColorVariations: Story = {
   render: () => {
     const colors = [
       { name: 'Default', value: 'currentColor' },
-      { name: 'Primary', value: '#007acc' },
-      { name: 'Success', value: '#28a745' },
-      { name: 'Warning', value: '#ffc107' },
-      { name: 'Danger', value: '#dc3545' },
-      { name: 'Secondary', value: '#6c757d' },
+      { name: 'Primary', value: 'var(--theme-input-bg)' },
+      { name: 'Success', value: 'var(--theme-success-500)' },
+      { name: 'Warning', value: 'var(--theme-warning-500)' },
+      { name: 'Danger', value: 'var(--theme-error-500)' },
+      { name: 'Secondary', value: 'var(--theme-elevation-400)' },
     ]
 
     const sampleIcons = [PlusIcon, EditIcon, TrashIcon, SearchIcon]
@@ -205,13 +205,16 @@ export const ColorVariations: Story = {
           {colors.map(({ name, value }) => (
             <div key={name} style={{ textAlign: 'center' }}>
               <h4
-                style={{ color: value !== 'currentColor' ? value : '#333', marginBottom: '16px' }}
+                style={{
+                  color: value !== 'currentColor' ? value : 'var(--theme-elevation-800)',
+                  marginBottom: '16px',
+                }}
               >
                 {name}
               </h4>
               <div
                 style={{
-                  backgroundColor: '#f8f9fa',
+                  backgroundColor: 'var(--theme-elevation-50)',
                   borderRadius: '8px',
                   display: 'flex',
                   justifyContent: 'space-around',

@@ -137,7 +137,7 @@ export const LiveSearch: Story = {
         {searchTerm && (
           <div
             style={{
-              backgroundColor: '#f8f9fa',
+              backgroundColor: 'var(--theme-elevation-50)',
               borderRadius: '4px',
               marginTop: '16px',
               padding: '12px',
@@ -161,7 +161,9 @@ export const LiveSearch: Story = {
                 ))}
               </ul>
             ) : (
-              <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>No results found</p>
+              <p style={{ color: 'var(--theme-elevation-400)', fontSize: '14px', margin: 0 }}>
+                No results found
+              </p>
             )}
           </div>
         )}
@@ -225,7 +227,7 @@ export const VariousActions: Story = {
         {searchResults && (
           <div
             style={{
-              backgroundColor: '#e7f3ff',
+              backgroundColor: 'var(--theme-elevation-50)',
               borderRadius: '4px',
               fontSize: '14px',
               marginTop: '16px',
@@ -300,7 +302,7 @@ export const CollectionSearch: Story = {
 
         <div
           style={{
-            backgroundColor: '#f8f9fa',
+            backgroundColor: 'var(--theme-elevation-50)',
             borderRadius: '4px',
             fontSize: '14px',
             marginTop: '16px',

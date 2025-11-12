@@ -236,7 +236,7 @@ export const Interactive: Story = {
 }
 
 .payload-button:hover {
-  background: #005fa3;
+  background: var(--theme-input-bg-hover);
 }`,
       html: `<!DOCTYPE html>
 <html lang="en">
@@ -308,7 +308,7 @@ const createUser = (userData: Partial<User>): User => {
             <select
               onChange={(e) => setLanguage(e.target.value)}
               style={{
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--theme-elevation-150)',
                 borderRadius: '4px',
                 fontSize: '14px',
                 minWidth: '150px',
@@ -328,7 +328,7 @@ const createUser = (userData: Partial<User>): User => {
             <button
               onClick={() => setCode(sampleCode[language])}
               style={{
-                backgroundColor: '#007acc',
+                backgroundColor: 'var(--theme-input-bg)',
                 border: 'none',
                 borderRadius: '4px',
                 color: 'white',

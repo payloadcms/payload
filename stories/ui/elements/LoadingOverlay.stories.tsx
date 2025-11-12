@@ -85,7 +85,7 @@ export const Interactive: Story = {
             onChange={(e) => setCustomText(e.target.value)}
             placeholder="Enter custom loading text..."
             style={{
-              border: '1px solid #ccc',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
               maxWidth: '300px',
               padding: '8px 12px',
@@ -99,10 +99,10 @@ export const Interactive: Story = {
         <button
           onClick={() => setIsLoading(!isLoading)}
           style={{
-            backgroundColor: isLoading ? '#dc3545' : '#007acc',
+            backgroundColor: isLoading ? 'var(--theme-error-500)' : 'var(--theme-primary-500)',
             border: 'none',
             borderRadius: '4px',
-            color: 'white',
+            color: 'var(--theme-elevation-0)',
             cursor: 'pointer',
             padding: '10px 20px',
           }}
@@ -112,8 +112,8 @@ export const Interactive: Story = {
 
         <div
           style={{
-            backgroundColor: '#f8f9fa',
-            border: '2px dashed #ccc',
+            backgroundColor: 'var(--theme-elevation-50)',
+            border: '2px dashed var(--theme-elevation-150)',
             borderRadius: '8px',
             marginTop: '20px',
             minHeight: '100px',
@@ -162,8 +162,8 @@ export const LoadingMessages: Story = {
             <div
               key={index}
               style={{
-                backgroundColor: '#fafafa',
-                border: '1px solid #e0e0e0',
+                backgroundColor: 'var(--theme-elevation-50)',
+                border: '1px solid var(--theme-elevation-150)',
                 borderRadius: '8px',
                 height: '120px',
                 position: 'relative',
@@ -196,8 +196,8 @@ export const SizeVariations: Story = {
               <h4 style={{ marginBottom: '8px' }}>{name}</h4>
               <div
                 style={{
-                  backgroundColor: '#fafafa',
-                  border: '1px solid #e0e0e0',
+                  backgroundColor: 'var(--theme-elevation-50)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '8px',
                   height: `${height}px`,
                   position: 'relative',

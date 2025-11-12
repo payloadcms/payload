@@ -281,8 +281,8 @@ export const Interactive: Story = {
                 key={key}
                 onClick={() => setJsonValue(value)}
                 style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--theme-elevation-50)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '4px',
                   cursor: 'pointer',
                   fontSize: '14px',
@@ -296,10 +296,10 @@ export const Interactive: Story = {
             <button
               onClick={() => setJsonValue('')}
               style={{
-                backgroundColor: '#fee2e2',
-                border: '1px solid #fecaca',
+                backgroundColor: 'var(--theme-error-50)',
+                border: '1px solid var(--theme-error-200)',
                 borderRadius: '4px',
-                color: '#dc2626',
+                color: 'var(--theme-error-500)',
                 cursor: 'pointer',
                 fontSize: '14px',
                 padding: '6px 12px',
@@ -327,8 +327,10 @@ export const Interactive: Story = {
 
         <div
           style={{
-            backgroundColor: validationStatus.isValid ? '#f0f9ff' : '#fef2f2',
-            border: `1px solid ${validationStatus.isValid ? '#bae6fd' : '#fecaca'}`,
+            backgroundColor: validationStatus.isValid
+              ? 'var(--theme-success-50)'
+              : 'var(--theme-error-50)',
+            border: `1px solid ${validationStatus.isValid ? 'var(--theme-success-200)' : 'var(--theme-error-200)'}`,
             borderRadius: '6px',
             padding: '12px',
           }}
@@ -338,12 +340,12 @@ export const Interactive: Story = {
             <strong>{validationStatus.isValid ? 'Valid JSON' : 'Invalid JSON'}</strong>
           </div>
           {validationStatus.error && (
-            <div style={{ color: '#dc2626', fontSize: '14px' }}>
+            <div style={{ color: 'var(--theme-error-500)', fontSize: '14px' }}>
               Error: {validationStatus.error}
             </div>
           )}
           {validationStatus.isValid && jsonValue && (
-            <div style={{ color: '#0369a1', fontSize: '14px' }}>
+            <div style={{ color: 'var(--theme-success-600)', fontSize: '14px' }}>
               JSON is properly formatted and valid.
             </div>
           )}
@@ -521,7 +523,9 @@ export const JSONExamples: Story = {
         {examples.map(({ description, json, title }, index) => (
           <div key={index}>
             <h4>{title}</h4>
-            <p style={{ color: '#6b7280', marginBottom: '16px' }}>{description}</p>
+            <p style={{ color: 'var(--theme-elevation-400)', marginBottom: '16px' }}>
+              {description}
+            </p>
             <JSONField
               label={`${title} JSON`}
               name={`example${index}`}

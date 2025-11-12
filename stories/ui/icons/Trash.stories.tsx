@@ -55,7 +55,13 @@ export const Danger: Story = {
   },
   decorators: [
     (Story) => (
-      <div style={{ color: '#dc3545', transform: 'scale(1.2)', transformOrigin: 'center' }}>
+      <div
+        style={{
+          color: 'var(--theme-error-500)',
+          transform: 'scale(1.2)',
+          transformOrigin: 'center',
+        }}
+      >
         <Story />
       </div>
     ),

@@ -235,10 +235,14 @@ export const Interactive: Story = {
         {validationMessage && (
           <div
             style={{
-              backgroundColor: validationMessage.includes('✅') ? '#f0f9ff' : '#fef2f2',
-              border: `1px solid ${validationMessage.includes('✅') ? '#bae6fd' : '#fecaca'}`,
+              backgroundColor: validationMessage.includes('✅')
+                ? 'var(--theme-success-50)'
+                : 'var(--theme-error-50)',
+              border: `1px solid ${validationMessage.includes('✅') ? 'var(--theme-success-200)' : 'var(--theme-error-200)'}`,
               borderRadius: '6px',
-              color: validationMessage.includes('✅') ? '#0369a1' : '#dc2626',
+              color: validationMessage.includes('✅')
+                ? 'var(--theme-success-700)'
+                : 'var(--theme-error-700)',
               fontSize: '14px',
               padding: '12px',
             }}
@@ -249,7 +253,7 @@ export const Interactive: Story = {
 
         <div
           style={{
-            backgroundColor: '#f8fafc',
+            backgroundColor: 'var(--theme-elevation-50)',
             borderRadius: '6px',
             fontSize: '14px',
             padding: '12px',

@@ -36,8 +36,14 @@ const TextInput: React.FC<TextInputProps> = ({
     readOnly={readOnly}
     required={required}
     style={{
-      backgroundColor: disabled ? '#f7fafc' : readOnly ? '#f8f9fa' : 'white',
-      border: hasError ? '1px solid #e53e3e' : '1px solid #e2e8f0',
+      backgroundColor: disabled
+        ? 'var(--theme-elevation-50)'
+        : readOnly
+          ? 'var(--theme-elevation-50)'
+          : 'var(--theme-elevation-0)',
+      border: hasError
+        ? '1px solid var(--theme-error-500)'
+        : '1px solid var(--theme-elevation-150)',
       borderRadius: '4px',
       fontSize: '14px',
       maxWidth: '300px',
@@ -59,7 +65,7 @@ const FieldLabel: React.FC<{ htmlFor?: string; label: string; required?: boolean
   <label
     htmlFor={htmlFor}
     style={{
-      color: '#2d3748',
+      color: 'var(--theme-elevation-800)',
       display: 'block',
       fontSize: '14px',
       fontWeight: '500',
@@ -67,7 +73,7 @@ const FieldLabel: React.FC<{ htmlFor?: string; label: string; required?: boolean
     }}
   >
     {label}
-    {required && <span style={{ color: '#e53e3e', marginLeft: '4px' }}>*</span>}
+    {required && <span style={{ color: 'var(--theme-error-500)', marginLeft: '4px' }}>*</span>}
   </label>
 )
 
@@ -75,7 +81,7 @@ const FieldError: React.FC<{ message: string | string[] }> = ({ message }) => (
   <div
     style={{
       alignItems: 'center',
-      color: '#e53e3e',
+      color: 'var(--theme-error-500)',
       display: 'flex',
       fontSize: '12px',
       gap: '4px',
@@ -98,7 +104,7 @@ const FieldError: React.FC<{ message: string | string[] }> = ({ message }) => (
 const FieldDescription: React.FC<{ description: string }> = ({ description }) => (
   <div
     style={{
-      color: '#718096',
+      color: 'var(--theme-elevation-400)',
       fontSize: '12px',
       lineHeight: '1.4',
       marginTop: '4px',
@@ -394,10 +400,10 @@ export const CompleteTextField: Story = {
         {value && !error && (
           <div
             style={{
-              backgroundColor: '#d4edda',
-              border: '1px solid #c3e6cb',
+              backgroundColor: 'var(--theme-success-100)',
+              border: '1px solid var(--theme-success-300)',
               borderRadius: '4px',
-              color: '#155724',
+              color: 'var(--theme-success-700)',
               fontSize: '14px',
               padding: '8px 12px',
             }}
@@ -543,10 +549,10 @@ export const FormIntegrationExample: Story = {
         <div style={{ marginTop: '16px' }}>
           <button
             style={{
-              backgroundColor: '#007acc',
+              backgroundColor: 'var(--theme-primary-500)',
               border: 'none',
               borderRadius: '4px',
-              color: 'white',
+              color: 'var(--theme-elevation-0)',
               cursor: 'pointer',
               fontSize: '16px',
               padding: '12px 24px',
@@ -561,7 +567,7 @@ export const FormIntegrationExample: Story = {
         <details style={{ marginTop: '20px' }}>
           <summary
             style={{
-              color: '#666',
+              color: 'var(--theme-elevation-400)',
               cursor: 'pointer',
               fontSize: '14px',
               padding: '8px 0',
@@ -572,8 +578,8 @@ export const FormIntegrationExample: Story = {
           </summary>
           <div
             style={{
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #dee2e6',
+              backgroundColor: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
               fontFamily: 'monospace',
               fontSize: '12px',

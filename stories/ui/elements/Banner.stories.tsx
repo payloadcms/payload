@@ -204,7 +204,7 @@ export const InteractiveBanners: Story = {
         {lastAction && (
           <div
             style={{
-              backgroundColor: '#f7fafc',
+              backgroundColor: 'var(--theme-elevation-50)',
               borderRadius: '4px',
               fontSize: '14px',
               padding: '12px',

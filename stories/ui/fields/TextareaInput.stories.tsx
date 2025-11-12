@@ -272,7 +272,7 @@ export const TextareaWithCharacterCount: Story = {
         <div
           style={{
             alignItems: 'center',
-            color: isOverLimit ? '#e53e3e' : '#666',
+            color: isOverLimit ? 'var(--theme-error-500)' : 'var(--theme-elevation-400)',
             display: 'flex',
             fontSize: '12px',
             justifyContent: 'space-between',
@@ -281,7 +281,7 @@ export const TextareaWithCharacterCount: Story = {
           <FieldDescription description="Provide a detailed description of your product including features, benefits, and specifications." />
           <div
             style={{
-              backgroundColor: isOverLimit ? '#fed7d7' : '#f7fafc',
+              backgroundColor: isOverLimit ? 'var(--theme-error-100)' : 'var(--theme-elevation-50)',
               borderRadius: '4px',
               fontWeight: '500',
               padding: '4px 8px',
@@ -300,10 +300,10 @@ export const TextareaWithCharacterCount: Story = {
         {value.length > 0 && !isOverLimit && (
           <div
             style={{
-              backgroundColor: '#d4edda',
-              border: '1px solid #c3e6cb',
+              backgroundColor: 'var(--theme-success-100)',
+              border: '1px solid var(--theme-success-300)',
               borderRadius: '4px',
-              color: '#155724',
+              color: 'var(--theme-success-700)',
               fontSize: '14px',
               padding: '8px 12px',
             }}
@@ -393,7 +393,9 @@ export const BlogPostEditor: Story = {
             onChange={handleChange('title')}
             placeholder="Enter blog post title"
             style={{
-              border: errors.title ? '1px solid #e53e3e' : '1px solid #e2e8f0',
+              border: errors.title
+                ? '1px solid var(--theme-error-500)'
+                : '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
               fontSize: '16px',
               outline: 'none',
@@ -402,7 +404,7 @@ export const BlogPostEditor: Story = {
             type="text"
             value={formData.title}
           />
-          <div style={{ color: '#666', fontSize: '12px' }}>
+          <div style={{ color: 'var(--theme-elevation-400)', fontSize: '12px' }}>
             {formData.title.length}/100 characters
           </div>
           {errors.title && <FieldError message={errors.title} />}
@@ -422,7 +424,7 @@ export const BlogPostEditor: Story = {
             value={formData.excerpt}
           />
           <FieldDescription description="A brief summary that appears in search results and social media previews" />
-          <div style={{ color: '#666', fontSize: '12px' }}>
+          <div style={{ color: 'var(--theme-elevation-400)', fontSize: '12px' }}>
             {formData.excerpt.length}/300 characters
           </div>
           {errors.excerpt && <FieldError message={errors.excerpt} />}
@@ -442,7 +444,7 @@ export const BlogPostEditor: Story = {
             value={formData.content}
           />
           <FieldDescription description="The main content of your blog post. Supports Markdown formatting." />
-          <div style={{ color: '#666', fontSize: '12px' }}>
+          <div style={{ color: 'var(--theme-elevation-400)', fontSize: '12px' }}>
             {formData.content.length} characters (minimum 100 required)
           </div>
           {errors.content && <FieldError message={errors.content} />}
@@ -477,7 +479,10 @@ export const BlogPostEditor: Story = {
           <FieldDescription description="Custom description for search engines (if different from excerpt)" />
           <div
             style={{
-              color: formData.metaDescription.length > 160 ? '#e53e3e' : '#666',
+              color:
+                formData.metaDescription.length > 160
+                  ? 'var(--theme-error-500)'
+                  : 'var(--theme-elevation-400)',
               fontSize: '12px',
             }}
           >
@@ -490,10 +495,10 @@ export const BlogPostEditor: Story = {
         <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
           <button
             style={{
-              backgroundColor: '#007acc',
+              backgroundColor: 'var(--theme-primary-500)',
               border: 'none',
               borderRadius: '4px',
-              color: 'white',
+              color: 'var(--theme-elevation-0)',
               cursor: 'pointer',
               fontSize: '16px',
               fontWeight: '500',
@@ -510,10 +515,10 @@ export const BlogPostEditor: Story = {
               alert('Draft saved!')
             }}
             style={{
-              backgroundColor: '#f7fafc',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
-              color: '#4a5568',
+              color: 'var(--theme-elevation-600)',
               cursor: 'pointer',
               fontSize: '16px',
               padding: '12px 24px',
@@ -528,17 +533,17 @@ export const BlogPostEditor: Story = {
         {formData.content && (
           <div
             style={{
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e9ecef',
+              backgroundColor: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '8px',
               marginTop: '24px',
               padding: '20px',
             }}
           >
-            <h4 style={{ color: '#495057', marginBottom: '16px' }}>Preview</h4>
+            <h4 style={{ color: 'var(--theme-elevation-600)', marginBottom: '16px' }}>Preview</h4>
             <div
               style={{
-                color: '#212529',
+                color: 'var(--theme-elevation-800)',
                 lineHeight: '1.6',
                 whiteSpace: 'pre-wrap',
               }}
@@ -547,7 +552,7 @@ export const BlogPostEditor: Story = {
               {formData.excerpt && (
                 <p
                   style={{
-                    color: '#6c757d',
+                    color: 'var(--theme-elevation-500)',
                     fontStyle: 'italic',
                     marginBottom: '16px',
                   }}

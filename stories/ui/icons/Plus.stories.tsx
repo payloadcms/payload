@@ -52,7 +52,13 @@ export const Small: Story = {
 export const Colored: Story = {
   decorators: [
     (Story) => (
-      <div style={{ color: '#007acc', transform: 'scale(1.2)', transformOrigin: 'center' }}>
+      <div
+        style={{
+          color: 'var(--theme-input-bg)',
+          transform: 'scale(1.2)',
+          transformOrigin: 'center',
+        }}
+      >
         <Story />
       </div>
     ),

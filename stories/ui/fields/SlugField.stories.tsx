@@ -77,7 +77,7 @@ const SlugField: React.FC<SlugFieldProps> = ({
           value={slugValue}
         />
         {checkAvailability && (
-          <div style={{ color: '#6b7280', fontSize: '12px', marginTop: '4px' }}>
+          <div style={{ color: 'var(--theme-elevation-400)', fontSize: '12px', marginTop: '4px' }}>
             ✓ Availability checking enabled
           </div>
         )}
@@ -225,7 +225,7 @@ export const Interactive: Story = {
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Enter article title..."
             style={{
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--theme-elevation-150)',
               borderRadius: '4px',
               fontSize: '14px',
               padding: '8px 12px',
@@ -253,8 +253,8 @@ export const Interactive: Story = {
         {slug && (
           <div
             style={{
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
+              backgroundColor: 'var(--theme-success-50)',
+              border: '1px solid var(--theme-success-200)',
               borderRadius: '6px',
               padding: '12px',
             }}
@@ -267,7 +267,7 @@ export const Interactive: Story = {
 
         <div
           style={{
-            backgroundColor: '#f8fafc',
+            backgroundColor: 'var(--theme-elevation-50)',
             borderRadius: '6px',
             fontSize: '14px',
             padding: '12px',
@@ -371,7 +371,13 @@ export const SlugGenerationExamples: Story = {
 
         <div style={{ display: 'grid', gap: '20px' }}>
           {examples.map(({ slug, title }, index) => (
-            <div key={index} style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
+            <div
+              key={index}
+              style={{
+                borderBottom: '1px solid var(--theme-elevation-150)',
+                paddingBottom: '16px',
+              }}
+            >
               <div style={{ marginBottom: '8px' }}>
                 <strong>Title:</strong> "{title}"
               </div>

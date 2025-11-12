@@ -295,8 +295,8 @@ export const Interactive: Story = {
         {selectedValue && (
           <div
             style={{
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
+              backgroundColor: 'var(--theme-success-50)',
+              border: '1px solid var(--theme-success-200)',
               borderRadius: '6px',
               padding: '12px',
             }}

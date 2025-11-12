@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>
 export const IconShowcase: Story = {
   render: () => {
     return (
-      <div style={{ background: '#f0f0f0', padding: '20px' }}>
+      <div style={{ background: 'var(--theme-elevation-50)', padding: '20px' }}>
         <h3>Icon Component Tests</h3>
         <div style={{ alignItems: 'center', display: 'flex', gap: '20px', margin: '20px 0' }}>
           <div style={{ textAlign: 'center' }}>
@@ -54,15 +54,17 @@ export const IconShowcase: Story = {
         <h4>Different Colors</h4>
         <div style={{ alignItems: 'center', display: 'flex', gap: '20px', margin: '20px 0' }}>
           <div style={{ textAlign: 'center' }}>
-            <PlusIcon style={{ color: '#007acc', height: '24px', width: '24px' }} />
+            <PlusIcon style={{ color: 'var(--theme-input-bg)', height: '24px', width: '24px' }} />
             <div>Blue</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <PlusIcon style={{ color: '#28a745', height: '24px', width: '24px' }} />
+            <PlusIcon
+              style={{ color: 'var(--theme-success-500)', height: '24px', width: '24px' }}
+            />
             <div>Green</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <PlusIcon style={{ color: '#dc3545', height: '24px', width: '24px' }} />
+            <PlusIcon style={{ color: 'var(--theme-error-500)', height: '24px', width: '24px' }} />
             <div>Red</div>
           </div>
         </div>

@@ -265,7 +265,7 @@ export const ControlledCollapsible: Story = {
             {actionLog.length > 0 && (
               <div
                 style={{
-                  backgroundColor: '#f7fafc',
+                  backgroundColor: 'var(--theme-elevation-50)',
                   borderRadius: '4px',
                   marginTop: '16px',
                   padding: '12px',
@@ -307,30 +307,56 @@ export const ComplexContent: Story = {
           <h5>Parameters:</h5>
           <table style={{ borderCollapse: 'collapse', fontSize: '14px', width: '100%' }}>
             <thead>
-              <tr style={{ backgroundColor: '#f7fafc' }}>
-                <th style={{ border: '1px solid #e2e8f0', padding: '8px', textAlign: 'left' }}>
+              <tr style={{ backgroundColor: 'var(--theme-elevation-50)' }}>
+                <th
+                  style={{
+                    border: '1px solid var(--theme-elevation-150)',
+                    padding: '8px',
+                    textAlign: 'left',
+                  }}
+                >
                   Parameter
                 </th>
-                <th style={{ border: '1px solid #e2e8f0', padding: '8px', textAlign: 'left' }}>
+                <th
+                  style={{
+                    border: '1px solid var(--theme-elevation-150)',
+                    padding: '8px',
+                    textAlign: 'left',
+                  }}
+                >
                   Type
                 </th>
-                <th style={{ border: '1px solid #e2e8f0', padding: '8px', textAlign: 'left' }}>
+                <th
+                  style={{
+                    border: '1px solid var(--theme-elevation-150)',
+                    padding: '8px',
+                    textAlign: 'left',
+                  }}
+                >
                   Description
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ border: '1px solid #e2e8f0', padding: '8px' }}>page</td>
-                <td style={{ border: '1px solid #e2e8f0', padding: '8px' }}>number</td>
-                <td style={{ border: '1px solid #e2e8f0', padding: '8px' }}>
+                <td style={{ border: '1px solid var(--theme-elevation-150)', padding: '8px' }}>
+                  page
+                </td>
+                <td style={{ border: '1px solid var(--theme-elevation-150)', padding: '8px' }}>
+                  number
+                </td>
+                <td style={{ border: '1px solid var(--theme-elevation-150)', padding: '8px' }}>
                   Page number for pagination
                 </td>
               </tr>
               <tr>
-                <td style={{ border: '1px solid #e2e8f0', padding: '8px' }}>limit</td>
-                <td style={{ border: '1px solid #e2e8f0', padding: '8px' }}>number</td>
-                <td style={{ border: '1px solid #e2e8f0', padding: '8px' }}>
+                <td style={{ border: '1px solid var(--theme-elevation-150)', padding: '8px' }}>
+                  limit
+                </td>
+                <td style={{ border: '1px solid var(--theme-elevation-150)', padding: '8px' }}>
+                  number
+                </td>
+                <td style={{ border: '1px solid var(--theme-elevation-150)', padding: '8px' }}>
                   Number of results per page
                 </td>
               </tr>
@@ -340,9 +366,9 @@ export const ComplexContent: Story = {
           <h5>Example Response:</h5>
           <pre
             style={{
-              backgroundColor: '#2d3748',
+              backgroundColor: 'var(--theme-elevation-800)',
               borderRadius: '4px',
-              color: '#f7fafc',
+              color: 'var(--theme-elevation-0)',
               fontSize: '12px',
               overflow: 'auto',
               padding: '12px',
