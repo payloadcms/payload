@@ -134,13 +134,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&fallback-locale=null&locale=${localeRef.current}`
+            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${localeRef.current}&fallback-locale=null`
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&fallback-locale=null&locale=${localeRef.current}`
+            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${localeRef.current}&fallback-locale=null`
             method = 'POST'
           }
 

@@ -452,7 +452,7 @@ describe('Versions', () => {
       await assertNetworkRequests(
         page,
         // Important: assert that depth is 0 in this request
-        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`,
         async () => {
           await page.locator('#field-title').fill('changed title')
         },
