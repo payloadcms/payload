@@ -113,7 +113,7 @@ export default buildConfigWithDefaults(
             })
           },
           unlock: ({ req }) => {
-            if (req.user && req.user.collection === 'users' && req.user?.roles?.includes('admin')) {
+            if (req.user && req.user.collection === 'users') {
               // admin users can only unlock themselves
               return {
                 id: {
@@ -699,7 +699,6 @@ export default buildConfigWithDefaults(
         data: {
           email: devUser.email,
           password: devUser.password,
-          roles: ['admin'],
         },
       })
 
