@@ -112,7 +112,7 @@ const meta = {
           'CodeField provides syntax-highlighted code editing capabilities with language detection and validation.',
       },
     },
-    layout: 'centered',
+    layout: 'padded',
   },
   title: 'UI/Fields/CodeField',
 } satisfies Meta<typeof CodeField>

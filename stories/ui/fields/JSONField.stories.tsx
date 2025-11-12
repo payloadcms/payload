@@ -124,7 +124,7 @@ const meta = {
           'JSONField provides JSON editing with syntax highlighting, validation, and formatting capabilities.',
       },
     },
-    layout: 'centered',
+    layout: 'padded',
   },
   title: 'UI/Fields/JSONField',
 } satisfies Meta<typeof JSONField>
