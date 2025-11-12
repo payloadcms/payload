@@ -99,7 +99,7 @@ const meta = {
   decorators: [
     (Story) => (
       <PayloadMockProviders>
-        <div style={{ maxWidth: '800px', padding: '20px', width: '100%' }}>
+        <div style={{ maxWidth: '1200px', padding: '20px', width: '100%' }}>
           <Story />
         </div>
       </PayloadMockProviders>
