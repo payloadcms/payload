@@ -361,6 +361,8 @@ export const createClientField = ({
               label: option.label as string,
               value: option.value,
             }
+          } else if (typeof option === 'string') {
+            field.options[i] = option
           }
         }
       }
