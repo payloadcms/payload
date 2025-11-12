@@ -181,7 +181,16 @@ export interface FieldsRelationship {
   /**
    * This will filter the relationship options if the filter field in this document is set to "Include me"
    */
-  nestedRelationshipFilteredByField?: (string | null) | FieldsRelationship;
+  filteredByFieldInCollapsible?: (string | null) | FieldsRelationship;
+  array?:
+    | {
+        /**
+         * This will filter the relationship options if the filter field in this document is set to "Include me"
+         */
+        filteredByFieldInArray?: (string | null) | FieldsRelationship;
+        id?: string | null;
+      }[]
+    | null;
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (
@@ -518,7 +527,13 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipWithTitle?: T;
   relationshipFilteredByID?: T;
   relationshipFilteredByField?: T;
-  nestedRelationshipFilteredByField?: T;
+  filteredByFieldInCollapsible?: T;
+  array?:
+    | T
+    | {
+        filteredByFieldInArray?: T;
+        id?: T;
+      };
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
   filter?: T;

@@ -420,7 +420,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} sikeresen létrehozva.',
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     successfullyReindexed:
-      'Sikeresen újraindexelve {{total}} dokumentumból {{count}} a(z) {{collections}} gyűjteményekből.',
+      'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
     takeOver: 'Átvétel',
     thisLanguage: 'Magyar',
     time: 'Idő',
@@ -460,7 +460,9 @@ export const huTranslations: DefaultTranslationsObject = {
     copyTo: 'Másolja ide',
     copyToLocale: 'Másolás a helyi verzióba',
     localeToPublish: 'Közzététel helye',
+    selectedLocales: 'Kiválasztott helyi beállítások',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
+    selectLocaleToDuplicate: 'Válassza ki a másolandó helyszínekent.',
   },
   operators: {
     contains: 'tartalmaz',
@@ -522,10 +524,12 @@ export const huTranslations: DefaultTranslationsObject = {
     invalidInput: 'Ez a mező érvénytelen értéket tartalmaz.',
     invalidSelection: 'Ez a mező érvénytelen kijelöléssel rendelkezik.',
     invalidSelections: 'Ez a mező a következő érvénytelen kijelöléseket tartalmazza:',
+    latitudeOutOfBounds: 'A szélességnek -90 és 90 között kell lennie.',
     lessThanMin: '{{value}} kisebb, mint a megengedett minimum {{label}} érték, ami {{min}}.',
     limitReached: 'Elérte a korlátot, csak {{max}} elem adható hozzá.',
     longerThanMin:
       'Ennek az értéknek hosszabbnak kell lennie, mint a minimális {{minLength}} karakter hosszúság.',
+    longitudeOutOfBounds: 'A hosszúságnak -180 és 180 között kell lennie.',
     notValidDate: '" {{value}} " nem érvényes dátum.',
     required: 'Ez a mező kötelező.',
     requiresAtLeast: 'Ehhez a mezőhöz legalább {{count}} {{label}} szükséges.',

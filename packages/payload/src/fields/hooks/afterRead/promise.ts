@@ -33,7 +33,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   field: Field | TabAsField
   fieldIndex: number
   /**
@@ -158,8 +158,20 @@ export const promise = async ({
     let hoistedValue = value
 
     if (fallbackLocale && fallbackLocale !== locale) {
-      const fallbackValue = siblingDoc[field.name!][fallbackLocale]
+      let fallbackValue
       const isNullOrUndefined = typeof value === 'undefined' || value === null
+
+      if (Array.isArray(fallbackLocale)) {
+        for (const locale of fallbackLocale) {
+          const val = siblingDoc[field.name!]?.[locale]
+          if (val !== undefined && val !== null && val !== '') {
+            fallbackValue = val
+            break
+          }
+        }
+      } else {
+        fallbackValue = siblingDoc[field.name!][fallbackLocale]
+      }
 
       if (fallbackValue) {
         switch (field.type) {
@@ -361,12 +373,19 @@ export const promise = async ({
     }
 
     // Set defaultValue on the field for globals being returned without being first created
-    // or collection documents created prior to having a default
+    // or collection documents created prior to having a default.
+
+    // Skip setting defaults when: global has no ID (never created or filtered by access)
+    // AND access control is active (not overriding). This prevents default values like
+    // `_status: 'draft'` from appearing when access control filters out the document.
+    const shouldSkipDefaults = global && !doc.id && !overrideAccess
+
     if (
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
-      typeof field.defaultValue !== 'undefined'
+      typeof field.defaultValue !== 'undefined' &&
+      !shouldSkipDefaults
     ) {
       siblingDoc[field.name!] = await getDefaultValue({
         defaultValue: field.defaultValue,

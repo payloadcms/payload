@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.59.1",
+  "version": "3.63.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -365,6 +365,7 @@
     ]
   },
   "dependencies": {
+    "@lexical/clipboard": "0.35.0",
     "@lexical/headless": "0.35.0",
     "@lexical/html": "0.35.0",
     "@lexical/link": "0.35.0",

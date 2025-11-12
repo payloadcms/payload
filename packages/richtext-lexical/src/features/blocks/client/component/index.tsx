@@ -1,5 +1,8 @@
 'use client'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Collapsible,
@@ -21,14 +24,6 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-
-const baseClass = 'lexical-block'
-
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { getTranslation } from '@payloadcms/translations'
 import { $getNodeByKey } from 'lexical'
 import {
   type BlocksFieldClient,
@@ -36,6 +31,8 @@ import {
   type CollapsedPreferences,
   type FormState,
 } from 'payload'
+import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
@@ -54,12 +51,13 @@ type Props = {
    * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
    */
   readonly cacheBuster: number
+  readonly className: string
   readonly formData: BlockFields
   readonly nodeKey: string
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, formData, nodeKey } = props
+  const { cacheBuster, className: baseClass, formData, nodeKey } = props
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -98,17 +96,26 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
-    return initialLexicalFormState?.[formData.id]?.formState
-      ? {
-          ...initialLexicalFormState?.[formData.id]?.formState,
-          blockName: {
-            initialValue: formData.blockName,
-            passesCondition: true,
-            valid: true,
-            value: formData.blockName,
-          },
-        }
-      : false
+    // Initial form state that was calculated server-side. May have stale values
+    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    if (!cachedFormState) {
+      return false
+    }
+
+    // Merge current formData values into the cached form state
+    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
+    return Object.fromEntries(
+      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
+        fieldName,
+        fieldName in formData
+          ? {
+              ...fieldState,
+              initialValue: formData[fieldName],
+              value: formData[fieldName],
+            }
+          : fieldState,
+      ]),
+    )
   })
 
   const hasMounted = useRef(false)
@@ -385,7 +392,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, t, isEditable, toggleDrawer],
+    [baseClass, isEditable, t, blockDisplayName, toggleDrawer],
   )
 
   const RemoveButton = useMemo(
@@ -403,7 +410,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         tooltip="Remove Block"
       />
     ),
-    [isEditable, removeBlock],
+    [baseClass, isEditable, removeBlock],
   )
 
   const BlockCollapsible = useMemo(
@@ -422,7 +429,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         removeButton,
       }: BlockCollapsibleWithErrorProps) => {
         return (
-          <div className={baseClass + ' ' + baseClass + '-' + blockType}>
+          <div className={`${baseClass}__container ${baseClass}-${blockType}`}>
             <Collapsible
               className={[
                 `${baseClass}__row`,
@@ -494,6 +501,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       EditButton,
       RemoveButton,
       blockDisplayName,
+      baseClass,
       clientBlock?.admin?.disableBlockName,
       blockType,
       i18n,
@@ -597,6 +605,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     blockType,
     RemoveButton,
     EditButton,
+    baseClass,
     editor,
     errorCount,
     toggleDrawer,
@@ -611,7 +620,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   if (!clientBlock) {
     return (
       <BlockCollapsible disableBlockName={true} fieldHasErrors={true}>
-        <div className="lexical-block-not-found">
+        <div className={`${baseClass}-not-found`}>
           Error: Block '{blockType}' not found in the config but exists in the lexical data
         </div>
       </BlockCollapsible>

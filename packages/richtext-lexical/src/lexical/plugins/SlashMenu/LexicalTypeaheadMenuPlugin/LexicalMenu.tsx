@@ -499,8 +499,15 @@ export function useMenuAnchorRef(
 
         const rootElementRect = rootElement.getBoundingClientRect()
 
-        if (left + menuWidth > rootElementRect.right) {
+        const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl'
+        const anchorRect = anchorElem.getBoundingClientRect()
+        const leftBoundary = Math.max(0, rootElementRect.left)
+
+        if (!isRTL && left + menuWidth > rootElementRect.right) {
           containerDiv.style.left = `${rootElementRect.right - menuWidth + window.scrollX}px`
+        } else if (isRTL && menuRect.left < leftBoundary) {
+          const newLeft = leftBoundary + menuWidth - anchorRect.left
+          containerDiv.style.left = `${newLeft + window.scrollX}px`
         }
 
         const wouldGoOffBottomOfScreen = rawTop + menuHeight + VERTICAL_OFFSET > window.innerHeight

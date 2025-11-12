@@ -4,6 +4,7 @@ import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import { categoriesSlug } from './collections/Categories/index.js'
+import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { relationshipsSlug } from './collections/Relationships/index.js'
 
@@ -36,13 +37,26 @@ export const seed = async (_payload: Payload) => {
           }),
         ])
 
+        // Create 30 pages, one for each post
+        const pages = await Promise.all(
+          Array.from({ length: 30 }).map(async (_, index) =>
+            _payload.create({
+              collection: pagesSlug,
+              data: {
+                title: `Page ${index + 1}`,
+              },
+            }),
+          ),
+        )
+
         await Promise.all(
           Array.from({ length: 30 }).map(async (_, index) =>
             _payload.create({
               collection: postsSlug,
               data: {
-                title: `Post ${index + 1}`,
                 category: index < 15 ? category1.id : category2.id,
+                page: pages[index]!.id,
+                title: `Post ${index + 1}`,
               },
             }),
           ),
@@ -51,16 +65,16 @@ export const seed = async (_payload: Payload) => {
         await _payload.create({
           collection: 'posts',
           data: {
-            title: 'Find me',
             category: category1.id,
+            title: 'Find me',
           },
         })
 
         await _payload.create({
           collection: 'posts',
           data: {
-            title: 'Find me',
             category: category2.id,
+            title: 'Find me',
           },
         })
 
@@ -76,11 +90,11 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Poly HasOne (Category)',
               PolyHasOneRelationship: {
                 relationTo: categoriesSlug,
                 value: category1.id,
               },
+              title: 'Poly HasOne (Category)',
             },
           }),
 
@@ -88,11 +102,11 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Poly HasOne (Post)',
               PolyHasOneRelationship: {
                 relationTo: postsSlug,
                 value: firstPost.docs[0]?.id ?? '',
               },
+              title: 'Poly HasOne (Post)',
             },
           }),
 
@@ -100,7 +114,6 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Poly HasMany (Mixed)',
               PolyHasManyRelationship: [
                 {
                   relationTo: categoriesSlug,
@@ -115,6 +128,7 @@ export const seed = async (_payload: Payload) => {
                   value: category2.id,
                 },
               ],
+              title: 'Poly HasMany (Mixed)',
             },
           }),
 
@@ -122,8 +136,8 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Mono HasOne',
               MonoHasOneRelationship: category1.id,
+              title: 'Mono HasOne',
             },
           }),
 
@@ -131,8 +145,8 @@ export const seed = async (_payload: Payload) => {
           _payload.create({
             collection: relationshipsSlug,
             data: {
-              title: 'Mono HasMany',
               MonoHasManyRelationship: [category1.id, category2.id],
+              title: 'Mono HasMany',
             },
           }),
 
@@ -160,7 +174,7 @@ export const seed = async (_payload: Payload) => {
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
     _payload,
-    collectionSlugs: [postsSlug, categoriesSlug, relationshipsSlug, 'users', 'media'],
+    collectionSlugs: [postsSlug, categoriesSlug, pagesSlug, relationshipsSlug, 'users', 'media'],
     seedFunction: seed,
     snapshotKey: 'groupByTests',
     // uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),

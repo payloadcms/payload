@@ -44,6 +44,11 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
       break
     }
 
+    case 'numeric': {
+      columnBuilderArgsArray.push("mode: 'number'")
+      break
+    }
+
     case 'serial': {
       columnBuilderFn = 'integer'
       break
@@ -110,7 +115,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     } else if (typeof column.default === 'string') {
       sanitizedDefault = JSON.stringify(column.default)
     } else if (column.type === 'numeric') {
-      sanitizedDefault = `'${column.default}'`
+      sanitizedDefault = `${column.default}`
     }
 
     code = `${code}.default(${sanitizedDefault})`

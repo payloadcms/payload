@@ -6,14 +6,14 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Edit View is where users interact with individual [Collection](../configuration/collections) and [Global](../configuration/globals) Documents within the [Admin Panel](../admin/overview). The Edit View contains the actual form in which submits the data to the server. This is where they can view, edit, and save their content. It contains controls for saving, publishing, and previewing the document, all of which can be customized to a high degree.
+The Edit View is where users interact with individual [Collection](../configuration/collections) and [Global](../configuration/globals) Documents within the [Admin Panel](../admin/overview). The Edit View contains the actual form that submits the data to the server. This is where they can view, edit, and save their content. It contains controls for saving, publishing, and previewing the document, all of which can be customized to a high degree.
 
 The Edit View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="warning">
   **Note:** The Edit View is one of many [Document Views](./document-views) in
   the Payload Admin Panel. Each Document View is responsible for a different
-  aspect of the interacting with a single Document.
+  aspect of interacting with a single Document.
 </Banner>
 
 ## Custom Edit View
@@ -74,7 +74,7 @@ In addition to swapping out the entire Edit View with a [Custom View](./custom-v
 
 <Banner type="warning">
   **Important:** Collection and Globals are keyed to a different property in the
-  `admin.components` object have slightly different options. Be sure to use the
+  `admin.components` object and have slightly different options. Be sure to use the
   correct key for the entity you are working with.
 </Banner>
 
@@ -199,7 +199,7 @@ export function MySaveButton(props: SaveButtonClientProps) {
 
 The `beforeDocumentControls` property allows you to render custom components just before the default document action buttons (like Save, Publish, or Preview). This is useful for injecting custom buttons, status indicators, or any other UI elements before the built-in controls.
 
-To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in you [Collection Config](../configuration/collections) or `components.elements.beforeDocumentControls` in your [Global Config](../configuration/globals):
+To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in your [Collection Config](../configuration/collections) or `components.elements.beforeDocumentControls` in your [Global Config](../configuration/globals):
 
 #### Collections
 

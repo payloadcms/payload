@@ -55,7 +55,7 @@ export const generateSubmissionCollection = (
         },
         {
           name: 'value',
-          type: 'text',
+          type: 'textarea',
           required: true,
           validate: (value: unknown) => {
             // TODO:
@@ -100,9 +100,12 @@ export const generateSubmissionCollection = (
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
+      afterChange: [
+        (data) => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
+      ],
       beforeChange: [
         (data) => createCharge(data, formConfig),
-        (data) => sendEmail(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },

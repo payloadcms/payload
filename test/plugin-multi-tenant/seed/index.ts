@@ -45,6 +45,7 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       name: 'Anchor Bar',
       domain: 'anchorbar.com',
+      selectedLocales: ['en'],
     },
   })
   const publicTenant = await payload.create({
@@ -132,6 +133,35 @@ export const seed: Config['onInit'] = async (payload) => {
       name: 'Pulled Pork Nachos',
       tenant: steelCatTenant.id,
     },
+  })
+
+  // Create anchor bar menu items
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Peanuts',
+      tenant: anchorBarTenant.id,
+      localizedName: 'Peanuts EN',
+    },
+    locale: 'en',
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Pretzels',
+      tenant: anchorBarTenant.id,
+      localizedName: 'Pretzels EN',
+    },
+    locale: 'en',
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Popcorn',
+      tenant: anchorBarTenant.id,
+      localizedName: 'Popcorn EN',
+    },
+    locale: 'en',
   })
 
   // Public tenant menu items

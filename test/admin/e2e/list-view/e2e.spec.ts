@@ -836,27 +836,6 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should show no results when queryin on a field a user cannot read', async () => {
-      await payload.create({
-        collection: postsCollectionSlug,
-        data: {
-          noReadAccessField: 'test',
-        },
-      })
-
-      await page.goto(postsUrl.list)
-
-      const { whereBuilder } = await addListFilter({
-        page,
-        fieldLabel: 'No Read Access Field',
-        operatorLabel: 'equals',
-        value: 'test',
-      })
-
-      await expect(whereBuilder.locator('.condition__value input')).toBeVisible()
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
-    })
-
     test('should properly paginate many documents', async () => {
       await page.goto(with300DocumentsUrl.list)
 
@@ -1476,12 +1455,12 @@ describe('List View', () => {
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
-      // delete button should be present
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
+      const deleteBtn = page.locator('.delete-documents__toggle')
+      await expect(deleteBtn).toBeVisible()
 
       await page.locator('.row-2 .cell-_select input').check()
 
-      await page.locator('.delete-documents__toggle').click()
+      await deleteBtn.click()
       await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })

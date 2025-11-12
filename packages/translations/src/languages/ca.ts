@@ -418,7 +418,7 @@ export const caTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creada correctament.',
     successfullyDuplicated: '{{label}} duplicada correctament.',
     successfullyReindexed:
-      'Reindexació correcta de {{count}} de {{total}} documents de {{collections}}',
+      "S'han reindexat correctament {{count}} de {{total}} documents de {{collections}} i s'han omès {{skips}} esborranys.",
     takeOver: 'Prendre el control',
     thisLanguage: 'Catala',
     time: 'Temps',
@@ -458,7 +458,9 @@ export const caTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiar a',
     copyToLocale: 'Copiar a idioma',
     localeToPublish: 'Idioma per publicar',
+    selectedLocales: 'Idiomes seleccionats',
     selectLocaleToCopy: "Selecciona l'idioma per copiar",
+    selectLocaleToDuplicate: 'Selecciona les configuracions regionals per duplicar',
   },
   operators: {
     contains: 'conté',
@@ -519,10 +521,12 @@ export const caTranslations: DefaultTranslationsObject = {
     invalidInput: 'Aquest camp té una entrada invàlida.',
     invalidSelection: 'Aquest camp té una selecció invàlida.',
     invalidSelections: 'Aquest camp té les següents seleccions invàlides:',
+    latitudeOutOfBounds: 'La latitud ha de ser entre -90 i 90.',
     lessThanMin: '{{value}} és menor que el mínim permès {{label}} de {{min}}.',
     limitReached: "S'ha arribat al límit, només es poden afegir {{max}} elements.",
     longerThanMin:
       'Aquest valor ha de ser més llarg que la longitud mínima de {{minLength}} caràcters.',
+    longitudeOutOfBounds: 'La longitud ha de ser entre -180 i 180.',
     notValidDate: '"{{value}}" no és una data vàlida.',
     required: 'Aquest camp és obligatori.',
     requiresAtLeast: 'Aquest camp requereix almenys {{count}} {{label}}.',

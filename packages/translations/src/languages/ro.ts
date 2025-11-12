@@ -421,7 +421,7 @@ export const roTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creat(ă) cu succes.',
     successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     successfullyReindexed:
-      'Reindexare realizată cu succes pentru {{count}} din {{total}} documente din colecțiile {{collections}}.',
+      'Au fost reindexate cu succes {{count}} din {{total}} documente din {{collections}}, iar {{skips}} proiecte au fost omise.',
     takeOver: 'Preia controlul',
     thisLanguage: 'Română',
     time: 'Timp',
@@ -461,7 +461,9 @@ export const roTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiați în',
     copyToLocale: 'Copiați în localizare',
     localeToPublish: 'Localizare pentru publicare',
+    selectedLocales: 'Locații selectate',
     selectLocaleToCopy: 'Selectați localizarea pentru copiere',
+    selectLocaleToDuplicate: 'Selectați localizările pentru duplicare',
   },
   operators: {
     contains: 'conține',
@@ -523,11 +525,13 @@ export const roTranslations: DefaultTranslationsObject = {
     invalidInput: 'Acest câmp are o intrare invalidă.',
     invalidSelection: 'Acest câmp are o selecție invalidă.',
     invalidSelections: 'Acest câmp are următoarele selecții invalide:',
+    latitudeOutOfBounds: 'Latitudinea trebuie să fie între -90 și 90.',
     lessThanMin:
       '{{value}} este mai mic decât valoarea minimă permisă pentru {{label}} de {{min}}.',
     limitReached: 'Limita atinsă, doar {{max}} elemente pot fi adăugate.',
     longerThanMin:
       'Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.',
+    longitudeOutOfBounds: 'Longitudinea trebuie să fie între -180 și 180.',
     notValidDate: '"{{value}}" nu este o dată valabilă.',
     required: 'Acest câmp este obligatoriu.',
     requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',

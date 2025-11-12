@@ -1,5 +1,5 @@
 import type { ConnectOptions } from 'mongoose'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import mongoose from 'mongoose'
 import { defaultBeginTransaction } from 'payload'
@@ -95,7 +95,7 @@ export const connect: Connect = async function connect(
     }
 
     if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-      await this.migrate({ migrations: this.prodMigrations })
+      await this.migrate({ migrations: this.prodMigrations as unknown as Migration[] })
     }
   } catch (err) {
     let msg = `Error: cannot connect to MongoDB.`
