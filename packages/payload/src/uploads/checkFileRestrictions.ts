@@ -73,6 +73,10 @@ export const checkFileRestrictions = async ({
   if (configMimeTypes.length > 0) {
     let detected = await fileTypeFromBuffer(file.data)
 
+    if (!detected) {
+      errors.push(`File buffer returned no detectable MIME type.`)
+    }
+
     // Handle SVG files that are detected as XML due to <?xml declarations
     if (
       detected?.mime === 'application/xml' &&
