@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import React from 'react'
 
+import { CodeEditor } from '../../../packages/ui/src/elements/CodeEditor'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
@@ -48,8 +49,7 @@ const CodeField: React.FC<CodeFieldProps> = ({
     <div
       className={[
         fieldBaseClass,
-        'field-type',
-        'code',
+        'code-field',
         required && !codeValue && 'error',
         disabled && 'read-only',
       ]
@@ -57,33 +57,19 @@ const CodeField: React.FC<CodeFieldProps> = ({
         .join(' ')}
     >
       <FieldLabel label={label} required={required} />
-      {description && <FieldDescription description={description} />}
-      <div className="code-field__language-label">
-        Language: <strong>{language.charAt(0).toUpperCase() + language.slice(1)}</strong>
-      </div>
       <div className={`${fieldBaseClass}__wrap`}>
-        <textarea
-          className="code-field__textarea"
-          disabled={disabled}
-          name={name}
-          onChange={(e) => handleChange(e.target.value)}
-          placeholder={`Enter ${language} code...`}
-          style={{
-            backgroundColor: 'var(--theme-input-bg)',
-            border: `1px solid ${required && !codeValue ? 'var(--theme-error-500)' : 'var(--theme-elevation-150)'}`,
-            borderRadius: 'var(--style-radius-s, 4px)',
-            boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)',
-            color: 'var(--theme-elevation-800)',
-            fontFamily: 'var(--font-body)',
-            fontSize: '1rem',
-            minHeight: '200px',
-            padding: 'calc(var(--base) * 0.4) calc(var(--base) * 0.75)',
-            width: '100%',
-          }}
+        {required && !codeValue && <FieldError message="This field is required" />}
+        <CodeEditor
+          defaultLanguage={language}
+          onChange={handleChange}
+          readOnly={disabled}
           value={codeValue}
+          wrapperProps={{
+            id: `field-${name.replace(/\./g, '__')}`,
+          }}
         />
       </div>
-      {required && !codeValue && <FieldError message="This field is required" />}
+      {description && <FieldDescription description={description} />}
     </div>
   )
 }

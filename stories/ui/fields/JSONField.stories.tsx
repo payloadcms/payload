@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import React from 'react'
 
+import { CodeEditor } from '../../../packages/ui/src/elements/CodeEditor'
 import { FieldDescription } from '../../../packages/ui/src/fields/FieldDescription'
 import { FieldError } from '../../../packages/ui/src/fields/FieldError'
 import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
@@ -68,35 +69,24 @@ const JSONField: React.FC<JSONFieldProps> = ({
 
   return (
     <div
-      className={[fieldBaseClass, 'field-type', 'json', error && 'error', disabled && 'read-only']
+      className={[fieldBaseClass, 'json-field', error && 'error', disabled && 'read-only']
         .filter(Boolean)
         .join(' ')}
     >
       <FieldLabel label={label} required={required} />
-      {description && <FieldDescription description={description} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        <textarea
-          className="json__input"
-          disabled={disabled}
-          name={name}
-          onChange={(e) => handleChange(e.target.value)}
-          placeholder="Enter valid JSON..."
-          style={{
-            backgroundColor: 'var(--theme-input-bg)',
-            border: `1px solid ${error ? 'var(--theme-error-500)' : 'var(--theme-elevation-150)'}`,
-            borderRadius: 'var(--style-radius-s, 4px)',
-            boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)',
-            color: 'var(--theme-elevation-800)',
-            fontFamily: 'var(--font-body)',
-            fontSize: '1rem',
-            minHeight: '200px',
-            padding: 'calc(var(--base) * 0.4) calc(var(--base) * 0.75)',
-            width: '100%',
-          }}
+        {error && <FieldError message={error} />}
+        <CodeEditor
+          defaultLanguage="json"
+          onChange={handleChange}
+          readOnly={disabled}
           value={jsonValue}
+          wrapperProps={{
+            id: `field-${name.replace(/\./g, '__')}`,
+          }}
         />
       </div>
-      {error && <FieldError message={error} />}
+      {description && <FieldDescription description={description} />}
     </div>
   )
 }
