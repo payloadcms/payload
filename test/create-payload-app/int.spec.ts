@@ -17,9 +17,14 @@ const writeFile = promisify(fs.writeFile)
 const commonNextCreateParams =
   '--typescript --eslint --no-tailwind --app --import-alias="@/*" --turbo --yes'
 
-const nextCreateCommands: Partial<Record<'noSrcDir' | 'srcDir', string>> = {
-  noSrcDir: `pnpm create next-app@canary . ${commonNextCreateParams} --no-src-dir`,
-  srcDir: `pnpm create next-app@canary . ${commonNextCreateParams} --src-dir`,
+const commandKeys = ['srcDir', 'noSrcDir', 'srcDirCanary', 'noSrcDirCanary'] as const
+type NextCmdKey = (typeof commandKeys)[number]
+
+const nextCreateCommands: Record<NextCmdKey, string> = {
+  srcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --src-dir`,
+  noSrcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --no-src-dir`,
+  srcDirCanary: `pnpm create next-app@canary . ${commonNextCreateParams} --src-dir`,
+  noSrcDirCanary: `pnpm create next-app@latest . ${commonNextCreateParams} --no-src-dir`,
 }
 
 describe('create-payload-app', () => {
@@ -28,7 +33,7 @@ describe('create-payload-app', () => {
     shelljs.exec('pnpm build:create-payload-app')
   })
 
-  describe.each(Object.keys(nextCreateCommands))(`--init-next with %s`, (nextCmdKey) => {
+  describe.each(commandKeys)(`--init-next with %s`, (nextCmdKey) => {
     const projectDir = tempy.directory()
     beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
@@ -44,7 +49,7 @@ describe('create-payload-app', () => {
       console.log(`Running: ${nextCreateCommands[nextCmdKey]} in ${projectDir}`)
       const [cmd, ...args] = nextCreateCommands[nextCmdKey].split(' ')
       console.log(`Running: ${cmd} ${args.join(' ')}`)
-      const { exitCode, stderr } = await execa(cmd, [...args], {
+      const { exitCode, stderr } = await execa(cmd as string, [...args], {
         cwd: projectDir,
         stdio: 'inherit',
       })
@@ -82,14 +87,14 @@ describe('create-payload-app', () => {
       expect(firstResult.success).toEqual(false)
 
       // Move all files from app to top-level directory named `(app)`
-      if (firstResult.success === false && 'nextAppDir' in firstResult) {
-        fs.mkdirSync(path.resolve(firstResult.nextAppDir, '(app)'))
-        fs.readdirSync(path.resolve(firstResult.nextAppDir)).forEach((file) => {
-          if (file === '(app)') return
-          fs.renameSync(
-            path.resolve(firstResult.nextAppDir, file),
-            path.resolve(firstResult.nextAppDir, '(app)', file),
-          )
+      if (firstResult.success === false && firstResult.nextAppDir) {
+        const nextAppDir = firstResult.nextAppDir
+        fs.mkdirSync(path.resolve(nextAppDir, '(app)'))
+        fs.readdirSync(path.resolve(nextAppDir)).forEach((file) => {
+          if (file === '(app)') {
+            return
+          }
+          fs.renameSync(path.resolve(nextAppDir, file), path.resolve(nextAppDir, '(app)', file))
         })
       }
 
@@ -102,7 +107,7 @@ describe('create-payload-app', () => {
         useDistFiles: true, // create-payload-app/dist/app/(payload)
       })
 
-      expect(result.success).toEqual(true)
+      assertAndExpectToBeTrue(result.success) // Narrowing for TS
       expect(result.nextAppDir).toEqual(
         path.resolve(projectDir, result.isSrcDir ? 'src/app' : 'app'),
       )
@@ -124,7 +129,7 @@ describe('create-payload-app', () => {
       }
 
       // Check that `@payload-config` path is added to tsconfig
-      expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toStrictEqual([
+      expect(userTsConfig.compilerOptions?.paths?.['@payload-config']).toStrictEqual([
         `./${result.isSrcDir ? 'src/' : ''}payload.config.ts`,
       ])
 
@@ -141,3 +146,8 @@ describe('create-payload-app', () => {
     })
   })
 })
+
+// Expect and assert that actual is true for type narrowing
+function assertAndExpectToBeTrue(actual: unknown): asserts actual is true {
+  expect(actual).toBe(true)
+}
