@@ -13,6 +13,7 @@ import {
   defaultAccessRelSlug,
   polymorphicRelationshipsSlug,
   relationSlug,
+  relationWithRestrictedFilterOptionsSlug,
   slug,
   slugWithLocalizedRel,
   treeSlug,
@@ -319,6 +320,18 @@ export default buildConfigWithDefaults({
           ],
           required: true,
           type: 'radio',
+        },
+      ],
+    },
+    {
+      slug: relationWithRestrictedFilterOptionsSlug,
+      fields: [
+        {
+          name: 'relationWithTwoTypes',
+          relationTo: ['users', 'movies'],
+          required: true,
+          type: 'relationship',
+          filterOptions: ({ relationTo }) => relationTo === 'users',
         },
       ],
     },

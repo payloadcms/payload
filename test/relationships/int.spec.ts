@@ -25,6 +25,7 @@ import {
   defaultAccessRelSlug,
   polymorphicRelationshipsSlug,
   relationSlug,
+  relationWithRestrictedFilterOptionsSlug,
   slug,
   slugWithLocalizedRel,
   treeSlug,
@@ -1560,6 +1561,24 @@ describe('Relationships', () => {
         expect(result.one).toStrictEqual(movie)
         expect(result.manyPoly[0]).toStrictEqual({ relationTo: 'movies', value: movie })
         expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
+      })
+
+      it('should fail validation if passing a relation for a collection restricted by the filter options', async () => {
+        const movie = await payload.create({ collection: 'movies', data: {} })
+        await expect(
+          async () =>
+            await payload.create({
+              collection: relationWithRestrictedFilterOptionsSlug,
+              data: {
+                relationWithTwoTypes: [
+                  {
+                    relationTo: 'movies',
+                    value: movie.id,
+                  },
+                ],
+              },
+            }),
+        ).rejects.toThrow('The following field is invalid: Relation With Two Types')
       })
     })
   })

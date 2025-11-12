@@ -735,7 +735,7 @@ const validateFilterOptions: Validate<
         requestedID = val.value
       }
 
-      if (falseCollections.find((slug) => relationTo === slug)) {
+      if (falseCollections.find((slug) => collection === slug)) {
         return true
       }
 
