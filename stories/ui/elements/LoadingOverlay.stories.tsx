@@ -27,6 +27,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Elements/LoadingOverlay',
 } satisfies Meta<typeof LoadingOverlay>
 

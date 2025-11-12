@@ -50,6 +50,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Elements/Banner',
 } satisfies Meta<typeof Banner>
 

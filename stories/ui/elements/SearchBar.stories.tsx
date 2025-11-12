@@ -46,6 +46,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Elements/SearchBar',
 } satisfies Meta<typeof SearchBar>
 

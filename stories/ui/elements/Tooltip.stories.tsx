@@ -49,6 +49,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Elements/Tooltip',
 } satisfies Meta<typeof Tooltip>
 

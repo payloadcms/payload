@@ -50,6 +50,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Elements/Collapsible',
 } satisfies Meta<typeof Collapsible>
 

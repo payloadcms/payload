@@ -166,6 +166,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Elements/Modal',
 } satisfies Meta
 
