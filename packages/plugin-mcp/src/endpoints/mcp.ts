@@ -19,6 +19,10 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
           ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
           : null
 
+      if (apiKey === null) {
+        throw new UnauthorizedError()
+      }
+
       const sha256APIKeyIndex = crypto
         .createHmac('sha256', payload.secret)
         .update(apiKey || '')
