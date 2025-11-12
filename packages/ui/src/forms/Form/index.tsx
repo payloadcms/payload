@@ -362,6 +362,7 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
+        setModified(false)
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
@@ -380,8 +381,6 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
-          setModified(false)
-
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
@@ -412,8 +411,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
           // When there was an error submitting a draft,
           // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-          if (!validateDrafts && overridesFromArgs['_status'] === 'draft') {
-            setSubmitted(false)
+          // Also keep the form as modified so the save button remains enabled for retry.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setModified(true)
+            if (!validateDrafts) {
+              setSubmitted(false)
+            }
           }
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
@@ -495,6 +498,7 @@ export const Form: React.FC<FormProps> = (props) => {
       router,
       t,
       i18n,
+      validateDrafts,
       waitForAutocomplete,
     ],
   )
