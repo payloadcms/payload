@@ -358,9 +358,11 @@ export const createClientField = ({
             }
           } else if (typeof option === 'object') {
             field.options[i] = {
-              label: option.label as string,
+              label: option.label,
               value: option.value,
             }
+          } else if (typeof option === 'string') {
+            field.options[i] = option
           }
         }
       }
