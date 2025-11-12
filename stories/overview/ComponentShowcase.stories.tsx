@@ -15,6 +15,7 @@ import { CheckboxInput } from '../../packages/ui/src/fields/Checkbox/Input'
 import { FieldError } from '../../packages/ui/src/fields/FieldError'
 // Import field components
 import { FieldLabel } from '../../packages/ui/src/fields/FieldLabel'
+import { TextInput } from '../../packages/ui/src/fields/Text/Input'
 // Note: TextInput, TextareaInput, SelectInput, NumberField, DateTimeField have full story suites
 
 import { CheckIcon, EditIcon, PlusIcon, SearchIcon, XIcon } from '@payloadcms/ui'
@@ -43,6 +44,7 @@ export const AllComponents: Story = {
     const [searchTerm, setSearchTerm] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [sampleText, setSampleText] = useState('')
     const [formData, setFormData] = useState({
       name: '',
       email: '',
@@ -85,7 +87,7 @@ export const AllComponents: Story = {
       <PayloadMockProviders>
         <div
           style={{
-            backgroundColor: '#f7fafc',
+            backgroundColor: 'var(--theme-elevation-50)',
             minHeight: '100vh',
             position: 'relative',
           }}
@@ -93,15 +95,22 @@ export const AllComponents: Story = {
           {/* Header */}
           <div
             style={{
-              backgroundColor: 'white',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'var(--theme-elevation-0)',
+              borderBottom: '1px solid var(--theme-elevation-150)',
               padding: '16px 24px',
             }}
           >
-            <h1 style={{ fontSize: '24px', fontWeight: 600, margin: 0 }}>
+            <h1
+              style={{
+                color: 'var(--theme-elevation-800)',
+                fontSize: '24px',
+                fontWeight: 600,
+                margin: 0,
+              }}
+            >
               Payload CMS Component Library
             </h1>
-            <p style={{ color: '#666', margin: '8px 0 0 0' }}>
+            <p style={{ color: 'var(--theme-elevation-400)', margin: '8px 0 0 0' }}>
               Interactive showcase of UI components built for Payload CMS
             </p>
           </div>
@@ -109,8 +118,8 @@ export const AllComponents: Story = {
           {/* Search Bar */}
           <div
             style={{
-              backgroundColor: 'white',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'var(--theme-elevation-0)',
+              borderBottom: '1px solid var(--theme-elevation-150)',
               padding: '16px 24px',
             }}
           >
@@ -152,13 +161,15 @@ export const AllComponents: Story = {
               {/* Buttons Card */}
               <div
                 style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ borderBottom: '1px solid #e2e8f0', padding: '16px' }}>
+                <div
+                  style={{ borderBottom: '1px solid var(--theme-elevation-150)', padding: '16px' }}
+                >
                   <h3 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>
                     Interactive Buttons
                   </h3>
@@ -190,13 +201,15 @@ export const AllComponents: Story = {
               {/* Form Components Card */}
               <div
                 style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ borderBottom: '1px solid #e2e8f0', padding: '16px' }}>
+                <div
+                  style={{ borderBottom: '1px solid var(--theme-elevation-150)', padding: '16px' }}
+                >
                   <h3 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>
                     Form Components
                   </h3>
@@ -204,20 +217,16 @@ export const AllComponents: Story = {
                 <div
                   style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}
                 >
-                  <div>
-                    <FieldLabel label="Sample Form Field" required={true} />
-                    <input
-                      placeholder="Enter some text"
-                      style={{
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        padding: '8px 12px',
-                        width: '100%',
-                      }}
-                      type="text"
-                    />
-                  </div>
+                  <TextInput
+                    description="This field uses proper Payload styling"
+                    label="Sample Form Field"
+                    onChange={(e) => setSampleText(e.target.value)}
+                    path="sampleField"
+                    placeholder="Enter some text"
+                    required={true}
+                    showError={false}
+                    value={sampleText}
+                  />
 
                   <CheckboxInput
                     checked={formData.newsletter}
@@ -237,13 +246,15 @@ export const AllComponents: Story = {
               {/* Icons Showcase Card */}
               <div
                 style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ borderBottom: '1px solid #e2e8f0', padding: '16px' }}>
+                <div
+                  style={{ borderBottom: '1px solid var(--theme-elevation-150)', padding: '16px' }}
+                >
                   <h3 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>
                     Icon Collection
                   </h3>
@@ -287,13 +298,15 @@ export const AllComponents: Story = {
               {/* Form Fields Showcase Card */}
               <div
                 style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ borderBottom: '1px solid #e2e8f0', padding: '16px' }}>
+                <div
+                  style={{ borderBottom: '1px solid var(--theme-elevation-150)', padding: '16px' }}
+                >
                   <h3 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>
                     Phase 1 Form Fields
                   </h3>
@@ -302,10 +315,16 @@ export const AllComponents: Story = {
                   style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}
                 >
                   <div>
-                    <h4 style={{ color: '#374151', marginBottom: '8px' }}>
+                    <h4 style={{ color: 'var(--theme-elevation-800)', marginBottom: '8px' }}>
                       Available Form Components
                     </h4>
-                    <div style={{ color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>
+                    <div
+                      style={{
+                        color: 'var(--theme-elevation-400)',
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                      }}
+                    >
                       <div>
                         <strong>TextInput:</strong> 5 stories with validation patterns
                       </div>
@@ -326,8 +345,8 @@ export const AllComponents: Story = {
 
                   <div
                     style={{
-                      backgroundColor: '#f0f9ff',
-                      border: '1px solid #e0f2fe',
+                      backgroundColor: 'var(--theme-elevation-50)',
+                      border: '1px solid var(--theme-elevation-150)',
                       borderRadius: '6px',
                       fontSize: '14px',
                       padding: '12px',
@@ -343,8 +362,8 @@ export const AllComponents: Story = {
               {/* Interactive Demo Card */}
               <div
                 style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-150)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
@@ -352,7 +371,7 @@ export const AllComponents: Story = {
                 <div
                   style={{
                     alignItems: 'center',
-                    borderBottom: '1px solid #e2e8f0',
+                    borderBottom: '1px solid var(--theme-elevation-150)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     padding: '16px',
@@ -490,7 +509,7 @@ export const AllComponents: Story = {
               >
                 <div
                   style={{
-                    backgroundColor: 'white',
+                    backgroundColor: 'var(--theme-elevation-0)',
                     borderRadius: '8px',
                     maxHeight: '80vh',
                     maxWidth: '500px',
@@ -502,41 +521,29 @@ export const AllComponents: Story = {
                     <h3 style={{ marginTop: 0 }}>Sample Form Modal</h3>
 
                     <div style={{ marginBottom: '16px' }}>
-                      <FieldLabel label="Name" required={true} />
-                      <input
+                      <TextInput
+                        label="Name"
                         onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                        path="name"
                         placeholder="Enter your name"
-                        style={{
-                          border: formErrors.name ? '1px solid #e53e3e' : '1px solid #e2e8f0',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          padding: '8px 12px',
-                          width: '100%',
-                        }}
-                        type="text"
+                        required={true}
+                        showError={!!formErrors.name}
                         value={formData.name}
                       />
-                      {formErrors.name && <FieldError message={formErrors.name} />}
                     </div>
 
                     <div style={{ marginBottom: '16px' }}>
-                      <FieldLabel label="Email" required={true} />
-                      <input
+                      <TextInput
+                        label="Email"
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, email: e.target.value }))
                         }
+                        path="email"
                         placeholder="Enter your email"
-                        style={{
-                          border: formErrors.email ? '1px solid #e53e3e' : '1px solid #e2e8f0',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          padding: '8px 12px',
-                          width: '100%',
-                        }}
-                        type="email"
+                        required={true}
+                        showError={!!formErrors.email}
                         value={formData.email}
                       />
-                      {formErrors.email && <FieldError message={formErrors.email} />}
                     </div>
 
                     <div style={{ marginBottom: '24px' }}>
