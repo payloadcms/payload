@@ -1,8 +1,9 @@
-import type { asc, desc, SQL, Table } from 'drizzle-orm'
+import type { SQL, Table } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { FlattenedField, Sort, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
+import type { BuildOrderByResult } from './buildOrderBy.js'
 import type { QueryContext } from './parseParams.js'
 
 import { buildOrderBy } from './buildOrderBy.js'
@@ -30,10 +31,7 @@ type BuildQueryArgs = {
 
 export type BuildQueryResult = {
   joins: BuildQueryJoinAliases
-  orderBy: {
-    column: GenericColumn
-    order: typeof asc | typeof desc
-  }[]
+  orderBy: BuildOrderByResult
   selectFields: Record<string, GenericColumn>
   where: SQL
 }
