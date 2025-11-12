@@ -9,9 +9,6 @@ import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
 import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
-// Import the actual Payload Code field styles
-import '../../../packages/ui/src/fields/Code/index.scss'
-
 // Mock Code Field component that simulates the real CodeField behavior
 interface CodeFieldProps {
   admin?: {

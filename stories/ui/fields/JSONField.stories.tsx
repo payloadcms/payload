@@ -9,9 +9,6 @@ import { FieldLabel } from '../../../packages/ui/src/fields/FieldLabel'
 import { fieldBaseClass } from '../../../packages/ui/src/fields/shared'
 import { PayloadMockProviders } from '../../_mocks/MockProviders'
 
-// Import the actual Payload JSON field styles
-import '../../../packages/ui/src/fields/JSON/index.scss'
-
 // Mock JSON Field component that simulates the real JSONField behavior
 interface JSONFieldProps {
   admin?: {

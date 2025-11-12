@@ -6,9 +6,16 @@ import '../packages/ui/src/scss/app.scss'
 
 // Import specific field component styles to ensure they load
 import '../packages/ui/src/fields/FieldLabel/index.scss'
-import '../packages/ui/src/fields/FieldError/index.scss'  
+import '../packages/ui/src/fields/FieldError/index.scss'
 import '../packages/ui/src/fields/FieldDescription/index.scss'
 import '../packages/ui/src/fields/Checkbox/index.scss'
+
+// Import CodeEditor styles
+import '../packages/ui/src/elements/CodeEditor/index.scss'
+
+// Import Code and JSON field styles
+import '../packages/ui/src/fields/Code/index.scss'
+import '../packages/ui/src/fields/JSON/index.scss'
 
 // Create a mock Next.js AppRouterContext
 const MockAppRouterContext = React.createContext({
