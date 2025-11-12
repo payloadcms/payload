@@ -48,7 +48,7 @@ const defaultContext: EcommerceContextType = {
   decrementItem: async () => {},
   incrementItem: async () => {},
   initiatePayment: async () => {},
-  isPending: false,
+  isLoading: false,
   paymentMethods: [],
   removeItem: async () => {},
   setCurrency: () => {},
@@ -93,7 +93,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   const { apiRoute = '/api', cartsFetchQuery = {}, serverURL = '' } = api || {}
   const baseAPIURL = `${serverURL}${apiRoute}`
 
-  const [isPending, startTransition] = useTransition()
+  const [isLoading, startTransition] = useTransition()
 
   const [user, setUser] = useState<null | TypedUser>(null)
 
@@ -893,7 +893,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         decrementItem,
         incrementItem,
         initiatePayment,
-        isPending,
+        isLoading,
         paymentMethods,
         removeItem,
         selectedPaymentMethod,
@@ -957,7 +957,7 @@ export const useCurrency = () => {
 }
 
 export function useCart<T extends CartsCollection>() {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, isPending, removeItem } =
+  const { addItem, cart, clearCart, decrementItem, incrementItem, isLoading, removeItem } =
     useEcommerce()
 
   if (!addItem) {
@@ -970,27 +970,28 @@ export function useCart<T extends CartsCollection>() {
     clearCart,
     decrementItem,
     incrementItem,
-    isPending,
+    isLoading,
     removeItem,
   }
 }
 
 export const usePayments = () => {
-  const { confirmOrder, initiatePayment, paymentMethods, selectedPaymentMethod } = useEcommerce()
+  const { confirmOrder, initiatePayment, isLoading, paymentMethods, selectedPaymentMethod } =
+    useEcommerce()
 
   if (!initiatePayment) {
     throw new Error('usePayments must be used within an EcommerceProvider')
   }
 
-  return { confirmOrder, initiatePayment, paymentMethods, selectedPaymentMethod }
+  return { confirmOrder, initiatePayment, isLoading, paymentMethods, selectedPaymentMethod }
 }
 
 export function useAddresses<T extends AddressesCollection>() {
-  const { addresses, createAddress, updateAddress } = useEcommerce()
+  const { addresses, createAddress, isLoading, updateAddress } = useEcommerce()
 
   if (!createAddress) {
     throw new Error('usePayments must be used within an EcommerceProvider')
   }
 
-  return { addresses: addresses as T[], createAddress, updateAddress }
+  return { addresses: addresses as T[], createAddress, isLoading, updateAddress }
 }

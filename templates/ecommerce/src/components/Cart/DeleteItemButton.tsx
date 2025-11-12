@@ -7,7 +7,7 @@ import { XIcon } from 'lucide-react'
 import React from 'react'
 
 export function DeleteItemButton({ item }: { item: CartItem }) {
-  const { isPending, removeItem } = useCart()
+  const { isLoading, removeItem } = useCart()
   const itemId = item.id
 
   return (
@@ -17,10 +17,10 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         className={clsx(
           'ease hover:cursor-pointer flex h-[17px] w-[17px] items-center justify-center rounded-full bg-neutral-500 transition-all duration-200',
           {
-            'cursor-not-allowed px-0': !itemId || isPending,
+            'cursor-not-allowed px-0': !itemId || isLoading,
           },
         )}
-        disabled={!itemId || isPending}
+        disabled={!itemId || isLoading}
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
           if (itemId) removeItem(itemId)

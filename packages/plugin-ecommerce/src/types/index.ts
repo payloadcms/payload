@@ -880,7 +880,7 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Indicates whether any cart operation is currently in progress.
    * Useful for disabling buttons and preventing race conditions.
    */
-  isPending: boolean
+  isLoading: boolean
   paymentMethods: PaymentAdapterClient[]
   /**
    * Remove an item from the cart by its index ID.
