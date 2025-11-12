@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { AuthenticationError, type PayloadHandler, type Where } from 'payload'
+import { type PayloadHandler, UnauthorizedError, type Where } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
@@ -44,7 +44,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       })
 
       if (docs.length === 0) {
-        throw new AuthenticationError()
+        throw new UnauthorizedError()
       }
 
       if (useVerboseLogs) {
