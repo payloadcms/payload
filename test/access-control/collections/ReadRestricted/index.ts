@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { unrestrictedSlug } from '../../shared.js'
+
 export const readRestrictedSlug = 'read-restricted'
 
 export const ReadRestricted: CollectionConfig = {
@@ -53,6 +55,19 @@ export const ReadRestricted: CollectionConfig = {
         {
           name: 'publicPhone',
           type: 'text',
+        },
+        {
+          name: 'virtualContactName',
+          type: 'text',
+          virtual: 'unrestricted.name',
+        },
+        {
+          name: 'restrictedVirtualContactInfo',
+          type: 'text',
+          virtual: 'unrestricted.name',
+          access: {
+            read: () => false,
+          },
         },
       ],
     },
@@ -226,6 +241,39 @@ export const ReadRestricted: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'unrestricted',
+      type: 'relationship',
+      relationTo: unrestrictedSlug,
+    },
+    {
+      name: 'unrestrictedVirtualFieldName',
+      type: 'text',
+      virtual: 'unrestricted.name',
+    },
+    {
+      name: 'unrestrictedVirtualGroupInfo',
+      type: 'group',
+      virtual: 'unrestricted.info',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+        },
+      ],
+    },
+    {
+      name: 'restrictedVirtualField',
+      type: 'text',
+      virtual: 'unrestricted.name',
+      access: {
+        read: () => false,
+      },
     },
   ],
 }

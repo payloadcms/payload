@@ -5,30 +5,23 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { duplicateOperation } from '../operations/duplicate.js'
 
 export const duplicateHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const { depth, draft, populate, select, selectedLocales } = req.query as {
-    depth?: string
-    draft?: string
-    populate?: Record<string, unknown>
-    select?: Record<string, unknown>
-    selectedLocales?: string[]
-  }
+
+  const { depth, draft, populate, select, selectedLocales } = parseParams(req.query)
 
   const doc = await duplicateOperation({
     id,
     collection,
     data: req.data,
-    depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: draft === 'true',
-    populate: sanitizePopulateParam(populate),
+    depth,
+    draft,
+    populate,
     req,
-    select: sanitizeSelectParam(select),
+    select,
     selectedLocales,
   })
 
