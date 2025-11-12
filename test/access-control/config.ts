@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import type { FieldAccess } from 'payload'
+import type { FieldAccess, Where } from 'payload'
 
 import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 
@@ -111,6 +111,18 @@ export default buildConfigWithDefaults(
               // Simulate a request to an external service to determine access, i.e. another instance of Payload
               setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
             })
+          },
+          unlock: ({ req }) => {
+            if (req.user && req.user.collection === 'users' && req.user?.roles?.includes('admin')) {
+              // admin users can only unlock themselves
+              return {
+                id: {
+                  equals: req.user.id,
+                },
+              }
+            }
+
+            return false
           },
         },
         auth: true,
@@ -687,6 +699,7 @@ export default buildConfigWithDefaults(
         data: {
           email: devUser.email,
           password: devUser.password,
+          roles: ['admin'],
         },
       })
 
