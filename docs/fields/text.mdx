@@ -72,11 +72,12 @@ export const MyTextField: Field = {
 
 The Text Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option             | Description                                                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **`placeholder`**  | Set this property to define a placeholder string in the text input.                                                         |
-| **`autoComplete`** | Set this property to a string that will be used for browser autocomplete.                                                   |
-| **`rtl`**          | Override the default text direction of the Admin Panel for this field. Set to `true` to force right-to-left text direction. |
+| Option                    | Description                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **`placeholder`**         | Set this property to define a placeholder string in the text input.                                                         |
+| **`autoComplete`**        | Set this property to a string that will be used for browser autocomplete.                                                   |
+| **`rtl`**                 | Override the default text direction of the Admin Panel for this field. Set to `true` to force right-to-left text direction. |
+| **`sortCaseInsensitive`** | Enable case-insensitive sorting for this field. When enabled, sorting will ignore letter case. Defaults to `false`.         |
 
 ## Example
 
@@ -94,6 +95,100 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Case-Insensitive Sorting
+
+By default, text fields use case-sensitive sorting where uppercase letters sort before lowercase letters (e.g., "Apple", "Cherry", "banana"). When `sortCaseInsensitive` is enabled, the field will sort alphabetically regardless of case (e.g., "Apple", "banana", "Cherry").
+
+### Example
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MediaCollection: CollectionConfig = {
+  slug: 'media',
+  fields: [
+    {
+      name: 'filename',
+      type: 'text',
+      admin: {
+        sortCaseInsensitive: true, // Enable case-insensitive sorting
+      },
+    },
+  ],
+}
+```
+
+With this configuration:
+
+- Sorting by `filename` ascending: "Apple.jpg", "banana.jpg", "Cherry.jpg", "date.jpg"
+- Without case-insensitive sorting: "Apple.jpg", "Cherry.jpg", "banana.jpg", "date.jpg"
+
+### Database Implementation
+
+The case-insensitive sorting feature is implemented differently depending on your database adapter:
+
+#### MongoDB
+
+Uses [collation](https://docs.mongodb.com/manual/reference/collation/) with `strength: 2` to perform case-insensitive sorting at the database level. This is applied per-query and respects your locale settings.
+
+```ts
+// MongoDB query with collation
+db.collection
+  .find()
+  .sort({ filename: 1 })
+  .collation({ locale: 'en', strength: 2 })
+```
+
+#### PostgreSQL & SQLite (Drizzle)
+
+Wraps the sorted column in SQL's `LOWER()` function to normalize case before sorting:
+
+```sql
+-- PostgreSQL/SQLite query
+SELECT * FROM media ORDER BY LOWER(filename) ASC;
+```
+
+### Performance Considerations
+
+Case-insensitive sorting can impact query performance, especially on large collections. Consider these optimization strategies:
+
+#### PostgreSQL
+
+Create a functional index on the lowercase version of the field:
+
+```sql
+CREATE INDEX idx_filename_lower ON media (LOWER(filename));
+```
+
+Add this to your database migrations or initialization scripts.
+
+#### SQLite
+
+Create a case-insensitive collation index:
+
+```sql
+CREATE INDEX idx_filename_lower ON media (filename COLLATE NOCASE);
+```
+
+#### MongoDB
+
+MongoDB's collation-based sorting is generally performant, but for very large collections, ensure you have a standard index on the field:
+
+```ts
+{
+  name: 'filename',
+  type: 'text',
+  index: true, // Creates a standard index
+  admin: {
+    sortCaseInsensitive: true,
+  },
+}
+```
+
+### System Fields
+
+The Media collection's `filename` field has case-insensitive sorting enabled by default to provide intuitive file browsing.
 
 ## Custom Components
 
