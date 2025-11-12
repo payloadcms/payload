@@ -138,7 +138,7 @@
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "16.0.1",
+    "@next/bundle-analyzer": "16.0.2-canary.17",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
@@ -175,7 +175,7 @@
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
     "mongoose": "8.15.1",
-    "next": "16.0.1",
+    "next": "16.0.2-canary.17",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",
