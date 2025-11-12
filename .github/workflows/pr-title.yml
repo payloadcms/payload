@@ -49,6 +49,8 @@ jobs:
             email-resend
             eslint
             graphql
+            kv
+            kv-redis
             live-preview
             live-preview-react
             next
@@ -58,6 +60,7 @@ jobs:
             plugin-ecommerce
             plugin-form-builder
             plugin-import-export
+            plugin-mcp
             plugin-multi-tenant
             plugin-nested-docs
             plugin-redirects

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.61.1",
+  "version": "3.63.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -10,6 +10,7 @@
   "scripts": {
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
+    "build-storybook": "storybook build",
     "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",
     "build:all": "turbo build --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "build:app": "next build",
@@ -106,6 +107,7 @@
     "script:license-check": "pnpm --filter scripts license-check",
     "script:list-published": "pnpm --filter releaser list-published",
     "script:pack": "pnpm --filter scripts pack-all-to-dest",
+    "storybook": "storybook dev -p 6006",
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=\" --no-deprecation --no-experimental-strip-types\" jest --config=jest.components.config.js",
@@ -122,9 +124,7 @@
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:types": "tstyche",
     "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
-    "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
@@ -137,16 +137,19 @@
     "tsconfig.base.json": "node scripts/reset-tsconfig.js",
     "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
+  "dependencies": {
+    "@faceless-ui/modal": "3.0.0"
+  },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.2",
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "15.4.4",
+    "@next/bundle-analyzer": "15.4.7",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
-    "@playwright/test": "1.54.1",
+    "@playwright/test": "1.56.1",
     "@sentry/nextjs": "^8.33.1",
     "@sentry/node": "^8.33.1",
     "@storybook/addon-a11y": "^10.0.2",
@@ -185,12 +188,13 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
-    "next": "15.4.4",
+    "mongoose": "8.15.1",
+    "next": "15.4.7",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",
-    "playwright": "1.54.1",
-    "playwright-core": "1.54.1",
+    "playwright": "1.56.1",
+    "playwright-core": "1.56.1",
     "prettier": "3.5.3",
     "react": "19.1.1",
     "react-dom": "19.1.1",
@@ -227,8 +231,5 @@
       "react-dom": "$react-dom",
       "typescript": "$typescript"
     }
-  },
-  "dependencies": {
-    "@faceless-ui/modal": "3.0.0"
   }
 }

@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { APIError, type PayloadHandler, type Where } from 'payload'
 
-import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
+import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
@@ -46,13 +46,13 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       throw new APIError('API Key is invalid', 401)
     }
 
-    const toolSettings = docs[0] as ToolSettings
+    const mcpAccessSettings = docs[0] as MCPAccessSettings
 
     if (useVerboseLogs) {
       payload.logger.info('[payload-mcp] API Key is valid')
     }
 
-    const handler = getMCPHandler(pluginOptions, toolSettings, req)
+    const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
     const request = createRequestFromPayloadRequest(req)
     return await handler(request)
   }
