@@ -139,6 +139,24 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(data.error.message).toBe('Method not allowed.')
   })
 
+  it('should not allow POST /api/mcp with unauthorized API key', async () => {
+    const apiKey = await getApiKey()
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer fake${apiKey}key`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+
+    const json: any = await response.json()
+
+    expect(response.status).toBe(401)
+    expect(json?.errors).toBeDefined()
+    expect(json.errors[0].message).toBe('Unauthorized, you must be logged in to make this request.')
+  })
+
   it('should ping', async () => {
     const apiKey = await getApiKey()
     const response = await restClient.POST('/mcp', {
