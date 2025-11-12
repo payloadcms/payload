@@ -30,6 +30,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { draftValidationSlug } from './collections/DraftValidation/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -647,6 +648,116 @@ test.describe('Form State', () => {
           timeout: 10000,
         },
       )
+    })
+  })
+
+  test.describe('Draft Validation', () => {
+    let draftValidationUrl: AdminUrlUtil
+
+    test.beforeAll(() => {
+      draftValidationUrl = new AdminUrlUtil(serverURL, draftValidationSlug)
+    })
+
+    test('should keep save draft button enabled after validation failure on update', async () => {
+      // First, create a document successfully
+      await page.goto(draftValidationUrl.create)
+      await page.locator('#field-title').fill('Test Document')
+      await page.locator('#field-validatedField').fill('Valid data')
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      // Wait for URL to update to edit page
+      await page.waitForURL(/\/admin\/collections\/draft-validation\/[a-zA-Z0-9]+/)
+
+      // Now we're in UPDATE mode - modify the document to trigger validation failure
+      await page.locator('#field-title').fill('Modified Document')
+      await page.locator('#field-failValidation').check()
+      await page.locator('#field-validatedField').fill('This will fail validation')
+
+      // Click Save Draft button - this should fail validation
+      await page.click('#action-save-draft')
+
+      // Wait for error message to appear
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+
+      // THIS IS THE KEY ASSERTION: The Save Draft button should remain enabled after the failed save
+      // Without the fix, the button becomes disabled because setModified(false) was called before checking success
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
+
+      // Verify we can click it again without making additional changes
+      await page.click('#action-save-draft')
+
+      // Should see an error again
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+    })
+
+    test('should keep save draft button enabled after successful save when form is modified again', async () => {
+      await page.goto(draftValidationUrl.create)
+
+      // Fill in required field
+      await page.locator('#field-title').fill('Test Document')
+
+      // Don't check the failValidation box, so validation passes
+      await page.locator('#field-validatedField').fill('Valid data')
+
+      // Click Save Draft button
+      await page.click('#action-save-draft')
+
+      // Wait for success
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      // Now modify the form
+      await page.locator('#field-title').fill('Modified Document')
+
+      // Button should be enabled because form is modified
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
+    })
+
+    test('should allow retrying save after network or server error on update', async () => {
+      // First, create a document successfully
+      await page.goto(draftValidationUrl.create)
+      await page.locator('#field-title').fill('Test Document')
+      await page.locator('#field-validatedField').fill('Valid data')
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      // Wait for URL to update to edit page
+      await page.waitForURL(/\/admin\/collections\/draft-validation\/[a-zA-Z0-9]+/)
+
+      // Now we're in UPDATE mode - intercept the save request and make it fail
+      await page.route('**/api/draft-validation/**', async (route) => {
+        if (route.request().method() === 'PATCH') {
+          await route.fulfill({
+            status: 500,
+            body: JSON.stringify({
+              message: 'Simulated server error',
+              errors: [],
+            }),
+          })
+          return
+        }
+        await route.continue()
+      })
+
+      // Modify the document and try to save
+      await page.locator('#field-title').fill('Modified Document')
+      await page.click('#action-save-draft')
+
+      // Wait for error message (could be "Simulated server error" or "Internal server error")
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+
+      // Verify the Save Draft button remains enabled after the network error
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
+
+      // Remove the route to allow the next save to succeed
+      await page.unroute('**/api/draft-validation/**')
+
+      // Try saving again - should succeed now
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
     })
   })
 })

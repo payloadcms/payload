@@ -362,7 +362,6 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        setModified(false)
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
@@ -381,6 +380,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          setModified(false)
+
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
