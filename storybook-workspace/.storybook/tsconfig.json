@@ -1,10 +1,10 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": false,
     "noEmit": true,
-    "baseUrl": "..",
-    "rootDir": "..",
+    "baseUrl": "../..",
+    "rootDir": "../..",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "skipLibCheck": true,
@@ -13,13 +13,14 @@
     "types": ["node", "vite/client"]
   },
   "include": [
-    "../stories/**/*",
-    "../.storybook/**/*",
-    "../packages/ui/src/**/*"
+    "../../stories/**/*",
+    "../../.storybook/**/*",
+    "../../packages/ui/src/**/*"
   ],
   "exclude": [
-    "../node_modules",
-    "../dist",
-    "../build"
+    "../../node_modules",
+    "../../dist",
+    "../../build",
+    "../../examples"
   ]
 }
