@@ -126,6 +126,7 @@ const meta = {
     },
     layout: 'padded',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/JSONField',
 } satisfies Meta<typeof JSONField>
 

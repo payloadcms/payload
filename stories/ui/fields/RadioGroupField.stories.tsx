@@ -127,6 +127,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/RadioGroupField',
 } satisfies Meta<typeof RadioGroupField>
 

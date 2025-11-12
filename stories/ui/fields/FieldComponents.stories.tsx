@@ -27,6 +27,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/Field Components',
 } satisfies Meta
 

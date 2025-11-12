@@ -114,6 +114,7 @@ const meta = {
     },
     layout: 'padded',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/CodeField',
 } satisfies Meta<typeof CodeField>
 

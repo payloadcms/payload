@@ -165,6 +165,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/Text Input',
 } satisfies Meta<typeof TextInput>
 

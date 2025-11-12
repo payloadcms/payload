@@ -123,6 +123,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/EmailField',
 } satisfies Meta<typeof EmailField>
 

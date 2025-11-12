@@ -114,6 +114,7 @@ const meta = {
     },
     layout: 'fullscreen',
   },
+  tags: ['autodocs'],
   title: 'UI/Icons/Complete Showcase',
 } satisfies Meta
 

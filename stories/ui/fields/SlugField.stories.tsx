@@ -125,6 +125,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/SlugField',
 } satisfies Meta<typeof SlugField>
 

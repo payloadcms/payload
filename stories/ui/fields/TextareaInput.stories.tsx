@@ -58,6 +58,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/Textarea Input',
 } satisfies Meta<typeof TextareaInput>
 

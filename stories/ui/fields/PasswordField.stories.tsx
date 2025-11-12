@@ -134,6 +134,7 @@ const meta = {
     },
     layout: 'centered',
   },
+  tags: ['autodocs'],
   title: 'UI/Fields/PasswordField',
 } satisfies Meta<typeof PasswordField>
 
