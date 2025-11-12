@@ -16,6 +16,9 @@ import { findResourceTool } from './tools/resource/find.js'
 import { updateResourceTool } from './tools/resource/update.js'
 
 // Experimental Tools
+/**
+ * @experimental This tools are experimental and may change or be removed in the future.
+ */
 import { authTool } from './tools/auth/auth.js'
 import { forgotPasswordTool } from './tools/auth/forgotPassword.js'
 import { loginTool } from './tools/auth/login.js'
