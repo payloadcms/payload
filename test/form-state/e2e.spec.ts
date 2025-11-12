@@ -659,58 +659,41 @@ test.describe('Form State', () => {
     })
 
     test('should keep save draft button enabled after validation failure on update', async () => {
-      // First, create a document successfully
+      // Create a document successfully
       await page.goto(draftValidationUrl.create)
       await page.locator('#field-title').fill('Test Document')
       await page.locator('#field-validatedField').fill('Valid data')
       await page.click('#action-save-draft')
       await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
 
-      // Wait for URL to update to edit page
       await page.waitForURL(/\/admin\/collections\/draft-validation\/[a-zA-Z0-9]+/)
 
-      // Now we're in UPDATE mode - modify the document to trigger validation failure
+      // Modify document to trigger validation failure
       await page.locator('#field-title').fill('Modified Document')
       await page.locator('#field-failValidation').check()
       await page.locator('#field-validatedField').fill('This will fail validation')
 
-      // Click Save Draft button - this should fail validation
       await page.click('#action-save-draft')
-
-      // Wait for error message to appear
       await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
 
-      // THIS IS THE KEY ASSERTION: The Save Draft button should remain enabled after the failed save
-      // Without the fix, the button becomes disabled because setModified(false) was called before checking success
+      // Save Draft button should remain enabled after failed save
       const saveDraftButton = page.locator('#action-save-draft')
       await expect(saveDraftButton).toBeEnabled()
 
-      // Verify we can click it again without making additional changes
+      // Verify we can retry without additional changes
       await page.click('#action-save-draft')
-
-      // Should see an error again
       await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
     })
 
     test('should keep save draft button enabled after successful save when form is modified again', async () => {
       await page.goto(draftValidationUrl.create)
-
-      // Fill in required field
       await page.locator('#field-title').fill('Test Document')
-
-      // Don't check the failValidation box, so validation passes
       await page.locator('#field-validatedField').fill('Valid data')
-
-      // Click Save Draft button
       await page.click('#action-save-draft')
-
-      // Wait for success
       await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
 
-      // Now modify the form
       await page.locator('#field-title').fill('Modified Document')
 
-      // Button should be enabled because form is modified
       const saveDraftButton = page.locator('#action-save-draft')
       await expect(saveDraftButton).toBeEnabled()
     })
