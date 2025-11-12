@@ -1,0 +1,115 @@
+---
+title: Quick Start Example
+label: Quick Start Example
+order: 20
+desc: A Queue is a specific group of jobs which can be executed in the order that they were added.
+keywords: jobs queue, application framework, typescript, node, react, nextjs
+---
+
+Let's walk through a practical example of setting up a simple job queue. We'll create a task that sends a welcome email when a user signs up.
+
+You might wonder: "Why not just send the email directly in the `afterChange` hook?"
+
+- **Non-blocking**: If your email service takes 2-3 seconds to send, your API response would be delayed. With jobs, the API returns immediately.
+- **Resilience**: If the email service is temporarily down, the hook would fail and potentially block the user creation. Jobs can retry automatically.
+- **Scalability**: As your app grows, you can move job processing to dedicated servers, keeping your API fast.
+- **Monitoring**: All jobs are tracked in the database, so you can see if emails failed and why.
+
+Now let's build this example step by step.
+
+### Step 1: Define a Task
+
+First, create a task in your `payload.config.ts`:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ... other config
+  jobs: {
+    tasks: [
+      {
+        slug: 'sendWelcomeEmail',
+        retries: 3,
+        inputSchema: [
+          {
+            name: 'userEmail',
+            type: 'email',
+            required: true,
+          },
+          {
+            name: 'userName',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ input, req }) => {
+          // Send email using your email service
+          await req.payload.sendEmail({
+            to: input.userEmail,
+            subject: 'Welcome!',
+            text: `Hi ${input.userName}, welcome to our platform!`,
+          })
+
+          return {
+            output: {
+              emailSent: true,
+            },
+          }
+        },
+      },
+    ],
+  },
+})
+```
+
+This defines a reusable task with a unique `slug`, an `inputSchema` that validates and types the input data, and a `handler` function containing the work to be performed. The `retries` option ensures the task will automatically retry up to 3 times if it fails. Learn more about [Tasks](/docs/jobs-queue/tasks).
+
+### Step 2: Queue the Job trigger
+
+```ts
+{
+  slug: 'users',
+  hooks: {
+    afterChange: [
+      async ({ req, doc, operation }) => {
+        // Only send welcome email for new users
+        if (operation === 'create') {
+          await req.payload.jobs.queue({
+            task: 'sendWelcomeEmail',
+            input: {
+              userEmail: doc.email,
+              userName: doc.name,
+            },
+          })
+        }
+      },
+    ],
+  },
+  // ... fields
+}
+```
+
+This uses [`payload.jobs.queue()`](/docs/jobs-queue/jobs#queuing-a-new-job) to create a job instance from the task definition. The job is added to the queue immediately but runs asynchronously, so the API response returns right away without waiting for the email to send. Jobs are stored in the database as documents in the `payload-jobs` collection.
+
+### Step 3: Run the Jobs
+
+```ts
+export default buildConfig({
+  // ... other config
+  jobs: {
+    tasks: [
+      /* ... */
+    ],
+    autoRun: [
+      {
+        cron: '*/5 * * * *', // Run every 5 minutes
+      },
+    ],
+  },
+})
+```
+
+The [`autoRun`](/docs/jobs-queue/workflows#autorun) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/workflows#manual-run) with `payload.jobs.run()` or run jobs in [separate worker processes](/docs/jobs-queue/workflows#inline-vs-workers) for better scalability.
+
+That's it! Now when users sign up, a job is queued and will be processed within 5 minutes without blocking the API response.
