@@ -81,6 +81,18 @@ const JSONField: React.FC<JSONFieldProps> = ({
           name={name}
           onChange={(e) => handleChange(e.target.value)}
           placeholder="Enter valid JSON..."
+          style={{
+            backgroundColor: 'var(--theme-input-bg)',
+            border: `1px solid ${error ? 'var(--theme-error-500)' : 'var(--theme-elevation-150)'}`,
+            borderRadius: 'var(--style-radius-s, 4px)',
+            boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)',
+            color: 'var(--theme-elevation-800)',
+            fontFamily: 'var(--font-body)',
+            fontSize: '1rem',
+            minHeight: '200px',
+            padding: 'calc(var(--base) * 0.4) calc(var(--base) * 0.75)',
+            width: '100%',
+          }}
           value={jsonValue}
         />
       </div>
