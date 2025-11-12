@@ -86,6 +86,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       '@payloadcms/db-sqlite',
       '@payloadcms/db-vercel-postgres',
       '@payloadcms/drizzle',
+      '@payloadcms/db-d1-sqlite',
       // External because they install @aws-sdk/client-s3:
       '@payloadcms/payload-cloud',
       // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
