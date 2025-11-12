@@ -39,7 +39,7 @@ export const createVariantTypesCollection: (props: Props) => CollectionConfig = 
     access: {
       create: access.isAdmin,
       delete: access.isAdmin,
-      read: access.publicAccess || (() => true),
+      read: access.publicAccess,
       update: access.isAdmin,
     },
     admin: {
