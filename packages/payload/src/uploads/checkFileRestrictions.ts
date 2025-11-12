@@ -64,6 +64,14 @@ export const checkFileRestrictions = async ({
       ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
+  const expectsDetectableType = configMimeTypes.some(
+    (type) =>
+      type.startsWith('image/') ||
+      type === 'application/pdf' ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/'),
+  )
+
   // Skip validation if `allowRestrictedFileTypes` is true
   if (allowRestrictedFileTypes) {
     return
@@ -73,7 +81,7 @@ export const checkFileRestrictions = async ({
   if (configMimeTypes.length > 0) {
     let detected = await fileTypeFromBuffer(file.data)
 
-    if (!detected) {
+    if (!detected && expectsDetectableType) {
       errors.push(`File buffer returned no detectable MIME type.`)
     }
 
