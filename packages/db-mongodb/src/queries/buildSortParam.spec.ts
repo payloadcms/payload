@@ -39,7 +39,10 @@ describe('builds sort params', () => {
       } as MongooseAdapter,
     })
 
-    expect(result).toStrictEqual({ sorting: { order: 'asc', createdAt: 'desc' } })
+    expect(result).toStrictEqual({
+      collation: undefined,
+      sorting: { order: 'asc', createdAt: 'desc' },
+    })
   })
 
   it('adds a fallback when sort isnt provided', () => {
@@ -64,7 +67,7 @@ describe('builds sort params', () => {
       } as MongooseAdapter,
     })
 
-    expect(result).toStrictEqual({ sorting: { createdAt: 'desc' } })
+    expect(result).toStrictEqual({ collation: undefined, sorting: { createdAt: 'desc' } })
   })
 
   it('does not add a fallback on non-unique field when disableFallbackSort is true', () => {
@@ -89,7 +92,7 @@ describe('builds sort params', () => {
       } as MongooseAdapter,
     })
 
-    expect(result).toStrictEqual({ sorting: { order: 'asc' } })
+    expect(result).toStrictEqual({ collation: undefined, sorting: { order: 'asc' } })
   })
 
   // This test should be true even when disableFallbackSort is false
@@ -116,7 +119,7 @@ describe('builds sort params', () => {
       } as MongooseAdapter,
     })
 
-    expect(result).toStrictEqual({ sorting: { order: 'asc' } })
+    expect(result).toStrictEqual({ collation: undefined, sorting: { order: 'asc' } })
   })
 
   it('returns collation when sortCaseInsensitive is enabled', () => {
@@ -136,7 +139,7 @@ describe('builds sort params', () => {
       adapter: { disableFallbackSort: false } as MongooseAdapter,
     })
 
-    expect(result.sorting).toStrictEqual({ title: 'asc' })
+    expect(result.sorting).toStrictEqual({ title: 'asc', _id: 'desc' })
     expect(result.collation).toStrictEqual({ locale: 'en', strength: 2 })
   })
 })
