@@ -3549,7 +3549,8 @@ describe('Localization', () => {
       expect((allLocalesDoc.g1 as any).es).toBeUndefined()
     })
   })
-  describe('specific locales', () => {
+
+  describe('publish/unpublish specific locales', () => {
     let docID: string
 
     beforeEach(async () => {
@@ -3568,9 +3569,9 @@ describe('Localization', () => {
             collection: allFieldsLocalizedSlug,
             data: {
               _status: 'draft',
-              deeplyNested: {
-                innerGroup: {
-                  innerArray: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
+              g1: {
+                g2: {
+                  g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
                 },
               },
               localizedArray: [{ item: 'EN Item 1' }, { item: 'EN Item 2' }],
@@ -3602,9 +3603,9 @@ describe('Localization', () => {
             id: draft.id,
             collection: allFieldsLocalizedSlug,
             data: {
-              deeplyNested: {
-                innerGroup: {
-                  innerArray: [{ text: 'ES Deep 1' }, { text: 'ES Deep 2' }],
+              g1: {
+                g2: {
+                  g2a1: [{ text: 'ES Deep 1' }, { text: 'ES Deep 2' }],
                 },
               },
               localizedArray: [{ item: 'ES Item 1' }, { item: 'ES Item 2' }],
@@ -3684,7 +3685,7 @@ describe('Localization', () => {
           expect((published.localizedBlocks as any).en).toHaveLength(2)
           expect((published.localizedBlocks as any).en[0].text).toBe('EN Text')
           expect((published.localizedBlocks as any).en[1].nestedArray[0].item).toBe('EN Nested')
-          expect((published.localizedBlocks as any).es).toHaveLength(0)
+          expect((published.localizedBlocks as any).es).toBeUndefined()
 
           // Verify localized named tabs have locale keys at top level
           expect((published.localizedTab as any).en).toBeDefined()
@@ -3692,10 +3693,10 @@ describe('Localization', () => {
           expect((published.localizedTab as any).es).toBeUndefined()
 
           // Verify deeply nested localization has locale keys only at topmost localized field
-          expect((published.deeplyNested as any).en).toBeDefined()
-          expect((published.deeplyNested as any).en.innerGroup.innerArray).toHaveLength(2)
-          expect((published.deeplyNested as any).en.innerGroup.innerArray[0].text).toBe('EN Deep 1')
-          expect((published.deeplyNested as any).es).toBeUndefined()
+          expect((published.g1 as any).en).toBeDefined()
+          expect((published.g1 as any).en.g2.g2a1).toHaveLength(2)
+          expect((published.g1 as any).en.g2.g2a1[0].text).toBe('EN Deep 1')
+          expect((published.g1 as any).es).toBeUndefined()
 
           // Verify draft still has Spanish
           const draftDoc = await payload.findByID({

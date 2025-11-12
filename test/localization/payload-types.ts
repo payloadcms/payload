@@ -73,7 +73,7 @@ export interface Config {
     'nested-field-tables': NestedFieldTable;
     'localized-drafts': LocalizedDraft;
     'localized-date-fields': LocalizedDateField;
-    'all-field-types-localized': AllFieldTypesLocalized;
+    'all-fields-localized': AllFieldsLocalized;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -102,7 +102,7 @@ export interface Config {
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
-    'all-field-types-localized': AllFieldTypesLocalizedSelect<false> | AllFieldTypesLocalizedSelect<true>;
+    'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -364,9 +364,9 @@ export interface LocalizedDateField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "all-field-types-localized".
+ * via the `definition` "all-fields-localized".
  */
-export interface AllFieldTypesLocalized {
+export interface AllFieldsLocalized {
   id: string;
   text?: string | null;
   textarea?: string | null;
@@ -434,9 +434,9 @@ export interface AllFieldTypesLocalized {
     localizedInNonLocalizedTab?: string | null;
   };
   unnamedTabLocalizedText?: string | null;
-  deeplyNested?: {
-    innerGroup?: {
-      innerArray?:
+  g1?: {
+    g2?: {
+      g2a1?:
         | {
             text?: string | null;
             id?: string | null;
@@ -881,8 +881,8 @@ export interface PayloadLockedDocument {
         value: string | LocalizedDateField;
       } | null)
     | ({
-        relationTo: 'all-field-types-localized';
-        value: string | AllFieldTypesLocalized;
+        relationTo: 'all-fields-localized';
+        value: string | AllFieldsLocalized;
       } | null)
     | ({
         relationTo: 'users';
@@ -1153,9 +1153,9 @@ export interface LocalizedDateFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "all-field-types-localized_select".
+ * via the `definition` "all-fields-localized_select".
  */
-export interface AllFieldTypesLocalizedSelect<T extends boolean = true> {
+export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   text?: T;
   textarea?: T;
   number?: T;
@@ -1224,13 +1224,13 @@ export interface AllFieldTypesLocalizedSelect<T extends boolean = true> {
         localizedInNonLocalizedTab?: T;
       };
   unnamedTabLocalizedText?: T;
-  deeplyNested?:
+  g1?:
     | T
     | {
-        innerGroup?:
+        g2?:
           | T
           | {
-              innerArray?:
+              g2a1?:
                 | T
                 | {
                     text?: T;
