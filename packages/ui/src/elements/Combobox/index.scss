@@ -1,0 +1,49 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .combobox {
+    &__content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &__search-wrapper {
+      padding-top: var(--popup-padding);
+      padding-bottom: calc(var(--base) * 0.5);
+      border-bottom: 1px solid var(--theme-elevation-150);
+      margin-bottom: calc(var(--base) * 0.5);
+
+      &--no-results {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+    }
+
+    &__search-input {
+      width: 100%;
+      background: var(--theme-elevation-50);
+      color: var(--theme-text);
+      border: none;
+      border-radius: var(--style-radius-s);
+      padding: calc(var(--base) * 0.25) calc(var(--base) * 0.5);
+      outline: none;
+      box-shadow: none;
+
+      &::placeholder {
+        color: var(--theme-elevation-400);
+      }
+
+      &:focus,
+      &:focus-visible {
+        background: var(--theme-elevation-100);
+        outline: none;
+        border: none;
+        box-shadow: none;
+      }
+    }
+
+    &__entry {
+      cursor: pointer;
+    }
+  }
+}

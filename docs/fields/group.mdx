@@ -77,8 +77,6 @@ The Group Field inherits all of the default admin options from the base [Field A
 
 ## Example
 
-`collections/ExampleCollection.ts`
-
 ```ts
 import type { CollectionConfig } from 'payload'
 
@@ -113,7 +111,7 @@ export const ExampleCollection: CollectionConfig = {
 
 ## Presentational group fields
 
-You can also use the Group field to only visually group fields without affecting the data structure. Not defining a label will render just the grouped fields.
+You can also use the Group field to only visually group fields without affecting the data structure. Not defining a `name` will render just the grouped fields (no nested object is created). If you want the group to appear as a titled section in the Admin UI, set a `label`.
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -122,6 +120,39 @@ export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
+      label: 'Page meta', // label only → presentational
+      type: 'group', // required
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          minLength: 20,
+          maxLength: 100,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          required: true,
+          minLength: 40,
+          maxLength: 160,
+        },
+      ],
+    },
+  ],
+}
+```
+
+## Named group
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'pageMeta', // name → nested object in data
       label: 'Page meta',
       type: 'group', // required
       fields: [

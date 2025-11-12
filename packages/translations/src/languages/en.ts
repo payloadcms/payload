@@ -1,5 +1,3 @@
-import { title } from 'process'
-
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -145,7 +143,7 @@ export const enTranslations = {
     addNewLabel: 'Add new {{label}}',
     addRelationship: 'Add Relationship',
     addUpload: 'Add Upload',
-    block: 'block',
+    block: 'Block',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:
@@ -175,6 +173,7 @@ export const enTranslations = {
     removeUpload: 'Remove Upload',
     saveChanges: 'Save changes',
     searchForBlock: 'Search for a block',
+    searchForLanguage: 'Search for a language',
     selectExistingLabel: 'Select existing {{label}}',
     selectFieldsToEdit: 'Select fields to edit',
     showAll: 'Show All',
@@ -329,7 +328,7 @@ export const enTranslations = {
     groupByLabel: 'Group by {{label}}',
     import: 'Import',
     isEditing: 'is editing',
-    item: 'item',
+    item: 'Item',
     items: 'items',
     language: 'Language',
     lastModified: 'Last Modified',
@@ -418,7 +417,7 @@ export const enTranslations = {
     successfullyCreated: '{{label}} successfully created.',
     successfullyDuplicated: '{{label}} successfully duplicated.',
     successfullyReindexed:
-      'Successfully reindexed {{count}} of {{total}} documents from {{collections}}',
+      'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     takeOver: 'Take over',
     thisLanguage: 'English',
     time: 'Time',
@@ -458,7 +457,9 @@ export const enTranslations = {
     copyTo: 'Copy to',
     copyToLocale: 'Copy to locale',
     localeToPublish: 'Locale to publish',
+    selectedLocales: 'Selected Locales',
     selectLocaleToCopy: 'Select locale to copy',
+    selectLocaleToDuplicate: 'Select locales to duplicate',
   },
   operators: {
     contains: 'contains',
@@ -514,12 +515,16 @@ export const enTranslations = {
     enterNumber: 'Please enter a valid number.',
     fieldHasNo: 'This field has no {{label}}',
     greaterThanMax: '{{value}} is greater than the max allowed {{label}} of {{max}}.',
+    invalidBlock: 'The block "{{block}}" is not allowed.',
+    invalidBlocks: 'This field contains blocks that are no longer allowed: {{blocks}}.',
     invalidInput: 'This field has an invalid input.',
     invalidSelection: 'This field has an invalid selection.',
     invalidSelections: 'This field has the following invalid selections:',
+    latitudeOutOfBounds: 'Latitude must be between -90 and 90.',
     lessThanMin: '{{value}} is less than the min allowed {{label}} of {{min}}.',
     limitReached: 'Limit reached, only {{max}} items can be added.',
     longerThanMin: 'This value must be longer than the minimum length of {{minLength}} characters.',
+    longitudeOutOfBounds: 'Longitude must be between -180 and 180.',
     notValidDate: '"{{value}}" is not a valid date.',
     required: 'This field is required.',
     requiresAtLeast: 'This field requires at least {{count}} {{label}}.',
@@ -571,6 +576,7 @@ export const enTranslations = {
     modifiedOnly: 'Modified only',
     moreVersions: 'More versions...',
     noFurtherVersionsFound: 'No further versions found',
+    noLabelGroup: 'Unnamed Group',
     noRowsFound: 'No {{label}} found',
     noRowsSelected: 'No {{label}} selected',
     preview: 'Preview',
@@ -608,7 +614,6 @@ export const enTranslations = {
     versionCount_none: 'No versions found',
     versionCount_one: '{{count}} version found',
     versionCount_other: '{{count}} versions found',
-    versionCreatedOn: '{{version}} created on:',
     versionID: 'Version ID',
     versions: 'Versions',
     viewingVersion: 'Viewing version for the {{entityLabel}} {{documentTitle}}',

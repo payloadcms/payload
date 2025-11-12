@@ -115,7 +115,7 @@ An array of collections slugs to enable nested docs.
 #### `generateLabel`
 
 Each `breadcrumb` has a required `label` field. By default, its value will be set to the collection's `admin.useAsTitle`
-or fallback the the `ID` of the document.
+or fallback to the `ID` of the document.
 
 You can also pass a function to dynamically set the `label` of your breadcrumb.
 
@@ -129,10 +129,11 @@ nestedDocsPlugin({
 
 The function takes two arguments and returns a string:
 
-| Argument | Type     | Description                                  |
-| -------- | -------- | -------------------------------------------- |
-| `docs`   | `Array`  | An array of the breadcrumbs up to that point |
-| `doc`    | `Object` | The current document being edited            |
+| Argument     | Type     | Description                                   |
+| ------------ | -------- | --------------------------------------------- |
+| `docs`       | `Array`  | An array of the breadcrumbs up to that point  |
+| `doc`        | `Object` | The current document being edited             |
+| `collection` | `Object` | The collection config of the current document |
 
 #### `generateURL`
 
@@ -148,10 +149,11 @@ nestedDocsPlugin({
 })
 ```
 
-| Argument | Type     | Description                                  |
-| -------- | -------- | -------------------------------------------- |
-| `docs`   | `Array`  | An array of the breadcrumbs up to that point |
-| `doc`    | `Object` | The current document being edited            |
+| Argument     | Type     | Description                                   |
+| ------------ | -------- | --------------------------------------------- |
+| `docs`       | `Array`  | An array of the breadcrumbs up to that point  |
+| `doc`        | `Object` | The current document being edited             |
+| `collection` | `Object` | The collection config of the current document |
 
 #### `parentFieldSlug`
 

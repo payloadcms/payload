@@ -38,6 +38,8 @@ export const updateOne: UpdateOne = async function updateOne(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({
@@ -50,11 +52,41 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
 
-  const $inc: Record<string, number> = {}
   let updateData: UpdateQuery<any> = data
-  transform({ $inc, adapter: this, data, fields, operation: 'write' })
+
+  const $inc: Record<string, number> = {}
+  const $push: Record<string, { $each: any[] } | any> = {}
+  const $addToSet: Record<string, { $each: any[] } | any> = {}
+  const $pull: Record<string, { $in: any[] } | any> = {}
+
+  transform({
+    $addToSet,
+    $inc,
+    $pull,
+    $push,
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
+  })
+
+  const updateOps: UpdateQuery<any> = {}
+
   if (Object.keys($inc).length) {
-    updateData = { $inc, $set: updateData }
+    updateOps.$inc = $inc
+  }
+  if (Object.keys($push).length) {
+    updateOps.$push = $push
+  }
+  if (Object.keys($addToSet).length) {
+    updateOps.$addToSet = $addToSet
+  }
+  if (Object.keys($pull).length) {
+    updateOps.$pull = $pull
+  }
+  if (Object.keys(updateOps).length) {
+    updateOps.$set = updateData
+    updateData = updateOps
   }
 
   try {

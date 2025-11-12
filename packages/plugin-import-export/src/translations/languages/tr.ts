@@ -15,6 +15,7 @@ export const trTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Sayfa',
     'field-selectionToUse-label': 'Kullanılacak seçim',
     'field-sort-label': 'Sırala',
+    'field-sort-order-label': 'Sıralama düzeni',
     'selectionToUse-allDocuments': 'Tüm belgeleri kullanın',
     'selectionToUse-currentFilters': 'Mevcut filtreleri kullanın',
     'selectionToUse-currentSelection': 'Mevcut seçimi kullanın',

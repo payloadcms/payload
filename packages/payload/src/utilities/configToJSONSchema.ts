@@ -1,9 +1,5 @@
-import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
-
-import pluralize from 'pluralize'
-const { singular } = pluralize
-
 import type { I18n } from '@payloadcms/translations'
+import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
 import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -14,7 +10,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
-import { toWords } from './formatLabels.js'
+import { formatNames } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
@@ -758,7 +754,7 @@ export function entityToJSONSchema(
 
   const title = entity.typescript?.interface
     ? entity.typescript.interface
-    : singular(toWords(entity.slug, true))
+    : formatNames(entity.slug).singular
 
   let mutableFields = [...entity.flattenedFields]
 
@@ -1067,7 +1063,7 @@ export function authCollectionToOperationsJSONSchema(
     additionalProperties: false,
     properties,
     required: Object.keys(properties),
-    title: `${singular(toWords(`${config.slug}`, true))}AuthOperations`,
+    title: `${formatNames(config.slug).singular}AuthOperations`,
   }
 }
 

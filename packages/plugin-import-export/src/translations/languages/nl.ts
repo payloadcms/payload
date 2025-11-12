@@ -15,6 +15,7 @@ export const nlTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Pagina',
     'field-selectionToUse-label': 'Selectie om te gebruiken',
     'field-sort-label': 'Sorteer op',
+    'field-sort-order-label': 'Sorteer volgorde',
     'selectionToUse-allDocuments': 'Gebruik alle documenten',
     'selectionToUse-currentFilters': 'Gebruik huidige filters',
     'selectionToUse-currentSelection': 'Gebruik huidige selectie',

@@ -97,5 +97,31 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'computedArray',
+      type: 'array',
+      admin: {
+        description:
+          'If there is no value, a default row will be added by a beforeChange hook. Otherwise, modifies the rows on save.',
+      },
+      hooks: {
+        beforeChange: [
+          ({ value }) =>
+            !value?.length
+              ? [
+                  {
+                    text: 'This is a computed value.',
+                  },
+                ]
+              : value,
+        ],
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }

@@ -95,7 +95,7 @@ _An asterisk denotes that an option is required._
 | **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                                                                                                                                                     |
 | **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                                                                                                                                                |
 | **`cacheTags`**                | Set to `false` to disable the cache tag set in the UI for the admin thumbnail component. Useful for when CDNs don't allow certain cache queries.                                                                                                                                                                                                                 |
-| **`constructorOptions`**       | An object passed to the the Sharp image library that accepts any Constructor options and applies them to the upload file. [More](https://sharp.pixelplumbing.com/api-constructor/)                                                                                                                                                                               |
+| **`constructorOptions`**       | An object passed to the Sharp image library that accepts any Constructor options and applies them to the upload file. [More](https://sharp.pixelplumbing.com/api-constructor/)                                                                                                                                                                                   |
 | **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                                                                                                                                                          |
 | **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                                                                                                                                                      |
 | **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                                                                                                                                                    |
@@ -108,11 +108,11 @@ _An asterisk denotes that an option is required._
 | **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                                                                                                                                               |
 | **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                                                                                                                                                         |
 | **`pasteURL`**                 | Controls whether files can be uploaded from remote URLs by pasting them into the Upload field. **Enabled by default.** Accepts `false` to disable or an object with an `allowList` of valid remote URLs. [More](#uploading-files-from-remote-urls)                                                                                                               |
-| **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                                                                                                                                  |
+| **`resizeOptions`**            | An object passed to the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                                                                                                                                      |
 | **`skipSafeFetch`**            | Set to an `allowList` to skip the safe fetch check when fetching external files. Set to `true` to skip the safe fetch for all documents in this collection. Defaults to `false`.                                                                                                                                                                                 |
 | **`allowRestrictedFileTypes`** | Set to `true` to allow restricted file types. If your Collection has defined [mimeTypes](#mimetypes), restricted file verification will be skipped. Defaults to `false`. [More](#restricted-file-types)                                                                                                                                                          |
 | **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                                                                                                                                           |
-| **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                                                                                                                               |
+| **`trimOptions`**              | An object passed to the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                                                                                                                                   |
 | **`withMetadata`**             | If specified, appends metadata to the output image file. Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                                                                                                                                                |
 | **`hideFileInputOnCreate`**    | Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.                                                                                                                                                                                                                                |
 | **`hideRemoveFile`**           | Set to `true` to prevent the admin UI having a way to remove an existing file while editing.                                                                                                                                                                                                                                                                     |
@@ -192,9 +192,34 @@ Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/a
 
 Note that for image resizing to work, `sharp` must be specified in your [Payload Config](../configuration/overview). This is configured by default if you created your Payload project with `create-payload-app`. See `sharp` in [Config Options](../configuration/overview#config-options).
 
+#### Admin List View Options
+
+Each image size also supports `admin` options to control whether it appears in the [Admin Panel](../admin/overview) list view.
+
+```ts
+{
+  name: 'thumbnail',
+  width: 400,
+  height: 300,
+  admin: {
+    disableGroupBy: true, // hide from list view groupBy options
+    disableListColumn: true, // hide from list view columns
+    disableListFilter: true, // hide from list view filters
+  },
+}
+```
+
+| Option                  | Description                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`disableGroupBy`**    | If set to `true`, this image size will not be available as a selectable groupBy option in the collection list view. Defaults to `false`. |
+| **`disableListColumn`** | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`.         |
+| **`disableListFilter`** | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.             |
+
+This is useful for hiding large or rarely used image sizes from the list view UI while still keeping them available in the API.
+
 #### Accessing the resized images in hooks
 
-All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
+All auto-resized images are exposed to be reused in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
 
 The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
 

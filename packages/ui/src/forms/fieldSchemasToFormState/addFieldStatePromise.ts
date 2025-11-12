@@ -15,11 +15,12 @@ import type {
   SanitizedFieldsPermissions,
   SelectMode,
   SelectType,
+  TabAsField,
   Validate,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { getBlockSelect } from 'payload'
+import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -37,8 +38,7 @@ import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -252,6 +252,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
+    /**
+     * This function adds the error **path** to the current field and all its parents. If a field is invalid, all its parents are also invalid.
+     * It does not add the error **message** to the current field, as that shouldn't apply to all parents.
+     * This is done separately below.
+     */
     const addErrorPathToParent = (errorPath: string) => {
       if (typeof addErrorPathToParentArg === 'function') {
         addErrorPathToParentArg(errorPath)
@@ -353,7 +358,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               newRow.lastRenderedPath = previousRow.lastRenderedPath
             }
 
-            acc.rows.push(newRow)
+            // add addedByServer flag
+            if (!previousRow) {
+              newRow.addedByServer = true
+            }
 
             const isCollapsed = isRowCollapsed({
               collapsedPrefs: preferences?.fields?.[path]?.collapsed,
@@ -363,14 +371,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             })
 
             if (isCollapsed) {
-              acc.rows[acc.rows.length - 1].collapsed = true
+              newRow.collapsed = true
             }
+
+            acc.rows.push(newRow)
 
             return acc
           },
           {
             promises: [],
-            rows: undefined,
+            rows: [],
           },
         )
 
@@ -401,6 +411,23 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       case 'blocks': {
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
+
+        // Handle blocks filterOptions
+        let filterOptionsValidationResult: Awaited<
+          ReturnType<typeof validateBlocksFilterOptions>
+        > | null = null
+        if (field.filterOptions) {
+          filterOptionsValidationResult = await validateBlocksFilterOptions({
+            id,
+            data: fullData,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData: data,
+            value: data[field.name],
+          })
+
+          fieldState.blocksFilterOptions = filterOptionsValidationResult.allowedBlockSlugs
+        }
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
@@ -436,6 +463,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[idKey] = {
                   initialValue: row.id,
                   value: row.id,
+                }
+
+                // If the blocks field fails filterOptions validation, add error paths to the individual blocks that are no longer allowed
+                if (
+                  filterOptionsValidationResult?.invalidBlockSlugs?.length &&
+                  filterOptionsValidationResult.invalidBlockSlugs.includes(row.blockType)
+                ) {
+                  state[idKey].errorMessage = req.t('validation:invalidBlock', {
+                    block: row.blockType,
+                  })
+                  state[idKey].valid = false
+                  addErrorPathToParent(idKey)
+
+                  // If the error is due to block filterOptions, we want the blocks field (fieldState) to include all the filterOptions-related
+                  // error paths for each sub-block, not for the validation result of the block itself. Otherwise, say there are 2 invalid blocks,
+                  // the blocks field will have 3 instead of 2 error paths - one for itself, and one for each invalid block.
+                  // Instead, we want only the 2 error paths for the individual, invalid blocks.
+                  fieldState.errorPaths = fieldState.errorPaths.filter(
+                    (errorPath) => errorPath !== path,
+                  )
                 }
 
                 if (includeSchema) {
@@ -807,15 +854,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       const isNamedTab = tabHasName(tab)
       let tabSelect: SelectType | undefined
 
+      const tabField: TabAsField = {
+        ...tab,
+        type: 'tab',
+      }
+
       const {
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
       } = getFieldPaths({
-        field: {
-          ...tab,
-          type: 'tab',
-        },
+        field: tabField,
         index: tabIndex,
         parentIndexPath: indexPath,
         parentPath,
@@ -825,6 +874,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       let childPermissions: SanitizedFieldsPermissions = undefined
 
       if (isNamedTab) {
+        const shouldContinue = stripUnselectedFields({
+          field: tabField,
+          select,
+          selectMode,
+          siblingDoc: data?.[tab.name] || {},
+        })
+
+        if (!shouldContinue) {
+          return
+        }
+
         if (parentPermissions === true) {
           childPermissions = true
         } else {

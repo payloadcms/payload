@@ -1,8 +1,6 @@
-import { title } from 'process'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import type { Language } from '../types.js'
-
-export const idTranslations = {
+export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
     accountOfCurrentUser: 'Akun pengguna saat ini',
@@ -29,11 +27,9 @@ export const idTranslations = {
     forgotPassword: 'Lupa Kata Sandi',
     forgotPasswordEmailInstructions:
       'Silakan masukkan email Anda di bawah ini. Anda akan menerima pesan email dengan instruksi tentang cara mengatur ulang kata sandi Anda.',
+    forgotPasswordQuestion: 'Lupa kata sandi?',
     forgotPasswordUsernameInstructions:
       'Silakan masukkan nama pengguna Anda di bawah ini. Instruksi tentang cara mengatur ulang kata sandi Anda akan dikirim ke alamat email yang terkait dengan nama pengguna Anda.',
-    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
-
-    forgotPasswordQuestion: 'Lupa kata sandi?',
     generate: 'Buat',
     generateNewAPIKey: 'Buat kunci API baru',
     generatingNewAPIKeyWillInvalidate:
@@ -71,6 +67,7 @@ export const idTranslations = {
     tokenRefreshSuccessful: 'Penyegaran token berhasil.',
     unableToVerify: 'Tidak Dapat Memverifikasi',
     username: 'Nama Pengguna',
+    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
     verified: 'Terverifikasi',
     verifiedSuccessfully: 'Berhasil Diverifikasi',
     verify: 'Verifikasi',
@@ -147,7 +144,7 @@ export const idTranslations = {
     addNewLabel: 'Tambah {{label}} baru',
     addRelationship: 'Tambah Hubungan',
     addUpload: 'Tambah Unggahan',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'blok',
     blockType: 'Tipe Blok',
     chooseBetweenCustomTextOrDocument:
@@ -177,6 +174,7 @@ export const idTranslations = {
     removeUpload: 'Hapus Unggahan',
     saveChanges: 'Simpan perubahan',
     searchForBlock: 'Cari blok',
+    searchForLanguage: 'Cari bahasa',
     selectExistingLabel: 'Pilih {{label}} yang ada',
     selectFieldsToEdit: 'Pilih isian untuk diedit',
     showAll: 'Tampilkan Semua',
@@ -330,7 +328,7 @@ export const idTranslations = {
     groupByLabel: 'Kelompokkan berdasarkan {{label}}',
     import: 'Impor',
     isEditing: 'sedang mengedit',
-    item: 'item',
+    item: 'Item',
     items: 'item',
     language: 'Bahasa',
     lastModified: 'Terakhir Diubah',
@@ -419,7 +417,7 @@ export const idTranslations = {
     successfullyCreated: '{{label}} berhasil dibuat.',
     successfullyDuplicated: '{{label}} berhasil diduplikasi.',
     successfullyReindexed:
-      'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}',
+      'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     takeOver: 'Ambil alih',
     thisLanguage: 'Bahasa Indonesia',
     time: 'Waktu',
@@ -461,7 +459,9 @@ export const idTranslations = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke lokal',
     localeToPublish: 'Lokal untuk dipublikasikan',
+    selectedLocales: 'Lokasi yang Dipilih',
     selectLocaleToCopy: 'Pilih lokal untuk disalin',
+    selectLocaleToDuplicate: 'Pilih bahasa lokal untuk duplikat',
   },
   operators: {
     contains: 'mengandung',
@@ -517,12 +517,16 @@ export const idTranslations = {
     enterNumber: 'Harap masukkan nomor yang valid.',
     fieldHasNo: 'Isian ini tidak memiliki {{label}}',
     greaterThanMax: '{{value}} lebih besar dari {{label}} maksimum yang diizinkan yaitu {{max}}.',
+    invalidBlock: 'Blok "{{block}}" tidak diperbolehkan.',
+    invalidBlocks: 'Bidang ini berisi blok yang tidak lagi diizinkan: {{blocks}}.',
     invalidInput: 'Isian ini memiliki masukan yang tidak valid.',
     invalidSelection: 'Isian ini memiliki pilihan yang tidak valid.',
     invalidSelections: 'Isian ini memiliki pilihan tidak valid berikut:',
+    latitudeOutOfBounds: 'Lintang harus berada antara -90 dan 90.',
     lessThanMin: '{{value}} lebih kecil dari {{label}} minimum yang diizinkan yaitu {{min}}.',
     limitReached: 'Batas tercapai, hanya {{max}} item yang dapat ditambahkan.',
     longerThanMin: 'Nilai ini harus lebih panjang dari panjang minimum {{minLength}} karakter.',
+    longitudeOutOfBounds: 'Garis bujur harus berada di antara -180 dan 180.',
     notValidDate: '"{{value}}" bukan tanggal yang valid.',
     required: 'Isian ini wajib diisi.',
     requiresAtLeast: 'Isian ini membutuhkan setidaknya {{count}} {{label}}.',
@@ -570,6 +574,7 @@ export const idTranslations = {
     modifiedOnly: 'Hanya yang diubah',
     moreVersions: 'Versi lainnya...',
     noFurtherVersionsFound: 'Tidak ada versi lebih lanjut yang ditemukan',
+    noLabelGroup: 'Grup Tanpa Nama',
     noRowsFound: 'Tidak ada {{label}} yang ditemukan',
     noRowsSelected: 'Tidak ada {{label}} yang dipilih',
     preview: 'Pratinjau',
@@ -606,7 +611,6 @@ export const idTranslations = {
     versionCount_none: 'Tidak ada versi yang ditemukan',
     versionCount_one: '{{count}} versi ditemukan',
     versionCount_other: '{{count}} versi ditemukan',
-    versionCreatedOn: '{{version}} dibuat pada:',
     versionID: 'ID Versi',
     versions: 'Versi',
     viewingVersion: 'Melihat versi untuk {{entityLabel}} {{documentTitle}}',

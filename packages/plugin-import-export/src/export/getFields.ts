@@ -118,6 +118,23 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-sort-label'),
             },
+            {
+              name: 'sortOrder',
+              type: 'select',
+              admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#SortOrder',
+                },
+                // Only show when `sort` has a value
+                condition: ({ sort }) => typeof sort === 'string' && sort.trim().length > 0,
+              },
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-sort-order-label'),
+              options: [
+                { label: 'Ascending', value: 'asc' },
+                { label: 'Descending', value: 'desc' },
+              ],
+            },
             ...(localeField ? [localeField] : []),
             {
               name: 'drafts',
@@ -207,7 +224,6 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
             components: {
               Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
             },
-            hidden: true,
           },
           required: true,
         },

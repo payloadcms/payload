@@ -98,6 +98,7 @@ export interface Config {
     'externally-served-media': ExternallyServedMedia;
     'uploads-1': Uploads1;
     'uploads-2': Uploads2;
+    'any-images': AnyImage;
     'admin-thumbnail-function': AdminThumbnailFunction;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
@@ -119,6 +120,8 @@ export interface Config {
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
+    'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -157,6 +160,7 @@ export interface Config {
     'externally-served-media': ExternallyServedMediaSelect<false> | ExternallyServedMediaSelect<true>;
     'uploads-1': Uploads1Select<false> | Uploads1Select<true>;
     'uploads-2': Uploads2Select<false> | Uploads2Select<true>;
+    'any-images': AnyImagesSelect<false> | AnyImagesSelect<true>;
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
@@ -178,6 +182,8 @@ export interface Config {
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
+    'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -188,7 +194,7 @@ export interface Config {
   };
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user: User & {
     collection: 'users';
   };
@@ -224,8 +230,18 @@ export interface Relation {
   image?: (string | null) | Media;
   versionedImage?: (string | null) | Version;
   hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
+  blocks?:
+    | {
+        media: string | Media;
+        relatedMedia?: (string | Media)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedMediaBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -233,6 +249,8 @@ export interface Relation {
  */
 export interface Media {
   id: string;
+  alt?: string | null;
+  localized?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1234,7 +1252,7 @@ export interface Uploads1 {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -1312,6 +1330,24 @@ export interface AdminThumbnailSize {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images".
+ */
+export interface AnyImage {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1625,6 +1661,76 @@ export interface SvgOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access".
+ */
+export interface MediaWithoutDeleteAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props".
+ */
+export interface MediaWithImageSizeAdminProp {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    one?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    two?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    three?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    four?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1779,6 +1885,10 @@ export interface PayloadLockedDocument {
         value: string | Uploads2;
       } | null)
     | ({
+        relationTo: 'any-images';
+        value: string | AnyImage;
+      } | null)
+    | ({
         relationTo: 'admin-thumbnail-function';
         value: string | AdminThumbnailFunction;
       } | null)
@@ -1863,6 +1973,14 @@ export interface PayloadLockedDocument {
         value: string | SvgOnly;
       } | null)
     | ({
+        relationTo: 'media-without-delete-access';
+        value: string | MediaWithoutDeleteAccess;
+      } | null)
+    | ({
+        relationTo: 'media-with-image-size-admin-props';
+        value: string | MediaWithImageSizeAdminProp;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -1916,8 +2034,21 @@ export interface RelationSelect<T extends boolean = true> {
   image?: T;
   versionedImage?: T;
   hideFileInputOnCreate?: T;
+  blocks?:
+    | T
+    | {
+        localizedMediaBlock?:
+          | T
+          | {
+              media?: T;
+              relatedMedia?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2347,6 +2478,8 @@ export interface FocalNoSizesSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  localized?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3021,6 +3154,23 @@ export interface Uploads2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images_select".
+ */
+export interface AnyImagesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "admin-thumbnail-function_select".
  */
 export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
@@ -3388,6 +3538,84 @@ export interface SvgOnlySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access_select".
+ */
+export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props_select".
+ */
+export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        one?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        two?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        three?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        four?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -3450,6 +3678,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

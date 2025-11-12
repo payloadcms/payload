@@ -5,11 +5,7 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const allDatabaseAdapters = {
-  mongodb: `
-  import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-  export const databaseAdapter = mongooseAdapter({
+const mongooseAdapterArgs = `
     ensureIndexes: true,
     // required for connect to detect that we are using a memory server
     mongoMemoryServer:  global._mongoMemoryServer,
@@ -20,23 +16,38 @@ export const allDatabaseAdapters = {
     collation: {
       strength: 1,
     },
-  })`,
-  firestore: `
-  import { mongooseAdapter, compatabilityOptions } from '@payloadcms/db-mongodb'
+`
+
+export const allDatabaseAdapters = {
+  mongodb: `
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
-    ...compatabilityOptions.firestore,
-    url:
-      process.env.DATABASE_URI ||
-      process.env.MONGODB_MEMORY_SERVER_URI ||
-      'mongodb://127.0.0.1/payloadtests',
-    collation: {
-      strength: 1,
-    },
+    ${mongooseAdapterArgs}
+  })`,
+  cosmosdb: `
+  import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ...compatibilityOptions.cosmosdb,
+    ${mongooseAdapterArgs}
+  })`,
+  documentdb: `
+  import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ...compatibilityOptions.documentdb,
+    ${mongooseAdapterArgs}
+  })`,
+  firestore: `
+  import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ...compatibilityOptions.firestore,
+    ${mongooseAdapterArgs}
     // The following options prevent some tests from failing.
     // More work needed to get tests succeeding without these options.
     ensureIndexes: true,
-    transactionOptions: {},
     disableIndexHints: false,
     useAlternativeDropDatabase: false,
   })`,
@@ -113,6 +124,11 @@ export const allDatabaseAdapters = {
         process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
     },
   })`,
+  d1: `
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export const databaseAdapter = sqliteD1Adapter({ binding: global.d1 })
+  `,
 }
 
 /**

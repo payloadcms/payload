@@ -78,6 +78,7 @@ export const transformBlocks = ({
 
     const newRow: BlockRowToInsert = {
       arrays: {},
+      arraysToPush: {},
       locales: {},
       row: {
         _order: i + 1,
@@ -116,6 +117,7 @@ export const transformBlocks = ({
     traverseFields({
       adapter,
       arrays: newRow.arrays,
+      arraysToPush: newRow.arraysToPush,
       baseTableName,
       blocks,
       blocksToDelete,
@@ -131,6 +133,7 @@ export const transformBlocks = ({
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,
+      relationshipsToAppend: [],
       relationshipsToDelete,
       row: newRow.row,
       selects,

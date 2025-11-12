@@ -15,6 +15,7 @@ export const bgTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Страница',
     'field-selectionToUse-label': 'Избор за използване',
     'field-sort-label': 'Сортирай по',
+    'field-sort-order-label': 'Ред на сортиране',
     'selectionToUse-allDocuments': 'Използвайте всички документи',
     'selectionToUse-currentFilters': 'Използвайте текущите филтри',
     'selectionToUse-currentSelection': 'Използвайте текущия избор',

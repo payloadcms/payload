@@ -1,3 +1,4 @@
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { getFileByPath, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
@@ -14,7 +15,6 @@ import {
   media2CollectionSlug,
   mediaCollectionSlug,
 } from './slugs.js'
-import { textToLexicalJSON } from './textToLexicalJSON.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -235,6 +235,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
             textInNamedTab1InBlock: 'textInNamedTab1InBlock',
           },
           textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock',
+          textInRowInUnnamedTab2InBlock: 'textInRowInUnnamedTab2InBlock',
           textInUnnamedTab2InBlockAccessFalse: 'textInUnnamedTab2InBlockAccessFalse',
         },
       ],
@@ -242,11 +243,15 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       code: 'code',
       date: '2021-04-01T00:00:00.000Z',
       email: 'email@email.com',
+      textInUnnamedGroup: 'textInUnnamedGroup',
+      textInUnnamedLabeledGroup: 'textInUnnamedLabeledGroup',
       group: {
         textInGroup: 'textInGroup',
       },
       namedTab1: {
         textInNamedTab1: 'textInNamedTab1',
+        textInNamedTab1ReadFalse: 'textInNamedTab1ReadFalse',
+        textInNamedTab1UpdateFalse: 'textInNamedTab1UpdateFalse',
       },
       number: 1,
       point: [1, 2],
@@ -268,13 +273,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc1ID,
         updated: false,
       }) as any,
-      richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff' }),
+      richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
+        text: 'richtextWithCustomDiff',
+      }),
       select: 'option1',
       text: 'text',
       textArea: 'textArea',
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      textInRowInUnnamedTab: 'textInRowInUnnamedTab',
+      textInRowInUnnamedTabUpdateFalse: 'textInRowInUnnamedTabUpdateFalse',
+
       textCannotRead: 'textCannotRead',
       relationshipPolymorphic: {
         relationTo: 'text',
@@ -372,6 +382,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
             textInNamedTab1InBlock: 'textInNamedTab1InBlock2',
           },
           textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock2',
+          textInRowInUnnamedTab2InBlock: 'textInRowInUnnamedTab2InBlock2',
           textInUnnamedTab2InBlockAccessFalse: 'textInUnnamedTab2InBlockAccessFalse2',
         },
       ],
@@ -379,11 +390,15 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       code: 'code2',
       date: '2023-04-01T00:00:00.000Z',
       email: 'email2@email.com',
+      textInUnnamedGroup: 'textInUnnamedGroup2',
+      textInUnnamedLabeledGroup: 'textInUnnamedLabeledGroup2',
       group: {
         textInGroup: 'textInGroup2',
       },
       namedTab1: {
         textInNamedTab1: 'textInNamedTab12',
+        textInNamedTab1ReadFalse: 'textInNamedTab1ReadFalse2',
+        textInNamedTab1UpdateFalse: 'textInNamedTab1UpdateFalse2',
       },
       number: 2,
       json: {
@@ -429,7 +444,9 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc2ID,
         updated: true,
       }) as any,
-      richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff2' }),
+      richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
+        text: 'richtextWithCustomDiff2',
+      }),
       select: 'option2',
       text: 'text2',
       textArea: 'textArea2',
@@ -437,6 +454,9 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow2',
       textCannotRead: 'textCannotRead2',
       textInUnnamedTab2: 'textInUnnamedTab22',
+      textInRowInUnnamedTab: 'textInRowInUnnamedTab2',
+      textInRowInUnnamedTabUpdateFalse: 'textInRowInUnnamedTabUpdateFalse2',
+
       upload: uploadedImage2,
       uploadHasMany: [uploadedImage, uploadedImage2],
     },

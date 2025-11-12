@@ -15,6 +15,7 @@ export const svTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Sida',
     'field-selectionToUse-label': 'Val att använda',
     'field-sort-label': 'Sortera efter',
+    'field-sort-order-label': 'Sortera i ordning',
     'selectionToUse-allDocuments': 'Använd alla dokument',
     'selectionToUse-currentFilters': 'Använd aktuella filter',
     'selectionToUse-currentSelection': 'Använd nuvarande urval',

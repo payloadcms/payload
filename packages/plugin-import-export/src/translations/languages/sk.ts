@@ -15,6 +15,7 @@ export const skTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Stránka',
     'field-selectionToUse-label': 'Výber na použitie',
     'field-sort-label': 'Triediť podľa',
+    'field-sort-order-label': 'Poradie triedenia',
     'selectionToUse-allDocuments': 'Použite všetky dokumenty',
     'selectionToUse-currentFilters': 'Použiť aktuálne filtre',
     'selectionToUse-currentSelection': 'Použiť aktuálny výber',

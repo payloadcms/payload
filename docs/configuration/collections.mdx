@@ -85,7 +85,7 @@ The following options are available:
 | `versions`           | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                              |
 | `defaultPopulate`    | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                            |
 | `indexes`            | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                                           |
-| `forceSelect`        | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks                                                                            |
+| `forceSelect`        | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).                                        |
 | `disableBulkEdit`    | Disable the bulk edit operation for the collection in the admin panel and the REST API                                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
@@ -136,12 +136,14 @@ The following options are available:
 | `enableRichTextLink`         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                   |
 | `enableRichTextRelationship` | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                           |
 | `folders`                    | A boolean to enable folders for a given collection. Defaults to `false`. [More details](../folders/overview).                                                                                                                |
+| `formatDocURL`               | Function to customize document links in the List View. Return `null` to disable linking, or a string for custom URLs. [More details](#format-document-urls).                                                                 |
 | `meta`                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](../admin/metadata).                                                                                                               |
 | `preview`                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](../admin/preview).                                                                                                       |
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
 | `components`                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
-| `pagination`                 | Set pagination-specific options for this Collection. [More details](#pagination).                                                                                                                                            |
+| `enableListViewSelectAPI`    | Performance opt-in. When `true`, uses the Select API in the List View to query only the active columns as opposed to entire documents. [More details](#enable-list-view-select-api).                                         |
+| `pagination`                 | Set pagination-specific options for this Collection in the List View. [More details](#pagination).                                                                                                                           |
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
 
 <Banner type="warning">
@@ -271,6 +273,136 @@ export const Posts: CollectionConfig = {
   **Tip:** If you are adding `listSearchableFields`, make sure you index each of
   these fields so your admin queries can remain performant.
 </Banner>
+
+## Enable List View Select API
+
+When `true`, the List View will use the [Select API](../queries/select) to query only the _active_ columns as opposed to entire documents. This can greatly improve performance, especially for collections with large documents or many fields.
+
+To enable this, set `enableListViewSelectAPI: true` in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    // ...
+    // highlight-start
+    enableListViewSelectAPI: true,
+    // highlight-end
+  },
+}
+```
+
+<Banner type="info">
+  **Note:** The `enableListViewSelectAPI` property is labeled as experimental,
+  as it will likely become the default behavior in v4 and be deprecated.
+</Banner>
+
+Enabling this feature may cause unexpected behavior in some cases, however, such as when using hooks that rely on the full document data.
+
+For example, if your component relies on a "title" field, this field will no longer be populated if the column is inactive:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      hooks: {
+        afterRead: [
+          ({ doc }) => doc.title, // The `title` field will no longer be populated by default, unless the column is active
+        ],
+      },
+    },
+  ],
+}
+```
+
+To ensure title is always present, you will need to add that field to the [`forceSelect`](../queries/select) property in your Collection Config:
+
+```ts
+export const Posts: CollectionConfig = {
+  // ...
+  forceSelect: {
+    title: true,
+  },
+}
+```
+
+### Format Document URLs
+
+The `formatDocURL` function allows you to customize how document links are generated in the List View. This is useful for disabling links for certain documents, redirecting to custom destinations, or modifying URLs based on user context or document state.
+
+To define a custom document URL formatter, use the `admin.formatDocURL` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    formatDocURL: ({ doc, defaultURL, req, collectionSlug, viewType }) => {
+      // Disable linking for documents with specific status
+      if (doc.status === 'private') {
+        return null
+      }
+
+      // Custom destination for featured posts
+      if (doc.featured) {
+        return '/admin/featured-posts'
+      }
+
+      // Add query parameters based on user role
+      if (req.user?.role === 'admin') {
+        return defaultURL + '?admin=true'
+      }
+
+      // Use default URL for all other cases
+      return defaultURL
+    },
+  },
+}
+```
+
+The `formatDocURL` function receives the following arguments:
+
+| Argument         | Description                                                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `doc`            | The document data for the current row                                                                                                  |
+| `defaultURL`     | The default URL that Payload would normally generate for this document. You can return this as-is, modify it, or replace it entirely.  |
+| `req`            | The full [PayloadRequest](../types/payload-request) object, providing access to user context, payload instance, and other request data |
+| `collectionSlug` | The slug of the current collection                                                                                                     |
+| `viewType`       | The current view context (`'list'`, `'trash'`, etc.) where the link is being generated                                                 |
+
+The function should return:
+
+- `null` to disable the link entirely (no link will be rendered)
+- A `string` containing the custom URL to use for the link
+- The `defaultURL` parameter to use Payload's default linking behavior
+
+<Banner type="success">
+  **Tip:** The `defaultURL` parameter saves you from having to reconstruct URLs
+  manually. You can modify it by appending query parameters or use it as a
+  fallback for your custom logic.
+</Banner>
+
+#### Examples
+
+**Disable linking for certain users:**
+
+```ts
+formatDocURL: ({ defaultURL, req }) => {
+  if (req.user?.role === 'editor') {
+    return null // No link rendered
+  }
+  return defaultURL
+}
+```
 
 ## GraphQL
 

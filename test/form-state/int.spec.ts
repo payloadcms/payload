@@ -1,4 +1,5 @@
 import type { FieldState, FormState, Payload, User } from 'payload'
+import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
@@ -10,6 +11,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
+
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
@@ -20,6 +22,14 @@ let user: User
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const DummyReactComponent: React.ReactNode = {
+  // @ts-expect-error - can ignore, needs to satisfy `typeof value.$$typeof === 'symbol'`
+  $$typeof: Symbol.for('react.element'),
+  type: 'div',
+  props: {},
+  key: null,
+}
 
 describe('Form State', () => {
   beforeAll(async () => {
@@ -566,7 +576,7 @@ describe('Form State', () => {
     expect(newState === currentState).toBe(true)
   })
 
-  it('should accept all values from the server regardless of local modifications, e.g. on submit', () => {
+  it('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
     const title: FieldState = {
       value: 'Test Post (modified on the client)',
       initialValue: 'Test Post',
@@ -577,10 +587,35 @@ describe('Form State', () => {
     const currentState: Record<string, FieldState> = {
       title: {
         ...title,
-        isModified: true,
+        isModified: true, // This is critical, this is what we're testing
       },
       computedTitle: {
         value: 'Test Post (computed on the client)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      array: {
+        rows: [
+          {
+            id: '1',
+            customComponents: {
+              RowLabel: DummyReactComponent,
+            },
+            lastRenderedPath: 'array.0.customTextField',
+          },
+        ],
+        valid: true,
+        passesCondition: true,
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        valid: true,
+        passesCondition: true,
+      },
+      'array.0.customTextField': {
+        value: 'Test Post (modified on the client)',
         initialValue: 'Test Post',
         valid: true,
         passesCondition: true,
@@ -600,6 +635,29 @@ describe('Form State', () => {
         valid: true,
         passesCondition: true,
       },
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
+            // Omit `customComponents` because the server did not re-render this row
+          },
+        ],
+        passesCondition: true,
+        valid: true,
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        valid: true,
+        passesCondition: true,
+      },
+      'array.0.customTextField': {
+        value: 'Test Post (modified on the client)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
     }
 
     const newState = mergeServerFormState({
@@ -614,10 +672,14 @@ describe('Form State', () => {
         ...incomingStateFromServer.title,
         isModified: true,
       },
+      array: {
+        ...incomingStateFromServer.array,
+        rows: currentState?.array?.rows,
+      },
     })
   })
 
-  it('should not accept values from the server if they have been modified locally since the request was made, e.g. on autosave', () => {
+  it('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
     const title: FieldState = {
       value: 'Test Post (modified on the client 1)',
       initialValue: 'Test Post',
@@ -667,5 +729,44 @@ describe('Form State', () => {
       },
       computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
+  })
+
+  it('should set rows to empty array for empty array fields', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    // Create a document with an empty array
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+        array: [], // Empty array - this should result in rows: [] in form state
+      },
+    })
+
+    const { state } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: {
+        create: true,
+        delete: true,
+        fields: true,
+        read: true,
+        readVersions: true,
+        update: true,
+      },
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(state.array).toBeDefined()
+    expect(state?.array?.rows).toEqual([]) // should be [] not undefined
   })
 })

@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
+import { addArrayRow, openArrayRowActions, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -45,7 +46,7 @@ describe('Field Error States', () => {
     await page.goto(`${serverURL}/admin/collections/error-fields/create`)
 
     // add parent array
-    await page.locator('#field-parentArray > .array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'parentArray' })
 
     // add first child array
     await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
@@ -60,12 +61,10 @@ describe('Field Error States', () => {
     // add third child array
     await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
 
-    // remove the row
-    await page.locator('#parentArray-0-childArray-row-2 .array-actions__button').click()
-
-    await page
-      .locator('#parentArray-0-childArray-row-2 .array-actions__action.array-actions__remove')
-      .click()
+    await removeArrayRow(page, {
+      fieldName: 'parentArray__0__childArray',
+      rowIndex: 2,
+    })
 
     await page.locator('#action-save').click()
 

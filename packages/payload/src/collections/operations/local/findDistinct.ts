@@ -42,7 +42,7 @@ export type Options<
   /**
    * The field to get distinct values for
    */
-  field: TField
+  field: ({} & string) | TField
   /**
    * The maximum distinct field values to be returned.
    * By default the operation returns all the values.
@@ -54,7 +54,7 @@ export type Options<
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean

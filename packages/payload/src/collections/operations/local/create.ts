@@ -9,6 +9,7 @@ import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromCollectionSlug,
+  DraftDataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -25,7 +26,7 @@ import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * the Collection slug to operate against.
    */
@@ -37,10 +38,6 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * to determine if it should run or not.
    */
   context?: RequestContext
-  /**
-   * The data for the document to create.
-   */
-  data: RequiredDataFromCollectionSlug<TSlug>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -55,10 +52,6 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * you can disable the email that is auto-sent
    */
   disableVerificationEmail?: boolean
-  /**
-   * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * If you want to create a document that is a duplicate of another document
    */
@@ -81,7 +74,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -114,6 +107,29 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   user?: Document
 }
+
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
+  | ({
+      /**
+       * The data for the document to create.
+       */
+      data: RequiredDataFromCollectionSlug<TSlug>
+      /**
+       * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: false
+    } & BaseOptions<TSlug, TSelect>)
+  | ({
+      /**
+       * The data for the document to create.
+       * When creating a draft, required fields are optional as validation is skipped by default.
+       */
+      data: DraftDataFromCollectionSlug<TSlug>
+      /**
+       * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft: true
+    } & BaseOptions<TSlug, TSelect>)
 
 export async function createLocal<
   TSlug extends CollectionSlug,

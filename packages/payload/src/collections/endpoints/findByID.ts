@@ -4,27 +4,29 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { type JoinParams, sanitizeJoinParams } from '../../utilities/sanitizeJoinParams.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { findByIDOperation } from '../operations/findByID.js'
 
 export const findByIDHandler: PayloadHandler = async (req) => {
-  const { searchParams } = req
+  const { data: dataArg } = req
   const { id, collection } = getRequestCollectionWithID(req)
-  const depth = searchParams.get('depth')
-  const trash = searchParams.get('trash') === 'true'
+
+  const { data, depth, draft, flattenLocales, joins, populate, select, trash } = parseParams({
+    ...req.query,
+    ...dataArg,
+  })
 
   const result = await findByIDOperation({
     id,
     collection,
-    depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
-    joins: sanitizeJoinParams(req.query.joins as JoinParams),
-    populate: sanitizePopulateParam(req.query.populate),
+    data,
+    depth,
+    draft,
+    flattenLocales,
+    joins,
+    populate,
     req,
-    select: sanitizeSelectParam(req.query.select),
+    select,
     trash,
   })
 

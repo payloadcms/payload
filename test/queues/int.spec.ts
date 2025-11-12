@@ -2,11 +2,12 @@ import path from 'path'
 import {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
+  createLocalReq,
+  Forbidden,
   type JobTaskStatus,
   type Payload,
-  type SanitizedConfig,
+  type TypedUser,
 } from 'payload'
-import { migrateCLI } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -17,15 +18,16 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-let token: string
-
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Queues', () => {
+describe('Queues - Payload', () => {
+  let payload: Payload
+  let restClient: NextRESTClient
+  let token: string
+  let user: TypedUser
+
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -64,28 +66,231 @@ describe('Queues', () => {
     if (data.token) {
       token = data.token
     }
+    user = data.user
     payload.config.jobs.deleteJobOnComplete = true
     _internal_jobSystemGlobals.shouldAutoRun = true
     _internal_jobSystemGlobals.shouldAutoSchedule = true
   })
 
-  it('will run access control on jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run?silent=true', {
-      headers: {
-        // Authorization: `JWT ${token}`,
-      },
-    }) // Needs to be a rest call to test auth
-    expect(response.status).toBe(401)
-  })
+  describe('access control', () => {
+    it('will run access control on jobs runner run endpoint', async () => {
+      const response = await restClient.GET('/payload-jobs/run?silent=true', {
+        headers: {
+          // Authorization: `JWT ${token}`,
+        },
+      }) // Needs to be a rest call to test auth
+      expect(response.status).toBe(401)
+    })
+    it('will return 200 from jobs runner', async () => {
+      const response = await restClient.GET('/payload-jobs/run?silent=true', {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      }) // Needs to be a rest call to test auth
 
-  it('will return 200 from jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run?silent=true', {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    }) // Needs to be a rest call to test auth
+      expect(response.status).toBe(200)
+    })
 
-    expect(response.status).toBe(200)
+    it('will fail access control on local api .queue when passing overrideAccess: false', async () => {
+      await expect(
+        payload.jobs.queue({
+          task: 'CreateSimple',
+          input: {
+            message: 'from single task',
+          },
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+
+    it('will pass access control on local api .queue when passing overrideAccess: false', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const result = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.input.message).toBe('from single task')
+    })
+
+    it('will fail access control on local api .run when passing overrideAccess: false', async () => {
+      await expect(
+        payload.jobs.run({
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+
+    it('will pass access control on local api .run when passing overrideAccess: false', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const result = await payload.jobs.run({
+        overrideAccess: false,
+        req,
+      })
+
+      expect(result).toBeDefined()
+    })
+
+    it('will fail access control on local api .runByID when passing overrideAccess: false', async () => {
+      await expect(
+        payload.jobs.runByID({
+          id: '1',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+
+    it('will pass access control on local api .runByID when passing overrideAccess: false', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      // Queue a job first so we have a valid ID
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+
+      const result = await payload.jobs.runByID({
+        id: job.id,
+        overrideAccess: false,
+        req,
+        silent: true,
+      })
+
+      expect(result).toBeDefined()
+    })
+
+    it('will fail access control on local api .cancel when passing overrideAccess: false', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue a job without running it
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+
+      await expect(
+        payload.jobs.cancel({
+          where: {
+            id: {
+              equals: job.id,
+            },
+          },
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+
+      // Verify the job was NOT cancelled
+      const jobAfterCancel = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterCancel.hasError).toBe(false)
+      // @ts-expect-error error is not typed
+      expect(jobAfterCancel.error?.cancelled).toBeUndefined()
+    })
+
+    it('will pass access control on local api .cancel when passing overrideAccess: false', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const req = await createLocalReq({ user }, payload)
+
+      // Queue a job without running it
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+
+      await payload.jobs.cancel({
+        where: {
+          id: {
+            equals: job.id,
+          },
+        },
+        overrideAccess: false,
+        req,
+      })
+
+      // Verify the job was cancelled
+      const jobAfterCancel = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterCancel.hasError).toBe(true)
+      // @ts-expect-error error is not typed
+      expect(jobAfterCancel.error?.cancelled).toBe(true)
+    })
+
+    it('will fail access control on local api .cancelByID when passing overrideAccess: false', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue a job without running it
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+
+      await expect(
+        payload.jobs.cancelByID({
+          id: job.id,
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+
+      // Verify the job was NOT cancelled
+      const jobAfterCancel = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterCancel.hasError).toBe(false)
+      // @ts-expect-error error is not typed
+      expect(jobAfterCancel.error?.cancelled).toBeUndefined()
+    })
+
+    it('will pass access control on local api .cancelByID when passing overrideAccess: false', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const req = await createLocalReq({ user }, payload)
+
+      // Queue a job without running it
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+
+      await payload.jobs.cancelByID({
+        id: job.id,
+        overrideAccess: false,
+        req,
+      })
+
+      // Verify the job was cancelled
+      const jobAfterCancel = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterCancel.hasError).toBe(true)
+      // @ts-expect-error error is not typed
+      expect(jobAfterCancel.error?.cancelled).toBe(true)
+    })
   })
 
   // There used to be a bug in payload where updating the job threw the following error - only in
@@ -1056,7 +1261,7 @@ describe('Queues', () => {
   it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: null | string = null
+    let lastJobID: null | number | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1100,7 +1305,7 @@ describe('Queues', () => {
   it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: null | string = null
+    let lastJobID: null | number | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1424,6 +1629,8 @@ describe('Queues', () => {
       id: job.id,
     })
 
+    // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
+    expect(Boolean(jobAfterRun.error)).toBe(false)
     expect(jobAfterRun.hasError).toBe(false)
     expect(jobAfterRun.log?.length).toBe(amount)
 
@@ -1442,6 +1649,30 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+  })
+
+  it('can reliably run workflows with parallel tasks that complete immediately', async () => {
+    const amount = 20
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'fastParallelTask',
+      input: {
+        amount,
+      },
+    })
+
+    await payload.jobs.run({ silent: false })
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
+    expect(Boolean(jobAfterRun.error)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(false)
+    expect(jobAfterRun.log?.length).toBe(amount)
   })
 
   it('can create and autorun jobs', async () => {
@@ -1465,26 +1696,5 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples?.docs?.[0]?.title).toBe('hello!')
-  })
-})
-
-describe('Queues - CLI', () => {
-  let config: SanitizedConfig
-  beforeAll(async () => {
-    ;({ config } = await initPayloadInt(dirname, undefined, false))
-  })
-  it('can run migrate CLI without jobs attempting to run', async () => {
-    await migrateCLI({
-      config,
-      parsedArgs: {
-        _: ['migrate'],
-      },
-    })
-
-    // Wait 3 seconds to let potential autorun crons trigger
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-
-    // Expect no errors. Previously, this would throw an "error: relation "payload_jobs" does not exist" error
-    expect(true).toBe(true)
   })
 })

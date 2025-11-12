@@ -164,7 +164,7 @@ export const traverseFields = ({
   parentRef = {},
   ref = {},
 }: TraverseFieldsArgs): void => {
-  fields.some((field) => {
+  const fieldsMatched = fields.some((field) => {
     let callbackStack: (() => ReturnType<TraverseFieldsCallback>)[] = []
     if (!isTopLevel) {
       callbackStack = _callbackStack
@@ -374,7 +374,7 @@ export const traverseFields = ({
                 isTopLevel: false,
                 leavesFirst,
                 parentIsLocalized: true,
-                parentPath: field.name ? `${parentPath}${field.name}` : parentPath,
+                parentPath: field.name ? `${parentPath}${field.name}.` : parentPath,
                 parentRef: currentParentRef,
                 ref: currentRef[key as keyof typeof currentRef],
               })
@@ -412,24 +412,15 @@ export const traverseFields = ({
         if (
           fieldShouldBeLocalized({
             field,
-            parentIsLocalized: parentIsLocalized ?? field.localized ?? false,
+            parentIsLocalized: parentIsLocalized ?? false,
           })
         ) {
           if (Array.isArray(currentRef)) {
-            return
-          }
-
-          for (const key in currentRef as Record<string, unknown>) {
-            const localeData = currentRef[key as keyof typeof currentRef]
-            if (!Array.isArray(localeData)) {
-              continue
-            }
-
             traverseArrayOrBlocksField({
               callback,
               callbackStack,
               config,
-              data: localeData,
+              data: currentRef,
               field,
               fillEmpty,
               leavesFirst,
@@ -437,6 +428,26 @@ export const traverseFields = ({
               parentPath,
               parentRef: currentParentRef,
             })
+          } else {
+            for (const key in currentRef as Record<string, unknown>) {
+              const localeData = currentRef[key as keyof typeof currentRef]
+              if (!Array.isArray(localeData)) {
+                continue
+              }
+
+              traverseArrayOrBlocksField({
+                callback,
+                callbackStack,
+                config,
+                data: localeData,
+                field,
+                fillEmpty,
+                leavesFirst,
+                parentIsLocalized: true,
+                parentPath,
+                parentRef: currentParentRef,
+              })
+            }
           }
         } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({
@@ -462,7 +473,7 @@ export const traverseFields = ({
           isTopLevel: false,
           leavesFirst,
           parentIsLocalized,
-          parentPath,
+          parentPath: 'name' in field && field.name ? `${parentPath}${field.name}.` : parentPath,
           parentRef: currentParentRef,
           ref: currentRef,
         })
@@ -475,4 +486,43 @@ export const traverseFields = ({
       })
     }
   })
+
+  // Fallback: Handle dot-notation paths when no fields matched
+  if (!fieldsMatched && ref && typeof ref === 'object') {
+    Object.keys(ref).forEach((key) => {
+      if (key.includes('.')) {
+        // Split on first dot only
+        const firstDotIndex = key.indexOf('.')
+        const fieldName = key.substring(0, firstDotIndex)
+        const remainingPath = key.substring(firstDotIndex + 1)
+
+        // Create nested structure for this field
+        if (!ref[fieldName as keyof typeof ref]) {
+          ;(ref as Record<string, unknown>)[fieldName] = {}
+        }
+
+        const nestedRef = ref[fieldName as keyof typeof ref] as Record<string, unknown>
+
+        // Move the value to the nested structure
+        nestedRef[remainingPath] = (ref as Record<string, unknown>)[key]
+        delete (ref as Record<string, unknown>)[key]
+
+        // Recursively process the newly created nested structure
+        // The field traversal will naturally handle it if the field exists in the schema
+        traverseFields({
+          callback,
+          callbackStack: _callbackStack,
+          config,
+          fields,
+          fillEmpty,
+          isTopLevel: false,
+          leavesFirst,
+          parentIsLocalized,
+          parentPath,
+          parentRef,
+          ref,
+        })
+      }
+    })
+  }
 }

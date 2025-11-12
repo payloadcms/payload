@@ -143,33 +143,36 @@ export async function VersionView(props: DocumentViewServerProps) {
         })
       : Promise.resolve(null),
     // Previous published version
-    fetchVersions({
-      collectionSlug,
-      depth: 0,
-      draft: true,
-      globalSlug,
-      limit: 1,
-      locale: 'all',
-      overrideAccess: false,
-      parentID: id,
-      req,
-      sort: '-updatedAt',
-      user,
-      where: {
-        and: [
-          {
-            updatedAt: {
-              less_than: versionTo.updatedAt,
-            },
+    // Only query for published versions if drafts are enabled (since _status field only exists with drafts)
+    draftsEnabled
+      ? fetchVersions({
+          collectionSlug,
+          depth: 0,
+          draft: true,
+          globalSlug,
+          limit: 1,
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
+          req,
+          sort: '-updatedAt',
+          user,
+          where: {
+            and: [
+              {
+                updatedAt: {
+                  less_than: versionTo.updatedAt,
+                },
+              },
+              {
+                'version._status': {
+                  equals: 'published',
+                },
+              },
+            ],
           },
-          {
-            'version._status': {
-              equals: 'published',
-            },
-          },
-        ],
-      },
-    }),
+        })
+      : Promise.resolve(null),
   ])
 
   const previousVersion: null | TypeWithVersion<object> = previousVersionResult?.docs?.[0] ?? null
@@ -213,7 +216,12 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config: payload.config, i18n, importMap: payload.importMap }),
+    config: getClientConfig({
+      config: payload.config,
+      i18n,
+      importMap: payload.importMap,
+      user,
+    }),
     globalSlug,
     i18n,
     payload,
@@ -223,8 +231,8 @@ export async function VersionView(props: DocumentViewServerProps) {
     clientSchemaMap,
     customDiffComponents: {},
     entitySlug: collectionSlug || globalSlug,
-    fieldPermissions: docPermissions?.fields,
     fields: (collectionConfig || globalConfig)?.fields,
+    fieldsPermissions: docPermissions?.fields,
     i18n,
     modifiedOnly,
     parentIndexPath: '',
@@ -411,11 +419,6 @@ export async function VersionView(props: DocumentViewServerProps) {
     })
   }
 
-  const useAsTitleFieldName = collectionConfig?.admin?.useAsTitle || 'id'
-  const versionToUseAsTitle =
-    useAsTitleFieldName === 'id'
-      ? String(versionTo.parent)
-      : versionTo.version?.[useAsTitleFieldName]
   return (
     <DefaultVersionView
       canUpdate={docPermissions?.update}
@@ -430,7 +433,6 @@ export async function VersionView(props: DocumentViewServerProps) {
       VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}
       versionToID={versionTo.id}
       versionToStatus={versionTo.version?._status}
-      versionToUseAsTitle={versionToUseAsTitle}
     />
   )
 }

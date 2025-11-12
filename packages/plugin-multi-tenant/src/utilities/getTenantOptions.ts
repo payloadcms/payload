@@ -35,7 +35,7 @@ export const getTenantOptions = async ({
       overrideAccess: false,
       select: {
         [useAsTitle]: true,
-        ...(isOrderable ? { _order: true } : {}),
+        ...(isOrderable && { _order: true }),
       },
       sort: isOrderable ? '_order' : useAsTitle,
       user,

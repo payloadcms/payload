@@ -6,7 +6,6 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
-  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -18,6 +17,7 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
@@ -138,7 +138,7 @@ export const renderDocument = async ({
     }
   }
 
-  const isTrashedDoc = typeof doc?.deletedAt === 'string'
+  const isTrashedDoc = Boolean(doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string')
 
   const [
     docPreferences,
@@ -208,7 +208,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation,
-      readOnly: isTrashedDoc,
+      readOnly: isTrashedDoc || isLocked,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -333,12 +333,16 @@ export const renderDocument = async ({
   }
 
   const documentSlots = renderDocumentSlots({
+    id,
     collectionConfig,
     globalConfig,
     hasSavePermission,
     permissions: docPermissions,
     req,
   })
+
+  // Extract Description from documentSlots to pass to DocumentHeader
+  const { Description } = documentSlots
 
   const clientProps: DocumentViewClientProps = {
     formState,
@@ -347,36 +351,23 @@ export const renderDocument = async ({
     viewType,
   }
 
-  const isLivePreviewEnabled = Boolean(
-    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
-      config.admin?.livePreview?.globals?.includes(globalSlug) ||
-      collectionConfig?.admin?.livePreview ||
-      globalConfig?.admin?.livePreview,
-  )
+  const { isLivePreviewEnabled, livePreviewConfig, livePreviewURL } = await handleLivePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
 
-  const livePreviewConfig: LivePreviewConfig = {
-    ...(isLivePreviewEnabled ? config.admin.livePreview : {}),
-    ...(collectionConfig?.admin?.livePreview || {}),
-    ...(globalConfig?.admin?.livePreview || {}),
-  }
-
-  const livePreviewURL =
-    operation !== 'create'
-      ? typeof livePreviewConfig?.url === 'function'
-        ? await livePreviewConfig.url({
-            collectionConfig,
-            data: doc,
-            globalConfig,
-            locale,
-            req,
-            /**
-             * @deprecated
-             * Use `req.payload` instead. This will be removed in the next major version.
-             */
-            payload: initPageResult.req.payload,
-          })
-        : livePreviewConfig?.url
-      : ''
+  const { isPreviewEnabled, previewURL } = await handlePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
 
   return {
     data: doc,
@@ -410,11 +401,17 @@ export const renderDocument = async ({
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
-          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          isLivePreviewing={Boolean(
+            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+          )}
+          isPreviewEnabled={Boolean(isPreviewEnabled)}
+          previewURL={previewURL}
+          typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
+              AfterHeader={Description}
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
               permissions={permissions}
@@ -436,7 +433,7 @@ export const renderDocument = async ({
   }
 }
 
-export async function Document(props: AdminViewServerProps) {
+export async function DocumentView(props: AdminViewServerProps) {
   try {
     const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument

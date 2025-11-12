@@ -15,6 +15,7 @@ export const csTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Stránka',
     'field-selectionToUse-label': 'Výběr k použití',
     'field-sort-label': 'Seřadit podle',
+    'field-sort-order-label': 'Řazení',
     'selectionToUse-allDocuments': 'Použijte všechny dokumenty',
     'selectionToUse-currentFilters': 'Použijte aktuální filtry',
     'selectionToUse-currentSelection': 'Použijte aktuální výběr',

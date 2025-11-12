@@ -51,6 +51,15 @@ export async function buildFolderWhereConstraints({
         equals: collectionConfig.slug,
       },
     })
+
+    // join queries need to omit trashed documents
+    if (collectionConfig.trash) {
+      constraints.push({
+        deletedAt: {
+          exists: false,
+        },
+      })
+    }
   }
 
   const filteredConstraints = constraints.filter(Boolean)

@@ -49,6 +49,9 @@ export const addSessionToUser = async ({
       user.sessions.push(session)
     }
 
+    // Prevent updatedAt from being updated when only adding a session
+    user.updatedAt = null
+
     await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,

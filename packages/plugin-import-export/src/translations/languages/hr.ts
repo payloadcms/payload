@@ -15,6 +15,7 @@ export const hrTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Stranica',
     'field-selectionToUse-label': 'Odabir za upotrebu',
     'field-sort-label': 'Sortiraj po',
+    'field-sort-order-label': 'Redoslijed sortiranja',
     'selectionToUse-allDocuments': 'Koristite sve dokumente',
     'selectionToUse-currentFilters': 'Koristite trenutne filtre',
     'selectionToUse-currentSelection': 'Koristite trenutni odabir',

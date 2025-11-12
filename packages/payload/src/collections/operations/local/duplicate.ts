@@ -62,7 +62,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -79,6 +79,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
    */
   select?: TSelect
+  /**
+   * Specifies which locales to include when duplicating localized fields. Non-localized data is always duplicated.
+   * By default, all locales are duplicated.
+   */
+  selectedLocales?: string[]
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -107,6 +112,7 @@ export async function duplicateLocal<
     overrideAccess = true,
     populate,
     select,
+    selectedLocales,
     showHiddenFields,
   } = options
 
@@ -138,6 +144,7 @@ export async function duplicateLocal<
     populate,
     req,
     select,
+    selectedLocales,
     showHiddenFields,
   })
 }

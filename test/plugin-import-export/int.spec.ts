@@ -227,6 +227,60 @@ describe('@payloadcms/plugin-import-export', () => {
       ).rejects.toThrow(/Limit/)
     })
 
+    it('should export results sorted ASC by title when sort="title"', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          sort: 'title',
+          where: {
+            or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Array 0')
+    })
+
+    it('should export results sorted DESC by title when sort="-title"', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          sort: '-title',
+          where: {
+            or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Title 4')
+    })
+
     it('should create a file for collection csv with draft data', async () => {
       const draftPage = await payload.create({
         collection: 'pages',

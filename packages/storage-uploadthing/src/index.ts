@@ -145,6 +145,9 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
       name: '_key',
       type: 'text',
       admin: {
+        disableBulkEdit: true,
+        disableListColumn: true,
+        disableListFilter: true,
         hidden: true,
       },
     },

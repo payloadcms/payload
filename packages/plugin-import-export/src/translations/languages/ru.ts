@@ -15,6 +15,7 @@ export const ruTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Страница',
     'field-selectionToUse-label': 'Выбор использования',
     'field-sort-label': 'Сортировать по',
+    'field-sort-order-label': 'Порядок сортировки',
     'selectionToUse-allDocuments': 'Используйте все документы',
     'selectionToUse-currentFilters': 'Использовать текущие фильтры',
     'selectionToUse-currentSelection': 'Использовать текущий выбор',

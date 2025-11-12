@@ -6,6 +6,8 @@ import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { createContext } from 'react'
 
+import { generateCookie } from '../../utilities/generateCookie.js'
+
 type ContextType = {
   /**
    * What is the context of the selector? It is either 'document' | 'global' | undefined.
@@ -63,6 +65,40 @@ const Context = createContext<ContextType>({
   updateTenants: () => null,
 })
 
+const DEFAULT_COOKIE_NAME = 'payload-tenant'
+
+const setTenantCookie = (args: { cookieName?: string; value: string }) => {
+  const { cookieName = DEFAULT_COOKIE_NAME, value } = args
+  document.cookie = generateCookie<string>({
+    name: cookieName,
+    maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
+    path: '/',
+    returnCookieAsObject: false,
+    value: value || '',
+  })
+}
+
+const deleteTenantCookie = (args: { cookieName?: string } = {}) => {
+  const { cookieName = DEFAULT_COOKIE_NAME } = args
+  document.cookie = generateCookie<string>({
+    name: cookieName,
+    maxAge: -1,
+    path: '/',
+    returnCookieAsObject: false,
+    value: '',
+  })
+}
+
+const getTenantCookie = (args: { cookieName?: string } = {}): string | undefined => {
+  const { cookieName = DEFAULT_COOKIE_NAME } = args
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${cookieName}=`)
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift()
+  }
+  return undefined
+}
+
 export const TenantSelectionProviderClient = ({
   children,
   initialTenantOptions,
@@ -81,6 +117,7 @@ export const TenantSelectionProviderClient = ({
   const [entityType, setEntityType] = React.useState<'document' | 'global' | undefined>(undefined)
   const { user } = useAuth()
   const { config } = useConfig()
+  const router = useRouter()
   const userID = React.useMemo(() => user?.id, [user?.id])
   const prevUserID = React.useRef(userID)
   const userChanged = userID !== prevUserID.current
@@ -92,47 +129,43 @@ export const TenantSelectionProviderClient = ({
     [selectedTenantID, tenantOptions],
   )
 
-  const router = useRouter()
-
-  const setCookie = React.useCallback((value?: string) => {
-    const expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT'
-    document.cookie = 'payload-tenant=' + (value || '') + expires + '; path=/'
-  }, [])
-
-  const deleteCookie = React.useCallback(() => {
-    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
-    document.cookie = 'payload-tenant=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
-  }, [])
+  const setTenantAndCookie = React.useCallback(
+    ({ id, refresh }: { id: number | string | undefined; refresh?: boolean }) => {
+      setSelectedTenantID(id)
+      if (id !== undefined) {
+        setTenantCookie({ value: String(id) })
+      } else {
+        deleteTenantCookie()
+      }
+      if (refresh) {
+        router.refresh()
+      }
+    },
+    [router],
+  )
 
   const setTenant = React.useCallback<ContextType['setTenant']>(
     ({ id, refresh }) => {
       if (id === undefined) {
-        if (tenantOptions.length > 1) {
+        if (tenantOptions.length > 1 || tenantOptions.length === 0) {
           // users with multiple tenants can clear the tenant selection
-          setSelectedTenantID(undefined)
-          deleteCookie()
+          setTenantAndCookie({ id: undefined, refresh })
         } else if (tenantOptions[0]) {
-          // if there is only one tenant, force the selection of that tenant
-          setSelectedTenantID(tenantOptions[0].value)
-          setCookie(String(tenantOptions[0].value))
+          // if there is only one tenant, auto-select that tenant
+          setTenantAndCookie({ id: tenantOptions[0].value, refresh: true })
         }
       } else if (!tenantOptions.find((option) => option.value === id)) {
-        // if the tenant is not valid, set the first tenant as selected
-        if (tenantOptions[0]?.value) {
-          setTenant({ id: tenantOptions[0]?.value, refresh: true })
-        } else {
-          setTenant({ id: undefined, refresh: true })
-        }
+        // if the tenant is invalid, set the first tenant as selected
+        setTenantAndCookie({
+          id: tenantOptions[0]?.value,
+          refresh,
+        })
       } else {
         // if the tenant is in the options, set it as selected
-        setSelectedTenantID(id)
-        setCookie(String(id))
-      }
-      if (entityType !== 'document' && refresh) {
-        router.refresh()
+        setTenantAndCookie({ id, refresh })
       }
     },
-    [deleteCookie, entityType, router, setCookie, tenantOptions],
+    [tenantOptions, setTenantAndCookie],
   )
 
   const syncTenants = React.useCallback(async () => {
@@ -152,13 +185,13 @@ export const TenantSelectionProviderClient = ({
 
         if (result.tenantOptions.length === 1) {
           setSelectedTenantID(result.tenantOptions[0].value)
-          setCookie(String(result.tenantOptions[0].value))
+          setTenantCookie({ value: String(result.tenantOptions[0].value) })
         }
       }
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, setCookie, userID])
+  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, userID])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {
@@ -180,21 +213,44 @@ export const TenantSelectionProviderClient = ({
   )
 
   React.useEffect(() => {
-    if (userChanged) {
+    if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
       if (userID) {
         // user logging in
         void syncTenants()
       } else {
         // user logging out
         setSelectedTenantID(undefined)
-        deleteCookie()
+        deleteTenantCookie()
         if (tenantOptions.length > 0) {
           setTenantOptions([])
         }
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, deleteCookie, tenantOptions])
+  }, [userID, userChanged, syncTenants, tenantOptions, initialValue])
+
+  /**
+   * If there is no initial value, clear the tenant and refresh the router.
+   * Needed for stale tenantIDs set as a cookie.
+   */
+  React.useEffect(() => {
+    if (!initialValue) {
+      setTenant({ id: undefined, refresh: true })
+    }
+  }, [initialValue, setTenant])
+
+  /**
+   * If there is no selected tenant ID and the entity type is 'global', set the first tenant as selected.
+   * This ensures that the global tenant is always set when the component mounts.
+   */
+  React.useEffect(() => {
+    if (!selectedTenantID && tenantOptions.length > 0 && entityType === 'global') {
+      setTenant({
+        id: tenantOptions[0]?.value,
+        refresh: true,
+      })
+    }
+  }, [selectedTenantID, tenantOptions, entityType, setTenant])
 
   return (
     <span

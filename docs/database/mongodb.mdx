@@ -60,21 +60,21 @@ You can access Mongoose models as follows:
 
 ## Using other MongoDB implementations
 
-You can import the `compatabilityOptions` object to get the recommended settings for other MongoDB implementations. Since these databases aren't officially supported by payload, you may still encounter issues even with these settings (please create an issue or PR if you believe these options should be updated):
+You can import the `compatibilityOptions` object to get the recommended settings for other MongoDB implementations. Since these databases aren't officially supported by payload, you may still encounter issues even with these settings (please create an issue or PR if you believe these options should be updated):
 
 ```ts
-import { mongooseAdapter, compatabilityOptions } from '@payloadcms/db-mongodb'
+import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI,
     // For example, if you're using firestore:
-    ...compatabilityOptions.firestore,
+    ...compatibilityOptions.firestore,
   }),
 })
 ```
 
-We export compatability options for [DocumentDB](https://aws.amazon.com/documentdb/), [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db) and [Firestore](https://cloud.google.com/firestore/mongodb-compatibility/docs/overview). Known limitations:
+We export compatibility options for [DocumentDB](https://aws.amazon.com/documentdb/), [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db) and [Firestore](https://cloud.google.com/firestore/mongodb-compatibility/docs/overview). Known limitations:
 
 - Azure Cosmos DB does not support transactions that update two or more documents in different collections, which is a common case when using Payload (via hooks).
-- Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
+- Azure Cosmos DB requires the root config property `indexSortableFields` to be set to `true`.

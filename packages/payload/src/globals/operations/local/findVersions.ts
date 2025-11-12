@@ -44,7 +44,7 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -53,6 +53,11 @@ export type Options<TSlug extends GlobalSlug> = {
    * @default 1
    */
   page?: number
+  /**
+   * Set to `false` to return all documents and avoid querying for document counts which introduces some overhead.
+   * You can also combine that property with a specified `limit` to limit documents but avoid the count query.
+   */
+  pagination?: boolean
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -101,6 +106,7 @@ export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
     limit,
     overrideAccess = true,
     page,
+    pagination = true,
     populate,
     select,
     showHiddenFields,
@@ -120,6 +126,7 @@ export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
     limit,
     overrideAccess,
     page,
+    pagination,
     populate,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,

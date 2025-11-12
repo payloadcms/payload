@@ -11,6 +11,7 @@ export type Data = {
 }
 
 export type Row = {
+  addedByServer?: FieldState['addedByServer']
   blockType?: string
   collapsed?: boolean
   customComponents?: {
@@ -33,6 +34,12 @@ export type FieldState = {
    * See `mergeServerFormState` for more details.
    */
   addedByServer?: boolean
+  /**
+   * If the field is a `blocks` field, this will contain the slugs of blocks that are allowed, based on the result of `field.filterOptions`.
+   * If this is undefined, all blocks are allowed.
+   * If this is an empty array, no blocks are allowed.
+   */
+  blocksFilterOptions?: string[]
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used
@@ -57,9 +64,10 @@ export type FieldState = {
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
-   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
    * After merging server form state, this flag is reset.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
    */
   isModified?: boolean
   /**
@@ -127,9 +135,29 @@ export type BuildFormStateArgs = {
    */
   renderAllFields?: boolean
   req: PayloadRequest
+  /**
+   * If true, will return a fresh URL for live preview based on the current form state.
+   * Note: this will run on every form state event, so if your `livePreview.url` function is long running or expensive,
+   * ensure it caches itself as needed.
+   */
+  returnLivePreviewURL?: boolean
   returnLockStatus?: boolean
+  /**
+   * If true, will return a fresh URL for preview based on the current form state.
+   * Note: this will run on every form state event, so if your `preview` function is long running or expensive,
+   * ensure it caches itself as needed.
+   */
+  returnPreviewURL?: boolean
   schemaPath: string
   select?: SelectType
+  /**
+   * When true, sets `user: true` when calling `getClientConfig`.
+   * This will retrieve the client config in its entirety, even when unauthenticated.
+   * For example, the create-first-user view needs the entire config, but there is no user yet.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
+   */
+  skipClientConfigAuth?: boolean
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (

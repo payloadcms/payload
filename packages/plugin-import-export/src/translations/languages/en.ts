@@ -14,6 +14,7 @@ export const enTranslations = {
     'field-page-label': 'Page',
     'field-selectionToUse-label': 'Selection to use',
     'field-sort-label': 'Sort by',
+    'field-sort-order-label': 'Sort order',
     'selectionToUse-allDocuments': 'Use all documents',
     'selectionToUse-currentFilters': 'Use current filters',
     'selectionToUse-currentSelection': 'Use current selection',

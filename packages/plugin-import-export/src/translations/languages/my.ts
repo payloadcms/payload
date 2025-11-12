@@ -15,6 +15,7 @@ export const myTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'စာမျက်နှာ',
     'field-selectionToUse-label': 'Pilihan untuk digunakan',
     'field-sort-label': 'စီမံအလိုက်',
+    'field-sort-order-label': 'Sorteringsrækkefølge',
     'selectionToUse-allDocuments': 'Gunakan semua dokumen',
     'selectionToUse-currentFilters': 'Gunakan penapis semasa',
     'selectionToUse-currentSelection': 'Gunakan pilihan semasa',

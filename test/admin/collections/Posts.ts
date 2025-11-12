@@ -8,7 +8,15 @@ import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
   admin: {
-    defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+    defaultColumns: [
+      'id',
+      'number',
+      'title',
+      'description',
+      'demoUIField',
+      'disableListColumnTextInRow',
+      'someGroup.disableListColumnTextInGroup',
+    ],
     description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
@@ -299,6 +307,31 @@ export const Posts: CollectionConfig = {
       access: {
         read: () => false,
       },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'disableListColumnTextInRow',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+          },
+        },
+      ],
+    },
+    {
+      name: 'someGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'disableListColumnTextInGroup',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+          },
+        },
+      ],
     },
   ],
   labels: {

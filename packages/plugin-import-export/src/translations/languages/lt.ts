@@ -15,6 +15,7 @@ export const ltTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Puslapis',
     'field-selectionToUse-label': 'Naudojimo pasirinkimas',
     'field-sort-label': 'Rūšiuoti pagal',
+    'field-sort-order-label': 'Rūšiavimo tvarka',
     'selectionToUse-allDocuments': 'Naudokite visus dokumentus.',
     'selectionToUse-currentFilters': 'Naudoti esamus filtrus',
     'selectionToUse-currentSelection': 'Naudoti dabartinį pasirinkimą',

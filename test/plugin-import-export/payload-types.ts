@@ -198,7 +198,7 @@ export interface Page {
               root: {
                 type: string;
                 children: {
-                  type: string;
+                  type: any;
                   version: number;
                   [k: string]: unknown;
                 }[];
@@ -270,6 +270,7 @@ export interface Export {
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
@@ -307,6 +308,7 @@ export interface ExportsTask {
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
@@ -609,6 +611,7 @@ export interface ExportsSelect<T extends boolean = true> {
   limit?: T;
   page?: T;
   sort?: T;
+  sortOrder?: T;
   locale?: T;
   drafts?: T;
   selectionToUse?: T;
@@ -637,6 +640,7 @@ export interface ExportsTasksSelect<T extends boolean = true> {
   limit?: T;
   page?: T;
   sort?: T;
+  sortOrder?: T;
   locale?: T;
   drafts?: T;
   selectionToUse?: T;
@@ -729,6 +733,7 @@ export interface TaskCreateCollectionExport {
     limit?: number | null;
     page?: number | null;
     sort?: string | null;
+    sortOrder?: ('asc' | 'desc') | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
     drafts?: ('yes' | 'no') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;

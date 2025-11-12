@@ -54,7 +54,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: false | TypedLocale | TypedLocale[]
   /**
    * Include info about the lock status to the result into all documents with fields: `_isLocked` and `_userEditing`
    */
@@ -76,7 +76,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean

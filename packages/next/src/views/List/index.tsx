@@ -1,20 +1,23 @@
+import type {
+  AdminViewServerProps,
+  CollectionPreferences,
+  Column,
+  ColumnPreference,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  PaginatedDocs,
+  PayloadComponent,
+  QueryPreset,
+  SanitizedCollectionPermission,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
-  type AdminViewServerProps,
-  type CollectionPreferences,
-  type Column,
-  type ColumnPreference,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type PaginatedDocs,
-  type QueryPreset,
-  type SanitizedCollectionPermission,
-} from 'payload'
-import {
+  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -28,8 +31,19 @@ import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 
-type RenderListViewArgs = {
+/**
+ * @internal
+ */
+export type RenderListViewArgs = {
+  /**
+   * Allows providing your own list view component. This will override the default list view component and
+   * the collection's configured list view component (if any).
+   */
+  ComponentOverride?:
+    | PayloadComponent
+    | React.ComponentType<ListViewClientProps | (ListViewClientProps & ListViewServerPropsOnly)>
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -37,7 +51,10 @@ type RenderListViewArgs = {
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
-  query: ListQuery
+  /**
+   * If not ListQuery is provided, `req.query` will be used.
+   */
+  query?: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   /**
@@ -51,6 +68,8 @@ type RenderListViewArgs = {
  * the list view on the server for both:
  *  - default list view
  *  - list view within drawers
+ *
+ * @internal
  */
 export const renderListView = async (
   args: RenderListViewArgs,
@@ -59,6 +78,7 @@ export const renderListView = async (
 }> => {
   const {
     clientConfig,
+    ComponentOverride,
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
@@ -208,18 +228,42 @@ export const renderListView = async (
       totalPages: 0,
     }
 
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
+    const columns = getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: collectionPreferences?.columns,
+      i18n,
+      permissions,
+    })
+
+    const select = collectionConfig.admin.enableListViewSelectAPI
+      ? transformColumnsToSelect(columns)
+      : undefined
+
+    /** Force select image fields for list view thumbnails */
+    appendUploadSelectFields({
+      collectionConfig,
+      select,
+    })
+
     try {
       if (collectionConfig.admin.groupBy && query.groupBy) {
         ;({ columnState, data, Table } = await handleGroupBy({
+          clientCollectionConfig,
           clientConfig,
           collectionConfig,
           collectionSlug,
-          columns: collectionPreferences?.columns,
+          columns,
           customCellProps,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
           query,
           req,
+          select,
           trash,
           user,
           viewType,
@@ -237,23 +281,26 @@ export const renderListView = async (
           overrideAccess: false,
           page: query?.page ? Number(query.page) : undefined,
           req,
+          select,
           sort: query?.sort,
           trash,
           user,
           where: whereWithMergedSearch,
         })
         ;({ columnState, Table } = renderTable({
-          clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
+          clientCollectionConfig,
           collectionConfig,
-          columns: collectionPreferences?.columns,
+          columns,
           customCellProps,
           data,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
           i18n: req.i18n,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
+          req,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         }))
@@ -358,7 +405,8 @@ export const renderListView = async (
                 Table,
                 viewType,
               } satisfies ListViewClientProps,
-              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Component:
+                ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,
               importMap: payload.importMap,
               serverProps,

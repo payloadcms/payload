@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -36,7 +36,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const restoreVersionOperation = async <TData extends TypeWithID = any>(
+export const restoreVersionOperation = async <
+  TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
+>(
   args: Arguments,
 ): Promise<TData> => {
   const {
@@ -89,13 +91,13 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       where: { id: { equals: id } },
     })
 
-    const [rawVersion] = versionDocs
+    const [rawVersionToRestore] = versionDocs
 
-    if (!rawVersion) {
+    if (!rawVersionToRestore) {
       throw new NotFound(req.t)
     }
 
-    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersion
+    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersionToRestore
 
     // /////////////////////////////////////
     // Access
@@ -118,7 +120,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     }
 
     // Get the document from the non versioned collection
-    const doc = await req.payload.db.findOne(findOneArgs)
+    const doc = await req.payload.db.findOne<TData>(findOneArgs)
 
     if (!doc && !hasWherePolicy) {
       throw new NotFound(req.t)
@@ -165,7 +167,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       collection: collectionConfig,
       context: req.context,
       depth: 0,
-      doc: deepCopyObjectSimple(versionToRestoreWithLocales),
+      doc: deepCopyObjectSimple(rawVersionToRestore.version),
       draft: draftArg,
       fallbackLocale: null,
       global: null,
@@ -175,17 +177,15 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       showHiddenFields: true,
     })
 
-    let data = deepCopyObjectSimple(prevVersionDoc)
-
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate({
+    let data = await beforeValidate({
       id: parentDocID,
       collection: collectionConfig,
       context: req.context,
-      data,
+      data: deepCopyObjectSimple(prevVersionDoc),
       doc: originalDoc,
       global: null,
       operation: 'update',
@@ -258,6 +258,10 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       select: incomingSelect,
     })
 
+    // Ensure updatedAt date is always updated
+    result.updatedAt = new Date().toISOString()
+    // Ensure status respects restoreAsDraft arg
+    result._status = draftArg ? 'draft' : result._status
     result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
@@ -267,7 +271,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     })
 
     // /////////////////////////////////////
-    // Save `previousDoc` as a version after restoring
+    // Save restored doc as a new version
     // /////////////////////////////////////
 
     result = await saveVersion({

@@ -172,7 +172,7 @@ export interface RichText {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -192,8 +192,17 @@ export interface RichText {
  */
 export interface BlocksField {
   id: string;
+  tabContent?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockInsideTab';
+      }[]
+    | null;
   content?:
     | {
+        text?: string | null;
         content?:
           | {
               text?: string | null;
@@ -217,6 +226,7 @@ export interface BlocksField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -381,6 +391,7 @@ export interface NoLocalizedField {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -877,12 +888,24 @@ export interface RichTextSelect<T extends boolean = true> {
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
+  tabContent?:
+    | T
+    | {
+        blockInsideTab?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   content?:
     | T
     | {
         blockInsideBlock?:
           | T
           | {
+              text?: T;
               content?:
                 | T
                 | {
@@ -910,6 +933,7 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1065,6 +1089,7 @@ export interface NoLocalizedFieldsSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1499,6 +1524,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

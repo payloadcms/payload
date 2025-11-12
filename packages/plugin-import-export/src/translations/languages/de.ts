@@ -15,6 +15,7 @@ export const deTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Seite',
     'field-selectionToUse-label': 'Auswahl zur Verwendung',
     'field-sort-label': 'Sortieren nach',
+    'field-sort-order-label': 'Sortierreihenfolge',
     'selectionToUse-allDocuments': 'Verwenden Sie alle Dokumente.',
     'selectionToUse-currentFilters': 'Verwenden Sie aktuelle Filter',
     'selectionToUse-currentSelection': 'Verwenden Sie die aktuelle Auswahl',

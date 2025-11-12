@@ -15,6 +15,7 @@ export const faTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'صفحه',
     'field-selectionToUse-label': 'انتخاب برای استفاده',
     'field-sort-label': 'مرتب سازی بر اساس',
+    'field-sort-order-label': 'ترتیب',
     'selectionToUse-allDocuments': 'از تمام مستندات استفاده کنید',
     'selectionToUse-currentFilters': 'از فیلترهای فعلی استفاده کنید',
     'selectionToUse-currentSelection': 'از انتخاب فعلی استفاده کنید',

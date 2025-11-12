@@ -92,6 +92,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
       existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
 
+      // Prevent updatedAt from being updated when only refreshing a session
+      user.updatedAt = null
+
       await req.payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,

@@ -93,7 +93,30 @@ export const Relationship: CollectionConfig = {
       label: 'Collapsible',
       fields: [
         {
-          name: 'nestedRelationshipFilteredByField',
+          name: 'filteredByFieldInCollapsible',
+          filterOptions: () => {
+            return {
+              filter: {
+                equals: 'Include me',
+              },
+            }
+          },
+          admin: {
+            description:
+              'This will filter the relationship options if the filter field in this document is set to "Include me"',
+          },
+          relationTo: slug,
+          type: 'relationship',
+        },
+      ],
+    },
+    {
+      name: 'array',
+      type: 'array',
+      label: 'Array',
+      fields: [
+        {
+          name: 'filteredByFieldInArray',
           filterOptions: () => {
             return {
               filter: {
