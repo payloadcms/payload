@@ -330,6 +330,30 @@ const config = buildConfig({
 })
 ```
 
+### Using a UTC timezone
+
+By default this is not included in the list of supported timezones but you can add it manually, this will ensure that any dates entered with this timezone are exactly matching the UTC value as well.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'UTC',
+          value: 'UTC',
+        },
+        // ...other timezones
+      ],
+      defaultTimezone: 'UTC',
+    },
+  },
+})
+```
+
 ## Toast
 
 The `admin.toast` configuration allows you to customize the handling of toast messages within the Admin Panel, such as increasing the duration they are displayed and limiting the number of visible toasts at once.

@@ -682,6 +682,48 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 
+    test('creates the expected UTC value when the selected timezone is UTC', async () => {
+      const expectedDateInput = 'Jan 1, 2025 6:00 PM'
+      const expectedUTCValue = '2025-01-01T18:00:00.000Z'
+
+      await page.goto(url.create)
+
+      const dateField = page.locator('#field-default input')
+      await dateField.fill('01/01/2025')
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Custom UTC")`
+
+      await page.click(dropdownControlSelector)
+      await page.click(timezoneOptionSelector)
+      await dateTimeLocator.fill(expectedDateInput)
+
+      await saveDocAndAssert(page)
+
+      const docID = page.url().split('/').pop()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(docID).toBeTruthy()
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          id: {
+            equals: docID,
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+
     test('creates the expected UTC value when the selected timezone is Paris - no daylight savings', async () => {
       const expectedDateInput = 'Jan 1, 2025 6:00 PM'
       const expectedUTCValue = '2025-01-01T17:00:00.000Z'

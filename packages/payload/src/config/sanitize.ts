@@ -94,7 +94,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
   // We're casting here because it's already been sanitised above but TS still thinks it could be a function
   ;(sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (!_internalSupportedTimezones.includes(timezone.value)) {
+    if (timezone.value !== 'UTC' && !_internalSupportedTimezones.includes(timezone.value)) {
       throw new InvalidConfiguration(
         `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
       )
