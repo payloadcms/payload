@@ -9,7 +9,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  changeLocale,
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
@@ -259,6 +264,34 @@ test.describe('Multi Tenant', () => {
           }),
         ).toBeHidden()
       })
+    })
+
+    test('should show correct filtered localized data', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+      })
+
+      await changeLocale(page, 'es')
+
+      await setTenantFilter({
+        page,
+        tenant: 'Anchor Bar',
+      })
+
+      await page.goto(menuItemsURL.list)
+
+      await expect(
+        page.locator('.collection-list .table .cell-localizedName', {
+          hasText: 'Popcorn EN',
+        }),
+      ).toBeVisible()
     })
   })
 
@@ -758,9 +791,12 @@ async function setTenantFilter({
 }: {
   page: Page
   tenant: string
-  urlUtil: AdminUrlUtil
+  urlUtil?: AdminUrlUtil
 }): Promise<void> {
-  await page.goto(urlUtil.list)
+  if (urlUtil) {
+    await page.goto(urlUtil.list)
+  }
+
   await openNav(page)
   await selectInput({
     multiSelect: false,

@@ -86,8 +86,11 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       '@payloadcms/db-sqlite',
       '@payloadcms/db-vercel-postgres',
       '@payloadcms/drizzle',
+      '@payloadcms/db-d1-sqlite',
       // External because they install @aws-sdk/client-s3:
       '@payloadcms/payload-cloud',
+      // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
+      '@sentry/nextjs',
       // TODO: We need to externalize @payloadcms/storage-s3 as well, once Next.js has the ability to exclude @payloadcms/storage-s3/client from being externalized.
       // Do not bundle additional server-only packages during dev to improve compilation speed
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
