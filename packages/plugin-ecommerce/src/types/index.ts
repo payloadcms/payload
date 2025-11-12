@@ -504,7 +504,7 @@ export type CartsConfig = {
   /**
    * Allow guest (unauthenticated) users to create carts.
    * When enabled, guests can create carts without being logged in.
-   * Defaults to false.
+   * Defaults to true.
    */
   allowGuestCarts?: boolean
   cartsCollectionOverride?: CollectionOverride
