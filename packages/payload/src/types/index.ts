@@ -43,7 +43,7 @@ export type CustomPayloadRequestProperties = {
   /**
    * The context in which the request is being made
    */
-  payloadAPI: 'GraphQL' | 'local' | 'REST'
+  payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
   /** Optimized document loader */
   payloadDataLoader: {
     /**
