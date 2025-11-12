@@ -1570,7 +1570,7 @@ describe('Relationships', () => {
             await payload.create({
               collection: relationWithRestrictedFilterOptionsSlug,
               data: {
-                relationWithTwoTypes: [
+                relationWithFilterOptions: [
                   {
                     relationTo: 'movies',
                     value: movie.id,
@@ -1578,7 +1578,64 @@ describe('Relationships', () => {
                 ],
               },
             }),
-        ).rejects.toThrow('The following field is invalid: Relation With Two Types')
+        ).rejects.toThrow('The following field is invalid: Relation With Filter Options')
+      })
+    })
+
+    describe('With filterOptions validation failures', () => {
+      it('should include the id in the validation message if the field does not have "useAsTitle"', async () => {
+        const relatedId = 'customIdExample'
+        const item = await payload.create({
+          collection: customIdSlug,
+          data: { id: relatedId, name: 'unused' },
+        })
+        let error
+        try {
+          await payload.create({
+            collection: relationWithRestrictedFilterOptionsSlug,
+            data: {
+              relationWithFilterOptions: [
+                {
+                  relationTo: customIdSlug,
+                  value: item.id,
+                },
+              ],
+            },
+          })
+        } catch (e) {
+          error = e
+        }
+        expect(error).toBeDefined()
+        expect(error.data.errors).toHaveLength(1)
+        expect(error.data.errors[0].message).toBe(
+          `This field has the following invalid selections: {"relationTo":"custom-id","value":"${relatedId}"}`,
+        )
+      })
+
+      it('should include the "useAsTitle" field in the validation message if the field does have "useAsTitle"', async () => {
+        const movieName = 'Jaws'
+        const movie = await payload.create({ collection: 'movies', data: { name: movieName } })
+        let error
+        try {
+          await payload.create({
+            collection: relationWithRestrictedFilterOptionsSlug,
+            data: {
+              relationWithFilterOptions: [
+                {
+                  relationTo: 'movies',
+                  value: movie.id,
+                },
+              ],
+            },
+          })
+        } catch (e) {
+          error = e
+        }
+        expect(error).toBeDefined()
+        expect(error.data.errors).toHaveLength(1)
+        expect(error.data.errors[0].message).toBe(
+          `This field has the following invalid selections: {"relationTo":"movies","value":"${movieName}"}`,
+        )
       })
     })
   })

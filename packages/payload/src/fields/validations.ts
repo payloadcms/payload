@@ -747,11 +747,55 @@ const validateFilterOptions: Validate<
     })
 
     if (invalidRelationships.length > 0) {
-      return invalidRelationships.reduce((err, invalid, i) => {
-        return `${err} ${JSON.stringify(invalid)}${
-          invalidRelationships.length === i + 1 ? ',' : ''
-        } `
-      }, t('validation:invalidSelections')) as string
+      const formattedInvalidRelations = await Promise.all(
+        invalidRelationships.map(async (rel) => {
+          let collection: string
+          let requestedID: number | string
+
+          if (typeof relationTo === 'string') {
+            collection = relationTo
+
+            if (typeof rel === 'string' || typeof rel === 'number') {
+              requestedID = rel
+            }
+
+            if (typeof rel === 'object' && ObjectId.isValid(rel)) {
+              requestedID = new ObjectId(rel).toHexString()
+            }
+          }
+
+          if (Array.isArray(relationTo) && typeof rel === 'object' && rel?.relationTo) {
+            collection = rel.relationTo
+            requestedID = rel.value
+          }
+
+          collection = collection!
+          requestedID = requestedID!
+
+          const titleField = req.payload.collections[collection]?.config?.admin?.useAsTitle
+          if (titleField) {
+            const result = await req.payloadDataLoader.find({
+              collection,
+              depth: 0,
+              limit: 0,
+              pagination: false,
+              req,
+              where: {
+                id: {
+                  equals: requestedID,
+                },
+              },
+            })
+
+            if (result.docs[0]) {
+              rel.value = result.docs[0][titleField]
+            }
+          }
+
+          return JSON.stringify(rel)
+        }),
+      )
+      return `${t('validation:invalidSelections')} ${formattedInvalidRelations.join(',')}`
     }
 
     return true

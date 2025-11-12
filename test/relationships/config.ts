@@ -225,6 +225,9 @@ export default buildConfigWithDefaults({
     {
       slug: 'movies',
       versions: { drafts: true },
+      admin: {
+        useAsTitle: 'name',
+      },
       fields: [
         {
           name: 'name',
@@ -327,11 +330,11 @@ export default buildConfigWithDefaults({
       slug: relationWithRestrictedFilterOptionsSlug,
       fields: [
         {
-          name: 'relationWithTwoTypes',
-          relationTo: ['users', 'movies'],
+          name: 'relationWithFilterOptions',
+          relationTo: ['movies', 'directors', customIdSlug],
           required: true,
           type: 'relationship',
-          filterOptions: ({ relationTo }) => relationTo === 'users',
+          filterOptions: ({ relationTo }) => relationTo === 'directors',
         },
       ],
     },
