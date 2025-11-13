@@ -41,15 +41,18 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   if (buttonType === 'custom') {
     return (
       <div
+        aria-expanded={active}
+        aria-haspopup="true"
         className={classes}
         onClick={handleClick}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
             handleClick()
           }
         }}
         role="button"
-        tabIndex={0}
+        tabIndex={active ? -1 : 0}
       >
         {button}
       </div>
@@ -58,15 +61,18 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
 
   return (
     <button
+      aria-expanded={active}
+      aria-haspopup="true"
       className={classes}
       disabled={disabled}
       onClick={handleClick}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
           handleClick()
         }
       }}
-      tabIndex={0}
+      tabIndex={active ? -1 : 0}
       type="button"
     >
       {button}

@@ -19,7 +19,6 @@
     }
 
     &__content {
-      position: absolute;
       background: var(--popup-bg);
       opacity: 0;
       visibility: hidden;
@@ -131,7 +130,6 @@
     }
     &--h-align-center {
       .popup__content {
-        left: 50%;
         transform: translateX(-50%);
       }
 
@@ -143,19 +141,17 @@
 
     [dir='rtl'] &--h-align-right {
       .popup__content {
-        right: unset;
-        left: 0;
+        transform: translateX(-100%);
       }
 
       .popup__caret {
-        right: unset;
         left: var(--popup-padding);
       }
     }
 
     &--h-align-right {
       .popup__content {
-        right: var(--button-size-offset);
+        transform: translateX(-100%);
       }
 
       .popup__caret {
@@ -175,11 +171,10 @@
     &--v-align-top {
       .popup__content {
         @include shadow-lg;
-        bottom: calc(100% + var(--popup-caret-size));
       }
 
       .popup__caret {
-        top: calc(100% - 1px);
+        top: 100%;
         border-top-color: var(--popup-bg);
       }
     }
@@ -187,11 +182,10 @@
     &--v-align-bottom {
       .popup__content {
         @include shadow-lg-top;
-        top: calc(100% + var(--popup-caret-size));
       }
 
       .popup__caret {
-        bottom: calc(100% - 1px);
+        bottom: 100%;
         border-bottom-color: var(--popup-bg);
       }
     }
@@ -211,32 +205,8 @@
     @include mid-break {
       --popup-padding: calc(var(--base) * 0.25);
 
-      &--h-align-center {
-        .popup__content {
-          left: 50%;
-          transform: translateX(-0%);
-        }
-
-        .popup__caret {
-          left: 50%;
-          transform: translateX(-0%);
-        }
-      }
-
-      &--h-align-right {
-        .popup__content {
-          right: 0;
-        }
-
-        .popup__caret {
-          right: var(--popup-padding);
-        }
-      }
-
       &--force-h-align-left {
         .popup__content {
-          left: 0;
-          right: unset;
           transform: unset;
         }
 
@@ -249,9 +219,7 @@
 
       &--force-h-align-right {
         .popup__content {
-          right: 0;
-          left: unset;
-          transform: unset;
+          transform: translateX(-100%);
         }
 
         .popup__caret {
