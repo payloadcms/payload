@@ -15,6 +15,7 @@ import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
 import { FieldPaths } from './collections/FieldPaths/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
+import NestedAfterChangeHooks from './collections/NestedAfterChangeHook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
@@ -36,6 +37,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     TransformHooks,
     Hooks,
     NestedAfterReadHooks,
+    NestedAfterChangeHooks,
     ChainingHooks,
     Relations,
     Users,
