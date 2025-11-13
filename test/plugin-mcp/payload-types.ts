@@ -224,6 +224,8 @@ export interface Product {
   createdAt: string;
 }
 /**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */

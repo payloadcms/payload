@@ -16,7 +16,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   this: MongooseAdapter,
   {
     global: globalSlug,
-    limit,
+    limit = 0,
     locale,
     page,
     pagination,
@@ -101,7 +101,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     }
   }
 
-  if (limit && limit >= 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
 
