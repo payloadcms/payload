@@ -264,7 +264,7 @@ export interface Relation {
  * via the `definition` "nested-after-change-hooks".
  */
 export interface NestedAfterChangeHook {
-  id: string;
+  id: number;
   text?: string | null;
   group?: {
     array?:
@@ -732,7 +732,7 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'nested-after-change-hooks';
-        value: string | NestedAfterChangeHook;
+        value: number | NestedAfterChangeHook;
       } | null)
     | ({
         relationTo: 'chaining-hooks';
@@ -1144,6 +1144,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

@@ -986,7 +986,7 @@ describe('Versions', () => {
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: Group > Title' },
+          { id: doc.id, message: 'The following field is invalid: Group > Title', isPublic: true },
         ])
       })
 
