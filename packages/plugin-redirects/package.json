@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-redirects",
-  "version": "3.62.0",
+  "version": "3.63.0",
   "description": "Redirects plugin for Payload",
   "keywords": [
     "payload",
@@ -56,9 +56,12 @@
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "payload": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"

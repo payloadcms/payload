@@ -1,10 +1,11 @@
 import type { Config } from 'payload'
 
-import type { PluginMCPServerConfig } from './types.js'
+import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
 
+export type { MCPAccessSettings }
 /**
  * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
  *
@@ -42,7 +43,12 @@ export const mcpPlugin =
      *  - If a custom tool has gone haywire, admins can disallow that tool.
      *
      */
-    const apiKeyCollection = createAPIKeysCollection(collections, customTools, experimentalTools)
+    const apiKeyCollection = createAPIKeysCollection(
+      collections,
+      customTools,
+      experimentalTools,
+      pluginOptions,
+    )
     if (pluginOptions.overrideApiKeyCollection) {
       config.collections.push(pluginOptions.overrideApiKeyCollection(apiKeyCollection))
     } else {

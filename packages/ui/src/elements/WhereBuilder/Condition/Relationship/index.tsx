@@ -23,11 +23,14 @@ const maxResultsPerRequest = 10
 export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
-    field: { admin: { isSortable, placeholder } = {}, hasMany, relationTo },
+    field: { admin = {}, hasMany, relationTo },
     filterOptions,
     onChange,
     value,
   } = props
+
+  const placeholder = 'placeholder' in admin ? admin?.placeholder : undefined
+  const isSortable = admin?.isSortable
 
   const {
     config: {
