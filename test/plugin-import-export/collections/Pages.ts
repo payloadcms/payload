@@ -51,6 +51,15 @@ export const Pages: CollectionConfig = {
               row[`${columnName}_email`] = (value as { email: string }).email
             }
           },
+          fromCSV: ({ data, columnName }) => {
+            // When importing, reconstruct the relationship from the split columns
+            const id = data[`${columnName}_id`]
+            const email = data[`${columnName}_email`]
+            if (id) {
+              return id // Return just the ID for the relationship
+            }
+            return undefined
+          },
         },
       },
     },

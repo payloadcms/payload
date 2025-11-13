@@ -40,12 +40,27 @@ export default buildConfigWithDefaults({
         collection.upload.staticDir = path.resolve(dirname, 'uploads')
         return collection
       },
+      overrideImportCollection: (collection) => {
+        collection.admin.group = 'System'
+        collection.upload.staticDir = path.resolve(dirname, 'uploads')
+        return collection
+      },
       disableJobsQueue: true,
+      debug: true,
     }),
     importExportPlugin({
+      debug: true,
       collections: ['pages'],
       overrideExportCollection: (collection) => {
         collection.slug = 'exports-tasks'
+        if (collection.admin) {
+          collection.admin.group = 'System'
+        }
+        collection.upload.staticDir = path.resolve(dirname, 'uploads')
+        return collection
+      },
+      overrideImportCollection: (collection) => {
+        collection.slug = 'imports-tasks'
         if (collection.admin) {
           collection.admin.group = 'System'
         }

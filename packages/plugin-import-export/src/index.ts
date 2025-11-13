@@ -3,13 +3,15 @@ import type { Config, FlattenedField } from 'payload'
 import { addDataAndFileToRequest, deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
-import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
+import type { FromCSVFunction, ImportExportPluginConfig, ToCSVFunction } from './types.js'
 
 import { flattenObject } from './export/flattenObject.js'
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
 import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
 import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
+import { getImportCollection } from './getImportCollection.js'
+import { getCreateCollectionImportTask } from './import/getCreateImportCollectionTask.js'
 import { translations } from './translations/index.js'
 import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
@@ -21,10 +23,13 @@ export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
   (config: Config): Config => {
     const exportCollection = getExportCollection({ config, pluginConfig })
+    const importCollection = getImportCollection({ config, pluginConfig })
+
     if (config.collections) {
       config.collections.push(exportCollection)
+      config.collections.push(importCollection)
     } else {
-      config.collections = [exportCollection]
+      config.collections = [exportCollection, importCollection]
     }
 
     // inject custom import export provider
@@ -35,8 +40,9 @@ export const importExportPlugin =
       '@payloadcms/plugin-import-export/rsc#ImportExportProvider',
     )
 
-    // inject the createExport job into the config
+    // inject the createExport and createImport jobs into the config
     ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config, pluginConfig))
+    config.jobs.tasks.push(getCreateCollectionImportTask(config, pluginConfig))
 
     let collectionsToUpdate = config.collections
 
@@ -61,6 +67,12 @@ export const importExportPlugin =
           exportCollectionSlug: exportCollection.slug,
         },
         path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
+      })
+      components.listMenuItems.push({
+        clientProps: {
+          importCollectionSlug: importCollection.slug,
+        },
+        path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
       })
 
       // Find fields explicitly marked as disabled for import/export
@@ -188,6 +200,83 @@ export const importExportPlugin =
       path: '/preview-data',
     })
 
+    config.endpoints.push({
+      handler: async (req) => {
+        await addDataAndFileToRequest(req)
+
+        const { collectionSlug, fileData, format } = req.data as {
+          collectionSlug: string
+          fileData?: string
+          format?: 'csv' | 'json'
+        }
+
+        const collection = req.payload.collections[collectionSlug]
+        if (!collection) {
+          return Response.json(
+            { error: `Collection with slug ${collectionSlug} not found` },
+            { status: 400 },
+          )
+        }
+
+        if (!fileData) {
+          return Response.json({ error: 'No file data provided' }, { status: 400 })
+        }
+
+        try {
+          // Parse the file data
+          let parsedData: Record<string, unknown>[]
+          const buffer = Buffer.from(fileData, 'base64')
+
+          if (format === 'csv') {
+            const { parseCSV } = await import('./import/parseCSV.js')
+            const rawData = await parseCSV({ data: buffer, req })
+
+            // Get fromCSV functions for field transformations
+            const { getCustomFieldFunctions: getImportFunctions } = await import(
+              './import/getCustomFieldFunctions.js'
+            )
+            const fromCSVFunctions = getImportFunctions({
+              fields: collection.config.flattenedFields || [],
+            })
+
+            // Unflatten CSV data
+            const { unflattenObject } = await import('./import/unflattenObject.js')
+            parsedData = rawData
+              .map((doc) => {
+                const unflattened = unflattenObject({
+                  data: doc,
+                  fields: collection.config.flattenedFields ?? [],
+                  fromCSVFunctions,
+                })
+                return unflattened ?? {}
+              })
+              .filter((doc) => doc && Object.keys(doc).length > 0)
+          } else {
+            const { parseJSON } = await import('./import/parseJSON.js')
+            parsedData = parseJSON({ data: buffer, req })
+          }
+
+          // Remove disabled fields from the documents
+          const disabledFields =
+            collection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+          if (disabledFields.length > 0) {
+            parsedData = parsedData.map((doc) => removeDisabledFields(doc, disabledFields))
+          }
+
+          return Response.json({
+            docs: parsedData,
+            totalDocs: parsedData.length,
+          })
+        } catch (error) {
+          req.payload.logger.error({ err: error, msg: 'Error parsing import preview data' })
+          return Response.json({ error: 'Failed to parse file data' }, { status: 500 })
+        }
+      },
+      method: 'post',
+      path: '/import-preview-data',
+    })
+
     /**
      * Merge plugin translations
      */
@@ -218,6 +307,7 @@ declare module 'payload' {
        * @default false
        */
       disabled?: boolean
+      fromCSV?: FromCSVFunction
       /**
        * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
        */

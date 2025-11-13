@@ -1,0 +1,646 @@
+import type { PayloadRequest } from 'payload'
+
+import type { ImportMode, ImportResult } from './createImport.js'
+
+export interface BatchProcessorOptions {
+  batchSize?: number
+  defaultVersionStatus?: 'draft' | 'published'
+}
+
+export interface ImportError {
+  documentData: Record<string, unknown>
+  error: string
+  field?: string
+  fieldLabel?: string
+  rowNumber: number // 1-indexed for user clarity
+  type: 'database' | 'duplicate' | 'notFound' | 'unknown' | 'validation'
+}
+
+export interface BatchResult {
+  failed: Array<ImportError>
+  successful: Array<{
+    document: Record<string, unknown>
+    index: number
+    operation?: 'created' | 'updated'
+    result: Record<string, unknown>
+  }>
+}
+
+export interface ProcessOptions {
+  collectionSlug: string
+  documents: Record<string, unknown>[]
+  importMode: ImportMode
+  matchField?: string
+  req: PayloadRequest
+}
+
+// Helper functions
+function createBatches(
+  documents: Record<string, unknown>[],
+  batchSize: number,
+): Record<string, unknown>[][] {
+  const batches: Record<string, unknown>[][] = []
+  for (let i = 0; i < documents.length; i += batchSize) {
+    batches.push(documents.slice(i, i + batchSize))
+  }
+  return batches
+}
+
+function extractErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message)
+  }
+
+  return String(error)
+}
+
+function categorizeError(error: unknown): ImportError['type'] {
+  const message = extractErrorMessage(error).toLowerCase()
+
+  if (message.includes('validation')) {
+    return 'validation'
+  }
+
+  if (message.includes('not found')) {
+    return 'notFound'
+  }
+
+  if (message.includes('duplicate') || message.includes('unique')) {
+    return 'duplicate'
+  }
+
+  if (message.includes('database') || message.includes('transaction')) {
+    return 'database'
+  }
+
+  return 'unknown'
+}
+
+// Helper function to handle multi-locale data
+function extractMultiLocaleData(data: Record<string, unknown>): {
+  flatData: Record<string, unknown>
+  hasMultiLocale: boolean
+  localeUpdates: Record<string, Record<string, unknown>>
+} {
+  const flatData: Record<string, unknown> = {}
+  const localeUpdates: Record<string, Record<string, unknown>> = {}
+  let hasMultiLocale = false
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const valueObj = value as Record<string, unknown>
+      // Check if this looks like locale data (has locale keys like 'en', 'es', etc.)
+      const localeKeys = Object.keys(valueObj).filter((k) => /^[a-z]{2}(?:_[A-Z]{2})?$/.test(k))
+      if (localeKeys.length > 0) {
+        hasMultiLocale = true
+        // This is a localized field with explicit locale keys
+        // Use the first locale for initial creation, then update others
+        const firstLocale = localeKeys[0]
+        if (firstLocale) {
+          flatData[key] = valueObj[firstLocale]
+          // Store other locales for later update
+          for (const locale of localeKeys) {
+            if (locale !== firstLocale) {
+              if (!localeUpdates[locale]) {
+                localeUpdates[locale] = {}
+              }
+              localeUpdates[locale][key] = valueObj[locale]
+            }
+          }
+        }
+      } else {
+        // Not locale data, keep as is
+        flatData[key] = value
+      }
+    } else {
+      // Not an object, keep as is. this includes localized fields without locale suffix; ie default locale
+      flatData[key] = value
+    }
+  }
+
+  return { flatData, hasMultiLocale, localeUpdates }
+}
+
+async function processBatch(
+  batch: Record<string, unknown>[],
+  batchIndex: number,
+  collectionSlug: string,
+  importMode: ImportMode,
+  matchField: string | undefined,
+  req: PayloadRequest,
+  options: { batchSize: number; defaultVersionStatus: 'draft' | 'published' },
+): Promise<BatchResult> {
+  const result: BatchResult = {
+    failed: [],
+    successful: [],
+  }
+
+  // Calculate the starting row number for this batch
+  const startingRowNumber = batchIndex * options.batchSize
+
+  for (let i = 0; i < batch.length; i++) {
+    const document = batch[i]
+    if (!document) {
+      continue
+    }
+    const rowNumber = startingRowNumber + i + 1
+
+    try {
+      let processedDoc: Record<string, unknown> | undefined
+      let existing: { docs: Array<Record<string, unknown>> } | undefined
+
+      if (importMode === 'create') {
+        // Remove ID field when creating new document
+        const createData = { ...document }
+        delete createData.id
+
+        // Check if _status is set - use defaultVersionStatus from config
+        // If no _status field provided, use the configured default
+        const statusValue = createData._status || options.defaultVersionStatus
+        const isPublished = statusValue !== 'draft'
+
+        // Debug: log status handling
+        if (req.payload.config.debug) {
+          req.payload.logger.info({
+            _status: createData._status,
+            isPublished,
+            msg: 'Status handling in create',
+            willSetDraft: !isPublished,
+          })
+        }
+
+        delete createData._status // Remove _status from data
+
+        // Debug: log what we're about to create
+        if (req.payload.config.debug && 'title' in createData) {
+          req.payload.logger.info({
+            msg: 'Creating document',
+            title: createData.title,
+            titleIsNull: createData.title === null,
+            titleType: typeof createData.title,
+          })
+        }
+
+        // Check if we have multi-locale data and extract it
+        const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(createData)
+
+        if (hasMultiLocale) {
+          // Create with default locale data
+          processedDoc = await req.payload.create({
+            collection: collectionSlug,
+            data: flatData,
+            draft: !isPublished,
+            overrideAccess: true,
+            req,
+          })
+
+          // Update for other locales
+          if (processedDoc && Object.keys(localeUpdates).length > 0) {
+            for (const [locale, localeData] of Object.entries(localeUpdates)) {
+              try {
+                const localeReq = { ...req, locale }
+                await req.payload.update({
+                  id: processedDoc.id as number | string,
+                  collection: collectionSlug,
+                  data: localeData,
+                  draft: false,
+                  overrideAccess: true,
+                  req: localeReq,
+                })
+              } catch (error) {
+                // Log but don't fail the entire import if a locale update fails
+                req.payload.logger.error({
+                  err: error,
+                  msg: `Failed to update locale ${locale} for document ${String(processedDoc.id)}`,
+                })
+              }
+            }
+          }
+        } else {
+          // No multi-locale data, create normally
+          processedDoc = await req.payload.create({
+            collection: collectionSlug,
+            data: createData,
+            draft: !isPublished,
+            overrideAccess: true,
+            req,
+          })
+        }
+      } else if (importMode === 'update' || importMode === 'upsert') {
+        const matchValue = document[matchField || 'id']
+        if (!matchValue) {
+          throw new Error(`Match field "${matchField || 'id'}" not found in document`)
+        }
+
+        // Special handling for ID field with MongoDB
+        // If matching by 'id' and it's not a valid ObjectID format, handle specially
+        const isMatchingById = (matchField || 'id') === 'id'
+
+        // Check if it's a valid MongoDB ObjectID format (24 hex chars)
+        // Note: matchValue could be string, number, or ObjectID object
+        let matchValueStr: string
+        if (typeof matchValue === 'object' && matchValue !== null) {
+          matchValueStr = JSON.stringify(matchValue)
+        } else if (typeof matchValue === 'string') {
+          matchValueStr = matchValue
+        } else if (typeof matchValue === 'number') {
+          matchValueStr = matchValue.toString()
+        } else {
+          // For other types, use JSON.stringify
+          matchValueStr = JSON.stringify(matchValue)
+        }
+        const isValidObjectIdFormat = /^[0-9a-f]{24}$/i.test(matchValueStr)
+
+        // Try to search normally first, catch errors for invalid IDs
+        try {
+          existing = await req.payload.find({
+            collection: collectionSlug,
+            depth: 0,
+            limit: 1,
+            overrideAccess: true,
+            req,
+            where: {
+              [matchField || 'id']: {
+                equals: matchValue,
+              },
+            },
+          })
+        } catch (error) {
+          // If we get an error when searching by ID (e.g., invalid ObjectID format)
+          // and we're in upsert mode, treat as non-existent
+          if (isMatchingById && importMode === 'upsert' && !isValidObjectIdFormat) {
+            existing = { docs: [] }
+          } else if (isMatchingById && importMode === 'update' && !isValidObjectIdFormat) {
+            // For update mode with invalid ID, this should fail
+            throw new Error(`Invalid ID format for update: ${matchValueStr}`)
+          } else {
+            // Re-throw other errors
+            throw error
+          }
+        }
+
+        if (existing.docs.length > 0) {
+          // Update existing
+          const existingDoc = existing.docs[0]
+          if (!existingDoc) {
+            throw new Error(`Document not found`)
+          }
+
+          // Debug: log what we found
+          if (req.payload.config.debug) {
+            req.payload.logger.info({
+              existingId: existingDoc.id,
+              existingStatus: existingDoc._status,
+              existingTitle: existingDoc.title,
+              incomingDocument: document,
+              mode: importMode,
+              msg: 'Found existing document for update',
+            })
+          }
+
+          const updateData = { ...document }
+          // Remove ID and internal fields from update data
+          delete updateData.id
+          delete updateData._id
+          delete updateData.createdAt
+          delete updateData.updatedAt
+
+          // Check if we have multi-locale data and extract it
+          const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(updateData)
+
+          if (req.payload.config.debug) {
+            req.payload.logger.info({
+              existingId: existingDoc.id,
+              hasMultiLocale,
+              mode: importMode,
+              msg: 'Updating document in upsert/update mode',
+              updateData: Object.keys(hasMultiLocale ? flatData : updateData).reduce(
+                (acc, key) => {
+                  const val = (hasMultiLocale ? flatData : updateData)[key]
+                  acc[key] =
+                    typeof val === 'string' && val.length > 50 ? val.substring(0, 50) + '...' : val
+                  return acc
+                },
+                {} as Record<string, unknown>,
+              ),
+            })
+          }
+
+          if (hasMultiLocale) {
+            // Update with default locale data
+            processedDoc = await req.payload.update({
+              id: existingDoc.id as number | string,
+              collection: collectionSlug,
+              data: flatData,
+              depth: 0,
+              // Don't specify draft - this creates a new draft for versioned collections
+              overrideAccess: true,
+              req,
+            })
+
+            // Update for other locales
+            if (processedDoc && Object.keys(localeUpdates).length > 0) {
+              for (const [locale, localeData] of Object.entries(localeUpdates)) {
+                try {
+                  // Clone the request with the specific locale
+                  const localeReq = { ...req, locale }
+                  await req.payload.update({
+                    id: existingDoc.id as number | string,
+                    collection: collectionSlug,
+                    data: localeData,
+                    depth: 0,
+                    // Don't specify draft - this creates a new draft for versioned collections
+                    overrideAccess: true,
+                    req: localeReq,
+                  })
+                } catch (error) {
+                  // Log but don't fail the entire import if a locale update fails
+                  req.payload.logger.error({
+                    err: error,
+                    msg: `Failed to update locale ${locale} for document ${String(existingDoc.id)}`,
+                  })
+                }
+              }
+            }
+          } else {
+            // No multi-locale data, update normally
+            try {
+              // Extra debug: log before update
+              if (req.payload.config.debug) {
+                req.payload.logger.info({
+                  existingId: existingDoc.id,
+                  existingTitle: existingDoc.title,
+                  msg: 'About to update document',
+                  newData: updateData,
+                })
+              }
+
+              // Update the document - don't specify draft to let Payload handle versions properly
+              // This will create a new draft version for collections with versions enabled
+              processedDoc = await req.payload.update({
+                id: existingDoc.id as number | string,
+                collection: collectionSlug,
+                data: updateData,
+                depth: 0,
+                // Don't specify draft - this creates a new draft for versioned collections
+                overrideAccess: true,
+                req,
+              })
+
+              // Debug: log what was returned
+              if (req.payload.config.debug && processedDoc) {
+                req.payload.logger.info({
+                  id: processedDoc.id,
+                  excerpt: processedDoc.excerpt,
+                  msg: 'Update completed',
+                  status: processedDoc._status,
+                  title: processedDoc.title,
+                })
+
+                // Extra debug: verify the update actually happened
+                const verifyPublished = await req.payload.findByID({
+                  id: existingDoc.id as number | string,
+                  collection: collectionSlug,
+                  depth: 0,
+                  draft: false, // Get published version
+                  overrideAccess: true,
+                  req,
+                })
+                req.payload.logger.info({
+                  id: verifyPublished.id,
+                  excerpt: verifyPublished.excerpt,
+                  matchesUpdate: verifyPublished.title === updateData.title,
+                  msg: 'Verification of published version',
+                  status: verifyPublished._status,
+                  title: verifyPublished.title,
+                })
+
+                const verifyDraft = await req.payload.findByID({
+                  id: existingDoc.id as number | string,
+                  collection: collectionSlug,
+                  depth: 0,
+                  draft: true, // Get draft version
+                  overrideAccess: true,
+                  req,
+                })
+                req.payload.logger.info({
+                  id: verifyDraft.id,
+                  excerpt: verifyDraft.excerpt,
+                  matchesUpdate: verifyDraft.title === updateData.title,
+                  msg: 'Verification of draft version',
+                  status: verifyDraft._status,
+                  title: verifyDraft.title,
+                })
+              }
+            } catch (updateError) {
+              req.payload.logger.error({
+                id: existingDoc.id,
+                err: updateError,
+                msg: 'Update failed',
+              })
+              throw updateError
+            }
+          }
+        } else if (importMode === 'upsert') {
+          // Create new in upsert mode
+          if (req.payload.config.debug) {
+            req.payload.logger.info({
+              document,
+              matchField: matchField || 'id',
+              matchValue: document[matchField || 'id'],
+              msg: 'No existing document found, creating new in upsert mode',
+            })
+          }
+
+          const createData = { ...document }
+          delete createData.id
+
+          // Use defaultVersionStatus from config if _status not provided
+          const statusValue = createData._status || options.defaultVersionStatus
+          const isPublished = statusValue !== 'draft'
+          delete createData._status
+
+          // Check if we have multi-locale data and extract it
+          const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(createData)
+
+          if (hasMultiLocale) {
+            // Create with default locale data
+            processedDoc = await req.payload.create({
+              collection: collectionSlug,
+              data: flatData,
+              draft: !isPublished,
+              overrideAccess: true,
+              req,
+            })
+
+            // Update for other locales
+            if (processedDoc && Object.keys(localeUpdates).length > 0) {
+              for (const [locale, localeData] of Object.entries(localeUpdates)) {
+                try {
+                  // Clone the request with the specific locale
+                  const localeReq = { ...req, locale }
+                  await req.payload.update({
+                    id: processedDoc.id as number | string,
+                    collection: collectionSlug,
+                    data: localeData,
+                    draft: false,
+                    overrideAccess: true,
+                    req: localeReq,
+                  })
+                } catch (error) {
+                  // Log but don't fail the entire import if a locale update fails
+                  req.payload.logger.error({
+                    err: error,
+                    msg: `Failed to update locale ${locale} for document ${String(processedDoc.id)}`,
+                  })
+                }
+              }
+            }
+          } else {
+            // No multi-locale data, create normally
+            processedDoc = await req.payload.create({
+              collection: collectionSlug,
+              data: createData,
+              draft: !isPublished,
+              overrideAccess: true,
+              req,
+            })
+          }
+        } else {
+          // Update mode but document not found
+          let matchValueDisplay: string
+          if (typeof matchValue === 'object' && matchValue !== null) {
+            matchValueDisplay = JSON.stringify(matchValue)
+          } else if (typeof matchValue === 'string') {
+            matchValueDisplay = matchValue
+          } else if (typeof matchValue === 'number') {
+            matchValueDisplay = matchValue.toString()
+          } else {
+            // For other types, use JSON.stringify to avoid [object Object]
+            matchValueDisplay = JSON.stringify(matchValue)
+          }
+          throw new Error(`Document with ${matchField || 'id'}="${matchValueDisplay}" not found`)
+        }
+      } else {
+        throw new Error(`Unknown import mode: ${String(importMode)}`)
+      }
+
+      if (processedDoc) {
+        // Determine operation type for proper counting
+        let operation: 'created' | 'updated' | undefined
+        if (importMode === 'create') {
+          operation = 'created'
+        } else if (importMode === 'update') {
+          operation = 'updated'
+        } else if (importMode === 'upsert') {
+          // In upsert mode, check if we found an existing document
+          if (existing && existing.docs.length > 0) {
+            operation = 'updated'
+          } else {
+            operation = 'created'
+          }
+        }
+
+        result.successful.push({
+          document,
+          index: rowNumber - 1, // Store as 0-indexed
+          operation,
+          result: processedDoc,
+        })
+      }
+    } catch (error) {
+      const importError: ImportError = {
+        type: categorizeError(error),
+        documentData: document || {},
+        error: extractErrorMessage(error),
+        rowNumber,
+      }
+
+      // Try to extract field information from validation errors
+      if (error && typeof error === 'object' && 'data' in error) {
+        const errorData = error as { data?: { errors?: Array<{ path?: string }> } }
+        if (errorData.data?.errors && Array.isArray(errorData.data.errors)) {
+          const firstError = errorData.data.errors[0]
+          if (firstError?.path) {
+            importError.field = firstError.path
+          }
+        }
+      }
+
+      result.failed.push(importError)
+      // Always continue processing all rows
+    }
+  }
+
+  return result
+}
+
+export function createBatchProcessor(options: BatchProcessorOptions = {}) {
+  const processorOptions = {
+    batchSize: options.batchSize ?? 100,
+    defaultVersionStatus: options.defaultVersionStatus ?? 'published',
+  }
+
+  const processImport = async (processOptions: ProcessOptions): Promise<ImportResult> => {
+    const { collectionSlug, documents, importMode, matchField, req } = processOptions
+    const batches = createBatches(documents, processorOptions.batchSize)
+
+    const result: ImportResult = {
+      errors: [],
+      imported: 0,
+      total: documents.length,
+      updated: 0,
+    }
+
+    for (let i = 0; i < batches.length; i++) {
+      const currentBatch = batches[i]
+      if (!currentBatch) {
+        continue
+      }
+
+      const batchResult = await processBatch(
+        currentBatch,
+        i,
+        collectionSlug,
+        importMode,
+        matchField,
+        req,
+        processorOptions,
+      )
+
+      // Update results
+      for (const success of batchResult.successful) {
+        if (success.operation === 'created') {
+          result.imported++
+        } else if (success.operation === 'updated') {
+          result.updated++
+        } else {
+          // Fallback
+          if (importMode === 'create') {
+            result.imported++
+          } else {
+            result.updated++
+          }
+        }
+      }
+
+      for (const error of batchResult.failed) {
+        result.errors.push({
+          doc: error.documentData,
+          error: error.error,
+          index: error.rowNumber - 1, // Convert back to 0-indexed
+        })
+      }
+    }
+
+    return result
+  }
+
+  return {
+    processImport,
+  }
+}
