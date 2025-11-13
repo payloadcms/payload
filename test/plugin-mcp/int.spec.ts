@@ -401,8 +401,50 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain('Total: 1 documents')
     expect(json.result.content[0].text).toContain('Page: 1 of 1')
     expect(json.result.content[0].text).toContain('```json')
-    expect(json.result.content[0].text).toContain('"title": "Test Post for Finding"')
+    expect(json.result.content[0].text).toContain('"content": "Content for test post."')
     expect(json.result.content[1].type).toBe('text')
     expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
+  })
+
+  it('should call operations with the payloadAPI context as MCP', async () => {
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Test Post for Finding',
+        content: 'Content for test post.',
+      },
+    })
+
+    const apiKey = await getApiKey()
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'findPosts',
+          arguments: {
+            limit: 1,
+            page: 1,
+            where: '{"title": {"contains": "Test Post for Finding"}}',
+          },
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toHaveLength(2)
+    expect(json.result.content[0].type).toBe('text')
+    expect(json.result.content[0].text).toContain(
+      '"title": "Test Post for Finding (MCP Hook Override)"',
+    )
   })
 })
