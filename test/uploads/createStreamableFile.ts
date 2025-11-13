@@ -8,13 +8,14 @@ import { getMimeType } from './getMimeType.js'
 
 export async function createStreamableFile(
   path: string,
+  typeOverride?: string,
 ): Promise<{ file: File; handle: fs.promises.FileHandle }> {
   const name = basename(path)
   const handle = await open(path)
 
   const { type } = getMimeType(path)
 
-  const file = new File([], name, { type })
+  const file = new File([], name, { type: typeOverride || type })
   file.stream = () => handle.readableWebStream()
 
   const formDataNode = new NodeFormData()
