@@ -95,7 +95,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    // Query the global first
     const docFromDB = await req.payload.db.findGlobal({
       slug,
       locale: locale!,
@@ -107,12 +106,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Check if no document was returned (Postgres returns {} instead of null)
     const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
 
-    // Return empty if access control denies
     if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
       return {} as any
     }
 
-    // Use provided data, queried doc, or empty object for defaults
     let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
 
     // /////////////////////////////////////

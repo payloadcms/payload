@@ -170,10 +170,8 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    // Query the document first
     const docFromDB = await req.payload.db.findOne(findOneArgs)
 
-    // Return NotFound if no document and no data provided
     if (!docFromDB && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
@@ -181,7 +179,6 @@ export const findByIDOperation = async <
       return null!
     }
 
-    // Use provided data or queried doc
     let result: DataFromCollectionSlug<TSlug> =
       (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
 
