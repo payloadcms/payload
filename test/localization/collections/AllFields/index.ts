@@ -204,6 +204,36 @@ export const AllFieldsLocalized: CollectionConfig = {
       ],
     },
 
+    // Deeply nested: localized tab
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 't1',
+          label: 'Deeply Nested Tab',
+          localized: true,
+          fields: [
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 't2',
+                  label: 'Nested Tab Level 2',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      localized: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
     // Deeply nested: localized group > non-localized group > localized array
     {
       name: 'g1',
