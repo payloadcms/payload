@@ -852,13 +852,46 @@ export const promise = async ({
     }
 
     case 'tab': {
-      let tabDoc = siblingDoc
+      const tabDoc = siblingDoc
       let tabSelect: SelectType | undefined
 
       const isNamedTab = tabHasName(field)
 
-      if (isNamedTab && shouldLocalizeField && !shouldHoistLocalizedValue) {
-        Object.values(siblingDoc[field.name] || {}).forEach((localizedData) => {
+      if (isNamedTab) {
+        if (shouldLocalizeField && !shouldHoistLocalizedValue) {
+          Object.values(siblingDoc[field.name] || {}).forEach((localizedData) => {
+            traverseFields({
+              blockData,
+              collection,
+              context,
+              currentDepth,
+              depth,
+              doc,
+              draft,
+              fallbackLocale,
+              fieldPromises,
+              fields: field.fields,
+              findMany,
+              flattenLocales,
+              global,
+              locale,
+              overrideAccess,
+              parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
+              parentPath: path,
+              parentSchemaPath: schemaPath,
+              populate,
+              populationPromises,
+              req,
+              select: tabSelect,
+              selectMode,
+              showHiddenFields,
+              siblingDoc: localizedData || {},
+              triggerAccessControl,
+              triggerHooks,
+            })
+          })
+        } else {
           traverseFields({
             blockData,
             collection,
@@ -882,29 +915,18 @@ export const promise = async ({
             populate,
             populationPromises,
             req,
-            select: tabSelect,
+            select:
+              typeof select?.[field.name] === 'object'
+                ? (select?.[field.name] as SelectType)
+                : undefined,
             selectMode,
             showHiddenFields,
-            siblingDoc: localizedData || {},
+            siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
             triggerHooks,
           })
-        })
-      } else {
-        if (isNamedTab) {
-          tabDoc = siblingDoc[field.name] as JsonObject
-
-          if (typeof siblingDoc[field.name] !== 'object') {
-            tabDoc = {}
-          }
-
-          if (typeof select?.[field.name] === 'object') {
-            tabSelect = select?.[field.name] as SelectType
-          }
-        } else {
-          tabSelect = select
         }
-
+      } else {
         traverseFields({
           blockData,
           collection,
@@ -928,7 +950,7 @@ export const promise = async ({
           populate,
           populationPromises,
           req,
-          select: tabSelect,
+          select,
           selectMode,
           showHiddenFields,
           siblingDoc: tabDoc,
