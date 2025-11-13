@@ -576,6 +576,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Ներկայումս դիտում է',
     currentPublishedVersion: 'Ընթացիկ հրապարակված տարբերակ',
     draft: 'Սևագիր',
+    draftHasPublishedVersion: 'Սրաց (ունի հրատարակված տարբերակ)',
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',
     lastSavedAgo: 'Վերջին անգամ պահպանվել է {{distance}} առաջ',
     modifiedOnly: 'Միայն փոփոխված',

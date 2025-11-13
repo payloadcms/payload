@@ -541,6 +541,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     currentlyViewing: '当前正在查看',
     currentPublishedVersion: '当前发布的版本',
     draft: '草稿',
+    draftHasPublishedVersion: '草稿（有已发布版本）',
     draftSavedSuccessfully: '草稿成功保存。',
     lastSavedAgo: '上次保存 {{distance}} 之前',
     modifiedOnly: '仅修改过的',

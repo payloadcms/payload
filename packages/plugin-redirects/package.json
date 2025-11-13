@@ -56,9 +56,12 @@
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "payload": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"

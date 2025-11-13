@@ -572,6 +572,7 @@ export const caTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actualment veient',
     currentPublishedVersion: 'Versió publicada actual',
     draft: 'Borrador',
+    draftHasPublishedVersion: 'Esborrany (té versió publicada)',
     draftSavedSuccessfully: 'Borrador desat amb èxit.',
     lastSavedAgo: 'Últim desament fa {{distance}}',
     modifiedOnly: 'Només modificat',

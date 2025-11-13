@@ -561,6 +561,7 @@ export const koTranslations: DefaultTranslationsObject = {
     currentlyViewing: '현재 보고 있습니다',
     currentPublishedVersion: '현재 게시된 버전',
     draft: '초안',
+    draftHasPublishedVersion: '발행된 버전이 있는 초안',
     draftSavedSuccessfully: '초안이 저장되었습니다.',
     lastSavedAgo: '마지막으로 저장한지 {{distance}} 전',
     modifiedOnly: '수정된 것만',

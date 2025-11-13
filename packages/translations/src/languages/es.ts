@@ -574,6 +574,7 @@ export const esTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actualmente viendo',
     currentPublishedVersion: 'Versión publicada actual',
     draft: 'Borrador',
+    draftHasPublishedVersion: 'Borrador (tiene versión publicada)',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
     modifiedOnly: 'Modificado solamente',
