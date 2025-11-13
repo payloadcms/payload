@@ -60,6 +60,7 @@ export async function enrichDocsWithVersionStatus({
     const publishedVersions = await req.payload.findVersions({
       collection: collectionConfig.slug,
       depth: 0,
+      limit: 0,
       pagination: false,
       select: {
         parent: true,
