@@ -67,13 +67,13 @@ export const LogoutClient: React.FC<{
   }, [inactivity, logOut, loginRoute, router, startRouteTransition, t])
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && !inactivity) {
       void handleLogOut()
     } else if (!navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
       startRouteTransition(() => router.push(loginRoute))
     }
-  }, [handleLogOut, isLoggedIn, loginRoute, router, startRouteTransition])
+  }, [handleLogOut, isLoggedIn, loginRoute, router, startRouteTransition, inactivity])
 
   if (!isLoggedIn && inactivity) {
     return (
