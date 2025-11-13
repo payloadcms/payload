@@ -30,6 +30,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { draftValidationSlug } from './collections/DraftValidation/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -647,6 +648,54 @@ test.describe('Form State', () => {
           timeout: 10000,
         },
       )
+    })
+  })
+
+  test.describe('Draft Validation', () => {
+    let draftValidationUrl: AdminUrlUtil
+
+    test.beforeAll(() => {
+      draftValidationUrl = new AdminUrlUtil(serverURL, draftValidationSlug)
+    })
+
+    test('should keep save draft button enabled after validation failure on update', async () => {
+      // Create a document successfully
+      await page.goto(draftValidationUrl.create)
+      await page.locator('#field-title').fill('Test Document')
+      await page.locator('#field-validatedField').fill('Valid data')
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      await page.waitForURL(/\/admin\/collections\/draft-validation\/[a-zA-Z0-9]+/)
+
+      // Modify document to trigger validation failure
+      await page.locator('#field-title').fill('Modified Document')
+      await page.locator('#field-failValidation').check()
+      await page.locator('#field-validatedField').fill('This will fail validation')
+
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+
+      // Save Draft button should remain enabled after failed save
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
+
+      // Verify we can retry without additional changes
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+    })
+
+    test('should keep save draft button enabled after successful save when form is modified again', async () => {
+      await page.goto(draftValidationUrl.create)
+      await page.locator('#field-title').fill('Test Document')
+      await page.locator('#field-validatedField').fill('Valid data')
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      await page.locator('#field-title').fill('Modified Document')
+
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
     })
   })
 })
