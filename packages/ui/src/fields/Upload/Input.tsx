@@ -33,6 +33,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
 import { UploadComponentHasOne } from './HasOne/index.js'
@@ -323,31 +324,7 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const normalizeValue = useCallback(
-    (value: any): any => {
-      const isPoly = Array.isArray(relationTo)
-
-      // If it's already a simple ID (string or number), return as-is for non-poly or wrap for poly
-      if (typeof value === 'string' || typeof value === 'number') {
-        return value
-      }
-
-      // If it's an object with relationTo and value
-      if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
-        // Extract the actual ID value, handling nested objects
-        let idValue: any = value.value
-        while (idValue && typeof idValue === 'object' && idValue !== null && 'value' in idValue) {
-          idValue = idValue.value
-        }
-
-        // Return the normalized structure
-        if (isPoly) {
-          return { relationTo: value.relationTo, value: idValue }
-        }
-        return idValue
-      }
-
-      return value
-    },
+    (value: any): any => normalizeRelationshipValue(value, relationTo),
     [relationTo],
   )
 
