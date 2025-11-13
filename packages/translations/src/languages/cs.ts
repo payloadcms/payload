@@ -565,6 +565,7 @@ export const csTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Aktuálně prohlížíte',
     currentPublishedVersion: 'Aktuálně publikovaná verze',
     draft: 'Koncept',
+    draftHasPublishedVersion: 'Koncept (má publikovanou verzi)',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     modifiedOnly: 'Pouze upraveno',
