@@ -294,7 +294,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
       window.addEventListener('resize', handleResize)
 
       // Focus first focusable element in popup when opened
-      setTimeout(() => {
+      // Use RAF to ensure portal is rendered and painted
+      const rafId = requestAnimationFrame(() => {
         if (contentRef.current) {
           const focusableElements = contentRef.current.querySelectorAll(
             'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
@@ -302,7 +303,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
           const firstElement = focusableElements[0] as HTMLElement
           firstElement?.focus()
         }
-      }, 0)
+      })
+
+      return () => {
+        cancelAnimationFrame(rafId)
+      }
     } else {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
