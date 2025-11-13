@@ -24,6 +24,7 @@ import {
   autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftUnlimitedGlobalSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -528,6 +529,23 @@ describe('Versions', () => {
         expect(draftsAscending.docs[0]).toMatchObject(
           draftsDescending.docs[draftsDescending.docs.length - 1]!,
         )
+      })
+
+      it('should findVersions with limit: 0', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'a', title: 'test-doc' },
+        })
+
+        for (let i = 0; i < 100; i++) {
+          await payload.update({ collection: draftCollectionSlug, id: doc.id, data: {} })
+        }
+        const res = await payload.findVersions({
+          collection: draftCollectionSlug,
+          limit: 0,
+          where: { parent: { equals: doc.id } },
+        })
+        expect(res.docs).toHaveLength(101)
       })
     })
 
@@ -2202,6 +2220,19 @@ describe('Versions', () => {
         })
 
         expect(version.id).toStrictEqual(globalVersionID)
+      })
+
+      it('should findGlobalVersions with limit: 0', async () => {
+        for (let i = 0; i < 100; i++) {
+          await payload.updateGlobal({ slug: draftUnlimitedGlobalSlug, data: { title: 'global' } })
+        }
+
+        const res = await payload.findGlobalVersions({
+          slug: draftUnlimitedGlobalSlug,
+          limit: 0,
+        })
+
+        expect(res.docs).toHaveLength(100)
       })
     })
 
