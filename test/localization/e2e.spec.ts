@@ -658,12 +658,18 @@ describe('Localization', () => {
     })
 
     test('blocks - should show fallback checkbox for non-default locale', async () => {
+      await changeLocale(page, 'en')
       await page.goto(urlBlocks.create)
+      const titleLocator = page.locator('#field-title')
+      await titleLocator.fill('Block Test')
       await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
       const rowTextInput = page.locator(`#field-content__0__text`)
       await rowTextInput.fill('text')
       await saveDocAndAssert(page)
-      await changeLocale(page, 'pt')
+
+      await changeLocale(page, spanishLocale)
+      await titleLocator.fill('PT Block Test')
+      await waitForAutoSaveToRunAndComplete(page)
       const fallbackCheckbox = page.locator('#field-content', {
         hasText: 'Fallback to default locale',
       })
