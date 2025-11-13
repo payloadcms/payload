@@ -577,6 +577,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Momenteel bekijken',
     currentPublishedVersion: 'Huidige Gepubliceerde Versie',
     draft: 'Concept',
+    draftHasPublishedVersion: 'Concept (heeft gepubliceerde versie)',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     modifiedOnly: 'Alleen gewijzigd',
