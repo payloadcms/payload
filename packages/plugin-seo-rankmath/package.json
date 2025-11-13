@@ -1,0 +1,68 @@
+{
+  "name": "@payloadcms/plugin-seo-rankmath",
+  "version": "1.0.0-beta.1",
+  "description": "Advanced SEO plugin for Payload CMS with RankMath-like features: scoring, keyword optimization, content analysis, schema markup, and more",
+  "keywords": [
+    "payload",
+    "cms",
+    "plugin",
+    "seo",
+    "rankmath",
+    "schema",
+    "sitemap",
+    "keywords",
+    "content-analysis",
+    "readability"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-seo-rankmath"
+  },
+  "license": "MIT",
+  "author": "Payload CMS",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types.ts",
+      "types": "./src/exports/types.ts"
+    },
+    "./fields": {
+      "import": "./src/exports/fields.ts",
+      "types": "./src/exports/fields.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts"
+    },
+    "./utilities": {
+      "import": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "pnpm run clean && tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "npm:types-react@beta",
+    "typescript": "5.7.2"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^19.0.0 || ^19.0.0-rc"
+  }
+}
