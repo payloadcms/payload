@@ -1,10 +1,11 @@
 import type { Config } from 'payload'
 
-import type { PluginMCPServerConfig } from './types.js'
+import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
 
+export type { MCPAccessSettings }
 /**
  * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
  *
