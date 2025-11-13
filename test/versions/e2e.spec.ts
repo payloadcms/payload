@@ -134,7 +134,7 @@ describe('Versions', () => {
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
     })
 
-    test('collection — should show "changed" status in list view when draft is saved after publish', async () => {
+    test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
       // Create a published document
       const publishedDoc = await payload.create({
         collection: draftCollectionSlug,
@@ -168,8 +168,7 @@ describe('Versions', () => {
 
       // Verify the status column shows "Changed" and not "Draft"
       const statusCell = documentRow.locator('.cell-_status')
-      await expect(statusCell).toContainText('Changed')
-      await expect(statusCell).not.toContainText('Draft')
+      await expect(statusCell).toContainText('Draft (has published version)')
     })
 
     test('collection — has versions tab', async () => {
