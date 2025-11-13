@@ -232,6 +232,9 @@ export default buildConfigWithDefaults({
         {
           name: 'name',
           type: 'text',
+          access: {
+            read: ({ req }) => (req.user as any).name !== 'UserWhoCannotReadMovieNames',
+          },
         },
         {
           name: 'select',

@@ -1601,6 +1601,7 @@ describe('Relationships', () => {
                 },
               ],
             },
+            user: {},
           })
         } catch (e) {
           error = e
@@ -1627,6 +1628,7 @@ describe('Relationships', () => {
                 },
               ],
             },
+            user: {},
           })
         } catch (e) {
           error = e
@@ -1635,6 +1637,36 @@ describe('Relationships', () => {
         expect(error.data.errors).toHaveLength(1)
         expect(error.data.errors[0].message).toBe(
           `This field has the following invalid selections: {"relationTo":"movies","value":"${movieName}"}`,
+        )
+      })
+
+      it('should include the id in the validation message if the requesting user does not have access to useAsTitle', async () => {
+        const movieName = 'Jaws'
+        const movie = await payload.create({ collection: 'movies', data: { name: movieName } })
+        let error
+        try {
+          await payload.create({
+            collection: relationWithRestrictedFilterOptionsSlug,
+            data: {
+              relationWithFilterOptions: [
+                {
+                  relationTo: 'movies',
+                  value: movie.id,
+                },
+              ],
+            },
+            user: {
+              name: 'UserWhoCannotReadMovieNames',
+            },
+          })
+        } catch (e) {
+          error = e
+        }
+
+        expect(error).toBeDefined()
+        expect(error.data.errors).toHaveLength(1)
+        expect(error.data.errors[0].message).toBe(
+          `This field has the following invalid selections: {"relationTo":"movies","value":"${movie.id}"}`,
         )
       })
     })

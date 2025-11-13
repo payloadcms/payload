@@ -772,24 +772,30 @@ const validateFilterOptions: Validate<
           collection = collection!
           requestedID = requestedID!
 
-          const titleField = req.payload.collections[collection]?.config?.admin?.useAsTitle
-          if (titleField) {
-            const result = await req.payloadDataLoader.find({
-              collection,
-              depth: 0,
-              limit: 0,
-              pagination: false,
-              req,
-              where: {
-                id: {
-                  equals: requestedID,
+          try {
+            const titleField = req.payload.collections[collection]?.config?.admin?.useAsTitle
+            if (titleField) {
+              const result = await req.payloadDataLoader.find({
+                collection,
+                depth: 0,
+                limit: 0,
+                overrideAccess: false,
+                pagination: false,
+                req,
+                user,
+                where: {
+                  id: {
+                    equals: requestedID,
+                  },
                 },
-              },
-            })
+              })
 
-            if (result.docs[0]) {
-              rel.value = result.docs[0][titleField]
+              if (result.docs[0] && result.docs[0][titleField]) {
+                rel.value = result.docs[0][titleField]
+              }
             }
+          } catch (ignored) {
+            // If we cannot get the title, use the ID as default
           }
 
           return JSON.stringify(rel)
