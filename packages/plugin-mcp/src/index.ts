@@ -1,9 +1,15 @@
-import type { Config } from 'payload'
+import type { Config, PayloadRequest } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
+
+declare module 'payload' {
+  export interface MCPPayloadRequest extends Omit<PayloadRequest, 'payloadAPI'> {
+    payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
+  }
+}
 
 export type { MCPAccessSettings }
 /**
