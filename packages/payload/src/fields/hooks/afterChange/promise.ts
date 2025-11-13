@@ -90,12 +90,12 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: getNestedValue(previousDoc, pathSegments),
+          previousValue: getNestedValue(previousDoc, pathSegments) ?? previousDoc?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields: siblingFields!,
-          value: getNestedValue(siblingDoc, pathSegments),
+          value: getNestedValue(siblingDoc, pathSegments) ?? siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {
