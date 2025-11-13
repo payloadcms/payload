@@ -65,6 +65,7 @@ export const findResourceTool = (
             id,
             collection: collectionSlug,
             overrideAccess: false,
+            req,
             user,
           })
 
@@ -117,6 +118,7 @@ ${JSON.stringify(doc, null, 2)}`,
         limit,
         overrideAccess: false,
         page,
+        req,
         user,
       }
 
