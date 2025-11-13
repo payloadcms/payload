@@ -2223,6 +2223,7 @@ describe('Versions', () => {
       })
 
       it('should findGlobalVersions with limit: 0', async () => {
+        await payload.db.deleteVersions({ globalSlug: draftUnlimitedGlobalSlug, where: {} })
         for (let i = 0; i < 100; i++) {
           await payload.updateGlobal({ slug: draftUnlimitedGlobalSlug, data: { title: 'global' } })
         }
