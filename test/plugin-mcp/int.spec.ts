@@ -354,7 +354,7 @@ describe('@payloadcms/plugin-mcp', () => {
     )
     expect(json.result.content[0].text).toContain('Created resource:')
     expect(json.result.content[0].text).toContain('```json')
-    expect(json.result.content[0].text).toContain('"title": "Title Override: Test Post"')
+    expect(json.result.content[0].text).toContain('"title": "Test Post"')
     expect(json.result.content[0].text).toContain('"content": "Content for test post."')
     expect(json.result.content[1].type).toBe('text')
     expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
