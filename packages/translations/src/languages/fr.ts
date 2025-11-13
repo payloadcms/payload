@@ -583,6 +583,7 @@ export const frTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actuellement en train de regarder',
     currentPublishedVersion: 'Version Publiée Actuelle',
     draft: 'Brouillon',
+    draftHasPublishedVersion: 'Brouillon (a une version publiée)',
     draftSavedSuccessfully: 'Brouillon enregistré avec succès.',
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     modifiedOnly: 'Modifié uniquement',

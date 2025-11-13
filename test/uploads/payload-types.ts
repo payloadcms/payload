@@ -88,6 +88,8 @@ export interface Config {
     'restrict-file-types': RestrictFileType;
     'no-restrict-file-types': NoRestrictFileType;
     'no-restrict-file-mime-types': NoRestrictFileMimeType;
+    'pdf-only': PdfOnly;
+    'restricted-mime-types': RestrictedMimeType;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
     'without-enlarge': WithoutEnlarge;
@@ -122,6 +124,7 @@ export interface Config {
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -150,6 +153,8 @@ export interface Config {
     'restrict-file-types': RestrictFileTypesSelect<false> | RestrictFileTypesSelect<true>;
     'no-restrict-file-types': NoRestrictFileTypesSelect<false> | NoRestrictFileTypesSelect<true>;
     'no-restrict-file-mime-types': NoRestrictFileMimeTypesSelect<false> | NoRestrictFileMimeTypesSelect<true>;
+    'pdf-only': PdfOnlySelect<false> | PdfOnlySelect<true>;
+    'restricted-mime-types': RestrictedMimeTypesSelect<false> | RestrictedMimeTypesSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
     'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
@@ -184,6 +189,7 @@ export interface Config {
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -927,6 +933,42 @@ export interface NoRestrictFileType {
  * via the `definition` "no-restrict-file-mime-types".
  */
 export interface NoRestrictFileMimeType {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pdf-only".
+ */
+export interface PdfOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-mime-types".
+ */
+export interface RestrictedMimeType {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -1731,6 +1773,23 @@ export interface MediaWithImageSizeAdminProp {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1843,6 +1902,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'no-restrict-file-mime-types';
         value: string | NoRestrictFileMimeType;
+      } | null)
+    | ({
+        relationTo: 'pdf-only';
+        value: string | PdfOnly;
+      } | null)
+    | ({
+        relationTo: 'restricted-mime-types';
+        value: string | RestrictedMimeType;
       } | null)
     | ({
         relationTo: 'animated-type-media';
@@ -2777,6 +2844,40 @@ export interface NoRestrictFileMimeTypesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pdf-only_select".
+ */
+export interface PdfOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-mime-types_select".
+ */
+export interface RestrictedMimeTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "animated-type-media_select".
  */
 export interface AnimatedTypeMediaSelect<T extends boolean = true> {
@@ -3616,6 +3717,14 @@ export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -3678,6 +3787,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
