@@ -19,9 +19,9 @@ export interface ScoringWeights {
 
 export const DEFAULT_WEIGHTS: ScoringWeights = {
   keyword: 25,
-  content: 15,
+  content: 25,
   technical: 25,
-  readability: 10,
+  readability: 25,
 }
 
 /**

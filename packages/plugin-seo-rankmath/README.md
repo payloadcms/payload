@@ -62,12 +62,12 @@ seoRankMathPlugin({
   contentAnalysisEnabled: true,
   readabilityAnalysisEnabled: true,
 
-  // Custom Scoring Weights (must add up to ~75)
+  // Custom Scoring Weights (must add up to 100)
   scoring: {
     keyword: 25, // Keyword optimization (default: 25)
-    content: 15, // Content quality (default: 15)
+    content: 25, // Content quality (default: 25)
     technical: 25, // Technical SEO (default: 25)
-    readability: 10, // Readability (default: 10)
+    readability: 25, // Readability (default: 25)
   },
 
   // Schema Markup
@@ -126,7 +126,7 @@ The plugin calculates a comprehensive SEO score (0-100) based on four categories
 - ✅ Keyword in URL (3 pts)
 - ✅ Keyword in image alt text (2 pts)
 
-### 2. Content Quality (15 points)
+### 2. Content Quality (25 points)
 
 - ✅ Word count >300 words (5 pts)
 - ✅ Proper heading structure (5 pts)
@@ -143,7 +143,7 @@ The plugin calculates a comprehensive SEO score (0-100) based on four categories
 - ✅ Open Graph tags (3 pts)
 - ✅ Canonical URL (3 pts)
 
-### 4. Readability (10 points)
+### 4. Readability (25 points)
 
 - ✅ Flesch Reading Ease score >60 (10 pts)
 - ✅ Average sentence length <20 words (5 pts)

@@ -35,12 +35,12 @@ export const defaults = {
     maxParagraphSentences: 6,
   },
 
-  // Scoring weights
+  // Scoring weights (must total 100)
   scoring: {
     keyword: 25,
-    content: 15,
+    content: 25,
     technical: 25,
-    readability: 10,
+    readability: 25,
   },
 
   // Sitemap
