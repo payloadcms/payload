@@ -5,7 +5,7 @@ export const BeforeDeleteCollection: CollectionConfig = {
   hooks: {
     beforeDelete: [
       ({ id }) => {
-        throw new APIError(`Test error: cannot delete document with ID ${id}`, 401, null, true)
+        throw new APIError(`Test error: cannot delete document with ID ${id}`, 401)
       },
     ],
   },
