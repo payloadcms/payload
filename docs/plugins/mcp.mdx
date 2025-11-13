@@ -255,7 +255,7 @@ mcpPlugin({
 
 To understand or modify data returned by models at runtime use a collection [Hook](https://payloadcms.com/docs/hooks/collections). Within a hook you can look up the API context. If the context is `MCP` that collection was triggered by the MCP Plugin. This does not apply to custom tools or resources that have their own context, and can make unrelated database calls.
 
-In this example, all Post titles are modified to include '(MCP Hook Override)' when they are read using MCP.
+In this example, Post titles are modified to include '(MCP Hook Override)' when they are read using MCP.
 
 ```ts
 import type { CollectionConfig } from 'payload'
