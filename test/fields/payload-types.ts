@@ -1995,10 +1995,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'ui-fields';
         value: string | UiField;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {

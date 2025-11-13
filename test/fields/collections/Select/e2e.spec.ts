@@ -134,7 +134,7 @@ describe('Select', () => {
         page,
         testInfo,
         include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -151,7 +151,7 @@ describe('Select', () => {
         page,
         testInfo,
         include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
