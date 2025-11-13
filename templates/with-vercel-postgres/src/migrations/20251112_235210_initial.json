@@ -1,9 +1,5 @@
 {
-<<<<<<<< HEAD:templates/with-vercel-postgres/src/migrations/20251106_231353_initial.json
-  "id": "5965d4d1-d8f0-43d6-a5a8-07deac93a555",
-========
-  "id": "b1eec400-2402-4b9e-a2a6-1c3abe4d218f",
->>>>>>>> origin/main:templates/with-vercel-postgres/src/migrations/20251107_183841_initial.json
+  "id": "049936cb-a5c2-45d0-aa56-2ed4782634d8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
