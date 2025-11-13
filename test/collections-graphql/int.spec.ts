@@ -135,6 +135,25 @@ describe('collections-graphql', () => {
       expect(docs.map((doc) => doc.id)).toEqual([doc3.id, doc1.id, doc4.id, doc2.id])
     })
 
+    it('should not fail with sort as empty string', async () => {
+      const query = `query {
+        Sorts(sort: "") {
+          docs {
+            id
+            title
+            number
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs } = data.Sorts
+
+      expect(docs).toBeTruthy()
+    })
+
     it('should count', async () => {
       const query = `query {
         countPosts {
