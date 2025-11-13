@@ -23,9 +23,11 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { filterDataToSelectedLocales } from '../../utilities/filterDataToSelectedLocales.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -258,20 +260,22 @@ export const updateOperation = async <
           })
         )?.global
 
-        if (unpublishSpecificLocale && !currentPublishedDocWithLocales) {
-          // doc has never been published and is not being published now
-          result = snapshotToSave
-        } else {
-          // result will contain only published localized data
-          result = await beforeChange({
-            ...beforeChangeArgs,
+        if (unpublishSpecificLocale) {
+          result = filterDataToSelectedLocales({
+            configBlockReferences: payload.config.blocks,
             docWithLocales: currentPublishedDocWithLocales || {},
-            ...(unpublishSpecificLocale
-              ? {
-                  data: {},
-                  skipValidation: true,
-                }
-              : {}),
+            fields: globalConfig.fields,
+            selectedLocales: payload.config.localization.localeCodes.filter(
+              (locale) => locale !== unpublishSpecificLocale,
+            ),
+          })
+        } else if (publishSpecificLocale) {
+          result = mergeLocalizedData({
+            configBlockReferences: payload.config.blocks,
+            dataWithLocales: result,
+            docWithLocales: currentPublishedDocWithLocales || {},
+            fields: globalConfig.fields,
+            selectedLocales: [publishSpecificLocale],
           })
         }
       }
