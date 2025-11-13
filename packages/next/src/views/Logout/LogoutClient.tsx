@@ -45,11 +45,10 @@ export const LogoutClient: React.FC<{
   const [loginRoute] = React.useState(() =>
     formatAdminURL({
       adminRoute,
-      path: `/login${
-        inactivity && redirect && redirect.length > 0
+      path: `/login${inactivity && redirect && redirect.length > 0
           ? `?redirect=${encodeURIComponent(redirect)}`
           : ''
-      }`,
+        }`,
     }),
   )
 
@@ -57,14 +56,14 @@ export const LogoutClient: React.FC<{
   const router = useRouter()
 
   const handleLogOut = React.useCallback(async () => {
-    if (!inactivity && !navigatingToLoginRef.current) {
+    if (!navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
       await logOut()
       toast.success(t('authentication:loggedOutSuccessfully'))
       startRouteTransition(() => router.push(loginRoute))
       return
     }
-  }, [inactivity, logOut, loginRoute, router, startRouteTransition, t])
+  }, [logOut, loginRoute, router, startRouteTransition, t])
 
   useEffect(() => {
     if (isLoggedIn && !inactivity) {
