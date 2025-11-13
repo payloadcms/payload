@@ -70,7 +70,7 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
-  const getNestedValue = (data: any, path: string[]) =>
+  const getNestedValue = (data: JsonObject, path: string[]) =>
     path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), data)
 
   if (fieldAffectsData(field)) {

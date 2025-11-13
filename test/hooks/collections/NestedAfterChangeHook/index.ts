@@ -7,13 +7,6 @@ const NestedAfterChangeHooks: CollectionConfig = {
     {
       type: 'text',
       name: 'text',
-      hooks: {
-        afterChange: [
-          ({ previousValue }) => {
-            console.log(previousValue)
-          },
-        ],
-      },
     },
     {
       type: 'group',
