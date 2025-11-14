@@ -477,6 +477,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { mostRecentUpdate } = useDocumentEvents()
 
   const handleDocumentUpdateEvent = useEffectEvent((mostRecentUpdate: DocumentEvent) => {
+    if (!value) {
+      return false
+    }
+
     let isMatchingUpdate = false
     if (hasMany === true) {
       isMatchingUpdate = value.some((option) => {
