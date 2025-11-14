@@ -226,6 +226,10 @@ export const createClientField = ({
         // Skip - we handle sub-fields in the switch below
         break
 
+      case 'options':
+        // Skip - we handle options in the radio/select switch below to avoid mutating the global config
+        break
+
       case 'label':
         //@ts-expect-error - would need to type narrow
         if (typeof incomingField.label === 'function') {
@@ -342,18 +346,23 @@ export const createClientField = ({
       const field = clientField as RadioFieldClient | SelectFieldClient
 
       if (incomingField.options?.length) {
+        field.options = [] // Create new array to avoid mutating global config
+
         for (let i = 0; i < incomingField.options.length; i++) {
           const option = incomingField.options[i]
 
           if (typeof option === 'object' && typeof option.label === 'function') {
-            if (!field.options) {
-              field.options = []
-            }
-
             field.options[i] = {
               label: option.label({ i18n, t: i18n.t as TFunction }),
               value: option.value,
             }
+          } else if (typeof option === 'object') {
+            field.options[i] = {
+              label: option.label,
+              value: option.value,
+            }
+          } else if (typeof option === 'string') {
+            field.options[i] = option
           }
         }
       }

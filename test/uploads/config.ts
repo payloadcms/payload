@@ -37,9 +37,11 @@ import {
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -557,6 +559,22 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         mimeTypes: ['text/html'],
+      },
+    },
+    {
+      slug: pdfOnlySlug,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        mimeTypes: ['application/pdf'],
+      },
+    },
+    {
+      slug: restrictedMimeTypesSlug,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        mimeTypes: ['image/png'],
       },
     },
     {

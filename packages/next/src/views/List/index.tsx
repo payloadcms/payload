@@ -28,6 +28,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
@@ -269,6 +270,13 @@ export const renderListView = async (
           viewType,
           where: whereWithMergedSearch,
         }))
+
+        // Enrich documents with correct display status for drafts
+        data = await enrichDocsWithVersionStatus({
+          collectionConfig,
+          data,
+          req,
+        })
       } else {
         data = await req.payload.find({
           collection: collectionSlug,
@@ -286,6 +294,13 @@ export const renderListView = async (
           trash,
           user,
           where: whereWithMergedSearch,
+        })
+
+        // Enrich documents with correct display status for drafts
+        data = await enrichDocsWithVersionStatus({
+          collectionConfig,
+          data,
+          req,
         })
         ;({ columnState, Table } = renderTable({
           clientCollectionConfig,

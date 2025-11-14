@@ -70,6 +70,8 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  const getNestedValue = (data: JsonObject, path: string[]) =>
+    path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), data)
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -88,12 +90,12 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc?.[field.name],
+          previousValue: getNestedValue(previousDoc, pathSegments) ?? previousDoc?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields: siblingFields!,
-          value: siblingDoc?.[field.name],
+          value: getNestedValue(siblingDoc, pathSegments) ?? siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {

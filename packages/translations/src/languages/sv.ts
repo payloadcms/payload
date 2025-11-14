@@ -457,7 +457,9 @@ export const svTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiera till',
     copyToLocale: 'Kopiera till språk',
     localeToPublish: 'Publicera språk',
+    selectedLocales: 'Valda språkinställningar',
     selectLocaleToCopy: 'Välj språk att kopiera',
+    selectLocaleToDuplicate: 'Välj platser att duplicera',
   },
   operators: {
     contains: 'innehåller',
@@ -566,6 +568,7 @@ export const svTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Visar för tillfället',
     currentPublishedVersion: 'Aktuell publicerad version',
     draft: 'Utkast',
+    draftHasPublishedVersion: 'Utkast (har publicerad version)',
     draftSavedSuccessfully: 'Utkastet sparades',
     lastSavedAgo: 'Senast sparad för {{distance}} sedan',
     modifiedOnly: 'Endast ändringar',

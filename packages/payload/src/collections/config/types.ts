@@ -752,6 +752,7 @@ export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends Se
   docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
+    isPublic: boolean
     message: string
   }[]
 }

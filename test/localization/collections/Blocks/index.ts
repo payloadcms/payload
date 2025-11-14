@@ -4,8 +4,20 @@ export const blocksCollectionSlug = 'blocks-fields'
 
 export const BlocksCollection: CollectionConfig = {
   slug: blocksCollectionSlug,
-  versions: { drafts: { autosave: true } },
+  admin: {
+    useAsTitle: 'title',
+  },
+  versions: {
+    drafts: {
+      autosave: true,
+    },
+  },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+    },
     {
       type: 'tabs',
       tabs: [

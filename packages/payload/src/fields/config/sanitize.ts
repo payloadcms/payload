@@ -407,14 +407,29 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin?.timezones?.defaultTimezone
 
-      const supportedTimezones = config.admin?.timezones?.supportedTimezones
+      let defaultTimezone =
+        field.timezone && typeof field.timezone === 'object'
+          ? field.timezone.defaultTimezone
+          : config.admin?.timezones?.defaultTimezone
+
+      const required =
+        field.required ||
+        (field.timezone && typeof field.timezone === 'object' && field.timezone.required)
+
+      const supportedTimezones =
+        field.timezone && typeof field.timezone === 'object' && field.timezone.supportedTimezones
+          ? field.timezone.supportedTimezones
+          : config.admin?.timezones?.supportedTimezones
 
       const options =
         typeof supportedTimezones === 'function'
           ? supportedTimezones({ defaultTimezones })
           : supportedTimezones
+
+      if (options && options.length === 1 && options[0]?.value) {
+        defaultTimezone = options[0].value
+      }
 
       // Need to set the options here manually so that any database enums are generated correctly
       // The UI component will import the options from the config
@@ -422,7 +437,7 @@ export const sanitizeFields = async ({
         name,
         defaultValue: defaultTimezone,
         options,
-        required: field.required,
+        required,
       })
 
       fields.splice(++i, 0, timezoneField)

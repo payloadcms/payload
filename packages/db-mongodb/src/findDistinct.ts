@@ -215,22 +215,31 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       $skip: (page - 1) * args.limit,
     })
     pipeline.push({ $limit: args.limit })
-    const totalDocs = await Model.aggregate(
-      [
-        {
-          $match: query,
-        },
-        {
-          $group: {
-            _id: `$${fieldPath}`,
-          },
-        },
-        { $count: 'count' },
-      ],
+
+    // Build count pipeline with the same structure as the main pipeline
+    // to ensure relationship lookups are included
+    const countPipeline: PipelineStage[] = [
       {
-        session,
+        $match: query,
       },
-    ).then((res) => res[0]?.count ?? 0)
+      ...(sortAggregation.length > 0 ? sortAggregation : []),
+      ...(relationLookup?.length ? relationLookup : []),
+      ...($unwind
+        ? [
+            {
+              $unwind,
+            },
+          ]
+        : []),
+      {
+        $group,
+      },
+      { $count: 'count' },
+    ]
+
+    const totalDocs = await Model.aggregate(countPipeline, {
+      session,
+    }).then((res) => res[0]?.count ?? 0)
     const totalPages = Math.ceil(totalDocs / args.limit)
     const hasPrevPage = page > 1
     const hasNextPage = totalPages > page

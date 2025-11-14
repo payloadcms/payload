@@ -1,5 +1,5 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
@@ -24,6 +24,37 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     mcpPlugin({
+      /**
+       * Override the authentication method.
+       * This allows you to use a custom authentication method instead of the default API key authentication.
+       * @param req - The request object.
+       * @returns The MCP access settings.
+       */
+      // overrideAuth: (req) => {
+      //   const { payload } = req
+
+      //   payload.logger.info('[Override MCP auth]:')
+
+      //   return {
+      //     posts: {
+      //       find: true,
+      //     },
+      //     products: {
+      //       find: true,
+      //       update: true,
+      //     },
+      //     'payload-mcp-tool': {
+      //       diceRoll: true,
+      //     },
+      //     'payload-mcp-prompt': {
+      //       echo: true,
+      //     },
+      //     'payload-mcp-resource': {
+      //       data: true,
+      //       dataByID: true,
+      //     },
+      //   } as MCPAccessSettings
+      // },
       overrideApiKeyCollection: (collection) => {
         collection.fields.push({
           name: 'override',

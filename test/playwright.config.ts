@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -35,4 +35,10 @@ export default defineConfig({
   reporter: process.env.CI
     ? [['list', { printSteps: true }], ['json']]
     : [['list', { printSteps: true }]],
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], channel: 'chromium' },
+    },
+  ],
 })

@@ -123,7 +123,6 @@ export const createLocalReq: CreateLocalReq = async (
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
   if (!req.headers) {
-    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.headers = new Headers()
   }
 

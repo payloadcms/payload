@@ -104,9 +104,39 @@ export function renderCell({
     }
   }
 
+  // For _status field, use _displayStatus if available (for showing "changed" status in list view)
+  const cellData =
+    'name' in clientField && accessor === '_status' && '_displayStatus' in doc
+      ? doc._displayStatus
+      : 'name' in clientField
+        ? findValueFromPath(doc, accessor)
+        : undefined
+
+  // For _status field, add 'changed' option for display purposes
+  // The 'changed' status is computed at runtime
+  let enrichedClientField = clientField
+  if ('name' in clientField && accessor === '_status' && clientField.type === 'select') {
+    const hasChangedOption = clientField.options?.some(
+      (opt) => (typeof opt === 'object' ? opt.value : opt) === 'changed',
+    )
+    if (!hasChangedOption) {
+      enrichedClientField = {
+        ...clientField,
+        options: [
+          ...(clientField.options || []),
+          {
+            label: i18n.t('version:draftHasPublishedVersion'),
+            value: 'changed',
+          },
+        ],
+      }
+    }
+  }
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
+    cellData,
+    field: enrichedClientField,
     link: shouldLink,
     linkURL: customLinkURL,
     rowData: doc,

@@ -89,6 +89,24 @@ export const LexicalFullyFeatured: CollectionConfig = {
                 ],
               },
               {
+                slug: 'inlineBlockWithSelect',
+                interfaceName: 'InlineBlockWithSelect',
+                fields: [
+                  {
+                    // Having this specific select field here reproduces an issue where the initial state is not applied on load, and every
+                    // inline block will make its own form state request on load.
+                    name: 'styles',
+                    type: 'select',
+                    hasMany: true,
+                    options: [
+                      { label: 'Option 1', value: 'opt1' },
+                      { label: 'Option 2', value: 'opt2' },
+                    ],
+                    defaultValue: [],
+                  },
+                ],
+              },
+              {
                 slug: 'inlineBlockWithRelationship',
                 fields: [
                   {

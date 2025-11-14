@@ -32,7 +32,7 @@ export type Options<TSlug extends GlobalSlug> = {
   /**
    * The ID of the version to find.
    */
-  id: string
+  id: number | string
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */

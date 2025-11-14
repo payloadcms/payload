@@ -459,7 +459,9 @@ export const idTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke lokal',
     localeToPublish: 'Lokal untuk dipublikasikan',
+    selectedLocales: 'Lokasi yang Dipilih',
     selectLocaleToCopy: 'Pilih lokal untuk disalin',
+    selectLocaleToDuplicate: 'Pilih bahasa lokal untuk duplikat',
   },
   operators: {
     contains: 'mengandung',
@@ -567,6 +569,7 @@ export const idTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Sedang melihat',
     currentPublishedVersion: 'Versi Terbitan Saat Ini',
     draft: 'Draf',
+    draftHasPublishedVersion: 'Draf (memiliki versi yang dipublikasikan)',
     draftSavedSuccessfully: 'Draf berhasil disimpan.',
     lastSavedAgo: 'Terakhir disimpan {{distance}} yang lalu',
     modifiedOnly: 'Hanya yang diubah',

@@ -134,6 +134,43 @@ describe('Versions', () => {
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
     })
 
+    test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
+      // Create a published document
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'Published Document',
+          description: 'This is published',
+        },
+      })
+
+      // Navigate to the document
+      await page.goto(url.edit(publishedDoc.id))
+
+      // Verify status shows "Published"
+      const status = page.locator('.status__value')
+      await expect(status).toContainText('Published')
+
+      // Modify the document and save as draft
+      await page.locator('#field-description').fill('Modified description')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify status shows "Changed" in the document view
+      await expect(status).toContainText('Changed')
+
+      // Go back to list view
+      await page.goto(url.list)
+
+      // Find the row for our document
+      const documentRow = page.locator(`tbody tr:has(.cell-title a:has-text("Published Document"))`)
+      await expect(documentRow).toBeVisible()
+
+      // Verify the status column shows "Changed" and not "Draft"
+      const statusCell = documentRow.locator('.cell-_status')
+      await expect(statusCell).toContainText('Draft (has published version)')
+    })
+
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
@@ -452,7 +489,7 @@ describe('Versions', () => {
       await assertNetworkRequests(
         page,
         // Important: assert that depth is 0 in this request
-        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`,
         async () => {
           await page.locator('#field-title').fill('changed title')
         },

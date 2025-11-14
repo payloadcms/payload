@@ -458,7 +458,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiar para',
     copyToLocale: 'Copiar para localidade',
     localeToPublish: 'Local para publicar',
+    selectedLocales: 'Locais selecionados',
     selectLocaleToCopy: 'Selecione o local para copiar',
+    selectLocaleToDuplicate: 'Selecione locais para duplicar',
   },
   operators: {
     contains: 'contém',
@@ -568,6 +570,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Atualmente visualizando',
     currentPublishedVersion: 'Versão Publicada Atual',
     draft: 'Rascunho',
+    draftHasPublishedVersion: 'Rascunho (tem versão publicada)',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
     lastSavedAgo: 'Última gravação há {{distance}}',
     modifiedOnly: 'Modificado apenas',

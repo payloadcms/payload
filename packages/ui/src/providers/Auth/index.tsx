@@ -25,6 +25,40 @@ export type UserWithToken<T = ClientUser> = {
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | TypedUser>
   logOut: () => Promise<boolean>
+  /**
+   * These are the permissions for the current user from a global scope.
+   *
+   * When checking for permissions on document specific level, use the `useDocumentInfo` hook instead.
+   *
+   * @example
+   *
+   * ```tsx
+   * import { useAuth } from 'payload/ui'
+   *
+   * const MyComponent: React.FC = () => {
+   *   const { permissions } = useAuth()
+   *
+   *   if (permissions?.collections?.myCollection?.create) {
+   *     // user can create documents in 'myCollection'
+   *   }
+   *
+   *   return null
+   * }
+   * ```
+   *
+   * with useDocumentInfo:
+   *
+   * ```tsx
+   * import { useDocumentInfo } from 'payload/ui'
+   *
+   * const MyComponent: React.FC = () => {
+   *  const { docPermissions } = useDocumentInfo()
+   *  if (docPermissions?.create) {
+   *   // user can create this document
+   *  }
+   *  return null
+   * } ```
+   */
   permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<ClientUser>

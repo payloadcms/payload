@@ -114,10 +114,12 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = CustomPayloadRequestProperties &
-  Partial<Request> &
-  PayloadRequestData &
-  Required<Pick<Request, 'headers'>>
+export interface PayloadRequest
+  extends CustomPayloadRequestProperties,
+    Partial<Request>,
+    PayloadRequestData {
+  headers: Request['headers']
+}
 
 export type { Operator }
 

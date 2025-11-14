@@ -8,6 +8,7 @@ import { APIError } from '../errors/APIError.js'
 import { getPayload } from '../index.js'
 import { formatErrors } from './formatErrors.js'
 import { headersWithCors } from './headersWithCors.js'
+import { isErrorPublic } from './isErrorPublic.js'
 import { logError } from './logError.js'
 import { mergeHeaders } from './mergeHeaders.js'
 
@@ -68,7 +69,7 @@ export const routeError = async ({
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`
-  if (!config.debug && !err.isPublic && status === httpStatus.INTERNAL_SERVER_ERROR) {
+  if (!isErrorPublic(err, config)) {
     response = formatErrors(new APIError('Something went wrong.'))
   }
 

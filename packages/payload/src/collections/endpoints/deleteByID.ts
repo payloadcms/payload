@@ -4,26 +4,22 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { deleteByIDOperation } from '../operations/deleteByID.js'
 
 export const deleteByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const { searchParams } = req
-  const depth = searchParams.get('depth')
-  const overrideLock = searchParams.get('overrideLock')
-  const trash = searchParams.get('trash') === 'true'
+
+  const { depth, overrideLock, populate, select, trash } = parseParams(req.query)
 
   const doc = await deleteByIDOperation({
     id,
     collection,
-    depth: isNumber(depth) ? depth : undefined,
-    overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulateParam(req.query.populate),
+    depth,
+    overrideLock: overrideLock ?? false,
+    populate,
     req,
-    select: sanitizeSelectParam(req.query.select),
+    select,
     trash,
   })
 

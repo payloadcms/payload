@@ -1,4 +1,5 @@
-import type { CollectionPreferences, ListQuery, ServerFunction, VisibleEntities } from 'payload'
+import type { RenderListServerFnArgs, RenderListServerFnReturnType } from '@payloadcms/ui'
+import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -7,27 +8,9 @@ import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderListView } from './index.js'
 
-type RenderListResult = {
-  List: React.ReactNode
-  preferences: CollectionPreferences
-}
-
 export const renderListHandler: ServerFunction<
-  {
-    collectionSlug: string
-    disableActions?: boolean
-    disableBulkDelete?: boolean
-    disableBulkEdit?: boolean
-    disableQueryPresets?: boolean
-    documentDrawerSlug: string
-    drawerSlug?: string
-    enableRowSelections: boolean
-    overrideEntityVisibility?: boolean
-    query: ListQuery
-    redirectAfterDelete: boolean
-    redirectAfterDuplicate: boolean
-  },
-  Promise<RenderListResult>
+  RenderListServerFnArgs,
+  Promise<RenderListServerFnReturnType>
 > = async (args) => {
   const {
     collectionSlug,

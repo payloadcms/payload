@@ -82,5 +82,29 @@ export const Tenants: CollectionConfig = {
       type: 'checkbox',
       label: 'Public Tenant',
     },
+    {
+      name: 'selectedLocales',
+      type: 'select',
+      hasMany: true,
+      defaultValue: ['allLocales'],
+      options: [
+        {
+          label: 'All Locales',
+          value: 'allLocales',
+        },
+        {
+          label: 'English',
+          value: 'en',
+        },
+        {
+          label: 'Spanish',
+          value: 'es',
+        },
+        {
+          label: 'French',
+          value: 'fr',
+        },
+      ],
+    },
   ],
 }

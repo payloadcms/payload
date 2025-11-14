@@ -451,7 +451,9 @@ export const etTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopeeri keelde',
     copyToLocale: 'Kopeeri keelde',
     localeToPublish: 'Lokaal avaldamiseks',
+    selectedLocales: 'Valitud lokaadid',
     selectLocaleToCopy: 'Vali keel kopeerimiseks',
+    selectLocaleToDuplicate: 'Valige kohad, mida dubleerida',
   },
   operators: {
     contains: 'sisaldab',
@@ -558,6 +560,7 @@ export const etTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Praegu vaatamine',
     currentPublishedVersion: 'Praegune avaldatud versioon',
     draft: 'Mustand',
+    draftHasPublishedVersion: 'Mustand (on avaldatud versioon)',
     draftSavedSuccessfully: 'Mustand edukalt salvestatud.',
     lastSavedAgo: 'Viimati salvestatud {{distance}} tagasi',
     modifiedOnly: 'Muudetud ainult',

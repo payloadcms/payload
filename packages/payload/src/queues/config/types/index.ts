@@ -71,6 +71,16 @@ export type RunJobAccessArgs = {
 
 export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
 
+export type QueueJobAccessArgs = {
+  req: PayloadRequest
+}
+
+export type CancelJobAccessArgs = {
+  req: PayloadRequest
+}
+export type CancelJobAccess = (args: CancelJobAccessArgs) => boolean | Promise<boolean>
+export type QueueJobAccess = (args: QueueJobAccessArgs) => boolean | Promise<boolean>
+
 export type SanitizedJobsConfig = {
   /**
    * If set to `true`, the job system is enabled and a payload-jobs collection exists.
@@ -94,7 +104,15 @@ export type JobsConfig = {
    */
   access?: {
     /**
-     * By default, all logged-in users can trigger jobs.
+     * By default, all logged-in users can cancel jobs.
+     */
+    cancel?: CancelJobAccess
+    /**
+     * By default, all logged-in users can queue jobs.
+     */
+    queue?: QueueJobAccess
+    /**
+     * By default, all logged-in users can run jobs.
      */
     run?: RunJobAccess
   }
@@ -127,6 +145,7 @@ export type JobsConfig = {
    * queries will be used.
    *
    * @default 0
+   * @deprecated - this will be removed in 4.0
    */
   depth?: number
   /**

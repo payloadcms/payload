@@ -1,6 +1,5 @@
 // storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
-import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -33,7 +32,6 @@ export default buildConfig({
   // database-adapter-config-end
   sharp,
   plugins: [
-    payloadCloudPlugin(),
     // storage-adapter-placeholder
   ],
 })

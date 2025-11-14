@@ -24,6 +24,8 @@ let payload: PayloadTestSDK<Config>
 describe('Hooks', () => {
   let url: AdminUrlUtil
   let beforeChangeURL: AdminUrlUtil
+  let beforeDeleteURL: AdminUrlUtil
+  let beforeDelete2URL: AdminUrlUtil
   let page: Page
   let serverURL: string
 
@@ -33,7 +35,8 @@ describe('Hooks', () => {
 
     url = new AdminUrlUtil(serverURL, 'before-validate')
     beforeChangeURL = new AdminUrlUtil(serverURL, 'before-change-hooks')
-
+    beforeDeleteURL = new AdminUrlUtil(serverURL, 'before-delete-hooks')
+    beforeDelete2URL = new AdminUrlUtil(serverURL, 'before-delete-2-hooks')
     const context = await browser.newContext()
     page = await context.newPage()
 
@@ -71,6 +74,150 @@ describe('Hooks', () => {
     await saveDocAndAssert(page)
 
     await expect(page.locator('#field-title')).toHaveValue('hi from hook')
+  })
+
+  describe('beforeDelete errors', () => {
+    test('ensure document with erroring beforeDelete hook cannot be deleted from list view while public 401 error is shown in toast', async () => {
+      const doc = await payload.create({
+        collection: 'before-delete-hooks',
+        data: {
+          title: 'some title',
+        },
+      })
+
+      await page.goto(beforeDeleteURL.list)
+
+      const tr = page.locator(`tr[data-id="${doc.id}"]`)
+      await expect(tr).toBeVisible()
+      await tr.locator('.checkbox-input__input input').check()
+
+      const deleteBtn = page.locator('.list-selection__button.delete-documents__toggle')
+      await deleteBtn.click()
+
+      await page.locator('#confirm-action').click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        `Test error: cannot delete document with ID ${doc.id}`,
+      )
+
+      // Ensure the document is still in the db
+      await expect
+        .poll(
+          async () => {
+            const docs = await payload.find({
+              collection: 'before-delete-hooks',
+              where: {
+                id: { equals: doc.id },
+              },
+            })
+            return docs.totalDocs
+          },
+          { timeout: TEST_TIMEOUT_LONG },
+        )
+        .toBe(1)
+
+      await payload.delete({
+        collection: 'before-delete-hooks',
+        id: doc.id,
+      })
+    })
+
+    test('ensure document with erroring beforeDelete hook cannot be deleted from edit view while public 401 error is shown in toast', async () => {
+      const doc = await payload.create({
+        collection: 'before-delete-hooks',
+        data: {
+          title: 'some title',
+        },
+      })
+
+      await page.goto(beforeDeleteURL.edit(doc.id))
+
+      await page.locator('.doc-controls__popup .popup-button').click()
+      await page.locator('#action-delete').click()
+
+      await page.locator('#confirm-action').click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        `Test error: cannot delete document with ID ${doc.id}`,
+      )
+
+      // Ensure the document is still in the db
+      await expect
+        .poll(
+          async () => {
+            const docs = await payload.find({
+              collection: 'before-delete-hooks',
+              where: {
+                id: { equals: doc.id },
+              },
+            })
+            return docs.totalDocs
+          },
+          { timeout: TEST_TIMEOUT_LONG },
+        )
+        .toBe(1)
+
+      await payload.delete({
+        collection: 'before-delete-hooks',
+        id: doc.id,
+      })
+    })
+
+    test('ensure private 500 error is not shown when deleting document with erroring beforeDelete hook from list view', async () => {
+      const doc = await payload.create({
+        collection: 'before-delete-2-hooks',
+        data: {
+          title: 'some title',
+        },
+      })
+
+      await page.goto(beforeDelete2URL.list)
+
+      const tr = page.locator(`tr[data-id="${doc.id}"]`)
+      await expect(tr).toBeVisible()
+      await tr.locator('.checkbox-input__input input').check()
+
+      const deleteBtn = page.locator('.list-selection__button.delete-documents__toggle')
+      await deleteBtn.click()
+
+      await page.locator('#confirm-action').click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText('Something went wrong.')
+      await expect(page.locator('.payload-toast-container')).not.toContainText(
+        `Test error: cannot delete document with ID ${doc.id}`,
+      )
+
+      await payload.delete({
+        collection: 'before-delete-2-hooks',
+        id: doc.id,
+      })
+    })
+
+    test('ensure private 500 error is not shown when deleting document with erroring beforeDelete hook from edit view', async () => {
+      const doc = await payload.create({
+        collection: 'before-delete-2-hooks',
+        data: {
+          title: 'some title',
+        },
+      })
+
+      await page.goto(beforeDelete2URL.edit(doc.id))
+
+      await page.locator('.doc-controls__popup .popup-button').click()
+      await page.locator('#action-delete').click()
+
+      await page.locator('#confirm-action').click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText('Something went wrong.')
+      await expect(page.locator('.payload-toast-container')).not.toContainText(
+        `Test error: cannot delete document with ID ${doc.id}`,
+      )
+
+      await payload.delete({
+        collection: 'before-delete-2-hooks',
+        id: doc.id,
+      })
+    })
   })
 })
 

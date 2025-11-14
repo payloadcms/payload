@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const toolSchemas = {
   findResources: {
-    description: 'Find documents in a Payload collection using Find or FindByID.',
+    description: 'Find documents in a collection by ID or where clause using Find or FindByID.',
     parameters: z.object({
       id: z
         .string()
@@ -39,7 +39,7 @@ export const toolSchemas = {
   },
 
   createResource: {
-    description: 'Create a document in a Payload collection.',
+    description: 'Create a document in a collection.',
     parameters: z.object({
       data: z.string().describe('JSON string containing the data for the new document'),
       draft: z
@@ -51,7 +51,7 @@ export const toolSchemas = {
   },
 
   updateResource: {
-    description: 'Update documents in a Payload collection by ID or where clause.',
+    description: 'Update documents in a collection by ID or where clause.',
     parameters: z.object({
       id: z.string().optional().describe('Optional: specific document ID to update'),
       data: z.string().describe('JSON string containing the data to update'),
@@ -83,7 +83,7 @@ export const toolSchemas = {
   },
 
   deleteResource: {
-    description: 'Delete documents in a Payload collection by ID or where clause.',
+    description: 'Delete documents in a collection by ID or where clause.',
     parameters: z.object({
       id: z.string().optional().describe('Optional: specific document ID to delete'),
       depth: z
@@ -103,7 +103,7 @@ export const toolSchemas = {
 
   // Experimental Below This Line
   createCollection: {
-    description: 'Creates a new Payload collection with specified fields and configuration.',
+    description: 'Creates a new collection with specified fields and configuration.',
     parameters: z.object({
       collectionDescription: z
         .string()
@@ -119,7 +119,7 @@ export const toolSchemas = {
   },
 
   findCollections: {
-    description: 'Finds and lists Payload collections with optional content and document counts.',
+    description: 'Finds and lists collections with optional content and document counts.',
     parameters: z.object({
       collectionName: z
         .string()
@@ -140,7 +140,7 @@ export const toolSchemas = {
 
   updateCollection: {
     description:
-      'Updates an existing Payload collection with new fields, modifications, or configuration changes.',
+      'Updates an existing collection with new fields, modifications, or configuration changes.',
     parameters: z.object({
       collectionName: z.string().describe('The name of the collection to update'),
       configUpdates: z.any().optional().describe('Configuration updates (for update_config type)'),
@@ -164,7 +164,7 @@ export const toolSchemas = {
   },
 
   deleteCollection: {
-    description: 'Deletes a Payload collection and optionally updates the configuration.',
+    description: 'Deletes a collection and optionally updates the configuration.',
     parameters: z.object({
       collectionName: z.string().describe('The name of the collection to delete'),
       confirmDeletion: z.boolean().describe('Confirmation flag to prevent accidental deletion'),
@@ -177,7 +177,7 @@ export const toolSchemas = {
   },
 
   findConfig: {
-    description: 'Reads and displays the current Payload configuration file.',
+    description: 'Reads and displays the current configuration file.',
     parameters: z.object({
       includeMetadata: z
         .boolean()
@@ -188,7 +188,7 @@ export const toolSchemas = {
   },
 
   updateConfig: {
-    description: 'Updates the Payload configuration file with various modifications.',
+    description: 'Updates the configuration file with various modifications.',
     parameters: z.object({
       adminConfig: z
         .any()
@@ -302,7 +302,7 @@ export const toolSchemas = {
   },
 
   createJob: {
-    description: 'Creates a new Payload job (task or workflow) with specified configuration.',
+    description: 'Creates a new job (task or workflow) with specified configuration.',
     parameters: z.object({
       description: z.string().describe('Description of what the job does'),
       inputSchema: z.record(z.any()).optional().default({}).describe('Input schema for the job'),
@@ -329,7 +329,7 @@ export const toolSchemas = {
   },
 
   updateJob: {
-    description: 'Updates an existing Payload job with new configuration, schema, or handler code.',
+    description: 'Updates an existing job with new configuration, schema, or handler code.',
     parameters: z.object({
       configUpdate: z.record(z.any()).optional().describe('New configuration for the job'),
       handlerCode: z
@@ -347,7 +347,7 @@ export const toolSchemas = {
   },
 
   runJob: {
-    description: 'Runs a Payload job with specified input data and queue options.',
+    description: 'Runs a job with specified input data and queue options.',
     parameters: z.object({
       delay: z
         .number()

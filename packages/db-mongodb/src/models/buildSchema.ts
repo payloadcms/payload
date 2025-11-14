@@ -236,6 +236,7 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
   parentIsLocalized,
 ): void => {
   const fieldSchema: SchemaTypeOptions<any> = {
+    ...formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized }),
     type: [new mongoose.Schema({}, { _id: false, discriminatorKey: 'blockType' })],
   }
 

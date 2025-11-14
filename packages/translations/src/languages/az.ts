@@ -460,7 +460,9 @@ export const azTranslations: DefaultTranslationsObject = {
     copyTo: 'Köçür',
     copyToLocale: 'Yerliyə köçürün',
     localeToPublish: 'Yayımlamaq üçün yerləşdirin',
+    selectedLocales: 'Seçilmiş Dillər',
     selectLocaleToCopy: 'Köçürmək üçün yerli seçin',
+    selectLocaleToDuplicate: 'Dublikat üçün məkanları seçin',
   },
   operators: {
     contains: 'daxilində',
@@ -569,6 +571,7 @@ export const azTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Hazırda baxılır',
     currentPublishedVersion: 'Hazırki Nəşr Versiyası',
     draft: 'Qaralama',
+    draftHasPublishedVersion: 'Qaralamalar (nəşr olunmuş versiyası var)',
     draftSavedSuccessfully: 'Qaralama uğurla yadda saxlandı.',
     lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
     modifiedOnly: 'Yalnızca dəyişdirilmişdir',

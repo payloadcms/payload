@@ -89,6 +89,11 @@ export const MenuItems: CollectionConfig = {
       required: true,
     },
     {
+      name: 'localizedName',
+      type: 'text',
+      localized: true,
+    },
+    {
       name: 'content',
       type: 'richText',
     },

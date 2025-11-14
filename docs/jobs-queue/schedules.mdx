@@ -1,7 +1,7 @@
 ---
 title: Job Schedules
 label: Schedules
-order: 60
+order: 70
 desc: Payload allows you to schedule jobs to run periodically
 keywords: jobs queue, application framework, typescript, node, react, nextjs, scheduling, cron, schedule
 ---
@@ -15,19 +15,33 @@ Scheduling Jobs differs significantly from running them:
 
 Use the `schedule` property specifically when you have recurring tasks or workflows. To enqueue a single Job to run once in the future, use the `waitUntil` property instead.
 
-## Example use cases
+## When to use Schedules
 
-**Regular emails or notifications**
+Here's a quick guide to help you choose the right approach:
 
-Send nightly digests, weekly newsletters, or hourly updates.
+| Approach            | Use Case                                             | Example                                                               |
+| ------------------- | ---------------------------------------------------- | --------------------------------------------------------------------- |
+| **Schedule**        | Recurring tasks that run automatically on a schedule | Daily reports, weekly emails, hourly syncs                            |
+| **waitUntil**       | One-time job in the future                           | Publish a post at 3pm tomorrow, send trial expiry email in 7 days     |
+| **Collection Hook** | Job triggered by document changes                    | Send email when post is published, generate PDF when order is created |
+| **Manual Queue**    | Job triggered by user action or API call             | User clicks "Generate Report" button                                  |
 
-**Batch processing during off-hours**
+**Example comparison:**
 
-Process analytics data or rebuild static sites during low-traffic times.
+```ts
+// Bad practice - Using schedule for one-time future job
+schedule: [{ cron: '0 15 * * *', queue: 'default' }] // Runs every day at 3pm
 
-**Periodic data synchronization**
+// Best practice - Use waitUntil for one-time future job
+await payload.jobs.queue({
+  task: 'publishPost',
+  input: { postId: '123' },
+  waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this specific time
+})
 
-Regularly push or pull updates to or from external APIs.
+// Best practice - Use schedule for recurring jobs
+schedule: [{ cron: '0 0 * * *', queue: 'nightly' }] // Runs every day at midnight
+```
 
 ## Handling schedules
 
@@ -119,7 +133,7 @@ Here's how the scheduling process operates in detail:
    - The default afterSchedule hook updates the `payload-jobs-stats` global metadata with the last scheduled time for the Job.
    - You can provide your own afterSchedule hook to it for custom logging, metrics, or other post-scheduling actions.
 
-## Customizing concurrency and input (Advanced)
+## Customizing concurrency and input
 
 You may want more control over concurrency or dynamically set Job inputs at scheduling time. For instance, allowing multiple overlapping Jobs to be scheduled, even if a previously scheduled job has not completed yet, or preparing dynamic data to pass to your Job handler:
 
@@ -167,3 +181,236 @@ For example, on Vercel, you can set up a Vercel Cron to regularly trigger schedu
 - **Vercel Cron Job:** Configure Vercel Cron to periodically call `GET /api/payload-jobs/handle-schedules`. If you would like to auto-run your scheduled jobs as well, you can use the `GET /api/payload-jobs/run` endpoint.
 
 Once Jobs are queued, their execution depends entirely on your configured runner setup (e.g., autorun, or manual invocation).
+
+## Common Schedule Patterns
+
+Here are typical cron expressions for common scheduling needs:
+
+```ts
+// Every minute
+schedule: [{ cron: '* * * * *', queue: 'frequent' }]
+
+// Every 5 minutes
+schedule: [{ cron: '*/5 * * * *', queue: 'default' }]
+
+// Every hour at minute 0
+schedule: [{ cron: '0 * * * *', queue: 'hourly' }]
+
+// Every day at midnight (00:00)
+schedule: [{ cron: '0 0 * * *', queue: 'nightly' }]
+
+// Every day at 2:30 AM
+schedule: [{ cron: '30 2 * * *', queue: 'nightly' }]
+
+// Every Monday at 9:00 AM
+schedule: [{ cron: '0 9 * * 1', queue: 'weekly' }]
+
+// First day of every month at midnight
+schedule: [{ cron: '0 0 1 * *', queue: 'monthly' }]
+
+// Every weekday (Mon-Fri) at 8:00 AM
+schedule: [{ cron: '0 8 * * 1-5', queue: 'weekdays' }]
+
+// Every 30 seconds (with seconds precision)
+schedule: [{ cron: '*/30 * * * * *', queue: 'frequent' }]
+```
+
+**Cron format reference:**
+
+```
+* * * * * *
+│ │ │ │ │ │
+│ │ │ │ │ └─ Day of week (0-7, 0 and 7 = Sunday)
+│ │ │ │ └─── Month (1-12)
+│ │ │ └───── Day of month (1-31)
+│ │ └─────── Hour (0-23)
+│ └───────── Minute (0-59)
+└─────────── Second (0-59, optional)
+```
+
+### Real-World Examples
+
+**Daily digest email:**
+
+```ts
+export const DailyDigestTask: TaskConfig<'DailyDigest'> = {
+  slug: 'DailyDigest',
+  schedule: [
+    {
+      cron: '0 7 * * *', // Every day at 7:00 AM
+      queue: 'emails',
+    },
+  ],
+  handler: async ({ req }) => {
+    const users = await req.payload.find({
+      collection: 'users',
+      where: { digestEnabled: { equals: true } },
+    })
+
+    for (const user of users.docs) {
+      await sendDigestEmail(user.email)
+    }
+
+    return { output: { emailsSent: users.docs.length } }
+  },
+}
+```
+
+**Weekly report generation:**
+
+```ts
+export const WeeklyReportTask: TaskConfig<'WeeklyReport'> = {
+  slug: 'WeeklyReport',
+  schedule: [
+    {
+      cron: '0 9 * * 1', // Every Monday at 9:00 AM
+      queue: 'reports',
+    },
+  ],
+  handler: async ({ req }) => {
+    const report = await generateWeeklyReport()
+    await req.payload.create({
+      collection: 'reports',
+      data: report,
+    })
+
+    return { output: { reportId: report.id } }
+  },
+}
+```
+
+**Hourly data sync:**
+
+```ts
+export const SyncDataTask: TaskConfig<'SyncData'> = {
+  slug: 'SyncData',
+  schedule: [
+    {
+      cron: '0 * * * *', // Every hour
+      queue: 'sync',
+    },
+  ],
+  handler: async ({ req }) => {
+    const data = await fetchFromExternalAPI()
+    await req.payload.create({
+      collection: 'synced-data',
+      data,
+    })
+
+    return { output: { itemsSynced: data.length } }
+  },
+}
+```
+
+## Troubleshooting Schedules
+
+Here are a few things to check when scheduled jobs are not being queued:
+
+**Is schedule handling enabled?**
+
+```ts
+// Make sure autoRun doesn't disable scheduling
+jobs: {
+  autoRun: [
+    {
+      cron: '*/5 * * * *',
+      queue: 'default',
+      disableScheduling: false, // Should be false or omitted
+    },
+  ],
+}
+```
+
+**Is the cron expression valid?**
+
+```ts
+// Invalid cron - 6 fields (with seconds) but missing day of week
+schedule: [{ cron: '0 0 * * *', queue: 'default' }] // Missing 6th field
+
+// Valid cron - 5 fields (standard format)
+schedule: [{ cron: '0 0 * * *', queue: 'default' }]
+
+// Valid cron - 6 fields (with seconds)
+schedule: [{ cron: '0 0 0 * * *', queue: 'default' }]
+```
+
+Test your cron expressions at [crontab.guru](https://crontab.guru) (for 5-field format).
+
+**Check the payload-jobs-stats global**
+
+```ts
+const stats = await payload.findGlobal({
+  slug: 'payload-jobs-stats',
+})
+
+console.log(stats.lastScheduled) // Check when each task was last scheduled
+```
+
+### Scheduled Jobs queued but not running
+
+This means scheduling is working, but execution isn't. See the [Queues troubleshooting](/docs/jobs-queue/queues#troubleshooting) section.
+
+### Jobs running at wrong times
+
+**Issue: Job scheduled for midnight but runs immediately**
+
+This happens when `waitUntil` isn't set properly. Check your schedule config:
+
+```ts
+// The schedule property only queues the job
+// The autoRun picks it up and runs it
+schedule: [{ cron: '0 0 * * *', queue: 'nightly' }]
+
+// Make sure autoRun checks the queue frequently enough
+autoRun: [
+  {
+    cron: '* * * * *', // Check every minute
+    queue: 'nightly',
+  },
+]
+```
+
+### Multiple instances of the same scheduled job
+
+By default, Payload prevents duplicate scheduled jobs. If you're seeing duplicates:
+
+**Are you running multiple servers without coordination?**
+
+If multiple servers are handling schedules, they might each queue jobs. Solution: Only enable schedule handling on one server:
+
+```ts
+// Server 1 (handles schedules)
+jobs: {
+  shouldAutoRun: () => process.env.HANDLE_SCHEDULES === 'true',
+  autoRun: [/* ... */],
+}
+
+// Server 2 (just processes jobs, no scheduling)
+jobs: {
+  shouldAutoRun: () => process.env.HANDLE_SCHEDULES !== 'true',
+  autoRun: [{ disableScheduling: true }],
+}
+```
+
+### Custom beforeSchedule hook
+
+If you have a custom `beforeSchedule` hook, make sure it properly checks for existing jobs:
+
+```ts
+import { countRunnableOrActiveJobsForQueue } from 'payload'
+
+hooks: {
+  beforeSchedule: async ({ queueable, req }) => {
+    const count = await countRunnableOrActiveJobsForQueue({
+      queue: queueable.scheduleConfig.queue,
+      req,
+      taskSlug: queueable.taskConfig?.slug,
+      onlyScheduled: true,
+    })
+
+    return {
+      shouldSchedule: count === 0, // Only schedule if no jobs exist
+    }
+  },
+}
+```

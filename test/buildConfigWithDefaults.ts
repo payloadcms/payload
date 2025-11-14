@@ -131,22 +131,24 @@ export async function buildConfigWithDefaults(
       ],
     }),
     email: testEmailAdapter,
-    endpoints: [localAPIEndpoint, reInitEndpoint],
     secret: 'TEST_SECRET',
     sharp,
     telemetry: false,
     ...testConfig,
+    endpoints: [localAPIEndpoint, reInitEndpoint, ...(testConfig?.endpoints || [])],
     i18n: {
       supportedLanguages: {
         de,
         en,
         es,
+        ...(testConfig?.i18n?.supportedLanguages || {}),
       },
       ...(testConfig?.i18n || {}),
     },
     typescript: {
       declare: {
         ignoreTSError: true,
+        ...(testConfig?.typescript?.declare || {}),
       },
       ...testConfig?.typescript,
     },

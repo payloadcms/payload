@@ -8,7 +8,6 @@ import React, { createContext, use, useEffect, useRef, useState } from 'react'
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
-import { usePreferences } from '../Preferences/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
@@ -50,7 +49,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const defaultLocale = localization ? localization.defaultLocale : 'en'
 
-  const { getPreference, setPreference } = usePreferences()
   const localeFromParams = useSearchParams().get('locale')
 
   const [locale, setLocale] = React.useState<Locale>(() => {
@@ -111,7 +109,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, fetchURL, localeFromParams, user?.id])
+  }, [defaultLocale, localization, fetchURL, localeFromParams, user?.id])
 
   return (
     <LocaleContext value={locale}>

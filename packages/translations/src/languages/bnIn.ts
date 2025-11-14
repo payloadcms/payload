@@ -462,7 +462,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     copyTo: 'কপি করুন',
     copyToLocale: 'লোকেলে কপি করুন',
     localeToPublish: 'প্রকাশ করার লোকেল',
+    selectedLocales: 'নির্বাচিত ভাষা বা অঞ্চল',
     selectLocaleToCopy: 'কপি করার জন্য লোকেল নির্বাচন করুন',
+    selectLocaleToDuplicate: 'নকল করার জন্য লোকেলস নির্বাচন করুন',
   },
   operators: {
     contains: 'ধারণ করে',
@@ -570,6 +572,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'বর্তমানে দেখছেন',
     currentPublishedVersion: 'বর্তমান প্রকাশিত সংস্করণ',
     draft: 'খসড়া',
+    draftHasPublishedVersion: 'খসড়া (প্রকাশিত সংস্করণ রয়েছে)',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
     lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',

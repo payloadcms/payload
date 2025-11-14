@@ -929,6 +929,8 @@ describe('Collections - Live Preview', () => {
       initialData,
     })
 
+    merge1.id = initialData.id
+
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
 

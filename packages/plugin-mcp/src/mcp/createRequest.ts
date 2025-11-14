@@ -1,8 +1,8 @@
-import { APIError, type PayloadRequest } from 'payload'
+import { AuthenticationError, type PayloadRequest } from 'payload'
 
 export const createRequestFromPayloadRequest = (req: PayloadRequest) => {
   if (!req.url) {
-    throw new APIError('Request URL is required', 500)
+    throw new AuthenticationError()
   }
   return new Request(req.url, {
     body: req.body,

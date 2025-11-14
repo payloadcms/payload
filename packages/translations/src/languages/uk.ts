@@ -454,7 +454,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     copyTo: 'Копіювати в',
     copyToLocale: 'Копіювати до локалізації',
     localeToPublish: 'Місце публікації',
+    selectedLocales: 'Вибрані локалі',
     selectLocaleToCopy: 'Виберіть локалізацію для копіювання',
+    selectLocaleToDuplicate: 'Виберіть локалі для дублювання',
   },
   operators: {
     contains: 'містить',
@@ -563,6 +565,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Поточний перегляд',
     currentPublishedVersion: 'Поточна опублікована версія',
     draft: 'Чернетка',
+    draftHasPublishedVersion: 'Чернетка (має опубліковану версію)',
     draftSavedSuccessfully: 'Чернетку успішно збережено.',
     lastSavedAgo: 'Востаннє збережено {{distance}} тому',
     modifiedOnly: 'Модифіковано тільки',

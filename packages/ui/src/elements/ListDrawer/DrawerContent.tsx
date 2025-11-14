@@ -6,7 +6,11 @@ import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
-import type { ListDrawerProps } from './types.js'
+import type {
+  ListDrawerProps,
+  RenderListServerFnArgs,
+  RenderListServerFnReturnType,
+} from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -92,10 +96,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         }
 
         if (slug) {
-          const result: { List: React.ReactNode } = (await serverFunction({
+          const result: RenderListServerFnReturnType = (await serverFunction({
             name: 'render-list',
             args: {
-              allowCreate,
               collectionSlug: slug,
               disableBulkDelete: true,
               disableBulkEdit: true,
@@ -104,8 +107,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               enableRowSelections,
               overrideEntityVisibility,
               query: newQuery,
-            },
-          })) as { List: React.ReactNode }
+            } satisfies RenderListServerFnArgs,
+          })) as RenderListServerFnReturnType
 
           setListView(result?.List || null)
         } else {
@@ -123,7 +126,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [
       serverFunction,
       closeModal,
-      allowCreate,
       drawerSlug,
       isOpen,
       enableRowSelections,

@@ -28,4 +28,14 @@ export const Posts: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeRead: [
+      ({ doc, req }) => {
+        if (req.payloadAPI === 'MCP') {
+          doc.title = `${doc.title} (MCP Hook Override)`
+        }
+        return doc
+      },
+    ],
+  },
 }

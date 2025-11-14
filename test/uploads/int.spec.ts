@@ -25,8 +25,10 @@ import {
   mediaSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -251,6 +253,36 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.filename).toBeDefined()
+      })
+
+      it('should not allow creation of corrupted PDF', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './fake-pdf.pdf')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow invalid mimeType to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './image.jpg')
+        const { file, handle } = await createStreamableFile(filePath, 'image/png')
+        formData.append('file', file)
+        formData.append('mime', 'image/png')
+        formData.append('contentType', 'image/png')
+
+        const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
       })
     })
     describe('update', () => {

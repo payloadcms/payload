@@ -461,7 +461,9 @@ export const trTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopyala',
     copyToLocale: 'Yerel hafızaya kopyala',
     localeToPublish: 'Yayınlanacak yerel',
+    selectedLocales: 'Seçilen Yerel Ayarlar',
     selectLocaleToCopy: 'Kopyalamak için yerel seçimi yapın',
+    selectLocaleToDuplicate: 'Çoğaltmak için yerelleri seçin',
   },
   operators: {
     contains: 'içerir',
@@ -568,6 +570,7 @@ export const trTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Şu anda görüntüleniyor',
     currentPublishedVersion: 'Mevcut Yayınlanan Sürüm',
     draft: 'Taslak',
+    draftHasPublishedVersion: 'Taslak (yayınlanmış versiyonu var)',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     modifiedOnly: 'Yalnızca değiştirilmiş',

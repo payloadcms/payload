@@ -247,6 +247,27 @@ export const RootPage = async ({
   })
   await applyLocaleFiltering({ clientConfig, config, req })
 
+  // Ensure locale on req is still valid after filtering locales
+  if (
+    clientConfig.localization &&
+    req.locale &&
+    !clientConfig.localization.localeCodes.includes(req.locale)
+  ) {
+    redirect(
+      `${currentRoute}${qs.stringify(
+        {
+          ...searchParams,
+          locale: clientConfig.localization.localeCodes.includes(
+            clientConfig.localization.defaultLocale,
+          )
+            ? clientConfig.localization.defaultLocale
+            : clientConfig.localization.localeCodes[0],
+        },
+        { addQueryPrefix: true },
+      )}`,
+    )
+  }
+
   const visibleEntities = getVisibleEntities({ req })
 
   const folderID = routeParams.folderID

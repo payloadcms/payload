@@ -14,6 +14,7 @@ import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
 import { hooksSlug } from './collections/Hook/index.js'
+import { nestedAfterChangeHooksSlug } from './collections/NestedAfterChangeHook/index.js'
 import {
   generatedAfterReadText,
   nestedAfterReadHooksSlug,
@@ -327,6 +328,40 @@ describe('Hooks', () => {
       })
 
       expect(retrievedDoc.value).toEqual('data from REST API')
+    })
+
+    it('should populate previousValue in nested afterChange hooks', async () => {
+      // this collection will throw an error if previousValue is not defined in nested afterChange hook
+      const nestedAfterChangeDoc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'initial',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'initial',
+              },
+            ],
+          },
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        collection: 'nested-after-change-hooks',
+        id: nestedAfterChangeDoc.id,
+        data: {
+          text: 'updated',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'updated',
+              },
+            ],
+          },
+        },
+      })
+
+      expect(updatedDoc).toBeDefined()
     })
   })
 

@@ -455,7 +455,9 @@ export const daTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopier til',
     copyToLocale: 'Kopier til lokal',
     localeToPublish: 'Offentliggør på lokalitet',
+    selectedLocales: 'Valgte sprogområder',
     selectLocaleToCopy: 'Vælg lokalitet til kopiering',
+    selectLocaleToDuplicate: 'Vælg lokaliteter til at duplikere',
   },
   operators: {
     contains: 'Indeholder',
@@ -565,6 +567,7 @@ export const daTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Aktuelt visning',
     currentPublishedVersion: 'Nuværende offentliggjort version',
     draft: 'Kladde',
+    draftHasPublishedVersion: 'Udkast (har offentliggjort version)',
     draftSavedSuccessfully: 'Kladde gemt.',
     lastSavedAgo: 'Sidst gemt {{distance}}',
     modifiedOnly: 'Kun ændret',

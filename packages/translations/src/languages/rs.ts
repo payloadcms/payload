@@ -456,7 +456,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
     localeToPublish: 'Lokalitet za objavljivanje',
+    selectedLocales: 'Izabrane lokalne postavke',
     selectLocaleToCopy: 'Izaberite lokalitet za kopiranje',
+    selectLocaleToDuplicate: 'Izaberite lokacije za dupliciranje',
   },
   operators: {
     contains: 'садржи',
@@ -562,6 +564,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Trenutno gledate',
     currentPublishedVersion: 'Trenutno Objavljena Verzija',
     draft: 'Нацрт',
+    draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Нацрт успешно сачуван.',
     lastSavedAgo: 'Задњи пут сачувано пре {{distance}',
     modifiedOnly: 'Samo izmenjen',
