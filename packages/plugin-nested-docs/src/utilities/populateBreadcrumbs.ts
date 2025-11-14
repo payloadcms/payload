@@ -53,6 +53,7 @@ export const populateBreadcrumbs = async ({
       docs: allParentDocuments.slice(0, i + 1),
       generateLabel,
       generateURL,
+      req,
     }),
   )
 
