@@ -463,7 +463,9 @@ export const myTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Salin ke tempat setempat',
     localeToPublish: 'Untuk menerbitkan di lokasi',
     localizedMeta: 'ဒေတာများကိုတည်ဆောက်နှင့်စီမံခန့်ခွဲပေးသည့်အခြေထောက် စုဆောင်းမှု@endif',
+    selectedLocales: 'Pilihan Locale',
     selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
+    selectLocaleToDuplicate: 'Pilih bahasa untuk dipadankan',
   },
   operators: {
     contains: 'ပါဝင်သည်',
@@ -576,6 +578,7 @@ export const myTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Sedang melihat sekarang',
     currentPublishedVersion: 'လက်ရှိထုတ်ဝေထားသောဗားရှင်း',
     draft: 'မူကြမ်း',
+    draftHasPublishedVersion: 'Draf (mempunyai versi yang diterbitkan)',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     modifiedOnly: 'Hanya diubah',

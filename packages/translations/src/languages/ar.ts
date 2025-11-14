@@ -447,7 +447,9 @@ export const arTranslations: DefaultTranslationsObject = {
     copyToLocale: 'نسخ إلى الموقع المحلي',
     localeToPublish: 'الموقع للنشر',
     localizedMeta: 'ميتا محلي',
+    selectedLocales: 'المواقع المختارة',
     selectLocaleToCopy: 'حدد الموقع المحلي للنسخ',
+    selectLocaleToDuplicate: 'اختر المواقع للتكرار',
   },
   operators: {
     contains: 'يحتوي',
@@ -552,6 +554,7 @@ export const arTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'تمت المشاهدة حاليا',
     currentPublishedVersion: 'النسخة المنشورة الحالية',
     draft: 'مسودّة',
+    draftHasPublishedVersion: 'مسودة (لديها نسخة منشورة)',
     draftSavedSuccessfully: 'تمّ حفظ المسودّة بنجاح.',
     lastSavedAgo: 'تم الحفظ آخر مرة قبل {{distance}}',
     modifiedOnly: 'تم التعديل فقط',

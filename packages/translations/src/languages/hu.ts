@@ -461,7 +461,9 @@ export const huTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Másolás a helyi verzióba',
     localeToPublish: 'Közzététel helye',
     localizedMeta: 'Helyi Meta',
+    selectedLocales: 'Kiválasztott helyi beállítások',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
+    selectLocaleToDuplicate: 'Válassza ki a másolandó helyszínekent.',
   },
   operators: {
     contains: 'tartalmaz',
@@ -574,6 +576,7 @@ export const huTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Jelenlegi megtekintés',
     currentPublishedVersion: 'Jelenleg Közzétett Verzió',
     draft: 'Piszkozat',
+    draftHasPublishedVersion: 'Piszkozat (van közzétett verziója)',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     modifiedOnly: 'Módosítva csak',

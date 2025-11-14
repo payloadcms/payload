@@ -465,7 +465,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Kopieer naar taal',
     localeToPublish: 'Te publiceren taal',
     localizedMeta: 'Gelokaliseerde Meta',
+    selectedLocales: 'Geselecteerde Locales',
     selectLocaleToCopy: 'Selecteer taal om te kopiëren',
+    selectLocaleToDuplicate: 'Selecteer locales om te dupliceren',
   },
   operators: {
     contains: 'bevat',
@@ -576,6 +578,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Momenteel bekijken',
     currentPublishedVersion: 'Huidige Gepubliceerde Versie',
     draft: 'Concept',
+    draftHasPublishedVersion: 'Concept (heeft gepubliceerde versie)',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     modifiedOnly: 'Alleen gewijzigd',

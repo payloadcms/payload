@@ -170,6 +170,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       }
 
       const params = qs.stringify({
+        depth: 0,
         publishSpecificLocale: locale,
       })
 

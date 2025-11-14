@@ -459,7 +459,9 @@ export const caTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Copiar a idioma',
     localeToPublish: 'Idioma per publicar',
     localizedMeta: 'Meta Localitzada',
+    selectedLocales: 'Idiomes seleccionats',
     selectLocaleToCopy: "Selecciona l'idioma per copiar",
+    selectLocaleToDuplicate: 'Selecciona les configuracions regionals per duplicar',
   },
   operators: {
     contains: 'conté',
@@ -571,6 +573,7 @@ export const caTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actualment veient',
     currentPublishedVersion: 'Versió publicada actual',
     draft: 'Borrador',
+    draftHasPublishedVersion: 'Esborrany (té versió publicada)',
     draftSavedSuccessfully: 'Borrador desat amb èxit.',
     lastSavedAgo: 'Últim desament fa {{distance}}',
     modifiedOnly: 'Només modificat',

@@ -469,7 +469,9 @@ export const deTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Erstelle Kopie für Sprach-Variante',
     localeToPublish: 'Zu veröffentlichende Sprache',
     localizedMeta: 'Lokalisierte Meta',
+    selectedLocales: 'Ausgewählte Gebietsschemata',
     selectLocaleToCopy: 'Wähle den Ort zum Kopieren aus',
+    selectLocaleToDuplicate: 'Wählen Sie die Gebietsschemata zum Duplizieren aus',
   },
   operators: {
     contains: 'enthält',
@@ -578,6 +580,7 @@ export const deTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Derzeitige Ansicht',
     currentPublishedVersion: 'Aktuell veröffentlichte Version',
     draft: 'Entwurf',
+    draftHasPublishedVersion: 'Entwurf (hat veröffentlichte Version)',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     modifiedOnly: 'Nur modifiziert',

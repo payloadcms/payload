@@ -456,7 +456,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Копирайте в местното',
     localeToPublish: 'Местоположение за публикуване',
     localizedMeta: 'Локализиран Мета',
+    selectedLocales: 'Избрани локали',
     selectLocaleToCopy: 'Изберете място за копиране',
+    selectLocaleToDuplicate: 'Изберете локации за дублиране',
   },
   operators: {
     contains: 'съдържа',
@@ -566,6 +568,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'В момента преглеждате',
     currentPublishedVersion: 'Текуща публикувана версия',
     draft: 'Чернова',
+    draftHasPublishedVersion: 'Чернова (има публикувана версия)',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
     lastSavedAgo: 'последно запазено преди {{distance}}',
     modifiedOnly: 'Само променени',

@@ -140,7 +140,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: uploadsMulti,
     data: {
-      media: [createdPNGDoc.id, createdJPGDoc.id],
+      media: [createdPNGDoc.id],
     },
   })
 

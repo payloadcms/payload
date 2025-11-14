@@ -42,7 +42,7 @@ export async function buildSearchParam({
   globalSlug?: string
   incomingPath: string
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   payload: Payload
   val: unknown
@@ -114,7 +114,7 @@ export async function buildSearchParam({
 
     const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
 
-    if (rawQuery) {
+    if (rawQuery && paths.length === 1) {
       return { value: rawQuery }
     }
 

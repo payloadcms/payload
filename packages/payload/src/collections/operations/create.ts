@@ -51,6 +51,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
+  selectedLocales?: string[]
   showHiddenFields?: boolean
 }
 
@@ -114,6 +115,7 @@ export const createOperation = async <
       },
       req,
       select: incomingSelect,
+      selectedLocales,
       showHiddenFields,
     } = args
 
@@ -132,6 +134,7 @@ export const createOperation = async <
         isSavingDraft,
         overrideAccess,
         req,
+        selectedLocales,
       })
 
       duplicatedFromDoc = duplicateResult.duplicatedFromDoc

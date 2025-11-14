@@ -445,7 +445,9 @@ export const heTranslations: DefaultTranslationsObject = {
     copyToLocale: 'העתק למקום',
     localeToPublish: 'מיקום לפרסום',
     localizedMeta: 'מטא מקומי',
+    selectedLocales: 'אזורים נבחרים',
     selectLocaleToCopy: 'בחר מיקום להעתקה',
+    selectLocaleToDuplicate: 'בחר שפות לשכפול',
   },
   operators: {
     contains: 'מכיל',
@@ -548,6 +550,7 @@ export const heTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'מציג כרגע',
     currentPublishedVersion: 'הגרסה שפורסמה כעת',
     draft: 'טיוטה',
+    draftHasPublishedVersion: 'טיוטה (יש גרסה שפורסמה)',
     draftSavedSuccessfully: 'טיוטה נשמרה בהצלחה.',
     lastSavedAgo: 'נשמר לאחרונה לפני {{distance}}',
     modifiedOnly: 'מותאם בלבד',

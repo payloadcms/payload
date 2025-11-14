@@ -456,7 +456,9 @@ export const viTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Sao chép vào địa phương',
     localeToPublish: 'Ngôn ngữ để xuất bản',
     localizedMeta: 'Meta Địa phương hóa',
+    selectedLocales: 'Địa phương đã chọn',
     selectLocaleToCopy: 'Chọn địa phương để sao chép',
+    selectLocaleToDuplicate: 'Chọn ngôn ngữ để sao chép',
   },
   operators: {
     contains: 'có chứa',
@@ -562,6 +564,7 @@ export const viTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Đang xem',
     currentPublishedVersion: 'Phiên bản Đã Xuất bản Hiện tại',
     draft: 'Bản nháp',
+    draftHasPublishedVersion: 'Bản nháp (có phiên bản đã xuất bản)',
     draftSavedSuccessfully: 'Bản nháp đã được lưu thành công.',
     lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
     modifiedOnly: 'Chỉ được sửa đổi',

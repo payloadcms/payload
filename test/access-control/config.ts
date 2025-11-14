@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import type { FieldAccess } from 'payload'
+import type { FieldAccess, Where } from 'payload'
 
 import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 
@@ -112,6 +112,18 @@ export default buildConfigWithDefaults(
               setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
             })
           },
+          unlock: ({ req }) => {
+            if (req.user && req.user.collection === 'users') {
+              // admin users can only unlock themselves
+              return {
+                id: {
+                  equals: req.user.id,
+                },
+              }
+            }
+
+            return false
+          },
         },
         auth: true,
         fields: [
@@ -203,6 +215,20 @@ export default buildConfigWithDefaults(
           {
             name: 'name',
             type: 'text',
+          },
+          {
+            name: 'info',
+            type: 'group',
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+              },
+              {
+                name: 'description',
+                type: 'textarea',
+              },
+            ],
           },
           {
             name: 'userRestrictedDocs',

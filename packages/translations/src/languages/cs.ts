@@ -455,7 +455,9 @@ export const csTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Kopírovat do lokalizace',
     localeToPublish: 'Místo k publikování',
     localizedMeta: 'Lokalizovaná Meta',
+    selectedLocales: 'Vybrané jazykové verze',
     selectLocaleToCopy: 'Vyberte lokalitu ke kopírování',
+    selectLocaleToDuplicate: 'Vyberte národní prostředí k duplikaci',
   },
   operators: {
     contains: 'obsahuje',
@@ -564,6 +566,7 @@ export const csTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Aktuálně prohlížíte',
     currentPublishedVersion: 'Aktuálně publikovaná verze',
     draft: 'Koncept',
+    draftHasPublishedVersion: 'Koncept (má publikovanou verzi)',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     modifiedOnly: 'Pouze upraveno',

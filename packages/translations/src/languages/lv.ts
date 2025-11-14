@@ -457,7 +457,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Kopēt uz lokalizāciju',
     localeToPublish: 'Lokalizācija publicēšanai',
     localizedMeta: 'Lokalizēts Meta',
+    selectedLocales: 'Izvēlētās lokalizācijas',
     selectLocaleToCopy: 'Izvēlieties lokalizāciju, no kuras kopēt',
+    selectLocaleToDuplicate: 'Izvēlieties lokalizācijas, kuras dublēt',
   },
   operators: {
     contains: 'satur',
@@ -567,6 +569,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Pašlaik skatās',
     currentPublishedVersion: 'Pašreizējā publicētā versija',
     draft: 'Melnraksts',
+    draftHasPublishedVersion: 'Projekts (ir publicēta versija)',
     draftSavedSuccessfully: 'Melnraksts veiksmīgi saglabāts.',
     lastSavedAgo: 'Pēdējo reizi saglabāts pirms {{distance}}',
     modifiedOnly: 'Tikai modificētie',

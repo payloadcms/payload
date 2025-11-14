@@ -373,7 +373,7 @@ export const promise = async ({
     }
 
     // Set defaultValue on the field for globals being returned without being first created
-    // or collection documents created prior to having a default
+    // or collection documents created prior to having a default.
     if (
       !removedFieldValue &&
       allowDefaultValue &&

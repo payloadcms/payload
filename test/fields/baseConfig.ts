@@ -148,6 +148,7 @@ export const baseConfig: Partial<Config> = {
       supportedTimezones: ({ defaultTimezones }) => [
         ...defaultTimezones,
         { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+        { label: 'Custom UTC', value: 'UTC' },
       ],
       defaultTimezone: 'America/Monterrey',
     },

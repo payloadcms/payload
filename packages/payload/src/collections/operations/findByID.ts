@@ -161,6 +161,7 @@ export const findByIDOperation = async <
         where,
       })
     }
+
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
@@ -169,17 +170,17 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    let result =
-      (args.data as DataFromCollectionSlug<TSlug>) ??
-      (await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs))!
+    const docFromDB = await req.payload.db.findOne(findOneArgs)
 
-    if (!result) {
+    if (!docFromDB && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
-
       return null!
     }
+
+    let result: DataFromCollectionSlug<TSlug> =
+      (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -243,7 +244,7 @@ export const findByIDOperation = async <
     if (collectionConfig.versions?.drafts && draftEnabled) {
       result = await replaceWithDraftIfAvailable({
         accessResult,
-        doc: result as TypeWithVersion<DataFromCollectionSlug<TSlug>>['version'],
+        doc: result,
         entity: collectionConfig,
         entityType: 'collection',
         overrideAccess,

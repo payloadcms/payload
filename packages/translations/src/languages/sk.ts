@@ -456,7 +456,9 @@ export const skTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Kopírovať do lokalizácie',
     localeToPublish: 'Miesto na publikovanie',
     localizedMeta: 'Lokalizované Meta',
+    selectedLocales: 'Vybrané miestne nastavenia',
     selectLocaleToCopy: 'Vyberte miestny systém na kopírovanie',
+    selectLocaleToDuplicate: 'Vyberte miestne nastavenia na duplikáciu',
   },
   operators: {
     contains: 'obsahuje',
@@ -565,6 +567,7 @@ export const skTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Práve prezeráte',
     currentPublishedVersion: 'Aktuálne publikovaná verzia',
     draft: 'Návrh',
+    draftHasPublishedVersion: 'Koncept (má publikovanú verziu)',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
     lastSavedAgo: 'Naposledy uložené pred {{distance}}',
     modifiedOnly: 'Iba upravené',

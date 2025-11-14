@@ -456,7 +456,9 @@ export const slTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Kopiraj v jezik',
     localeToPublish: 'Lokalno za objavo',
     localizedMeta: 'Lokalizirani Meta',
+    selectedLocales: 'Izbrane regionalne nastavitve',
     selectLocaleToCopy: 'Izberite jezik za kopiranje',
+    selectLocaleToDuplicate: 'Izberite jezikovne nastavitve za podvojitev',
   },
   operators: {
     contains: 'vsebuje',
@@ -564,6 +566,7 @@ export const slTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Trenutno pregledujete',
     currentPublishedVersion: 'Trenutna objavljena različica',
     draft: 'Osnutek',
+    draftHasPublishedVersion: 'Osnutek (ima objavljeno različico)',
     draftSavedSuccessfully: 'Osnutek uspešno shranjen.',
     lastSavedAgo: 'Nazadnje shranjeno pred {{distance}}',
     modifiedOnly: 'Samo spremenjeno',

@@ -455,7 +455,9 @@ export const isTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Afrita í staðfærslu',
     localeToPublish: 'Staðfærsla til að gefa út',
     localizedMeta: 'Staðbundin lýsigögn',
+    selectedLocales: 'Valdar svæði',
     selectLocaleToCopy: 'Veldu staðfærslu til að afrita',
+    selectLocaleToDuplicate: 'Veldu staðföng til að afrita',
   },
   operators: {
     contains: 'inniheldur',
@@ -564,6 +566,7 @@ export const isTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Skoða núna',
     currentPublishedVersion: 'Núverandi útgefin útgáfa',
     draft: 'Drög',
+    draftHasPublishedVersion: 'Drög (hafa birt útgáfu)',
     draftSavedSuccessfully: 'Drög vistuð með góðum árangri.',
     lastSavedAgo: 'Síðast vistað {{distance}} síðan',
     modifiedOnly: 'Aðeins breytt',

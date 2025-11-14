@@ -658,12 +658,18 @@ describe('Localization', () => {
     })
 
     test('blocks - should show fallback checkbox for non-default locale', async () => {
+      await changeLocale(page, 'en')
       await page.goto(urlBlocks.create)
+      const titleLocator = page.locator('#field-title')
+      await titleLocator.fill('Block Test')
       await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
       const rowTextInput = page.locator(`#field-content__0__text`)
       await rowTextInput.fill('text')
       await saveDocAndAssert(page)
-      await changeLocale(page, 'pt')
+
+      await changeLocale(page, spanishLocale)
+      await titleLocator.fill('PT Block Test')
+      await waitForAutoSaveToRunAndComplete(page)
       const fallbackCheckbox = page.locator('#field-content', {
         hasText: 'Fallback to default locale',
       })
@@ -750,6 +756,53 @@ describe('Localization', () => {
     await changeLocale(page, spanishLocale)
     await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
     await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+  })
+
+  describe('duplicate selected locales', () => {
+    test('should duplicate document with data from selected locales', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await changeLocale(page, defaultLocale)
+      await fillValues({ title: 'English Title' })
+      await saveDocAndAssert(page)
+      const id = await page.locator('.id-label').innerText()
+
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: 'Spanish Title' })
+      await saveDocAndAssert(page)
+
+      await changeLocale(page, 'pt')
+      await fillValues({ title: 'Portuguese Title' })
+      await saveDocAndAssert(page)
+
+      await openDocControls(page)
+      await page.locator('#action-duplicate-locales').click()
+
+      await expect(page.locator('.select-locales-drawer__content')).toBeVisible()
+      await page
+        .locator('.select-locales-drawer__item', { hasText: 'English' })
+        .locator('input')
+        .click()
+      await page
+        .locator('.select-locales-drawer__item', { hasText: 'Portuguese' })
+        .locator('input')
+        .click()
+      const confirmButton = page.locator('#\\#action-duplicate-confirm')
+      await expect(confirmButton).toBeEnabled()
+      await confirmButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'successfully duplicated',
+      )
+
+      await expect.poll(() => page.url()).not.toContain(id)
+      await page.waitForURL((url) => !url.toString().includes(id))
+
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('#field-title')).toHaveValue('English Title')
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+      await changeLocale(page, 'pt')
+      await expect(page.locator('#field-title')).toHaveValue('Portuguese Title')
+    })
   })
 })
 

@@ -10,6 +10,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -81,6 +82,10 @@ export const findOneOperation = async <T extends JsonObject>(
       accessResult = await executeAccess({ req }, globalConfig.access.read)
     }
 
+    if (accessResult === false) {
+      throw new NotFound(req.t)
+    }
+
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
       forceSelect: globalConfig.forceSelect,
@@ -91,18 +96,22 @@ export const findOneOperation = async <T extends JsonObject>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc: T =
-      args.data ??
-      (await req.payload.db.findGlobal<T>({
-        slug,
-        locale: locale!,
-        req,
-        select,
-        where: overrideAccess ? undefined : (accessResult as Where),
-      }))
-    if (!doc) {
-      doc = {} as T
+    const docFromDB = await req.payload.db.findGlobal({
+      slug,
+      locale: locale!,
+      req,
+      select,
+      where: overrideAccess ? undefined : (accessResult as Where),
+    })
+
+    // Check if no document was returned (Postgres returns {} instead of null)
+    const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+
+    if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
+      return {} as any
     }
+
+    let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
 
     // /////////////////////////////////////
     // Include Lock Status if required

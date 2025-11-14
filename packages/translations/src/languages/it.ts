@@ -461,7 +461,9 @@ export const itTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Copia in locale',
     localeToPublish: 'Località da pubblicare',
     localizedMeta: 'Meta Localizzati',
+    selectedLocales: 'Località Selezionate',
     selectLocaleToCopy: 'Seleziona la località da copiare',
+    selectLocaleToDuplicate: 'Seleziona le località da duplicare',
   },
   operators: {
     contains: 'contiene',
@@ -572,6 +574,7 @@ export const itTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Visualizzazione attuale',
     currentPublishedVersion: 'Versione Pubblicata Attuale',
     draft: 'Bozza',
+    draftHasPublishedVersion: 'Bozza (ha una versione pubblicata)',
     draftSavedSuccessfully: 'Bozza salvata con successo.',
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     modifiedOnly: 'Modificato solo',

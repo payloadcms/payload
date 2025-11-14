@@ -156,12 +156,12 @@ The arguments can be extended but should always include the `PaymentAdapterArgs`
 
 | Property         | Type             | Description                                                                                                                  |
 | ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `label`          | `string`         | (Optional) Allow overriding the default UI label for this adaper.                                                            |
+| `label`          | `string`         | (Optional) Allow overriding the default UI label for this adapter.                                                           |
 | `groupOverrides` | `FieldsOverride` | (Optional) Allow overriding the default fields of the payment group. See [Payment Fields](#payment-fields) for more details. |
 
 #### initiatePayment
 
-The `initiatePayment` function is called when a payment is initiated. At this step the transaction is created with a status "Processing", an abandoned purchaase will leave this transaction in this state. It receives an object with the following properties:
+The `initiatePayment` function is called when a payment is initiated. At this step the transaction is created with a status "Processing", an abandoned purchase will leave this transaction in this state. It receives an object with the following properties:
 
 | Property           | Type             | Description                                   |
 | ------------------ | ---------------- | --------------------------------------------- |
@@ -407,7 +407,7 @@ And for the args use the `PaymentAdapterClientArgs` type:
 
 | Property | Type     | Description                                                       |
 | -------- | -------- | ----------------------------------------------------------------- |
-| `label`  | `string` | (Optional) Allow overriding the default UI label for this adaper. |
+| `label`  | `string` | (Optional) Allow overriding the default UI label for this adapter. |
 
 ## Best Practices
 

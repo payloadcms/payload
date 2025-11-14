@@ -222,6 +222,32 @@ describe('Live Preview', () => {
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
+  test('collection — does not render preview button when url is null', async () => {
+    const noURL = new AdminUrlUtil(serverURL, 'conditional-url')
+    await page.goto(noURL.create)
+    await page.locator('#field-title').fill('No URL')
+    await saveDocAndAssert(page)
+
+    // No button should render
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeHidden()
+
+    // Check the `enabled` field
+    const enabledCheckbox = page.locator('#field-enabled')
+    await enabledCheckbox.check()
+    await saveDocAndAssert(page)
+
+    // Button is present
+    await expect(previewButton).toBeVisible()
+
+    // Uncheck the `enabled` field
+    await enabledCheckbox.uncheck()
+    await saveDocAndAssert(page)
+
+    // Button is gone
+    await expect(previewButton).toBeHidden()
+  })
+
   test('collection — retains static URL across edits', async () => {
     const util = new AdminUrlUtil(serverURL, 'static-url')
     await page.goto(util.create)

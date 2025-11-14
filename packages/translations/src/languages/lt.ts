@@ -459,7 +459,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Kopijuoti į vietovę',
     localeToPublish: 'Publikuoti lokacijoje',
     localizedMeta: 'Lokalizuota Meta',
+    selectedLocales: 'Pasirinktos lokalės',
     selectLocaleToCopy: 'Pasirinkite lokalės kopijavimui',
+    selectLocaleToDuplicate: 'Pasirinkite vietoves, kurias norite dubliuoti',
   },
   operators: {
     contains: 'yra',
@@ -571,6 +573,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Šiuo metu peržiūrima',
     currentPublishedVersion: 'Dabartinė publikuota versija',
     draft: 'Projektas',
+    draftHasPublishedVersion: 'Juodraštis (turi publikuotą versiją)',
     draftSavedSuccessfully: 'Juosmuo sėkmingai išsaugotas.',
     lastSavedAgo: 'Paskutinį kartą išsaugota prieš {{distance}}',
     modifiedOnly: 'Tik modifikuotas',

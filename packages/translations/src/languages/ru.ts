@@ -460,7 +460,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     copyToLocale: 'Копировать в локаль',
     localeToPublish: 'Локаль для публикации',
     localizedMeta: 'Локализованные метаданные',
+    selectedLocales: 'Выбранные локали',
     selectLocaleToCopy: 'Выберите локаль для копирования',
+    selectLocaleToDuplicate: 'Выберите локали для дублирования',
   },
   operators: {
     contains: 'содержит',
@@ -569,6 +571,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'В настоящее время просматривается',
     currentPublishedVersion: 'Текущая опубликованная версия',
     draft: 'Черновик',
+    draftHasPublishedVersion: 'Черновик (имеет опубликованную версию)',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     modifiedOnly: 'Модифицирован только',
