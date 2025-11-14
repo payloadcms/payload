@@ -18,7 +18,7 @@ import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
 
 type Arguments<T extends JsonObject> = {
   accessResult: AccessResult
-  doc: TypeWithVersion<T>['version']
+  doc: T | TypeWithVersion<T>['version']
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   overrideAccess: boolean
