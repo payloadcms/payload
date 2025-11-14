@@ -1,4 +1,4 @@
-import type { Payload, User, Where } from 'payload'
+import type { LocalizationConfig, Payload, User, Where } from 'payload'
 
 import path from 'path'
 import { createLocalReq } from 'payload'
@@ -3561,7 +3561,246 @@ describe('Localization', () => {
       }
     })
 
-    describe('publish specific locales', () => {
+    describe('_localizedMeta', () => {
+      describe('publishing', () => {
+        it('should publish all', async () => {
+          // Create draft with published locales
+          const draft = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'published',
+              text: 'English text',
+            },
+            locale: 'en',
+          })
+
+          const mainDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(mainDoc._localizedMeta.en.status).toEqual('published')
+          expect(mainDoc._localizedMeta.es.status).toEqual('published')
+        })
+
+        it('should publish specific locale', async () => {
+          // Create draft in English
+          const draft = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'draft',
+              text: 'English text',
+            },
+            locale: 'en',
+          })
+
+          const mainDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(mainDoc._localizedMeta.es.status).toEqual('draft')
+          expect(mainDoc._localizedMeta.en.status).toEqual('draft')
+
+          const versionDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: true,
+          })
+          expect(versionDoc._localizedMeta.es.status).toEqual('draft')
+          expect(versionDoc._localizedMeta.en.status).toEqual('draft')
+
+          // Publish only English
+          await payload.update({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'published',
+            },
+            locale: 'en',
+            publishSpecificLocale: 'en',
+          })
+
+          const updatedMainDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(updatedMainDoc._localizedMeta.en.status).toEqual('published')
+          expect(updatedMainDoc._localizedMeta.es.status).toEqual('draft')
+
+          const updatedVersionDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: true,
+          })
+          expect(updatedVersionDoc._localizedMeta.en.status).toEqual('published')
+          expect(updatedVersionDoc._localizedMeta.es.status).toEqual('draft')
+
+          const publishedStatusQuery = await payload.find({
+            collection: allFieldsLocalizedSlug,
+            where: {
+              '_localizedMeta.status': {
+                equals: 'published',
+              },
+            },
+            locale: 'en',
+          })
+          expect(publishedStatusQuery.docs).toHaveLength(1)
+
+          const draftStatusQuery = await payload.find({
+            collection: allFieldsLocalizedSlug,
+            where: {
+              '_localizedMeta.status': {
+                equals: 'draft',
+              },
+            },
+            locale: 'es',
+          })
+          expect(draftStatusQuery.docs).toHaveLength(
+            (payload.config.localization as LocalizationConfig).locales.length - 1,
+          )
+        })
+      })
+
+      describe('unpublishing', () => {
+        it('should set _localizedMeta to draft when bulk unpublishing', async () => {
+          // Create published doc
+          const published = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'published',
+              text: 'English text',
+            },
+            locale: 'en',
+          })
+
+          const mainDoc = await payload.findByID({
+            id: published.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(mainDoc._localizedMeta.en.status).toEqual('published')
+          expect(mainDoc._localizedMeta.es.status).toEqual('published')
+
+          // Unpublish all locales
+          await payload.update({
+            id: published.id,
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'draft',
+            },
+            locale: 'en',
+          })
+
+          const updatedMainDoc = await payload.findByID({
+            id: published.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(updatedMainDoc._localizedMeta.en.status).toEqual('draft')
+          expect(updatedMainDoc._localizedMeta.es.status).toEqual('draft')
+        })
+
+        it('should unpublish specific locale', async () => {
+          // Create draft with published locales
+          const draft = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'published',
+              text: 'English text',
+            },
+            locale: 'en',
+          })
+
+          const mainDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(mainDoc._localizedMeta.en.status).toEqual('published')
+          expect(mainDoc._localizedMeta.es.status).toEqual('published')
+
+          // Unpublish only English
+          await payload.update({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'draft',
+            },
+            locale: 'en',
+            unpublishSpecificLocale: 'en',
+          })
+
+          const updatedMainDoc = await payload.findByID({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
+            draft: false,
+          })
+          expect(updatedMainDoc._localizedMeta.en.status).toEqual('draft')
+          expect(updatedMainDoc._localizedMeta.es.status).toEqual('published')
+        })
+      })
+
+      describe('querying by _localizedMeta.status', () => {
+        it('should query correctly after publishing specific locale', async () => {
+          // Create draft in English
+          const draft = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'draft',
+              text: 'English text',
+            },
+            locale: 'en',
+          })
+
+          await payload.update({
+            id: draft.id,
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'draft',
+            },
+            locale: 'en',
+            publishSpecificLocale: 'en',
+          })
+
+          const publishedStatusQuery = await payload.find({
+            collection: allFieldsLocalizedSlug,
+            where: {
+              '_localizedMeta.status': {
+                equals: 'published',
+              },
+            },
+            locale: 'en',
+          })
+          expect(publishedStatusQuery.docs).toHaveLength(1)
+
+          const draftStatusQuery = await payload.find({
+            collection: allFieldsLocalizedSlug,
+            where: {
+              '_localizedMeta.status': {
+                equals: 'draft',
+              },
+            },
+            locale: 'es',
+          })
+          expect(draftStatusQuery.docs).toHaveLength(
+            (payload.config.localization as LocalizationConfig).locales.length - 1,
+          )
+        })
+      })
+    })
+
+    describe('publish locales', () => {
       describe('collections', () => {
         it('should publish only the specified locale with correct nesting structure', async () => {
           // Create draft with all field types in multiple locales

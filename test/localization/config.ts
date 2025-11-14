@@ -63,6 +63,9 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  experimental: {
+    localizeMeta: true,
+  },
   collections: [
     RichTextCollection,
     BlocksCollection,
