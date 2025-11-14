@@ -131,6 +131,29 @@ localization: {
 
 Since the filtering happens at the root level of the application and its result is not calculated every time you navigate to a new page, you may want to call `router.refresh` in a custom component that watches when values that affect the result change. In the example above, you would want to do this when `supportedLocales` changes on the tenant document.
 
+## Experimental Options
+
+Experimental options are features that may not be fully stable and may change or be removed in future releases.
+
+These options can be enabled in your Payload Config under the `experimental` key. You can set them like this:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  experimental: {
+    localizeMeta: true,
+  },
+})
+```
+
+The following experimental options are available related to localization:
+
+| Option             | Description                                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`localizeMeta`** | **Boolean.** When `true`, shows document metadata (e.g., status, updatedAt) per locale in the admin panel instead of showing the latest overall metadata. Defaults to `false`. |
+
 ## Field Localization
 
 Payload Localization works on a **field** level—not a document level. In addition to configuring the base Payload Config to support Localization, you need to specify each field that you would like to localize.
