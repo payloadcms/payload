@@ -573,6 +573,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Šiuo metu peržiūrima',
     currentPublishedVersion: 'Dabartinė publikuota versija',
     draft: 'Projektas',
+    draftHasPublishedVersion: 'Juodraštis (turi publikuotą versiją)',
     draftSavedSuccessfully: 'Juosmuo sėkmingai išsaugotas.',
     lastSavedAgo: 'Paskutinį kartą išsaugota prieš {{distance}}',
     modifiedOnly: 'Tik modifikuotas',

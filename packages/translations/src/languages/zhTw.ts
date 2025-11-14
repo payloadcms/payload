@@ -541,6 +541,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     currentlyViewing: '目前檢視',
     currentPublishedVersion: '目前已發佈版本',
     draft: '草稿',
+    draftHasPublishedVersion: '草稿（有已發佈版本）',
     draftSavedSuccessfully: '草稿已成功儲存。',
     lastSavedAgo: '上次儲存時間：{{distance}} 前',
     modifiedOnly: '僅顯示已變更的內容',

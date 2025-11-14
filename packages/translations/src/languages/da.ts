@@ -568,6 +568,7 @@ export const daTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Aktuelt visning',
     currentPublishedVersion: 'Nuværende offentliggjort version',
     draft: 'Kladde',
+    draftHasPublishedVersion: 'Udkast (har offentliggjort version)',
     draftSavedSuccessfully: 'Kladde gemt.',
     lastSavedAgo: 'Sidst gemt {{distance}}',
     modifiedOnly: 'Kun ændret',

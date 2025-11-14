@@ -581,6 +581,7 @@ export const deTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Derzeitige Ansicht',
     currentPublishedVersion: 'Aktuell veröffentlichte Version',
     draft: 'Entwurf',
+    draftHasPublishedVersion: 'Entwurf (hat veröffentlichte Version)',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     modifiedOnly: 'Nur modifiziert',

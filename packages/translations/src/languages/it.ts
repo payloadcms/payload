@@ -575,6 +575,7 @@ export const itTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Visualizzazione attuale',
     currentPublishedVersion: 'Versione Pubblicata Attuale',
     draft: 'Bozza',
+    draftHasPublishedVersion: 'Bozza (ha una versione pubblicata)',
     draftSavedSuccessfully: 'Bozza salvata con successo.',
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     modifiedOnly: 'Modificato solo',

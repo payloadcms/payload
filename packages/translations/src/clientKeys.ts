@@ -475,6 +475,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:currentPublishedVersion',
   'version:currentlyPublished',
   'version:draft',
+  'version:draftHasPublishedVersion',
   'version:draftSavedSuccessfully',
   'version:lastSavedAgo',
   'version:modifiedOnly',

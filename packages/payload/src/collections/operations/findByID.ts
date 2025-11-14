@@ -170,16 +170,17 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
+    const docFromDB = await req.payload.db.findOne(findOneArgs)
 
-    if (!result) {
+    if (!docFromDB && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
-
       return null!
     }
+
+    let result: DataFromCollectionSlug<TSlug> =
+      (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
 
     // /////////////////////////////////////
     // Include Lock Status if required

@@ -568,6 +568,7 @@ export const skTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Práve prezeráte',
     currentPublishedVersion: 'Aktuálne publikovaná verzia',
     draft: 'Návrh',
+    draftHasPublishedVersion: 'Koncept (má publikovanú verziu)',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
     lastSavedAgo: 'Naposledy uložené pred {{distance}}',
     modifiedOnly: 'Iba upravené',

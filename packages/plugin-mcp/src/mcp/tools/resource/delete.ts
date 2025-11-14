@@ -78,6 +78,7 @@ export const deleteResourceTool = (
         collection: collectionSlug,
         depth,
         overrideAccess: false,
+        req,
         user,
       }
 

@@ -569,6 +569,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'В момента преглеждате',
     currentPublishedVersion: 'Текуща публикувана версия',
     draft: 'Чернова',
+    draftHasPublishedVersion: 'Чернова (има публикувана версия)',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
     lastSavedAgo: 'последно запазено преди {{distance}}',
     modifiedOnly: 'Само променени',

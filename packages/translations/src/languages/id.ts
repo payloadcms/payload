@@ -571,6 +571,7 @@ export const idTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Sedang melihat',
     currentPublishedVersion: 'Versi Terbitan Saat Ini',
     draft: 'Draf',
+    draftHasPublishedVersion: 'Draf (memiliki versi yang dipublikasikan)',
     draftSavedSuccessfully: 'Draf berhasil disimpan.',
     lastSavedAgo: 'Terakhir disimpan {{distance}} yang lalu',
     modifiedOnly: 'Hanya yang diubah',

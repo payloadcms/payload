@@ -198,6 +198,7 @@ export interface RichText {
  */
 export interface BlocksField {
   id: string;
+  title?: string | null;
   tabContent?:
     | {
         text?: string | null;
@@ -1001,6 +1002,7 @@ export interface RichTextSelect<T extends boolean = true> {
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
+  title?: T;
   tabContent?:
     | T
     | {

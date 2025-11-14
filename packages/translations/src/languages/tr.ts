@@ -571,6 +571,7 @@ export const trTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Şu anda görüntüleniyor',
     currentPublishedVersion: 'Mevcut Yayınlanan Sürüm',
     draft: 'Taslak',
+    draftHasPublishedVersion: 'Taslak (yayınlanmış versiyonu var)',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     modifiedOnly: 'Yalnızca değiştirilmiş',

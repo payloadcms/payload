@@ -569,6 +569,7 @@ export const svTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Visar för tillfället',
     currentPublishedVersion: 'Aktuell publicerad version',
     draft: 'Utkast',
+    draftHasPublishedVersion: 'Utkast (har publicerad version)',
     draftSavedSuccessfully: 'Utkastet sparades',
     lastSavedAgo: 'Senast sparad för {{distance}} sedan',
     modifiedOnly: 'Endast ändringar',

@@ -561,6 +561,7 @@ export const etTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Praegu vaatamine',
     currentPublishedVersion: 'Praegune avaldatud versioon',
     draft: 'Mustand',
+    draftHasPublishedVersion: 'Mustand (on avaldatud versioon)',
     draftSavedSuccessfully: 'Mustand edukalt salvestatud.',
     lastSavedAgo: 'Viimati salvestatud {{distance}} tagasi',
     modifiedOnly: 'Muudetud ainult',

@@ -570,6 +570,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     currentlyViewing: '現在表示中',
     currentPublishedVersion: '現在公開されているバージョン',
     draft: 'ドラフト',
+    draftHasPublishedVersion: 'ドラフト（公開版が存在する）',
     draftSavedSuccessfully: '下書きは正常に保存されました。',
     lastSavedAgo: '{{distance}}前に最後に保存されました',
     modifiedOnly: '変更済みのみ',

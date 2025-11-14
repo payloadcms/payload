@@ -568,6 +568,7 @@ export const plTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Obecnie przeglądasz',
     currentPublishedVersion: 'Aktualna Opublikowana Wersja',
     draft: 'Szkic',
+    draftHasPublishedVersion: 'Szkic (ma opublikowaną wersję)',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
     lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
     modifiedOnly: 'Tylko zmodyfikowany',

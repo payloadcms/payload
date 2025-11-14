@@ -571,6 +571,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Ser på for øyeblikket',
     currentPublishedVersion: 'Nåværende publiserte versjon',
     draft: 'Utkast',
+    draftHasPublishedVersion: 'Utkast (har publisert versjon)',
     draftSavedSuccessfully: 'Utkast lagret.',
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     modifiedOnly: 'Kun endret',

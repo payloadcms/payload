@@ -572,6 +572,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Atualmente visualizando',
     currentPublishedVersion: 'Versão Publicada Atual',
     draft: 'Rascunho',
+    draftHasPublishedVersion: 'Rascunho (tem versão publicada)',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
     lastSavedAgo: 'Última gravação há {{distance}}',
     modifiedOnly: 'Modificado apenas',

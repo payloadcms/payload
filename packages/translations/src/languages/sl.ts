@@ -567,6 +567,7 @@ export const slTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Trenutno pregledujete',
     currentPublishedVersion: 'Trenutna objavljena različica',
     draft: 'Osnutek',
+    draftHasPublishedVersion: 'Osnutek (ima objavljeno različico)',
     draftSavedSuccessfully: 'Osnutek uspešno shranjen.',
     lastSavedAgo: 'Nazadnje shranjeno pred {{distance}}',
     modifiedOnly: 'Samo spremenjeno',

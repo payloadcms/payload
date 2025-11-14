@@ -565,6 +565,7 @@ export const viTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Đang xem',
     currentPublishedVersion: 'Phiên bản Đã Xuất bản Hiện tại',
     draft: 'Bản nháp',
+    draftHasPublishedVersion: 'Bản nháp (có phiên bản đã xuất bản)',
     draftSavedSuccessfully: 'Bản nháp đã được lưu thành công.',
     lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
     modifiedOnly: 'Chỉ được sửa đổi',

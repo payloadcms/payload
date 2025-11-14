@@ -556,6 +556,7 @@ export const thTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'กำลังดูอยู่ในขณะนี้',
     currentPublishedVersion: 'เวอร์ชันที่เผยแพร่ในปัจจุบัน',
     draft: 'ฉบับร่าง',
+    draftHasPublishedVersion: 'ร่าง (มีรุ่นที่เผยแพร่แล้ว)',
     draftSavedSuccessfully: 'บันทึกร่างสำเร็จ',
     lastSavedAgo: 'บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา',
     modifiedOnly: 'แก้ไขเท่านั้น',

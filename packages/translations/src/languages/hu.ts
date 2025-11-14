@@ -577,6 +577,7 @@ export const huTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Jelenlegi megtekintés',
     currentPublishedVersion: 'Jelenleg Közzétett Verzió',
     draft: 'Piszkozat',
+    draftHasPublishedVersion: 'Piszkozat (van közzétett verziója)',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     modifiedOnly: 'Módosítva csak',

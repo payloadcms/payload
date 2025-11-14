@@ -550,6 +550,7 @@ export const heTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'מציג כרגע',
     currentPublishedVersion: 'הגרסה שפורסמה כעת',
     draft: 'טיוטה',
+    draftHasPublishedVersion: 'טיוטה (יש גרסה שפורסמה)',
     draftSavedSuccessfully: 'טיוטה נשמרה בהצלחה.',
     lastSavedAgo: 'נשמר לאחרונה לפני {{distance}}',
     modifiedOnly: 'מותאם בלבד',
