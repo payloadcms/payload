@@ -624,6 +624,33 @@ export default buildConfigWithDefaults(
       Hooks,
       Auth,
       ReadRestricted,
+      {
+        slug: 'field-restricted-update-based-on-data',
+        fields: [
+          {
+            name: 'restricted',
+            type: 'text',
+            access: {
+              update: ({ data, doc }) => {
+                console.log(`update access control.`, {
+                  data,
+                  doc,
+                  returned: !data?.field1,
+                })
+                return !data?.isRestricted
+              },
+            },
+          },
+          {
+            name: 'doesNothing',
+            type: 'checkbox',
+          },
+          {
+            name: 'isRestricted',
+            type: 'checkbox',
+          },
+        ],
+      },
     ],
     globals: [
       {

@@ -97,6 +97,7 @@ export interface Config {
     hooks: Hook;
     'auth-collection': AuthCollection;
     'read-restricted': ReadRestricted;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDatum;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -130,13 +131,14 @@ export interface Config {
     hooks: HooksSelect<false> | HooksSelect<true>;
     'auth-collection': AuthCollectionSelect<false> | AuthCollectionSelect<true>;
     'read-restricted': ReadRestrictedSelect<false> | ReadRestrictedSelect<true>;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDataSelect<false> | FieldRestrictedUpdateBasedOnDataSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {
     settings: Setting;
@@ -237,7 +239,7 @@ export interface Titleblock {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
@@ -262,7 +264,7 @@ export interface User {
  * via the `definition` "public-users".
  */
 export interface PublicUser {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -286,7 +288,7 @@ export interface PublicUser {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   restrictedField?: string | null;
   group?: {
     restrictedGroupText?: string | null;
@@ -301,14 +303,14 @@ export interface Post {
  * via the `definition` "unrestricted".
  */
 export interface Unrestricted {
-  id: string;
+  id: number;
   name?: string | null;
   info?: {
     title?: string | null;
     description?: string | null;
   };
-  userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
-  createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null;
+  userRestrictedDocs?: (number | UserRestrictedCollection)[] | null;
+  createNotUpdateDocs?: (number | CreateNotUpdateCollection)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -317,7 +319,7 @@ export interface Unrestricted {
  * via the `definition` "user-restricted-collection".
  */
 export interface UserRestrictedCollection {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -327,7 +329,7 @@ export interface UserRestrictedCollection {
  * via the `definition` "create-not-update-collection".
  */
 export interface CreateNotUpdateCollection {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -337,9 +339,9 @@ export interface CreateNotUpdateCollection {
  * via the `definition` "relation-restricted".
  */
 export interface RelationRestricted {
-  id: string;
+  id: number;
   name?: string | null;
-  post?: (string | null) | Post;
+  post?: (number | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -348,7 +350,7 @@ export interface RelationRestricted {
  * via the `definition` "fully-restricted".
  */
 export interface FullyRestricted {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -358,7 +360,7 @@ export interface FullyRestricted {
  * via the `definition` "read-only-collection".
  */
 export interface ReadOnlyCollection {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -368,7 +370,7 @@ export interface ReadOnlyCollection {
  * via the `definition` "restricted-versions".
  */
 export interface RestrictedVersion {
-  id: string;
+  id: number;
   name?: string | null;
   hidden?: boolean | null;
   updatedAt: string;
@@ -379,7 +381,7 @@ export interface RestrictedVersion {
  * via the `definition` "restricted-versions-admin-panel".
  */
 export interface RestrictedVersionsAdminPanel {
-  id: string;
+  id: number;
   name?: string | null;
   hidden?: boolean | null;
   updatedAt: string;
@@ -390,7 +392,7 @@ export interface RestrictedVersionsAdminPanel {
  * via the `definition` "sibling-data".
  */
 export interface SiblingDatum {
-  id: string;
+  id: number;
   array?:
     | {
         allowPublicReadability?: boolean | null;
@@ -406,7 +408,7 @@ export interface SiblingDatum {
  * via the `definition` "rely-on-request-headers".
  */
 export interface RelyOnRequestHeader {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -416,7 +418,7 @@ export interface RelyOnRequestHeader {
  * via the `definition` "doc-level-access".
  */
 export interface DocLevelAccess {
-  id: string;
+  id: number;
   approvedForRemoval?: boolean | null;
   approvedTitle?: string | null;
   lockTitle?: boolean | null;
@@ -428,7 +430,7 @@ export interface DocLevelAccess {
  * via the `definition` "hidden-fields".
  */
 export interface HiddenField {
-  id: string;
+  id: number;
   title?: string | null;
   partiallyHiddenGroup?: {
     name?: string | null;
@@ -451,7 +453,7 @@ export interface HiddenField {
  * via the `definition` "hidden-access".
  */
 export interface HiddenAccess {
-  id: string;
+  id: number;
   title: string;
   hidden?: boolean | null;
   updatedAt: string;
@@ -462,7 +464,7 @@ export interface HiddenAccess {
  * via the `definition` "hidden-access-count".
  */
 export interface HiddenAccessCount {
-  id: string;
+  id: number;
   title: string;
   hidden?: boolean | null;
   updatedAt: string;
@@ -473,7 +475,7 @@ export interface HiddenAccessCount {
  * via the `definition` "fields-and-top-access".
  */
 export interface FieldsAndTopAccess {
-  id: string;
+  id: number;
   secret?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -484,7 +486,7 @@ export interface FieldsAndTopAccess {
  * via the `definition` "blocks-field-access".
  */
 export interface BlocksFieldAccess {
-  id: string;
+  id: number;
   title: string;
   editableBlocks?:
     | {
@@ -526,7 +528,7 @@ export interface BlocksFieldAccess {
  * via the `definition` "disabled".
  */
 export interface Disabled {
-  id: string;
+  id: number;
   group?: {
     text?: string | null;
   };
@@ -548,7 +550,7 @@ export interface Disabled {
  * via the `definition` "rich-text".
  */
 export interface RichText {
-  id: string;
+  id: number;
   blocks?:
     | {
         richText?: {
@@ -579,7 +581,7 @@ export interface RichText {
  * via the `definition` "regression1".
  */
 export interface Regression1 {
-  id: string;
+  id: number;
   group1?: {
     richText1?: {
       root: {
@@ -744,7 +746,7 @@ export interface Regression1 {
  * via the `definition` "regression2".
  */
 export interface Regression2 {
-  id: string;
+  id: number;
   group?: {
     richText1?: {
       root: {
@@ -791,7 +793,7 @@ export interface Regression2 {
  * via the `definition` "hooks".
  */
 export interface Hook {
-  id: string;
+  id: number;
   cannotMutateRequired: string;
   cannotMutateNotRequired?: string | null;
   canMutate?: string | null;
@@ -803,7 +805,7 @@ export interface Hook {
  * via the `definition` "auth-collection".
  */
 export interface AuthCollection {
-  id: string;
+  id: number;
   password?: string | null;
   roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
@@ -830,7 +832,7 @@ export interface AuthCollection {
  * via the `definition` "read-restricted".
  */
 export interface ReadRestricted {
-  id: string;
+  id: number;
   restrictedTopLevel?: string | null;
   visibleTopLevel?: string | null;
   contactInfo?: {
@@ -873,7 +875,7 @@ export interface ReadRestricted {
     visibleAdvanced?: string | null;
     restrictedAdvanced?: string | null;
   };
-  unrestricted?: (string | null) | Unrestricted;
+  unrestricted?: (number | null) | Unrestricted;
   unrestrictedVirtualFieldName?: string | null;
   unrestrictedVirtualGroupInfo?: {
     title?: string | null;
@@ -885,10 +887,22 @@ export interface ReadRestricted {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data".
+ */
+export interface FieldRestrictedUpdateBasedOnDatum {
+  id: number;
+  restricted?: string | null;
+  doesNothing?: boolean | null;
+  isRestricted?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -905,125 +919,129 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'unrestricted';
-        value: string | Unrestricted;
+        value: number | Unrestricted;
       } | null)
     | ({
         relationTo: 'relation-restricted';
-        value: string | RelationRestricted;
+        value: number | RelationRestricted;
       } | null)
     | ({
         relationTo: 'fully-restricted';
-        value: string | FullyRestricted;
+        value: number | FullyRestricted;
       } | null)
     | ({
         relationTo: 'read-only-collection';
-        value: string | ReadOnlyCollection;
+        value: number | ReadOnlyCollection;
       } | null)
     | ({
         relationTo: 'user-restricted-collection';
-        value: string | UserRestrictedCollection;
+        value: number | UserRestrictedCollection;
       } | null)
     | ({
         relationTo: 'create-not-update-collection';
-        value: string | CreateNotUpdateCollection;
+        value: number | CreateNotUpdateCollection;
       } | null)
     | ({
         relationTo: 'restricted-versions';
-        value: string | RestrictedVersion;
+        value: number | RestrictedVersion;
       } | null)
     | ({
         relationTo: 'restricted-versions-admin-panel';
-        value: string | RestrictedVersionsAdminPanel;
+        value: number | RestrictedVersionsAdminPanel;
       } | null)
     | ({
         relationTo: 'sibling-data';
-        value: string | SiblingDatum;
+        value: number | SiblingDatum;
       } | null)
     | ({
         relationTo: 'rely-on-request-headers';
-        value: string | RelyOnRequestHeader;
+        value: number | RelyOnRequestHeader;
       } | null)
     | ({
         relationTo: 'doc-level-access';
-        value: string | DocLevelAccess;
+        value: number | DocLevelAccess;
       } | null)
     | ({
         relationTo: 'hidden-fields';
-        value: string | HiddenField;
+        value: number | HiddenField;
       } | null)
     | ({
         relationTo: 'hidden-access';
-        value: string | HiddenAccess;
+        value: number | HiddenAccess;
       } | null)
     | ({
         relationTo: 'hidden-access-count';
-        value: string | HiddenAccessCount;
+        value: number | HiddenAccessCount;
       } | null)
     | ({
         relationTo: 'fields-and-top-access';
-        value: string | FieldsAndTopAccess;
+        value: number | FieldsAndTopAccess;
       } | null)
     | ({
         relationTo: 'blocks-field-access';
-        value: string | BlocksFieldAccess;
+        value: number | BlocksFieldAccess;
       } | null)
     | ({
         relationTo: 'disabled';
-        value: string | Disabled;
+        value: number | Disabled;
       } | null)
     | ({
         relationTo: 'rich-text';
-        value: string | RichText;
+        value: number | RichText;
       } | null)
     | ({
         relationTo: 'regression1';
-        value: string | Regression1;
+        value: number | Regression1;
       } | null)
     | ({
         relationTo: 'regression2';
-        value: string | Regression2;
+        value: number | Regression2;
       } | null)
     | ({
         relationTo: 'hooks';
-        value: string | Hook;
+        value: number | Hook;
       } | null)
     | ({
         relationTo: 'auth-collection';
-        value: string | AuthCollection;
+        value: number | AuthCollection;
       } | null)
     | ({
         relationTo: 'read-restricted';
-        value: string | ReadRestricted;
+        value: number | ReadRestricted;
+      } | null)
+    | ({
+        relationTo: 'field-restricted-update-based-on-data';
+        value: number | FieldRestrictedUpdateBasedOnDatum;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
       }
     | {
         relationTo: 'auth-collection';
-        value: string | AuthCollection;
+        value: number | AuthCollection;
       };
   updatedAt: string;
   createdAt: string;
@@ -1033,19 +1051,19 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
       }
     | {
         relationTo: 'auth-collection';
-        value: string | AuthCollection;
+        value: number | AuthCollection;
       };
   key?: string | null;
   value?:
@@ -1065,7 +1083,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1595,6 +1613,17 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data_select".
+ */
+export interface FieldRestrictedUpdateBasedOnDataSelect<T extends boolean = true> {
+  restricted?: T;
+  doesNothing?: T;
+  isRestricted?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1638,7 +1667,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "settings".
  */
 export interface Setting {
-  id: string;
+  id: number;
   test?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1648,7 +1677,7 @@ export interface Setting {
  * via the `definition` "test".
  */
 export interface Test {
-  id: string;
+  id: number;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1657,7 +1686,7 @@ export interface Test {
  * via the `definition` "read-only-global".
  */
 export interface ReadOnlyGlobal {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1667,7 +1696,7 @@ export interface ReadOnlyGlobal {
  * via the `definition` "user-restricted-global".
  */
 export interface UserRestrictedGlobal {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1677,7 +1706,7 @@ export interface UserRestrictedGlobal {
  * via the `definition` "read-not-update-global".
  */
 export interface ReadNotUpdateGlobal {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
