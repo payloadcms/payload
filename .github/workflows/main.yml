@@ -621,6 +621,11 @@ jobs:
           mongodb-version: 6.0
         if: matrix.database == 'mongodb'
 
+      # Avoid "ERR_PNPM_NO_MATCHING_VERSION" errors shortly after a new version is published
+      - name: Clear pnpm metadata cache
+        run: pnpm store prune
+        if: matrix.template != 'plugin'
+
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}

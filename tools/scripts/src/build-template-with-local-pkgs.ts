@@ -52,6 +52,9 @@ async function main() {
 
   await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
 
+  // Configure pnpm to retry npm registry fetches to handle CDN propagation delays
+  execSync('pnpm config set fetch-retries 3', execOpts)
+
   execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
   execSync('pnpm install --ignore-workspace', execOpts)
 
