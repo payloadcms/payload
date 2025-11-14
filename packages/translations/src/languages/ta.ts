@@ -569,6 +569,7 @@ export const taTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'தற்போது காணப்படுகிறது',
     currentPublishedVersion: 'தற்போதைய வெளியிடப்பட்ட பதிப்பு',
     draft: 'வரைவு',
+    draftHasPublishedVersion: 'வரைவு (வெளியிடப்பட்ட பதிப்பு உள்ளது)',
     draftSavedSuccessfully: 'வரைவு வெற்றிகரமாக சேமிக்கப்பட்டது.',
     lastSavedAgo: 'கடைசியாக {{distance}} முன்பு சேமிக்கப்பட்டது',
     modifiedOnly: 'மாற்றப்பட்டவை மட்டும்',

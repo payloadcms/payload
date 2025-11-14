@@ -557,6 +557,7 @@ export const faTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'در حال مشاهده',
     currentPublishedVersion: 'آخرین نسخه منتشر شده',
     draft: 'پیش‌نویس',
+    draftHasPublishedVersion: 'پیش‌نویس (نسخه منتشر شده دارد)',
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
     lastSavedAgo: 'آخرین ذخیره {{distance}} پیش',
     modifiedOnly: 'فقط موارد تغییر کرده',

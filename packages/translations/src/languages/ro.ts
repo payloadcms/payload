@@ -577,6 +577,7 @@ export const roTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Vizualizare curentă',
     currentPublishedVersion: 'Versiunea Publicată Curentă',
     draft: 'Proiect',
+    draftHasPublishedVersion: 'Proiect (are versiune publicată)',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
     modifiedOnly: 'Modificat doar',

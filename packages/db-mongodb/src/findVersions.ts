@@ -16,7 +16,7 @@ export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
   {
     collection: collectionSlug,
-    limit,
+    limit = 0,
     locale,
     page,
     pagination,
@@ -109,7 +109,7 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  if (limit && limit >= 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
 

@@ -114,7 +114,9 @@ export const updateResourceTool = (
           data: parsedData,
           depth,
           draft,
+          overrideAccess: false,
           overrideLock,
+          req,
           user,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
@@ -125,7 +127,7 @@ export const updateResourceTool = (
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+          data: parsedData,
         } as any)
 
         if (verboseLogs) {
@@ -159,8 +161,10 @@ ${JSON.stringify(result, null, 2)}
           data: parsedData,
           depth,
           draft,
-          overrideAccess: true,
+          overrideAccess: false,
           overrideLock,
+          req,
+          user,
           where: whereClause,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
@@ -171,7 +175,7 @@ ${JSON.stringify(result, null, 2)}
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+          data: parsedData,
         } as any)
 
         const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
@@ -283,7 +287,7 @@ ${JSON.stringify(errors, null, 2)}
 
     server.tool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
       updateResourceSchema.shape,
       async (params: Record<string, unknown>) => {
         const {

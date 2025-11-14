@@ -565,6 +565,7 @@ export const isTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Skoða núna',
     currentPublishedVersion: 'Núverandi útgefin útgáfa',
     draft: 'Drög',
+    draftHasPublishedVersion: 'Drög (hafa birt útgáfu)',
     draftSavedSuccessfully: 'Drög vistuð með góðum árangri.',
     lastSavedAgo: 'Síðast vistað {{distance}} síðan',
     modifiedOnly: 'Aðeins breytt',
