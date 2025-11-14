@@ -912,6 +912,54 @@ describe('relationship', () => {
     await newButton.click()
     await expect(listDrawerContent).toBeHidden()
   })
+
+  test('should update label for *all* relationship fields pointing to the same document, if the useAsTitle is updated from drawer', async () => {
+    const textDoc = await createTextFieldDoc()
+    const doc = await payload.create({
+      collection: 'relationship-fields',
+      data: {
+        relationship: {
+          relationTo: 'text-fields',
+          value: textDoc.id,
+        },
+        relationshipDrawer: textDoc.id,
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    //ensure page is loaded
+    await wait(100)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    await expect(page.locator('#field-relationship .relationship--single-value__text')).toHaveText(
+      textDoc.text,
+    )
+    await expect(
+      page.locator('#field-relationshipDrawer .relationship--single-value__text'),
+    ).toHaveText(textDoc.text)
+
+    await openDocDrawer({
+      page,
+      selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+    })
+
+    await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').fill('new text')
+
+    // save drawer
+    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    // close drawer
+    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+
+    await expect(page.locator('#field-relationship .relationship--single-value__text')).toHaveText(
+      'new text',
+    )
+
+    // The previous issue was that the label of *other* relationship fields pointing to the same document was not updated
+    await expect(
+      page.locator('#field-relationshipDrawer .relationship--single-value__text'),
+    ).toHaveText('new text')
+  })
 })
 
 async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextField> {
