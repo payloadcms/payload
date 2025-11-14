@@ -92,6 +92,47 @@ describePostgres('database - postgres logs', () => {
     consoleCount.mockRestore()
   })
 
+  it('ensure deleteOne is done in two db queries - returning true', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title',
+        number: 5,
+      },
+    })
+    // Count every console log
+    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    await payload.db.deleteOne({
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })
+
+    expect(consoleCount).toHaveBeenCalledTimes(2)
+    consoleCount.mockRestore()
+  })
+
+  it('ensure deleteOne is done in single db query - returning false', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title',
+        number: 5,
+      },
+    })
+    // Count every console log
+    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    await payload.db.deleteOne({
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+      returning: false,
+    })
+
+    expect(consoleCount).toHaveBeenCalledTimes(1)
+    consoleCount.mockRestore()
+  })
+
   it('ensure deleteMany is done in single db query - no where query', async () => {
     await payload.create({
       collection: 'posts',

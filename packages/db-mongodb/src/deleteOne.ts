@@ -1,5 +1,5 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
-import type { DeleteOne } from 'payload'
+import type { DeleteOne, SelectType } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -11,9 +11,16 @@ import { transform } from './utilities/transform.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection: collectionSlug, req, returning, select, where },
+  { collection: collectionSlug, req, returning, select: selectArg, where },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  const select: SelectType | undefined =
+    returning === false
+      ? {
+          id: true,
+        }
+      : selectArg
 
   const options: MongooseUpdateQueryOptions = {
     projection: buildProjectionFromSelect({
