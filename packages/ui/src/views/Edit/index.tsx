@@ -373,6 +373,7 @@ export function DefaultEditView({
 
         reportUpdate({
           id,
+          doc: document,
           entitySlug,
           updatedAt,
         })
