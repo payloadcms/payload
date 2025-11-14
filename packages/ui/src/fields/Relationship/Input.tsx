@@ -109,7 +109,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const valueRef = useRef(value)
 
-  const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
+  const [DocumentDrawer, , { drawerSlug, isDrawerOpen, openDrawer }] = useDocumentDrawer({
     id: currentlyOpenRelationship.id,
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
@@ -481,17 +481,24 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       return false
     }
 
+    const docID = mostRecentUpdate.doc.id
+
     let isMatchingUpdate = false
-    if (hasMany === true) {
-      const currentValue = Array.isArray(value) ? value : [value]
-      isMatchingUpdate = currentValue.some((option) => {
-        return (
-          option.value === mostRecentUpdate.id && option.relationTo === mostRecentUpdate.entitySlug
-        )
-      })
-    } else if (hasMany === false) {
-      isMatchingUpdate =
-        value?.value === mostRecentUpdate.id && value?.relationTo === mostRecentUpdate.entitySlug
+    if (mostRecentUpdate.operation === 'update') {
+      if (hasMany === true) {
+        const currentValue = Array.isArray(value) ? value : [value]
+        isMatchingUpdate = currentValue.some((option) => {
+          return option.value === docID && option.relationTo === mostRecentUpdate.entitySlug
+        })
+      } else if (hasMany === false) {
+        isMatchingUpdate =
+          value?.value === docID && value?.relationTo === mostRecentUpdate.entitySlug
+      }
+    } else if (mostRecentUpdate.operation === 'create') {
+      // "Create New" drawer operations on the same level as this drawer should
+      // set the value to the newly created document.
+      // See test "should create document within document drawer > has one"
+      isMatchingUpdate = mostRecentUpdate.drawerSlug === drawerSlug
     }
 
     if (!isMatchingUpdate) {
@@ -507,8 +514,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       doc: mostRecentUpdate.doc,
       i18n,
     })
-
-    const docID = mostRecentUpdate.id
 
     if (hasMany) {
       const currentValue = value ? (Array.isArray(value) ? value : [value]) : []

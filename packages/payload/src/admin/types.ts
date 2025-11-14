@@ -719,7 +719,9 @@ export type ClientFieldSchemaMap = Map<
 
 export type DocumentEvent = {
   doc?: TypeWithID
+  drawerSlug?: string
   entitySlug: string
   id?: number | string
+  operation: 'create' | 'update'
   updatedAt: string
 }
