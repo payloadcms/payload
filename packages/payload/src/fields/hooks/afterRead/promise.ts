@@ -206,11 +206,7 @@ export const promise = async ({
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
-      if (
-        fieldAffectsDataResult &&
-        shouldHoistLocalizedValue &&
-        typeof siblingDoc[field.name] === 'undefined'
-      ) {
+      if (fieldAffectsDataResult && typeof siblingDoc[field.name] === 'undefined') {
         siblingDoc[field.name] = {}
       }
 
@@ -653,7 +649,10 @@ export const promise = async ({
 
     case 'group': {
       if (fieldAffectsDataResult) {
-        const groupSelect = select?.[field.name]
+        const groupSelect =
+          typeof select?.[field.name] === 'object'
+            ? (select?.[field.name] as SelectType)
+            : undefined
 
         if (shouldLocalizeField && !shouldHoistLocalizedValue) {
           Object.values(siblingDoc[field.name] || {}).forEach((localizedData) => {
@@ -680,7 +679,7 @@ export const promise = async ({
               populate,
               populationPromises,
               req,
-              select: typeof groupSelect === 'object' ? groupSelect : undefined,
+              select: groupSelect,
               selectMode,
               showHiddenFields,
               siblingDoc: localizedData || {},
@@ -712,7 +711,7 @@ export const promise = async ({
             populate,
             populationPromises,
             req,
-            select: typeof groupSelect === 'object' ? groupSelect : undefined,
+            select: groupSelect,
             selectMode,
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
@@ -853,11 +852,14 @@ export const promise = async ({
 
     case 'tab': {
       const tabDoc = siblingDoc
-      let tabSelect: SelectType | undefined
 
       const isNamedTab = tabHasName(field)
 
       if (isNamedTab) {
+        const tabSelect: SelectType | undefined =
+          typeof select?.[field.name] === 'object'
+            ? (select?.[field.name] as SelectType)
+            : undefined
         if (shouldLocalizeField && !shouldHoistLocalizedValue) {
           Object.values(siblingDoc[field.name] || {}).forEach((localizedData) => {
             traverseFields({
@@ -915,10 +917,7 @@ export const promise = async ({
             populate,
             populationPromises,
             req,
-            select:
-              typeof select?.[field.name] === 'object'
-                ? (select?.[field.name] as SelectType)
-                : undefined,
+            select: tabSelect,
             selectMode,
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
