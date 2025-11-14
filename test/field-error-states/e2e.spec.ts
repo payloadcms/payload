@@ -111,7 +111,9 @@ describe('Field Error States', () => {
       await page.locator('#field-validatedField').fill('This will fail')
 
       await page.click('#action-save-draft')
-      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+      const errorToast = page.locator('.payload-toast-container .toast-error').first()
+      await expect(errorToast).toBeVisible()
+      await errorToast.locator('button[aria-label="Close toast"]').click()
 
       const saveDraftButton = page.locator('#action-save-draft')
       await expect(saveDraftButton).toBeEnabled()
