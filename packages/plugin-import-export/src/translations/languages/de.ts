@@ -10,7 +10,7 @@ export const deTranslations: PluginDefaultTranslationsObject = {
     'field-fields-label': 'Felder',
     'field-format-label': 'Exportformat',
     'field-limit-label': 'Limit',
-    'field-locale-label': 'Sprachvarianten',
+    'field-locale-label': 'Sprachvariante',
     'field-name-label': 'Dateiname',
     'field-page-label': 'Seite',
     'field-selectionToUse-label': 'Auswahl zur Verwendung',
