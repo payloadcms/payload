@@ -222,16 +222,15 @@ tools: [
 ]
 ```
 
-## Override API Keys Collection
+## API Key access to MCP
 
-Payload adds an API key collection that allows admins to manage MCP capabilities:
+Payload adds an API key collection that allows admins to manage MCP capabilities. Admins can:
 
-- Create API keys for MCP clients
-- Allow or disallow specific MCP capabilities in real-time
-- Control which collections can be accessed via MCP
-- Enable or disable tools
+- Create user associated API keys for MCP clients
+- `Allow` or `disallow` endpoint traffic in real-time
+- `Allow` or `disallow` tools, resources, and prompts
 
-You can customize this collection using the `overrideApiKeyCollection` option:
+You can customize the API Key collection using the `overrideApiKeyCollection` option:
 
 ```ts
 mcpPlugin({
@@ -251,7 +250,7 @@ mcpPlugin({
 })
 ```
 
-You can create your own MCP access strategy using the `overrideAuth` option:
+You can create an MCP access strategy using the `overrideAuth` option:
 
 ```ts
 import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
