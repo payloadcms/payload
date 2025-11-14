@@ -130,7 +130,6 @@ export const createOperation = async <
         id: duplicateFromID,
         collectionConfig,
         draftArg: isSavingDraft,
-        isSavingDraft,
         overrideAccess,
         req,
         selectedLocales,
