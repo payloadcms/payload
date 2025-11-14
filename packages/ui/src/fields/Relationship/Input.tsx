@@ -483,7 +483,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
     let isMatchingUpdate = false
     if (hasMany === true) {
-      isMatchingUpdate = value.some((option) => {
+      const currentValue = Array.isArray(value) ? value : [value]
+      isMatchingUpdate = currentValue.some((option) => {
         return (
           option.value === mostRecentUpdate.id && option.relationTo === mostRecentUpdate.entitySlug
         )
