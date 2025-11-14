@@ -50,10 +50,9 @@ export const createResourceTool = (
       // Create the resource
       const result = await payload.create({
         collection: collectionSlug,
-        req,
-        // TODO: Move the override to a `beforeChange` hook and extend the payloadAPI context req to include MCP request info.
-        data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+        data: parsedData,
         overrideAccess: false,
+        req,
         user,
       })
 

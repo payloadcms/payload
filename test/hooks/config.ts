@@ -9,6 +9,10 @@ import { APIError } from 'payload'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
 import { BeforeChangeHooks } from './collections/BeforeChange/index.js'
+import {
+  BeforeDelete2Collection,
+  BeforeDeleteCollection,
+} from './collections/BeforeDelete/index.js'
 import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
@@ -42,6 +46,8 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     Relations,
     Users,
     DataHooks,
+    BeforeDeleteCollection,
+    BeforeDelete2Collection,
     FieldPaths,
     ValueCollection,
   ],
