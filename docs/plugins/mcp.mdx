@@ -71,50 +71,50 @@ export default config
 
 ### Options
 
-| Option                                 | Type                | Description                                                                                  |
-| -------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------- |
-| `collections`                          | `object`            | An object of collection slugs to use for MCP capabilities.                                   |
-| `collections[slug]`                    | `object`            | An object of collection slugs to use for MCP capabilities.                                   |
-| `collections[slug].description`        | `string`            | A description for the collection.                                                            |
-| `collections[slug].overrideResponse`   | `function`          | A function that allows you to override the response from the operation tool call             |
-| `collections[slug].enabled`            | `object or boolean` | Determines whether the LLM can find, create, update, and delete documents in the collection. |
-| `collections[slug].enabled.find`       | `boolean`           | Whether to allow the LLM to find documents in the collection.                                |
-| `collections[slug].enabled.create`     | `boolean`           | Whether to allow the LLM to create documents in the collection.                              |
-| `collections[slug].enabled.update`     | `boolean`           | Whether to allow the LLM to update documents in the collection.                              |
-| `collections[slug].enabled.delete`     | `boolean`           | Whether to allow the LLM to delete documents in the collection.                              |
-| `disabled`                             | `boolean`           | Disable the MCP plugin while keeping database schema consistent.                             |
-| `overrideApiKeyCollection`             | `function`          | A function that allows you to override the automatically generated API Keys collection.      |
-| `mcp`                                  | `object`            | MCP options that allow you to customize the MCP server.                                      |
-| `mcp.tools`                            | `array`             | An array of tools to add to the MCP server.                                                  |
-| `mcp.tools.name`                       | `string`            | The name of the tool.                                                                        |
-| `mcp.tools.description`                | `string`            | The description of the tool.                                                                 |
-| `mcp.tools.handler`                    | `function`          | The handler function for the tool.                                                           |
-| `mcp.tools.parameters`                 | `object`            | The parameters for the tool (Zod schema).                                                    |
-| `mcp.prompts`                          | `array`             | An array of prompts to add to the MCP server.                                                |
-| `mcp.prompts.name`                     | `string`            | The name of the prompt.                                                                      |
-| `mcp.prompts.title`                    | `string`            | The title of the prompt (used by LLMs to determine when to use it).                          |
-| `mcp.prompts.description`              | `string`            | The description of the prompt.                                                               |
-| `mcp.prompts.handler`                  | `function`          | The handler function for the prompt.                                                         |
-| `mcp.prompts.argsSchema`               | `object`            | The arguments schema for the prompt (Zod schema).                                            |
-| `mcp.resources`                        | `array`             | An array of resources to add to the MCP server.                                              |
-| `mcp.resources.name`                   | `string`            | The name of the resource.                                                                    |
-| `mcp.resources.title`                  | `string`            | The title of the resource (used by LLMs to determine when to use it).                        |
-| `mcp.resources.description`            | `string`            | The description of the resource.                                                             |
-| `mcp.resources.handler`                | `function`          | The handler function for the resource.                                                       |
-| `mcp.resources.uri`                    | `string or object`  | The URI of the resource (can be a string or ResourceTemplate for dynamic URIs).              |
-| `mcp.resources.mimeType`               | `string`            | The MIME type of the resource.                                                               |
-| `mcp.handlerOptions`                   | `object`            | The handler options for the MCP server.                                                      |
-| `mcp.handlerOptions.basePath`          | `string`            | The base path for the MCP server (default: '/api').                                          |
-| `mcp.handlerOptions.verboseLogs`       | `boolean`           | Whether to log verbose logs to the console (default: false).                                 |
-| `mcp.handlerOptions.maxDuration`       | `number`            | The maximum duration for the MCP server requests (default: 60).                              |
-| `mcp.serverOptions`                    | `object`            | The server options for the MCP server.                                                       |
-| `mcp.serverOptions.serverInfo`         | `object`            | The server info for the MCP server.                                                          |
-| `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                  |
-| `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                            |
+| Option                                 | Type                | Description                                                                                    |
+| -------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
+| `collections`                          | `object`            | An object of collection slugs to use for MCP capabilities.                                     |
+| `collections[slug]`                    | `object`            | An object of collection slugs to use for MCP capabilities.                                     |
+| `collections[slug].description`        | `string`            | A description for the collection.                                                              |
+| `collections[slug].overrideResponse`   | `function`          | A function that allows you to override the response from the operation tool call               |
+| `collections[slug].enabled`            | `object or boolean` | Determines whether the model can find, create, update, and delete documents in the collection. |
+| `collections[slug].enabled.find`       | `boolean`           | Whether to allow the model to find documents in the collection.                                |
+| `collections[slug].enabled.create`     | `boolean`           | Whether to allow the model to create documents in the collection.                              |
+| `collections[slug].enabled.update`     | `boolean`           | Whether to allow the model to update documents in the collection.                              |
+| `collections[slug].enabled.delete`     | `boolean`           | Whether to allow the model to delete documents in the collection.                              |
+| `disabled`                             | `boolean`           | Disable the MCP plugin while keeping database schema consistent.                               |
+| `overrideApiKeyCollection`             | `function`          | A function that allows you to override the automatically generated API Keys collection.        |
+| `mcp`                                  | `object`            | MCP options that allow you to customize the MCP server.                                        |
+| `mcp.tools`                            | `array`             | An array of tools to add to the MCP server.                                                    |
+| `mcp.tools.name`                       | `string`            | The name of the tool.                                                                          |
+| `mcp.tools.description`                | `string`            | The description of the tool.                                                                   |
+| `mcp.tools.handler`                    | `function`          | The handler function for the tool.                                                             |
+| `mcp.tools.parameters`                 | `object`            | The parameters for the tool (Zod schema).                                                      |
+| `mcp.prompts`                          | `array`             | An array of prompts to add to the MCP server.                                                  |
+| `mcp.prompts.name`                     | `string`            | The name of the prompt.                                                                        |
+| `mcp.prompts.title`                    | `string`            | The title of the prompt (used by models to determine when to use it).                          |
+| `mcp.prompts.description`              | `string`            | The description of the prompt.                                                                 |
+| `mcp.prompts.handler`                  | `function`          | The handler function for the prompt.                                                           |
+| `mcp.prompts.argsSchema`               | `object`            | The arguments schema for the prompt (Zod schema).                                              |
+| `mcp.resources`                        | `array`             | An array of resources to add to the MCP server.                                                |
+| `mcp.resources.name`                   | `string`            | The name of the resource.                                                                      |
+| `mcp.resources.title`                  | `string`            | The title of the resource (used by models to determine when to use it).                        |
+| `mcp.resources.description`            | `string`            | The description of the resource.                                                               |
+| `mcp.resources.handler`                | `function`          | The handler function for the resource.                                                         |
+| `mcp.resources.uri`                    | `string or object`  | The URI of the resource (can be a string or ResourceTemplate for dynamic URIs).                |
+| `mcp.resources.mimeType`               | `string`            | The MIME type of the resource.                                                                 |
+| `mcp.handlerOptions`                   | `object`            | The handler options for the MCP server.                                                        |
+| `mcp.handlerOptions.basePath`          | `string`            | The base path for the MCP server (default: '/api').                                            |
+| `mcp.handlerOptions.verboseLogs`       | `boolean`           | Whether to log verbose logs to the console (default: false).                                   |
+| `mcp.handlerOptions.maxDuration`       | `number`            | The maximum duration for the MCP server requests (default: 60).                                |
+| `mcp.serverOptions`                    | `object`            | The server options for the MCP server.                                                         |
+| `mcp.serverOptions.serverInfo`         | `object`            | The server info for the MCP server.                                                            |
+| `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                    |
+| `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                              |
 
 ## Prompts
 
-Prompts allow LLMs to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
+Prompts allow models to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
 
 ```ts
 prompts: [
@@ -143,7 +143,7 @@ prompts: [
 
 ## Resources
 
-Resources provide access to data or content that LLMs can read. They can be static or dynamic with parameterized URIs:
+Resources provide access to data or content that models can read. They can be static or dynamic with parameterized URIs:
 
 ```ts
 resources: [
@@ -224,7 +224,7 @@ tools: [
 
 ## Override API Keys Collection
 
-The plugin automatically creates an **API Keys** collection that provides high-resolution control over MCP capabilities. This collection allows admins to:
+Payload adds an API key collection that allows admins to manage MCP capabilities:
 
 - Create API keys for MCP clients
 - Allow or disallow specific MCP capabilities in real-time
@@ -250,6 +250,37 @@ mcpPlugin({
   // ... other options
 })
 ```
+
+You can create your own MCP access strategy using the `overrideAuth` option:
+
+```ts
+import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
+
+// ... other config
+
+mcpPlugin({
+  overrideAuth: (req, getDefaultMcpAccessSettings) => {
+    const { payload } = req
+
+    // This will return the default MCPAccessSettings
+    // getDefaultMcpAccessSettings()
+
+    payload.logger.info('Custom access Settings for all MCP traffic')
+    return {
+      posts: {
+        find: true,
+      },
+      products: {
+        find: true,
+      },
+    } as MCPAccessSettings
+  },
+  // ... other options
+})
+```
+
+If you want the default `MCPAccessSettings`, you can use the addtional argument `getDefaultMcpAccessSettings`.
+This will use the Bearer token found in the headers on the req to return the `MCPAccessSettings` related to the user assigned to the API key.
 
 ## Hooks
 
@@ -327,4 +358,44 @@ const config = buildConfig({
     }),
   ],
 })
+```
+
+## MCP Clients
+
+MCP Clients can be configured to interact with your MCP server. These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
+
+> Caution: the format of these JSON files may change over time. Please check the client website for updates.
+
+[VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
+
+```json
+{
+  "mcp.servers": {
+    "Payload": {
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer API-KEY-HERE"
+      }
+    }
+  }
+}
+```
+
+[Cursor](https://cursor.com/docs/context/mcp)
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
+    }
+  }
+}
 ```
