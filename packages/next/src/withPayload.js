@@ -91,6 +91,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       '@payloadcms/payload-cloud',
       // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
       '@sentry/nextjs',
+      // Can be externalized, because we require users to install graphql themselves - we only rely on it as a peer dependency.
+      // WHY: without externalizing graphql, a graphql version error will be thrown
+      // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
+      'graphql',
       // TODO: We need to externalize @payloadcms/storage-s3 as well, once Next.js has the ability to exclude @payloadcms/storage-s3/client from being externalized.
       // Do not bundle additional server-only packages during dev to improve compilation speed
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
