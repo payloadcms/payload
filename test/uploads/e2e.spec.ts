@@ -1269,6 +1269,85 @@ describe('Uploads', () => {
       // should show add files dropzone view
       await expect(fieldBulkUploadDrawer.locator('.bulk-upload--add-files')).toBeVisible()
     })
+
+    test('should show error when bulk uploading files with missing filenames and allow retry after fixing', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
+
+      await bulkUploadModal
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-one')
+
+      // Clear the filename from the first file
+      await bulkUploadModal.locator('.file-field__filename').clear()
+
+      const nextImageChevronButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextImageChevronButton.click()
+
+      await bulkUploadModal
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-two')
+
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show error message for failed files
+      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 1 files')
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Successfully saved 1 files',
+      )
+
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
+      await expect(errorCount).toHaveText('1')
+
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Navigate back to first file to fix it
+      const prevImageChevronButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
+      )
+      await prevImageChevronButton.click()
+      await expect(bulkUploadModal.locator('.file-field__filename')).toHaveValue('')
+
+      // Add the filename back
+      await bulkUploadModal.locator('.file-field__filename').fill('fixed-filename.png')
+
+      await saveButton.click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Successfully saved 1 files',
+      )
+
+      await expect(bulkUploadModal).toBeHidden()
+
+      const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
+      await expect(items).toHaveCount(2)
+
+      await saveDocAndAssert(page)
+    })
   })
 
   describe('remote url fetching', () => {
