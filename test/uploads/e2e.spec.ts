@@ -1330,6 +1330,11 @@ describe('Uploads', () => {
         '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
       )
       await prevImageChevronButton.click()
+
+      // Should show "A file name is required" error message
+      await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
+
+      // Filename field should be empty (as we cleared it)
       await expect(bulkUploadModal.locator('.file-field__filename')).toHaveValue('')
 
       // Add the filename back
