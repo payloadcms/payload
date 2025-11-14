@@ -791,7 +791,7 @@ const validateFilterOptions: Validate<
               })
 
               if (result.docs[0] && result.docs[0][titleField]) {
-                rel.value = result.docs[0][titleField]
+                rel = result.docs[0][titleField]
               }
             }
           } catch (ignored) {
@@ -801,7 +801,7 @@ const validateFilterOptions: Validate<
           return JSON.stringify(rel)
         }),
       )
-      return `${t('validation:invalidSelections')} ${formattedInvalidRelations.join(',')}`
+      return `${t('validation:invalidSelections')} ${formattedInvalidRelations.join(', ')}`
     }
 
     return true

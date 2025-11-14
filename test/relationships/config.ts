@@ -336,6 +336,7 @@ export default buildConfigWithDefaults({
           name: 'relationWithFilterOptions',
           relationTo: ['movies', 'directors', customIdSlug],
           required: true,
+          hasMany: true,
           type: 'relationship',
           filterOptions: ({ relationTo }) => relationTo === 'directors',
         },

@@ -1609,7 +1609,7 @@ describe('Relationships', () => {
         expect(error).toBeDefined()
         expect(error.data.errors).toHaveLength(1)
         expect(error.data.errors[0].message).toBe(
-          `This field has the following invalid selections: {"relationTo":"custom-id","value":"${relatedId}"}`,
+          `This field has the following invalid selections: "${relatedId}"`,
         )
       })
 
@@ -1636,7 +1636,7 @@ describe('Relationships', () => {
         expect(error).toBeDefined()
         expect(error.data.errors).toHaveLength(1)
         expect(error.data.errors[0].message).toBe(
-          `This field has the following invalid selections: {"relationTo":"movies","value":"${movieName}"}`,
+          `This field has the following invalid selections: "${movieName}"`,
         )
       })
 
