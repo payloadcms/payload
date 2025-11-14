@@ -164,6 +164,7 @@ export const createClientConfig = ({
       case 'admin':
         clientConfig.admin = {
           autoLogin: config.admin.autoLogin,
+          autoRefresh: config.admin.autoRefresh,
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
