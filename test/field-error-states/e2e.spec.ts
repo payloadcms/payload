@@ -102,7 +102,7 @@ describe('Field Error States', () => {
       await page.goto(validateDraftsOn.create)
       await page.locator('#field-title').fill('Test Document')
       await page.click('#action-save-draft')
-      await expect(page.locator('.payload-toast-container .toast-success').first()).toBeVisible()
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
 
       await page.waitForURL(/\/admin\/collections\/validate-drafts-on\/[a-zA-Z0-9]+/)
 
@@ -111,20 +111,22 @@ describe('Field Error States', () => {
       await page.locator('#field-validatedField').fill('This will fail')
 
       await page.click('#action-save-draft')
-      await expect(page.locator('.payload-toast-container .toast-error').first()).toBeVisible()
+      const errorToast = page.locator('.payload-toast-container .toast-error').first()
+      await expect(errorToast).toBeVisible()
+      await errorToast.locator('button[aria-label="Close toast"]').click()
 
       const saveDraftButton = page.locator('#action-save-draft')
       await expect(saveDraftButton).toBeEnabled()
 
       await page.click('#action-save-draft')
-      await expect(page.locator('.payload-toast-container .toast-error').first()).toBeVisible()
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
     })
 
     test('should keep save draft button enabled after successful save when form is modified again', async () => {
       await page.goto(validateDraftsOn.create)
       await page.locator('#field-title').fill('Test Document')
       await page.click('#action-save-draft')
-      await expect(page.locator('.payload-toast-container .toast-success').first()).toBeVisible()
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
 
       await page.locator('#field-title').fill('Modified Document')
 
