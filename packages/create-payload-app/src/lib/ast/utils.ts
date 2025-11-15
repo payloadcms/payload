@@ -44,11 +44,7 @@ type AddImportOptions = {
   namedImports?: string[]
 }
 
-export function addImportDeclaration(
-  sourceFile: SourceFile,
-  options: AddImportOptions,
-  debugMode = false,
-): void {
+export function addImportDeclaration(sourceFile: SourceFile, options: AddImportOptions): void {
   const { defaultImport, moduleSpecifier, namedImports } = options
 
   const existingImport = findImportDeclaration(sourceFile, moduleSpecifier)
@@ -61,12 +57,10 @@ export function addImportDeclaration(
 
       if (newNamedImports.length > 0) {
         existingImport.addNamedImports(newNamedImports)
-        if (debugMode) {
-          debug(
-            `[AST] Added named imports to existing import from '${moduleSpecifier}': ${newNamedImports.join(', ')}`,
-          )
-        }
-      } else if (debugMode) {
+        debug(
+          `[AST] Added named imports to existing import from '${moduleSpecifier}': ${newNamedImports.join(', ')}`,
+        )
+      } else {
         debug(`[AST] Import from '${moduleSpecifier}' already has all required named imports`)
       }
     }
@@ -77,27 +71,23 @@ export function addImportDeclaration(
       ...(namedImports && { namedImports }),
       ...(defaultImport && { defaultImport }),
     })
-    if (debugMode) {
-      const parts = []
-      if (defaultImport) {parts.push(`default: ${defaultImport}`)}
-      if (namedImports) {parts.push(`named: ${namedImports.join(', ')}`)}
-      debug(`[AST] Added new import from '${moduleSpecifier}' (${parts.join(', ')})`)
+    const parts = []
+    if (defaultImport) {
+      parts.push(`default: ${defaultImport}`)
     }
+    if (namedImports) {
+      parts.push(`named: ${namedImports.join(', ')}`)
+    }
+    debug(`[AST] Added new import from '${moduleSpecifier}' (${parts.join(', ')})`)
   }
 }
 
-export function removeImportDeclaration(
-  sourceFile: SourceFile,
-  moduleSpecifier: string,
-  debugMode = false,
-): void {
+export function removeImportDeclaration(sourceFile: SourceFile, moduleSpecifier: string): void {
   const importDecl = findImportDeclaration(sourceFile, moduleSpecifier)
   if (importDecl) {
     importDecl.remove()
-    if (debugMode) {
-      debug(`[AST] Removed import from '${moduleSpecifier}'`)
-    }
-  } else if (debugMode) {
+    debug(`[AST] Removed import from '${moduleSpecifier}'`)
+  } else {
     debug(`[AST] Import from '${moduleSpecifier}' not found (already absent)`)
   }
 }

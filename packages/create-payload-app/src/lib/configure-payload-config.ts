@@ -34,7 +34,6 @@ function getEnvVarName(dbType: DbType, customEnvName?: string): string {
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
   dbType?: DbType
-  debugMode?: boolean
   envNames?: {
     dbUri: string
   }
@@ -43,8 +42,6 @@ export async function configurePayloadConfig(args: {
   sharp?: boolean
   storageAdapter?: StorageAdapterType
 }): Promise<void> {
-  const { debugMode = false } = args
-
   if (!args.dbType) {
     return
   }
@@ -58,7 +55,6 @@ export async function configurePayloadConfig(args: {
     try {
       updatePackageJson(packageJsonPath, {
         databaseAdapter: mapDbType(args.dbType),
-        debugMode,
         packageName: args.packageJsonName,
         removeSharp: args.sharp === false,
       })
@@ -94,7 +90,6 @@ export async function configurePayloadConfig(args: {
         type: mapDbType(args.dbType),
         envVarName,
       },
-      debugMode,
       formatWithPrettier: false, // Disabled due to Jest compatibility issues
       removeSharp: args.sharp === false,
       storage: args.storageAdapter ? mapStorageAdapter(args.storageAdapter) : undefined,

@@ -13,13 +13,8 @@ import { debug } from '../../utils/log.js'
 import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
 import { addImportDeclaration, formatError, removeImportDeclaration } from './utils.js'
 
-export function detectPayloadConfigStructure(
-  sourceFile: SourceFile,
-  debugMode = false,
-): DetectionResult {
-  if (debugMode) {
-    debug(`[AST] Detecting payload config structure in ${sourceFile.getFilePath()}`)
-  }
+export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
+  debug(`[AST] Detecting payload config structure in ${sourceFile.getFilePath()}`)
 
   // Find buildConfig call expression
   const buildConfigCall = sourceFile
@@ -30,9 +25,7 @@ export function detectPayloadConfigStructure(
     })
 
   if (!buildConfigCall) {
-    if (debugMode) {
-      debug('[AST] ✗ buildConfig call not found')
-    }
+    debug('[AST] ✗ buildConfig call not found')
     return {
       error: formatError({
         actual: 'No buildConfig call found in file',
@@ -44,15 +37,11 @@ export function detectPayloadConfigStructure(
     }
   }
 
-  if (debugMode) {
-    debug('[AST] ✓ buildConfig call found')
-  }
+  debug('[AST] ✓ buildConfig call found')
 
   // Get import statements
   const importStatements = sourceFile.getImportDeclarations()
-  if (debugMode) {
-    debug(`[AST] Found ${importStatements.length} import statements`)
-  }
+  debug(`[AST] Found ${importStatements.length} import statements`)
 
   // Find db property if it exists
   const configObject = buildConfigCall.getArguments()[0]
@@ -64,9 +53,7 @@ export function detectPayloadConfigStructure(
       ?.asKind(SyntaxKind.PropertyAssignment)
   }
 
-  if (debugMode) {
-    debug(`[AST] db property: ${dbProperty ? '✓ found' : '✗ not found'}`)
-  }
+  debug(`[AST] db property: ${dbProperty ? '✓ found' : '✗ not found'}`)
 
   // Find plugins array if it exists
   let pluginsArray
@@ -84,9 +71,7 @@ export function detectPayloadConfigStructure(
     }
   }
 
-  if (debugMode) {
-    debug(`[AST] plugins array: ${pluginsArray ? '✓ found' : '✗ not found'}`)
-  }
+  debug(`[AST] plugins array: ${pluginsArray ? '✓ found' : '✗ not found'}`)
 
   return {
     sourceFile,
@@ -104,13 +89,10 @@ export function addDatabaseAdapter(
   sourceFile: SourceFile,
   adapter: DatabaseAdapter,
   envVarName = 'DATABASE_URI',
-  debugMode = false,
 ): void {
-  if (debugMode) {
-    debug(`[AST] Adding database adapter: ${adapter} (envVar: ${envVarName})`)
-  }
+  debug(`[AST] Adding database adapter: ${adapter} (envVar: ${envVarName})`)
 
-  const detection = detectPayloadConfigStructure(sourceFile, debugMode)
+  const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success || !detection.structures) {
     throw new Error('Cannot add database adapter: ' + detection.error?.userMessage)
@@ -124,51 +106,35 @@ export function addDatabaseAdapter(
   const removedAdapters: string[] = []
   oldAdapters.forEach((oldConfig) => {
     if (oldConfig.packageName !== config.packageName) {
-      removeImportDeclaration(sourceFile, oldConfig.packageName, debugMode)
+      removeImportDeclaration(sourceFile, oldConfig.packageName)
       removedAdapters.push(oldConfig.packageName)
     }
   })
 
-  if (debugMode && removedAdapters.length > 0) {
+  if (removedAdapters.length > 0) {
     debug(`[AST] Removed old adapter imports: ${removedAdapters.join(', ')}`)
   }
 
   // Add new import
-  addImportDeclaration(
-    sourceFile,
-    {
-      moduleSpecifier: config.packageName,
-      namedImports: [config.adapterName],
-    },
-    debugMode,
-  )
+  addImportDeclaration(sourceFile, {
+    moduleSpecifier: config.packageName,
+    namedImports: [config.adapterName],
+  })
 
   // Add special imports for specific adapters
   if (adapter === 'vercel-postgres') {
-    if (debugMode) {
-      debug('[AST] Adding special import: @vercel/postgres')
-    }
-    addImportDeclaration(
-      sourceFile,
-      {
-        moduleSpecifier: '@vercel/postgres',
-        namedImports: ['createPool'],
-      },
-      debugMode,
-    )
+    debug('[AST] Adding special import: @vercel/postgres')
+    addImportDeclaration(sourceFile, {
+      moduleSpecifier: '@vercel/postgres',
+      namedImports: ['createPool'],
+    })
   }
   if (adapter === 'd1-sqlite') {
-    if (debugMode) {
-      debug('[AST] Adding special import: ./db/migrations')
-    }
-    addImportDeclaration(
-      sourceFile,
-      {
-        defaultImport: 'migrations',
-        moduleSpecifier: './db/migrations',
-      },
-      debugMode,
-    )
+    debug('[AST] Adding special import: ./db/migrations')
+    addImportDeclaration(sourceFile, {
+      defaultImport: 'migrations',
+      moduleSpecifier: './db/migrations',
+    })
   }
 
   // Get config object
@@ -181,9 +147,7 @@ export function addDatabaseAdapter(
 
   // Remove existing db property if present
   if (dbProperty) {
-    if (debugMode) {
-      debug('[AST] Removing existing db property')
-    }
+    debug('[AST] Removing existing db property')
     dbProperty.remove()
   }
 
@@ -197,21 +161,13 @@ export function addDatabaseAdapter(
     initializer: config.configTemplate(envVarName),
   })
 
-  if (debugMode) {
-    debug(`[AST] ✓ Database adapter ${adapter} added successfully`)
-  }
+  debug(`[AST] ✓ Database adapter ${adapter} added successfully`)
 }
 
-export function addStorageAdapter(
-  sourceFile: SourceFile,
-  adapter: StorageAdapter,
-  debugMode = false,
-): void {
-  if (debugMode) {
-    debug(`[AST] Adding storage adapter: ${adapter}`)
-  }
+export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapter): void {
+  debug(`[AST] Adding storage adapter: ${adapter}`)
 
-  const detection = detectPayloadConfigStructure(sourceFile, debugMode)
+  const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success || !detection.structures) {
     throw new Error('Cannot add storage adapter: ' + detection.error?.userMessage)
@@ -221,22 +177,16 @@ export function addStorageAdapter(
 
   // Local disk doesn't need any imports or plugins
   if (adapter === 'localDisk') {
-    if (debugMode) {
-      debug('[AST] localDisk storage adapter - no imports or plugins needed')
-    }
+    debug('[AST] localDisk storage adapter - no imports or plugins needed')
     return
   }
 
   // Add import
   if (config.packageName && config.adapterName) {
-    addImportDeclaration(
-      sourceFile,
-      {
-        moduleSpecifier: config.packageName,
-        namedImports: [config.adapterName],
-      },
-      debugMode,
-    )
+    addImportDeclaration(sourceFile, {
+      moduleSpecifier: config.packageName,
+      namedImports: [config.adapterName],
+    })
   }
 
   const { buildConfigCall } = detection.structures
@@ -252,16 +202,14 @@ export function addStorageAdapter(
   let pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
 
   if (!pluginsProperty) {
-    if (debugMode) {
-      debug('[AST] Creating new plugins array')
-    }
+    debug('[AST] Creating new plugins array')
     // Create plugins array
     objLiteral.addPropertyAssignment({
       name: 'plugins',
       initializer: '[]',
     })
     pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
-  } else if (debugMode) {
+  } else {
     debug('[AST] Reusing existing plugins array')
   }
 
@@ -282,21 +230,17 @@ export function addStorageAdapter(
     pluginsArray.addElement(configText)
   }
 
-  if (debugMode) {
-    debug(`[AST] ✓ Storage adapter ${adapter} added successfully`)
-  }
+  debug(`[AST] ✓ Storage adapter ${adapter} added successfully`)
 }
 
-export function removeSharp(sourceFile: SourceFile, debugMode = false): void {
-  if (debugMode) {
-    debug('[AST] Removing sharp import and property')
-  }
+export function removeSharp(sourceFile: SourceFile): void {
+  debug('[AST] Removing sharp import and property')
 
   // Remove import
-  removeImportDeclaration(sourceFile, 'sharp', debugMode)
+  removeImportDeclaration(sourceFile, 'sharp')
 
   // Find and remove sharp property from buildConfig
-  const detection = detectPayloadConfigStructure(sourceFile, debugMode)
+  const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success || !detection.structures) {
     return
@@ -314,10 +258,8 @@ export function removeSharp(sourceFile: SourceFile, debugMode = false): void {
 
   if (sharpProperty) {
     sharpProperty.remove()
-    if (debugMode) {
-      debug('[AST] ✓ Sharp property removed from config')
-    }
-  } else if (debugMode) {
+    debug('[AST] ✓ Sharp property removed from config')
+  } else {
     debug('[AST] Sharp property not found (already absent)')
   }
 }
@@ -342,17 +284,13 @@ export function removeCommentMarkers(sourceFile: SourceFile): void {
   sourceFile.replaceWithText(text)
 }
 
-export function validateStructure(sourceFile: SourceFile, debugMode = false): WriteResult {
-  if (debugMode) {
-    debug('[AST] Validating payload config structure')
-  }
+export function validateStructure(sourceFile: SourceFile): WriteResult {
+  debug('[AST] Validating payload config structure')
 
-  const detection = detectPayloadConfigStructure(sourceFile, debugMode)
+  const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success) {
-    if (debugMode) {
-      debug('[AST] ✗ Validation failed: detection unsuccessful')
-    }
+    debug('[AST] ✗ Validation failed: detection unsuccessful')
     return {
       error: detection.error,
       success: false,
@@ -363,9 +301,7 @@ export function validateStructure(sourceFile: SourceFile, debugMode = false): Wr
 
   // Validate db property exists
   if (!structures?.dbProperty) {
-    if (debugMode) {
-      debug('[AST] ✗ Validation failed: db property missing')
-    }
+    debug('[AST] ✗ Validation failed: db property missing')
     return {
       error: formatError({
         actual: 'No db property found',
@@ -377,9 +313,7 @@ export function validateStructure(sourceFile: SourceFile, debugMode = false): Wr
     }
   }
 
-  if (debugMode) {
-    debug('[AST] ✓ Validation passed')
-  }
+  debug('[AST] ✓ Validation passed')
   return { success: true }
 }
 
@@ -387,19 +321,13 @@ export async function writeTransformedFile(
   sourceFile: SourceFile,
   options: WriteOptions = {},
 ): Promise<WriteResult> {
-  const {
-    debugMode = false,
-    formatWithPrettier = true,
-    validateStructure: shouldValidate = true,
-  } = options
+  const { formatWithPrettier = true, validateStructure: shouldValidate = true } = options
 
-  if (debugMode) {
-    debug(`[AST] Writing transformed file: ${sourceFile.getFilePath()}`)
-  }
+  debug(`[AST] Writing transformed file: ${sourceFile.getFilePath()}`)
 
   // Validate if requested
   if (shouldValidate) {
-    const validation = validateStructure(sourceFile, debugMode)
+    const validation = validateStructure(sourceFile)
     if (!validation.success) {
       return validation
     }
@@ -410,18 +338,14 @@ export async function writeTransformedFile(
   let content = sourceFile.getText()
 
   // Fix quote style (ts-morph sometimes uses double quotes, convert to single)
-  if (debugMode) {
-    debug('[AST] Normalizing quote style to single quotes')
-  }
+  debug('[AST] Normalizing quote style to single quotes')
   content = content.replace(/from "([^"]+)"/g, "from '$1'")
   content = content.replace(/import "([^"]+)"/g, "import '$1'")
 
   // Normalize indentation: ts-morph adds base indentation, but our template strings also have indentation
   // This causes double indentation. We need to reduce indentation in property initializers.
   // Match patterns like: "  db: adapter({\n      content" and reduce the excess indentation
-  if (debugMode) {
-    debug('[AST] Normalizing indentation')
-  }
+  debug('[AST] Normalizing indentation')
 
   const lines = content.split('\n')
   const normalized: string[] = []
@@ -467,9 +391,7 @@ export async function writeTransformedFile(
 
   // Format with prettier if requested
   if (formatWithPrettier) {
-    if (debugMode) {
-      debug('[AST] Running prettier formatting')
-    }
+    debug('[AST] Running prettier formatting')
     try {
       // Use prettier's format API with dynamic import for v3+
       const prettier = await import('prettier')
@@ -479,28 +401,20 @@ export async function writeTransformedFile(
         singleQuote: true,
         trailingComma: 'all',
       })
-      if (debugMode) {
-        debug('[AST] ✓ Prettier formatting successful')
-      }
+      debug('[AST] ✓ Prettier formatting successful')
     } catch (error) {
       // Log but don't fail if prettier fails
-      if (debugMode) {
-        debug('[AST] ⚠ Prettier formatting failed, continuing with normalized output')
-      }
+      debug('[AST] ⚠ Prettier formatting failed, continuing with normalized output')
     }
-  } else if (debugMode) {
+  } else {
     debug('[AST] Skipping prettier formatting (disabled)')
   }
 
   // Write file
-  if (debugMode) {
-    debug('[AST] Writing file to disk')
-  }
+  debug('[AST] Writing file to disk')
   await sourceFile.getProject().getFileSystem().writeFile(filePath, content)
 
-  if (debugMode) {
-    debug('[AST] ✓ File written successfully')
-  }
+  debug('[AST] ✓ File written successfully')
 
   return { success: true }
 }
@@ -509,14 +423,10 @@ export async function configurePayloadConfig(
   filePath: string,
   options: ConfigureOptions = {},
 ): Promise<WriteResult> {
-  const { debugMode = false } = options
-
-  if (debugMode) {
-    debug(`[AST] Configuring payload config: ${filePath}`)
-    debug(
-      `[AST] Options: db=${options.db?.type}, storage=${options.storage}, removeSharp=${options.removeSharp}`,
-    )
-  }
+  debug(`[AST] Configuring payload config: ${filePath}`)
+  debug(
+    `[AST] Options: db=${options.db?.type}, storage=${options.storage}, removeSharp=${options.removeSharp}`,
+  )
 
   try {
     // Create Project and load source file with proper settings
@@ -528,31 +438,25 @@ export async function configurePayloadConfig(
     const sourceFile = project.addSourceFileAtPath(filePath)
 
     // Run detection
-    const detection = detectPayloadConfigStructure(sourceFile, debugMode)
+    const detection = detectPayloadConfigStructure(sourceFile)
     if (!detection.success) {
       return detection
     }
 
     // Apply transformations based on options
     if (options.db) {
-      if (debugMode) {
-        debug('[AST] Applying database adapter transformation')
-      }
-      addDatabaseAdapter(sourceFile, options.db.type, options.db.envVarName, debugMode)
+      debug('[AST] Applying database adapter transformation')
+      addDatabaseAdapter(sourceFile, options.db.type, options.db.envVarName)
     }
 
     if (options.storage) {
-      if (debugMode) {
-        debug('[AST] Applying storage adapter transformation')
-      }
-      addStorageAdapter(sourceFile, options.storage, debugMode)
+      debug('[AST] Applying storage adapter transformation')
+      addStorageAdapter(sourceFile, options.storage)
     }
 
     if (options.removeSharp) {
-      if (debugMode) {
-        debug('[AST] Applying sharp removal')
-      }
-      removeSharp(sourceFile, debugMode)
+      debug('[AST] Applying sharp removal')
+      removeSharp(sourceFile)
     }
 
     // Remove comment markers from template
@@ -560,16 +464,11 @@ export async function configurePayloadConfig(
 
     // Write transformed file with validation and formatting
     return await writeTransformedFile(sourceFile, {
-      debugMode: options.debugMode,
       formatWithPrettier: options.formatWithPrettier,
       validateStructure: options.validateStructure ?? true,
     })
   } catch (error) {
-    if (debugMode) {
-      debug(
-        `[AST] ✗ Configuration failed: ${error instanceof Error ? error.message : String(error)}`,
-      )
-    }
+    debug(`[AST] ✗ Configuration failed: ${error instanceof Error ? error.message : String(error)}`)
     return {
       error: formatError({
         actual: error instanceof Error ? error.message : String(error),

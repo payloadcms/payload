@@ -49,7 +49,6 @@ export type TransformOptions = {
 }
 
 export type WriteOptions = {
-  debugMode?: boolean
   formatWithPrettier?: boolean
   validateStructure?: boolean
 }

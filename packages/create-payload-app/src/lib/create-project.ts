@@ -156,7 +156,6 @@ export async function createProject(
       spinner.message('Configuring Payload...')
       await configurePayloadConfig({
         dbType: dbDetails?.type,
-        debugMode: cliArgs['--debug'],
         projectDirOrConfigPath: { projectDir },
       })
     }

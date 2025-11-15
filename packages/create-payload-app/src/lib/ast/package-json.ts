@@ -7,7 +7,6 @@ import { getDbPackageName } from './adapter-config.js'
 
 type PackageJsonTransformOptions = {
   databaseAdapter?: DatabaseAdapter
-  debugMode?: boolean
   packageName?: string
   removeSharp?: boolean
 }
@@ -30,14 +29,11 @@ function transformPackageJson(
   pkg: PackageJsonStructure,
   options: PackageJsonTransformOptions,
 ): PackageJsonStructure {
-  const { debugMode = false } = options
   const transformed = { ...pkg }
 
   // Update database adapter
   if (options.databaseAdapter) {
-    if (debugMode) {
-      debug(`[AST] Updating package.json database adapter to: ${options.databaseAdapter}`)
-    }
+    debug(`[AST] Updating package.json database adapter to: ${options.databaseAdapter}`)
 
     transformed.dependencies = { ...transformed.dependencies }
 
@@ -58,7 +54,7 @@ function transformPackageJson(
       delete transformed.dependencies![pkgName]
     })
 
-    if (debugMode && removedAdapters.length > 0) {
+    if (removedAdapters.length > 0) {
       debug(`[AST] Removed old adapter packages: ${removedAdapters.join(', ')}`)
     }
 
@@ -68,16 +64,12 @@ function transformPackageJson(
     const payloadVersion = transformed.dependencies?.payload || '^3.0.0'
     transformed.dependencies[newAdapter] = payloadVersion
 
-    if (debugMode) {
-      debug(`[AST] Added adapter package: ${newAdapter}`)
-    }
+    debug(`[AST] Added adapter package: ${newAdapter}`)
 
     // Add vercel/postgres if needed
     if (options.databaseAdapter === 'vercel-postgres') {
       transformed.dependencies['@vercel/postgres'] = '^0.10.0'
-      if (debugMode) {
-        debug('[AST] Added @vercel/postgres dependency')
-      }
+      debug('[AST] Added @vercel/postgres dependency')
     }
   }
 
@@ -86,19 +78,15 @@ function transformPackageJson(
     transformed.dependencies = { ...transformed.dependencies }
     if (transformed.dependencies.sharp) {
       delete transformed.dependencies.sharp
-      if (debugMode) {
-        debug('[AST] Removed sharp dependency')
-      }
-    } else if (debugMode) {
+      debug('[AST] Removed sharp dependency')
+    } else {
       debug('[AST] Sharp dependency not found (already absent)')
     }
   }
 
   // Update package name
   if (options.packageName) {
-    if (debugMode) {
-      debug(`[AST] Updated package name to: ${options.packageName}`)
-    }
+    debug(`[AST] Updated package name to: ${options.packageName}`)
     transformed.name = options.packageName
   }
 
@@ -112,11 +100,7 @@ function writePackageJson(filePath: string, pkg: PackageJsonStructure): void {
 
 // Main orchestration function
 export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
-  const { debugMode = false } = options
-
-  if (debugMode) {
-    debug(`[AST] Updating package.json: ${filePath}`)
-  }
+  debug(`[AST] Updating package.json: ${filePath}`)
 
   // Phase 1: Detection
   const pkg = detectPackageJsonStructure(filePath)
@@ -127,7 +111,5 @@ export function updatePackageJson(filePath: string, options: PackageJsonTransfor
   // Phase 3: Modification
   writePackageJson(filePath, transformed)
 
-  if (debugMode) {
-    debug('[AST] ✓ package.json updated successfully')
-  }
+  debug('[AST] ✓ package.json updated successfully')
 }
