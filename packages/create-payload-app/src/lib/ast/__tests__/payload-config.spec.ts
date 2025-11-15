@@ -120,6 +120,91 @@ export default buildConfig({
     expect(text).not.toContain('mongooseAdapter')
     expect(text).not.toContain('@payloadcms/db-mongodb')
   })
+
+  it('preserves db property position when replacing', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  admin: {},
+  collections: [],
+  db: mongooseAdapter({ url: '' }),
+  typescript: { outputFile: '' }
+})`,
+    )
+
+    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
+
+    const text = sourceFile.getText()
+    // Verify db property is still between collections and typescript
+    const dbIndex = text.indexOf('db: postgresAdapter')
+    const collectionsIndex = text.indexOf('collections:')
+    const typescriptIndex = text.indexOf('typescript:')
+
+    expect(dbIndex).toBeGreaterThan(collectionsIndex)
+    expect(dbIndex).toBeLessThan(typescriptIndex)
+  })
+
+  it('adds db property at end when not present', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  admin: {},
+  collections: []
+})`,
+    )
+
+    addDatabaseAdapter({ sourceFile, adapter: 'mongodb', envVarName: 'DATABASE_URI' })
+
+    const text = sourceFile.getText()
+    // Verify db property is after collections (at end)
+    const dbIndex = text.indexOf('db: mongooseAdapter')
+    const collectionsIndex = text.indexOf('collections:')
+
+    expect(dbIndex).toBeGreaterThan(collectionsIndex)
+  })
+
+  it('preserves import position when replacing adapter', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import someOtherImport from 'some-package'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import anotherImport from 'another-package'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' }),
+  collections: []
+})`,
+    )
+
+    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
+
+    const text = sourceFile.getText()
+    const lines = text.split('\n')
+
+    // Find import lines - use more flexible matching
+    const buildConfigLine = lines.findIndex((l) => l.includes('payload'))
+    const someOtherLine = lines.findIndex((l) => l.includes('some-package'))
+    const postgresLine = lines.findIndex((l) => l.includes('db-postgres'))
+    const anotherLine = lines.findIndex((l) => l.includes('another-package'))
+
+    // Verify postgres import is where mongodb import was (between someOther and another)
+    expect(postgresLine).toBeGreaterThan(-1) // Found
+    expect(postgresLine).toBeGreaterThan(someOtherLine)
+    expect(postgresLine).toBeLessThan(anotherLine)
+    expect(postgresLine).toBeGreaterThan(buildConfigLine)
+
+    // Verify mongodb import is removed
+    expect(text).not.toContain('@payloadcms/db-mongodb')
+  })
 })
 
 describe('addStorageAdapter', () => {
@@ -297,7 +382,6 @@ export default buildConfig({
 
     const result = await writeTransformedFile(realSourceFile, {
       validateStructure: true,
-      formatWithPrettier: false, // Skip prettier for test
     })
 
     expect(result.success).toBe(true)
@@ -354,7 +438,6 @@ export default buildConfig({
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
       storage: 'vercelBlobStorage',
-      formatWithPrettier: false,
     })
 
     expect(result.success).toBe(true)
@@ -379,7 +462,6 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('../payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'mongodb', envVarName: 'MONGO_URL' },
-      formatWithPrettier: false,
     })
 
     expect(result.success).toBe(true)
@@ -407,7 +489,6 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('../payload-config')
     const result = await configurePayloadConfig(filePath, {
       removeSharp: true,
-      formatWithPrettier: false,
     })
 
     expect(result.success).toBe(true)
@@ -427,7 +508,6 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('../payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-      formatWithPrettier: false,
     })
 
     expect(result.success).toBe(false)
@@ -440,7 +520,6 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('../payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-      formatWithPrettier: false,
     })
 
     expect(result.success).toBe(false)

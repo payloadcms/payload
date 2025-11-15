@@ -90,7 +90,7 @@ export async function configurePayloadConfig(args: {
         type: mapDbType(args.dbType),
         envVarName,
       },
-      formatWithPrettier: false, // Disabled due to Jest compatibility issues
+      formatWithPrettier: true,
       removeSharp: args.sharp === false,
       storage: args.storageAdapter ? mapStorageAdapter(args.storageAdapter) : undefined,
       validateStructure: false,

@@ -1,3 +1,5 @@
+import { execSync } from 'child_process'
+import path from 'path'
 import { Project, QuoteKind, type SourceFile, SyntaxKind } from 'ts-morph'
 
 import type {
@@ -11,7 +13,12 @@ import type {
 
 import { debug } from '../../utils/log.js'
 import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
-import { addImportDeclaration, formatError, removeImportDeclaration } from './utils.js'
+import {
+  addImportDeclaration,
+  detectPackageManager,
+  formatError,
+  removeImportDeclaration,
+} from './utils.js'
 
 export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
   debug(`[AST] Detecting payload config structure in ${sourceFile.getFilePath()}`)
@@ -105,13 +112,23 @@ export function addDatabaseAdapter({
   const { buildConfigCall, dbProperty } = detection.structures
   const config = DB_ADAPTER_CONFIG[adapter]
 
-  // Remove old db adapter imports
+  // Remove old db adapter imports and track position for replacement
   const oldAdapters = Object.values(DB_ADAPTER_CONFIG)
   const removedAdapters: string[] = []
+  let importInsertIndex: number | undefined
   oldAdapters.forEach((oldConfig) => {
     if (oldConfig.packageName !== config.packageName) {
-      removeImportDeclaration({ moduleSpecifier: oldConfig.packageName, sourceFile })
-      removedAdapters.push(oldConfig.packageName)
+      const removedIndex = removeImportDeclaration({
+        moduleSpecifier: oldConfig.packageName,
+        sourceFile,
+      })
+      if (removedIndex !== undefined) {
+        // Use the first removed adapter's position
+        if (importInsertIndex === undefined) {
+          importInsertIndex = removedIndex
+        }
+        removedAdapters.push(oldConfig.packageName)
+      }
     }
   })
 
@@ -119,8 +136,9 @@ export function addDatabaseAdapter({
     debug(`[AST] Removed old adapter imports: ${removedAdapters.join(', ')}`)
   }
 
-  // Add new import
+  // Add new import at the position of the removed one (or default position)
   addImportDeclaration({
+    insertIndex: importInsertIndex,
     moduleSpecifier: config.packageName,
     namedImports: [config.adapterName],
     sourceFile,
@@ -152,16 +170,19 @@ export function addDatabaseAdapter({
 
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
 
-  // Remove existing db property if present
+  // Determine insert position before removing existing property
+  let insertIndex = 0
   if (dbProperty) {
-    debug('[AST] Removing existing db property')
+    // Preserve position of existing db property
+    const allProperties = objLiteral.getProperties()
+    insertIndex = allProperties.indexOf(dbProperty)
+    debug(`[AST] Replacing db property at index ${insertIndex}`)
     dbProperty.remove()
+  } else {
+    // No existing db property - insert at end
+    insertIndex = objLiteral.getProperties().length
+    debug(`[AST] Adding db property at index ${insertIndex}`)
   }
-
-  // Add new db property - insert after first property to match expected format
-  // Find first property to determine insert position
-  const firstProperty = objLiteral.getProperties()[0]
-  const insertIndex = firstProperty ? 0 : 0
 
   objLiteral.insertPropertyAssignment(insertIndex, {
     name: 'db',
@@ -347,86 +368,43 @@ export async function writeTransformedFile(
     }
   }
 
-  // Get file path and content
+  // Get file path and save to disk
   const filePath = sourceFile.getFilePath()
-  let content = sourceFile.getText()
 
-  // Fix quote style (ts-morph sometimes uses double quotes, convert to single)
-  debug('[AST] Normalizing quote style to single quotes')
-  content = content.replace(/from "([^"]+)"/g, "from '$1'")
-  content = content.replace(/import "([^"]+)"/g, "import '$1'")
-
-  // Normalize indentation: ts-morph adds base indentation, but our template strings also have indentation
-  // This causes double indentation. We need to reduce indentation in property initializers.
-  // Match patterns like: "  db: adapter({\n      content" and reduce the excess indentation
-  debug('[AST] Normalizing indentation')
-
-  const lines = content.split('\n')
-  const normalized: string[] = []
-  let inPropertyInitializer = false
-  let baseIndent = 0
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-
-    // Check if this line starts a property assignment in buildConfig
-    if (line && /^\s+\w+:\s+\w+\(\{$/.test(line)) {
-      inPropertyInitializer = true
-      const match = line.match(/^(\s+)/)
-      baseIndent = match?.[1]?.length || 0
-      normalized.push(line)
-      continue
-    }
-
-    // Check if we're closing the property initializer
-    if (line && inPropertyInitializer && /^\s+\}\),$/.test(line)) {
-      // Fix closing brace indentation to match base
-      const properLine = ' '.repeat(baseIndent) + '}),'
-      normalized.push(properLine)
-      inPropertyInitializer = false
-      continue
-    }
-
-    // If we're in a property initializer, reduce indentation by 2 spaces
-    if (line && inPropertyInitializer && line.trim()) {
-      const match = line.match(/^(\s+)/)
-      const currentIndent = match?.[1]?.length || 0
-      if (currentIndent > baseIndent) {
-        const reducedIndent = Math.max(baseIndent + 2, currentIndent - 2)
-        normalized.push(' '.repeat(reducedIndent) + line.trim())
-        continue
-      }
-    }
-
-    normalized.push(line || '')
-  }
-
-  content = normalized.join('\n')
+  // Write file
+  debug('[AST] Writing file to disk')
+  await sourceFile.save()
 
   // Format with prettier if requested
   if (formatWithPrettier) {
-    debug('[AST] Running prettier formatting')
+    debug('[AST] Running prettier formatting via CLI')
     try {
-      // Use prettier's format API with dynamic import for v3+
-      const prettier = await import('prettier')
-      content = await prettier.format(content, {
-        filepath: filePath,
-        semi: false,
-        singleQuote: true,
-        trailingComma: 'all',
+      // Detect project directory (go up from file until we find package.json or use dirname)
+      const projectDir = path.dirname(filePath)
+      const packageManager = detectPackageManager({ projectDir })
+
+      // Run prettier via CLI (avoids Jest/ESM compatibility issues)
+      const prettierCmd =
+        packageManager === 'npx'
+          ? `npx prettier --write "${filePath}"`
+          : `${packageManager} prettier --write "${filePath}"`
+
+      debug(`[AST] Executing: ${prettierCmd}`)
+      execSync(prettierCmd, {
+        cwd: projectDir,
+        stdio: 'pipe', // Suppress output
       })
       debug('[AST] ✓ Prettier formatting successful')
     } catch (error) {
-      // Log but don't fail if prettier fails
-      debug('[AST] ⚠ Prettier formatting failed, continuing with normalized output')
+      // Log but don't fail if prettier fails (might not be installed)
+      debug(
+        `[AST] ⚠ Prettier formatting failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
+      debug('[AST] Continuing with unformatted output')
     }
   } else {
     debug('[AST] Skipping prettier formatting (disabled)')
   }
-
-  // Write file
-  debug('[AST] Writing file to disk')
-  await sourceFile.getProject().getFileSystem().writeFile(filePath, content)
 
   debug('[AST] ✓ File written successfully')
 

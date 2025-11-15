@@ -1,5 +1,8 @@
 import type { ImportDeclaration, SourceFile } from 'ts-morph'
 
+import { existsSync } from 'fs'
+import path from 'path'
+
 import type { DetectionError } from './types.js'
 
 import { debug } from '../../utils/log.js'
@@ -43,11 +46,13 @@ Please ensure your config file follows the expected structure.`
 
 export function addImportDeclaration({
   defaultImport,
+  insertIndex,
   moduleSpecifier,
   namedImports,
   sourceFile,
 }: {
   defaultImport?: string
+  insertIndex?: number
   moduleSpecifier: string
   namedImports?: string[]
   sourceFile: SourceFile
@@ -70,12 +75,21 @@ export function addImportDeclaration({
       }
     }
   } else {
-    // Create new import
-    sourceFile.addImportDeclaration({
+    // Create new import at specified index or at default position
+    const importDeclaration = {
       moduleSpecifier,
       ...(namedImports && { namedImports }),
       ...(defaultImport && { defaultImport }),
-    })
+    }
+
+    if (insertIndex !== undefined) {
+      sourceFile.insertImportDeclaration(insertIndex, importDeclaration)
+      debug(`[AST] Inserted import from '${moduleSpecifier}' at index ${insertIndex}`)
+    } else {
+      sourceFile.addImportDeclaration(importDeclaration)
+      debug(`[AST] Added import from '${moduleSpecifier}' at default position`)
+    }
+
     const parts = []
     if (defaultImport) {
       parts.push(`default: ${defaultImport}`)
@@ -83,7 +97,7 @@ export function addImportDeclaration({
     if (namedImports) {
       parts.push(`named: ${namedImports.join(', ')}`)
     }
-    debug(`[AST] Added new import from '${moduleSpecifier}' (${parts.join(', ')})`)
+    debug(`[AST] Import contents: ${parts.join(', ')}`)
   }
 }
 
@@ -93,12 +107,52 @@ export function removeImportDeclaration({
 }: {
   moduleSpecifier: string
   sourceFile: SourceFile
-}): void {
+}): number | undefined {
   const importDecl = findImportDeclaration({ moduleSpecifier, sourceFile })
   if (importDecl) {
+    // Get index before removing
+    const allImports = sourceFile.getImportDeclarations()
+    const index = allImports.indexOf(importDecl)
     importDecl.remove()
-    debug(`[AST] Removed import from '${moduleSpecifier}'`)
+    debug(`[AST] Removed import from '${moduleSpecifier}' at index ${index}`)
+    return index
   } else {
     debug(`[AST] Import from '${moduleSpecifier}' not found (already absent)`)
+    return undefined
   }
+}
+
+/**
+ * Detects the package manager used in a project by checking for lockfiles.
+ * Returns the appropriate CLI command prefix for running commands.
+ */
+export function detectPackageManager({ projectDir }: { projectDir: string }): string {
+  // Check for lockfiles in project directory
+  if (existsSync(path.join(projectDir, 'pnpm-lock.yaml'))) {
+    return 'pnpm'
+  }
+  if (existsSync(path.join(projectDir, 'yarn.lock'))) {
+    return 'yarn'
+  }
+  if (existsSync(path.join(projectDir, 'bun.lockb'))) {
+    return 'bun'
+  }
+  if (existsSync(path.join(projectDir, 'package-lock.json'))) {
+    return 'npm'
+  }
+
+  // Check environment variable as fallback
+  const userAgent = process.env.npm_config_user_agent || ''
+  if (userAgent.startsWith('pnpm')) {
+    return 'pnpm'
+  }
+  if (userAgent.startsWith('yarn')) {
+    return 'yarn'
+  }
+  if (userAgent.startsWith('bun')) {
+    return 'bun'
+  }
+
+  // Default to npx prettier (works without package manager)
+  return 'npx'
 }
