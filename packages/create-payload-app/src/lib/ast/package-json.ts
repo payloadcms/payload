@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-import type { DatabaseAdapter } from './types'
+import type { DatabaseAdapter } from './types.js'
 
 interface PackageJsonTransformOptions {
   databaseAdapter?: DatabaseAdapter
@@ -46,7 +46,7 @@ function transformPackageJson(
     })
 
     // Add new adapter
-    const newAdapter = DB_PACKAGE_NAMES[options.databaseAdapter]
+    const newAdapter = DB_PACKAGE_NAMES[options.databaseAdapter as keyof typeof DB_PACKAGE_NAMES]
     // Get payload version for consistency
     const payloadVersion = transformed.dependencies?.payload || '^3.0.0'
     transformed.dependencies[newAdapter] = payloadVersion

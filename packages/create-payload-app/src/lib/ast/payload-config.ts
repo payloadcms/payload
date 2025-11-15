@@ -1,4 +1,4 @@
-import { Project, type SourceFile, SyntaxKind } from 'ts-morph'
+import { Project, QuoteKind, type SourceFile, SyntaxKind } from 'ts-morph'
 
 import type {
   ConfigureOptions,
@@ -433,15 +433,16 @@ export async function writeTransformedFile(
     const line = lines[i]
 
     // Check if this line starts a property assignment in buildConfig
-    if (/^\s+\w+:\s+\w+\(\{$/.test(line)) {
+    if (line && /^\s+\w+:\s+\w+\(\{$/.test(line)) {
       inPropertyInitializer = true
-      baseIndent = line.match(/^(\s+)/)?.[1].length || 0
+      const match = line.match(/^(\s+)/)
+      baseIndent = match?.[1]?.length || 0
       normalized.push(line)
       continue
     }
 
     // Check if we're closing the property initializer
-    if (inPropertyInitializer && /^\s+\}\),$/.test(line)) {
+    if (line && inPropertyInitializer && /^\s+\}\),$/.test(line)) {
       // Fix closing brace indentation to match base
       const properLine = ' '.repeat(baseIndent) + '}),'
       normalized.push(properLine)
@@ -450,8 +451,9 @@ export async function writeTransformedFile(
     }
 
     // If we're in a property initializer, reduce indentation by 2 spaces
-    if (inPropertyInitializer && line.trim()) {
-      const currentIndent = line.match(/^(\s+)/)?.[1].length || 0
+    if (line && inPropertyInitializer && line.trim()) {
+      const match = line.match(/^(\s+)/)
+      const currentIndent = match?.[1]?.length || 0
       if (currentIndent > baseIndent) {
         const reducedIndent = Math.max(baseIndent + 2, currentIndent - 2)
         normalized.push(' '.repeat(reducedIndent) + line.trim())
@@ -459,7 +461,7 @@ export async function writeTransformedFile(
       }
     }
 
-    normalized.push(line)
+    normalized.push(line || '')
   }
 
   content = normalized.join('\n')
@@ -497,8 +499,7 @@ export async function configurePayloadConfig(
     // Create Project and load source file with proper settings
     const project = new Project({
       manipulationSettings: {
-        indentationText: '  ', // 2 spaces
-        quoteKind: 1, // Single quotes (QuoteKind.Single = 1)
+        quoteKind: QuoteKind.Single,
       },
     })
     const sourceFile = project.addSourceFileAtPath(filePath)
