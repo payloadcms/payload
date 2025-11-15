@@ -2,6 +2,8 @@ import type { ImportDeclaration, SourceFile } from 'ts-morph'
 
 import type { DetectionError } from './types.js'
 
+import { debug } from '../../utils/log.js'
+
 export function findImportDeclaration(
   sourceFile: SourceFile,
   moduleSpecifier: string,
@@ -11,7 +13,7 @@ export function findImportDeclaration(
     .find((imp) => imp.getModuleSpecifierValue() === moduleSpecifier)
 }
 
-interface FormatErrorOptions {
+type FormatErrorOptions = {
   actual: string
   context: string
   debugInfo?: Record<string, unknown>
@@ -36,13 +38,17 @@ Please ensure your config file follows the expected structure.`
   }
 }
 
-interface AddImportOptions {
+type AddImportOptions = {
   defaultImport?: string
   moduleSpecifier: string
   namedImports?: string[]
 }
 
-export function addImportDeclaration(sourceFile: SourceFile, options: AddImportOptions): void {
+export function addImportDeclaration(
+  sourceFile: SourceFile,
+  options: AddImportOptions,
+  debugMode = false,
+): void {
   const { defaultImport, moduleSpecifier, namedImports } = options
 
   const existingImport = findImportDeclaration(sourceFile, moduleSpecifier)
@@ -55,6 +61,13 @@ export function addImportDeclaration(sourceFile: SourceFile, options: AddImportO
 
       if (newNamedImports.length > 0) {
         existingImport.addNamedImports(newNamedImports)
+        if (debugMode) {
+          debug(
+            `[AST] Added named imports to existing import from '${moduleSpecifier}': ${newNamedImports.join(', ')}`,
+          )
+        }
+      } else if (debugMode) {
+        debug(`[AST] Import from '${moduleSpecifier}' already has all required named imports`)
       }
     }
   } else {
@@ -64,12 +77,27 @@ export function addImportDeclaration(sourceFile: SourceFile, options: AddImportO
       ...(namedImports && { namedImports }),
       ...(defaultImport && { defaultImport }),
     })
+    if (debugMode) {
+      const parts = []
+      if (defaultImport) {parts.push(`default: ${defaultImport}`)}
+      if (namedImports) {parts.push(`named: ${namedImports.join(', ')}`)}
+      debug(`[AST] Added new import from '${moduleSpecifier}' (${parts.join(', ')})`)
+    }
   }
 }
 
-export function removeImportDeclaration(sourceFile: SourceFile, moduleSpecifier: string): void {
+export function removeImportDeclaration(
+  sourceFile: SourceFile,
+  moduleSpecifier: string,
+  debugMode = false,
+): void {
   const importDecl = findImportDeclaration(sourceFile, moduleSpecifier)
   if (importDecl) {
     importDecl.remove()
+    if (debugMode) {
+      debug(`[AST] Removed import from '${moduleSpecifier}'`)
+    }
+  } else if (debugMode) {
+    debug(`[AST] Import from '${moduleSpecifier}' not found (already absent)`)
   }
 }

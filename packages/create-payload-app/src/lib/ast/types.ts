@@ -6,20 +6,20 @@ import type {
   SourceFile,
 } from 'ts-morph'
 
-export interface DetectionError {
+export type DetectionError = {
   debugInfo?: Record<string, unknown>
   technicalDetails: string
   userMessage: string
 }
 
-export interface PayloadConfigStructures {
+export type PayloadConfigStructures = {
   buildConfigCall: CallExpression
   dbProperty?: PropertyAssignment
   importStatements: ImportDeclaration[]
   pluginsArray?: ArrayLiteralExpression
 }
 
-export interface DetectionResult {
+export type DetectionResult = {
   error?: DetectionError
   sourceFile?: SourceFile
   structures?: PayloadConfigStructures
@@ -37,7 +37,7 @@ export type StorageAdapter =
   | 'uploadthingStorage'
   | 'vercelBlobStorage'
 
-export interface TransformOptions {
+export type TransformOptions = {
   databaseAdapter?: {
     envVarName?: string
     type: DatabaseAdapter
@@ -48,22 +48,22 @@ export interface TransformOptions {
   }
 }
 
-export interface WriteOptions {
+export type WriteOptions = {
   debugMode?: boolean
   formatWithPrettier?: boolean
   validateStructure?: boolean
 }
 
-export interface WriteResult {
+export type WriteResult = {
   error?: DetectionError
   success: boolean
 }
 
-export interface ConfigureOptions extends WriteOptions {
+export type ConfigureOptions = {
   db?: {
     envVarName?: string
     type: DatabaseAdapter
   }
   removeSharp?: boolean
   storage?: StorageAdapter
-}
+} & WriteOptions

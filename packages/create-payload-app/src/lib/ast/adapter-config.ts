@@ -5,13 +5,13 @@
 
 import type { DatabaseAdapter, StorageAdapter } from './types.js'
 
-export interface DatabaseAdapterConfig {
+export type DatabaseAdapterConfig = {
   adapterName: string
   configTemplate: (envVar: string) => string
   packageName: string
 }
 
-export interface StorageAdapterConfig {
+export type StorageAdapterConfig = {
   adapterName: null | string
   configTemplate: () => null | string
   packageName: null | string

@@ -2,15 +2,17 @@ import * as fs from 'fs'
 
 import type { DatabaseAdapter } from './types.js'
 
+import { debug } from '../../utils/log.js'
 import { getDbPackageName } from './adapter-config.js'
 
-interface PackageJsonTransformOptions {
+type PackageJsonTransformOptions = {
   databaseAdapter?: DatabaseAdapter
+  debugMode?: boolean
   packageName?: string
   removeSharp?: boolean
 }
 
-interface PackageJsonStructure {
+type PackageJsonStructure = {
   [key: string]: unknown
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
@@ -28,10 +30,15 @@ function transformPackageJson(
   pkg: PackageJsonStructure,
   options: PackageJsonTransformOptions,
 ): PackageJsonStructure {
+  const { debugMode = false } = options
   const transformed = { ...pkg }
 
   // Update database adapter
   if (options.databaseAdapter) {
+    if (debugMode) {
+      debug(`[AST] Updating package.json database adapter to: ${options.databaseAdapter}`)
+    }
+
     transformed.dependencies = { ...transformed.dependencies }
 
     // Remove old db adapters
@@ -42,10 +49,18 @@ function transformPackageJson(
       'vercel-postgres',
       'd1-sqlite',
     ]
+    const removedAdapters: string[] = []
     allDbAdapters.forEach((adapter) => {
       const pkgName = getDbPackageName(adapter)
+      if (transformed.dependencies![pkgName]) {
+        removedAdapters.push(pkgName)
+      }
       delete transformed.dependencies![pkgName]
     })
+
+    if (debugMode && removedAdapters.length > 0) {
+      debug(`[AST] Removed old adapter packages: ${removedAdapters.join(', ')}`)
+    }
 
     // Add new adapter
     const newAdapter = getDbPackageName(options.databaseAdapter)
@@ -53,20 +68,37 @@ function transformPackageJson(
     const payloadVersion = transformed.dependencies?.payload || '^3.0.0'
     transformed.dependencies[newAdapter] = payloadVersion
 
+    if (debugMode) {
+      debug(`[AST] Added adapter package: ${newAdapter}`)
+    }
+
     // Add vercel/postgres if needed
     if (options.databaseAdapter === 'vercel-postgres') {
       transformed.dependencies['@vercel/postgres'] = '^0.10.0'
+      if (debugMode) {
+        debug('[AST] Added @vercel/postgres dependency')
+      }
     }
   }
 
   // Remove sharp
   if (options.removeSharp && transformed.dependencies) {
     transformed.dependencies = { ...transformed.dependencies }
-    delete transformed.dependencies.sharp
+    if (transformed.dependencies.sharp) {
+      delete transformed.dependencies.sharp
+      if (debugMode) {
+        debug('[AST] Removed sharp dependency')
+      }
+    } else if (debugMode) {
+      debug('[AST] Sharp dependency not found (already absent)')
+    }
   }
 
   // Update package name
   if (options.packageName) {
+    if (debugMode) {
+      debug(`[AST] Updated package name to: ${options.packageName}`)
+    }
     transformed.name = options.packageName
   }
 
@@ -80,6 +112,12 @@ function writePackageJson(filePath: string, pkg: PackageJsonStructure): void {
 
 // Main orchestration function
 export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
+  const { debugMode = false } = options
+
+  if (debugMode) {
+    debug(`[AST] Updating package.json: ${filePath}`)
+  }
+
   // Phase 1: Detection
   const pkg = detectPackageJsonStructure(filePath)
 
@@ -88,4 +126,8 @@ export function updatePackageJson(filePath: string, options: PackageJsonTransfor
 
   // Phase 3: Modification
   writePackageJson(filePath, transformed)
+
+  if (debugMode) {
+    debug('[AST] ✓ package.json updated successfully')
+  }
 }
