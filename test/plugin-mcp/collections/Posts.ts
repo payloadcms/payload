@@ -34,7 +34,16 @@ export const Posts: CollectionConfig = {
     beforeRead: [
       ({ doc, req }) => {
         if (req.payloadAPI === 'MCP') {
-          doc.title = `${doc.title} (MCP Hook Override)`
+          // Handle both localized (object) and non-localized (string) title
+          if (typeof doc.title === 'object' && doc.title !== null) {
+            // Localized field - update all locale values
+            Object.keys(doc.title).forEach((locale) => {
+              doc.title[locale] = `${doc.title[locale]} (MCP Hook Override)`
+            })
+          } else if (typeof doc.title === 'string') {
+            // Non-localized field
+            doc.title = `${doc.title} (MCP Hook Override)`
+          }
         }
         return doc
       },

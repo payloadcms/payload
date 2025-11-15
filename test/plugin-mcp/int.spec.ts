@@ -56,6 +56,7 @@ const getApiKey = async (enableUpdate = false, enableDelete = false): Promise<st
       enableAPIKey: true,
       label: 'Test API Key',
       posts: { find: true, create: true, update: enableUpdate, delete: enableDelete },
+      products: { find: true },
       apiKey: randomUUID(),
       user: userId,
     },
@@ -522,7 +523,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain('Resource created successfully')
-      expect(json.result.content[0].text).toContain('"title": "Title Override: Hello World"')
+      expect(json.result.content[0].text).toContain('"title": "Hello World"')
       expect(json.result.content[0].text).toContain('"content": "This is my first post in English"')
     })
 
@@ -564,7 +565,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain('Document updated successfully')
-      expect(json.result.content[0].text).toContain('"title": "Title Override: Título Español"')
+      expect(json.result.content[0].text).toContain('"title": "Título Español"')
       expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
     })
 
@@ -613,7 +614,9 @@ describe('@payloadcms/plugin-mcp', () => {
       const json = await parseStreamResponse(response)
 
       expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('"title": "Publicación Española"')
+      expect(json.result.content[0].text).toContain(
+        '"title": "Publicación Española (MCP Hook Override)"',
+      )
       expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
     })
 
@@ -678,9 +681,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('"en":')
       expect(responseText).toContain('"es":')
       expect(responseText).toContain('"fr":')
-      expect(responseText).toContain('English Title')
-      expect(responseText).toContain('Título Español')
-      expect(responseText).toContain('Titre Français')
+      expect(responseText).toContain('English Title (MCP Hook Override)')
+      expect(responseText).toContain('Título Español (MCP Hook Override)')
+      expect(responseText).toContain('Titre Français (MCP Hook Override)')
     })
 
     it('should use fallback locale when translation does not exist', async () => {
@@ -719,7 +722,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       // Should fallback to English (with default value for content)
-      expect(json.result.content[0].text).toContain('"title": "English Only Title"')
+      expect(json.result.content[0].text).toContain(
+        '"title": "English Only Title (MCP Hook Override)"',
+      )
       expect(json.result.content[0].text).toContain('"content": "Hello World."')
     })
   })
