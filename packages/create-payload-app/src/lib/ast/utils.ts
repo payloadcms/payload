@@ -35,3 +35,34 @@ Please ensure your config file follows the expected structure.`
     ...(debugInfo && { debugInfo }),
   }
 }
+
+interface AddImportOptions {
+  defaultImport?: string
+  moduleSpecifier: string
+  namedImports?: string[]
+}
+
+export function addImportDeclaration(sourceFile: SourceFile, options: AddImportOptions): void {
+  const { defaultImport, moduleSpecifier, namedImports } = options
+
+  const existingImport = findImportDeclaration(sourceFile, moduleSpecifier)
+
+  if (existingImport) {
+    // Add named imports to existing import if they don't exist
+    if (namedImports) {
+      const existingNamedImports = existingImport.getNamedImports().map((ni) => ni.getName())
+      const newNamedImports = namedImports.filter((ni) => !existingNamedImports.includes(ni))
+
+      if (newNamedImports.length > 0) {
+        existingImport.addNamedImports(newNamedImports)
+      }
+    }
+  } else {
+    // Create new import
+    sourceFile.addImportDeclaration({
+      moduleSpecifier,
+      ...(namedImports && { namedImports }),
+      ...(defaultImport && { defaultImport }),
+    })
+  }
+}

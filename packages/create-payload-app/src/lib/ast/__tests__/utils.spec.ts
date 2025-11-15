@@ -1,5 +1,5 @@
 import { Project } from 'ts-morph'
-import { findImportDeclaration, formatError } from '../utils'
+import { addImportDeclaration, findImportDeclaration, formatError } from '../utils'
 
 describe('findImportDeclaration', () => {
   it('finds import by module specifier', () => {
@@ -50,5 +50,54 @@ describe('formatError', () => {
     })
 
     expect(error.debugInfo).toEqual({ line: 10, column: 5 })
+  })
+})
+
+describe('addImportDeclaration', () => {
+  it('adds new import when not present', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+
+    addImportDeclaration(sourceFile, {
+      moduleSpecifier: '@payloadcms/db-postgres',
+      namedImports: ['postgresAdapter'],
+    })
+
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(2)
+    expect(imports[1].getModuleSpecifierValue()).toBe('@payloadcms/db-postgres')
+    expect(imports[1].getNamedImports()[0].getName()).toBe('postgresAdapter')
+  })
+
+  it('does not duplicate existing import', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
+    )
+
+    addImportDeclaration(sourceFile, {
+      moduleSpecifier: '@payloadcms/db-mongodb',
+      namedImports: ['mongooseAdapter'],
+    })
+
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+  })
+
+  it('adds named import to existing module import', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+
+    addImportDeclaration(sourceFile, {
+      moduleSpecifier: 'payload',
+      namedImports: ['Field'],
+    })
+
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+    const namedImports = imports[0].getNamedImports().map((ni) => ni.getName())
+    expect(namedImports).toContain('buildConfig')
+    expect(namedImports).toContain('Field')
   })
 })
