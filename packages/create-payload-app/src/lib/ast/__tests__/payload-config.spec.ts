@@ -3,6 +3,7 @@ import {
   addDatabaseAdapter,
   addStorageAdapter,
   detectPayloadConfigStructure,
+  removeSharp,
 } from '../payload-config'
 
 describe('detectPayloadConfigStructure', () => {
@@ -171,5 +172,44 @@ export default buildConfig({
     const text = sourceFile.getText()
     expect(text).toContain('someOtherPlugin()')
     expect(text).toContain('s3Storage(')
+  })
+})
+
+describe('removeSharp', () => {
+  it('removes sharp import and property', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import sharp from 'sharp'
+
+export default buildConfig({
+  sharp,
+  collections: []
+})`,
+    )
+
+    removeSharp(sourceFile)
+
+    const text = sourceFile.getText()
+    expect(text).not.toContain("import sharp from 'sharp'")
+    expect(text).not.toContain('sharp,')
+  })
+
+  it('does nothing if sharp not present', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    const originalText = sourceFile.getText()
+    removeSharp(sourceFile)
+
+    expect(sourceFile.getText()).toBe(originalText)
   })
 })

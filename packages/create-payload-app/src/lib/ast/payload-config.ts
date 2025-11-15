@@ -313,3 +313,29 @@ export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapte
     pluginsArray.addElement(configText)
   }
 }
+
+export function removeSharp(sourceFile: SourceFile): void {
+  // Remove import
+  removeImportDeclaration(sourceFile, 'sharp')
+
+  // Find and remove sharp property from buildConfig
+  const detection = detectPayloadConfigStructure(sourceFile)
+
+  if (!detection.success || !detection.structures) {
+    return
+  }
+
+  const { buildConfigCall } = detection.structures
+  const configObject = buildConfigCall.getArguments()[0]
+
+  if (!configObject || configObject.getKind() !== SyntaxKind.ObjectLiteralExpression) {
+    return
+  }
+
+  const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+  const sharpProperty = objLiteral.getProperty('sharp')
+
+  if (sharpProperty) {
+    sharpProperty.remove()
+  }
+}
