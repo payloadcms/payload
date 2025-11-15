@@ -175,8 +175,12 @@ export function addDatabaseAdapter(
     dbProperty.remove()
   }
 
-  // Add new db property at the beginning
-  objLiteral.insertPropertyAssignment(0, {
+  // Add new db property - insert after first property to match expected format
+  // Find first property to determine insert position
+  const firstProperty = objLiteral.getProperties()[0]
+  const insertIndex = firstProperty ? 0 : 0
+
+  objLiteral.insertPropertyAssignment(insertIndex, {
     name: 'db',
     initializer: config.configTemplate(envVarName),
   })
@@ -186,22 +190,22 @@ const STORAGE_ADAPTER_CONFIG = {
   azureStorage: {
     adapterName: 'azureStorage',
     configTemplate: () => `azureStorage({
-    collections: {
-      media: true,
-    },
-    connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING || '',
-    containerName: process.env.AZURE_STORAGE_CONTAINER_NAME || '',
-  })`,
+  collections: {
+    media: true,
+  },
+  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING || '',
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME || '',
+})`,
     packageName: '@payloadcms/storage-azure',
   },
   gcsStorage: {
     adapterName: 'gcsStorage',
     configTemplate: () => `gcsStorage({
-    collections: {
-      media: true,
-    },
-    bucket: process.env.GCS_BUCKET || '',
-  })`,
+  collections: {
+    media: true,
+  },
+  bucket: process.env.GCS_BUCKET || '',
+})`,
     packageName: '@payloadcms/storage-gcs',
   },
   localDisk: {
@@ -212,50 +216,50 @@ const STORAGE_ADAPTER_CONFIG = {
   r2Storage: {
     adapterName: 'r2Storage',
     configTemplate: () => `r2Storage({
-    collections: {
-      media: true,
-    },
-    bucket: process.env.R2_BUCKET || '',
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-  })`,
+  collections: {
+    media: true,
+  },
+  bucket: process.env.R2_BUCKET || '',
+  accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+})`,
     packageName: '@payloadcms/storage-cloudflare-r2',
   },
   s3Storage: {
     adapterName: 's3Storage',
     configTemplate: () => `s3Storage({
-    collections: {
-      media: true,
+  collections: {
+    media: true,
+  },
+  bucket: process.env.S3_BUCKET || '',
+  config: {
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
     },
-    bucket: process.env.S3_BUCKET || '',
-    config: {
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-      },
-      region: process.env.S3_REGION || '',
-    },
-  })`,
+    region: process.env.S3_REGION || '',
+  },
+})`,
     packageName: '@payloadcms/storage-s3',
   },
   uploadthingStorage: {
     adapterName: 'uploadthingStorage',
     configTemplate: () => `uploadthingStorage({
-    collections: {
-      media: true,
-    },
-    token: process.env.UPLOADTHING_SECRET || '',
-  })`,
+  collections: {
+    media: true,
+  },
+  token: process.env.UPLOADTHING_SECRET || '',
+})`,
     packageName: '@payloadcms/storage-uploadthing',
   },
   vercelBlobStorage: {
     adapterName: 'vercelBlobStorage',
     configTemplate: () => `vercelBlobStorage({
-    collections: {
-      media: true,
-    },
-    token: process.env.BLOB_READ_WRITE_TOKEN || '',
-  })`,
+  collections: {
+    media: true,
+  },
+  token: process.env.BLOB_READ_WRITE_TOKEN || '',
+})`,
     packageName: '@payloadcms/storage-vercel-blob',
   },
 } as const
@@ -347,6 +351,26 @@ export function removeSharp(sourceFile: SourceFile): void {
   }
 }
 
+export function removeCommentMarkers(sourceFile: SourceFile): void {
+  // Get the full text and replace comment markers
+  let text = sourceFile.getFullText()
+
+  // Remove inline comment markers from imports
+  text = text.replace(/\s*\/\/\s*database-adapter-import\s*$/gm, '')
+  text = text.replace(/\s*\/\/\s*storage-adapter-import-placeholder\s*$/gm, '')
+
+  // Remove standalone comment lines
+  text = text.replace(/^\s*\/\/\s*database-adapter-config-start\s*\n/gm, '')
+  text = text.replace(/^\s*\/\/\s*database-adapter-config-end\s*\n/gm, '')
+  text = text.replace(/^\s*\/\/\s*storage-adapter-placeholder\s*\n/gm, '')
+
+  // Also remove the placeholder line from template (storage-adapter-import-placeholder at top)
+  text = text.replace(/^\/\/\s*storage-adapter-import-placeholder\s*\n/gm, '')
+
+  // Replace the entire source file content
+  sourceFile.replaceWithText(text)
+}
+
 export function validateStructure(sourceFile: SourceFile): WriteResult {
   const detection = detectPayloadConfigStructure(sourceFile)
 
@@ -393,6 +417,53 @@ export async function writeTransformedFile(
   const filePath = sourceFile.getFilePath()
   let content = sourceFile.getText()
 
+  // Fix quote style (ts-morph sometimes uses double quotes, convert to single)
+  content = content.replace(/from "([^"]+)"/g, "from '$1'")
+  content = content.replace(/import "([^"]+)"/g, "import '$1'")
+
+  // Normalize indentation: ts-morph adds base indentation, but our template strings also have indentation
+  // This causes double indentation. We need to reduce indentation in property initializers.
+  // Match patterns like: "  db: adapter({\n      content" and reduce the excess indentation
+  const lines = content.split('\n')
+  const normalized: string[] = []
+  let inPropertyInitializer = false
+  let baseIndent = 0
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+
+    // Check if this line starts a property assignment in buildConfig
+    if (/^\s+\w+:\s+\w+\(\{$/.test(line)) {
+      inPropertyInitializer = true
+      baseIndent = line.match(/^(\s+)/)?.[1].length || 0
+      normalized.push(line)
+      continue
+    }
+
+    // Check if we're closing the property initializer
+    if (inPropertyInitializer && /^\s+\}\),$/.test(line)) {
+      // Fix closing brace indentation to match base
+      const properLine = ' '.repeat(baseIndent) + '}),'
+      normalized.push(properLine)
+      inPropertyInitializer = false
+      continue
+    }
+
+    // If we're in a property initializer, reduce indentation by 2 spaces
+    if (inPropertyInitializer && line.trim()) {
+      const currentIndent = line.match(/^(\s+)/)?.[1].length || 0
+      if (currentIndent > baseIndent) {
+        const reducedIndent = Math.max(baseIndent + 2, currentIndent - 2)
+        normalized.push(' '.repeat(reducedIndent) + line.trim())
+        continue
+      }
+    }
+
+    normalized.push(line)
+  }
+
+  content = normalized.join('\n')
+
   // Format with prettier if requested
   if (formatWithPrettier) {
     try {
@@ -423,8 +494,13 @@ export async function configurePayloadConfig(
   options: ConfigureOptions = {},
 ): Promise<WriteResult> {
   try {
-    // Create Project and load source file
-    const project = new Project()
+    // Create Project and load source file with proper settings
+    const project = new Project({
+      manipulationSettings: {
+        indentationText: '  ', // 2 spaces
+        quoteKind: 1, // Single quotes (QuoteKind.Single = 1)
+      },
+    })
     const sourceFile = project.addSourceFileAtPath(filePath)
 
     // Run detection
@@ -445,6 +521,9 @@ export async function configurePayloadConfig(
     if (options.removeSharp) {
       removeSharp(sourceFile)
     }
+
+    // Remove comment markers from template
+    removeCommentMarkers(sourceFile)
 
     // Write transformed file with validation and formatting
     return await writeTransformedFile(sourceFile, {
