@@ -34,7 +34,7 @@ type CreateAccessPromise = (args: {
 type EntityDoc = JsonObject | TypeWithID
 
 /**
- * Build up permissions object for an entity (collection or global)
+ * Build up permissions object for an entity (collection or global). SCHEMA Permissions - disregards siblingData
  */
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
   const { id, type, blockPolicies, entity, operations, req } = args
