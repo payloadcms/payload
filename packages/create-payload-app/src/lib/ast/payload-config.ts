@@ -9,6 +9,7 @@ import type {
   WriteResult,
 } from './types.js'
 
+import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
 import { addImportDeclaration, formatError, removeImportDeclaration } from './utils.js'
 
 export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
@@ -73,53 +74,6 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
   }
 }
 
-const DB_ADAPTER_CONFIG = {
-  'd1-sqlite': {
-    adapterName: 'sqliteAdapter',
-    configTemplate: () => `sqliteAdapter({
-  client: {
-    url: getD1Database()!,
-  },
-  prodMigrations: migrations,
-})`,
-    packageName: '@payloadcms/db-sqlite',
-  },
-  mongodb: {
-    adapterName: 'mongooseAdapter',
-    configTemplate: (envVar: string) => `mongooseAdapter({
-  url: process.env.${envVar} || '',
-})`,
-    packageName: '@payloadcms/db-mongodb',
-  },
-  postgres: {
-    adapterName: 'postgresAdapter',
-    configTemplate: (envVar: string) => `postgresAdapter({
-  pool: {
-    connectionString: process.env.${envVar} || '',
-  },
-})`,
-    packageName: '@payloadcms/db-postgres',
-  },
-  sqlite: {
-    adapterName: 'sqliteAdapter',
-    configTemplate: () => `sqliteAdapter({
-  client: {
-    url: process.env.DATABASE_URI || '',
-  },
-})`,
-    packageName: '@payloadcms/db-sqlite',
-  },
-  'vercel-postgres': {
-    adapterName: 'vercelPostgresAdapter',
-    configTemplate: () => `vercelPostgresAdapter({
-  pool: createPool({
-    connectionString: process.env.POSTGRES_URL || '',
-  }),
-})`,
-    packageName: '@payloadcms/db-vercel-postgres',
-  },
-} as const
-
 export function addDatabaseAdapter(
   sourceFile: SourceFile,
   adapter: DatabaseAdapter,
@@ -132,7 +86,7 @@ export function addDatabaseAdapter(
   }
 
   const { buildConfigCall, dbProperty } = detection.structures
-  const config = DB_ADAPTER_CONFIG[adapter as keyof typeof DB_ADAPTER_CONFIG]
+  const config = DB_ADAPTER_CONFIG[adapter]
 
   // Remove old db adapter imports
   const oldAdapters = Object.values(DB_ADAPTER_CONFIG)
@@ -186,84 +140,6 @@ export function addDatabaseAdapter(
   })
 }
 
-const STORAGE_ADAPTER_CONFIG = {
-  azureStorage: {
-    adapterName: 'azureStorage',
-    configTemplate: () => `azureStorage({
-  collections: {
-    media: true,
-  },
-  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING || '',
-  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME || '',
-})`,
-    packageName: '@payloadcms/storage-azure',
-  },
-  gcsStorage: {
-    adapterName: 'gcsStorage',
-    configTemplate: () => `gcsStorage({
-  collections: {
-    media: true,
-  },
-  bucket: process.env.GCS_BUCKET || '',
-})`,
-    packageName: '@payloadcms/storage-gcs',
-  },
-  localDisk: {
-    adapterName: null,
-    configTemplate: () => null,
-    packageName: null,
-  },
-  r2Storage: {
-    adapterName: 'r2Storage',
-    configTemplate: () => `r2Storage({
-  collections: {
-    media: true,
-  },
-  bucket: process.env.R2_BUCKET || '',
-  accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-})`,
-    packageName: '@payloadcms/storage-cloudflare-r2',
-  },
-  s3Storage: {
-    adapterName: 's3Storage',
-    configTemplate: () => `s3Storage({
-  collections: {
-    media: true,
-  },
-  bucket: process.env.S3_BUCKET || '',
-  config: {
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-    },
-    region: process.env.S3_REGION || '',
-  },
-})`,
-    packageName: '@payloadcms/storage-s3',
-  },
-  uploadthingStorage: {
-    adapterName: 'uploadthingStorage',
-    configTemplate: () => `uploadthingStorage({
-  collections: {
-    media: true,
-  },
-  token: process.env.UPLOADTHING_SECRET || '',
-})`,
-    packageName: '@payloadcms/storage-uploadthing',
-  },
-  vercelBlobStorage: {
-    adapterName: 'vercelBlobStorage',
-    configTemplate: () => `vercelBlobStorage({
-  collections: {
-    media: true,
-  },
-  token: process.env.BLOB_READ_WRITE_TOKEN || '',
-})`,
-    packageName: '@payloadcms/storage-vercel-blob',
-  },
-} as const
-
 export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapter): void {
   const detection = detectPayloadConfigStructure(sourceFile)
 
@@ -271,7 +147,7 @@ export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapte
     throw new Error('Cannot add storage adapter: ' + detection.error?.userMessage)
   }
 
-  const config = STORAGE_ADAPTER_CONFIG[adapter as keyof typeof STORAGE_ADAPTER_CONFIG]
+  const config = STORAGE_ADAPTER_CONFIG[adapter]
 
   // Local disk doesn't need any imports or plugins
   if (adapter === 'localDisk') {

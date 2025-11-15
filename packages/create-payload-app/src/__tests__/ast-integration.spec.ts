@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as os from 'os'
 import { configurePayloadConfig } from '../lib/configure-payload-config'
 import type { DbType, StorageAdapterType } from '../types'
+import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from '../lib/ast/adapter-config'
 
 interface TestCase {
   name: string
@@ -51,42 +52,6 @@ const TEST_CASES: TestCase[] = [
   },
 ]
 
-const DB_ADAPTER_IMPORTS = {
-  mongodb: '@payloadcms/db-mongodb',
-  postgres: '@payloadcms/db-postgres',
-  sqlite: '@payloadcms/db-sqlite',
-  'vercel-postgres': '@payloadcms/db-vercel-postgres',
-  'd1-sqlite': '@payloadcms/db-sqlite',
-} as const
-
-const DB_ADAPTER_NAMES = {
-  mongodb: 'mongooseAdapter',
-  postgres: 'postgresAdapter',
-  sqlite: 'sqliteAdapter',
-  'vercel-postgres': 'vercelPostgresAdapter',
-  'd1-sqlite': 'sqliteAdapter',
-} as const
-
-const STORAGE_ADAPTER_IMPORTS = {
-  localDisk: null,
-  vercelBlobStorage: '@payloadcms/storage-vercel-blob',
-  s3Storage: '@payloadcms/storage-s3',
-  r2Storage: '@payloadcms/storage-cloudflare-r2',
-  azureStorage: '@payloadcms/storage-azure',
-  gcsStorage: '@payloadcms/storage-gcs',
-  uploadthingStorage: '@payloadcms/storage-uploadthing',
-} as const
-
-const STORAGE_ADAPTER_NAMES = {
-  localDisk: null,
-  vercelBlobStorage: 'vercelBlobStorage',
-  s3Storage: 's3Storage',
-  r2Storage: 'r2Storage',
-  azureStorage: 'azureStorage',
-  gcsStorage: 'gcsStorage',
-  uploadthingStorage: 'uploadthingStorage',
-} as const
-
 describe('AST Integration Tests', () => {
   let tempDir: string
   const templatesRoot = path.resolve(__dirname, '../../../..', 'templates')
@@ -131,23 +96,21 @@ describe('AST Integration Tests', () => {
       const configContent = fs.readFileSync(payloadConfigPath, 'utf-8')
 
       // Check database adapter import
-      const dbImport = DB_ADAPTER_IMPORTS[dbType]
-      const dbAdapterName = DB_ADAPTER_NAMES[dbType]
-      expect(configContent).toContain(`from '${dbImport}'`)
-      expect(configContent).toContain(`import { ${dbAdapterName} }`)
+      const dbConfig = DB_ADAPTER_CONFIG[dbType]
+      expect(configContent).toContain(`from '${dbConfig.packageName}'`)
+      expect(configContent).toContain(`import { ${dbConfig.adapterName} }`)
 
       // Check database adapter config
-      expect(configContent).toMatch(new RegExp(`db:\\s*${dbAdapterName}\\(`))
+      expect(configContent).toMatch(new RegExp(`db:\\s*${dbConfig.adapterName}\\(`))
 
       // Check storage adapter if not localDisk
       if (storageAdapter !== 'localDisk') {
-        const storageImport = STORAGE_ADAPTER_IMPORTS[storageAdapter]
-        const storageAdapterName = STORAGE_ADAPTER_NAMES[storageAdapter]
+        const storageConfig = STORAGE_ADAPTER_CONFIG[storageAdapter]
 
-        if (storageImport && storageAdapterName) {
-          expect(configContent).toContain(`from '${storageImport}'`)
-          expect(configContent).toContain(`import { ${storageAdapterName} }`)
-          expect(configContent).toContain(`${storageAdapterName}(`)
+        if (storageConfig.packageName && storageConfig.adapterName) {
+          expect(configContent).toContain(`from '${storageConfig.packageName}'`)
+          expect(configContent).toContain(`import { ${storageConfig.adapterName} }`)
+          expect(configContent).toContain(`${storageConfig.adapterName}(`)
         }
       }
 
@@ -166,12 +129,12 @@ describe('AST Integration Tests', () => {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
 
       // Check that correct db adapter package is in dependencies
-      expect(packageJson.dependencies[dbImport]).toBeDefined()
+      expect(packageJson.dependencies[dbConfig.packageName]).toBeDefined()
 
       // Check that old db adapters are removed
-      Object.entries(DB_ADAPTER_IMPORTS).forEach(([key, pkgName]) => {
-        if (key !== dbType && pkgName !== dbImport) {
-          expect(packageJson.dependencies[pkgName]).toBeUndefined()
+      Object.entries(DB_ADAPTER_CONFIG).forEach(([key, config]) => {
+        if (key !== dbType && config.packageName !== dbConfig.packageName) {
+          expect(packageJson.dependencies[config.packageName]).toBeUndefined()
         }
       })
 

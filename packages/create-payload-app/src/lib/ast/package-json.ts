@@ -2,6 +2,8 @@ import * as fs from 'fs'
 
 import type { DatabaseAdapter } from './types.js'
 
+import { getDbPackageName } from './adapter-config.js'
+
 interface PackageJsonTransformOptions {
   databaseAdapter?: DatabaseAdapter
   packageName?: string
@@ -14,14 +16,6 @@ interface PackageJsonStructure {
   devDependencies?: Record<string, string>
   name?: string
 }
-
-const DB_PACKAGE_NAMES = {
-  'd1-sqlite': '@payloadcms/db-sqlite',
-  mongodb: '@payloadcms/db-mongodb',
-  postgres: '@payloadcms/db-postgres',
-  sqlite: '@payloadcms/db-sqlite',
-  'vercel-postgres': '@payloadcms/db-vercel-postgres',
-} as const
 
 // Phase 1: Detection
 function detectPackageJsonStructure(filePath: string): PackageJsonStructure {
@@ -41,12 +35,20 @@ function transformPackageJson(
     transformed.dependencies = { ...transformed.dependencies }
 
     // Remove old db adapters
-    Object.values(DB_PACKAGE_NAMES).forEach((pkgName) => {
+    const allDbAdapters: DatabaseAdapter[] = [
+      'mongodb',
+      'postgres',
+      'sqlite',
+      'vercel-postgres',
+      'd1-sqlite',
+    ]
+    allDbAdapters.forEach((adapter) => {
+      const pkgName = getDbPackageName(adapter)
       delete transformed.dependencies![pkgName]
     })
 
     // Add new adapter
-    const newAdapter = DB_PACKAGE_NAMES[options.databaseAdapter as keyof typeof DB_PACKAGE_NAMES]
+    const newAdapter = getDbPackageName(options.databaseAdapter)
     // Get payload version for consistency
     const payloadVersion = transformed.dependencies?.payload || '^3.0.0'
     transformed.dependencies[newAdapter] = payloadVersion
