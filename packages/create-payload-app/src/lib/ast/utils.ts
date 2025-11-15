@@ -1,6 +1,6 @@
 import type { ImportDeclaration, SourceFile } from 'ts-morph'
 
-import type { DetectionError } from './types'
+import type { DetectionError } from './types.js'
 
 export function findImportDeclaration(
   sourceFile: SourceFile,
