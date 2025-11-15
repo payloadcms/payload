@@ -1,5 +1,5 @@
 import { Project } from 'ts-morph'
-import { detectPayloadConfigStructure } from '../payload-config'
+import { addDatabaseAdapter, detectPayloadConfigStructure } from '../payload-config'
 
 describe('detectPayloadConfigStructure', () => {
   it('successfully detects buildConfig call', () => {
@@ -48,5 +48,66 @@ export default config`,
 
     expect(result.success).toBe(true)
     expect(result.structures?.buildConfigCall).toBeDefined()
+  })
+})
+
+describe('addDatabaseAdapter', () => {
+  it('adds mongodb adapter with import and config', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    addDatabaseAdapter(sourceFile, 'mongodb', 'DATABASE_URI')
+
+    const text = sourceFile.getText()
+    expect(text).toMatch(/import.*mongooseAdapter.*from.*@payloadcms\/db-mongodb/)
+    expect(text).toContain('db: mongooseAdapter')
+    expect(text).toContain('process.env.DATABASE_URI')
+  })
+
+  it('adds postgres adapter', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    addDatabaseAdapter(sourceFile, 'postgres', 'DATABASE_URI')
+
+    const text = sourceFile.getText()
+    expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
+    expect(text).toContain('db: postgresAdapter')
+  })
+
+  it('replaces existing db adapter', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' }),
+  collections: []
+})`,
+    )
+
+    addDatabaseAdapter(sourceFile, 'postgres', 'DATABASE_URI')
+
+    const text = sourceFile.getText()
+    expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
+    expect(text).toContain('db: postgresAdapter')
+    expect(text).not.toContain('mongooseAdapter')
+    expect(text).not.toContain('@payloadcms/db-mongodb')
   })
 })
