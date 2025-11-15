@@ -327,3 +327,123 @@ export default buildConfig({
     expect(result.error?.userMessage).toContain('db')
   })
 })
+
+describe('configurePayloadConfig', () => {
+  let tempDir: string
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'payload-test-'))
+  })
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('applies all transformations in one call (db + storage)', async () => {
+    const filePath = path.join(tempDir, 'payload.config.ts')
+    fs.writeFileSync(
+      filePath,
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    const { configurePayloadConfig } = await import('../payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      db: { type: 'postgres', envVarName: 'DATABASE_URL' },
+      storage: 'vercelBlobStorage',
+      formatWithPrettier: false,
+    })
+
+    expect(result.success).toBe(true)
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    expect(content).toContain('postgresAdapter')
+    expect(content).toContain('vercelBlobStorage')
+    expect(content).toContain('DATABASE_URL')
+  })
+
+  it('applies db transformation only', async () => {
+    const filePath = path.join(tempDir, 'payload.config.ts')
+    fs.writeFileSync(
+      filePath,
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    const { configurePayloadConfig } = await import('../payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      db: { type: 'mongodb', envVarName: 'MONGO_URL' },
+      formatWithPrettier: false,
+    })
+
+    expect(result.success).toBe(true)
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    expect(content).toContain('mongooseAdapter')
+    expect(content).toContain('MONGO_URL')
+  })
+
+  it('applies removeSharp transformation', async () => {
+    const filePath = path.join(tempDir, 'payload.config.ts')
+    fs.writeFileSync(
+      filePath,
+      `import { buildConfig } from 'payload'
+import sharp from 'sharp'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' }),
+  sharp,
+  collections: []
+})`,
+    )
+
+    const { configurePayloadConfig } = await import('../payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      removeSharp: true,
+      formatWithPrettier: false,
+    })
+
+    expect(result.success).toBe(true)
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    expect(content).not.toContain("import sharp from 'sharp'")
+    expect(content).not.toContain('sharp,')
+  })
+
+  it('handles transformation errors gracefully', async () => {
+    const filePath = path.join(tempDir, 'payload.config.ts')
+    fs.writeFileSync(
+      filePath,
+      `export default {}`, // Invalid structure
+    )
+
+    const { configurePayloadConfig } = await import('../payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      db: { type: 'postgres', envVarName: 'DATABASE_URL' },
+      formatWithPrettier: false,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.userMessage).toContain('buildConfig')
+  })
+
+  it('handles file not found error', async () => {
+    const filePath = path.join(tempDir, 'nonexistent.ts')
+
+    const { configurePayloadConfig } = await import('../payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      db: { type: 'postgres', envVarName: 'DATABASE_URL' },
+      formatWithPrettier: false,
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBeDefined()
+  })
+})

@@ -58,3 +58,12 @@ export interface WriteResult {
   error?: DetectionError
   success: boolean
 }
+
+export interface ConfigureOptions extends WriteOptions {
+  db?: {
+    envVarName?: string
+    type: DatabaseAdapter
+  }
+  removeSharp?: boolean
+  storage?: StorageAdapter
+}

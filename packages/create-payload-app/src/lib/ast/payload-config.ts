@@ -1,14 +1,15 @@
-import { type SourceFile, SyntaxKind } from 'ts-morph'
+import { Project, type SourceFile, SyntaxKind } from 'ts-morph'
 
 import type {
+  ConfigureOptions,
   DatabaseAdapter,
   DetectionResult,
   StorageAdapter,
   WriteOptions,
   WriteResult,
-} from './types'
+} from './types.js'
 
-import { addImportDeclaration, formatError, removeImportDeclaration } from './utils'
+import { addImportDeclaration, formatError, removeImportDeclaration } from './utils.js'
 
 export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
   // Find buildConfig call expression
@@ -131,7 +132,7 @@ export function addDatabaseAdapter(
   }
 
   const { buildConfigCall, dbProperty } = detection.structures
-  const config = DB_ADAPTER_CONFIG[adapter]
+  const config = DB_ADAPTER_CONFIG[adapter as keyof typeof DB_ADAPTER_CONFIG]
 
   // Remove old db adapter imports
   const oldAdapters = Object.values(DB_ADAPTER_CONFIG)
@@ -266,7 +267,7 @@ export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapte
     throw new Error('Cannot add storage adapter: ' + detection.error?.userMessage)
   }
 
-  const config = STORAGE_ADAPTER_CONFIG[adapter]
+  const config = STORAGE_ADAPTER_CONFIG[adapter as keyof typeof STORAGE_ADAPTER_CONFIG]
 
   // Local disk doesn't need any imports or plugins
   if (adapter === 'localDisk') {
@@ -415,4 +416,51 @@ export async function writeTransformedFile(
   await sourceFile.getProject().getFileSystem().writeFile(filePath, content)
 
   return { success: true }
+}
+
+export async function configurePayloadConfig(
+  filePath: string,
+  options: ConfigureOptions = {},
+): Promise<WriteResult> {
+  try {
+    // Create Project and load source file
+    const project = new Project()
+    const sourceFile = project.addSourceFileAtPath(filePath)
+
+    // Run detection
+    const detection = detectPayloadConfigStructure(sourceFile)
+    if (!detection.success) {
+      return detection
+    }
+
+    // Apply transformations based on options
+    if (options.db) {
+      addDatabaseAdapter(sourceFile, options.db.type, options.db.envVarName)
+    }
+
+    if (options.storage) {
+      addStorageAdapter(sourceFile, options.storage)
+    }
+
+    if (options.removeSharp) {
+      removeSharp(sourceFile)
+    }
+
+    // Write transformed file with validation and formatting
+    return await writeTransformedFile(sourceFile, {
+      debugMode: options.debugMode,
+      formatWithPrettier: options.formatWithPrettier,
+      validateStructure: options.validateStructure ?? true,
+    })
+  } catch (error) {
+    return {
+      error: formatError({
+        actual: error instanceof Error ? error.message : String(error),
+        context: 'configurePayloadConfig',
+        expected: 'Successful file transformation',
+        technicalDetails: error instanceof Error ? error.stack || error.message : String(error),
+      }),
+      success: false,
+    }
+  }
 }
