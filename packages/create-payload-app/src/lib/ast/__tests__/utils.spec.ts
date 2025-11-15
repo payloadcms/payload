@@ -15,7 +15,7 @@ describe('findImportDeclaration', () => {
 import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
     )
 
-    const result = findImportDeclaration(sourceFile, '@payloadcms/db-mongodb')
+    const result = findImportDeclaration({ sourceFile, moduleSpecifier: '@payloadcms/db-mongodb' })
 
     expect(result).toBeDefined()
     expect(result?.getModuleSpecifierValue()).toBe('@payloadcms/db-mongodb')
@@ -25,7 +25,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
 
-    const result = findImportDeclaration(sourceFile, 'nonexistent')
+    const result = findImportDeclaration({ sourceFile, moduleSpecifier: 'nonexistent' })
 
     expect(result).toBeUndefined()
   })
@@ -63,7 +63,8 @@ describe('addImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
 
-    addImportDeclaration(sourceFile, {
+    addImportDeclaration({
+      sourceFile,
       moduleSpecifier: '@payloadcms/db-postgres',
       namedImports: ['postgresAdapter'],
     })
@@ -81,7 +82,8 @@ describe('addImportDeclaration', () => {
       `import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
     )
 
-    addImportDeclaration(sourceFile, {
+    addImportDeclaration({
+      sourceFile,
       moduleSpecifier: '@payloadcms/db-mongodb',
       namedImports: ['mongooseAdapter'],
     })
@@ -94,7 +96,8 @@ describe('addImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
 
-    addImportDeclaration(sourceFile, {
+    addImportDeclaration({
+      sourceFile,
       moduleSpecifier: 'payload',
       namedImports: ['Field'],
     })
@@ -116,7 +119,7 @@ describe('removeImportDeclaration', () => {
 import sharp from 'sharp'`,
     )
 
-    removeImportDeclaration(sourceFile, 'sharp')
+    removeImportDeclaration({ sourceFile, moduleSpecifier: 'sharp' })
 
     const imports = sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
@@ -127,7 +130,7 @@ import sharp from 'sharp'`,
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
 
-    removeImportDeclaration(sourceFile, 'nonexistent')
+    removeImportDeclaration({ sourceFile, moduleSpecifier: 'nonexistent' })
 
     const imports = sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)

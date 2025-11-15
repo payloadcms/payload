@@ -4,10 +4,13 @@ import type { DetectionError } from './types.js'
 
 import { debug } from '../../utils/log.js'
 
-export function findImportDeclaration(
-  sourceFile: SourceFile,
-  moduleSpecifier: string,
-): ImportDeclaration | undefined {
+export function findImportDeclaration({
+  moduleSpecifier,
+  sourceFile,
+}: {
+  moduleSpecifier: string
+  sourceFile: SourceFile
+}): ImportDeclaration | undefined {
   return sourceFile
     .getImportDeclarations()
     .find((imp) => imp.getModuleSpecifierValue() === moduleSpecifier)
@@ -38,16 +41,18 @@ Please ensure your config file follows the expected structure.`
   }
 }
 
-type AddImportOptions = {
+export function addImportDeclaration({
+  defaultImport,
+  moduleSpecifier,
+  namedImports,
+  sourceFile,
+}: {
   defaultImport?: string
   moduleSpecifier: string
   namedImports?: string[]
-}
-
-export function addImportDeclaration(sourceFile: SourceFile, options: AddImportOptions): void {
-  const { defaultImport, moduleSpecifier, namedImports } = options
-
-  const existingImport = findImportDeclaration(sourceFile, moduleSpecifier)
+  sourceFile: SourceFile
+}): void {
+  const existingImport = findImportDeclaration({ moduleSpecifier, sourceFile })
 
   if (existingImport) {
     // Add named imports to existing import if they don't exist
@@ -82,8 +87,14 @@ export function addImportDeclaration(sourceFile: SourceFile, options: AddImportO
   }
 }
 
-export function removeImportDeclaration(sourceFile: SourceFile, moduleSpecifier: string): void {
-  const importDecl = findImportDeclaration(sourceFile, moduleSpecifier)
+export function removeImportDeclaration({
+  moduleSpecifier,
+  sourceFile,
+}: {
+  moduleSpecifier: string
+  sourceFile: SourceFile
+}): void {
+  const importDecl = findImportDeclaration({ moduleSpecifier, sourceFile })
   if (importDecl) {
     importDecl.remove()
     debug(`[AST] Removed import from '${moduleSpecifier}'`)

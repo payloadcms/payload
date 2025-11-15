@@ -85,11 +85,15 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
   }
 }
 
-export function addDatabaseAdapter(
-  sourceFile: SourceFile,
-  adapter: DatabaseAdapter,
+export function addDatabaseAdapter({
+  adapter,
   envVarName = 'DATABASE_URI',
-): void {
+  sourceFile,
+}: {
+  adapter: DatabaseAdapter
+  envVarName?: string
+  sourceFile: SourceFile
+}): void {
   debug(`[AST] Adding database adapter: ${adapter} (envVar: ${envVarName})`)
 
   const detection = detectPayloadConfigStructure(sourceFile)
@@ -106,7 +110,7 @@ export function addDatabaseAdapter(
   const removedAdapters: string[] = []
   oldAdapters.forEach((oldConfig) => {
     if (oldConfig.packageName !== config.packageName) {
-      removeImportDeclaration(sourceFile, oldConfig.packageName)
+      removeImportDeclaration({ moduleSpecifier: oldConfig.packageName, sourceFile })
       removedAdapters.push(oldConfig.packageName)
     }
   })
@@ -116,24 +120,27 @@ export function addDatabaseAdapter(
   }
 
   // Add new import
-  addImportDeclaration(sourceFile, {
+  addImportDeclaration({
     moduleSpecifier: config.packageName,
     namedImports: [config.adapterName],
+    sourceFile,
   })
 
   // Add special imports for specific adapters
   if (adapter === 'vercel-postgres') {
     debug('[AST] Adding special import: @vercel/postgres')
-    addImportDeclaration(sourceFile, {
+    addImportDeclaration({
       moduleSpecifier: '@vercel/postgres',
       namedImports: ['createPool'],
+      sourceFile,
     })
   }
   if (adapter === 'd1-sqlite') {
     debug('[AST] Adding special import: ./db/migrations')
-    addImportDeclaration(sourceFile, {
+    addImportDeclaration({
       defaultImport: 'migrations',
       moduleSpecifier: './db/migrations',
+      sourceFile,
     })
   }
 
@@ -164,7 +171,13 @@ export function addDatabaseAdapter(
   debug(`[AST] ✓ Database adapter ${adapter} added successfully`)
 }
 
-export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapter): void {
+export function addStorageAdapter({
+  adapter,
+  sourceFile,
+}: {
+  adapter: StorageAdapter
+  sourceFile: SourceFile
+}): void {
   debug(`[AST] Adding storage adapter: ${adapter}`)
 
   const detection = detectPayloadConfigStructure(sourceFile)
@@ -183,9 +196,10 @@ export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapte
 
   // Add import
   if (config.packageName && config.adapterName) {
-    addImportDeclaration(sourceFile, {
+    addImportDeclaration({
       moduleSpecifier: config.packageName,
       namedImports: [config.adapterName],
+      sourceFile,
     })
   }
 
@@ -237,7 +251,7 @@ export function removeSharp(sourceFile: SourceFile): void {
   debug('[AST] Removing sharp import and property')
 
   // Remove import
-  removeImportDeclaration(sourceFile, 'sharp')
+  removeImportDeclaration({ moduleSpecifier: 'sharp', sourceFile })
 
   // Find and remove sharp property from buildConfig
   const detection = detectPayloadConfigStructure(sourceFile)
@@ -446,12 +460,16 @@ export async function configurePayloadConfig(
     // Apply transformations based on options
     if (options.db) {
       debug('[AST] Applying database adapter transformation')
-      addDatabaseAdapter(sourceFile, options.db.type, options.db.envVarName)
+      addDatabaseAdapter({
+        adapter: options.db.type,
+        envVarName: options.db.envVarName,
+        sourceFile,
+      })
     }
 
     if (options.storage) {
       debug('[AST] Applying storage adapter transformation')
-      addStorageAdapter(sourceFile, options.storage)
+      addStorageAdapter({ adapter: options.storage, sourceFile })
     }
 
     if (options.removeSharp) {

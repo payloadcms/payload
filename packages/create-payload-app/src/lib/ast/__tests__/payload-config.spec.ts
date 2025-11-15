@@ -73,7 +73,7 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter(sourceFile, 'mongodb', 'DATABASE_URI')
+    addDatabaseAdapter({ sourceFile, adapter: 'mongodb', envVarName: 'DATABASE_URI' })
 
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*mongooseAdapter.*from.*@payloadcms\/db-mongodb/)
@@ -92,7 +92,7 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter(sourceFile, 'postgres', 'DATABASE_URI')
+    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
 
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
@@ -112,7 +112,7 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter(sourceFile, 'postgres', 'DATABASE_URI')
+    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
 
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
@@ -134,7 +134,7 @@ export default buildConfig({
 })`,
     )
 
-    addStorageAdapter(sourceFile, 'vercelBlobStorage')
+    addStorageAdapter({ sourceFile, adapter: 'vercelBlobStorage' })
 
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*vercelBlobStorage.*from.*@payloadcms\/storage-vercel-blob/)
@@ -152,7 +152,7 @@ export default buildConfig({
 })`,
     )
 
-    addStorageAdapter(sourceFile, 'r2Storage')
+    addStorageAdapter({ sourceFile, adapter: 'r2Storage' })
 
     const text = sourceFile.getText()
     expect(text).toContain('plugins: [')
@@ -172,7 +172,7 @@ export default buildConfig({
 })`,
     )
 
-    addStorageAdapter(sourceFile, 's3Storage')
+    addStorageAdapter({ sourceFile, adapter: 's3Storage' })
 
     const text = sourceFile.getText()
     expect(text).toContain('someOtherPlugin()')
