@@ -4,6 +4,7 @@ import {
   addStorageAdapter,
   detectPayloadConfigStructure,
   removeSharp,
+  validateStructure,
 } from '../payload-config'
 
 describe('detectPayloadConfigStructure', () => {
@@ -211,5 +212,52 @@ export default buildConfig({
     removeSharp(sourceFile)
 
     expect(sourceFile.getText()).toBe(originalText)
+  })
+})
+
+describe('validateStructure', () => {
+  it('validates correct structure', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' }),
+  collections: []
+})`,
+    )
+
+    const result = validateStructure(sourceFile)
+
+    expect(result.success).toBe(true)
+  })
+
+  it('fails when buildConfig missing', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('payload.config.ts', `export default {}`)
+
+    const result = validateStructure(sourceFile)
+
+    expect(result.success).toBe(false)
+    expect(result.error?.userMessage).toContain('buildConfig')
+  })
+
+  it('fails when db property missing', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    const result = validateStructure(sourceFile)
+
+    expect(result.success).toBe(false)
+    expect(result.error?.userMessage).toContain('db')
   })
 })

@@ -1,6 +1,6 @@
 import { type SourceFile, SyntaxKind } from 'ts-morph'
 
-import type { DatabaseAdapter, DetectionResult, StorageAdapter } from './types'
+import type { DatabaseAdapter, DetectionResult, StorageAdapter, WriteResult } from './types'
 
 import { addImportDeclaration, formatError, removeImportDeclaration } from './utils'
 
@@ -338,4 +338,32 @@ export function removeSharp(sourceFile: SourceFile): void {
   if (sharpProperty) {
     sharpProperty.remove()
   }
+}
+
+export function validateStructure(sourceFile: SourceFile): WriteResult {
+  const detection = detectPayloadConfigStructure(sourceFile)
+
+  if (!detection.success) {
+    return {
+      error: detection.error,
+      success: false,
+    }
+  }
+
+  const { structures } = detection
+
+  // Validate db property exists
+  if (!structures?.dbProperty) {
+    return {
+      error: formatError({
+        actual: 'No db property found',
+        context: 'database configuration',
+        expected: 'buildConfig must have a db property',
+        technicalDetails: 'PropertyAssignment with name "db" not found in buildConfig object',
+      }),
+      success: false,
+    }
+  }
+
+  return { success: true }
 }
