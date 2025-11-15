@@ -5,7 +5,11 @@ import {
   detectPayloadConfigStructure,
   removeSharp,
   validateStructure,
+  writeTransformedFile,
 } from '../payload-config'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as os from 'os'
 
 describe('detectPayloadConfigStructure', () => {
   it('successfully detects buildConfig call', () => {
@@ -256,6 +260,68 @@ export default buildConfig({
     )
 
     const result = validateStructure(sourceFile)
+
+    expect(result.success).toBe(false)
+    expect(result.error?.userMessage).toContain('db')
+  })
+})
+
+describe('writeTransformedFile', () => {
+  let tempDir: string
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'payload-test-'))
+  })
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('writes file and validates structure', async () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' }),
+  collections: []
+})`,
+    )
+
+    // Change to real file system
+    const realFilePath = path.join(tempDir, 'payload.config.ts')
+    const realProject = new Project()
+    const realSourceFile = realProject.createSourceFile(realFilePath, sourceFile.getText())
+
+    const result = await writeTransformedFile(realSourceFile, {
+      validateStructure: true,
+      formatWithPrettier: false, // Skip prettier for test
+    })
+
+    expect(result.success).toBe(true)
+    expect(fs.existsSync(realFilePath)).toBe(true)
+  })
+
+  it('fails when validation fails', async () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    const realFilePath = path.join(tempDir, 'payload.config.ts')
+    const realProject = new Project()
+    const realSourceFile = realProject.createSourceFile(realFilePath, sourceFile.getText())
+
+    const result = await writeTransformedFile(realSourceFile, {
+      validateStructure: true,
+    })
 
     expect(result.success).toBe(false)
     expect(result.error?.userMessage).toContain('db')

@@ -1,6 +1,12 @@
 import { type SourceFile, SyntaxKind } from 'ts-morph'
 
-import type { DatabaseAdapter, DetectionResult, StorageAdapter, WriteResult } from './types'
+import type {
+  DatabaseAdapter,
+  DetectionResult,
+  StorageAdapter,
+  WriteOptions,
+  WriteResult,
+} from './types'
 
 import { addImportDeclaration, formatError, removeImportDeclaration } from './utils'
 
@@ -364,6 +370,49 @@ export function validateStructure(sourceFile: SourceFile): WriteResult {
       success: false,
     }
   }
+
+  return { success: true }
+}
+
+export async function writeTransformedFile(
+  sourceFile: SourceFile,
+  options: WriteOptions = {},
+): Promise<WriteResult> {
+  const { formatWithPrettier = true, validateStructure: shouldValidate = true } = options
+
+  // Validate if requested
+  if (shouldValidate) {
+    const validation = validateStructure(sourceFile)
+    if (!validation.success) {
+      return validation
+    }
+  }
+
+  // Get file path and content
+  const filePath = sourceFile.getFilePath()
+  let content = sourceFile.getText()
+
+  // Format with prettier if requested
+  if (formatWithPrettier) {
+    try {
+      // Use prettier's format API with dynamic import for v3+
+      const prettier = await import('prettier')
+      content = await prettier.format(content, {
+        filepath: filePath,
+        semi: false,
+        singleQuote: true,
+        trailingComma: 'all',
+      })
+    } catch (error) {
+      // Log but don't fail if prettier fails
+      if (options.debugMode) {
+        console.warn('Prettier formatting failed:', error)
+      }
+    }
+  }
+
+  // Write file
+  await sourceFile.getProject().getFileSystem().writeFile(filePath, content)
 
   return { success: true }
 }
