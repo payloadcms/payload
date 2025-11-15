@@ -1,5 +1,9 @@
 import { Project } from 'ts-morph'
-import { addDatabaseAdapter, detectPayloadConfigStructure } from '../payload-config'
+import {
+  addDatabaseAdapter,
+  addStorageAdapter,
+  detectPayloadConfigStructure,
+} from '../payload-config'
 
 describe('detectPayloadConfigStructure', () => {
   it('successfully detects buildConfig call', () => {
@@ -109,5 +113,63 @@ export default buildConfig({
     expect(text).toContain('db: postgresAdapter')
     expect(text).not.toContain('mongooseAdapter')
     expect(text).not.toContain('@payloadcms/db-mongodb')
+  })
+})
+
+describe('addStorageAdapter', () => {
+  it('adds vercelBlobStorage adapter to plugins array', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  plugins: []
+})`,
+    )
+
+    addStorageAdapter(sourceFile, 'vercelBlobStorage')
+
+    const text = sourceFile.getText()
+    expect(text).toMatch(/import.*vercelBlobStorage.*from.*@payloadcms\/storage-vercel-blob/)
+    expect(text).toContain('vercelBlobStorage(')
+  })
+
+  it('creates plugins array if missing', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    addStorageAdapter(sourceFile, 'r2Storage')
+
+    const text = sourceFile.getText()
+    expect(text).toContain('plugins: [')
+    expect(text).toContain('r2Storage(')
+  })
+
+  it('adds to existing plugins array', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  plugins: [
+    someOtherPlugin()
+  ]
+})`,
+    )
+
+    addStorageAdapter(sourceFile, 's3Storage')
+
+    const text = sourceFile.getText()
+    expect(text).toContain('someOtherPlugin()')
+    expect(text).toContain('s3Storage(')
   })
 })

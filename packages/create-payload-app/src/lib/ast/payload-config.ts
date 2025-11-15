@@ -1,6 +1,6 @@
 import { type SourceFile, SyntaxKind } from 'ts-morph'
 
-import type { DatabaseAdapter, DetectionResult } from './types'
+import type { DatabaseAdapter, DetectionResult, StorageAdapter } from './types'
 
 import { addImportDeclaration, formatError, removeImportDeclaration } from './utils'
 
@@ -173,4 +173,143 @@ export function addDatabaseAdapter(
     name: 'db',
     initializer: config.configTemplate(envVarName),
   })
+}
+
+const STORAGE_ADAPTER_CONFIG = {
+  azureStorage: {
+    adapterName: 'azureStorage',
+    configTemplate: () => `azureStorage({
+    collections: {
+      media: true,
+    },
+    connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING || '',
+    containerName: process.env.AZURE_STORAGE_CONTAINER_NAME || '',
+  })`,
+    packageName: '@payloadcms/storage-azure',
+  },
+  gcsStorage: {
+    adapterName: 'gcsStorage',
+    configTemplate: () => `gcsStorage({
+    collections: {
+      media: true,
+    },
+    bucket: process.env.GCS_BUCKET || '',
+  })`,
+    packageName: '@payloadcms/storage-gcs',
+  },
+  localDisk: {
+    adapterName: null,
+    configTemplate: () => null,
+    packageName: null,
+  },
+  r2Storage: {
+    adapterName: 'r2Storage',
+    configTemplate: () => `r2Storage({
+    collections: {
+      media: true,
+    },
+    bucket: process.env.R2_BUCKET || '',
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+  })`,
+    packageName: '@payloadcms/storage-cloudflare-r2',
+  },
+  s3Storage: {
+    adapterName: 's3Storage',
+    configTemplate: () => `s3Storage({
+    collections: {
+      media: true,
+    },
+    bucket: process.env.S3_BUCKET || '',
+    config: {
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+      },
+      region: process.env.S3_REGION || '',
+    },
+  })`,
+    packageName: '@payloadcms/storage-s3',
+  },
+  uploadthingStorage: {
+    adapterName: 'uploadthingStorage',
+    configTemplate: () => `uploadthingStorage({
+    collections: {
+      media: true,
+    },
+    token: process.env.UPLOADTHING_SECRET || '',
+  })`,
+    packageName: '@payloadcms/storage-uploadthing',
+  },
+  vercelBlobStorage: {
+    adapterName: 'vercelBlobStorage',
+    configTemplate: () => `vercelBlobStorage({
+    collections: {
+      media: true,
+    },
+    token: process.env.BLOB_READ_WRITE_TOKEN || '',
+  })`,
+    packageName: '@payloadcms/storage-vercel-blob',
+  },
+} as const
+
+export function addStorageAdapter(sourceFile: SourceFile, adapter: StorageAdapter): void {
+  const detection = detectPayloadConfigStructure(sourceFile)
+
+  if (!detection.success || !detection.structures) {
+    throw new Error('Cannot add storage adapter: ' + detection.error?.userMessage)
+  }
+
+  const config = STORAGE_ADAPTER_CONFIG[adapter]
+
+  // Local disk doesn't need any imports or plugins
+  if (adapter === 'localDisk') {
+    return
+  }
+
+  // Add import
+  if (config.packageName && config.adapterName) {
+    addImportDeclaration(sourceFile, {
+      moduleSpecifier: config.packageName,
+      namedImports: [config.adapterName],
+    })
+  }
+
+  const { buildConfigCall } = detection.structures
+  const configObject = buildConfigCall.getArguments()[0]
+
+  if (!configObject || configObject.getKind() !== SyntaxKind.ObjectLiteralExpression) {
+    throw new Error('buildConfig must have an object literal argument')
+  }
+
+  const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+
+  // Find or create plugins array
+  let pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+
+  if (!pluginsProperty) {
+    // Create plugins array
+    objLiteral.addPropertyAssignment({
+      name: 'plugins',
+      initializer: '[]',
+    })
+    pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+  }
+
+  if (!pluginsProperty) {
+    throw new Error('Failed to create plugins property')
+  }
+
+  const initializer = pluginsProperty.getInitializer()
+  if (!initializer || initializer.getKind() !== SyntaxKind.ArrayLiteralExpression) {
+    throw new Error('plugins must be an array')
+  }
+
+  const pluginsArray = initializer.asKindOrThrow(SyntaxKind.ArrayLiteralExpression)
+
+  // Add storage adapter call
+  const configText = config.configTemplate()
+  if (configText) {
+    pluginsArray.addElement(configText)
+  }
 }
