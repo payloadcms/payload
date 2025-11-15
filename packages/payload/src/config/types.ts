@@ -810,6 +810,10 @@ export type Config = {
        * Add custom components before the navigation links
        */
       beforeNavLinks?: CustomComponent[]
+      /**
+       * Add custom components when dashboard has any nav groups to show
+       */
+      emptyDashboard?: CustomComponent[]
       /** Replace graphical components */
       graphics?: {
         /** Replace the icon in the navigation */
