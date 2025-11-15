@@ -89,4 +89,11 @@ export type NextAppDetails = {
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
-export type StorageAdapterType = 'localDisk' | 'r2Storage' | 'vercelBlobStorage'
+export type StorageAdapterType =
+  | 'azureStorage'
+  | 'gcsStorage'
+  | 'localDisk'
+  | 'r2Storage'
+  | 's3Storage'
+  | 'uploadthingStorage'
+  | 'vercelBlobStorage'
