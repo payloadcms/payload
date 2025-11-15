@@ -1,5 +1,10 @@
 import { Project } from 'ts-morph'
-import { addImportDeclaration, findImportDeclaration, formatError } from '../utils'
+import {
+  addImportDeclaration,
+  findImportDeclaration,
+  formatError,
+  removeImportDeclaration,
+} from '../utils'
 
 describe('findImportDeclaration', () => {
   it('finds import by module specifier', () => {
@@ -99,5 +104,32 @@ describe('addImportDeclaration', () => {
     const namedImports = imports[0].getNamedImports().map((ni) => ni.getName())
     expect(namedImports).toContain('buildConfig')
     expect(namedImports).toContain('Field')
+  })
+})
+
+describe('removeImportDeclaration', () => {
+  it('removes import by module specifier', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { buildConfig } from 'payload'
+import sharp from 'sharp'`,
+    )
+
+    removeImportDeclaration(sourceFile, 'sharp')
+
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+    expect(imports[0].getModuleSpecifierValue()).toBe('payload')
+  })
+
+  it('does nothing when import does not exist', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+
+    removeImportDeclaration(sourceFile, 'nonexistent')
+
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
   })
 })

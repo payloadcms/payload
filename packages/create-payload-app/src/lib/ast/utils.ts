@@ -66,3 +66,10 @@ export function addImportDeclaration(sourceFile: SourceFile, options: AddImportO
     })
   }
 }
+
+export function removeImportDeclaration(sourceFile: SourceFile, moduleSpecifier: string): void {
+  const importDecl = findImportDeclaration(sourceFile, moduleSpecifier)
+  if (importDecl) {
+    importDecl.remove()
+  }
+}
