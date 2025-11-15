@@ -28,18 +28,15 @@ export const deleteResourceTool = (
   }> => {
     const payload = req.payload
 
-    // Convert ID to string if it's a number (for PostgreSQL compatibility)
-    const idString = id !== undefined ? String(id) : undefined
-
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Deleting resource from collection: ${collectionSlug}${idString ? ` with ID: ${idString}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
+        `[payload-mcp] Deleting resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
     try {
       // Validate that either id or where is provided
-      if (!idString && !where) {
+      if (!id && !where) {
         payload.logger.error('[payload-mcp] Either id or where clause must be provided')
         const response = {
           content: [
@@ -90,10 +87,10 @@ export const deleteResourceTool = (
       }
 
       // Delete by ID or where clause
-      if (idString) {
-        deleteOptions.id = idString
+      if (id) {
+        deleteOptions.id = id
         if (verboseLogs) {
-          payload.logger.info(`[payload-mcp] Deleting single document with ID: ${idString}`)
+          payload.logger.info(`[payload-mcp] Deleting single document with ID: ${id}`)
         }
       } else {
         deleteOptions.where = whereClause

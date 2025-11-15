@@ -37,12 +37,9 @@ export const updateResourceTool = (
   }> => {
     const payload = req.payload
 
-    // Convert ID to string if it's a number (for PostgreSQL compatibility)
-    const idString = id !== undefined ? String(id) : undefined
-
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Updating resource in collection: ${collectionSlug}${idString ? ` with ID: ${idString}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -71,7 +68,7 @@ export const updateResourceTool = (
       }
 
       // Validate that either id or where is provided
-      if (!idString && !where) {
+      if (!id && !where) {
         payload.logger.error('[payload-mcp] Either id or where clause must be provided')
         const response = {
           content: [
@@ -111,10 +108,10 @@ export const updateResourceTool = (
       }
 
       // Update by ID or where clause
-      if (idString) {
+      if (id) {
         // Single document update
         const updateOptions = {
-          id: idString,
+          id,
           collection: collectionSlug,
           data: parsedData,
           depth,
@@ -130,7 +127,7 @@ export const updateResourceTool = (
         }
 
         if (verboseLogs) {
-          payload.logger.info(`[payload-mcp] Updating single document with ID: ${idString}`)
+          payload.logger.info(`[payload-mcp] Updating single document with ID: ${id}`)
         }
         const result = await payload.update({
           ...updateOptions,
@@ -138,7 +135,7 @@ export const updateResourceTool = (
         } as any)
 
         if (verboseLogs) {
-          payload.logger.info(`[payload-mcp] Successfully updated document with ID: ${idString}`)
+          payload.logger.info(`[payload-mcp] Successfully updated document with ID: ${id}`)
         }
 
         const response = {

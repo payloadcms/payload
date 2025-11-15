@@ -32,7 +32,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
   - You can to allow / disallow capabilities in real time
   - You can define your own Prompts, Tools and Resources available over MCP
 - Full support for Payload's localization features with `locale` and `fallbackLocale` parameters
-- MCP server supporting HTTP (with REDIS and STDIO under consideration)
+- HTTP transport for MCP server connections
 
 ## Installation
 
@@ -86,7 +86,53 @@ After installing and configuring the plugin, you can connect AI tools that suppo
 
 ### Step 2: Configure Your MCP Client
 
-Add your Payload MCP server to your MCP client's configuration file (typically `.mcp.json` or similar):
+The recommended approach for most MCP clients is to use the `mcp-remote` package via `npx`. Below are configuration examples for popular MCP clients.
+
+#### VSCode MCP Extension
+
+Add your Payload MCP server to VSCode's settings (`.vscode/settings.json` or user settings):
+
+```json
+{
+  "mcp.servers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY_HERE"
+      ]
+    }
+  }
+}
+```
+
+#### Cursor IDE
+
+Add your Payload MCP server to Cursor's configuration file:
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY_HERE"
+      ]
+    }
+  }
+}
+```
+
+#### Other MCP Clients
+
+For other MCP clients that support direct HTTP connections, you can use this configuration format:
 
 ```json
 {
@@ -109,6 +155,7 @@ Replace `YOUR_API_KEY_HERE` with the API key you created in Step 1.
 - **URL:** If you're using a custom `basePath` in your MCP plugin configuration, update the URL accordingly (e.g., `http://localhost:3000/custom-path/mcp`)
 - **Production:** For production deployments, use your domain instead of `localhost` (e.g., `https://yourdomain.com/api/mcp`)
 - **Headers:** The `Authorization` header with Bearer token is required for authentication
+- **Recommended:** The `npx mcp-remote` approach is recommended as it provides better compatibility across different MCP clients
 
 ### Step 3: Restart Your MCP Client
 
@@ -235,14 +282,18 @@ const config = buildConfig({
 
 Create content in a specific locale using the `locale` parameter:
 
-```ts
-// Via MCP tool call
+```json
 {
-  "name": "createPosts",
-  "arguments": {
-    "title": "Hello World",
-    "content": "This is my first post in English",
-    "locale": "en"
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "createPosts",
+    "arguments": {
+      "title": "Hello World",
+      "content": "This is my first post in English",
+      "locale": "en"
+    }
   }
 }
 ```
@@ -251,24 +302,34 @@ Create content in a specific locale using the `locale` parameter:
 
 Add translations to existing content by updating with a different locale:
 
-```ts
+```json
 // First, create in English
 {
-  "name": "createPosts",
-  "arguments": {
-    "title": "Hello World",
-    "content": "English content"
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "createPosts",
+    "arguments": {
+      "title": "Hello World",
+      "content": "English content"
+    }
   }
 }
 
 // Then, add Spanish translation
 {
-  "name": "updatePosts",
-  "arguments": {
-    "id": "document-id",
-    "title": "Hola Mundo",
-    "content": "Contenido en español",
-    "locale": "es"
+  "id": 2,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "updatePosts",
+    "arguments": {
+      "id": "document-id",
+      "title": "Hola Mundo",
+      "content": "Contenido en español",
+      "locale": "es"
+    }
   }
 }
 ```
@@ -277,25 +338,34 @@ Add translations to existing content by updating with a different locale:
 
 Retrieve content in a specific locale:
 
-```ts
-// Get Spanish version
+```json
 {
-  "name": "findPosts",
-  "arguments": {
-    "id": "document-id",
-    "locale": "es"
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "findPosts",
+    "arguments": {
+      "id": "document-id",
+      "locale": "es"
+    }
   }
 }
 ```
 
 Retrieve all translations at once using `locale: 'all'`:
 
-```ts
+```json
 {
-  "name": "findPosts",
-  "arguments": {
-    "id": "document-id",
-    "locale": "all"
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "findPosts",
+    "arguments": {
+      "id": "document-id",
+      "locale": "all"
+    }
   }
 }
 
@@ -307,6 +377,7 @@ Retrieve all translations at once using `locale: 'all'`:
 //     "fr": "Bonjour le Monde"
 //   },
 //   "content": { ... }
+
 // }
 ```
 
@@ -314,30 +385,43 @@ Retrieve all translations at once using `locale: 'all'`:
 
 When requesting content in a locale that doesn't have a translation, Payload will automatically fall back to the default locale:
 
-```ts
-// Request French content when only English exists
+```json
 {
-  "name": "findPosts",
-  "arguments": {
-    "id": "document-id",
-    "locale": "fr"
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "findPosts",
+    "arguments": {
+      "id": "document-id",
+      "locale": "fr"
+    }
   }
 }
+
 
 // Returns English content (default locale) as fallback
 ```
 
 You can also specify a custom fallback locale:
 
-```ts
+```json
 {
-  "name": "findPosts",
-  "arguments": {
-    "id": "document-id",
-    "locale": "fr",
-    "fallbackLocale": "es"  // Use Spanish as fallback instead of default
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "findPosts",
+    "arguments": {
+      "id": "document-id",
+      "locale": "fr",
+      "fallbackLocale": "es"
+    }
   }
 }
+
+
+// Use Spanish as fallback instead of default
 ```
 
 ### Locale Parameters

@@ -405,7 +405,6 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
   })
 
-<<<<<<< HEAD
   it('should call operations with the payloadAPI context as MCP', async () => {
     await payload.create({
       collection: 'posts',
@@ -446,7 +445,8 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain(
       '"title": "Test Post for Finding (MCP Hook Override)"',
     )
-=======
+  })
+
   describe('Localization', () => {
     it('should include locale parameters in tool schemas', async () => {
       const apiKey = await getApiKey(true, true)
@@ -722,6 +722,5 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('"title": "English Only Title"')
       expect(json.result.content[0].text).toContain('"content": "Hello World."')
     })
->>>>>>> 2d56ce211 (feat(plugin-mcp): add localization support to resource operations)
   })
 })
