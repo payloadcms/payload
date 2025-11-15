@@ -1,4 +1,15 @@
+import type { ImportDeclaration, SourceFile } from 'ts-morph'
+
 import type { DetectionError } from './types'
+
+export function findImportDeclaration(
+  sourceFile: SourceFile,
+  moduleSpecifier: string,
+): ImportDeclaration | undefined {
+  return sourceFile
+    .getImportDeclarations()
+    .find((imp) => imp.getModuleSpecifierValue() === moduleSpecifier)
+}
 
 interface FormatErrorOptions {
   actual: string

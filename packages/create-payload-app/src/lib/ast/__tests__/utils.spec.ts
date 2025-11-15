@@ -1,4 +1,30 @@
-import { formatError } from '../utils'
+import { Project } from 'ts-morph'
+import { findImportDeclaration, formatError } from '../utils'
+
+describe('findImportDeclaration', () => {
+  it('finds import by module specifier', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
+    )
+
+    const result = findImportDeclaration(sourceFile, '@payloadcms/db-mongodb')
+
+    expect(result).toBeDefined()
+    expect(result?.getModuleSpecifierValue()).toBe('@payloadcms/db-mongodb')
+  })
+
+  it('returns undefined when import not found', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+
+    const result = findImportDeclaration(sourceFile, 'nonexistent')
+
+    expect(result).toBeUndefined()
+  })
+})
 
 describe('formatError', () => {
   it('formats user-friendly error message', () => {
