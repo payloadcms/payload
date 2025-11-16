@@ -105,8 +105,6 @@ export const populateFieldPermissions = async ({
             fieldPermissions.fields = {}
           }
 
-          fieldPermissions.fields = {} as FieldsPermissions
-
           // For correct calculation of `parentPermissionForOperation`, the parentPermissionsObject must be completely
           // calculated and awaited before calculating field permissions of nested fields.
           if (pendingAccessPromise) {
@@ -265,15 +263,19 @@ export const populateFieldPermissions = async ({
       } else if (field.type === 'tabs') {
         for (const tab of field.tabs) {
           if (tabHasName(tab)) {
-            const tabPermissions: FieldPermissions | undefined = permissionsObject[tab.name]
-
-            if (!tabPermissions) {
+            if (!permissionsObject[tab.name]) {
               permissionsObject[tab.name] = {
                 fields: {},
                 [operation]: { permission: parentPermissionForOperation },
               } as FieldPermissions
-            } else if (!tabPermissions[operation]) {
+            } else if (!permissionsObject[tab.name]![operation]) {
               permissionsObject[tab.name]![operation] = { permission: parentPermissionForOperation }
+            }
+
+            const tabPermissions: FieldPermissions = permissionsObject[tab.name]!
+
+            if (!tabPermissions.fields) {
+              tabPermissions.fields = {}
             }
 
             // For tabs with names, we don't have async access functions on the tab itself,
@@ -284,8 +286,8 @@ export const populateFieldPermissions = async ({
               data,
               fields: tab.fields,
               operations,
-              parentPermissionsObject: tabPermissions!,
-              permissionsObject: tabPermissions!.fields!,
+              parentPermissionsObject: tabPermissions,
+              permissionsObject: tabPermissions.fields,
               promises,
               req,
             })
