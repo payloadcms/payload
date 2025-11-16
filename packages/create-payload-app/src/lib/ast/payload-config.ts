@@ -13,12 +13,7 @@ import type {
 
 import { debug } from '../../utils/log.js'
 import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
-import {
-  addImportDeclaration,
-  detectPackageManager,
-  formatError,
-  removeImportDeclaration,
-} from './utils.js'
+import { addImportDeclaration, formatError, removeImportDeclaration } from './utils.js'
 
 export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
   debug(`[AST] Detecting payload config structure in ${sourceFile.getFilePath()}`)
@@ -319,6 +314,10 @@ export function removeCommentMarkers(sourceFile: SourceFile): void {
   sourceFile.replaceWithText(text)
 }
 
+/**
+ * Validates payload config structure has required elements after transformation.
+ * Checks that buildConfig() call exists and has a db property configured.
+ */
 export function validateStructure(sourceFile: SourceFile): WriteResult {
   debug('[AST] Validating payload config structure')
 
@@ -381,13 +380,9 @@ export async function writeTransformedFile(
     try {
       // Detect project directory (go up from file until we find package.json or use dirname)
       const projectDir = path.dirname(filePath)
-      const packageManager = detectPackageManager({ projectDir })
 
       // Run prettier via CLI (avoids Jest/ESM compatibility issues)
-      const prettierCmd =
-        packageManager === 'npx'
-          ? `npx prettier --write "${filePath}"`
-          : `${packageManager} prettier --write "${filePath}"`
+      const prettierCmd = `npx prettier --write "${filePath}"`
 
       debug(`[AST] Executing: ${prettierCmd}`)
       execSync(prettierCmd, {

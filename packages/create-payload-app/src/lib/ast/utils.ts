@@ -121,38 +121,3 @@ export function removeImportDeclaration({
     return undefined
   }
 }
-
-/**
- * Detects the package manager used in a project by checking for lockfiles.
- * Returns the appropriate CLI command prefix for running commands.
- */
-export function detectPackageManager({ projectDir }: { projectDir: string }): string {
-  // Check for lockfiles in project directory
-  if (existsSync(path.join(projectDir, 'pnpm-lock.yaml'))) {
-    return 'pnpm'
-  }
-  if (existsSync(path.join(projectDir, 'yarn.lock'))) {
-    return 'yarn'
-  }
-  if (existsSync(path.join(projectDir, 'bun.lockb'))) {
-    return 'bun'
-  }
-  if (existsSync(path.join(projectDir, 'package-lock.json'))) {
-    return 'npm'
-  }
-
-  // Check environment variable as fallback
-  const userAgent = process.env.npm_config_user_agent || ''
-  if (userAgent.startsWith('pnpm')) {
-    return 'pnpm'
-  }
-  if (userAgent.startsWith('yarn')) {
-    return 'yarn'
-  }
-  if (userAgent.startsWith('bun')) {
-    return 'bun'
-  }
-
-  // Default to npx prettier (works without package manager)
-  return 'npx'
-}
