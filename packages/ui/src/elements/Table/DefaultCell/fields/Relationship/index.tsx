@@ -13,7 +13,9 @@ import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
+import { formatAdminURL } from '../../../../../utilities/formatAdminURL.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
+import { Link } from '../../../../Link/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
 import './index.scss'
@@ -43,6 +45,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
 
   const { config, getEntityConfig } = useConfig()
   const { collections, routes } = config
+  const { admin: adminRoute } = routes
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
   const { documents, getRelationships } = useListRelationships()
@@ -128,11 +131,22 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
           }
         }
 
+        const documentHref = formatAdminURL({
+          adminRoute,
+          path: `/collections/${relationTo}/${encodeURIComponent(value)}`,
+        })
+
         return (
           <React.Fragment key={i}>
             {document === false && `${t('general:untitled')} - ID: ${value}`}
             {document === null && `${t('general:loading')}...`}
-            {document ? fileField || label : null}
+            {document
+              ? fileField || (
+                  <Link href={documentHref} prefetch={false}>
+                    {label}
+                  </Link>
+                )
+              : null}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         )
