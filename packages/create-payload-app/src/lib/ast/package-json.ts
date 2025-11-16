@@ -78,12 +78,6 @@ function transformPackageJson(
     transformed.dependencies[dbAdapterPackageName] = payloadVersion
 
     debug(`[AST] Added adapter package: ${dbAdapterPackageName}`)
-
-    // Add vercel/postgres if needed
-    if (options.databaseAdapter === 'vercel-postgres') {
-      transformed.dependencies['@vercel/postgres'] = '^0.10.0'
-      debug('[AST] Added @vercel/postgres dependency')
-    }
   }
 
   // Remove sharp

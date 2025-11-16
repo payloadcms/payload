@@ -140,14 +140,6 @@ export function addDatabaseAdapter({
   })
 
   // Add special imports for specific adapters
-  if (adapter === 'vercel-postgres') {
-    debug('[AST] Adding special import: @vercel/postgres')
-    addImportDeclaration({
-      moduleSpecifier: '@vercel/postgres',
-      namedImports: ['createPool'],
-      sourceFile,
-    })
-  }
   if (adapter === 'd1-sqlite') {
     debug('[AST] Adding special import: ./db/migrations')
     addImportDeclaration({
