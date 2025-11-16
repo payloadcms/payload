@@ -135,6 +135,8 @@ function checkAndSanitizePermissions(
           continue
         }
       } else {
+        // eslint-disable-next-line no-console
+        console.error('Unexpected object in fields permissions', data, 'key:', key)
         throw new Error('Unexpected object in fields permissions')
       }
     } else if (data[key] !== true) {
