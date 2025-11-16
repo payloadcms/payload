@@ -4,6 +4,7 @@ import type { DatabaseAdapter } from './types.js'
 
 import { debug } from '../../utils/log.js'
 import { getDbPackageName } from './adapter-config.js'
+import { ALL_DATABASE_ADAPTERS } from './types.js'
 
 type PackageJsonTransformOptions = {
   databaseAdapter?: DatabaseAdapter
@@ -18,13 +19,34 @@ type PackageJsonStructure = {
   name?: string
 }
 
-// Phase 1: Detection
-function detectPackageJsonStructure(filePath: string): PackageJsonStructure {
+/**
+ * Main orchestration function
+ */
+export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
+  debug(`[AST] Updating package.json: ${filePath}`)
+
+  // Phase 1: Detection
+  const pkg = parsePackageJson(filePath)
+
+  // Phase 2: Transformation
+  const transformed = transformPackageJson(pkg, options)
+
+  // Phase 3: Modification
+  writePackageJson(filePath, transformed)
+
+  debug('[AST] ✓ package.json updated successfully')
+}
+
+// Helper functions
+
+function parsePackageJson(filePath: string): PackageJsonStructure {
   const content = fs.readFileSync(filePath, 'utf-8')
   return JSON.parse(content)
 }
 
-// Phase 2: Transformation (pure function)
+/**
+ *  Transforms the package.json based upon provided options
+ */
 function transformPackageJson(
   pkg: PackageJsonStructure,
   options: PackageJsonTransformOptions,
@@ -37,16 +59,8 @@ function transformPackageJson(
 
     transformed.dependencies = { ...transformed.dependencies }
 
-    // Remove old db adapters
-    const allDbAdapters: DatabaseAdapter[] = [
-      'mongodb',
-      'postgres',
-      'sqlite',
-      'vercel-postgres',
-      'd1-sqlite',
-    ]
     const removedAdapters: string[] = []
-    allDbAdapters.forEach((adapter) => {
+    ALL_DATABASE_ADAPTERS.forEach((adapter) => {
       const pkgName = getDbPackageName(adapter)
       if (transformed.dependencies![pkgName]) {
         removedAdapters.push(pkgName)
@@ -59,12 +73,11 @@ function transformPackageJson(
     }
 
     // Add new adapter
-    const newAdapter = getDbPackageName(options.databaseAdapter)
-    // Get payload version for consistency
+    const dbAdapterPackageName = getDbPackageName(options.databaseAdapter)
     const payloadVersion = transformed.dependencies?.payload || '^3.0.0'
-    transformed.dependencies[newAdapter] = payloadVersion
+    transformed.dependencies[dbAdapterPackageName] = payloadVersion
 
-    debug(`[AST] Added adapter package: ${newAdapter}`)
+    debug(`[AST] Added adapter package: ${dbAdapterPackageName}`)
 
     // Add vercel/postgres if needed
     if (options.databaseAdapter === 'vercel-postgres') {
@@ -93,23 +106,6 @@ function transformPackageJson(
   return transformed
 }
 
-// Phase 3: Modification
 function writePackageJson(filePath: string, pkg: PackageJsonStructure): void {
   fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2) + '\n')
-}
-
-// Main orchestration function
-export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
-  debug(`[AST] Updating package.json: ${filePath}`)
-
-  // Phase 1: Detection
-  const pkg = detectPackageJsonStructure(filePath)
-
-  // Phase 2: Transformation
-  const transformed = transformPackageJson(pkg, options)
-
-  // Phase 3: Modification
-  writePackageJson(filePath, transformed)
-
-  debug('[AST] ✓ package.json updated successfully')
 }

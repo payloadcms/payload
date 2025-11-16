@@ -25,8 +25,15 @@ export type DetectionResult = {
   structures?: PayloadConfigStructures
   success: boolean
 }
+export type DatabaseAdapter = (typeof ALL_DATABASE_ADAPTERS)[number]
 
-export type DatabaseAdapter = 'd1-sqlite' | 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
+export const ALL_DATABASE_ADAPTERS = [
+  'mongodb',
+  'postgres',
+  'sqlite',
+  'vercel-postgres',
+  'd1-sqlite',
+] as const
 
 export type StorageAdapter =
   | 'azureStorage'

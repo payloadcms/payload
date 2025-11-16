@@ -1,5 +1,7 @@
 # create-payload-app
 
+Package for creating new Payload projects with custom configurations.
+
 ## Architecture
 
 ### AST-Based File Modification
@@ -14,7 +16,7 @@ create-payload-app uses AST (Abstract Syntax Tree) parsing with ts-morph to modi
 
 ### File Structure
 
-```
+```txt
 src/lib/ast/
 ├── types.ts              # Shared types for AST operations
 ├── utils.ts              # Low-level AST helpers
@@ -54,4 +56,4 @@ No comment markers needed - AST finds structure by code patterns.
 **Unit tests:** Test individual transformation functions
 **Integration tests:** Test full create-payload-app flows
 
-Run tests: `pnpm test:unit --filter create-payload-app && pnpm test:int --filter create-payload-app`
+Run tests: `pnpm --filter create-payload-app test`
