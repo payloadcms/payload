@@ -22,14 +22,11 @@ export type StorageAdapterConfig = {
  */
 export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> = {
   'd1-sqlite': {
-    adapterName: 'sqliteAdapter',
-    configTemplate: () => `sqliteAdapter({
-  client: {
-    url: getD1Database()!,
-  },
-  prodMigrations: migrations,
+    adapterName: 'sqliteD1Adapter',
+    configTemplate: () => `sqliteD1Adapter({
+  binding: cloudflare.env.D1,
 })`,
-    packageName: '@payloadcms/db-sqlite',
+    packageName: '@payloadcms/db-d1-sqlite',
   },
   mongodb: {
     adapterName: 'mongooseAdapter',
@@ -59,9 +56,9 @@ export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> =
   'vercel-postgres': {
     adapterName: 'vercelPostgresAdapter',
     configTemplate: () => `vercelPostgresAdapter({
-  pool: createPool({
+  pool: {
     connectionString: process.env.POSTGRES_URL || '',
-  }),
+  },
 })`,
     packageName: '@payloadcms/db-vercel-postgres',
   },
@@ -100,14 +97,10 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
   r2Storage: {
     adapterName: 'r2Storage',
     configTemplate: () => `r2Storage({
-    collections: {
-      media: true,
-    },
-    bucket: process.env.R2_BUCKET || '',
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    bucket: cloudflare.env.R2,
+    collections: { media: true },
   })`,
-    packageName: '@payloadcms/storage-cloudflare-r2',
+    packageName: '@payloadcms/storage-r2',
   },
   s3Storage: {
     adapterName: 's3Storage',
