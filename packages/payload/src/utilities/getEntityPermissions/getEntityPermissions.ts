@@ -66,7 +66,7 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
  * rows, as we're calculating schema permissions, which do not include individual rows.
  * For consistency, it's thus better to never include the siblingData and blockData
  */
-export async function getEntityPermission<TEntityType extends 'collection' | 'global'>(
+export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,
 ): Promise<ReturnType<TEntityType>> {
   const { id, blockReferencesPermissions, entity, entityType, fetchData, operations, req } = args
@@ -137,6 +137,7 @@ export async function getEntityPermission<TEntityType extends 'collection' | 'gl
             access: accessFunction,
             data,
             entityType,
+            fetchData,
             locale,
             operation,
             permissionsObject: entityPermissions,
@@ -153,7 +154,7 @@ export async function getEntityPermission<TEntityType extends 'collection' | 'gl
 
   const resolvedData = await data
 
-  populateFieldPermissions({
+  await populateFieldPermissions({
     blockReferencesPermissions,
     data: resolvedData,
     fields: entity.fields,
@@ -190,6 +191,7 @@ type CreateEntityAccessPromise = (args: {
   data: JsonObject | Promise<JsonObject> | undefined
   disableWhere?: boolean
   entityType: 'collection' | 'global'
+  fetchData: boolean
   id?: DefaultDocumentIDType
   locale?: string
   operation: Extract<keyof (CollectionPermission | GlobalPermission), AllOperations>
@@ -205,6 +207,7 @@ const createEntityAccessPromise: CreateEntityAccessPromise = async ({
   data,
   disableWhere = false,
   entityType,
+  fetchData,
   locale,
   operation,
   permissionsObject,
@@ -218,18 +221,17 @@ const createEntityAccessPromise: CreateEntityAccessPromise = async ({
   // Where query was returned from access function => check if document is returned when querying with where
   if (typeof accessResult === 'object' && !disableWhere) {
     permissionsObject[operation] = {
-      permission:
-        id || entityType === 'global'
-          ? await entityDocExists({
-              id,
-              slug,
-              entityType,
-              locale,
-              operation,
-              req,
-              where: accessResult,
-            })
-          : true,
+      permission: fetchData
+        ? await entityDocExists({
+            id,
+            slug,
+            entityType,
+            locale,
+            operation,
+            req,
+            where: accessResult,
+          })
+        : false,
       where: accessResult,
     }
   } else if (permissionsObject[operation]?.permission !== false) {

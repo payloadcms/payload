@@ -2,7 +2,7 @@ import type { SanitizedCollectionPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
-import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizePermissions } from '../../utilities/sanitizePermissions.js'
 
@@ -36,11 +36,12 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
   }
 
   try {
-    const result = await getEntityPolicies({
+    const result = await getEntityPermissions({
       id,
-      type: 'collection',
-      blockPolicies: {},
+      blockReferencesPermissions: {},
       entity: config,
+      entityType: 'collection',
+      fetchData: true,
       operations: collectionOperations,
       req,
     })
