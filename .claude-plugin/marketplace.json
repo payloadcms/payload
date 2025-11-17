@@ -1,7 +1,7 @@
 {
-  "name": "payload-plugins",
+  "name": "payload",
   "version": "0.0.1",
-  "description": "Development marketplace for Payload",
+  "description": "Payload Development Marketplace",
   "owner": {
     "name": "Payload",
     "email": "info@payloadcms.com"
