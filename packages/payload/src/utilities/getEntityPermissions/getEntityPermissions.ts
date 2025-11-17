@@ -249,7 +249,10 @@ const createEntityAccessPromise: CreateEntityAccessPromise = async ({
             req,
             where: accessResult,
           })
-        : false,
+        : // TODO: 4.0: Investigate defaulting to `false` here, if where query is returned but ignored as we don't
+          // have the document data available. This seems more secure.
+          // Alternatively, we could set permission to a third state, like 'unknown'.
+          true,
       where: accessResult,
     }
   } else if (permissionsObject[operation]?.permission !== false) {

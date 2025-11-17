@@ -20,6 +20,7 @@ type Args = {
   overrideAccess: boolean
   parentIsLocalized?: boolean
   path: string
+  // TODO: Rename to permissions or entityPermissions in 4.0
   policies: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
