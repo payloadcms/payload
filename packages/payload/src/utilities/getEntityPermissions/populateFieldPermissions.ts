@@ -44,12 +44,14 @@ export const populateFieldPermissions = async ({
   req: PayloadRequest
 }): Promise<void> => {
   for (const field of fields) {
+    // Track pending access promises for this field across all operations
+    const fieldAccessPromises: Promise<void>[] = []
+
+    // First pass: Set up permissions for all operations
     for (const operation of operations) {
       const parentPermissionForOperation = (
         parentPermissionsObject[operation as keyof typeof parentPermissionsObject] as Permission
       )?.permission
-
-      // const operation = _operation as keyof Omit<FieldPermissions, 'fields'>
 
       // Fields don't have all operations of a collection
       if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
@@ -61,9 +63,6 @@ export const populateFieldPermissions = async ({
           permissionsObject[field.name] = {} as FieldPermissions
         }
         const fieldPermissions: FieldPermissions = permissionsObject[field.name]!
-
-        // Track if we need to await before processing nested fields
-        let pendingAccessPromise: Promise<void> | undefined
 
         if ('access' in field && field.access && typeof field.access[operation] === 'function') {
           const accessResult = field.access[operation]({
@@ -82,10 +81,14 @@ export const populateFieldPermissions = async ({
               }
             })
 
-            // If this field has nested fields, we'll await this promise before recursing
-            // Otherwise, add it to the promises array for parallel processing
-            if ('fields' in field && field.fields) {
-              pendingAccessPromise = promise
+            // If this field has nested content (fields or blocks), collect promises to await before processing nested content
+            // Otherwise, add to global promises array for parallel processing
+            if (
+              ('fields' in field && field.fields) ||
+              ('blocks' in field && field.blocks?.length) ||
+              ('blockReferences' in field && field.blockReferences?.length)
+            ) {
+              fieldAccessPromises.push(promise)
             } else {
               promises.push(promise)
             }
@@ -99,39 +102,55 @@ export const populateFieldPermissions = async ({
             permission: parentPermissionForOperation,
           }
         }
+      }
+    }
 
-        if ('fields' in field && field.fields) {
-          if (!fieldPermissions.fields) {
-            fieldPermissions.fields = {}
-          }
+    // Await all field-level access promises before processing nested content
+    if (fieldAccessPromises.length > 0) {
+      await Promise.all(fieldAccessPromises)
+    }
 
-          // For correct calculation of `parentPermissionForOperation`, the parentPermissionsObject must be completely
-          // calculated and awaited before calculating field permissions of nested fields.
-          if (pendingAccessPromise) {
-            await pendingAccessPromise
-          }
+    // Handle named fields with nested content
+    if ('name' in field && field.name) {
+      const fieldPermissions: FieldPermissions = permissionsObject[field.name]!
 
-          await populateFieldPermissions({
-            id,
-            blockReferencesPermissions,
-            data,
-            fields: field.fields,
-            operations,
-            parentPermissionsObject: fieldPermissions,
-            permissionsObject: fieldPermissions.fields,
-            promises,
-            req,
-          })
+      if ('fields' in field && field.fields) {
+        if (!fieldPermissions.fields) {
+          fieldPermissions.fields = {}
         }
 
-        if (
-          ('blocks' in field && field.blocks?.length) ||
-          ('blockReferences' in field && field.blockReferences?.length)
-        ) {
-          if (!fieldPermissions.blocks) {
-            fieldPermissions.blocks = {}
+        await populateFieldPermissions({
+          id,
+          blockReferencesPermissions,
+          data,
+          fields: field.fields,
+          operations,
+          parentPermissionsObject: fieldPermissions,
+          permissionsObject: fieldPermissions.fields,
+          promises,
+          req,
+        })
+      }
+
+      if (
+        ('blocks' in field && field.blocks?.length) ||
+        ('blockReferences' in field && field.blockReferences?.length)
+      ) {
+        if (!fieldPermissions.blocks) {
+          fieldPermissions.blocks = {}
+        }
+        const blocksPermissions: BlocksPermissions = fieldPermissions.blocks
+
+        // First, set up permissions for all operations for all blocks
+        for (const operation of operations) {
+          // Fields don't have all operations of a collection
+          if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
+            continue
           }
-          const blocksPermissions: BlocksPermissions = fieldPermissions.blocks
+
+          const parentPermissionForOperation = (
+            parentPermissionsObject[operation as keyof typeof parentPermissionsObject] as Permission
+          )?.permission
 
           for (const _block of field.blockReferences ?? field.blocks) {
             const block = typeof _block === 'string' ? req.payload.blocks[_block] : _block
@@ -141,126 +160,132 @@ export const populateFieldPermissions = async ({
               continue
             }
 
-            if (!blocksPermissions[block.slug]) {
-              blocksPermissions[block.slug] = {} as BlockPermissions
-            }
-
+            // Handle block references - check if we've seen this block before
             if (typeof _block === 'string') {
               const blockReferencePermissions = blockReferencesPermissions[_block]
               if (blockReferencePermissions) {
                 if (isThenable(blockReferencePermissions)) {
-                  // Earlier access to this block is still pending, so await it instead of re-running populateFieldPermissions
+                  // Earlier access to this block is still pending, so await it
                   blocksPermissions[block.slug] = await blockReferencePermissions
                 } else {
                   // It's already a resolved policy object
                   blocksPermissions[block.slug] = blockReferencePermissions
                 }
                 continue
-              } else {
-                // We have not seen this block slug yet. Immediately create a promise
-                // so that any parallel calls will just await this same promise
-                // instead of re-running populateFieldPermissions.
-                const blockPromise = (async (): Promise<BlockPermissions> => {
-                  // If the block doesn't exist yet in our permissionsObject, initialize it
-                  // Use field-level permission instead of parentPermissionForOperation for blocks
-                  // This ensures that if the field has access control, it applies to all blocks in the field
-                  const fieldPermission =
-                    fieldPermissions[operation]?.permission ?? parentPermissionForOperation
-
-                  if (!blocksPermissions[block.slug]) {
-                    blocksPermissions[block.slug] = {
-                      fields: {},
-                      [operation]: { permission: fieldPermission },
-                    } as BlockPermissions
-                  } else if (!blocksPermissions[block.slug]?.[operation]) {
-                    blocksPermissions[block.slug]![operation] = {
-                      permission: fieldPermission,
-                    }
-                  }
-
-                  const blockPermission = blocksPermissions[block.slug]!
-                  if (!blockPermission.fields) {
-                    blockPermission.fields = {}
-                  }
-
-                  await populateFieldPermissions({
-                    id,
-                    blockReferencesPermissions,
-                    data,
-                    fields: block.fields,
-                    operations,
-                    parentPermissionsObject: blockPermission,
-                    permissionsObject: blockPermission.fields,
-                    promises,
-                    req,
-                  })
-
-                  return blockPermission
-                })()
-
-                blockReferencesPermissions[_block] = blockPromise
-                blocksPermissions[block.slug] = await blockPromise
-                continue
               }
             }
 
-            // Use field-level permission instead of parentPermissionForOperation for blocks
-            const fieldPermission =
-              fieldPermissions[operation]?.permission ?? parentPermissionForOperation
-
+            // Initialize block permissions object if needed
             if (!blocksPermissions[block.slug]) {
-              blocksPermissions[block.slug] = {
-                fields: {},
-                [operation]: { permission: fieldPermission },
-              } as BlockPermissions
+              blocksPermissions[block.slug] = {} as BlockPermissions
             }
 
-            const blockPermission = blocksPermissions[block.slug]
-            if (!blockPermission) {
-              // Should never happen since we just set it above, but TypeScript needs the check
-              continue
-            }
+            const blockPermission = blocksPermissions[block.slug]!
 
+            // Set permission for this operation
             if (!blockPermission[operation]) {
+              const fieldPermission =
+                fieldPermissions[operation]?.permission ?? parentPermissionForOperation
               blockPermission[operation] = {
                 permission: fieldPermission,
               }
             }
-
-            if (!blockPermission.fields) {
-              blockPermission.fields = {}
-            }
-
-            // For correct calculation of `parentPermissionForOperation`, the parentPermissionsObject must be completely
-            // calculated and awaited before calculating field permissions of nested fields.
-            await populateFieldPermissions({
-              id,
-              blockReferencesPermissions,
-              data,
-              fields: block.fields,
-              operations,
-              parentPermissionsObject: blockPermission,
-              permissionsObject: blockPermission.fields,
-              promises,
-              req,
-            })
           }
         }
-      } else if ('fields' in field && field.fields) {
-        // Field does not have a name => same parentPermissionsObject => no need to await current level
-        await populateFieldPermissions({
-          id,
-          blockReferencesPermissions,
-          data,
-          fields: field.fields,
-          operations,
-          // Field does not have a name here => use parent permissions object
-          parentPermissionsObject,
-          permissionsObject,
-          promises,
-          req,
-        })
-      } else if (field.type === 'tabs') {
+
+        // Now process nested content for each unique block (once per block, not once per operation)
+        const processedBlocks = new Set<string>()
+        for (const _block of field.blockReferences ?? field.blocks) {
+          const block = typeof _block === 'string' ? req.payload.blocks[_block] : _block
+
+          // Skip if block doesn't exist (invalid block reference)
+          if (!block || processedBlocks.has(block.slug)) {
+            continue
+          }
+          processedBlocks.add(block.slug)
+
+          // Handle block references with caching
+          if (typeof _block === 'string' && !blockReferencesPermissions[_block]) {
+            blockReferencesPermissions[_block] = (async (): Promise<BlockPermissions> => {
+              const blockPermission = blocksPermissions[block.slug]!
+              if (!blockPermission.fields) {
+                blockPermission.fields = {}
+              }
+
+              await populateFieldPermissions({
+                id,
+                blockReferencesPermissions,
+                data,
+                fields: block.fields,
+                operations,
+                parentPermissionsObject: blockPermission,
+                permissionsObject: blockPermission.fields,
+                promises,
+                req,
+              })
+
+              return blockPermission
+            })()
+
+            blocksPermissions[block.slug] = await blockReferencesPermissions[_block]
+            continue
+          }
+
+          // Process inline blocks or already-resolved references
+          const blockPermission = blocksPermissions[block.slug]
+          if (!blockPermission) {
+            continue
+          }
+
+          if (!blockPermission.fields) {
+            blockPermission.fields = {}
+          }
+
+          await populateFieldPermissions({
+            id,
+            blockReferencesPermissions,
+            data,
+            fields: block.fields,
+            operations,
+            parentPermissionsObject: blockPermission,
+            permissionsObject: blockPermission.fields,
+            promises,
+            req,
+          })
+        }
+      }
+    }
+
+    // Handle unnamed group fields
+    if ('fields' in field && field.fields && !('name' in field && field.name)) {
+      // Field does not have a name => same parentPermissionsObject => no need to await current level
+      await populateFieldPermissions({
+        id,
+        blockReferencesPermissions,
+        data,
+        fields: field.fields,
+        operations,
+        // Field does not have a name here => use parent permissions object
+        parentPermissionsObject,
+        permissionsObject,
+        promises,
+        req,
+      })
+    }
+
+    // Handle tabs fields
+    if (field.type === 'tabs') {
+      // Process tabs for all operations
+      for (const operation of operations) {
+        // Fields don't have all operations of a collection
+        if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
+          continue
+        }
+
+        const parentPermissionForOperation = (
+          parentPermissionsObject[operation as keyof typeof parentPermissionsObject] as Permission
+        )?.permission
+
         for (const tab of field.tabs) {
           if (tabHasName(tab)) {
             if (!permissionsObject[tab.name]) {
@@ -271,41 +296,43 @@ export const populateFieldPermissions = async ({
             } else if (!permissionsObject[tab.name]![operation]) {
               permissionsObject[tab.name]![operation] = { permission: parentPermissionForOperation }
             }
-
-            const tabPermissions: FieldPermissions = permissionsObject[tab.name]!
-
-            if (!tabPermissions.fields) {
-              tabPermissions.fields = {}
-            }
-
-            // For tabs with names, we don't have async access functions on the tab itself,
-            // so no need to await before recursing. The permission is set synchronously above.
-            await populateFieldPermissions({
-              id,
-              blockReferencesPermissions,
-              data,
-              fields: tab.fields,
-              operations,
-              parentPermissionsObject: tabPermissions,
-              permissionsObject: tabPermissions.fields,
-              promises,
-              req,
-            })
-          } else {
-            // Tab does not have a name => same parentPermissionsObject => no need to await current level
-            await populateFieldPermissions({
-              id,
-              blockReferencesPermissions,
-              data,
-              fields: tab.fields,
-              operations,
-              // Tab does not have a name here => use parent permissions object
-              parentPermissionsObject,
-              permissionsObject,
-              promises,
-              req,
-            })
           }
+        }
+      }
+
+      for (const tab of field.tabs) {
+        if (tabHasName(tab)) {
+          const tabPermissions: FieldPermissions = permissionsObject[tab.name]!
+
+          if (!tabPermissions.fields) {
+            tabPermissions.fields = {}
+          }
+
+          await populateFieldPermissions({
+            id,
+            blockReferencesPermissions,
+            data,
+            fields: tab.fields,
+            operations,
+            parentPermissionsObject: tabPermissions,
+            permissionsObject: tabPermissions.fields,
+            promises,
+            req,
+          })
+        } else {
+          // Tab does not have a name => same parentPermissionsObject => no need to await current level
+          await populateFieldPermissions({
+            id,
+            blockReferencesPermissions,
+            data,
+            fields: tab.fields,
+            operations,
+            // Tab does not have a name here => use parent permissions object
+            parentPermissionsObject,
+            permissionsObject,
+            promises,
+            req,
+          })
         }
       }
     }

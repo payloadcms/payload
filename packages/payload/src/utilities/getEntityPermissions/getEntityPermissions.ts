@@ -119,6 +119,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     fields: fieldsPermissions,
   } as ReturnType<TEntityType>
 
+  const entityAccessPromises: Promise<void>[] = []
   const promises: Promise<void>[] = []
 
   for (const _operation of operations) {
@@ -130,7 +131,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       (entityType === 'global' && topLevelGlobalPermissions.includes(operation))
     ) {
       if (typeof accessFunction === 'function') {
-        promises.push(
+        entityAccessPromises.push(
           createEntityAccessPromise({
             id,
             slug: entity.slug,
@@ -151,6 +152,10 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       }
     }
   }
+
+  // Await entity-level access promises before processing fields
+  // This ensures parentPermissionForOperation is always defined
+  await Promise.all(entityAccessPromises)
 
   const resolvedData = await data
 
