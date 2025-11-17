@@ -43,7 +43,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       if (hasTurbopackConfigWarning) {
         consoleWarn(...args)
         consoleWarn(
-          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to a newer version of Next.js to resolve this warning.',
+          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to Next.js 15.4.7 to resolve this warning.',
         )
         return
       }
