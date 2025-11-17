@@ -117,7 +117,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
             if (entityType === 'collection') {
               return req.payload.findByID({
-                id,
+                id: id!,
                 collection: entity.slug,
                 depth: 0,
                 fallbackLocale: null,
