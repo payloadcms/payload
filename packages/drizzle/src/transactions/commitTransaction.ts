@@ -1,12 +1,9 @@
 import type { CommitTransaction } from 'payload'
 
-export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
-  let transactionID: number | string
-  if (id instanceof Promise) {
-    transactionID = await id
-  } else {
-    transactionID = id
-  }
+export const commitTransaction: CommitTransaction = async function commitTransaction(
+  incomingID = '',
+) {
+  const transactionID = incomingID instanceof Promise ? await incomingID : incomingID
 
   // if the session was deleted it has already been aborted
   if (!this.sessions[transactionID]) {
