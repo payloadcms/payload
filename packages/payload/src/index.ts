@@ -300,10 +300,10 @@ export type GlobalSlug = StringKeyOf<TypedGlobal>
 
 // @ts-expect-error
 type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
-// @ts-expect-error
 type ResolveFallbackLocaleType<T> = 'fallbackLocale' extends keyof T
   ? T['fallbackLocale']
-  : T['fallbackLocaleUntyped']
+  : // @ts-expect-error
+    T['fallbackLocaleUntyped']
 // @ts-expect-error
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
