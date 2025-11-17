@@ -16,6 +16,9 @@ export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   data: Data
   globalConfig?: SanitizedGlobalConfig
+  /**
+   * When called for creating a new document, id is not provided.
+   */
   id?: number | string
   req: PayloadRequest
 }): Promise<{

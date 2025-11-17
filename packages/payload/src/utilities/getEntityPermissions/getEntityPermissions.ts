@@ -94,6 +94,10 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
   const locale = _locale ? _locale : undefined
 
+  if (fetchData && entityType === 'collection' && !id) {
+    throw new Error('ID is required when fetching data for a collection')
+  }
+
   const hasData = _data && Object.keys(_data).length > 0
   const data: JsonObject | Promise<JsonObject> | undefined = (
     hasData
@@ -112,10 +116,6 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
             }
 
             if (entityType === 'collection') {
-              if (!id) {
-                throw new Error('ID is required when fetching data for a collection')
-              }
-
               return req.payload.findByID({
                 id,
                 collection: entity.slug,

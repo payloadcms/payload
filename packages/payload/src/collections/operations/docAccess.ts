@@ -14,7 +14,10 @@ type Arguments = {
    * If the document data is passed, it will be used to check access instead of fetching the document from the database.
    */
   data?: JsonObject
-  id: number | string
+  /**
+   * When called for creating a new document, id is not provided.
+   */
+  id?: number | string
   req: PayloadRequest
 }
 
@@ -42,12 +45,12 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
 
   try {
     const result = await getEntityPermissions({
-      id,
+      id: id!,
       blockReferencesPermissions: {},
       data,
       entity: config,
       entityType: 'collection',
-      fetchData: true,
+      fetchData: id ? true : (false as true),
       operations: collectionOperations,
       req,
     })
