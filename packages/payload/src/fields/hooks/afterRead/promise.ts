@@ -1,6 +1,7 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -12,7 +13,6 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 import type { AfterReadArgs } from './index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
-import { type RequestContext } from '../../../index.js'
 import { getBlockSelect } from '../../../utilities/getBlockSelect.js'
 import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
@@ -33,7 +33,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: false | null | string | string[]
+  fallbackLocale: TypedFallbackLocale
   field: Field | TabAsField
   fieldIndex: number
   /**

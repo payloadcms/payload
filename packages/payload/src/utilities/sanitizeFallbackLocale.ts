@@ -1,7 +1,8 @@
 import type { SanitizedLocalizationConfig } from '../config/types.js'
+import type { TypedFallbackLocale } from '../index.js'
 
 interface Args {
-  fallbackLocale: false | null | string | string[]
+  fallbackLocale: TypedFallbackLocale
   locale: string
   localization: SanitizedLocalizationConfig
 }
@@ -18,7 +19,7 @@ export const sanitizeFallbackLocale = ({
   fallbackLocale,
   locale,
   localization,
-}: Args): false | null | string | string[] | undefined => {
+}: Args): TypedFallbackLocale => {
   if (fallbackLocale === undefined || fallbackLocale === null) {
     if (localization && localization.fallback) {
       // Check for locale specific fallback
@@ -28,17 +29,23 @@ export const sanitizeFallbackLocale = ({
 
       if (localeSpecificFallback) {
         return localeSpecificFallback
-      } else {
-        return localization.defaultLocale
       }
-    } else {
+
+      return localization.defaultLocale
+    }
+
+    return false
+  } else if (Array.isArray(fallbackLocale)) {
+    return fallbackLocale.filter((localeCode) => localization.localeCodes.includes(localeCode))
+  } else if (fallbackLocale) {
+    if (['false', 'none', 'null'].includes(fallbackLocale)) {
       return false
     }
-  } else if (Array.isArray(fallbackLocale)) {
-    return fallbackLocale
-  } else if (fallbackLocale && ['false', 'none', 'null'].includes(fallbackLocale)) {
-    return false
+
+    if (localization.localeCodes.includes(fallbackLocale)) {
+      return fallbackLocale
+    }
   }
 
-  return fallbackLocale
+  return false
 }

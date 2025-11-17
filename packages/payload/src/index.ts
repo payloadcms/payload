@@ -200,10 +200,10 @@ export interface GeneratedTypes {
   dbUntyped: {
     defaultIDType: number | string
   }
+  fallbackLocaleUntyped: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
   globalsSelectUntyped: {
     [slug: string]: SelectType
   }
-
   globalsUntyped: {
     [slug: string]: JsonObject
   }
@@ -301,9 +301,15 @@ export type GlobalSlug = StringKeyOf<TypedGlobal>
 // @ts-expect-error
 type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
 // @ts-expect-error
+type ResolveFallbackLocaleType<T> = 'fallbackLocale' extends keyof T
+  ? T['fallbackLocale']
+  : T['fallbackLocaleUntyped']
+// @ts-expect-error
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+
+export type TypedFallbackLocale = ResolveFallbackLocaleType<GeneratedTypes>
 
 /**
  * @todo rename to `User` in 4.0

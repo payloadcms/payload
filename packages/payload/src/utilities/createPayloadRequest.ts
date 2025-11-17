@@ -2,6 +2,7 @@ import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
 import type { SanitizedConfig } from '../config/types.js'
+import type { TypedFallbackLocale } from '../index.js'
 import type { CustomPayloadRequestProperties, PayloadRequest } from '../types/index.js'
 
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
@@ -64,7 +65,7 @@ export const createPayloadRequest = async ({
 
   const fallbackFromRequest = (query.fallbackLocale ||
     searchParams.get('fallback-locale') ||
-    searchParams.get('fallbackLocale')) as false | null | string | string[]
+    searchParams.get('fallbackLocale')) as TypedFallbackLocale
 
   let fallbackLocale = fallbackFromRequest
 
