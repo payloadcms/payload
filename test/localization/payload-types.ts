@@ -126,6 +126,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
     'global-array': GlobalArray;
     'global-text': GlobalText;
@@ -443,6 +449,7 @@ export interface AllFieldsLocalized {
         | null;
     };
   };
+  selfRelation?: (string | null) | AllFieldsLocalized;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1238,6 +1245,7 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
                   };
             };
       };
+  selfRelation?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
