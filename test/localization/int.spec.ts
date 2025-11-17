@@ -3441,6 +3441,43 @@ describe('Localization', () => {
 
         expect(localizedFallback.title).not.toBeDefined()
       })
+
+      it('should respect fallback: false on relationship values', async () => {
+        const originalPost = await payload.create({
+          collection: allFieldsLocalizedSlug,
+          data: {
+            text: 'Post EN',
+          },
+          locale: 'en',
+        })
+
+        await payload.update({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          data: {
+            selfRelation: originalPost.id,
+          },
+          locale: 'en',
+        })
+
+        const spanishPostWithEnglishFallback = await payload.findByID({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          locale: 'es',
+          fallbackLocale: 'en',
+        })
+
+        expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
+
+        const spanishPostWithNoFallback = await payload.findByID({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          locale: 'es',
+          fallbackLocale: false,
+        })
+
+        expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
+      })
     })
   })
 
