@@ -43,15 +43,26 @@ export const getMCPHandler = (
   const { payload } = req
   const configSchema = configToJSONSchema(payload.config)
 
-  const payloadToolHandler = (
-    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['tools']>[number]['handler'],
-  ) => {
-    return async function (...args: unknown[]) {
-      // - Add the Payload request object to the handler
-      // - Add back the _extra argument that comes from the underlying MCP handler
-      return await handler(args[0] as Record<string, unknown>, req, args[1])
+  // Handler wrapper that injects req before the _extra argument
+  const wrapHandler = (handler: (...args: any[]) => any) => {
+    return async (...args: any[]) => {
+      const _extra = args[args.length - 1]
+      const handlerArgs = args.slice(0, -1)
+      return await handler(...handlerArgs, req, _extra)
     }
   }
+
+  const payloadToolHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['tools']>[number]['handler'],
+  ) => wrapHandler(handler)
+
+  const payloadPromptHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['prompts']>[number]['handler'],
+  ) => wrapHandler(handler)
+
+  const payloadResourceHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['resources']>[number]['handler'],
+  ) => wrapHandler(handler)
 
   // User
   const user = mcpAccessSettings.user
@@ -238,7 +249,7 @@ export const getMCPHandler = (
                 description: prompt.description,
                 title: prompt.title,
               },
-              prompt.handler,
+              payloadPromptHandler(prompt.handler),
             )
             if (useVerboseLogs) {
               payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
@@ -264,7 +275,7 @@ export const getMCPHandler = (
                 mimeType: resource.mimeType,
                 title: resource.title,
               },
-              resource.handler,
+              payloadResourceHandler(resource.handler),
             )
 
             if (useVerboseLogs) {
