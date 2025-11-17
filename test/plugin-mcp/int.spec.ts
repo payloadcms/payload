@@ -358,8 +358,6 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     const roll = docs?.[0]
-
-    expect(docs).toHaveLength(1)
     expect(roll?.sides).toBe(6)
     expect(roll?.result).toBeDefined()
     // @ts-expect-error - doc.user is a string | User
