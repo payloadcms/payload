@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
+import type { CollectionConfig, CollectionSlug, PayloadRequest, TypedUser } from 'payload'
 import type { z } from 'zod'
 
 import { type ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -192,7 +192,11 @@ export type PluginMCPServerConfig = {
       /**
        * Set the handler of the tool. This is the function that will be called when the tool is used.
        */
-      handler: (args: Record<string, unknown>) => Promise<{
+      handler: (
+        args: Record<string, unknown>,
+        req: PayloadRequest,
+        _extra: unknown,
+      ) => Promise<{
         content: Array<{
           text: string
           type: 'text'
@@ -309,6 +313,7 @@ export type MCPAccessSettings = {
   'payload-mcp-prompt'?: Record<string, boolean>
   'payload-mcp-resource'?: Record<string, boolean>
   'payload-mcp-tool'?: Record<string, boolean>
+  user: TypedUser
 } & Record<string, unknown>
 
 export type FieldDefinition = {
