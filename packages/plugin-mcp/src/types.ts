@@ -135,7 +135,29 @@ export type PluginMCPServerConfig = {
       /**
        * Set the handler of the prompt. This is the function that will be called when the prompt is used.
        */
-      handler: (...args: any) => any
+      handler: (
+        args: Record<string, unknown>,
+        req: PayloadRequest,
+        _extra: unknown,
+      ) =>
+        | {
+            messages: Array<{
+              content: {
+                text: string
+                type: 'text'
+              }
+              role: 'assistant' | 'user'
+            }>
+          }
+        | Promise<{
+            messages: Array<{
+              content: {
+                text: string
+                type: 'text'
+              }
+              role: 'assistant' | 'user'
+            }>
+          }>
       /**
        * Set the function name of the prompt.
        */
@@ -157,8 +179,21 @@ export type PluginMCPServerConfig = {
       description: string
       /**
        * Set the handler of the resource. This is the function that will be called when the resource is used.
+       * The handler can have either 3 arguments (when no args are passed) or 4 arguments (when args are passed).
        */
-      handler: (...args: any) => any
+      handler: (...args: any[]) =>
+        | {
+            contents: Array<{
+              text: string
+              uri: string
+            }>
+          }
+        | Promise<{
+            contents: Array<{
+              text: string
+              uri: string
+            }>
+          }>
       /**
        * Set the mime type of the resource.
        * example: 'text/plain'
@@ -196,12 +231,21 @@ export type PluginMCPServerConfig = {
         args: Record<string, unknown>,
         req: PayloadRequest,
         _extra: unknown,
-      ) => Promise<{
-        content: Array<{
-          text: string
-          type: 'text'
-        }>
-      }>
+      ) =>
+        | {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+            role?: string
+          }
+        | Promise<{
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+            role?: string
+          }>
       /**
        * Set the name of the tool. This is the name that will be used to identify the tool. LLMs will interperate the name to determine when to use the tool.
        */
