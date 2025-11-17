@@ -186,12 +186,11 @@ export const getMCPHandler = (
           try {
             const schema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
 
-            const toolCapabilities = toolSettings?.[`${toCamelCase(enabledGlobalSlug)}`] as Record<
-              string,
-              unknown
-            >
-            const allowFind: boolean | undefined = toolCapabilities['find'] as boolean
-            const allowUpdate: boolean | undefined = toolCapabilities['update'] as boolean
+            const toolCapabilities = mcpAccessSettings?.[
+              `${toCamelCase(enabledGlobalSlug)}`
+            ] as Record<string, unknown>
+            const allowFind: boolean | undefined = toolCapabilities?.['find'] as boolean
+            const allowUpdate: boolean | undefined = toolCapabilities?.['update'] as boolean
 
             if (allowFind) {
               registerTool(
