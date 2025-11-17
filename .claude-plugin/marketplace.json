@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "payload",
-      "description": "Skills for developing Payload ",
+      "description": "Payload Development plugin - covers collections, fields, hooks, access control, plugins, and database adapters.",
       "version": "0.0.1",
       "source": "./tools/claude-plugin",
       "author": {
