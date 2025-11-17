@@ -87,6 +87,14 @@ export interface Args {
   allowIDOnCreate?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /**
+   * When true, bulk operations will process documents one at a time
+   * in separate transactions instead of all at once in a single transaction.
+   * Useful for avoiding transaction limitations with large datasets in DocumentDB and Cosmos DB.
+   *
+   * @default false
+   */
+  bulkOperationsSingleTransaction?: boolean
 
   /**
    * If enabled, collation allows for language-specific rules for string comparison.
@@ -173,6 +181,7 @@ export interface Args {
 }
 
 export type MongooseAdapter = {
+  bulkOperationsSingleTransaction: boolean
   collections: {
     [slug: string]: CollectionModel
   }
@@ -239,6 +248,7 @@ export function mongooseAdapter({
   allowAdditionalKeys = false,
   allowIDOnCreate = false,
   autoPluralization = true,
+  bulkOperationsSingleTransaction = false,
   collectionsSchemaOptions = {},
   connectOptions,
   disableFallbackSort = false,
@@ -263,6 +273,7 @@ export function mongooseAdapter({
 
       // Mongoose-specific
       autoPluralization,
+      bulkOperationsSingleTransaction,
       collections: {},
       // @ts-expect-error initialize without a connection
       connection: undefined,

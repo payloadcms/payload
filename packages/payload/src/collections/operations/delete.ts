@@ -147,6 +147,12 @@ export const deleteOperation = async <
       const { id } = doc
 
       try {
+        // Each document gets its own transaction when singleTransaction is enabled
+        let docShouldCommit = false
+        if (req.payload.db.bulkOperationsSingleTransaction) {
+          docShouldCommit = await initTransaction(req)
+        }
+
         // /////////////////////////////////////
         // Handle potentially locked documents
         // /////////////////////////////////////
@@ -279,9 +285,15 @@ export const deleteOperation = async <
         // /////////////////////////////////////
         // 8. Return results
         // /////////////////////////////////////
+        if (docShouldCommit) {
+          await commitTransaction(req)
+        }
 
         return result
       } catch (error) {
+        if (req.payload.db.bulkOperationsSingleTransaction) {
+          await killTransaction(req)
+        }
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
         errors.push({
@@ -293,7 +305,17 @@ export const deleteOperation = async <
       return null
     })
 
-    const awaitedDocs = await Promise.all(promises)
+    // Process sequentially when using single transaction mode to avoid shared state issues
+    // Process in parallel when using one transaction for better performance
+    let awaitedDocs
+    if (req.payload.db.bulkOperationsSingleTransaction) {
+      awaitedDocs = []
+      for (const promise of promises) {
+        awaitedDocs.push(await promise)
+      }
+    } else {
+      awaitedDocs = await Promise.all(promises)
+    }
 
     // /////////////////////////////////////
     // Delete Preferences
