@@ -60,17 +60,19 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
   // Find plugins array if it exists
   let pluginsArray
   if (configObject && configObject.getKind() === SyntaxKind.ObjectLiteralExpression) {
-    const pluginsProperty = configObject
-      .asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
-      .getProperty('plugins')
-      ?.asKind(SyntaxKind.PropertyAssignment)
+    const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+    const pluginsProperty = objLiteral.getProperty('plugins')
 
-    if (pluginsProperty) {
-      const initializer = pluginsProperty.getInitializer()
+    // Handle PropertyAssignment (e.g., plugins: [...])
+    const propertyAssignment = pluginsProperty?.asKind(SyntaxKind.PropertyAssignment)
+    if (propertyAssignment) {
+      const initializer = propertyAssignment.getInitializer()
       if (initializer?.getKind() === SyntaxKind.ArrayLiteralExpression) {
         pluginsArray = initializer.asKind(SyntaxKind.ArrayLiteralExpression)
       }
     }
+    // For ShorthandPropertyAssignment (e.g., plugins), we can't get the array directly
+    // but we'll detect it in addStorageAdapter
   }
 
   debug(`[AST] plugins array: ${pluginsArray ? '✓ found' : '✗ not found'}`)
@@ -221,9 +223,32 @@ export function addStorageAdapter({
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
 
   // Find or create plugins array
-  let pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+  const pluginsPropertyRaw = objLiteral.getProperty('plugins')
+  let pluginsProperty = pluginsPropertyRaw?.asKind(SyntaxKind.PropertyAssignment)
 
-  if (!pluginsProperty) {
+  // Check if it's a shorthand property (e.g., `plugins` referencing an imported variable)
+  const shorthandProperty = pluginsPropertyRaw?.asKind(SyntaxKind.ShorthandPropertyAssignment)
+
+  if (shorthandProperty) {
+    debug('[AST] Found shorthand plugins property, converting to long form with spread')
+    // Get the identifier name (usually 'plugins')
+    const identifierName = shorthandProperty.getName()
+
+    // Find insert position before removing
+    const allProperties = objLiteral.getProperties()
+    const insertIndex = allProperties.indexOf(shorthandProperty)
+
+    // Remove the shorthand property
+    shorthandProperty.remove()
+
+    // Create new property with spread operator: plugins: [...plugins, newAdapter]
+    objLiteral.insertPropertyAssignment(insertIndex, {
+      name: 'plugins',
+      initializer: `[...${identifierName}]`,
+    })
+
+    pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+  } else if (!pluginsProperty) {
     debug('[AST] Creating new plugins array')
     // Create plugins array
     objLiteral.addPropertyAssignment({
