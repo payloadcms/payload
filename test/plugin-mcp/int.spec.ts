@@ -796,12 +796,6 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(json.result.content[0].text).toContain('"content": "Hello World."')
     })
-=======
-    expect(json.result.content).toHaveLength(1)
-    expect(json.result.content[0].type).toBe('text')
-    expect(json.result.content[0].text).toContain('Global "site-settings" updated successfully')
-    expect(json.result.content[0].text).toContain('MCP Test Site')
-    expect(json.result.content[0].text).toContain('A test site for MCP global operations')
   })
 
   it('should include globals in tools list', async () => {
@@ -833,6 +827,5 @@ describe('@payloadcms/plugin-mcp', () => {
     const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
     expect(updateGlobalTool).toBeDefined()
     expect(updateGlobalTool.description).toContain('Payload global')
->>>>>>> a9306176f (feat: add globals support to MCP resource operations)
   })
 })
