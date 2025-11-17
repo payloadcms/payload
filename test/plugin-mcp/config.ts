@@ -8,6 +8,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Media } from './collections/Media.js'
 import { Posts } from './collections/Posts.js'
 import { Products } from './collections/Products.js'
+import { Rolls } from './collections/Rolls.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
@@ -20,7 +21,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Products],
+  collections: [Users, Media, Posts, Products, Rolls],
   onInit: seed,
   plugins: [
     mcpPlugin({
@@ -110,9 +111,28 @@ export default buildConfigWithDefaults({
           {
             name: 'diceRoll',
             description: 'Rolls a virtual dice with a specified number of sides',
-            handler: (args: Record<string, unknown>) => {
+            handler: async (args: Record<string, unknown>, req) => {
               const sides = (args.sides as number) || 6
               const result = Math.floor(Math.random() * sides) + 1
+              const payload = req.payload
+
+              payload.logger.info(
+                `Dice Roll MCP Tool rolled a ${args.sides} sided die and got a ${result}`,
+              )
+
+              await payload.create({
+                collection: 'rolls',
+                data: {
+                  sides,
+                  result,
+                  user: req.user?.id,
+                },
+                req,
+                overrideAccess: false,
+                user: req.user,
+                draft: true,
+              })
+
               return Promise.resolve({
                 content: [
                   {

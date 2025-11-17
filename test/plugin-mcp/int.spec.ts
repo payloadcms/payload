@@ -321,6 +321,51 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain('** on a 6-sided die!')
   })
 
+  it('should call diceRoll and create a document in the rolls collection with a user relationship set to the current user', async () => {
+    const apiKey = await getApiKey()
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'diceRoll',
+          arguments: {
+            sides: 6,
+          },
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toHaveLength(1)
+
+    const { docs } = await payload.find({
+      collection: 'rolls',
+      where: {
+        user: {
+          equals: userId,
+        },
+      },
+    })
+
+    const roll = docs?.[0]
+
+    expect(docs).toHaveLength(1)
+    expect(roll?.sides).toBe(6)
+    expect(roll?.result).toBeDefined()
+    // @ts-expect-error - doc.user is a string | User
+    expect(roll?.user?.id).toBe(userId)
+  })
+
   it('should call createPosts', async () => {
     const apiKey = await getApiKey()
     const response = await restClient.POST('/mcp', {
