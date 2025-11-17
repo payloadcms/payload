@@ -187,14 +187,7 @@ export const updateByIDOperation = async <
 
     const { operations } = args
 
-    try {
-      validateAtomicOperations(operations, data, collectionConfig.flattenedFields)
-    } catch (error) {
-      throw new APIError(
-        error instanceof Error ? error.message : String(error),
-        httpStatus.BAD_REQUEST,
-      )
-    }
+    validateAtomicOperations(operations, data, collectionConfig.flattenedFields)
 
     const resolvedData = deepCopyObjectSimple(data)
 

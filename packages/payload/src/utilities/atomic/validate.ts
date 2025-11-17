@@ -1,5 +1,9 @@
+import { status as httpStatus } from 'http-status'
+
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { AtomicOperations } from '../../types/atomic.js'
+
+import { APIError } from '../../errors/index.js'
 
 /**
  * Get leaf field paths from an object recursively (only final fields, not containers)
@@ -115,15 +119,19 @@ export const validateAtomicOperations = (
   }
 
   if (schemaErrors.length > 0) {
-    throw new Error(`Invalid atomic operations: ${schemaErrors.join(', ')}`)
+    throw new APIError(
+      `Invalid atomic operations: ${schemaErrors.join(', ')}`,
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   // Check for conflicts between data and operations
   if (data) {
     const conflicts = detectNestedFieldConflicts(data, operations)
     if (conflicts.length > 0) {
-      throw new Error(
+      throw new APIError(
         `Field conflicts detected between data and operations: ${conflicts.join(', ')}`,
+        httpStatus.BAD_REQUEST,
       )
     }
   }

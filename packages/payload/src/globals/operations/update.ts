@@ -180,14 +180,7 @@ export const updateOperation = async <
 
     const { operations } = args
 
-    try {
-      validateAtomicOperations(operations, data, globalConfig.flattenedFields)
-    } catch (error) {
-      throw new APIError(
-        error instanceof Error ? error.message : String(error),
-        httpStatus.BAD_REQUEST,
-      )
-    }
+    validateAtomicOperations(operations, data, globalConfig.flattenedFields)
 
     if (operations) {
       applyAtomicOperations(globalJSON, data, operations)
