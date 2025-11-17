@@ -33,5 +33,38 @@ export const SiteSettings: GlobalConfig = {
         description: 'Contact email address for the site',
       },
     },
+    {
+      name: 'socialLinks',
+      type: 'array',
+      admin: {
+        description: 'Social media links',
+      },
+      fields: [
+        {
+          name: 'platform',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'allowedDomains',
+      type: 'array',
+      admin: {
+        description: 'List of allowed domains',
+      },
+      fields: [
+        {
+          name: 'domain',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
   ],
 }
