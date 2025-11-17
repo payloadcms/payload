@@ -225,7 +225,7 @@ type CreateCacheKeyArgs = {
   depth: number
   docID: number | string
   draft: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: false | null | string | string[]
   locale: string | string[]
   overrideAccess: boolean
   populate?: PopulateType

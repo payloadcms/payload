@@ -33,7 +33,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string | string[]
+  fallbackLocale: false | null | string | string[]
   field: Field | TabAsField
   fieldIndex: number
   /**

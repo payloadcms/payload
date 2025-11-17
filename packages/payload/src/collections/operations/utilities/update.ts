@@ -39,7 +39,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   depth: number
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: false | null | string | string[]
   filesToUpload: FileToSave[]
   id: number | string
   locale: string

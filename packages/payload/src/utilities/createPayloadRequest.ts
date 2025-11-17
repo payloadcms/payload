@@ -62,10 +62,9 @@ export const createPayloadRequest = async ({
       })
     : {}
 
-  const fallbackFromRequest =
-    (query.fallbackLocale as string | string[]) ||
+  const fallbackFromRequest = (query.fallbackLocale ||
     searchParams.get('fallback-locale') ||
-    searchParams.get('fallbackLocale')
+    searchParams.get('fallbackLocale')) as false | null | string | string[]
 
   let fallbackLocale = fallbackFromRequest
 
