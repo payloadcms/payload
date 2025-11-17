@@ -167,6 +167,11 @@ describe('Access Control', () => {
 
       await payload.delete({
         collection: 'field-restricted-update-based-on-data',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
       })
 
       const collectionURL = new AdminUrlUtil(serverURL, 'field-restricted-update-based-on-data')
@@ -212,6 +217,11 @@ describe('Access Control', () => {
 
       await payload.delete({
         collection: 'field-restricted-update-based-on-data',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
       })
     })
   })
