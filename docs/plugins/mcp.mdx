@@ -196,7 +196,9 @@ tools: [
   {
     name: 'getPostScores',
     description: 'Get useful scores about content in posts',
-    handler: async (args, { payload }) => {
+    handler: async (args, req) => {
+      const { payload } = req
+
       const stats = await payload.find({
         collection: 'posts',
         where: {
@@ -204,6 +206,9 @@ tools: [
             greater_than: args.since,
           },
         },
+        req,
+        overrideAccess: false,
+        user: req.user,
       })
 
       return {
