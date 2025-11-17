@@ -113,6 +113,6 @@ export const connect: Connect = async function connect(
       err,
       msg,
     })
-    process.exit(1)
+    throw new Error(`Error: cannot connect to MongoDB: ${msg}`)
   }
 }
