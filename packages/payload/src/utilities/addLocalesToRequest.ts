@@ -51,12 +51,12 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
 }
 
 type SanitizeLocalesArgs = {
-  fallbackLocale: string | string[]
+  fallbackLocale: false | null | string | string[]
   locale: string
   localization: SanitizedConfig['localization']
 }
 type SanitizeLocalesReturn = {
-  fallbackLocale?: string | string[]
+  fallbackLocale?: false | null | string | string[]
   locale?: string
 }
 export const sanitizeLocales = ({
