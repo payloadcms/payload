@@ -43,8 +43,18 @@ export const getMCPHandler = (
   const { payload } = req
   const configSchema = configToJSONSchema(payload.config)
 
+  const payloadToolHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['tools']>[number]['handler'],
+  ) => {
+    return async function (...args: unknown[]) {
+      // - Add the Payload request object to the handler
+      // - Add back the _extra argument that comes from the underlying MCP handler
+      return await handler(args[0] as Record<string, unknown>, req, args[1])
+    }
+  }
+
   // User
-  const user = mcpAccessSettings.user as TypedUser
+  const user = mcpAccessSettings.user
 
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
@@ -202,7 +212,13 @@ export const getMCPHandler = (
           registerTool(
             isToolEnabled,
             tool.name,
-            () => server.tool(tool.name, tool.description, tool.parameters, tool.handler),
+            () =>
+              server.tool(
+                tool.name,
+                tool.description,
+                tool.parameters,
+                payloadToolHandler(tool.handler),
+              ),
             payload,
             useVerboseLogs,
           )
