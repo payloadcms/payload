@@ -1,5 +1,5 @@
 import type { SanitizedCollectionPermission } from '../../auth/index.js'
-import type { AllOperations, PayloadRequest } from '../../types/index.js'
+import type { AllOperations, JsonObject, PayloadRequest } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
@@ -10,6 +10,10 @@ const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
 type Arguments = {
   collection: Collection
+  /**
+   * If the document data is passed, it will be used to check access instead of fetching the document from the database.
+   */
+  data?: JsonObject
   id: number | string
   req: PayloadRequest
 }
@@ -18,6 +22,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
   const {
     id,
     collection: { config },
+    data,
     req,
   } = args
 
@@ -39,6 +44,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     const result = await getEntityPermissions({
       id,
       blockReferencesPermissions: {},
+      data,
       entity: config,
       entityType: 'collection',
       fetchData: true,

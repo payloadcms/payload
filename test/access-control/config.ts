@@ -631,12 +631,7 @@ export default buildConfigWithDefaults(
             name: 'restricted',
             type: 'text',
             access: {
-              update: ({ data, doc }) => {
-                console.log(`update access control.`, {
-                  data,
-                  doc,
-                  returned: !data?.field1,
-                })
+              update: ({ data }) => {
                 return !data?.isRestricted
               },
             },

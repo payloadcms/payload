@@ -26,6 +26,10 @@ type ReturnType<TEntityType extends 'collection' | 'global'> = TEntityType exten
 
 type Args<TEntityType extends 'collection' | 'global'> = {
   blockReferencesPermissions: BlockReferencesPermissions
+  /**
+   * If the document data is passed, it will be used to check access instead of fetching the document from the database.
+   */
+  data?: JsonObject
   entity: TEntityType extends 'collection' ? SanitizedCollectionConfig : SanitizedGlobalConfig
   entityType: TEntityType
   /**
@@ -69,8 +73,17 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
 export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,
 ): Promise<ReturnType<TEntityType>> {
-  const { id, blockReferencesPermissions, entity, entityType, fetchData, operations, req } = args
-  const { data: _data, locale: _locale, user } = req
+  const {
+    id,
+    blockReferencesPermissions,
+    data: _data,
+    entity,
+    entityType,
+    fetchData,
+    operations,
+    req,
+  } = args
+  const { locale: _locale, user } = req
 
   const locale = _locale ? _locale : undefined
 
