@@ -1,14 +1,21 @@
 {
   "name": "payload-plugins",
   "version": "0.0.1",
-  "description": "Payload CMS development plugins",
+  "description": "Development marketplace for Payload",
   "owner": {
     "name": "Payload",
     "email": "info@payloadcms.com"
   },
   "plugins": [
     {
-      "source": "./tools/claude-plugin"
+      "name": "payload",
+      "description": "Skills for developing Payload ",
+      "version": "0.0.1",
+      "source": "./tools/claude-plugin",
+      "author": {
+        "name": "Payload",
+        "email": "info@payloadcms.com"
+      }
     }
   ]
 }

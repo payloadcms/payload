@@ -1,7 +1,7 @@
 {
   "name": "payload",
   "version": "0.0.1",
-  "description": "Payload CMS 3.x development skill with TypeScript patterns, field configs, hooks, access control, and API examples",
+  "description": "Payload development plugin - covers collections, fields, hooks, access control, plugins, and database adapters for building with Payload",
   "author": {
     "name": "Payload",
     "email": "info@payloadcms.com",
