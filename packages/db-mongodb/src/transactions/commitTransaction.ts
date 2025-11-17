@@ -4,15 +4,9 @@ import type { MongooseAdapter } from '../index.js'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(
   this: MongooseAdapter,
-  incomingID,
+  incomingID = '',
 ) {
-  let transactionID: number | string
-
-  if (incomingID instanceof Promise) {
-    transactionID = await incomingID
-  } else {
-    transactionID = incomingID
-  }
+  const transactionID = incomingID instanceof Promise ? await incomingID : incomingID
 
   if (!this.sessions[transactionID]) {
     return
@@ -24,7 +18,7 @@ export const commitTransaction: CommitTransaction = async function commitTransac
     return
   }
 
-  const session = this.sessions[transactionID]!
+  const session = this.sessions[transactionID]
 
   // Delete from registry FIRST to prevent race conditions
   // This ensures other operations can't retrieve this session while we're ending it

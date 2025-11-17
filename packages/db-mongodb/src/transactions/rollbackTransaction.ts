@@ -6,13 +6,7 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
   this: MongooseAdapter,
   incomingID = '',
 ) {
-  let transactionID: number | string
-
-  if (incomingID instanceof Promise) {
-    transactionID = await incomingID
-  } else {
-    transactionID = incomingID
-  }
+  const transactionID = incomingID instanceof Promise ? await incomingID : incomingID
 
   // if multiple operations are using the same transaction, the first will flow through and delete the session.
   // subsequent calls should be ignored.
@@ -27,7 +21,7 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
     return
   }
 
-  const session = this.sessions[transactionID]!
+  const session = this.sessions[transactionID]
 
   // Delete from registry FIRST to prevent race conditions
   // This ensures other operations can't retrieve this session while we're aborting it
