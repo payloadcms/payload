@@ -68,6 +68,8 @@ export type CollectionPermission = {
   fields: FieldsPermissions
   read: Permission
   readVersions?: Permission
+  // Auth-enabled Collections only
+  unlock?: Permission
   update: Permission
 }
 
@@ -77,6 +79,8 @@ export type SanitizedCollectionPermission = {
   fields: SanitizedFieldsPermissions
   read?: true
   readVersions?: true
+  // Auth-enabled Collections only
+  unlock?: true
   update?: true
 }
 

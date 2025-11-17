@@ -48,7 +48,14 @@ type Args<TEntityType extends 'collection' | 'global'> = {
     }
 )
 
-const topLevelCollectionPermissions = ['create', 'delete', 'read', 'readVersions', 'update']
+const topLevelCollectionPermissions = [
+  'create',
+  'delete',
+  'read',
+  'readVersions',
+  'update',
+  'unlock',
+]
 const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
 
 /**
