@@ -10,6 +10,5 @@
   "homepage": "https://github.com/payloadcms/payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
-  "keywords": ["payload", "cms", "payload-cms", "nextjs", "typescript", "headless-cms"],
-  "commands": "."
+  "keywords": ["payload", "cms", "payload-cms", "nextjs", "typescript", "headless-cms"]
 }

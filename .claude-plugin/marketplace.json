@@ -1,13 +1,14 @@
 {
-  "name": "payload",
+  "name": "payload-plugins",
+  "version": "0.0.1",
+  "description": "Payload CMS development plugins",
   "owner": {
     "name": "Payload",
     "email": "info@payloadcms.com"
   },
   "plugins": [
     {
-      "name": "payload",
-      "source": "./"
+      "source": "./tools/claude-plugin"
     }
   ]
 }
