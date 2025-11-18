@@ -154,12 +154,21 @@ export interface Args {
    * @default false
    */
   useAlternativeDropDatabase?: boolean
+
   /**
    * Set to `true` to use `BigInt` for custom ID fields of type `'number'`.
    * Useful for databases that don't support `double` or `int32` IDs.
    * @default false
    */
   useBigIntForNumberIDs?: boolean
+  /**
+   * Use collation within MongoDB queries.
+   *
+   * This will be enabled by default in v4.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
+   */
+  useCollation?: boolean
   /**
    * Set to `false` to disable join aggregations (which use correlated subqueries) and instead populate join fields via multiple `find` queries.
    * @default true
@@ -188,6 +197,14 @@ export type MongooseAdapter = {
   sessions: Record<number | string, ClientSession>
   useAlternativeDropDatabase: boolean
   useBigIntForNumberIDs: boolean
+  /**
+   * Use collation within MongoDB queries.
+   *
+   * This will be enabled by default in v4.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
+   */
+  useCollation?: boolean
   useJoinAggregations: boolean
   usePipelineInSortLookup: boolean
   versions: {
@@ -252,6 +269,7 @@ export function mongooseAdapter({
   url,
   useAlternativeDropDatabase = false,
   useBigIntForNumberIDs = false,
+  useCollation = false,
   useJoinAggregations = true,
   usePipelineInSortLookup = true,
 }: Args): DatabaseAdapterObj {
@@ -264,7 +282,7 @@ export function mongooseAdapter({
 
       // Mongoose-specific
       autoPluralization,
-      collation,
+      ...(useCollation ? { collation } : {}),
       collections: {},
       // @ts-expect-error initialize without a connection
       connection: undefined,
