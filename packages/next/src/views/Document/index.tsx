@@ -21,7 +21,7 @@ import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
-import { isolateObjectProperty, logError } from 'payload'
+import { logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -140,27 +140,6 @@ export const renderDocument = async ({
 
   const isTrashedDoc = Boolean(doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string')
 
-  // CRITICAL FIX FOR RACE CONDITION:
-  // When running parallel operations with Promise.all, if they share the same req object
-  // and one operation calls initTransaction() which MUTATES req.transactionID, that mutation
-  // is visible to all parallel operations. This causes:
-  // 1. Operation A (e.g., getDocumentPermissions → docAccessOperation) calls initTransaction()
-  //    which sets req.transactionID = Promise, then resolves it to a UUID
-  // 2. Operation B (e.g., getIsLocked) running in parallel receives the SAME req with the mutated transactionID
-  // 3. Operation A (does not even know that Operation B even exists and is stil using the transactionID) commits/ends its transaction
-  // 4. Operation B tries to use the now-expired session → MongoExpiredSessionError!
-  //
-  // Solution: Use isolateObjectProperty to create a Proxy that isolates the 'transactionID' property.
-  // This allows each operation to have its own transactionID without affecting the parent req.
-  // If parent req already has a transaction, preserve it (don't isolate).
-  //
-  // Note: We use isolateObjectProperty instead of shallow copy ({ ...req }) because:
-  // - Shallow copy would break tests that expect req.transactionID mutations to be visible to the caller
-  // - isolateObjectProperty creates a Proxy where transactionID mutations go to a delegate object
-  // - The parent req remains unmutated while each child operation can have its own transaction
-  const reqForPermissions = req.transactionID ? req : isolateObjectProperty(req, 'transactionID')
-  const reqForLockCheck = req.transactionID ? req : isolateObjectProperty(req, 'transactionID')
-
   const [
     docPreferences,
     { docPermissions, hasPublishPermission, hasSavePermission },
@@ -176,22 +155,22 @@ export const renderDocument = async ({
       user,
     }),
 
-    // Get permissions - isolated transactionID prevents cross-contamination
+    // Get permissions
     getDocumentPermissions({
       id: idFromArgs,
       collectionConfig,
       data: doc,
       globalConfig,
-      req: reqForPermissions,
+      req,
     }),
 
-    // Fetch document lock state - isolated transactionID prevents cross-contamination
+    // Fetch document lock state
     getIsLocked({
       id: idFromArgs,
       collectionConfig,
       globalConfig,
       isEditing,
-      req: reqForLockCheck,
+      req,
     }),
 
     // get entity preferences
