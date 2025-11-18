@@ -30,6 +30,7 @@ import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { filterDataToSelectedLocales } from '../../../utilities/filterDataToSelectedLocales.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
+import { populateLocalizedMeta } from '../../../utilities/populateLocalizedMeta.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -222,6 +223,27 @@ export const updateDocument = async <
           req,
         })) || data
     }
+  }
+
+  // /////////////////////////////////////
+  // Handle localizedMeta
+  // /////////////////////////////////////
+
+  if (
+    config.experimental?.localizeMeta &&
+    config.localization &&
+    config.localization.locales.length > 0
+  ) {
+    docWithLocales._localizedMeta = populateLocalizedMeta({
+      config,
+      locale,
+      previousMeta: docWithLocales._localizedMeta,
+      publishSpecificLocale,
+      status: data._status,
+    })
+
+    data._localizedMeta = docWithLocales._localizedMeta[locale]
+    originalDoc._localizedMeta = docWithLocales._localizedMeta[locale]
   }
 
   // /////////////////////////////////////

@@ -3580,8 +3580,9 @@ describe('Localization', () => {
             locale: 'all',
             draft: false,
           })
-          expect(mainDoc._localizedMeta.en.status).toEqual('published')
-          expect(mainDoc._localizedMeta.es.status).toEqual('published')
+
+          expect(mainDoc?._localizedMeta?.en?.status).toEqual('published')
+          expect(mainDoc?._localizedMeta?.es?.status).toEqual('published')
         })
 
         it('should publish specific locale', async () => {
@@ -3601,8 +3602,9 @@ describe('Localization', () => {
             locale: 'all',
             draft: false,
           })
-          expect(mainDoc._localizedMeta.es.status).toEqual('draft')
-          expect(mainDoc._localizedMeta.en.status).toEqual('draft')
+
+          expect(mainDoc?._localizedMeta?.es.status).toEqual('draft')
+          expect(mainDoc?._localizedMeta?.en.status).toEqual('draft')
 
           const versionDoc = await payload.findByID({
             id: draft.id,
@@ -3628,8 +3630,10 @@ describe('Localization', () => {
             id: draft.id,
             collection: allFieldsLocalizedSlug,
             locale: 'all',
-            draft: false,
+            draft: true,
           })
+
+          console.log(updatedMainDoc)
           expect(updatedMainDoc._localizedMeta.en.status).toEqual('published')
           expect(updatedMainDoc._localizedMeta.es.status).toEqual('draft')
 

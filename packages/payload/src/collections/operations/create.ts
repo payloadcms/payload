@@ -31,6 +31,7 @@ import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { populateLocalizedMeta } from '../../utilities/populateLocalizedMeta.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildAfterOperation } from './utils.js'
@@ -138,6 +139,24 @@ export const createOperation = async <
 
       duplicatedFromDoc = duplicateResult.duplicatedFromDoc
       duplicatedFromDocWithLocales = duplicateResult.duplicatedFromDocWithLocales
+    }
+
+    if (
+      config.experimental?.localizeMeta &&
+      config.localization &&
+      config.localization.locales.length > 0 &&
+      locale
+    ) {
+      duplicatedFromDocWithLocales._localizedMeta = populateLocalizedMeta({
+        config,
+        locale,
+        previousMeta: duplicatedFromDocWithLocales._localizedMeta,
+        publishSpecificLocale,
+        status: data._status,
+      })
+
+      data._localizedMeta = duplicatedFromDocWithLocales._localizedMeta[locale]
+      duplicatedFromDoc._localizedMeta = duplicatedFromDocWithLocales._localizedMeta[locale]
     }
 
     // /////////////////////////////////////
