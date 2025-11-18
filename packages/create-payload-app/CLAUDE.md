@@ -18,14 +18,13 @@ create-payload-app uses AST (Abstract Syntax Tree) parsing with ts-morph to modi
 
 ```txt
 src/lib/ast/
-├── types.ts              # Shared types for AST operations
-├── utils.ts              # Low-level AST helpers
-├── payload-config.ts     # Payload config transformations
-├── package-json.ts       # package.json modifications
-└── __tests__/           # Unit tests
-    ├── utils.spec.ts
-    ├── payload-config.spec.ts
-    └── package-json.spec.ts
+├── types.ts                    # Shared types for AST operations
+├── utils.ts                    # Low-level AST helpers
+├── utils.spec.ts              # Unit tests for utils
+├── payload-config.ts          # Payload config transformations
+├── payload-config.spec.ts    # Unit tests for payload-config
+├── package-json.ts            # package.json modifications
+└── package-json.spec.ts      # Unit tests for package-json
 ```
 
 ### Key Functions

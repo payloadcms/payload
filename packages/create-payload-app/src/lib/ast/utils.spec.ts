@@ -4,7 +4,7 @@ import {
   findImportDeclaration,
   formatError,
   removeImportDeclaration,
-} from '../utils'
+} from './utils'
 
 describe('findImportDeclaration', () => {
   it('finds import by module specifier', () => {

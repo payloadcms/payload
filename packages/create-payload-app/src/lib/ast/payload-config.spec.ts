@@ -6,7 +6,7 @@ import {
   removeSharp,
   validateStructure,
   writeTransformedFile,
-} from '../payload-config'
+} from './payload-config'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
@@ -434,7 +434,7 @@ export default buildConfig({
 })`,
     )
 
-    const { configurePayloadConfig } = await import('../payload-config')
+    const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
       storage: 'vercelBlobStorage',
@@ -459,7 +459,7 @@ export default buildConfig({
 })`,
     )
 
-    const { configurePayloadConfig } = await import('../payload-config')
+    const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'mongodb', envVarName: 'MONGO_URL' },
     })
@@ -486,7 +486,7 @@ export default buildConfig({
 })`,
     )
 
-    const { configurePayloadConfig } = await import('../payload-config')
+    const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       removeSharp: true,
     })
@@ -505,7 +505,7 @@ export default buildConfig({
       `export default {}`, // Invalid structure
     )
 
-    const { configurePayloadConfig } = await import('../payload-config')
+    const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
     })
@@ -517,7 +517,7 @@ export default buildConfig({
   it('handles file not found error', async () => {
     const filePath = path.join(tempDir, 'nonexistent.ts')
 
-    const { configurePayloadConfig } = await import('../payload-config')
+    const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
     })

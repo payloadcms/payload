@@ -2,9 +2,9 @@ import * as fs from 'fs'
 import * as fse from 'fs-extra'
 import * as path from 'path'
 import * as os from 'os'
-import { configurePayloadConfig } from '../lib/configure-payload-config'
-import type { DbType, StorageAdapterType } from '../types'
-import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from '../lib/ast/adapter-config'
+import { configurePayloadConfig } from './lib/configure-payload-config'
+import type { DbType, StorageAdapterType } from './types'
+import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './lib/ast/adapter-config'
 
 interface TestCase {
   name: string
@@ -54,7 +54,7 @@ const TEST_CASES: TestCase[] = [
 
 describe('AST Integration Tests', () => {
   let tempDir: string
-  const templatesRoot = path.resolve(__dirname, '../../../..', 'templates')
+  const templatesRoot = path.resolve(__dirname, '../../..', 'templates')
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'payload-ast-integration-'))
