@@ -95,7 +95,7 @@ export const DuplicateDocument: React.FC<Props> = ({
             addQueryPrefix: true,
           })}`,
           {
-            body: JSON.stringify({}),
+            body: JSON.stringify(collectionConfig.versions?.drafts ? { _status: 'draft' } : {}),
             headers,
           },
         )

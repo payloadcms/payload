@@ -76,14 +76,6 @@ export default buildConfigWithDefaults({
             create: true,
           },
           description: 'This is a Payload collection with Post documents.',
-          override: (original: Record<string, unknown>, req) => {
-            const updatedOriginal = {
-              ...original,
-              title: `Title Override: ${original?.title as string}`,
-            }
-            req.payload.logger.info('[Override MCP call for Posts]:')
-            return updatedOriginal
-          },
           overrideResponse: (response, doc, req) => {
             req.payload.logger.info('[Override MCP response for Posts]:')
             response.content.push({

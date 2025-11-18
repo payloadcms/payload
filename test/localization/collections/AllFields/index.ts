@@ -4,6 +4,9 @@ import { allFieldsLocalizedSlug } from '../../shared.js'
 
 export const AllFieldsLocalized: CollectionConfig = {
   slug: allFieldsLocalizedSlug,
+  admin: {
+    useAsTitle: 'text',
+  },
   fields: [
     // Simple localized fields
     {
@@ -230,6 +233,13 @@ export const AllFieldsLocalized: CollectionConfig = {
         },
       ],
       localized: true,
+    },
+
+    // relation to self
+    {
+      name: 'selfRelation',
+      type: 'relationship',
+      relationTo: allFieldsLocalizedSlug,
     },
   ],
   versions: {
