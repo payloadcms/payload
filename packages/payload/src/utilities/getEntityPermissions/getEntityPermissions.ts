@@ -179,7 +179,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
   const resolvedData = await data
 
-  await populateFieldPermissions({
+  populateFieldPermissions({
     blockReferencesPermissions,
     data: resolvedData,
     fields: entity.fields,
