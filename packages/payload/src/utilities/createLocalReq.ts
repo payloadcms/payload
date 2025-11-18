@@ -99,11 +99,6 @@ export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },
   payload,
 ): Promise<PayloadRequest> => {
-  // CRITICAL: Create a shallow copy of req to prevent mutations from propagating
-  // to the original req object (which may be cached or shared across operations)
-  // This preserves any intentional transactionID while preventing mutation leakage
-  req = { ...req }
-
   const localization = payload.config?.localization
 
   if (localization) {
