@@ -1133,12 +1133,12 @@ export const getPayload = async (
     return cached.payload
   }
 
-  if (!cached.promise) {
-    // no need to await options.config here, as it's already awaited in the BasePayload.init
-    cached.promise = new BasePayload().init(options)
-  }
-
   try {
+    if (!cached.promise) {
+      // no need to await options.config here, as it's already awaited in the BasePayload.init
+      cached.promise = new BasePayload().init(options)
+    }
+
     cached.payload = await cached.promise
 
     if (
