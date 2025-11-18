@@ -17,6 +17,32 @@ const isThenable = (value: unknown): value is Promise<unknown> =>
   value != null && typeof (value as { then?: unknown }).then === 'function'
 
 /**
+ * Helper to set a permission value that might be a promise.
+ * If it's a promise, creates a chained promise that resolves to update the target,
+ * stores the promise temporarily, and adds it to the promises array for later resolution.
+ */
+const setPermission = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  target: any,
+  operation: AllOperations,
+  value: boolean | Promise<boolean> | undefined,
+  promises: Promise<void>[],
+): void => {
+  if (isThenable(value)) {
+    const permissionPromise = value.then((result) => {
+      target[operation] = { permission: result }
+    })
+
+    // Store promise temporarily, so that children can access the permission before it is resolved.
+    // It will be overwritten when promise resolves
+    target[operation] = { permission: permissionPromise as unknown as boolean }
+    promises.push(permissionPromise)
+  } else {
+    target[operation] = { permission: value }
+  }
+}
+
+/**
  * Build up permissions object and run access functions for each field of an entity
  * This function is synchronous and collects all async work into the promises array
  */
@@ -72,46 +98,17 @@ export const populateFieldPermissions = ({
             // rows, as we're calculating schema permissions, which do not include individual rows.
             // For consistency, it's thus better to never include the siblingData and blockData
           })
+
+          // Handle both sync and async access results
           if (isThenable(accessResult)) {
-            // Store the promise and add to collection for later resolution
-            const permissionPromise = accessResult.then((result) => {
-              fieldPermissions[operation] = {
-                permission: Boolean(result),
-              }
-            })
-
-            // Store promise directly so children can chain onto it
-            fieldPermissions[operation] = {
-              permission: permissionPromise as unknown as boolean,
-            }
-
-            promises.push(permissionPromise)
+            const booleanPromise = accessResult.then((result) => Boolean(result))
+            setPermission(fieldPermissions, operation, booleanPromise, promises)
           } else {
-            fieldPermissions[operation] = {
-              permission: Boolean(accessResult),
-            }
+            setPermission(fieldPermissions, operation, Boolean(accessResult), promises)
           }
         } else {
-          // Parent permission might be a promise - if so, chain onto it
-          if (isThenable(parentPermissionForOperation)) {
-            const permissionPromise = (parentPermissionForOperation as Promise<boolean>).then(
-              (result) => {
-                fieldPermissions[operation] = {
-                  permission: result,
-                }
-              },
-            )
-
-            fieldPermissions[operation] = {
-              permission: permissionPromise as unknown as boolean,
-            }
-
-            promises.push(permissionPromise)
-          } else {
-            fieldPermissions[operation] = {
-              permission: parentPermissionForOperation,
-            }
-          }
+          // Inherit from parent (which might be a promise)
+          setPermission(fieldPermissions, operation, parentPermissionForOperation, promises)
         }
       }
     }
@@ -188,24 +185,8 @@ export const populateFieldPermissions = ({
               const fieldPermission =
                 fieldPermissions[operation]?.permission ?? parentPermissionForOperation
 
-              // If parent permission is a promise, chain onto it
-              if (isThenable(fieldPermission)) {
-                const permissionPromise = (fieldPermission as Promise<boolean>).then((result) => {
-                  blockPermission[operation] = {
-                    permission: result,
-                  }
-                })
-
-                blockPermission[operation] = {
-                  permission: permissionPromise as unknown as boolean,
-                }
-
-                promises.push(permissionPromise)
-              } else {
-                blockPermission[operation] = {
-                  permission: fieldPermission,
-                }
-              }
+              // Inherit from field permission (which might be a promise)
+              setPermission(blockPermission, operation, fieldPermission, promises)
             }
           }
         }
@@ -285,44 +266,13 @@ export const populateFieldPermissions = ({
         for (const tab of field.tabs) {
           if (tabHasName(tab)) {
             if (!permissionsObject[tab.name]) {
-              // Parent permission might be a promise - if so, set up chaining
-              if (isThenable(parentPermissionForOperation)) {
-                const tabPermissions: FieldPermissions = {
-                  fields: {},
-                  [operation]: { permission: parentPermissionForOperation as unknown as boolean },
-                } as FieldPermissions
+              permissionsObject[tab.name] = { fields: {} } as FieldPermissions
+            }
 
-                const permissionPromise = (parentPermissionForOperation as Promise<boolean>).then(
-                  (result) => {
-                    tabPermissions[operation] = { permission: result }
-                  },
-                )
-
-                promises.push(permissionPromise)
-                permissionsObject[tab.name] = tabPermissions
-              } else {
-                permissionsObject[tab.name] = {
-                  fields: {},
-                  [operation]: { permission: parentPermissionForOperation },
-                } as FieldPermissions
-              }
-            } else if (!permissionsObject[tab.name]![operation]) {
-              // Parent permission might be a promise - if so, set up chaining
-              if (isThenable(parentPermissionForOperation)) {
-                const tabPermissions = permissionsObject[tab.name]!
-                const permissionPromise = (parentPermissionForOperation as Promise<boolean>).then(
-                  (result) => {
-                    tabPermissions[operation] = { permission: result }
-                  },
-                )
-
-                tabPermissions[operation] = { permission: permissionPromise as unknown as boolean }
-                promises.push(permissionPromise)
-              } else {
-                permissionsObject[tab.name]![operation] = {
-                  permission: parentPermissionForOperation,
-                }
-              }
+            const tabPermissions = permissionsObject[tab.name]!
+            if (!tabPermissions[operation]) {
+              // Inherit from parent (which might be a promise)
+              setPermission(tabPermissions, operation, parentPermissionForOperation, promises)
             }
           }
         }
