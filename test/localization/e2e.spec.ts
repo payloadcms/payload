@@ -2,7 +2,6 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { englishLocale } from 'globals/config.js'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
@@ -440,7 +439,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'English')
-      await runCopy({ page, toLocale: englishLocale })
+      await runCopy({ page, toLocale: defaultLocale })
 
       await expect(arrayField).toHaveValue(sampleText)
     })
