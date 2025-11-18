@@ -195,7 +195,14 @@ export const sanitizeCollection = async (
         sanitized.versions.drafts.validate = false
       }
 
-      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
+      sanitized.fields = mergeBaseFields(
+        sanitized.fields,
+        baseVersionFields({
+          localizeMetadata: config.localization
+            ? config.localization?.localizeMetadata || false
+            : false,
+        }),
+      )
     }
   }
 

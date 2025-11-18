@@ -30,9 +30,9 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   req,
   select,
 }: Arguments<T>): Promise<T> => {
-  const { locale } = req
+  const { locale, payload } = req
 
-  const queryToBuild: Where = {
+  let queryToBuild: Where = {
     and: [
       {
         'version._status': {
@@ -40,6 +40,32 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
         },
       },
     ],
+  }
+
+  if (payload.config.localization && payload.config.localization.localizeMetadata) {
+    if (locale === 'all') {
+      queryToBuild = {
+        and: [
+          {
+            or: payload.config.localization.localeCodes.map((localeCode) => ({
+              [`version._status.${localeCode}`]: {
+                equals: 'draft',
+              },
+            })),
+          },
+        ],
+      }
+    } else if (locale) {
+      queryToBuild = {
+        and: [
+          {
+            [`version._status.${locale}`]: {
+              equals: 'draft',
+            },
+          },
+        ],
+      }
+    }
   }
 
   if (entityType === 'collection') {

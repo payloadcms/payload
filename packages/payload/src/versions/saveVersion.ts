@@ -47,7 +47,13 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   } & TData = deepCopyObjectSimple(docWithLocales)
 
   if (draft) {
-    versionData._status = 'draft'
+    if (payload.config.localization && payload.config.localization.localizeMetadata) {
+      if (req?.locale && payload.config.localization.localeCodes.includes(req.locale)) {
+        versionData._status[req.locale] = 'draft'
+      }
+    } else {
+      versionData._status = 'draft'
+    }
   }
 
   if (collection?.timestamps && draft) {

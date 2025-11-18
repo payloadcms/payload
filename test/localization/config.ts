@@ -430,6 +430,9 @@ export default buildConfigWithDefaults({
       slug: 'global-text',
     },
   ],
+  experimental: {
+    localizeMetadata: true,
+  },
   localization: {
     filterAvailableLocales: ({ locales }) => {
       return locales.filter((locale) => locale.code !== 'xx')

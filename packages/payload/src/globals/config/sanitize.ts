@@ -122,7 +122,14 @@ export const sanitizeGlobal = async (
         global.versions.drafts.validate = false
       }
 
-      global.fields = mergeBaseFields(global.fields, baseVersionFields)
+      global.fields = mergeBaseFields(
+        global.fields,
+        baseVersionFields({
+          localizeMetadata: config.localization
+            ? config.localization.localizeMetadata || false
+            : false,
+        }),
+      )
     }
   }
 

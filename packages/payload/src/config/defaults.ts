@@ -147,6 +147,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
   } as JobsConfig
   config.localization = config.localization ?? false
+
+  if (config.localization && config.experimental?.localizeMetadata) {
+    config.localization.localizeMetadata = config.localization.localizeMetadata ?? true
+  }
+
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
     admin: '/admin',
