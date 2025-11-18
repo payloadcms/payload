@@ -27,6 +27,12 @@ export const createVersion: CreateVersion = async function createVersion(
     versions: true,
   })
 
+  const options = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
+
   const data = {
     autosave,
     createdAt,
@@ -49,12 +55,6 @@ export const createVersion: CreateVersion = async function createVersion(
     fields,
     operation: 'write',
   })
-
-  const options = {
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
-  }
 
   let [doc] = await Model.create([data], options, req)
 

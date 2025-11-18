@@ -18,15 +18,6 @@ export const findGlobal: FindGlobal = async function findGlobal(
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
 
   const fields = globalConfig.flattenedFields
-
-  const query = await buildQuery({
-    adapter: this,
-    fields,
-    globalSlug,
-    locale,
-    where: combineQueries({ globalType: { equals: globalSlug } }, where),
-  })
-
   const options: QueryOptions = {
     lean: true,
     select: buildProjectionFromSelect({
@@ -36,6 +27,14 @@ export const findGlobal: FindGlobal = async function findGlobal(
     }),
     session: await getSession(this, req),
   }
+
+  const query = await buildQuery({
+    adapter: this,
+    fields,
+    globalSlug,
+    locale,
+    where: combineQueries({ globalType: { equals: globalSlug } }, where),
+  })
 
   const doc: any = await Model.findOne(query, {}, options)
 

@@ -25,6 +25,7 @@ export const updateMany: UpdateMany = async function updateMany(
     where: whereToUse,
   },
 ) {
+  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
@@ -38,8 +39,6 @@ export const updateMany: UpdateMany = async function updateMany(
     tableName,
     where: whereToUse,
   })
-
-  const db = await getTransaction(this, req)
 
   let idsToUpdate: (number | string)[] = []
 

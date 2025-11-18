@@ -15,6 +15,8 @@ export const count: Count = async function count(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
+  const db = await getTransaction(this, req)
+
   const { joins, where } = buildQuery({
     adapter: this,
     fields: collectionConfig.flattenedFields,
@@ -22,8 +24,6 @@ export const count: Count = async function count(
     tableName,
     where: whereArg,
   })
-
-  const db = await getTransaction(this, req)
 
   const countResult = await this.countDistinct({
     db,
