@@ -16,8 +16,6 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     collectionSlug: args.collection,
   })
 
-  const session = await getSession(this, args.req)
-
   const { where = {} } = args
 
   let sortAggregation: PipelineStage[] = []
@@ -201,6 +199,8 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       },
     },
   ]
+
+  const session = await getSession(this, args.req)
 
   const getValues = async () => {
     return Model.aggregate(pipeline, { session }).then((res) =>
