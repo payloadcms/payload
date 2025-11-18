@@ -439,6 +439,11 @@ export interface AllFieldsLocalized {
     localizedInNonLocalizedTab?: string | null;
   };
   unnamedTabLocalizedText?: string | null;
+  t1?: {
+    t2?: {
+      text?: string | null;
+    };
+  };
   g1?: {
     g2?: {
       g2a1?:
@@ -1231,6 +1236,15 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
         localizedInNonLocalizedTab?: T;
       };
   unnamedTabLocalizedText?: T;
+  t1?:
+    | T
+    | {
+        t2?:
+          | T
+          | {
+              text?: T;
+            };
+      };
   g1?:
     | T
     | {
@@ -1744,6 +1758,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
