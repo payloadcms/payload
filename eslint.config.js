@@ -25,6 +25,7 @@ export const defaultESLintIgnores = [
   'src/**/*.spec.ts',
   '**/jest.setup.js',
   'packages/payload/rollup.dts.config.mjs',
+  'storybook-static/',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -58,6 +59,7 @@ export const rootEslintConfig = [
       'payload/no-imports-from-exports-dir': 'error',
       'payload/no-imports-from-self': 'error',
       'payload/proper-payload-logger-usage': 'error',
+      'import-x/no-cycle': ['error', { maxDepth: 3, ignoreExternal: true }],
     },
   },
   {
@@ -92,6 +94,23 @@ export default [
     files: ['templates/vercel-postgres/**'],
     rules: {
       'no-restricted-exports': 'off',
+    },
+  },
+  {
+    files: ['stories/**/*.{ts,tsx}', '.storybook/**/*.{ts,tsx}'],
+    rules: {
+      'payload/no-relative-monorepo-imports': 'off',
+      'payload/no-imports-from-exports-dir': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-restricted-exports': 'off', // Allow default exports in Storybook
+      'no-console': 'off', // Allow console.log in stories for interactivity
+      'react-hooks/rules-of-hooks': 'off', // Allow hooks in story render functions
+      'jsx-a11y/accessible-emoji': 'off', // Allow emojis in stories without accessibility wrapping
+      'jsx-a11y/label-has-associated-control': 'off',
+      'jsx-a11y/control-has-associated-label': 'off',
+      '@eslint-react/dom/no-missing-button-type': 'off',
     },
   },
 ]

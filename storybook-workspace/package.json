@@ -1,0 +1,21 @@
+{
+  "name": "@payloadcms/storybook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@payloadcms/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.0.2",
+    "@storybook/addon-docs": "^10.0.2",
+    "@storybook/nextjs-vite": "^10.0.2",
+    "@storybook/react": "^10.0.2",
+    "storybook": "^10.0.2",
+    "vite": "^5.0.0"
+  }
+}
