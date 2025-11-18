@@ -4,36 +4,21 @@ import type { MongooseAdapter } from '../index.js'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(
   this: MongooseAdapter,
-  incomingID,
+  id,
 ) {
-  let transactionID: number | string
-
-  if (incomingID instanceof Promise) {
-    transactionID = await incomingID
-  } else {
-    transactionID = incomingID
-  }
-
-  if (!this.sessions[transactionID]) {
+  if (id instanceof Promise) {
     return
   }
 
-  if (!this.sessions[transactionID]?.inTransaction()) {
-    // Clean up the orphaned session reference
-    delete this.sessions[transactionID]
+  if (!this.sessions[id]?.inTransaction()) {
     return
   }
 
-  const session = this.sessions[transactionID]!
-
-  // Delete from registry FIRST to prevent race conditions
-  // This ensures other operations can't retrieve this session while we're ending it
-  delete this.sessions[transactionID]
-
-  await session.commitTransaction()
+  await this.sessions[id].commitTransaction()
   try {
-    await session.endSession()
+    await this.sessions[id].endSession()
   } catch (_) {
     // ending sessions is only best effort and won't impact anything if it fails since the transaction was committed
   }
+  delete this.sessions[id]
 }
