@@ -1,9 +1,10 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { withReplicas } from 'drizzle-orm/pg-core'
 import pg from 'pg'
 
 import type { VercelPostgresAdapter } from './types.js'
@@ -15,13 +16,6 @@ export const connect: Connect = async function connect(
   },
 ) {
   const { hotReload } = options
-
-  this.schema = {
-    pgSchema: this.pgSchema,
-    ...this.tables,
-    ...this.relations,
-    ...this.enums,
-  }
 
   try {
     const logger = this.logger || false
@@ -53,6 +47,19 @@ export const connect: Connect = async function connect(
       schema: this.schema,
     })
 
+    if (this.readReplicaOptions) {
+      const readReplicas = this.readReplicaOptions.map((connectionString) => {
+        const options = {
+          ...this.poolOptions,
+          connectionString,
+        }
+        const pool = new VercelPool(options)
+        return drizzle({ client: pool, logger, schema: this.schema })
+      })
+      const myReplicas = withReplicas(this.drizzle, readReplicas as any)
+      this.drizzle = myReplicas
+    }
+
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
@@ -60,7 +67,8 @@ export const connect: Connect = async function connect(
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
-  } catch (err) {
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error))
     if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
       // capitalize first char of the err msg
       this.payload.logger.info(
@@ -69,7 +77,7 @@ export const connect: Connect = async function connect(
       const isCreated = await this.createDatabase()
 
       if (isCreated) {
-        await this.connect(options)
+        await this.connect?.(options)
         return
       }
     } else {
@@ -82,7 +90,7 @@ export const connect: Connect = async function connect(
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
-    process.exit(1)
+    throw new Error(`Error: cannot connect to Postgres: ${err.message}`)
   }
 
   await this.createExtensions()
@@ -101,6 +109,6 @@ export const connect: Connect = async function connect(
   }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as Migration[] })
   }
 }

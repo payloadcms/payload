@@ -1,22 +1,43 @@
 import type { CollectionConfig, Config, Field, SelectField } from 'payload'
 
+import { deepMergeSimple } from 'payload/shared'
+
 import type { RedirectsPluginConfig } from './types.js'
 
 import { redirectOptions } from './redirectTypes.js'
+import { translations } from './translations/index.js'
 
 export { redirectOptions, redirectTypes } from './redirectTypes.js'
+export { translations as redirectsTranslations } from './translations/index.js'
 export const redirectsPlugin =
   (pluginConfig: RedirectsPluginConfig) =>
   (incomingConfig: Config): Config => {
+    // Merge translations FIRST (before building fields)
+    if (!incomingConfig.i18n) {
+      incomingConfig.i18n = {}
+    }
+
+    if (!incomingConfig.i18n?.translations) {
+      incomingConfig.i18n.translations = {}
+    }
+
+    incomingConfig.i18n.translations = deepMergeSimple(
+      translations,
+      incomingConfig.i18n?.translations,
+    )
+
     const redirectSelectField: SelectField = {
       name: 'type',
       type: 'select',
-      label: 'Redirect Type',
+      // @ts-expect-error - translations are not typed in plugins yet
+      label: ({ t }) => t('plugin-redirects:redirectType'),
       options: redirectOptions.filter((option) =>
         pluginConfig?.redirectTypes?.includes(option.value),
       ),
       required: true,
-      ...((pluginConfig?.redirectTypeFieldOverride || {}) as SelectField),
+      ...((pluginConfig?.redirectTypeFieldOverride || {}) as {
+        hasMany: boolean
+      } & Partial<SelectField>),
     }
 
     const defaultFields: Field[] = [
@@ -24,8 +45,10 @@ export const redirectsPlugin =
         name: 'from',
         type: 'text',
         index: true,
-        label: 'From URL',
+        // @ts-expect-error - translations are not typed in plugins yet
+        label: ({ t }) => t('plugin-redirects:fromUrl'),
         required: true,
+        unique: true,
       },
       {
         name: 'to',
@@ -38,14 +61,17 @@ export const redirectsPlugin =
               layout: 'horizontal',
             },
             defaultValue: 'reference',
-            label: 'To URL Type',
+            // @ts-expect-error - translations are not typed in plugins yet
+            label: ({ t }) => t('plugin-redirects:toUrlType'),
             options: [
               {
-                label: 'Internal link',
+                // @ts-expect-error - translations are not typed in plugins yet
+                label: ({ t }) => t('plugin-redirects:internalLink'),
                 value: 'reference',
               },
               {
-                label: 'Custom URL',
+                // @ts-expect-error - translations are not typed in plugins yet
+                label: ({ t }) => t('plugin-redirects:customUrl'),
                 value: 'custom',
               },
             ],
@@ -56,7 +82,8 @@ export const redirectsPlugin =
             admin: {
               condition: (_, siblingData) => siblingData?.type === 'reference',
             },
-            label: 'Document to redirect to',
+            // @ts-expect-error - translations are not typed in plugins yet
+            label: ({ t }) => t('plugin-redirects:documentToRedirect'),
             relationTo: pluginConfig?.collections || [],
             required: true,
           },
@@ -66,7 +93,8 @@ export const redirectsPlugin =
             admin: {
               condition: (_, siblingData) => siblingData?.type === 'custom',
             },
-            label: 'Custom URL',
+            // @ts-expect-error - translations are not typed in plugins yet
+            label: ({ t }) => t('plugin-redirects:customUrl'),
             required: true,
           },
         ],

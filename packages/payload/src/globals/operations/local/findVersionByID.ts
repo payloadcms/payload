@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -32,14 +32,14 @@ export type Options<TSlug extends GlobalSlug> = {
   /**
    * The ID of the version to find.
    */
-  id: string
+  id: number | string
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -71,8 +71,7 @@ export type Options<TSlug extends GlobalSlug> = {
   user?: Document
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
+export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {
@@ -100,7 +99,7 @@ export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
     globalConfig,
     overrideAccess,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   })

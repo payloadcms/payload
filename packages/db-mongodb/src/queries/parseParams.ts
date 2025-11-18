@@ -55,9 +55,9 @@ export async function parseParams({
         // So we need to loop on keys again here to handle each operator independently
         const pathOperators = where[relationOrPath]
         if (typeof pathOperators === 'object') {
-          const validOperators = Object.keys(pathOperators).filter((operator) =>
+          const validOperators: Operator[] = Object.keys(pathOperators).filter((operator) =>
             validOperatorSet.has(operator as Operator),
-          )
+          ) as Operator[]
 
           for (const operator of validOperators) {
             const searchParam = await buildSearchParam({
@@ -81,7 +81,19 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 })
               } else {
-                result[searchParam.path] = searchParam.value
+                if (result[searchParam.path]) {
+                  if (!result.$and) {
+                    result.$and = []
+                  }
+
+                  result.$and.push({ [searchParam.path]: result[searchParam.path] })
+                  result.$and.push({
+                    [searchParam.path]: searchParam.value,
+                  })
+                  delete result[searchParam.path]
+                } else {
+                  result[searchParam.path] = searchParam.value
+                }
               }
             } else if (typeof searchParam?.value === 'object') {
               result = deepMergeWithCombinedArrays(result, searchParam.value ?? {}, {

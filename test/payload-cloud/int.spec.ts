@@ -10,18 +10,16 @@ let payload: Payload
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('@payloadcms/plugin-cloud', () => {
+describe('@payloadcms/payload--cloud', () => {
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('tests', () => {
-    it.todo('plugin-cloud tests')
+    it.todo('payload-cloud tests')
   })
 })

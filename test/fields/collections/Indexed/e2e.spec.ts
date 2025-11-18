@@ -100,6 +100,7 @@ describe('Radio', () => {
     await assertToastErrors({
       page,
       errors: ['uniqueText'],
+      dismissAfterAssertion: true,
     })
 
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
@@ -113,7 +114,9 @@ describe('Radio', () => {
     // nested in a group error
     await page.locator('#field-group__unique').fill(uniqueText)
 
-    await wait(1000)
+    // TODO: used because otherwise the toast locator resolves to 2 items
+    // at the same time. Instead we should uniquely identify each toast.
+    await wait(2000)
 
     // attempt to save
     await page.locator('#action-save').click()

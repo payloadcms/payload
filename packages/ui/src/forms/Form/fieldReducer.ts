@@ -3,14 +3,14 @@ import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObjectSimple, deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
+import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
@@ -27,9 +27,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        blockType: blockType || undefined,
-        collapsed: false,
         isLoading: true,
+      }
+
+      if (blockType) {
+        newRow.blockType = blockType
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
@@ -53,14 +55,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [`${path}.${rowIndex}.id`]: {
           initialValue: newRow.id,
           passesCondition: true,
-          requiresRender: true,
           valid: true,
           value: newRow.id,
         },
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -131,36 +131,75 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    /**
+     * Duplicates a row in an array or blocks field.
+     * It needs to manipulate two distinct parts of the form state:
+     *   - The `rows` property of the parent field, e.g. `array.rows`, `blocks.rows`, etc.
+     *   - The row's state, e.g. `array.0.id`, `array.0.text`, etc.
+     */
     case 'DUPLICATE_ROW': {
       const { path, rowIndex } = action
       const { remainingFields, rows } = separateRows(path, state)
-      const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
-      if (duplicateRowMetadata.id) {
-        duplicateRowMetadata.id = new ObjectId().toHexString()
+      // 1. Duplicate the `rows` property of the parent field, e.g. `array.rows`, `blocks.rows`, etc.
+      const newRows = [...(state[path].rows || [])]
+
+      const newRow = deepCopyObjectSimpleWithoutReactComponents(newRows[rowIndex])
+
+      const newRowID = new ObjectId().toHexString()
+
+      if (newRow.id) {
+        newRow.id = newRowID
       }
 
-      const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
-      if (duplicateRowState.id) {
-        duplicateRowState.id.value = new ObjectId().toHexString()
-        duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      if (newRows[rowIndex]?.customComponents?.RowLabel) {
+        newRow.customComponents = {
+          RowLabel: newRows[rowIndex].customComponents.RowLabel,
+        }
       }
 
-      for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
-        const idState = duplicateRowState[key]
+      // 2. Duplicate the row's state, e.g. `array.0.id`, `array.0.text`, etc.
+      const newRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
+
+      // Ensure that `id` in form state exactly matches the row id on the parent field
+      if (newRowState.id) {
+        newRowState.id.value = newRowID
+        newRowState.id.initialValue = newRowID
+      }
+
+      // Generate new ids for all nested id fields, e.g. `array.0.nestedArray.0.id`
+      for (const key of Object.keys(newRowState).filter((key) => key.endsWith('.id'))) {
+        const idState = newRowState[key]
+
+        const newNestedFieldID = new ObjectId().toHexString()
 
         if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
-          duplicateRowState[key].value = new ObjectId().toHexString()
-          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+          newRowState[key].value = newNestedFieldID
+          newRowState[key].initialValue = newNestedFieldID
+
+          // Apply the ID to its corresponding parent field's rows, e.g. `array.0.nestedArray.rows[0].id`
+          const segments = key.split('.')
+          const rowIndex = parseInt(segments[segments.length - 2], 10)
+          const parentFieldPath = segments.slice(0, segments.length - 2).join('.')
+          const parentFieldRows = newRowState?.[parentFieldPath]?.rows
+
+          if (newRowState[parentFieldPath] && Array.isArray(parentFieldRows)) {
+            if (!parentFieldRows[rowIndex]) {
+              parentFieldRows[rowIndex] = {
+                id: newNestedFieldID,
+              }
+            } else {
+              parentFieldRows[rowIndex].id = newNestedFieldID
+            }
+          }
         }
       }
 
       // If there are subfields
-      if (Object.keys(duplicateRowState).length > 0) {
+      if (Object.keys(newRowState).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
-        rows.splice(rowIndex + 1, 0, duplicateRowState)
-        rowsMetadata.splice(rowIndex + 1, 0, duplicateRowMetadata)
+        rows.splice(rowIndex + 1, 0, newRowState)
+        newRows.splice(rowIndex + 1, 0, newRow)
       }
 
       const newState = {
@@ -169,11 +208,24 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
-          rows: rowsMetadata,
+          rows: newRows,
           value: rows.length,
         },
       }
+
+      return newState
+    }
+
+    case 'MERGE_SERVER_STATE': {
+      const { acceptValues, prevStateRef, serverState } = action
+
+      const newState = mergeServerFormState({
+        acceptValues,
+        currentState: state || {},
+        incomingState: serverState,
+      })
+
+      prevStateRef.current = newState
 
       return newState
     }
@@ -198,32 +250,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, topLevelRows),
         [path]: {
           ...state[path],
-          requiresRender: true,
           rows: rowsWithinField,
         },
-      }
-
-      // Do the same for custom components, i.e. `array.customComponents.RowLabels[0]` -> `array.customComponents.RowLabels[1]`
-      // Do this _after_ initializing `newState` to avoid adding the `customComponents` key to the state if it doesn't exist
-      if (newState[path]?.customComponents?.RowLabels) {
-        const customComponents = {
-          ...newState[path].customComponents,
-          RowLabels: [...newState[path].customComponents.RowLabels],
-        }
-
-        // Ensure the array grows if necessary
-        if (moveToIndex >= customComponents.RowLabels.length) {
-          customComponents.RowLabels.length = moveToIndex + 1
-        }
-
-        const copyOfMovingLabel = customComponents.RowLabels[moveFromIndex]
-
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        customComponents.RowLabels.splice(moveFromIndex, 1)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        customComponents.RowLabels.splice(moveToIndex, 0, copyOfMovingLabel)
-
-        newState[path].customComponents = customComponents
       }
 
       return newState
@@ -250,7 +278,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: rows.length > 0,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -327,7 +354,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return newState
       }
 
-      //TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
+      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
       if (action.sanitize) {
         for (const field of Object.values(action.state)) {
           if (field.valid !== false) {
@@ -385,17 +412,27 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             return {
               ...field,
               [key]: value,
+              ...(key === 'value' ? { isModified: true } : {}),
             }
           }
 
           return field
         },
-        state[action.path] || ({} as FormField),
+        state?.[action.path] || ({} as FormField),
       )
 
       const newState = {
         ...state,
         [action.path]: newField,
+      }
+
+      // reset `isModified` in all other fields
+      if ('value' in action) {
+        for (const [path, field] of Object.entries(newState)) {
+          if (path !== action.path && 'isModified' in field) {
+            delete newState[path].isModified
+          }
+        }
       }
 
       return newState

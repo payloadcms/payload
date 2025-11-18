@@ -3,7 +3,15 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+/.idea/runConfigurations/_template*
 !/.idea/payload.iml
+
+# Local AI Agent files
+AGENTS.local.md
+CLAUDE.local.md
+.claude/commands/*.local.md
+.claude/artifacts
+.worktrees/
 
 # Custom actions
 !.github/actions/**/dist
@@ -21,7 +29,15 @@ meta_server.json
 meta_index.json
 meta_shared.json
 
+packages/payload/esbuild
+packages/ui/esbuild
+packages/next/esbuild
+packages/richtext-lexical/esbuild
+
+audit_output.json
+
 .turbo
+.wrangler
 
 # Ignore test directory media folder/files
 /media
@@ -314,6 +330,8 @@ test/admin-root/app/(payload)/admin/importMap.js
 /test/admin-root/app/(payload)/admin/importMap.js
 test/app/(payload)/admin/importMap.js
 /test/app/(payload)/admin/importMap.js
+test/plugin-ecommerce/app/(payload)/admin/importMap.js
+/test/plugin-ecommerce/app/(payload)/admin/importMap.js
 test/pnpm-lock.yaml
 test/databaseAdapter.js
 /filename-compound-index
@@ -323,3 +341,8 @@ test/databaseAdapter.js
 test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
+/media-without-delete-access
+/media-documents
+
+
+licenses.csv

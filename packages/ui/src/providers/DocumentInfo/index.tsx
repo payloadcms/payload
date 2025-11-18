@@ -1,27 +1,20 @@
 'use client'
-import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
+import type { ClientUser, DocumentPreferences } from 'payload'
 
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
-
+import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
+import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
+import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
 
 const Context = createContext({} as DocumentInfoContext)
@@ -53,12 +46,11 @@ const DocumentInfo: React.FC<
     versionCount: versionCountFromProps,
   } = props
 
-  const [docPermissions, setDocPermissions] =
-    useState<SanitizedDocumentPermissions>(docPermissionsFromProps)
+  const [docPermissions, setDocPermissions] = useControllableState(docPermissionsFromProps)
 
-  const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
+  const [hasSavePermission, setHasSavePermission] = useControllableState(hasSavePermissionFromProps)
 
-  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
+  const [hasPublishPermission, setHasPublishPermission] = useControllableState(
     hasPublishPermissionFromProps,
   )
 
@@ -83,7 +75,11 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const [documentTitle, setDocumentTitle] = useState(() =>
+  /**
+   * @deprecated This state will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   */
+  const [title, setDocumentTitle] = useState(() =>
     formatDocTitle({
       collectionConfig,
       data: { ...(initialData || {}), id },
@@ -101,19 +97,42 @@ const DocumentInfo: React.FC<
   const [versionCount, setVersionCount] = useState(versionCountFromProps)
 
   const [hasPublishedDoc, setHasPublishedDoc] = useState(hasPublishedDocFromProps)
+
   const [unpublishedVersionCount, setUnpublishedVersionCount] = useState(
     unpublishedVersionCountFromProps,
   )
 
-  const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(isLockedFromProps)
-  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
-  const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
-  const [savedDocumentData, setSavedDocumentData] = useState(initialData)
-  const [uploadStatus, setUploadStatus] = useState<'failed' | 'idle' | 'uploading'>('idle')
+  const [documentIsLocked, setDocumentIsLocked] = useControllableState<boolean | undefined>(
+    isLockedFromProps,
+  )
 
-  const updateUploadStatus = useCallback((status: 'failed' | 'idle' | 'uploading') => {
-    setUploadStatus(status)
-  }, [])
+  const [currentEditor, setCurrentEditor] = useControllableState<ClientUser | null>(
+    currentEditorFromProps,
+  )
+  const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
+
+  const [data, setData] = useControllableState(initialData)
+
+  const [uploadStatus, setUploadStatus] = useControllableState<'failed' | 'idle' | 'uploading'>(
+    'idle',
+  )
+
+  const documentLockState = useRef<{
+    hasShownLockedModal: boolean
+    isLocked: boolean
+    user: ClientUser | number | string
+  } | null>({
+    hasShownLockedModal: false,
+    isLocked: false,
+    user: null,
+  })
+
+  const updateUploadStatus = useCallback(
+    (status: 'failed' | 'idle' | 'uploading') => {
+      setUploadStatus(status)
+    },
+    [setUploadStatus],
+  )
 
   const { getPreference, setPreference } = usePreferences()
   const { code: locale } = useLocale()
@@ -149,17 +168,24 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
-
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
+          credentials: 'include',
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
+        })
 
         const { docs } = await request.json()
 
-        if (docs.length > 0) {
+        if (docs?.length > 0) {
           const lockID = docs[0].id
           await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -171,7 +197,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [serverURL, api, globalSlug],
+    [serverURL, api, globalSlug, setDocumentIsLocked],
   )
 
   const updateDocumentEditor = useCallback(
@@ -179,16 +205,22 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
-
         // Check if the document is already locked
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
+          credentials: 'include',
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
+        })
 
         const { docs } = await request.json()
 
-        if (docs.length > 0) {
+        if (docs?.length > 0) {
           const lockID = docs[0].id
 
           const userData =
@@ -201,6 +233,7 @@ const DocumentInfo: React.FC<
             body: JSON.stringify({
               user: userData,
             }),
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -273,25 +306,22 @@ const DocumentInfo: React.FC<
     }
   }, [collectionConfig, globalConfig, versionCount])
 
-  const updateSavedDocumentData = React.useCallback<DocumentInfoContext['updateSavedDocumentData']>(
-    (json) => {
-      setSavedDocumentData(json)
-    },
-    [],
-  )
-
+  /**
+   * @todo: Remove this in v4
+   * Users should use the `DocumentTitleContext` instead.
+   */
   useEffect(() => {
     setDocumentTitle(
       formatDocTitle({
         collectionConfig,
-        data: { ...savedDocumentData, id },
+        data: { ...data, id },
         dateFormat,
         fallback: id?.toString(),
         globalConfig,
         i18n,
       }),
     )
-  }, [collectionConfig, globalConfig, savedDocumentData, dateFormat, i18n, id])
+  }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
 
   // clean on unmount
   useEffect(() => {
@@ -326,9 +356,11 @@ const DocumentInfo: React.FC<
     ...props,
     action,
     currentEditor,
+    data,
     docConfig,
     docPermissions,
     documentIsLocked,
+    documentLockState,
     getDocPermissions,
     getDocPreferences,
     hasPublishedDoc,
@@ -341,8 +373,9 @@ const DocumentInfo: React.FC<
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     preferencesKey,
-    savedDocumentData,
+    savedDocumentData: data,
     setCurrentEditor,
+    setData,
     setDocFieldPreferences,
     setDocumentIsLocked,
     setDocumentTitle,
@@ -351,16 +384,20 @@ const DocumentInfo: React.FC<
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title: documentTitle,
+    title,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
-    updateSavedDocumentData,
+    updateSavedDocumentData: setData,
     uploadStatus,
     versionCount,
   }
 
-  return <Context value={value}>{children}</Context>
+  return (
+    <Context value={value}>
+      <DocumentTitleProvider>{children}</DocumentTitleProvider>
+    </Context>
+  )
 }
 
 export const DocumentInfoProvider: React.FC<

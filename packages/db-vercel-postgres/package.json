@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "3.28.1",
+  "version": "3.64.0",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -25,9 +26,9 @@
       "default": "./src/index.ts"
     },
     "./types": {
-      "import": "./src/types.ts",
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts",
+      "default": "./src/exports/types-deprecated.ts"
     },
     "./migration-utils": {
       "import": "./src/exports/migration-utils.ts",
@@ -56,7 +57,7 @@
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
@@ -77,19 +78,19 @@
     "@payloadcms/drizzle": "workspace:*",
     "@vercel/postgres": "^0.9.0",
     "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.28.0",
-    "drizzle-orm": "0.36.1",
-    "pg": "8.11.3",
+    "drizzle-kit": "0.31.5",
+    "drizzle-orm": "0.44.6",
+    "pg": "8.16.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.24.2",
+    "esbuild": "0.25.5",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -103,9 +104,9 @@
         "default": "./dist/index.js"
       },
       "./types": {
-        "import": "./dist/types.js",
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "import": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts",
+        "default": "./dist/exports/types-deprecated.js"
       },
       "./migration-utils": {
         "import": "./dist/exports/migration-utils.js",

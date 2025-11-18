@@ -3,6 +3,7 @@ import * as os from 'node:os'
 import path from 'path'
 import { type Payload } from 'payload'
 
+import { isErrorWithCode } from './isErrorWithCode.js'
 import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
@@ -35,7 +36,11 @@ export async function seedDB({
   /**
    * Reset database
    */
-  await resetDB(_payload, collectionSlugs)
+  try {
+    await resetDB(_payload, collectionSlugs)
+  } catch (error) {
+    console.error('Error in operation (resetting database):', error)
+  }
   /**
    * Delete uploads directory if it exists
    */
@@ -43,15 +48,18 @@ export async function seedDB({
     const uploadsDirs = Array.isArray(uploadsDir) ? uploadsDir : [uploadsDir]
     for (const dir of uploadsDirs) {
       try {
-        // Attempt to clear the uploads directory if it exists
         await fs.promises.access(dir)
         const files = await fs.promises.readdir(dir)
         for (const file of files) {
-          await fs.promises.rm(path.join(dir, file))
+          const filePath = path.join(dir, file)
+          await fs.promises.rm(filePath, { recursive: true, force: true })
         }
       } catch (error) {
-        if (error.code !== 'ENOENT') {
-          // If the error is not because the directory doesn't exist
+        if (isErrorWithCode(error, 'ENOENT')) {
+          // Directory does not exist - that's okay, skip it
+          continue
+        } else {
+          // Some other error occurred - rethrow it
           console.error('Error in operation (deleting uploads dir):', dir, error)
           throw error
         }
@@ -117,18 +125,26 @@ export async function seedDB({
    *  Postgres: No need for any action here, since we only delete the table data and no schemas
    */
   // Dropping the db breaks indexes (on mongoose - did not test extensively on postgres yet), so we recreate them here
-  if (isMongoose(_payload)) {
-    await Promise.all([
-      ...collectionSlugs.map(async (collectionSlug) => {
-        await _payload.db.collections[collectionSlug].createIndexes()
-      }),
-    ])
-
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await _payload.db?.collections[coll.slug]?.ensureIndexes()
-      }),
-    )
+  try {
+    if (isMongoose(_payload)) {
+      await Promise.all([
+        ...collectionSlugs
+          .filter(
+            (collectionSlug) =>
+              ['payload-migrations', 'payload-preferences', 'payload-locked-documents'].indexOf(
+                collectionSlug,
+              ) === -1,
+          )
+          .map(async (collectionSlug) => {
+            await _payload.db.collections[collectionSlug]?.createIndexes({
+              // Blocks writes (doesn't matter here) but faster
+              background: false,
+            })
+          }),
+      ])
+    }
+  } catch (e) {
+    console.error('Error in operation (re-creating indexes):', e)
   }
 
   /**
@@ -162,7 +178,7 @@ export async function seedDB({
         let newObj: {
           cacheDir: string
           originalDir: string
-        } = null
+        } | null = null
         if (!uploadsDirCache[snapshotKey].find((cache) => cache.originalDir === dir)) {
           // Define new cache folder path to the OS temp directory (well a random folder inside it)
           newObj = {

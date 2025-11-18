@@ -15,6 +15,7 @@
       display: flex;
       align-items: stretch;
       height: 100%;
+      cursor: pointer;
     }
 
     &__content {
@@ -42,6 +43,8 @@
       width: calc(100% + var(--scrollbar-width));
       padding-top: var(--popup-padding);
       padding-bottom: var(--popup-padding);
+      max-height: calc(var(--base) * 10);
+      overflow-y: auto;
     }
 
     &__scroll-content {
@@ -63,6 +66,13 @@
     ////////////////////////////////
     // SIZE
     ////////////////////////////////
+
+    &--size-xsmall {
+      --popup-width: 80px;
+      .popup__content {
+        @include shadow-sm;
+      }
+    }
 
     &--size-small {
       --popup-width: 100px;
@@ -88,6 +98,10 @@
     ////////////////////////////////
     /// BUTTON SIZE
     ////////////////////////////////
+
+    &--button-size-xsmall {
+      --button-size-offset: -12px;
+    }
 
     &--button-size-small {
       --button-size-offset: -8px;

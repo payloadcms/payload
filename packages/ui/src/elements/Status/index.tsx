@@ -23,18 +23,22 @@ export const Status: React.FC = () => {
     globalSlug,
     hasPublishedDoc,
     incrementVersionCount,
+    isTrashed,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
+
   const { toggleModal } = useModal()
+
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
+
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -51,6 +55,12 @@ export const Status: React.FC = () => {
   } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
     statusToRender = 'published'
   }
+
+  const displayStatusKey = isTrashed
+    ? hasPublishedDoc
+      ? 'previouslyPublished'
+      : 'previouslyDraft'
+    : statusToRender
 
   const performAction = useCallback(
     async (action: 'revert' | 'unpublish') => {
@@ -117,7 +127,19 @@ export const Status: React.FC = () => {
           setUnpublishedVersionCount(0)
         }
       } else {
-        toast.error(t('error:unPublishingDocument'))
+        try {
+          const json = await res.json()
+          if (json.errors?.[0]?.message) {
+            toast.error(json.errors[0].message)
+          } else if (json.error) {
+            toast.error(json.error)
+          } else {
+            toast.error(t('error:unPublishingDocument'))
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+          toast.error(t('error:unPublishingDocument'))
+        }
       }
     },
     [
@@ -143,17 +165,18 @@ export const Status: React.FC = () => {
     return (
       <div
         className={baseClass}
-        title={`${t('version:status')}: ${t(`version:${statusToRender}`)}`}
+        title={`${t('version:status')}: ${t(`version:${displayStatusKey}`)}`}
       >
         <div className={`${baseClass}__value-wrap`}>
           <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
-          <span className={`${baseClass}__value`}>{t(`version:${statusToRender}`)}</span>
-          {canUpdate && statusToRender === 'published' && (
+          <span className={`${baseClass}__value`}>{t(`version:${displayStatusKey}`)}</span>
+          {!isTrashed && canUpdate && statusToRender === 'published' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
                 buttonStyle="none"
                 className={`${baseClass}__action`}
+                id={`action-unpublish`}
                 onClick={() => toggleModal(unPublishModalSlug)}
               >
                 {t('version:unpublish')}
@@ -167,26 +190,29 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {canUpdate && statusToRender === 'changed' && (
-            <React.Fragment>
-              &nbsp;&mdash;&nbsp;
-              <Button
-                buttonStyle="none"
-                className={`${baseClass}__action`}
-                id="action-revert-to-published"
-                onClick={() => toggleModal(revertModalSlug)}
-              >
-                {t('version:revertToPublished')}
-              </Button>
-              <ConfirmationModal
-                body={t('version:aboutToRevertToPublished')}
-                confirmingLabel={t('version:reverting')}
-                heading={t('version:confirmRevertToSaved')}
-                modalSlug={revertModalSlug}
-                onConfirm={() => performAction('revert')}
-              />
-            </React.Fragment>
-          )}
+          {!isTrashed &&
+            canUpdate &&
+            hasPublishedDoc &&
+            statusToRender === 'changed' && (
+              <React.Fragment>
+                &nbsp;&mdash;&nbsp;
+                <Button
+                  buttonStyle="none"
+                  className={`${baseClass}__action`}
+                  id="action-revert-to-published"
+                  onClick={() => toggleModal(revertModalSlug)}
+                >
+                  {t('version:revertToPublished')}
+                </Button>
+                <ConfirmationModal
+                  body={t('version:aboutToRevertToPublished')}
+                  confirmingLabel={t('version:reverting')}
+                  heading={t('version:confirmRevertToSaved')}
+                  modalSlug={revertModalSlug}
+                  onConfirm={() => performAction('revert')}
+                />
+              </React.Fragment>
+            )}
         </div>
       </div>
     )

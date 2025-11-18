@@ -2,13 +2,14 @@
 
 import type { JsonObject } from 'payload'
 
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
+import './index.scss'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
-import './index.scss'
 
 const baseClass = 'upload upload--has-one'
 
@@ -23,10 +24,20 @@ type Props = {
   readonly readonly?: boolean
   readonly reloadDoc: ReloadDoc
   readonly serverURL: string
+  readonly showCollectionSlug?: boolean
 }
 
 export function UploadComponentHasOne(props: Props) {
-  const { className, displayPreview, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
+  const {
+    className,
+    displayPreview,
+    fileDoc,
+    onRemove,
+    readonly,
+    reloadDoc,
+    serverURL,
+    showCollectionSlug = false,
+  } = props
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
@@ -49,6 +60,15 @@ export function UploadComponentHasOne(props: Props) {
     }
   }
 
+  if (isImage(value.mimeType)) {
+    thumbnailSrc = getBestFitFromSizes({
+      sizes: value.sizes,
+      thumbnailURL: thumbnailSrc,
+      url: src,
+      width: value.width,
+    })
+  }
+
   return (
     <UploadCard className={[baseClass, className].filter(Boolean).join(' ')}>
       <RelationshipContent
@@ -63,8 +83,9 @@ export function UploadComponentHasOne(props: Props) {
         mimeType={value?.mimeType as string}
         onRemove={onRemove}
         reloadDoc={reloadDoc}
+        showCollectionSlug={showCollectionSlug}
         src={src}
-        thumbnailSrc={thumbnailSrc || src}
+        thumbnailSrc={thumbnailSrc}
         x={value?.width as number}
         y={value?.height as number}
       />

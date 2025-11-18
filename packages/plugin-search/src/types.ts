@@ -1,6 +1,6 @@
 import type {
   CollectionAfterChangeHook,
-  CollectionAfterDeleteHook,
+  CollectionBeforeDeleteHook,
   CollectionConfig,
   Field,
   Locale,
@@ -84,7 +84,7 @@ export type SanitizedSearchPluginConfig = {
 
 export type SyncWithSearchArgs = {
   collection: string
-  pluginConfig: SearchPluginConfig
+  pluginConfig: SanitizedSearchPluginConfig
 } & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>
 
 export type SyncDocArgs = {
@@ -96,8 +96,4 @@ export type SyncDocArgs = {
 // Convert the `collection` arg from `SanitizedCollectionConfig` to a string
 export type SyncWithSearch = (Args: SyncWithSearchArgs) => ReturnType<CollectionAfterChangeHook>
 
-export type DeleteFromSearch = (
-  Args: {
-    pluginConfig: SearchPluginConfig
-  } & Parameters<CollectionAfterDeleteHook>[0],
-) => ReturnType<CollectionAfterDeleteHook>
+export type DeleteFromSearch = (args: SearchPluginConfig) => CollectionBeforeDeleteHook

@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-Document Views consist of multiple, individual views that together represent any single [Collection](../configuration/collections) or [Global](../configuration/globals) Document. All Document Views and are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, respectively.
+Document Views consist of multiple, individual views that together represent any single [Collection](../configuration/collections) or [Global](../configuration/globals) Document. All Document Views are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, respectively.
 
 There are a number of default Document Views, such as the [Edit View](./edit-view) and API View, but you can also create [entirely new views](./custom-views#adding-new-views) as needed. All Document Views share a layout and can be given their own tab-based navigation, if desired.
 
@@ -30,7 +30,6 @@ export const MyCollectionOrGlobalConfig: CollectionConfig = {
           // - api
           // - versions
           // - version
-          // - livePreview
           // - [key: string]
           // See below for more details
         },
@@ -45,21 +44,21 @@ export const MyCollectionOrGlobalConfig: CollectionConfig = {
 
 The following options are available:
 
-| Property          | Description                                                                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set. [More details](#document-root). |
-| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](./edit-view).                                                    |
+| Property      | Description                                                                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set. [More details](#document-root).      |
+| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](./edit-view).                       |
 | `versions`    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
 | `version`     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
 | `api`         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
 | `livePreview` | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview/overview).     |
-| `[key]`       | Any other key can be used to add a completely new Document View.                                                                |
+| `[key]`       | Any other key can be used to add a completely new Document View.                                                                                                |
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
 ### Document Root
 
-The Document Root is mounted on the top-level route for a Document. Setting this property will completely take over the entire Document View layout, including the title, [Document Tabs](#ocument-tabs), _and all other nested Document Views_ including the [Edit View](./edit-view), API View, etc.
+The Document Root is mounted on the top-level route for a Document. Setting this property will completely take over the entire Document View layout, including the title, [Document Tabs](#document-tabs), _and all other nested Document Views_ including the [Edit View](./edit-view), API View, etc.
 
 When setting a Document Root, you are responsible for rendering all necessary components and controls, as no document controls or tabs would be rendered. To replace only the Edit View precisely, use the `edit.default` key instead.
 
@@ -88,7 +87,7 @@ export const MyCollection: CollectionConfig = {
 
 ### Edit View
 
-The Edit View is where users interact with individual Collection and Global Documents. This is where they can view, edit, and save their content. the Edit View is keyed under the `default` property in the `views.edit` object.
+The Edit View is where users interact with individual Collection and Global Documents. This is where they can view, edit, and save their content. The Edit View is keyed under the `default` property in the `views.edit` object.
 
 For more information on customizing the Edit View, see the [Edit View](./edit-view) documentation.
 
@@ -107,23 +106,24 @@ export const MyCollection: CollectionConfig = {
     components: {
       views: {
         edit: {
-          myCustomTab: {
-            Component: '/path/to/MyCustomTab',
+          myCustomView: {
+            Component: '/path/to/MyCustomView',
             path: '/my-custom-tab',
             // highlight-start
             tab: {
-              Component: '/path/to/MyCustomTabComponent'
-            }
+              Component: '/path/to/MyCustomTabComponent',
+            },
             // highlight-end
           },
-          anotherCustomTab: {
+          anotherCustomView: {
             Component: '/path/to/AnotherCustomView',
             path: '/another-custom-view',
             // highlight-start
             tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
-            }
+              order: '100',
+            },
             // highlight-end
           },
         },
@@ -134,16 +134,16 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
- **Note:**
- This applies to _both_ Collections _and_ Globals.
+  **Note:** This applies to _both_ Collections _and_ Globals.
 </Banner>
 
 The following options are available for tabs:
 
-| Property    | Description                                                                                           |
-| ----------- | ----------------------------------------------------------------------------------------------------- |
-| `label`     | The label to display in the tab.                                                                      |
-| `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.    |
+| Property    | Description                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `label`     | The label to display in the tab.                                                                              |
+| `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.            |
+| `order`     | The order in which the tab appears in the navigation. Can be set on default and custom tabs.                  |
 | `Component` | The component to render in the tab. This can be a Server or Client component. [More details](#tab-components) |
 
 ### Tab Components
@@ -161,9 +161,7 @@ import { Link } from '@payloadcms/ui'
 
 export function MyCustomTabComponent(props: DocumentTabServerProps) {
   return (
-    <Link href="/my-custom-tab">
-      This is a custom Document Tab (Server)
-    </Link>
+    <Link href="/my-custom-tab">This is a custom Document Tab (Server)</Link>
   )
 }
 ```
@@ -178,9 +176,7 @@ import { Link } from '@payloadcms/ui'
 
 export function MyCustomTabComponent(props: DocumentTabClientProps) {
   return (
-    <Link href="/my-custom-tab">
-      This is a custom Document Tab (Client)
-    </Link>
+    <Link href="/my-custom-tab">This is a custom Document Tab (Client)</Link>
   )
 }
 ```

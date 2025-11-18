@@ -2,6 +2,8 @@
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
+import type { Preferences } from '../../forms/Form/types.js'
+
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { deepMergeSimple } from '../../utilities/deepMerge.js'
@@ -9,13 +11,13 @@ import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
 type PreferencesContext = {
-  getPreference: <T = any>(key: string) => Promise<T>
+  getPreference: <T = Preferences>(key: string) => Promise<T>
   /**
    * @param key - a string identifier for the property being set
    * @param value - preference data to store
    * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
    */
-  setPreference: <T = any>(key: string, value: T, merge?: boolean) => Promise<void>
+  setPreference: <T = Preferences>(key: string, value: T, merge?: boolean) => Promise<void>
 }
 
 const Context = createContext({} as PreferencesContext)
@@ -49,28 +51,37 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   }, [user])
 
   const getPreference = useCallback(
-    async <T = any,>(key: string): Promise<T> => {
+    async <T = unknown,>(key: string): Promise<T> => {
       const prefs = preferencesRef.current
+
       if (typeof prefs[key] !== 'undefined') {
         return prefs[key]
       }
+
       const promise = new Promise((resolve: (value: T) => void) => {
         void (async () => {
           const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {
+            credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
             },
           })
+
           let value = null
+
           if (request.status === 200) {
             const preference = await request.json()
             value = preference.value
           }
+
           preferencesRef.current[key] = value
+
           resolve(value)
         })()
       })
+
       prefs[key] = promise
+
       return promise
     },
     [i18n.language, api, preferencesRef, serverURL],
@@ -148,7 +159,6 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
   contextRef.current.getPreference = getPreference
   contextRef.current.setPreference = setPreference
-
   return <Context value={contextRef.current}>{children}</Context>
 }
 

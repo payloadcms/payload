@@ -1,12 +1,19 @@
-import type { Config, TaskHandler, User } from 'payload'
+import type { Config, TaskConfig, TypedUser } from 'payload'
 
-import type { CreateExportArgs } from './createExport.js'
+import type { ImportExportPluginConfig } from '../types.js'
+import type { CreateExportArgs, Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
 
-export const getCreateCollectionExportTask = (config: Config): TaskHandler<any, string> => {
-  const inputSchema = getFields(config).concat(
+export const getCreateCollectionExportTask = (
+  config: Config,
+  pluginConfig?: ImportExportPluginConfig,
+): TaskConfig<{
+  input: Export
+  output: object
+}> => {
+  const inputSchema = getFields(config, pluginConfig).concat(
     {
       name: 'user',
       type: 'text',
@@ -22,16 +29,15 @@ export const getCreateCollectionExportTask = (config: Config): TaskHandler<any, 
   )
 
   return {
-    // @ts-expect-error plugin tasks cannot have predefined type slug
     slug: 'createCollectionExport',
     handler: async ({ input, req }: CreateExportArgs) => {
-      let user: undefined | User
+      let user: TypedUser | undefined
 
       if (input.userCollection && input.user) {
         user = (await req.payload.findByID({
           id: input.user,
           collection: input.userCollection,
-        })) as User
+        })) as TypedUser
       }
 
       if (!user) {
@@ -41,15 +47,9 @@ export const getCreateCollectionExportTask = (config: Config): TaskHandler<any, 
       await createExport({ input, req, user })
 
       return {
-        success: true,
+        output: {},
       }
     },
     inputSchema,
-    outputSchema: [
-      {
-        name: 'success',
-        type: 'checkbox',
-      },
-    ],
   }
 }

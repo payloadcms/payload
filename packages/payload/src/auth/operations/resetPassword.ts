@@ -1,14 +1,18 @@
 import { status as httpStatus } from 'http-status'
 
-import type { Collection } from '../../collections/config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
+import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError, Forbidden } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { addSessionToUser } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -28,7 +32,9 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {
+export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
+  args: Arguments,
+): Promise<Result> => {
   const {
     collection: { config: collectionConfig },
     data,
@@ -55,17 +61,36 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
   try {
     const shouldCommit = await initTransaction(req)
 
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection?.config,
+            context: args.req.context,
+            operation: 'resetPassword',
+            req: args.req,
+          })) || args
+      }
+    }
+
     // /////////////////////////////////////
     // Reset Password
     // /////////////////////////////////////
 
-    const user = await payload.db.findOne<any>({
-      collection: collectionConfig.slug,
-      req,
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(collectionConfig.trash),
+      trash: false,
       where: {
         resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
+    })
+
+    const user = await payload.db.findOne<any>({
+      collection: collectionConfig.slug,
+      req,
+      where,
     })
 
     if (!user) {
@@ -107,6 +132,9 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     // Update new password
     // /////////////////////////////////////
 
+    // Ensure updatedAt date is always updated
+    user.updatedAt = new Date().toISOString()
+
     const doc = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
@@ -116,11 +144,24 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
 
     await authenticateLocalStrategy({ doc, password: data.password })
 
-    const fieldsToSign = getFieldsToSign({
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: user.email,
       user,
+    }
+
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user,
     })
+
+    if (sid) {
+      fieldsToSignArgs.sid = sid
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     const { token } = await jwtSign({
       fieldsToSign,
@@ -134,15 +175,33 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       depth,
       overrideAccess,
       req,
+      trash: false,
     })
+
     if (shouldCommit) {
       await commitTransaction(req)
     }
 
-    const result = {
+    if (fullUser) {
+      fullUser.collection = collectionConfig.slug
+      fullUser._strategy = 'local-jwt'
+    }
+
+    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       token,
       user: fullUser,
     }
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: args.collection?.config,
+      operation: 'resetPassword',
+      result,
+    })
 
     return result
   } catch (error: unknown) {

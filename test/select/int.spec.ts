@@ -1,6 +1,8 @@
+import type { Payload } from 'payload'
+
 import { randomUUID } from 'crypto'
 import path from 'path'
-import { deepCopyObject, type Payload } from 'payload'
+import { deepCopyObject } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
@@ -13,9 +15,11 @@ import type {
   Page,
   Point,
   Post,
+  User,
   VersionedPost,
 } from './payload-types.js'
 
+import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
@@ -36,9 +40,7 @@ describe('Select', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Local API - Base', () => {
@@ -1644,6 +1646,41 @@ describe('Select', () => {
       expect(doc.version.createdAt).toBeUndefined()
       expect(doc.version.text).toBe(post.text)
     })
+
+    it('should create versions with complete data when updating with select', async () => {
+      // First, update the post with select to only return the id field
+      const updatedPost = await payload.update({
+        collection: 'versioned-posts',
+        id: postId,
+        data: {
+          text: 'updated text',
+          number: 999,
+        },
+        select: {},
+      })
+
+      // The update operation should only return the selected field
+      expect(updatedPost).toStrictEqual({
+        id: postId,
+      })
+
+      // However, the created version should contain the complete document
+      const versions = await payload.findVersions({
+        collection: 'versioned-posts',
+        where: { parent: { equals: postId } },
+        sort: '-updatedAt',
+        limit: 1,
+      })
+
+      const latestVersion = versions.docs[0]
+      assert(latestVersion)
+
+      // The version should have complete data, not just the selected fields
+      expect(latestVersion.version.text).toBe('updated text')
+      expect(latestVersion.version.number).toBe(999)
+      expect(latestVersion.version.array).toEqual(post.array)
+      expect(latestVersion.version.blocks).toEqual(post.blocks)
+    })
   })
 
   describe('Local API - Globals', () => {
@@ -1972,6 +2009,64 @@ describe('Select', () => {
     })
   })
 
+  describe('REST API - Logged in', () => {
+    let token: string | undefined
+    let loggedInUser: undefined | User
+
+    beforeAll(async () => {
+      const response = await restClient.POST(`/users/login`, {
+        body: JSON.stringify({
+          email: devUser.email,
+          password: devUser.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      token = data.token
+      loggedInUser = data.user
+    })
+
+    it('should return only select fields in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+          select: {
+            name: true,
+          } satisfies Config['collectionsSelect']['users'],
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.name).toBeDefined()
+      expect(data.user.email).not.toBeDefined()
+      expect(data.user.number).not.toBeDefined()
+    })
+
+    it('should return all fields by default in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.email).toBeDefined()
+      expect(data.user.name).toBeDefined()
+      expect(data.user.number).toBeDefined()
+    })
+  })
+
   describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
@@ -2153,7 +2248,7 @@ describe('Select', () => {
     it('graphQL - should retrieve fields against defaultPopulate', async () => {
       const query = `query {
         Pages {
-          docs { 
+          docs {
             id,
             content {
               ... on Introduction {
@@ -2161,7 +2256,7 @@ describe('Select', () => {
                   doc {
                     id,
                     additional,
-                    slug, 
+                    slug,
                   }
                 },
                 richTextLexical(depth: 1)
@@ -2335,6 +2430,104 @@ describe('Select', () => {
         relatedPage: null,
       })
     })
+  })
+
+  it('should force collection select fields with forceSelect', async () => {
+    const { id, text, array, forceSelected } = await payload.create({
+      collection: 'force-select',
+      data: {
+        array: [{ forceSelected: 'text' }],
+        text: 'some-text',
+        forceSelected: 'force-selected',
+      },
+    })
+
+    const response = await payload.findByID({
+      collection: 'force-select',
+      id,
+      select: { text: true },
+    })
+
+    expect(response).toStrictEqual({
+      id,
+      forceSelected,
+      text,
+      array,
+    })
+  })
+
+  it('should force global select fields with forceSelect', async () => {
+    const { forceSelected, id, array, text } = await payload.updateGlobal({
+      slug: 'force-select-global',
+      data: {
+        array: [{ forceSelected: 'text' }],
+        text: 'some-text',
+        forceSelected: 'force-selected',
+      },
+    })
+
+    const response = await payload.findGlobal({
+      slug: 'force-select-global',
+      select: { text: true },
+    })
+
+    expect(response).toStrictEqual({
+      id,
+      forceSelected,
+      text,
+      array,
+    })
+  })
+
+  it('should properly return relationships when using select on block with depth 0', async () => {
+    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const doc = await payload.create({
+      collection: 'relationships-blocks',
+      data: {
+        blocks: [
+          {
+            blockType: 'block',
+            hasMany: [rel_1],
+            hasOne: rel_1,
+          },
+        ],
+      },
+    })
+    const result = await payload.findByID({
+      depth: 0,
+      collection: 'relationships-blocks',
+      id: doc.id,
+      select: { blocks: true },
+    })
+
+    expect(result.blocks[0]?.hasOne).toBe(rel_1.id)
+    expect(result.blocks[0]?.hasMany).toEqual([rel_1.id])
+  })
+
+  it('should populate relationships when using select on block', async () => {
+    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const doc = await payload.create({
+      collection: 'relationships-blocks',
+      data: {
+        blocks: [
+          {
+            blockType: 'block',
+            hasMany: [rel_1],
+            hasOne: rel_1,
+          },
+        ],
+      },
+    })
+
+    const result = await payload.findByID({
+      depth: 1,
+      collection: 'relationships-blocks',
+      id: doc.id,
+      select: { blocks: true },
+    })
+
+    expect(result.blocks[0]?.hasOne.text).toBe('rel-1')
+    expect(result.blocks[0]?.hasMany[0].text).toBe('rel-1')
   })
 })
 

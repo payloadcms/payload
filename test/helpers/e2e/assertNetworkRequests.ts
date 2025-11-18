@@ -18,25 +18,39 @@ import { expect } from '@playwright/test'
  */
 export const assertNetworkRequests = async (
   page: Page,
+  /**
+   * The URL to match in the network requests. The request URL will need to *include* this URL.
+   */
   url: string,
   action: () => Promise<any>,
   {
     beforePoll,
     allowedNumberOfRequests = 1,
     timeout = 5000,
+    minimumNumberOfRequests,
     interval = 1000,
+    requestFilter,
   }: {
     allowedNumberOfRequests?: number
     beforePoll?: () => Promise<any> | void
     interval?: number
+    /**
+     * If set, allows tests to pass if **less** than the allowed number of requests are made,
+     * as long as at least this number of requests are made.
+     */
+    minimumNumberOfRequests?: number
+    /**
+     * If set, only consider requests that match the filter AND the URL.
+     */
+    requestFilter?: (request: Request) => boolean | Promise<boolean>
     timeout?: number
   } = {},
 ): Promise<Array<Request>> => {
   const matchedRequests: Request[] = []
 
   // begin tracking network requests
-  page.on('request', (request) => {
-    if (request.url().includes(url)) {
+  page.on('request', async (request) => {
+    if (request.url().includes(url) && (requestFilter ? await requestFilter(request) : true)) {
       matchedRequests.push(request)
     }
   })
@@ -60,7 +74,12 @@ export const assertNetworkRequests = async (
     await new Promise((resolve) => setTimeout(resolve, interval))
   }
 
-  expect(matchedRequests.length).toBe(allowedNumberOfRequests)
+  if (!minimumNumberOfRequests) {
+    expect(matchedRequests.length).toBe(allowedNumberOfRequests)
+  } else {
+    expect(matchedRequests.length).toBeLessThanOrEqual(allowedNumberOfRequests)
+    expect(matchedRequests.length).toBeGreaterThanOrEqual(minimumNumberOfRequests)
+  }
 
   return matchedRequests
 }

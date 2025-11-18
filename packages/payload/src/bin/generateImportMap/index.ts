@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import fs from 'fs'
+import fs from 'fs/promises'
 import process from 'node:process'
 
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
@@ -38,11 +38,18 @@ export type ImportMap = {
   [path: UserImportPath]: any
 }
 
-export type AddToImportMap = (payloadComponent: PayloadComponent | PayloadComponent[]) => void
+export type AddToImportMap = (payloadComponent?: PayloadComponent | PayloadComponent[]) => void
 
 export async function generateImportMap(
   config: SanitizedConfig,
-  options?: { force?: boolean; log: boolean },
+  options?: {
+    force?: boolean /**
+     * If true, will not throw an error if the import map file path cannot be resolved
+    Instead, it will return silently.
+     */
+    ignoreResolveError?: boolean
+    log: boolean
+  },
 ): Promise<void> {
   const shouldLog = options?.log ?? true
 
@@ -58,11 +65,19 @@ export async function generateImportMap(
 
   const baseDir = config.admin.importMap.baseDir ?? process.cwd()
 
-  const importMapFilePath = resolveImportMapFilePath({
+  const importMapFilePath = await resolveImportMapFilePath({
     adminRoute: config.routes.admin,
     importMapFile: config?.admin?.importMap?.importMapFile,
     rootDir,
   })
+
+  if (importMapFilePath instanceof Error) {
+    if (options?.ignoreResolveError) {
+      return
+    } else {
+      throw importMapFilePath
+    }
+  }
 
   const importMapToBaseDirPath = getImportMapToBaseDirPath({
     baseDir,
@@ -147,7 +162,7 @@ ${mapKeys.join(',\n')}
 
   if (!force) {
     // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-    const currentImportMap = await fs.promises.readFile(importMapFilePath, 'utf-8')
+    const currentImportMap = await fs.readFile(importMapFilePath, 'utf-8')
 
     if (currentImportMap?.trim() === importMapOutputFile?.trim()) {
       if (log) {
@@ -161,5 +176,5 @@ ${mapKeys.join(',\n')}
     console.log('Writing import map to', importMapFilePath)
   }
 
-  await fs.promises.writeFile(importMapFilePath, importMapOutputFile)
+  await fs.writeFile(importMapFilePath, importMapOutputFile)
 }

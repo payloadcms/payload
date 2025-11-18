@@ -1,5 +1,5 @@
 'use client'
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
 import {
   closestCenter,
@@ -18,7 +18,7 @@ import type { Props } from './types.js'
 export { Props }
 
 export const DraggableSortable: React.FC<Props> = (props) => {
-  const { children, className, ids, onDragEnd } = props
+  const { children, className, ids, onDragEnd, onDragStart } = props
 
   const id = useId()
 
@@ -58,11 +58,27 @@ export const DraggableSortable: React.FC<Props> = (props) => {
     [onDragEnd, ids],
   )
 
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const { active } = event
+
+      if (!active) {
+        return
+      }
+
+      if (typeof onDragStart === 'function') {
+        onDragStart({ id: active.id, event })
+      }
+    },
+    [onDragStart],
+  )
+
   return (
     <DndContext
       collisionDetection={closestCenter}
       id={id}
       onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
       sensors={sensors}
     >
       <SortableContext items={ids}>

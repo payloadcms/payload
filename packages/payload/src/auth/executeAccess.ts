@@ -10,25 +10,25 @@ type OperationArgs = {
   isReadingStaticFile?: boolean
   req: PayloadRequest
 }
-const executeAccess = async (
+export const executeAccess = async (
   { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
   access: Access,
 ): Promise<AccessResult> => {
   if (access) {
-    const result = await access({
+    const resolvedConstraint = await access({
       id,
       data,
       isReadingStaticFile,
       req,
     })
 
-    if (!result) {
+    if (!resolvedConstraint) {
       if (!disableErrors) {
         throw new Forbidden(req.t)
       }
     }
 
-    return result
+    return resolvedConstraint
   }
 
   if (req.user) {
@@ -40,5 +40,3 @@ const executeAccess = async (
   }
   return false
 }
-
-export default executeAccess

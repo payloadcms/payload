@@ -20,9 +20,7 @@ describe('graphql', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('graphql', () => {
@@ -103,6 +101,51 @@ describe('graphql', () => {
       const res = data.Post
 
       expect(res.hyphenated_name).toStrictEqual('example-hyphenated-name')
+    })
+
+    it('should not error because of non nullable fields', async () => {
+      await payload.delete({ collection: 'posts', where: {} })
+
+      // this is an array if any errors
+      const res_1 = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `
+query {
+  Posts {
+    docs {
+      title
+    }
+    prevPage
+  }
+}
+        `,
+          }),
+        })
+        .then((res) => res.json())
+      expect(res_1.errors).toBeFalsy()
+
+      await payload.create({
+        collection: 'posts',
+        data: { title: 'any-title' },
+      })
+
+      const res_2 = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `
+query {
+  Posts(limit: 1) {
+    docs {
+      title
+    }
+  }
+}
+        `,
+          }),
+        })
+        .then((res) => res.json())
+      expect(res_2.errors).toBeFalsy()
     })
   })
 })

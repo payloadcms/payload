@@ -17,9 +17,9 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -33,9 +33,11 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -52,7 +54,8 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
+import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -64,6 +67,7 @@ const filename = fileURLToPath(import.meta.url)
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -94,7 +98,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({
@@ -114,6 +120,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -127,6 +134,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators: operatorMap,
+      pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       pool: undefined,
@@ -134,6 +142,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
+      readReplicaOptions: args.readReplicas,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
@@ -170,9 +179,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,
@@ -188,6 +197,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
@@ -199,16 +209,23 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 
   return {
+    name: 'postgres',
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }
 }
 
+export type {
+  Args as PostgresAdapterArgs,
+  GeneratedDatabaseSchema,
+  PostgresAdapter,
+} from './types.js'
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
 export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

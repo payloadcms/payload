@@ -48,5 +48,4 @@ export const EntityVisibilityProvider: React.FC<{
   )
 }
 
-export const useEntityVisibility = (): VisibleEntitiesContextType =>
-  use(EntityVisibilityContext)
+export const useEntityVisibility = (): VisibleEntitiesContextType => use(EntityVisibilityContext)

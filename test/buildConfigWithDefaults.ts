@@ -32,7 +32,7 @@ import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
 import { databaseAdapter } from './databaseAdapter.js'
-import { reInitEndpoint } from './helpers/reInit.js'
+import { reInitEndpoint } from './helpers/reInitEndpoint.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
@@ -131,22 +131,24 @@ export async function buildConfigWithDefaults(
       ],
     }),
     email: testEmailAdapter,
-    endpoints: [localAPIEndpoint, reInitEndpoint],
     secret: 'TEST_SECRET',
     sharp,
     telemetry: false,
     ...testConfig,
+    endpoints: [localAPIEndpoint, reInitEndpoint, ...(testConfig?.endpoints || [])],
     i18n: {
       supportedLanguages: {
         de,
         en,
         es,
+        ...(testConfig?.i18n?.supportedLanguages || {}),
       },
       ...(testConfig?.i18n || {}),
     },
     typescript: {
       declare: {
         ignoreTSError: true,
+        ...(testConfig?.typescript?.declare || {}),
       },
       ...testConfig?.typescript,
     },

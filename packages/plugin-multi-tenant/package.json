@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
-  "version": "3.28.1",
+  "version": "3.64.0",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
@@ -24,6 +24,10 @@
       "email": "info@payloadcms.com",
       "url": "https://payloadcms.com"
     }
+  ],
+  "sideEffects": [
+    "*.scss",
+    "*.css"
   ],
   "type": "module",
   "exports": {
@@ -56,6 +60,16 @@
       "import": "./src/exports/utilities.ts",
       "types": "./src/exports/utilities.ts",
       "default": "./src/exports/utilities.ts"
+    },
+    "./translations/languages/all": {
+      "import": "./src/translations/index.ts",
+      "types": "./src/translations/index.ts",
+      "default": "./src/translations/index.ts"
+    },
+    "./translations/languages/*": {
+      "import": "./src/translations/languages/*.ts",
+      "types": "./src/translations/languages/*.ts",
+      "default": "./src/translations/languages/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -84,7 +98,7 @@
   },
   "peerDependencies": {
     "@payloadcms/ui": "workspace:*",
-    "next": "^15.0.3",
+    "next": "^15.2.3",
     "payload": "workspace:*"
   },
   "publishConfig": {
@@ -118,6 +132,16 @@
         "import": "./dist/exports/utilities.js",
         "types": "./dist/exports/utilities.d.ts",
         "default": "./dist/exports/utilities.js"
+      },
+      "./translations/languages/all": {
+        "import": "./dist/translations/index.js",
+        "types": "./dist/translations/index.d.ts",
+        "default": "./dist/translations/index.js"
+      },
+      "./translations/languages/*": {
+        "import": "./dist/translations/languages/*.js",
+        "types": "./dist/translations/languages/*.d.ts",
+        "default": "./dist/translations/languages/*.js"
       }
     },
     "main": "./dist/index.js",

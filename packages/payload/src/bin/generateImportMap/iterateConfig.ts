@@ -1,6 +1,3 @@
-// @ts-strict-ignore
-
-import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
@@ -60,6 +57,7 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.Nav)
   addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
+  addToImportMap(config.admin?.components?.settingsMenu)
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)
 
@@ -95,8 +93,7 @@ export function iterateConfig({
   }
 
   if (config?.admin?.dependencies) {
-    for (const key in config.admin.dependencies) {
-      const dependency = config.admin.dependencies[key]
+    for (const dependency of Object.values(config.admin.dependencies)) {
       addToImportMap(dependency.path)
     }
   }

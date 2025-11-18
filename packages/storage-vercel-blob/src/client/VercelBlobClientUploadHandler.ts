@@ -30,5 +30,7 @@ export const VercelBlobClientUploadHandler =
       if (addRandomSuffix) {
         updateFilename(result.url.replace(`${baseURL}/`, ''))
       }
+
+      return { prefix }
     },
   })

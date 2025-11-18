@@ -18,15 +18,7 @@ export const stripeREST = async (args: {
   await addDataAndFileToRequest(req)
 
   const requestWithData = req
-
-  const {
-    data: {
-      stripeArgs, // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
-      stripeMethod, // example: 'subscriptions.list',
-    },
-    payload,
-    user,
-  } = requestWithData
+  const { data, payload, user } = requestWithData
 
   const { stripeSecretKey } = pluginConfig
 
@@ -37,8 +29,8 @@ export const stripeREST = async (args: {
     }
 
     responseJSON = await stripeProxy({
-      stripeArgs,
-      stripeMethod,
+      stripeArgs: data?.stripeArgs, // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
+      stripeMethod: data?.stripeMethod, // example: 'subscriptions.list',
       stripeSecretKey,
     })
 

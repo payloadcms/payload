@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "3.28.1",
+  "version": "3.64.0",
   "description": "The official React SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -45,8 +46,8 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
     "payload": "workspace:*"
   },
   "peerDependencies": {

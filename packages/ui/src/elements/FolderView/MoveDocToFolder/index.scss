@@ -1,0 +1,12 @@
+@layer payload-default {
+  .move-doc-to-folder {
+    margin: 0;
+    .btn__icon {
+      color: var(--theme-elevation-300);
+    }
+
+    .btn__label {
+      font-weight: 600;
+    }
+  }
+}

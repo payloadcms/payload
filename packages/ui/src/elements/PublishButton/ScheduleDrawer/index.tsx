@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
 'use client'
 
-import type { Column, Where } from 'payload'
+import type { Column, SchedulePublish, Where } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { endOfToday, isToday, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
@@ -17,6 +18,7 @@ import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { Radio } from '../../../fields/RadioGroup/Radio/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
@@ -27,9 +29,9 @@ import { DatePickerField } from '../../DatePicker/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { Gutter } from '../../Gutter/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
+import './index.scss'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
-import './index.scss'
 import { TimezonePicker } from '../../TimezonePicker/index.js'
 import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 
@@ -37,6 +39,7 @@ const baseClass = 'schedule-publish'
 
 type Props = {
   defaultType?: PublishType
+  schedulePublishConfig?: SchedulePublish
   slug: string
 }
 
@@ -45,7 +48,7 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
+export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePublishConfig }) => {
   const { toggleModal } = useModal()
   const {
     config: {
@@ -58,7 +61,8 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
       serverURL,
     },
   } = useConfig()
-  const { id, collectionSlug, globalSlug, title } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { title } = useDocumentTitle()
   const { i18n, t } = useTranslation()
   const { schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
@@ -135,7 +139,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-HTTP-Method-Override': 'GET',
+          'X-Payload-HTTP-Method-Override': 'GET',
         },
       })
       .then((res) => res.json())
@@ -148,11 +152,23 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         docs,
         i18n,
         localization,
+        supportedTimezones,
         t,
       }),
     )
     setUpcoming(docs)
-  }, [collectionSlug, globalSlug, serverURL, api, dateFormat, id, t, i18n, localization])
+  }, [
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+  ])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -202,7 +218,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         timezone,
       })
 
-      setTimezone(defaultTimezone)
       setDate(undefined)
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
@@ -222,7 +237,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
     id,
     globalSlug,
     timezone,
-    defaultTimezone,
     fetchUpcoming,
   ])
 
@@ -277,6 +291,14 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
     }
   }, [upcoming, fetchUpcoming])
 
+  const minTime = useMemo(() => {
+    if (date && isToday(date)) {
+      return new Date()
+    }
+
+    return startOfDay(new Date())
+  }, [date])
+
   return (
     <Drawer
       className={baseClass}
@@ -317,11 +339,14 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         <FieldLabel label={t('general:time')} path={'time'} required />
         <DatePickerField
           id="time"
+          maxTime={endOfToday()}
           minDate={new Date()}
+          minTime={minTime}
           onChange={(e) => onChangeDate(e)}
           pickerAppearance="dayAndTime"
           readOnly={processing}
-          timeIntervals={5}
+          timeFormat={schedulePublishConfig?.timeFormat}
+          timeIntervals={schedulePublishConfig?.timeIntervals ?? 5}
           value={displayedValue}
         />
         {supportedTimezones.length > 0 && (

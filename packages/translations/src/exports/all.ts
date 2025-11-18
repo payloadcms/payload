@@ -3,6 +3,8 @@ import type { SupportedLanguages } from '../types.js'
 import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
+import { bnBd } from '../languages/bnBd.js'
+import { bnIn } from '../languages/bnIn.js'
 import { ca } from '../languages/ca.js'
 import { cs } from '../languages/cs.js'
 import { da } from '../languages/da.js'
@@ -15,10 +17,14 @@ import { fr } from '../languages/fr.js'
 import { he } from '../languages/he.js'
 import { hr } from '../languages/hr.js'
 import { hu } from '../languages/hu.js'
+import { hy } from '../languages/hy.js'
+import { id } from '../languages/id.js'
+import { is } from '../languages/is.js'
 import { it } from '../languages/it.js'
 import { ja } from '../languages/ja.js'
 import { ko } from '../languages/ko.js'
 import { lt } from '../languages/lt.js'
+import { lv } from '../languages/lv.js'
 import { my } from '../languages/my.js'
 import { nb } from '../languages/nb.js'
 import { nl } from '../languages/nl.js'
@@ -31,6 +37,7 @@ import { ru } from '../languages/ru.js'
 import { sk } from '../languages/sk.js'
 import { sl } from '../languages/sl.js'
 import { sv } from '../languages/sv.js'
+import { ta } from '../languages/ta.js'
 import { th } from '../languages/th.js'
 import { tr } from '../languages/tr.js'
 import { uk } from '../languages/uk.js'
@@ -42,6 +49,8 @@ export const translations = {
   ar,
   az,
   bg,
+  'bn-BD': bnBd,
+  'bn-IN': bnIn,
   ca,
   cs,
   da,
@@ -54,10 +63,15 @@ export const translations = {
   he,
   hr,
   hu,
+  hy,
+
+  id,
+  is,
   it,
   ja,
   ko,
   lt,
+  lv,
   my,
   nb,
   nl,
@@ -70,6 +84,7 @@ export const translations = {
   sk,
   sl,
   sv,
+  ta,
   th,
   tr,
   uk,

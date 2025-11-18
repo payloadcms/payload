@@ -2,6 +2,7 @@ import type {
   FlattenedBlock,
   FlattenedBlocksField,
   FlattenedField,
+  Operator,
   Payload,
   RelationshipField,
 } from 'payload'
@@ -14,7 +15,7 @@ type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   path: string
   payload: Payload
@@ -105,6 +106,7 @@ export const sanitizeQueryValue = ({
   | undefined => {
   let formattedValue = val
   let formattedOperator = operator
+
   if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()
@@ -151,6 +153,8 @@ export const sanitizeQueryValue = ({
           if (!hasCustomID) {
             if (Types.ObjectId.isValid(inVal)) {
               formattedValues.push(new Types.ObjectId(inVal))
+
+              return formattedValues
             }
           }
 
@@ -416,7 +420,7 @@ export const sanitizeQueryValue = ({
       return buildExistsQuery(
         formattedValue,
         path,
-        !['relationship', 'upload'].includes(field.type),
+        !['checkbox', 'relationship', 'upload'].includes(field.type),
       )
     }
   }

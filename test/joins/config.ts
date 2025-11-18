@@ -4,6 +4,8 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
+import { FolderPoly1 } from './collections/FolderPoly1.js'
+import { FolderPoly2 } from './collections/FolderPoly2.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
@@ -222,6 +224,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'multiple-collections-parents',
+      access: { read: () => true },
       fields: [
         {
           type: 'join',
@@ -236,6 +239,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'multiple-collections-1',
+      access: { read: () => true },
       admin: { useAsTitle: 'title' },
       fields: [
         {
@@ -255,6 +259,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'multiple-collections-2',
+      access: { read: () => true },
       admin: { useAsTitle: 'title' },
       fields: [
         {
@@ -272,7 +277,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-
     {
       slug: 'folders',
       fields: [
@@ -334,6 +338,8 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    FolderPoly1,
+    FolderPoly2,
   ],
   localization: {
     locales: [
