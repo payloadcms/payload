@@ -22,14 +22,6 @@ export async function getSession(
   }
 
   if (transactionID) {
-    const session = db.sessions[transactionID]
-
-    // Check if session exists and is still in a transaction
-    // If the session has ended or expired, return undefined to avoid MongoExpiredSessionError
-    if (session && !session.inTransaction()) {
-      return undefined
-    }
-
-    return session
+    return db.sessions[transactionID]
   }
 }
