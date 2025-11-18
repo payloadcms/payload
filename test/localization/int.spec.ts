@@ -3496,6 +3496,11 @@ describe('Localization', () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
+          t1: {
+            t2: {
+              text: 'EN Deep Text',
+            },
+          },
           g1: {
             g2: {
               g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
@@ -3573,9 +3578,16 @@ describe('Localization', () => {
 
       // Verify deeply nested localization has locale keys only at topmost localized field
       expect((allLocalesDoc.g1 as any).en).toBeDefined()
+      expect((allLocalesDoc.g1 as any).g2).toBeUndefined()
       expect((allLocalesDoc.g1 as any).en.g2.g2a1).toHaveLength(2)
       expect((allLocalesDoc.g1 as any).en.g2.g2a1[0].text).toBe('EN Deep 1')
       expect((allLocalesDoc.g1 as any).es).toBeUndefined()
+
+      // Verify deeply nested localization in tab has locale keys only at topmost localized field
+      expect((allLocalesDoc.t1 as any).en).toBeDefined()
+      expect((allLocalesDoc.t1 as any).t2).toBeUndefined()
+      expect((allLocalesDoc.t1 as any).en.t2.text).toBe('EN Deep Text')
+      expect((allLocalesDoc.t1 as any).es).toBeUndefined()
     })
   })
 })
