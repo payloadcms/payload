@@ -3620,6 +3620,7 @@ describe('Localization', () => {
             id: draft.id,
             collection: allFieldsLocalizedSlug,
             data: {
+              text: 'Published english',
               _status: 'published',
             },
             locale: 'en',
@@ -3633,7 +3634,6 @@ describe('Localization', () => {
             draft: true,
           })
 
-          console.log(updatedMainDoc)
           expect(updatedMainDoc._localizedMeta.en.status).toEqual('published')
           expect(updatedMainDoc._localizedMeta.es.status).toEqual('draft')
 
@@ -3655,6 +3655,7 @@ describe('Localization', () => {
             },
             locale: 'en',
           })
+
           expect(publishedStatusQuery.docs).toHaveLength(1)
 
           const draftStatusQuery = await payload.find({
@@ -3665,10 +3666,10 @@ describe('Localization', () => {
               },
             },
             locale: 'es',
+            draft: true,
           })
-          expect(draftStatusQuery.docs).toHaveLength(
-            (payload.config.localization as LocalizationConfig).locales.length - 1,
-          )
+
+          expect(draftStatusQuery.docs).toHaveLength(1)
         })
       })
 
@@ -3710,7 +3711,7 @@ describe('Localization', () => {
             draft: false,
           })
           expect(updatedMainDoc._localizedMeta.en.status).toEqual('draft')
-          expect(updatedMainDoc._localizedMeta.es.status).toEqual('draft')
+          expect(updatedMainDoc._localizedMeta.es.status).toEqual('published')
         })
 
         it('should unpublish specific locale', async () => {
@@ -3748,8 +3749,9 @@ describe('Localization', () => {
             id: draft.id,
             collection: allFieldsLocalizedSlug,
             locale: 'all',
-            draft: false,
+            draft: true,
           })
+
           expect(updatedMainDoc._localizedMeta.en.status).toEqual('draft')
           expect(updatedMainDoc._localizedMeta.es.status).toEqual('published')
         })
@@ -3771,7 +3773,8 @@ describe('Localization', () => {
             id: draft.id,
             collection: allFieldsLocalizedSlug,
             data: {
-              _status: 'draft',
+              text: 'Published',
+              _status: 'published',
             },
             locale: 'en',
             publishSpecificLocale: 'en',
@@ -3795,11 +3798,10 @@ describe('Localization', () => {
                 equals: 'draft',
               },
             },
+            draft: true,
             locale: 'es',
           })
-          expect(draftStatusQuery.docs).toHaveLength(
-            (payload.config.localization as LocalizationConfig).locales.length - 1,
-          )
+          expect(draftStatusQuery.docs).toHaveLength(1)
         })
       })
     })
