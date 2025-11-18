@@ -158,6 +158,76 @@ const email = await payload.sendEmail({
 })
 ```
 
+## Sending email with attachments
+
+**Nodemailer adapter (SMTP/SendGrid/etc.)**
+
+Works with `@payloadcms/email-nodemailer` and any Nodemailer transport.
+
+```ts
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your report',
+  html: '<p>See attached.</p>',
+  attachments: [
+    // From a file path (local disk, mounted volume, etc.)
+    {
+      filename: 'invoice.pdf',
+      path: '/var/data/invoice.pdf',
+      contentType: 'application/pdf',
+    },
+    // From a Buffer you generated at runtime
+    {
+      filename: 'report.csv',
+      content: Buffer.from('col1,col2\nA,B\n'),
+      contentType: 'text/csv',
+    },
+  ],
+})
+```
+
+Anything supported by Nodemailer’s attachments—streams, Buffers, URLs, content IDs for inline images (cid), etc.—will work here.
+
+**Resend adapter**
+
+Works with @payloadcms/email-resend.
+
+For attachments from remote URLs
+
+```ts
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your invoice',
+  html: '<p>Thanks! Invoice attached.</p>',
+  attachments: [
+    {
+      // Resend will fetch this URL
+      path: 'https://example.com/invoices/1234.pdf',
+      filename: 'invoice-1234.pdf',
+    },
+  ],
+})
+```
+
+For a local file
+
+```ts
+import { readFile } from 'node:fs/promises'
+const pdf = await readFile('/var/data/invoice.pdf')
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your invoice',
+  html: '<p>Thanks! Invoice attached.</p>',
+  attachments: [
+    {
+      filename: 'invoice.pdf',
+      // Resend expects Base64 here
+      content: pdf.toString('base64'),
+    },
+  ],
+})
+```
+
 ## Using multiple mail providers
 
 Payload supports the use of a single transporter of email, but there is nothing stopping you from having more. Consider a use case where sending bulk email is handled differently than transactional email and could be done using a [hook](/docs/hooks/overview).
