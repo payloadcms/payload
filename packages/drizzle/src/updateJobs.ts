@@ -23,6 +23,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
   const whereToUse: Where = id ? { id: { equals: id } } : whereArg
   const limit = id ? 1 : limitArg
 
+  const db = await getTransaction(this, req)
   const collection = this.payload.collections['payload-jobs'].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collection.defaultSort
@@ -33,8 +34,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
   })
 
   if (useOptimizedUpsertRow && id) {
-    const db = await getTransaction(this, req)
-
     const result = await upsertRow({
       id,
       adapter: this,
@@ -64,8 +63,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
   if (!jobs.docs.length) {
     return []
   }
-
-  const db = await getTransaction(this, req)
 
   const results = []
 

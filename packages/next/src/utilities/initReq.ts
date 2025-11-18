@@ -140,14 +140,7 @@ export const initReq = async function ({
       // This ensures parallel operations using the same cache key don't affect each other.
       return {
         ...result,
-        req: {
-          ...result.req,
-          ...(result.req?.context
-            ? {
-                context: { ...result.req.context },
-              }
-            : {}),
-        },
+        req: { ...result.req },
       }
     })
 }

@@ -18,6 +18,8 @@ export const countVersions: CountVersions = async function countVersions(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
 
+  const db = await getTransaction(this, req)
+
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
   const { joins, where } = buildQuery({
@@ -27,8 +29,6 @@ export const countVersions: CountVersions = async function countVersions(
     tableName,
     where: whereArg,
   })
-
-  const db = await getTransaction(this, req)
 
   const countResult = await this.countDistinct({
     db,
