@@ -23,6 +23,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { tabSlug } from './collections/Tab/index.js'
 import {
   allFieldsLocalizedSlug,
@@ -3588,6 +3589,32 @@ describe('Localization', () => {
       expect((allLocalesDoc.t1 as any).t2).toBeUndefined()
       expect((allLocalesDoc.t1 as any).en.t2.text).toBe('EN Deep Text')
       expect((allLocalesDoc.t1 as any).es).toBeUndefined()
+    })
+  })
+
+  describe('Localization like fields', () => {
+    it('should not localize fields that merely resemble localization fields', async () => {
+      const doc = await payload.create({
+        collection: noLocalizedFieldsCollectionSlug,
+        data: {
+          text: 'title',
+          group: {
+            en: {
+              text: 'some text',
+            },
+          },
+        },
+      })
+
+      const queriedDoc = await payload.find({
+        collection: noLocalizedFieldsCollectionSlug,
+        where: {
+          'group.en.text': { equals: 'some text' },
+        },
+      })
+
+      expect(queriedDoc.docs).toHaveLength(1)
+      expect(queriedDoc.docs[0]!.id).toBe(doc.id)
     })
   })
 })
