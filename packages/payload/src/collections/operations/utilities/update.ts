@@ -34,6 +34,7 @@ import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -276,7 +277,7 @@ export const updateDocument = async <
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: JsonObject = { ...result }
+  let dataToUpdate: JsonObject = { ...result }
 
   if (shouldSavePassword && typeof password === 'string') {
     const { hash, salt } = await generatePasswordSaltHash({
@@ -297,6 +298,25 @@ export const updateDocument = async <
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
+    if (collectionConfig.versions.localizeMetadata) {
+      const mainDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
+        collection: collectionConfig.slug,
+        req,
+        where: {
+          id: {
+            equals: id,
+          },
+        },
+      })
+
+      dataToUpdate = mergeLocalizedData({
+        configBlockReferences: config.blocks,
+        dataWithLocales: dataToUpdate || {},
+        docWithLocales: mainDoc || {},
+        fields: collectionConfig.fields,
+        selectedLocales: [locale],
+      })
+    }
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
