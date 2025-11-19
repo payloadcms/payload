@@ -288,7 +288,6 @@ describePostgres('Access Control - postgres logs', () => {
 
         expect(permissions).toEqual({
           // TODO: Permissions currently default to true when fetchData is false, this should be changed to false in 4.0.
-          // These are later sanitized to false in the sanitizePermissions function.
           fields: {
             title: { read: { permission: true }, update: { permission: true } },
             readRole: { read: { permission: true }, update: { permission: true } },
