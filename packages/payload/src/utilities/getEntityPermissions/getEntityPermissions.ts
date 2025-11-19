@@ -1,17 +1,21 @@
+import { isDeepStrictEqual } from 'util'
+
 import type {
   BlockPermissions,
   CollectionPermission,
   FieldsPermissions,
   GlobalPermission,
+  Permission,
 } from '../../auth/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
-import type { Access } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { BlockSlug, DefaultDocumentIDType } from '../../index.js'
-import type { AllOperations, JsonObject, PayloadRequest } from '../../types/index.js'
+import type { AllOperations, JsonObject, PayloadRequest, Where } from '../../types/index.js'
 
 import { entityDocExists } from './entityDocExists.js'
 import { populateFieldPermissions } from './populateFieldPermissions.js'
+
+type WhereQueryCache = { result: Promise<boolean>; where: Where }[]
 
 export type BlockReferencesPermissions = Record<
   BlockSlug,
@@ -99,37 +103,35 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   }
 
   const hasData = _data && Object.keys(_data).length > 0
-  const data: JsonObject | Promise<JsonObject> | undefined = (
-    hasData
-      ? _data
-      : fetchData
-        ? (async () => {
-            if (entityType === 'global') {
-              return req.payload.findGlobal({
-                slug: entity.slug,
-                depth: 0,
-                fallbackLocale: null,
-                locale,
-                overrideAccess: true,
-                req,
-              })
-            }
+  const data: JsonObject | undefined = hasData
+    ? _data
+    : fetchData
+      ? await (async () => {
+          if (entityType === 'global') {
+            return req.payload.findGlobal({
+              slug: entity.slug,
+              depth: 0,
+              fallbackLocale: null,
+              locale,
+              overrideAccess: true,
+              req,
+            })
+          }
 
-            if (entityType === 'collection') {
-              return req.payload.findByID({
-                id: id!,
-                collection: entity.slug,
-                depth: 0,
-                fallbackLocale: null,
-                locale,
-                overrideAccess: true,
-                req,
-                trash: true,
-              })
-            }
-          })()
-        : undefined
-  ) as JsonObject | Promise<JsonObject>
+          if (entityType === 'collection') {
+            return req.payload.findByID({
+              id: id!,
+              collection: entity.slug,
+              depth: 0,
+              fallbackLocale: null,
+              locale,
+              overrideAccess: true,
+              req,
+              trash: true,
+            })
+          }
+        })()
+      : undefined
 
   const isLoggedIn = !!user
 
@@ -139,8 +141,13 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     fields: fieldsPermissions,
   } as ReturnType<TEntityType>
 
-  const entityAccessPromises: Promise<void>[] = []
   const promises: Promise<void>[] = []
+
+  // Phase 1: Resolve all access functions to get where queries
+  const accessResults: {
+    operation: keyof typeof entity.access
+    result: Promise<boolean | Where>
+  }[] = []
 
   for (const _operation of operations) {
     const operation = _operation as keyof typeof entity.access
@@ -151,20 +158,10 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       (entityType === 'global' && topLevelGlobalPermissions.includes(operation))
     ) {
       if (typeof accessFunction === 'function') {
-        entityAccessPromises.push(
-          createEntityAccessPromise({
-            id,
-            slug: entity.slug,
-            access: accessFunction,
-            data,
-            entityType,
-            fetchData,
-            locale,
-            operation,
-            permissionsObject: entityPermissions,
-            req,
-          }),
-        )
+        accessResults.push({
+          operation,
+          result: Promise.resolve(accessFunction({ id, data, req })) as Promise<boolean | Where>,
+        })
       } else {
         entityPermissions[operation] = {
           permission: isLoggedIn,
@@ -173,15 +170,44 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     }
   }
 
-  // Await entity-level access promises before processing fields
-  // This ensures parentPermissionForOperation is always defined
-  await Promise.all(entityAccessPromises)
+  // Await all access functions in parallel
+  const resolvedAccessResults = await Promise.all(
+    accessResults.map(async (item) => ({
+      operation: item.operation,
+      result: await item.result,
+    })),
+  )
 
-  const resolvedData = await data
+  // Phase 2: Process where queries with cache and resolve in parallel
+  const whereQueryCache: WhereQueryCache = []
+  const wherePromises: Promise<void>[] = []
+
+  for (const { operation, result: accessResult } of resolvedAccessResults) {
+    if (typeof accessResult === 'object') {
+      processWhereQuery({
+        id,
+        slug: entity.slug,
+        accessResult,
+        entityPermissions,
+        entityType,
+        fetchData,
+        locale,
+        operation,
+        req,
+        wherePromises,
+        whereQueryCache,
+      })
+    } else if (entityPermissions[operation]?.permission !== false) {
+      entityPermissions[operation] = { permission: !!accessResult }
+    }
+  }
+
+  // Await all where query DB calls in parallel
+  await Promise.all(wherePromises)
 
   populateFieldPermissions({
     blockReferencesPermissions,
-    data: resolvedData,
+    data,
     fields: entity.fields,
     operations,
     parentPermissionsObject: entityPermissions,
@@ -211,60 +237,65 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   return entityPermissions
 }
 
-type CreateEntityAccessPromise = (args: {
-  access: Access
-  data: JsonObject | Promise<JsonObject> | undefined
-  disableWhere?: boolean
+const processWhereQuery = ({
+  id,
+  slug,
+  accessResult,
+  entityPermissions,
+  entityType,
+  fetchData,
+  locale,
+  operation,
+  req,
+  wherePromises,
+  whereQueryCache,
+}: {
+  accessResult: Where
+  entityPermissions: CollectionPermission | GlobalPermission
   entityType: 'collection' | 'global'
   fetchData: boolean
   id?: DefaultDocumentIDType
   locale?: string
   operation: Extract<keyof (CollectionPermission | GlobalPermission), AllOperations>
-  permissionsObject: CollectionPermission | GlobalPermission
   req: PayloadRequest
   slug: string
-}) => Promise<void>
+  wherePromises: Promise<void>[]
+  whereQueryCache: WhereQueryCache
+}): void => {
+  if (fetchData) {
+    // Check cache for identical where query using deep comparison
+    let cached = whereQueryCache.find((entry) => isDeepStrictEqual(entry.where, accessResult))
 
-const createEntityAccessPromise: CreateEntityAccessPromise = async ({
-  id,
-  slug,
-  access,
-  data,
-  disableWhere = false,
-  entityType,
-  fetchData,
-  locale,
-  operation,
-  permissionsObject,
-  req,
-}) => {
-  // Await data - if it's a Promise it resolves, if not it returns immediately
-  const resolvedData = await data
-
-  const accessResult = await access({ id, data: resolvedData, req })
-
-  // Where query was returned from access function => check if document is returned when querying with where
-  if (typeof accessResult === 'object' && !disableWhere) {
-    permissionsObject[operation] = {
-      permission: fetchData
-        ? await entityDocExists({
-            id,
-            slug,
-            entityType,
-            locale,
-            operation,
-            req,
-            where: accessResult,
-          })
-        : // TODO: 4.0: Investigate defaulting to `false` here, if where query is returned but ignored as we don't
-          // have the document data available. This seems more secure.
-          // Alternatively, we could set permission to a third state, like 'unknown'.
-          true,
-      where: accessResult,
+    if (!cached) {
+      // Cache miss - start DB query (don't await)
+      cached = {
+        result: entityDocExists({
+          id,
+          slug,
+          entityType,
+          locale,
+          operation,
+          req,
+          where: accessResult,
+        }),
+        where: accessResult,
+      }
+      whereQueryCache.push(cached)
     }
-  } else if (permissionsObject[operation]?.permission !== false) {
-    permissionsObject[operation] = {
-      permission: !!accessResult,
-    }
+
+    // Defer resolution to Promise.all (cache hits reuse same promise)
+    wherePromises.push(
+      cached.result.then((hasPermission) => {
+        entityPermissions[operation] = {
+          permission: hasPermission,
+          where: accessResult,
+        } as Permission
+      }),
+    )
+  } else {
+    // TODO: 4.0: Investigate defaulting to `false` here, if where query is returned but ignored as we don't
+    // have the document data available. This seems more secure.
+    // Alternatively, we could set permission to a third state, like 'unknown'.
+    entityPermissions[operation] = { permission: true, where: accessResult } as Permission
   }
 }
