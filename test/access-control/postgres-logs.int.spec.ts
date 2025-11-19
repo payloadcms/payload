@@ -259,6 +259,49 @@ describePostgres('Access Control - postgres logs', () => {
           update: { permission: true, where: { updateRole: { equals: 'admin' } } },
         } satisfies CollectionPermission)
       })
+
+      it('ensure no db calls when fetchData is false', async () => {
+        const _doc = await payload.create({
+          collection: whereCacheUniqueSlug,
+          data: {
+            title: 'Test Document',
+            readRole: 'admin',
+            updateRole: 'noAccess',
+            deleteRole: 'admin',
+          },
+        })
+
+        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+        // Get permissions - each operation returns unique where query
+        const permissions = await getEntityPermissions({
+          blockReferencesPermissions: {} as any,
+          entity: payload.collections[whereCacheUniqueSlug].config,
+          entityType: 'collection',
+          operations: ['read', 'update', 'delete'],
+          fetchData: false,
+          req,
+        })
+
+        expect(consoleCount).toHaveBeenCalledTimes(0)
+        consoleCount.mockRestore()
+
+        expect(permissions).toEqual({
+          // TODO: Permissions currently default to true when fetchData is false, this should be changed to false in 4.0.
+          // These are later sanitized to false in the sanitizePermissions function.
+          fields: {
+            title: { read: { permission: true }, update: { permission: true } },
+            readRole: { read: { permission: true }, update: { permission: true } },
+            updateRole: { read: { permission: true }, update: { permission: true } },
+            deleteRole: { read: { permission: true }, update: { permission: true } },
+            updatedAt: { read: { permission: true }, update: { permission: true } },
+            createdAt: { read: { permission: true }, update: { permission: true } },
+          },
+          read: { permission: true, where: { readRole: { equals: 'admin' } } },
+          update: { permission: true, where: { updateRole: { equals: 'admin' } } },
+          delete: { permission: true, where: { deleteRole: { equals: 'admin' } } },
+        } satisfies CollectionPermission)
+      })
     })
   })
 })
