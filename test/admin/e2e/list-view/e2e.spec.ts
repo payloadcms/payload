@@ -745,10 +745,8 @@ describe('List View', () => {
     test('should show all documents when equals filter value is cleared', async () => {
       await page.goto(postsUrl.list)
 
-      // Verify we start with 2 posts
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
-      // Add a filter with a value
       const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Title',
@@ -759,10 +757,8 @@ describe('List View', () => {
       // Wait for filter to be applied
       await page.waitForTimeout(500)
 
-      // Should now show only 1 post
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
-      // Clear the filter value
       const valueInput = whereBuilder.locator('.condition__value >> input')
       await valueInput.clear()
 
