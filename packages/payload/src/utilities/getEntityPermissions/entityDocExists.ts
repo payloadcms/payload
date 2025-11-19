@@ -27,15 +27,17 @@ export async function entityDocExists({
   where: Where
 }): Promise<boolean> {
   if (entityType === 'global') {
-    // TODO: Write test (should be broken in prev version since we just find without where?),
-    // perf optimize (returning false or countGlobal or db.globalExists?)
     const global = await req.payload.db.findGlobal({
       slug,
       locale,
       req,
-      where: combineQueries(where, { id: { equals: id } }),
+      select: {},
+      where,
     })
-    return Boolean(global)
+
+    const hasGlobalDoc = Boolean(global && Object.keys(global).length > 0)
+
+    return hasGlobalDoc
   }
 
   if (entityType === 'collection' && id) {
