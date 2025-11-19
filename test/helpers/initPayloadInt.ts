@@ -27,6 +27,31 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
       }
 > {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
+
+  // For Content API: Clear the database before each test suite
+  if (process.env.PAYLOAD_DATABASE === 'content-api') {
+    try {
+      const response = await fetch(
+        `${process.env.CONTENT_API_URL || 'http://localhost:8080'}/dev/clear-db`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contentSystemId: process.env.CONTENT_SYSTEM_ID }),
+        },
+      )
+      if (response.ok) {
+        console.log(
+          'Cleared content-api database for content system:',
+          process.env.CONTENT_SYSTEM_ID,
+        )
+      } else {
+        console.warn('Failed to clear content-api database:', response.status)
+      }
+    } catch (error) {
+      console.warn('Failed to clear content-api database:', error.message)
+    }
+  }
+
   await runInit(testSuiteName, false, true, configFile)
   console.log('importing config', path.resolve(dirname, configFile ?? 'config.ts'))
   const { default: config } = await import(path.resolve(dirname, configFile ?? 'config.ts'))
