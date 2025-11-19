@@ -16,6 +16,7 @@ export async function entityDocExists({
   locale,
   operation,
   req,
+  stats,
   where,
 }: {
   entityType: 'collection' | 'global'
@@ -24,9 +25,17 @@ export async function entityDocExists({
   operation?: AllOperations
   req: PayloadRequest
   slug: string
+  stats: PermissionStats
   where: Where
 }): Promise<boolean> {
   if (entityType === 'global') {
+    if (stats) {
+      stats.whereQueryCalls++
+      stats.totalCalls++
+      if (process.env.DEBUG_PERMS) {
+        console.log(`[NEW] Where query call for ${slug}, operation: ${operation}`)
+      }
+    }
     // TODO: Write test (should be broken in prev version since we just find without where?),
     // perf optimize (returning false or countGlobal or db.globalExists?)
     const global = await req.payload.db.findGlobal({
@@ -40,6 +49,13 @@ export async function entityDocExists({
 
   if (entityType === 'collection' && id) {
     if (operation === 'readVersions') {
+      if (stats) {
+        stats.whereQueryCalls++
+        stats.totalCalls++
+        if (process.env.DEBUG_PERMS) {
+          console.log(`[NEW] Where query call for ${slug}, operation: ${operation}`)
+        }
+      }
       const count = await req.payload.db.countVersions({
         collection: slug,
         locale,
@@ -47,6 +63,13 @@ export async function entityDocExists({
         where: combineQueries(where, { parent: { equals: id } }),
       })
       return count.totalDocs > 0
+    }
+    if (stats) {
+      stats.whereQueryCalls++
+      stats.totalCalls++
+      if (process.env.DEBUG_PERMS) {
+        console.log(`[NEW] Where query call for ${slug}, operation: ${operation}`)
+      }
     }
 
     const count = await req.payload.db.count({

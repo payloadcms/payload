@@ -69,6 +69,15 @@ export interface Config {
   };
   blocks: {
     titleblock: Titleblock;
+    contentblock: Contentblock;
+    imageblock: Imageblock;
+    videoblock: Videoblock;
+    quoteblock: Quoteblock;
+    codeblock: Codeblock;
+    calloutblock: Calloutblock;
+    statsblock: Statsblock;
+    featureblock: Featureblock;
+    testimonialblock: Testimonialblock;
   };
   collections: {
     users: User;
@@ -240,6 +249,114 @@ export interface Titleblock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'titleblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contentblock".
+ */
+export interface Contentblock {
+  content?: string | null;
+  author?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contentblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imageblock".
+ */
+export interface Imageblock {
+  url?: string | null;
+  alt?: string | null;
+  width?: number | null;
+  height?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'imageblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videoblock".
+ */
+export interface Videoblock {
+  videoUrl?: string | null;
+  autoplay?: boolean | null;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'videoblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quoteblock".
+ */
+export interface Quoteblock {
+  quote?: string | null;
+  attribution?: string | null;
+  role?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'quoteblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "codeblock".
+ */
+export interface Codeblock {
+  code?: string | null;
+  language?: string | null;
+  showLineNumbers?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'codeblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "calloutblock".
+ */
+export interface Calloutblock {
+  type?: ('info' | 'warning' | 'error' | 'success') | null;
+  message?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'calloutblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "statsblock".
+ */
+export interface Statsblock {
+  label?: string | null;
+  value?: number | null;
+  unit?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'statsblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "featureblock".
+ */
+export interface Featureblock {
+  title?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureblock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonialblock".
+ */
+export interface Testimonialblock {
+  testimonial?: string | null;
+  author?: string | null;
+  company?: string | null;
+  avatar?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonialblock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1874,6 +1991,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

@@ -5,6 +5,7 @@ import type { Field, FieldAccess } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { BlockSlug } from '../index.js'
 import type { AllOperations, JsonObject, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { PermissionStats } from './getEntityPermissions/getEntityPermissions.js'
 
 import { combineQueries } from '../database/combineQueries.js'
 import { tabHasName } from '../fields/config/types.js'
@@ -16,6 +17,10 @@ type Args = {
   id?: number | string
   operations: AllOperations[]
   req: PayloadRequest
+  /**
+   * Optional stats object to track database calls
+   */
+  stats?: PermissionStats
   type: 'collection' | 'global'
 }
 
@@ -37,7 +42,7 @@ type EntityDoc = JsonObject | TypeWithID
  * Build up permissions object for an entity (collection or global). SCHEMA Permissions - disregards siblingData
  */
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, type, blockPolicies, entity, operations, req } = args
+  const { id, type, blockPolicies, entity, operations, req, stats } = args
   const { data, locale, payload, user } = req
   const isLoggedIn = !!user
 
@@ -48,14 +53,50 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   let docBeingAccessed: EntityDoc | Promise<EntityDoc | undefined> | undefined
 
   async function getEntityDoc({
+    debug = false,
     operation,
     where,
   }: { operation?: AllOperations; where?: Where } = {}): Promise<EntityDoc | undefined> {
+    if (debug) {
+      console.log('11')
+    }
     if (!entity.slug) {
+      if (debug) {
+        console.log('22')
+      }
       return undefined
     }
 
+    if (debug) {
+      console.log('11.2')
+    }
+
     if (type === 'global') {
+      if (debug) {
+        console.log('33')
+      }
+      // Track DB calls
+      if (stats) {
+        const isWhereQuery = where && typeof where === 'object'
+        if (isWhereQuery) {
+          stats.whereQueryCalls++
+          if (process.env.DEBUG_PERMS) {
+            console.log(
+              `[OLD] Where query call for ${entity.slug}, operation: ${operation}, where:`,
+              JSON.stringify(where),
+            )
+          }
+        } else {
+          stats.dataFetchCalls++
+          if (process.env.DEBUG_PERMS) {
+            console.log(
+              `[OLD] Data fetch call for ${entity.slug}, operation: ${operation}, where present: ${!!where}`,
+            )
+          }
+        }
+        stats.totalCalls++
+      }
+
       return payload.findGlobal({
         slug: entity.slug,
         depth: 0,
@@ -65,8 +106,13 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         req,
       })
     }
-
+    if (debug) {
+      console.log('11.3', type, id)
+    }
     if (type === 'collection' && id) {
+      if (debug) {
+        console.log('44')
+      }
       if (typeof where === 'object') {
         const options = {
           collection: entity.slug,
@@ -79,11 +125,57 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         }
 
         if (operation === 'readVersions') {
+          // Track DB calls
+          if (stats) {
+            const isWhereQuery = where && typeof where === 'object'
+            if (isWhereQuery) {
+              stats.whereQueryCalls++
+              if (process.env.DEBUG_PERMS) {
+                console.log(
+                  `[OLD] Where query call for ${entity.slug}, operation: ${operation}, where:`,
+                  JSON.stringify(where),
+                )
+              }
+            } else {
+              stats.dataFetchCalls++
+              if (process.env.DEBUG_PERMS) {
+                console.log(
+                  `[OLD] Data fetch call for ${entity.slug}, operation: ${operation}, where present: ${!!where}`,
+                )
+              }
+            }
+            stats.totalCalls++
+          }
+
           const paginatedRes = await payload.findVersions({
             ...options,
             where: combineQueries(where, { parent: { equals: id } }),
           })
           return paginatedRes?.docs?.[0] || undefined
+        }
+        if (debug) {
+          console.log('55')
+        }
+        // Track DB calls
+        if (stats) {
+          const isWhereQuery = where && typeof where === 'object'
+          if (isWhereQuery) {
+            stats.whereQueryCalls++
+            if (process.env.DEBUG_PERMS) {
+              console.log(
+                `[OLD] Where query call for ${entity.slug}, operation: ${operation}, where:`,
+                JSON.stringify(where),
+              )
+            }
+          } else {
+            stats.dataFetchCalls++
+            if (process.env.DEBUG_PERMS) {
+              console.log(
+                `[OLD] Data fetch call for ${entity.slug}, operation: ${operation}, where present: ${!!where}`,
+              )
+            }
+          }
+          stats.totalCalls++
         }
 
         const paginatedRes = await payload.find({
@@ -94,6 +186,32 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
         return paginatedRes?.docs?.[0] || undefined
       }
+      if (debug) {
+        console.log('66')
+      }
+      // Track DB calls
+      if (stats) {
+        const isWhereQuery = where && typeof where === 'object'
+        if (isWhereQuery) {
+          stats.whereQueryCalls++
+          if (process.env.DEBUG_PERMS) {
+            console.log(
+              `[OLD] Where query call for ${entity.slug}, operation: ${operation}, where:`,
+              JSON.stringify(where),
+            )
+          }
+        } else {
+          stats.dataFetchCalls++
+          if (process.env.DEBUG_PERMS) {
+            console.log(
+              `[OLD] Data fetch call for ${entity.slug}, operation: ${operation}, where present: ${!!where}`,
+            )
+          }
+        }
+        stats.totalCalls++
+      }
+
+      // console.log('findByIDing')
 
       return payload.findByID({
         id,
@@ -106,6 +224,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         trash: true,
       })
     }
+    if (debug) {
+      console.log('11.5')
+    }
   }
 
   const createAccessPromise: CreateAccessPromise = async ({
@@ -117,8 +238,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   }) => {
     const mutablePolicies = policiesObj as Record<string, any>
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
+      //console.log('Within field access promise')
       // assign docBeingAccessed first as the promise to avoid multiple calls to getEntityDoc
-      docBeingAccessed = getEntityDoc().then((doc) => {
+      docBeingAccessed = getEntityDoc({ debug: false }).then((doc) => {
         docBeingAccessed = doc
       })
     }

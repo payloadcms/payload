@@ -1,14 +1,27 @@
 import type { AllOperations, PayloadRequest } from '../types/index.js'
+import type { PermissionStats } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 import type { Permissions, SanitizedPermissions } from './types.js'
 
 import { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
+import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
 import { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 
 type GetAccessResultsArgs = {
+  /**
+   * Use legacy getEntityPolicies instead of optimized getEntityPermissions
+   * @default false
+   */
+  legacy?: boolean
   req: PayloadRequest
+  /**
+   * Optional stats object to track database calls
+   */
+  stats?: PermissionStats
 }
 export async function getAccessResults({
+  legacy = false,
   req,
+  stats,
 }: GetAccessResultsArgs): Promise<SanitizedPermissions> {
   const results = {
     collections: {},
@@ -45,14 +58,24 @@ export async function getAccessResults({
         collectionOperations.push('readVersions')
       }
 
-      const collectionPermissions = await getEntityPermissions({
-        blockReferencesPermissions,
-        entity: collection,
-        entityType: 'collection',
-        fetchData: false,
-        operations: collectionOperations,
-        req,
-      })
+      const collectionPermissions = legacy
+        ? await getEntityPolicies({
+            type: 'collection',
+            blockPolicies: blockReferencesPermissions,
+            entity: collection,
+            operations: collectionOperations,
+            req,
+            stats,
+          })
+        : await getEntityPermissions({
+            blockReferencesPermissions,
+            entity: collection,
+            entityType: 'collection',
+            fetchData: false,
+            operations: collectionOperations,
+            req,
+            stats,
+          })
       results.collections![collection.slug] = collectionPermissions
     }),
   )
@@ -65,14 +88,25 @@ export async function getAccessResults({
         globalOperations.push('readVersions')
       }
 
-      const globalPermissions = await getEntityPermissions({
-        blockReferencesPermissions,
-        entity: global,
-        entityType: 'global',
-        fetchData: false,
-        operations: globalOperations,
-        req,
-      })
+      const globalPermissions = legacy
+        ? await getEntityPolicies({
+            type: 'global',
+            blockPolicies: blockReferencesPermissions,
+            entity: global,
+            operations: globalOperations,
+            req,
+            stats,
+          })
+        : await getEntityPermissions({
+            blockReferencesPermissions,
+            entity: global,
+            entityType: 'global',
+            fetchData: false,
+            operations: globalOperations,
+            req,
+            stats,
+          })
+
       results.globals![global.slug] = globalPermissions
     }),
   )

@@ -1740,7 +1740,10 @@ export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
-export { getEntityPermissions } from './utilities/getEntityPermissions/getEntityPermissions.js'
+export {
+  getEntityPermissions,
+  type PermissionStats,
+} from './utilities/getEntityPermissions/getEntityPermissions.js'
 export { getEntityPolicies } from './utilities/getEntityPolicies.js'
 export { getFieldByPath } from './utilities/getFieldByPath.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'

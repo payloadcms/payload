@@ -28,6 +28,12 @@ type ReturnType<TEntityType extends 'collection' | 'global'> = TEntityType exten
   ? GlobalPermission
   : CollectionPermission
 
+export type PermissionStats = {
+  dataFetchCalls: number
+  totalCalls: number
+  whereQueryCalls: number
+}
+
 type Args<TEntityType extends 'collection' | 'global'> = {
   blockReferencesPermissions: BlockReferencesPermissions
   /**
@@ -41,6 +47,10 @@ type Args<TEntityType extends 'collection' | 'global'> = {
    */
   operations: AllOperations[]
   req: PayloadRequest
+  /**
+   * Optional stats object to track database calls
+   */
+  stats?: PermissionStats
 } & (
   | {
       fetchData: false
@@ -95,6 +105,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     fetchData,
     operations,
     req,
+    stats,
   } = args
   const { locale: _locale, user } = req
 
@@ -110,6 +121,14 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     : fetchData
       ? await (async () => {
           if (entityType === 'global') {
+            if (stats) {
+              stats.dataFetchCalls++
+              stats.totalCalls++
+              if (process.env.DEBUG_PERMS) {
+                console.log(`[NEW] Data fetch call for ${entity.slug}`)
+              }
+            }
+
             return req.payload.findGlobal({
               slug: entity.slug,
               depth: 0,
@@ -121,6 +140,14 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
           }
 
           if (entityType === 'collection') {
+            if (stats) {
+              stats.dataFetchCalls++
+              stats.totalCalls++
+              if (process.env.DEBUG_PERMS) {
+                console.log(`[NEW] Data fetch call for ${entity.slug}`)
+              }
+            }
+
             return req.payload.findByID({
               id: id!,
               collection: entity.slug,
@@ -196,6 +223,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
         locale,
         operation,
         req,
+        stats,
         wherePromises,
         whereQueryCache,
       })
@@ -225,8 +253,10 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
    * This is why we need to loop again to process the new promises, until there are no more promises left.
    */
   let iterations = 0
+  let totalPromises = 0
   while (promises.length > 0) {
     const currentPromises = promises.splice(0, promises.length)
+    totalPromises += currentPromises.length
 
     await Promise.all(currentPromises)
 
@@ -234,6 +264,36 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     if (iterations >= 100) {
       throw new Error('Infinite getEntityPermissions promise loop detected.')
     }
+  }
+
+  // Debug: log if we're in dev mode
+  if (process.env.DEBUG_PERMS) {
+    console.log(
+      `[getEntityPermissions] Resolved ${totalPromises} promises in ${iterations} iterations`,
+    )
+  }
+
+  // Verify all promises are resolved by checking for any remaining Promise objects
+  if (process.env.DEBUG_PERMS) {
+    const checkForPromises = (obj: any, path = ''): void => {
+      if (!obj || typeof obj !== 'object') {
+        return
+      }
+
+      for (const key in obj) {
+        const value = obj[key]
+        if (value && typeof value === 'object') {
+          if (typeof value.then === 'function') {
+            console.warn(`[WARNING] Unresolved promise found at ${path}.${key}`)
+          }
+          if ('permission' in value && typeof value.permission?.then === 'function') {
+            console.warn(`[WARNING] Unresolved promise in permission at ${path}.${key}`)
+          }
+          checkForPromises(value, `${path}.${key}`)
+        }
+      }
+    }
+    checkForPromises(entityPermissions, 'entityPermissions')
   }
 
   return entityPermissions
@@ -249,6 +309,7 @@ const processWhereQuery = ({
   locale,
   operation,
   req,
+  stats,
   wherePromises,
   whereQueryCache,
 }: {
@@ -261,6 +322,7 @@ const processWhereQuery = ({
   operation: Extract<keyof (CollectionPermission | GlobalPermission), AllOperations>
   req: PayloadRequest
   slug: string
+  stats?: PermissionStats
   wherePromises: Promise<void>[]
   whereQueryCache: WhereQueryCache
 }): void => {
@@ -270,6 +332,7 @@ const processWhereQuery = ({
 
     if (!cached) {
       // Cache miss - start DB query (don't await)
+
       cached = {
         result: entityDocExists({
           id,
@@ -278,6 +341,7 @@ const processWhereQuery = ({
           locale,
           operation,
           req,
+          stats,
           where: accessResult,
         }),
         where: accessResult,

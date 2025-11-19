@@ -3,7 +3,12 @@ import type { CollectionPermission, Payload, PayloadRequest } from 'payload'
 /* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
 import path from 'path'
-import { createLocalReq, getEntityPermissions } from 'payload'
+import {
+  createLocalReq,
+  getEntityPermissions,
+  getEntityPolicies,
+  sanitizePermissions,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -300,6 +305,198 @@ describePostgres('Access Control - postgres logs', () => {
           update: { permission: true, where: { updateRole: { equals: 'admin' } } },
           delete: { permission: true, where: { deleteRole: { equals: 'admin' } } },
         } satisfies CollectionPermission)
+
+        const permissions1 = await getEntityPermissions({
+          blockReferencesPermissions: {} as any,
+          entity: payload.collections[whereCacheUniqueSlug].config,
+          entityType: 'collection',
+          operations: ['read', 'update', 'delete'],
+          fetchData: false,
+          req,
+        })
+        const sanitized1 = sanitizePermissions({
+          collections: {
+            [whereCacheUniqueSlug]: permissions1,
+          },
+        } as any)
+
+        const permissions2 = await getEntityPolicies({
+          blockPolicies: {} as any,
+          entity: payload.collections[whereCacheUniqueSlug].config,
+          type: 'collection',
+          operations: ['read', 'update', 'delete'],
+          req: {
+            ...req,
+            data: undefined,
+          },
+        })
+
+        const sanitized2 = sanitizePermissions({
+          collections: {
+            [whereCacheUniqueSlug]: permissions2,
+          },
+        } as any)
+
+        console.dir(sanitized1, { depth: 1000 })
+        console.dir(sanitized2, { depth: 1000 })
+      })
+    })
+
+    describe('async parent permission inheritance', () => {
+      it('should correctly inherit permissions from async parent field access', async () => {
+        // This test verifies that when a parent field has async access control that returns a promise,
+        // child fields can properly chain onto that promise and inherit the resolved permission.
+        // Previously, this would fail because children couldn't detect/chain onto parent promises.
+
+        const doc = await payload.create({
+          collection: 'complex-content',
+          data: {
+            title: 'Async Test Doc',
+            status: 'published',
+            isPublic: true,
+            author: '123',
+            metadata: {
+              keywords: 'test',
+              internalNotes: 'admin only',
+            },
+          },
+        })
+
+        // Get permissions - the 'metadata.keywords' field has ASYNC read access
+        // The parent 'metadata' group doesn't have access, so children inherit from collection
+        const permissions = await getEntityPermissions({
+          id: doc.id,
+          blockReferencesPermissions: {} as any,
+          entity: payload.collections['complex-content'].config,
+          entityType: 'collection',
+          operations: ['read', 'update'],
+          fetchData: true,
+          req,
+        })
+
+        // Verify the async field access resolved correctly
+        expect(permissions.fields?.metadata).toBeDefined()
+        expect(permissions.fields?.metadata?.fields?.keywords).toBeDefined()
+        expect(permissions.fields?.metadata?.fields?.keywords?.read?.permission).toBe(true)
+
+        // The async access should have resolved (not be a promise)
+        expect(typeof permissions.fields?.metadata?.fields?.keywords?.read?.permission).toBe(
+          'boolean',
+        )
+
+        // internalNotes has sync access (admin only)
+        expect(permissions.fields?.metadata?.fields?.internalNotes?.read?.permission).toBe(true)
+        expect(permissions.fields?.metadata?.fields?.internalNotes?.update?.permission).toBe(true)
+      })
+
+      it('should handle nested async access with block references', async () => {
+        // Test that block permissions correctly inherit from async parent field permissions
+        const doc = await payload.create({
+          collection: 'complex-content',
+          data: {
+            title: 'Block Test Doc',
+            status: 'published',
+            isPublic: true,
+            author: '123',
+          },
+        })
+
+        // The 'hero' field has async UPDATE access, read is sync
+        // Blocks within hero should inherit these permissions
+        const permissions = await getEntityPermissions({
+          id: doc.id,
+          blockReferencesPermissions: {} as any,
+          entity: payload.collections['complex-content'].config,
+          entityType: 'collection',
+          operations: ['read', 'update'],
+          fetchData: true,
+          req,
+        })
+
+        // Verify hero field permissions
+        expect(permissions.fields?.hero).toBeDefined()
+        expect(permissions.fields?.hero?.read?.permission).toBe(true)
+        expect(permissions.fields?.hero?.update?.permission).toBe(true)
+
+        // Verify blocks within hero inherited permissions correctly
+        expect(permissions.fields?.hero?.blocks).toBeDefined()
+        if (
+          permissions.fields?.hero?.blocks &&
+          typeof permissions.fields.hero.blocks === 'object'
+        ) {
+          // Check that blocks are present and have correct permissions
+          const blockKeys = Object.keys(permissions.fields.hero.blocks)
+          expect(blockKeys.length).toBeGreaterThan(0)
+
+          // All blocks should inherit read=true, update=true from parent
+          blockKeys.forEach((blockSlug) => {
+            const block = (permissions.fields?.hero?.blocks as any)[blockSlug]
+            expect(block.read?.permission).toBe(true)
+            expect(block.update?.permission).toBe(true)
+          })
+        }
+      })
+
+      it('should resolve all async permissions before returning', async () => {
+        // Verify that no promises leak into the final permissions object
+        const doc = await payload.create({
+          collection: 'complex-content',
+          data: {
+            title: 'Promise Test Doc',
+            status: 'published',
+            isPublic: true,
+            author: '123',
+            sections: [
+              {
+                sectionTitle: 'Section 1',
+                sectionMetadata: {
+                  visibility: 'public',
+                },
+              },
+            ],
+          },
+        })
+
+        const permissions = await getEntityPermissions({
+          id: doc.id,
+          blockReferencesPermissions: {} as any,
+          entity: payload.collections['complex-content'].config,
+          entityType: 'collection',
+          operations: ['read', 'update'],
+          fetchData: true,
+          req,
+        })
+
+        // Recursively check that no Promise objects exist in the permissions
+        const checkForPromises = (obj: any, path = ''): void => {
+          if (!obj || typeof obj !== 'object') {
+            return
+          }
+
+          for (const key in obj) {
+            const value = obj[key]
+            if (value && typeof value === 'object') {
+              // Check if it's a promise
+              if (typeof value.then === 'function') {
+                throw new Error(`Found unresolved promise at ${path}.${key}`)
+              }
+              // Check if permission property is a promise
+              if ('permission' in value && typeof value.permission?.then === 'function') {
+                throw new Error(`Found unresolved promise in permission at ${path}.${key}`)
+              }
+              checkForPromises(value, `${path}.${key}`)
+            }
+          }
+        }
+
+        // This should not throw - all promises should be resolved
+        expect(() => checkForPromises(permissions, 'permissions')).not.toThrow()
+
+        // Verify specific async fields are resolved
+        expect(permissions.fields?.metadata?.fields?.keywords?.read?.permission).toBe(true)
+        expect(typeof permissions.fields?.metadata?.fields?.keywords?.read?.permission).toBe(
+          'boolean',
+        )
       })
     })
   })
