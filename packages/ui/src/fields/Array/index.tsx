@@ -455,7 +455,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               {showMinRows && (
                 <Banner type="error">
                   {t('validation:requiresAtLeast', {
-                    count: minRows,
+                    count: minRowsProp ?? minRows,
                     label:
                       getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
                       t(minRows > 1 ? 'general:rows' : 'general:row'),
