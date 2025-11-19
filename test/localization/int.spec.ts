@@ -1,7 +1,7 @@
 import type { Payload, User, Where } from 'payload'
 
 import path from 'path'
-import { createLocalReq } from 'payload'
+import { createLocalReq, getLocalizedPaths } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -3576,6 +3576,54 @@ describe('Localization', () => {
       expect((allLocalesDoc.g1 as any).en.g2.g2a1).toHaveLength(2)
       expect((allLocalesDoc.g1 as any).en.g2.g2a1[0].text).toBe('EN Deep 1')
       expect((allLocalesDoc.g1 as any).es).toBeUndefined()
+    })
+  })
+
+  describe('getLocalizedPaths', () => {
+    it('resolves a non-localized field with a locale subfield, e.g. "nonLocalized.en"', () => {
+      const mockConfig: any = {
+        config: {
+          localization: {
+            localeCodes: ['en', 'es'],
+          },
+        },
+        collections: {},
+        blocks: {},
+        db: {
+          defaultIDType: 'text',
+        },
+      }
+      const fields = [
+        {
+          name: 'nonLocalized',
+          type: 'group',
+          localized: false,
+          flattenedFields: [
+            {
+              name: 'en',
+              type: 'text',
+              localized: false,
+            },
+          ],
+        },
+      ]
+
+      const result = getLocalizedPaths({
+        incomingPath: 'nonLocalized.en',
+        fields: fields as any[],
+        payload: mockConfig,
+        locale: 'en',
+      })
+
+      expect(result).toHaveLength(1)
+
+      const path = result[0]
+
+      expect(path).toBeDefined()
+      expect(path?.invalid).toBe(false)
+      expect(path?.complete).toBe(true)
+      expect(path?.path).toBe('nonLocalized.en')
+      expect(path?.field?.name).toBe('en')
     })
   })
 })
