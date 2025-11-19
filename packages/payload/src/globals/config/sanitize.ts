@@ -114,7 +114,12 @@ export const sanitizeGlobal = async (
           validate: false,
         }
       }
-      global.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
+
+      if (!config.localization) {
+        global.versions.drafts.localizeStatus = false
+      } else {
+        global.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
+      }
 
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
