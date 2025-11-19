@@ -31,3 +31,4 @@ export const authSlug = 'auth-collection'
 
 export const whereCacheSameSlug = 'where-cache-same'
 export const whereCacheUniqueSlug = 'where-cache-unique'
+export const asyncParentSlug = 'async-parent'

@@ -731,6 +731,62 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    // Collection for testing async parent permission inheritance
+    {
+      slug: 'async-parent',
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'parentField',
+          type: 'group',
+          access: {
+            read: async ({ req: { user } }) => {
+              // Simulate async permission check
+              await new Promise((resolve) => setTimeout(resolve, 1))
+              return Boolean(isUser(user) && user.roles?.includes('admin'))
+            },
+            update: async ({ req: { user } }) => {
+              await new Promise((resolve) => setTimeout(resolve, 1))
+              return Boolean(isUser(user) && user.roles?.includes('admin'))
+            },
+          },
+          fields: [
+            {
+              name: 'childField1',
+              type: 'text',
+              // No access control - should inherit from parent
+            },
+            {
+              name: 'childField2',
+              type: 'textarea',
+              // No access control - should inherit from parent
+            },
+            {
+              name: 'nestedGroup',
+              type: 'group',
+              // No access control - should inherit from parent
+              fields: [
+                {
+                  name: 'deepChild1',
+                  type: 'text',
+                  // No access control - should inherit from grandparent
+                },
+                {
+                  name: 'deepChild2',
+                  type: 'number',
+                  // No access control - should inherit from grandparent
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {
