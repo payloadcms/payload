@@ -9,6 +9,14 @@ import nodemailer from 'nodemailer'
 
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
 
+process.env.PAYLOAD_DATABASE = 'content-api'
+
+// Content API authentication configuration
+process.env.CONTENT_API_URL = process.env.CONTENT_API_URL || 'http://localhost:8080'
+process.env.CONTENT_SYSTEM_ID =
+  process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001'
+// JWT authentication will be used (no API key)
+
 process.env.PAYLOAD_DISABLE_ADMIN = 'true'
 
 process.env.PAYLOAD_DROP_DATABASE = 'true'
@@ -39,3 +47,6 @@ if (!process.env.PAYLOAD_DATABASE) {
 process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
 generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)
+
+// Note: Database clearing is handled by each adapter's init() function
+// when PAYLOAD_DROP_DATABASE === 'true' (see postgres adapter's connect.ts for reference)

@@ -86,6 +86,14 @@ export const allDatabaseAdapters = {
     },
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
+      `,
+  'content-api': `
+import { contentAPIAdapter } from '@payloadcms/db-content-api'
+export const databaseAdapter = contentAPIAdapter({
+  contentAPIURL: process.env.CONTENT_API_URL || 'http://localhost:8080',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || 'test-system',
+  apiKey: process.env.CONTENT_API_KEY,
+})
   `,
   'vercel-postgres-read-replica': `
   import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'

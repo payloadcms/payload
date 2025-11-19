@@ -16,6 +16,7 @@ const esModules = [
   '@faceless-ui/window-info',
   '@faceless-ui/modal',
   '@faceless-ui/scroll-info',
+  '@payloadcms/db-content-api',
 ].join('|')
 
 import path from 'path'
