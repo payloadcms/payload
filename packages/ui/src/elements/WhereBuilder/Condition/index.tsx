@@ -74,7 +74,7 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent(async (debouncedValue) => {
+  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
       await updateCondition({
         type: 'value',
@@ -82,7 +82,7 @@ export const Condition: React.FC<Props> = (props) => {
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null ? '' : debouncedValue,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
       })
     }
   })
