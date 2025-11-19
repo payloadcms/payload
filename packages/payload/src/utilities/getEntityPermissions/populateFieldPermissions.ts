@@ -29,13 +29,16 @@ const setPermission = (
   promises: Promise<void>[],
 ): void => {
   if (isThenable(value)) {
+    // Create a single permission object that will be mutated in place
+    // This ensures all references (including cached blocks) see the resolved value
+    const permissionObj = { permission: value as any }
+    target[operation] = permissionObj
+
     const permissionPromise = value.then((result) => {
-      target[operation] = { permission: result }
+      // Mutate the permission property in place so all references see the update
+      permissionObj.permission = result
     })
 
-    // Store promise temporarily, so that children can access the permission before it is resolved.
-    // It will be overwritten when promise resolves
-    target[operation] = { permission: permissionPromise as unknown as boolean }
     promises.push(permissionPromise)
   } else {
     target[operation] = { permission: value }
