@@ -1,6 +1,8 @@
-import type { CognitoUserSession } from 'amazon-cognito-identity-js'
+import * as serverExternals from '@payloadcms/payload-cloud/server-externals'
+const { AuthenticationDetails, CognitoUser, CognitoUserPool } =
+  serverExternals['amazon-cognito-identity-js']
 
-import { AuthenticationDetails, CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
+import type { CognitoUserSession } from 'amazon-cognito-identity-js'
 
 let sessionAndToken: CognitoUserSession | null = null
 

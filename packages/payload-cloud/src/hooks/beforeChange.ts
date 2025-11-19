@@ -1,7 +1,8 @@
 import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 import type stream from 'stream'
 
-import { Upload } from '@aws-sdk/lib-storage'
+import * as serverExternals from '@payloadcms/payload-cloud/server-externals'
+const { Upload } = serverExternals['@aws-sdk/lib-storage']
 import fs from 'fs'
 
 import { createKey } from '../utilities/createKey.js'

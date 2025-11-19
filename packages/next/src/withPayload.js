@@ -125,7 +125,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       '@payloadcms/drizzle',
       '@payloadcms/db-d1-sqlite',
       // External because they install @aws-sdk/client-s3:
-      '@payloadcms/payload-cloud',
+      '@payloadcms/payload-cloud/server-externals',
       // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
       '@sentry/nextjs',
       // Can be externalized, because we require users to install graphql themselves - we only rely on it as a peer dependency.

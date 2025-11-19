@@ -1,12 +1,15 @@
-import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
-import { S3 } from '@aws-sdk/client-s3'
-import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers'
+import * as serverExternals from '@payloadcms/payload-cloud/server-externals'
+const { CognitoIdentityClient } = serverExternals['@aws-sdk/client-cognito-identity']
+const { S3 } = serverExternals['@aws-sdk/client-s3']
+import type { S3 as S3Type } from '@aws-sdk/client-s3'
+
+const { fromCognitoIdentityPool } = serverExternals['@aws-sdk/credential-providers']
 
 import { authAsCognitoUser } from './authAsCognitoUser.js'
 
 export type GetStorageClient = () => Promise<{
   identityID: string
-  storageClient: S3
+  storageClient: S3Type
 }>
 
 export const refreshSession = async () => {
