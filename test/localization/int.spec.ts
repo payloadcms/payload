@@ -3768,6 +3768,50 @@ describe('Localization', () => {
       expect(enPublished.totalDocs).toBe(1)
       expect(enPublished.docs[0]!.text).toBe('Localized Metadata EN')
     })
+
+    it('should preserve published data when publishing other locales', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          text: 'Published EN',
+          _status: 'published',
+        },
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        data: {
+          text: 'New Draft EN',
+          _status: 'draft',
+        },
+        draft: true,
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        data: {
+          text: 'Published ES',
+          _status: 'published',
+        },
+        locale: spanishLocale,
+      })
+
+      const finalDoc = await payload.findByID({
+        locale: 'all',
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        draft: false,
+      })
+
+      expect(finalDoc._status!.es).toBe('published')
+      expect(finalDoc.text!.es).toBe('Published ES')
+      expect(finalDoc._status!.en).toBe('published')
+      expect(finalDoc.text!.en).toBe('Published EN')
+    })
   })
 })
 
