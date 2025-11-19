@@ -40,10 +40,10 @@ export type SanitizedBlocksPermissions =
 
 export type FieldPermissions = {
   blocks?: BlocksPermissions
-  create: Permission
+  create?: Permission
   fields?: FieldsPermissions
-  read: Permission
-  update: Permission
+  read?: Permission
+  update?: Permission
 }
 
 export type SanitizedFieldPermissions =
@@ -63,14 +63,14 @@ export type SanitizedFieldsPermissions =
   | true
 
 export type CollectionPermission = {
-  create: Permission
-  delete: Permission
+  create?: Permission
+  delete?: Permission
   fields: FieldsPermissions
-  read: Permission
+  read?: Permission
   readVersions?: Permission
   // Auth-enabled Collections only
   unlock?: Permission
-  update: Permission
+  update?: Permission
 }
 
 export type SanitizedCollectionPermission = {
@@ -86,9 +86,9 @@ export type SanitizedCollectionPermission = {
 
 export type GlobalPermission = {
   fields: FieldsPermissions
-  read: Permission
+  read?: Permission
   readVersions?: Permission
-  update: Permission
+  update?: Permission
 }
 
 export type SanitizedGlobalPermission = {

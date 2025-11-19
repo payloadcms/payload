@@ -8,13 +8,13 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { Forbidden, ValidationError } from 'payload'
+import { Forbidden } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { requestHeaders } from './config.js'
+import { requestHeaders } from './getConfig.js'
 import {
   firstArrayText,
   fullyRestrictedSlug,
