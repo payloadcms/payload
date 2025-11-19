@@ -9,21 +9,47 @@ export const rule = {
       category: 'Best Practices',
       recommended: true,
     },
-    schema: [],
+    schema: {
+      type: 'array',
+      items: [
+        {
+          type: 'object',
+          properties: {
+            exclude: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
+      minItems: 0,
+      maxItems: 100,
+    },
   },
 
   create(context) {
     let packageName = null
+    const options = context.options[0] || {}
+    const excludePatterns = (options.exclude || []).map((pattern) => new RegExp(pattern))
 
     return {
       ImportDeclaration(node) {
         const importPath = node.source.value
         packageName = getPackageName(context, packageName)
+
         if (packageName && importPath.startsWith(packageName)) {
-          context.report({
-            node,
-            message: `Package "${packageName}" should not import from itself. Use relative instead.`,
-          })
+          // Check if import matches any exclude pattern
+          const isExcluded = excludePatterns.some((pattern) => pattern.test(importPath))
+
+          if (!isExcluded) {
+            context.report({
+              node,
+              message: `Package "${packageName}" should not import from itself. Use relative instead.`,
+            })
+          }
         }
       },
     }

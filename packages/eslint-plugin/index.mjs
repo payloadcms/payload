@@ -4,6 +4,7 @@ import noRelativeMonorepoImports from './customRules/no-relative-monorepo-import
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 import noImportsFromSelf from './customRules/no-imports-from-self.js'
+import noRestrictedImports from './customRules/no-restricted-imports.js'
 import properPinoLoggerErrorUsage from './customRules/proper-payload-logger-usage.js'
 
 /**
@@ -15,6 +16,7 @@ const index = {
     'no-relative-monorepo-imports': noRelativeMonorepoImports,
     'no-imports-from-exports-dir': noImportsFromExportsDir,
     'no-imports-from-self': noImportsFromSelf,
+    'no-restricted-imports': noRestrictedImports,
     'proper-payload-logger-usage': properPinoLoggerErrorUsage,
 
     // Testing-related

@@ -56,7 +56,12 @@ export const rootEslintConfig = [
       'payload/no-jsx-import-statements': 'warn',
       'payload/no-relative-monorepo-imports': 'error',
       'payload/no-imports-from-exports-dir': 'error',
-      'payload/no-imports-from-self': 'error',
+      'payload/no-imports-from-self': [
+        'error',
+        {
+          exclude: ['/server-externals$'],
+        },
+      ],
       'payload/proper-payload-logger-usage': 'error',
     },
   },
@@ -86,6 +91,20 @@ export default [
     files: ['packages/eslint-config/**/*.ts'],
     rules: {
       'perfectionist/sort-objects': 'off',
+    },
+  },
+  {
+    files: ['packages/payload-cloud/**/*.ts', 'packages/payload-cloud/**/*.tsx'],
+    rules: {
+      'payload/no-restricted-imports': [
+        'error',
+        {
+          resolvePathsFrom: 'src/exports/server-externals.ts',
+          restrictTypeImports: false,
+          message:
+            'Direct imports from server-externals packages are not allowed. Use type-only imports or import from @payloadcms/payload-cloud/server-externals instead.',
+        },
+      ],
     },
   },
   {
