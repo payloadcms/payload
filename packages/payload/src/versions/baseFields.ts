@@ -12,7 +12,7 @@ export const statuses: Option[] = [
   },
 ]
 
-export const baseVersionFields = ({ localizeMetadata }: { localizeMetadata: boolean }): Field[] => [
+export const baseVersionFields = ({ localized }: { localized: boolean }): Field[] => [
   {
     name: '_status',
     type: 'select',
@@ -25,7 +25,7 @@ export const baseVersionFields = ({ localizeMetadata }: { localizeMetadata: bool
     defaultValue: 'draft',
     index: true,
     label: ({ t }) => t('version:status'),
-    localized: Boolean(localizeMetadata),
+    localized: Boolean(localized),
     options: statuses,
   },
 ]

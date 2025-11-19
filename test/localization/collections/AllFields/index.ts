@@ -7,6 +7,9 @@ export const AllFieldsLocalized: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
+  experimental: {
+    localizeMetadata: true,
+  },
   fields: [
     // Simple localized fields
     {

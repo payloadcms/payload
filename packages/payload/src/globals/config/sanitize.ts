@@ -99,8 +99,14 @@ export const sanitizeGlobal = async (
 
   if (global.versions) {
     if (global.versions === true) {
-      global.versions = { drafts: false, max: 100 }
+      global.versions = {
+        drafts: false,
+        localizeMetadata: Boolean(global.experimental?.localizeMetadata),
+        max: 100,
+      }
     }
+
+    global.versions.localizeMetadata ??= Boolean(global.experimental?.localizeMetadata)
 
     global.versions.max = typeof global.versions.max === 'number' ? global.versions.max : 100
 
@@ -125,9 +131,7 @@ export const sanitizeGlobal = async (
       global.fields = mergeBaseFields(
         global.fields,
         baseVersionFields({
-          localizeMetadata: config.localization
-            ? config.localization.localizeMetadata || false
-            : false,
+          localized: global.versions.localizeMetadata,
         }),
       )
     }

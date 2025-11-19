@@ -511,12 +511,6 @@ export type BaseLocalizationConfig = {
     locales: Locale[]
     req: PayloadRequest
   }) => Locale[] | Promise<Locale[]>
-  /**
-   * If true, status and updatedAt fields will be localized
-   *
-   * @default false
-   */
-  localizeMetadata?: boolean
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
@@ -1093,17 +1087,6 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
-  /**
-   * Experimental features that are not yet stable.
-   */
-  experimental?: {
-    /**
-     * If true, the admin panel will attempt to localize the `updatedAt` and `status` fields.
-     *
-     * @default false
-     */
-    localizeMetadata?: boolean
-  }
   /**
    * Options for folder view within the admin panel
    *

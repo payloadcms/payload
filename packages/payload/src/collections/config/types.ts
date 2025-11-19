@@ -476,6 +476,17 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
+type CollectionExperimentalOptions = {
+  /**
+   * If true and localization is enabled
+   * - status (when drafts are enabled) will be localized
+   * - updatedAt (in versions) will be localized
+   *
+   * @default false
+   */
+  localizeMetadata?: boolean
+}
+
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
@@ -536,6 +547,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
+  /**
+   * Experimental features that are not yet stable.
+   */
+  experimental?: CollectionExperimentalOptions
   fields: Field[]
   /**
    * Enables folders for this collection
