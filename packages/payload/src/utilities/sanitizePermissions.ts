@@ -203,7 +203,7 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
 /**
  * Recursively remove empty objects and false values from an object.
  *
- * @internal - this function may change or be removed in a minor release.
+ * @internal
  */
 export function sanitizePermissions(
   data: MarkOptional<Permissions, 'canAccessAdmin'>,

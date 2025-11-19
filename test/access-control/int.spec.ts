@@ -9,7 +9,8 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { createLocalReq, Forbidden, getEntityPermissions } from 'payload'
+import { createLocalReq, Forbidden } from 'payload'
+import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 
 import type { FullyRestricted, Post } from './payload-types.js'

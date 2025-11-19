@@ -81,7 +81,7 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
  * rows, as we're calculating schema permissions, which do not include individual rows.
  * For consistency, it's thus better to never include the siblingData and blockData
  *
- * @internal - this function may change or be removed in a minor release.
+ * @internal
  */
 export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,

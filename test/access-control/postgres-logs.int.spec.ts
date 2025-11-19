@@ -3,7 +3,8 @@ import type { CollectionPermission, Payload, PayloadRequest } from 'payload'
 /* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
 import path from 'path'
-import { createLocalReq, getEntityPermissions } from 'payload'
+import { createLocalReq } from 'payload'
+import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
