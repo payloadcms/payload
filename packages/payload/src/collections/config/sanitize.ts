@@ -173,12 +173,9 @@ export const sanitizeCollection = async (
     if (sanitized.versions === true) {
       sanitized.versions = {
         drafts: false,
-        localizeMetadata: Boolean(sanitized.experimental?.localizeMetadata),
         maxPerDoc: 100,
       }
     }
-
-    sanitized.versions.localizeMetadata ??= Boolean(sanitized.experimental?.localizeMetadata)
 
     sanitized.versions.maxPerDoc =
       typeof sanitized.versions.maxPerDoc === 'number' ? sanitized.versions.maxPerDoc : 100
@@ -190,6 +187,8 @@ export const sanitizeCollection = async (
           validate: false,
         }
       }
+
+      sanitized.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
@@ -204,7 +203,7 @@ export const sanitizeCollection = async (
       sanitized.fields = mergeBaseFields(
         sanitized.fields,
         baseVersionFields({
-          localized: sanitized.versions.localizeMetadata,
+          localized: sanitized.versions.drafts.localizeStatus,
         }),
       )
     }

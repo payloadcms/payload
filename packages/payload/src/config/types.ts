@@ -1087,6 +1087,9 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
+  experimental?: {
+    localizeStatus?: boolean
+  }
   /**
    * Options for folder view within the admin panel
    *

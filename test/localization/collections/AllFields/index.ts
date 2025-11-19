@@ -7,9 +7,6 @@ export const AllFieldsLocalized: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
-  experimental: {
-    localizeMetadata: true,
-  },
   fields: [
     // Simple localized fields
     {
@@ -246,6 +243,8 @@ export const AllFieldsLocalized: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      localizeStatus: true,
+    },
   },
 }

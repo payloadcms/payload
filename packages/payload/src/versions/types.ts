@@ -39,6 +39,12 @@ export type IncomingDrafts = {
    */
   autosave?: Autosave | boolean
   /**
+   * If true, status will be localized
+   *
+   * @default false
+   */
+  localizeStatus?: boolean
+  /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
   schedulePublish?: boolean | SchedulePublish
@@ -56,6 +62,12 @@ export type SanitizedDrafts = {
    * To enable, set to true or pass an object with options.
    */
   autosave: Autosave | false
+  /**
+   * If true, status will be localized
+   *
+   * @default false
+   */
+  localizeStatus?: boolean
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
@@ -75,12 +87,6 @@ export type IncomingCollectionVersions = {
    */
   drafts?: boolean | IncomingDrafts
   /**
-   * If true, status and updatedAt will be localized
-   *
-   * @default false
-   */
-  localizeMetadata?: boolean
-  /**
    * Use this setting to control how many versions to keep on a document by document basis.
    * Must be an integer. Use 0 to save all versions.
    *
@@ -96,12 +102,6 @@ export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVers
    */
   drafts: false | SanitizedDrafts
   /**
-   * If true, status and updatedAt will be localized
-   *
-   * @default false
-   */
-  localizeMetadata?: boolean
-  /**
    * Use this setting to control how many versions to keep on a document by document basis.
    * Must be an integer. Use 0 to save all versions.
    *
@@ -112,12 +112,6 @@ export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVers
 
 export type IncomingGlobalVersions = {
   drafts?: boolean | IncomingDrafts
-  /**
-   * If true, status and updatedAt will be localized
-   *
-   * @default false
-   */
-  localizeMetadata?: boolean
   /**
    * Use this setting to control how many versions to keep on a global by global basis.
    * Must be an integer.
@@ -130,12 +124,6 @@ export type SanitizedGlobalVersions = {
    * Enable Drafts mode for this global. To enable, set to true or pass an object with draft options
    */
   drafts: false | SanitizedDrafts
-  /**
-   * If true, status and updatedAt will be localized
-   *
-   * @default false
-   */
-  localizeMetadata?: boolean
   /**
    * Use this setting to control how many versions to keep on a global by global basis.
    * Must be an integer.

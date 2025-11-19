@@ -165,17 +165,6 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-type GlobalExperimentalOptions = {
-  /**
-   * If true and localization is enabled
-   * - status (when drafts are enabled) will be localized
-   * - updatedAt (in versions) will be localized
-   *
-   * @default false
-   */
-  localizeMetadata?: boolean
-}
-
 export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -196,10 +185,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
    */
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
-  /**
-   * Experimental features that are not yet stable.
-   */
-  experimental?: GlobalExperimentalOptions
   fields: Field[]
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
