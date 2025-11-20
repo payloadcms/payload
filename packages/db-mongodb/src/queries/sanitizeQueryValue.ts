@@ -7,8 +7,10 @@ import type {
   RelationshipField,
 } from 'payload'
 
-import { Types } from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 import { createArrayFromCommaDelineated } from 'payload'
+
+const { Types } = mongoose
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {

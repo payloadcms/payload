@@ -1,8 +1,10 @@
 import { flattenAllFields, type Field, type SanitizedConfig } from 'payload'
 
-import { Types } from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 
 import { transform } from './transform.js'
+
+const { Types } = mongoose
 import type { MongooseAdapter } from '../index.js'
 
 const flattenRelationshipValues = (obj: Record<string, any>, prefix = ''): Record<string, any> => {

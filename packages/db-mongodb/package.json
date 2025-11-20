@@ -29,6 +29,11 @@
       "import": "./src/exports/migration-utils.ts",
       "types": "./src/exports/migration-utils.ts",
       "default": "./src/exports/migration-utils.ts"
+    },
+    "./server-externals": {
+      "import": "./src/exports/server-externals.ts",
+      "types": "./src/exports/server-externals.ts",
+      "default": "./src/exports/server-externals.ts"
     }
   },
   "main": "./src/index.ts",
@@ -75,6 +80,11 @@
         "import": "./dist/exports/migration-utils.js",
         "types": "./dist/exports/migration-utils.d.ts",
         "default": "./dist/exports/migration-utils.js"
+      },
+      "./server-externals": {
+        "import": "./dist/exports/server-externals.js",
+        "types": "./dist/exports/server-externals.d.ts",
+        "default": "./dist/exports/server-externals.js"
       }
     },
     "main": "./dist/index.js",

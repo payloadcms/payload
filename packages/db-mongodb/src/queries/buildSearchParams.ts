@@ -1,8 +1,10 @@
 import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
-import { Types } from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 import { APIError, getFieldByPath, getLocalizedPaths } from 'payload'
+
+const { Types } = mongoose
 import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'

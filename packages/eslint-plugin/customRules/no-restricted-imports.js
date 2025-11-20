@@ -125,15 +125,32 @@ function resolvePathsFromFile(context, filePath) {
 
     const fileContent = fs.readFileSync(fullPath, 'utf8')
 
-    // Extract export declarations with string literals
-    // Matches patterns like: export * as '@aws-sdk/client-cognito-identity' from '@aws-sdk/client-cognito-identity'
-    const exportRegex = /export\s+\*\s+as\s+['"]([^'"]+)['"]\s+from\s+['"]([^'"]+)['"]/g
+    // Extract export declarations
+    // Matches patterns like:
+    // - export * as moduleName from 'package-name'
+    // - export { moduleName } from 'package-name'
+    const exportAsRegex = /export\s+\*\s+as\s+(\w+)\s+from\s+['"]([^'"]+)['"]/g
+    const exportNamedRegex = /export\s+\{[^}]*\}\s+from\s+['"]([^'"]+)['"]/g
+    const exportDefaultRegex = /export\s+\{\s*default\s+as\s+(\w+)\s*\}\s+from\s+['"]([^'"]+)['"]/g
+
     const paths = []
     let match
 
-    while ((match = exportRegex.exec(fileContent)) !== null) {
-      // Use the exported name (first capture group)
-      paths.push(match[1])
+    // Match "export * as name from 'package'" and extract the package name
+    while ((match = exportAsRegex.exec(fileContent)) !== null) {
+      paths.push(match[2]) // Use the package name (second capture group)
+    }
+
+    // Match "export { default as name } from 'package'" and extract the package name
+    exportDefaultRegex.lastIndex = 0
+    while ((match = exportDefaultRegex.exec(fileContent)) !== null) {
+      paths.push(match[2]) // Use the package name (second capture group)
+    }
+
+    // Match "export { name } from 'package'" and extract the package name
+    exportNamedRegex.lastIndex = 0
+    while ((match = exportNamedRegex.exec(fileContent)) !== null) {
+      paths.push(match[1]) // Use the package name (first capture group)
     }
 
     return paths

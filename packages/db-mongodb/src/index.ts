@@ -20,7 +20,7 @@ import type {
   UpdateVersionArgs,
 } from 'payload'
 
-import mongoose from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 
 import type {

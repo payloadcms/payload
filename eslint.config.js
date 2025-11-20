@@ -108,6 +108,84 @@ export default [
     },
   },
   {
+    files: ['packages/drizzle/**/*.ts', 'packages/drizzle/**/*.tsx'],
+    rules: {
+      // Note: @payloadcms/drizzle is not directly installed by users, so we allow direct imports here.
+      // The heavy packages (drizzle-kit, drizzle-orm) are re-exported through db adapter server-externals.
+      'payload/no-restricted-imports': 'off',
+    },
+  },
+  {
+    files: ['packages/db-mongodb/**/*.ts', 'packages/db-mongodb/**/*.tsx'],
+    rules: {
+      'payload/no-restricted-imports': [
+        'error',
+        {
+          resolvePathsFrom: 'src/exports/server-externals.ts',
+          restrictTypeImports: false,
+          message:
+            'Direct imports from server-externals packages are not allowed. Use type-only imports or import from @payloadcms/db-mongodb/server-externals instead.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/db-postgres/**/*.ts', 'packages/db-postgres/**/*.tsx'],
+    rules: {
+      'payload/no-restricted-imports': [
+        'error',
+        {
+          resolvePathsFrom: 'src/exports/server-externals.ts',
+          restrictTypeImports: false,
+          message:
+            'Direct imports from server-externals packages are not allowed. Use type-only imports or import from @payloadcms/db-postgres/server-externals instead.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/db-sqlite/**/*.ts', 'packages/db-sqlite/**/*.tsx'],
+    rules: {
+      'payload/no-restricted-imports': [
+        'error',
+        {
+          resolvePathsFrom: 'src/exports/server-externals.ts',
+          restrictTypeImports: false,
+          message:
+            'Direct imports from server-externals packages are not allowed. Use type-only imports or import from @payloadcms/db-sqlite/server-externals instead.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/db-vercel-postgres/**/*.ts', 'packages/db-vercel-postgres/**/*.tsx'],
+    rules: {
+      'payload/no-restricted-imports': [
+        'error',
+        {
+          resolvePathsFrom: 'src/exports/server-externals.ts',
+          restrictTypeImports: false,
+          message:
+            'Direct imports from server-externals packages are not allowed. Use type-only imports or import from @payloadcms/db-vercel-postgres/server-externals instead.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/db-d1-sqlite/**/*.ts', 'packages/db-d1-sqlite/**/*.tsx'],
+    rules: {
+      'payload/no-restricted-imports': [
+        'error',
+        {
+          resolvePathsFrom: 'src/exports/server-externals.ts',
+          restrictTypeImports: false,
+          message:
+            'Direct imports from server-externals packages are not allowed. Use type-only imports or import from @payloadcms/db-d1-sqlite/server-externals instead.',
+        },
+      ],
+    },
+  },
+  {
     files: ['templates/vercel-postgres/**'],
     rules: {
       'no-restricted-exports': 'off',

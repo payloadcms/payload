@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 
 import type { MongooseAdapter } from '../index.js'
 import type { GlobalModel } from '../types.js'

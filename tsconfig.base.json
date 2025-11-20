@@ -90,6 +90,27 @@
       "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
       "@payloadcms/storage-uploadthing/client": [
         "./packages/storage-uploadthing/src/exports/client.ts"
+      ],
+      "@payloadcms/payload-cloud/server-externals": [
+        "./packages/payload-cloud/src/exports/server-externals.ts"
+      ],
+      "@payloadcms/drizzle/server-externals": [
+        "./packages/drizzle/src/exports/server-externals.ts"
+      ],
+      "@payloadcms/db-mongodb/server-externals": [
+        "./packages/db-mongodb/src/exports/server-externals.ts"
+      ],
+      "@payloadcms/db-postgres/server-externals": [
+        "./packages/db-postgres/src/exports/server-externals.ts"
+      ],
+      "@payloadcms/db-sqlite/server-externals": [
+        "./packages/db-sqlite/src/exports/server-externals.ts"
+      ],
+      "@payloadcms/db-vercel-postgres/server-externals": [
+        "./packages/db-vercel-postgres/src/exports/server-externals.ts"
+      ],
+      "@payloadcms/db-d1-sqlite/server-externals": [
+        "./packages/db-d1-sqlite/src/exports/server-externals.ts"
       ]
     }
   },

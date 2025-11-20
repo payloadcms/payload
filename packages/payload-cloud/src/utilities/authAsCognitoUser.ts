@@ -1,6 +1,5 @@
-import * as serverExternals from '@payloadcms/payload-cloud/server-externals'
-const { AuthenticationDetails, CognitoUser, CognitoUserPool } =
-  serverExternals['amazon-cognito-identity-js']
+import { amazonCognitoIdentityJs } from '@payloadcms/payload-cloud/server-externals'
+const { AuthenticationDetails, CognitoUser, CognitoUserPool } = amazonCognitoIdentityJs
 
 import type { CognitoUserSession } from 'amazon-cognito-identity-js'
 

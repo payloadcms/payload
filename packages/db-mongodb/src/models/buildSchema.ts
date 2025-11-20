@@ -1,6 +1,6 @@
 import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
 
-import mongoose from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 import {
   type ArrayField,
   type BlocksField,

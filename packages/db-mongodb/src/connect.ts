@@ -1,7 +1,7 @@
 import type { ConnectOptions } from 'mongoose'
 import type { Connect, Migration } from 'payload'
 
-import mongoose from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 import { defaultBeginTransaction } from 'payload'
 
 import type { MongooseAdapter } from './index.js'

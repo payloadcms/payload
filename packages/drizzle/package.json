@@ -39,6 +39,11 @@
       "import": "./src/exports/types-deprecated.ts",
       "types": "./src/exports/types-deprecated.ts",
       "default": "./src/exports/types-deprecated.ts"
+    },
+    "./server-externals": {
+      "import": "./src/exports/server-externals.ts",
+      "types": "./src/exports/server-externals.ts",
+      "default": "./src/exports/server-externals.ts"
     }
   },
   "main": "./src/index.ts",
@@ -96,6 +101,11 @@
         "import": "./dist/exports/types-deprecated.js",
         "types": "./dist/exports/types-deprecated.d.ts",
         "default": "./dist/exports/types-deprecated.js"
+      },
+      "./server-externals": {
+        "import": "./dist/exports/server-externals.js",
+        "types": "./dist/exports/server-externals.d.ts",
+        "default": "./dist/exports/server-externals.js"
       }
     },
     "main": "./dist/index.js",

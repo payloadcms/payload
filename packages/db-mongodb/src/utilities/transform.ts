@@ -11,8 +11,10 @@ import type {
   UploadField,
 } from 'payload'
 
-import { Types } from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 import { flattenAllFields, traverseFields } from 'payload'
+
+const { Types } = mongoose
 import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'

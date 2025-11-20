@@ -1,8 +1,11 @@
 import type { Create } from 'payload'
 
-import { type CreateOptions, Types } from 'mongoose'
+import type { CreateOptions } from 'mongoose'
+import { mongoose } from '@payloadcms/db-mongodb/server-externals'
 
 import type { MongooseAdapter } from './index.js'
+
+const { Types } = mongoose
 
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'

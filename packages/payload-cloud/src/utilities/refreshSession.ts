@@ -1,9 +1,13 @@
-import * as serverExternals from '@payloadcms/payload-cloud/server-externals'
-const { CognitoIdentityClient } = serverExternals['@aws-sdk/client-cognito-identity']
-const { S3 } = serverExternals['@aws-sdk/client-s3']
+import {
+  awsSdkClientCognitoIdentity,
+  awsSdkClientS3,
+  awsSdkCredentialProviders,
+} from '@payloadcms/payload-cloud/server-externals'
+const { CognitoIdentityClient } = awsSdkClientCognitoIdentity
+const { S3 } = awsSdkClientS3
 import type { S3 as S3Type } from '@aws-sdk/client-s3'
 
-const { fromCognitoIdentityPool } = serverExternals['@aws-sdk/credential-providers']
+const { fromCognitoIdentityPool } = awsSdkCredentialProviders
 
 import { authAsCognitoUser } from './authAsCognitoUser.js'
 

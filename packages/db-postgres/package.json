@@ -54,6 +54,11 @@
       "import": "./src/drizzle-proxy/relations.ts",
       "types": "./src/drizzle-proxy/relations.ts",
       "default": "./src/drizzle-proxy/relations.ts"
+    },
+    "./server-externals": {
+      "import": "./src/exports/server-externals.ts",
+      "types": "./src/exports/server-externals.ts",
+      "default": "./src/exports/server-externals.ts"
     }
   },
   "main": "./src/index.ts",
@@ -131,6 +136,11 @@
         "import": "./dist/drizzle-proxy/relations.js",
         "types": "./dist/drizzle-proxy/relations.d.ts",
         "default": "./dist/drizzle-proxy/relations.js"
+      },
+      "./server-externals": {
+        "import": "./dist/exports/server-externals.js",
+        "types": "./dist/exports/server-externals.d.ts",
+        "default": "./dist/exports/server-externals.js"
       }
     },
     "main": "./dist/index.js",

@@ -117,13 +117,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       //
       //
       // External because it installs mongoose (part of default serverExternalPackages: https://github.com/vercel/next.js/blob/canary/packages/next/src/lib/server-external-packages.json => would throw warning if we don't exclude the entry-point package):
-      '@payloadcms/db-mongodb',
-      // External because they install dependencies like drizzle, libsql, esbuild etc.:
-      '@payloadcms/db-postgres',
-      '@payloadcms/db-sqlite',
-      '@payloadcms/db-vercel-postgres',
-      '@payloadcms/drizzle',
-      '@payloadcms/db-d1-sqlite',
+      '@payloadcms/db-mongodb/server-externals',
+      // External because they install dependencies like drizzle-kit:
+      '@payloadcms/db-postgres/server-externals',
+      '@payloadcms/db-sqlite/server-externals',
+      '@payloadcms/db-vercel-postgres/server-externals',
+      '@payloadcms/db-d1-sqlite/server-externals',
       // External because they install @aws-sdk/client-s3:
       '@payloadcms/payload-cloud/server-externals',
       // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.

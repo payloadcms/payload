@@ -1,7 +1,7 @@
 import type { PaginateOptions, Schema } from 'mongoose'
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
-import paginate from 'mongoose-paginate-v2'
+import { 'mongoose-paginate-v2': paginate } from '@payloadcms/db-mongodb/server-externals'
 
 import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'

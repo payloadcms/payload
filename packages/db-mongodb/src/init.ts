@@ -1,8 +1,9 @@
 import type { PaginateOptions } from 'mongoose'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
-import mongoose from 'mongoose'
-import paginate from 'mongoose-paginate-v2'
+import { mongoose, mongoosePaginateV2 } from '@payloadcms/db-mongodb/server-externals'
+const { paginate } = mongoosePaginateV2
+
 import {
   buildVersionCollectionFields,
   buildVersionCompoundIndexes,
