@@ -112,6 +112,94 @@ export default config
 | `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                              |
 
+## Connecting to MCP Clients
+
+After installing and configuring the plugin, you can connect apps with MCP client capabilities to Payload.
+
+### Step 1: Create an API Key
+
+1. Start your Payload server
+2. Navigate to your admin panel at `http://localhost:3000/admin`
+3. Go to the **MCP → API Keys** collection
+4. Click **Create New**
+5. Allow or Disallow MCP traffic permissions for each collection (enable find, create, update, delete as needed)
+6. Click **Create** and copy the uniquely generated API key
+
+### Step 2: Configure Your MCP Client
+
+MCP Clients can be configured to interact with your MCP server.
+These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
+
+<Banner type="warning">
+  Caution: the format of these JSON files may change over time. Please check the
+  client website for updates.
+</Banner>
+
+Our recommended approach to make your server available for most MCP clients is to use the [mcp-remote](https://www.npmjs.com/package/mcp-remote) package via `npx`.
+
+Below are configuration examples for popular MCP clients.
+
+#### [VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
+
+```json
+{
+  "mcp.servers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
+    }
+  }
+}
+```
+
+#### [Cursor](https://cursor.com/docs/context/mcp)
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
+    }
+  }
+}
+```
+
+#### Other MCP Clients
+
+For connections without using `mcp-remote` you can use this configuration format:
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer API-KEY-HERE"
+      }
+    }
+  }
+}
+```
+
+## Customizations
+
+The plugin supports fully custom `prompts`, `tools` and `resources` that can be called or retrieved by MCP clients.
+After defining a custom method you can allow / disallow the feature from the admin panel by adjusting the `API Key` MCP Options checklist.
+
 ## Prompts
 
 Prompts allow models to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
@@ -126,7 +214,7 @@ prompts: [
       content: z.string().describe('The content to review'),
       criteria: z.array(z.string()).describe('Review criteria'),
     },
-    handler: ({ content, criteria }) => ({
+    handler: ({ content, criteria }, req) => ({
       messages: [
         {
           content: {
@@ -154,6 +242,7 @@ resources: [
     description: 'Company content creation guidelines',
     uri: 'guidelines://company',
     mimeType: 'text/markdown',
+    handler: (uri, req) => ({
     handler: (uri, req) => ({
       contents: [
         {
@@ -198,7 +287,6 @@ tools: [
     description: 'Get useful scores about content in posts',
     handler: async (args, req) => {
       const { payload } = req
-
       const stats = await payload.find({
         collection: 'posts',
         where: {
@@ -248,6 +336,12 @@ mcpPlugin({
         { label: 'Development', value: 'dev' },
         { label: 'Marketing', value: 'marketing' },
       ],
+    })
+
+    // You can also add hooks
+    collection.hooks?.beforeRead?.push(({ doc, req }) => {
+      req.payload.logger.info('Before Read MCP hook!')
+      return doc
     })
     return collection
   },
@@ -362,44 +456,4 @@ const config = buildConfig({
     }),
   ],
 })
-```
-
-## MCP Clients
-
-MCP Clients can be configured to interact with your MCP server. These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
-
-> Caution: the format of these JSON files may change over time. Please check the client website for updates.
-
-[VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
-
-```json
-{
-  "mcp.servers": {
-    "Payload": {
-      "url": "http://localhost:3000/api/mcp",
-      "headers": {
-        "Authorization": "Bearer API-KEY-HERE"
-      }
-    }
-  }
-}
-```
-
-[Cursor](https://cursor.com/docs/context/mcp)
-
-```json
-{
-  "mcpServers": {
-    "Payload": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "http://localhost:3000/api/mcp",
-        "--header",
-        "Authorization: Bearer API-KEY-HERE"
-      ]
-    }
-  }
-}
 ```

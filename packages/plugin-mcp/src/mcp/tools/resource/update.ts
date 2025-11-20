@@ -20,13 +20,15 @@ export const updateResourceTool = (
 ) => {
   const tool = async (
     data: string,
-    id?: string,
+    id?: number | string,
     where?: string,
     draft: boolean = false,
     depth: number = 0,
     overrideLock: boolean = true,
     filePath?: string,
     overwriteExistingFiles: boolean = false,
+    locale?: string,
+    fallbackLocale?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -37,7 +39,7 @@ export const updateResourceTool = (
 
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}`,
+        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -120,6 +122,8 @@ export const updateResourceTool = (
           user,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
+          ...(locale && { locale }),
+          ...(fallbackLocale && { fallbackLocale }),
         }
 
         if (verboseLogs) {
@@ -168,6 +172,8 @@ ${JSON.stringify(result, null, 2)}
           where: whereClause,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
+          ...(locale && { locale }),
+          ...(fallbackLocale && { fallbackLocale }),
         }
 
         if (verboseLogs) {
@@ -255,9 +261,10 @@ ${JSON.stringify(errors, null, 2)}
     const convertedFields = convertCollectionSchemaToZod(schema)
 
     // Create a new schema that combines the converted fields with update-specific parameters
+    // Use .partial() to make all fields optional for partial updates
     const updateResourceSchema = z.object({
-      ...convertedFields.shape,
-      id: z.string().optional().describe('The ID of the document to update'),
+      ...convertedFields.partial().shape,
+      id: z.union([z.string(), z.number()]).optional().describe('The ID of the document to update'),
       depth: z
         .number()
         .optional()
@@ -268,7 +275,17 @@ ${JSON.stringify(errors, null, 2)}
         .optional()
         .default(false)
         .describe('Whether to update the document as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
       filePath: z.string().optional().describe('File path for file uploads'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
       overrideLock: z
         .boolean()
         .optional()
@@ -294,7 +311,9 @@ ${JSON.stringify(errors, null, 2)}
           id,
           depth,
           draft,
+          fallbackLocale,
           filePath,
+          locale,
           overrideLock,
           overwriteExistingFiles,
           where,
@@ -304,13 +323,15 @@ ${JSON.stringify(errors, null, 2)}
         const data = JSON.stringify(fieldData)
         return await tool(
           data,
-          id as string | undefined,
+          id as number | string | undefined,
           where as string | undefined,
           draft as boolean,
           depth as number,
           overrideLock as boolean,
           filePath as string | undefined,
           overwriteExistingFiles as boolean,
+          locale as string | undefined,
+          fallbackLocale as string | undefined,
         )
       },
     )
