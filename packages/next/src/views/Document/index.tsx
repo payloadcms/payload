@@ -21,7 +21,7 @@ import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
-import { logError } from 'payload'
+import { isolateObjectProperty, logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -140,6 +140,28 @@ export const renderDocument = async ({
 
   const isTrashedDoc = Boolean(doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string')
 
+  // CRITICAL FIX FOR TRANSACTION RACE CONDITION:
+  // When running parallel operations with Promise.all, if they share the same req object
+  // and one operation calls initTransaction() which MUTATES req.transactionID, that mutation
+  // is visible to all parallel operations. This causes:
+  // 1. Operation A (e.g., getDocumentPermissions → docAccessOperation) calls initTransaction()
+  //    which sets req.transactionID = Promise, then resolves it to a UUID
+  // 2. Operation B (e.g., getIsLocked) running in parallel receives the SAME req with the mutated transactionID
+  // 3. Operation A (does not even know that Operation B even exists and is stil using the transactionID) commits/ends its transaction
+  // 4. Operation B tries to use the now-expired session → MongoExpiredSessionError!
+  //
+  // Solution: Use isolateObjectProperty to create a Proxy that isolates the 'transactionID' property.
+  // This allows each operation to have its own transactionID without affecting the parent req.
+  // If parent req already has a transaction, preserve it (don't isolate), since this
+  // issue only arises when one of the operations calls initTransaction() themselves -
+  // because then, that operation will also try to commit/end the transaction itself.
+
+  // If the transactionID is already set, the parallel operations will not try to
+  // commit/end the transaction themselves, so we don't need to isolate the
+  // transactionID property.
+  const reqForPermissions = req.transactionID ? req : isolateObjectProperty(req, 'transactionID')
+  const reqForLockCheck = req.transactionID ? req : isolateObjectProperty(req, 'transactionID')
+
   const [
     docPreferences,
     { docPermissions, hasPublishPermission, hasSavePermission },
@@ -155,22 +177,22 @@ export const renderDocument = async ({
       user,
     }),
 
-    // Get permissions
+    // Get permissions - isolated transactionID prevents cross-contamination
     getDocumentPermissions({
       id: idFromArgs,
       collectionConfig,
       data: doc,
       globalConfig,
-      req,
+      req: reqForPermissions,
     }),
 
-    // Fetch document lock state
+    // Fetch document lock state - isolated transactionID prevents cross-contamination
     getIsLocked({
       id: idFromArgs,
       collectionConfig,
       globalConfig,
       isEditing,
-      req,
+      req: reqForLockCheck,
     }),
 
     // get entity preferences
