@@ -94,7 +94,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     setHasLocalizedFields(hasLocalizedField)
   }, [entityConfig?.fields])
 
-  const canPublishSpecificLocale = localization && hasLocalizedFields && hasPublishPermission
+  const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 
   const operation = useOperation()
 
@@ -193,8 +193,8 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   )
 
   // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
-  const publishAll =
-    !canPublishSpecificLocale ||
+  const isDefaultPublishAll =
+    !isSpecificLocalePublishEnabled ||
     (localization && localization?.defaultLocalePublishOption !== 'active')
 
   const activeLocale =
@@ -209,11 +209,17 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       ? activeLocale.label
       : (activeLocale.label?.[localeCode] ?? undefined))
 
-  const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
-  const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })
+  const defaultPublish = isDefaultPublishAll
+    ? publish
+    : () => publishSpecificLocale(activeLocale.code)
+  const defaultLabel = isDefaultPublishAll
+    ? label
+    : t('version:publishIn', { locale: activeLocaleLabel })
 
-  const secondaryPublish = publishAll ? () => publishSpecificLocale(activeLocale.code) : publish
-  const secondaryLabel = publishAll
+  const secondaryPublish = isDefaultPublishAll
+    ? () => publishSpecificLocale(activeLocale.code)
+    : publish
+  const secondaryLabel = isDefaultPublishAll
     ? t('version:publishIn', { locale: activeLocaleLabel })
     : t('version:publishAllLocales')
 
@@ -230,7 +236,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         onClick={defaultPublish}
         size="medium"
         SubMenuPopupContent={
-          canPublishSpecificLocale || canSchedulePublish
+          isSpecificLocalePublishEnabled || canSchedulePublish
             ? ({ close }) => {
                 return (
                   <React.Fragment>
@@ -244,7 +250,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
-                    {canPublishSpecificLocale && (
+                    {isSpecificLocalePublishEnabled && (
                       <PopupList.ButtonGroup>
                         <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
                           {secondaryLabel}
@@ -258,7 +264,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         }
         type="button"
       >
-        {canPublishSpecificLocale ? defaultLabel : label}
+        {isSpecificLocalePublishEnabled ? defaultLabel : label}
       </FormSubmit>
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
