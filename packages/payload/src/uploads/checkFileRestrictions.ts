@@ -51,6 +51,7 @@ export const checkFileRestrictions = async ({
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
+  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -81,7 +82,7 @@ export const checkFileRestrictions = async ({
   if (configMimeTypes.length > 0) {
     let detected = await fileTypeFromBuffer(file.data)
 
-    if (!detected && expectsDetectableType) {
+    if (!detected && expectsDetectableType && !useTempFiles) {
       errors.push(`File buffer returned no detectable MIME type.`)
     }
 
