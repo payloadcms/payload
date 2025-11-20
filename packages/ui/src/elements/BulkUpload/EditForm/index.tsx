@@ -43,7 +43,7 @@ export function EditForm({
     Upload: CustomUpload,
   } = useDocumentInfo()
 
-  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
+  const { drawerSlug, onSave: onSaveFromContext } = useDocumentDrawerContext()
 
   const { getFormState } = useServerFunctions()
 
@@ -64,7 +64,10 @@ export function EditForm({
   const onSave = useCallback(
     (json) => {
       reportUpdate({
+        doc: json?.doc || json?.result,
+        drawerSlug,
         entitySlug: collectionSlug,
+        operation: 'create',
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
@@ -76,7 +79,7 @@ export function EditForm({
       }
       resetUploadEdits()
     },
-    [collectionSlug, onSaveFromContext, reportUpdate, resetUploadEdits],
+    [collectionSlug, onSaveFromContext, reportUpdate, resetUploadEdits, drawerSlug],
   )
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(

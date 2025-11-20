@@ -23,6 +23,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { tabSlug } from './collections/Tab/index.js'
 import {
   allFieldsLocalizedSlug,
@@ -3441,6 +3442,43 @@ describe('Localization', () => {
 
         expect(localizedFallback.title).not.toBeDefined()
       })
+
+      it('should respect fallback: false on relationship values', async () => {
+        const originalPost = await payload.create({
+          collection: allFieldsLocalizedSlug,
+          data: {
+            text: 'Post EN',
+          },
+          locale: 'en',
+        })
+
+        await payload.update({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          data: {
+            selfRelation: originalPost.id,
+          },
+          locale: 'en',
+        })
+
+        const spanishPostWithEnglishFallback = await payload.findByID({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          locale: 'es',
+          fallbackLocale: 'en',
+        })
+
+        expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
+
+        const spanishPostWithNoFallback = await payload.findByID({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          locale: 'es',
+          fallbackLocale: false,
+        })
+
+        expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
+      })
     })
   })
 
@@ -3459,6 +3497,11 @@ describe('Localization', () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
+          t1: {
+            t2: {
+              text: 'EN Deep Text',
+            },
+          },
           g1: {
             g2: {
               g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
@@ -3536,9 +3579,42 @@ describe('Localization', () => {
 
       // Verify deeply nested localization has locale keys only at topmost localized field
       expect((allLocalesDoc.g1 as any).en).toBeDefined()
+      expect((allLocalesDoc.g1 as any).g2).toBeUndefined()
       expect((allLocalesDoc.g1 as any).en.g2.g2a1).toHaveLength(2)
       expect((allLocalesDoc.g1 as any).en.g2.g2a1[0].text).toBe('EN Deep 1')
       expect((allLocalesDoc.g1 as any).es).toBeUndefined()
+
+      // Verify deeply nested localization in tab has locale keys only at topmost localized field
+      expect((allLocalesDoc.t1 as any).en).toBeDefined()
+      expect((allLocalesDoc.t1 as any).t2).toBeUndefined()
+      expect((allLocalesDoc.t1 as any).en.t2.text).toBe('EN Deep Text')
+      expect((allLocalesDoc.t1 as any).es).toBeUndefined()
+    })
+  })
+
+  describe('Localization like fields', () => {
+    it('should not localize fields that merely resemble localization fields', async () => {
+      const doc = await payload.create({
+        collection: noLocalizedFieldsCollectionSlug,
+        data: {
+          text: 'title',
+          group: {
+            en: {
+              text: 'some text',
+            },
+          },
+        },
+      })
+
+      const queriedDoc = await payload.find({
+        collection: noLocalizedFieldsCollectionSlug,
+        where: {
+          'group.en.text': { equals: 'some text' },
+        },
+      })
+
+      expect(queriedDoc.docs).toHaveLength(1)
+      expect(queriedDoc.docs[0]!.id).toBe(doc.id)
     })
   })
 })
