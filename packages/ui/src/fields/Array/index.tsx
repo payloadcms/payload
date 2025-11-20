@@ -67,7 +67,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const {
@@ -455,7 +455,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               {showMinRows && (
                 <Banner type="error">
                   {t('validation:requiresAtLeast', {
-                    count: minRowsProp ?? minRows,
+                    count: minRows,
                     label:
                       getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
                       t(minRows > 1 ? 'general:rows' : 'general:row'),
