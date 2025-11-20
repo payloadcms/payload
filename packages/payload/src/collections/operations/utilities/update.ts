@@ -298,7 +298,7 @@ export const updateDocument = async <
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
-    if (collectionConfig.versions.localizeMetadata) {
+    if (config.localization && collectionConfig.versions.drafts) {
       const mainDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         req,
