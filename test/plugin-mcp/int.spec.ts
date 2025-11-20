@@ -55,6 +55,7 @@ const getApiKey = async (enableUpdate = false, enableDelete = false): Promise<st
     data: {
       enableAPIKey: true,
       label: 'Test API Key',
+      // @ts-expect-error - update is not a valid property
       posts: { find: true, create: true, update: enableUpdate, delete: enableDelete },
       products: { find: true },
       apiKey: randomUUID(),
@@ -79,7 +80,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
       .then((res) => res.json())
 
+    // @ts-expect-error - data is not a valid property
     token = data.token
+    // @ts-expect-error - data.user is a valid property
     userId = data.user.id
   })
 
@@ -133,9 +136,13 @@ describe('@payloadcms/plugin-mcp', () => {
       .then((res) => res.json())
 
     expect(data).toBeDefined()
+    // @ts-expect-error - data is a valid property
     expect(data.jsonrpc).toBe('2.0')
+    // @ts-expect-error - data is a valid property
     expect(data.error).toBeDefined()
+    // @ts-expect-error - data is a valid property
     expect(data.error.code).toBe(-32000)
+    // @ts-expect-error - data is a valid property
     expect(data.error.message).toBe('Method not allowed.')
   })
 
@@ -220,6 +227,161 @@ describe('@payloadcms/plugin-mcp', () => {
       'Rolls a virtual dice with a specified number of sides',
     )
     expect(json.result.tools[3].inputSchema).toBeDefined()
+
+    // Input Schemas
+    expect(json.result.tools[0].inputSchema).toBeDefined()
+    expect(json.result.tools[0].inputSchema.required).not.toBeDefined()
+    expect(json.result.tools[0].inputSchema.type).toBe('object')
+    expect(json.result.tools[0].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[0].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[0].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.id).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.id.type).toHaveLength(2)
+    expect(json.result.tools[0].inputSchema.properties.id.type[0]).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.id.type[1]).toBe('number')
+    expect(json.result.tools[0].inputSchema.properties.id.description).toContain(
+      'Optional: specific document ID to retrieve. If not provided, returns all documents',
+    )
+    expect(json.result.tools[0].inputSchema.properties.fallbackLocale).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.fallbackLocale.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.fallbackLocale.description).toContain(
+      'Optional: fallback locale code to use when requested locale is not available',
+    )
+    expect(json.result.tools[0].inputSchema.properties.limit).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.limit.type).toBe('integer')
+    expect(json.result.tools[0].inputSchema.properties.limit.minimum).toBe(1)
+    expect(json.result.tools[0].inputSchema.properties.limit.maximum).toBe(100)
+    expect(json.result.tools[0].inputSchema.properties.limit.default).toBe(10)
+    expect(json.result.tools[0].inputSchema.properties.limit.description).toContain(
+      'Maximum number of documents to return (default: 10, max: 100)',
+    )
+    expect(json.result.tools[0].inputSchema.properties.locale).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.locale.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.locale.description).toContain(
+      'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+    )
+    expect(json.result.tools[0].inputSchema.properties.page).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.page.type).toBe('integer')
+    expect(json.result.tools[0].inputSchema.properties.page.minimum).toBe(1)
+    expect(json.result.tools[0].inputSchema.properties.page.default).toBe(1)
+    expect(json.result.tools[0].inputSchema.properties.page.description).toContain(
+      'Page number for pagination (default: 1)',
+    )
+    expect(json.result.tools[0].inputSchema.properties.sort).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.sort.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.sort.description).toContain(
+      'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
+    )
+    expect(json.result.tools[0].inputSchema.properties.where).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.where.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.where.description).toContain(
+      'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+    )
+
+    expect(json.result.tools[1].inputSchema).toBeDefined()
+    expect(json.result.tools[1].inputSchema.required).toBeDefined()
+    expect(json.result.tools[1].inputSchema.required).toHaveLength(1)
+    expect(json.result.tools[1].inputSchema.required[0]).toBe('title')
+    expect(json.result.tools[1].inputSchema.type).toBe('object')
+    expect(json.result.tools[1].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[1].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[1].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.title).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.title.type).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.title.description).toBe(
+      'The title of the post',
+    )
+    expect(json.result.tools[1].inputSchema.properties.content).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.content.type).toHaveLength(2)
+    expect(json.result.tools[1].inputSchema.properties.content.type[0]).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.content.type[1]).toBe('null')
+    expect(json.result.tools[1].inputSchema.properties.content.description).toBe(
+      'The content of the post',
+    )
+    expect(json.result.tools[1].inputSchema.properties.author).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.author.type).toBe(undefined)
+    expect(json.result.tools[1].inputSchema.properties.author.description).toBe(
+      'The author of the post',
+    )
+    expect(json.result.tools[1].inputSchema.properties.draft).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.draft.type).toBe('boolean')
+    expect(json.result.tools[1].inputSchema.properties.draft.description).toBe(
+      'Whether to create the document as a draft',
+    )
+    expect(json.result.tools[1].inputSchema.properties.fallbackLocale).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.fallbackLocale.type).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.fallbackLocale.description).toBe(
+      'Optional: fallback locale code to use when requested locale is not available',
+    )
+    expect(json.result.tools[1].inputSchema.properties.locale).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.locale.type).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.locale.description).toBe(
+      'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+    )
+
+    expect(json.result.tools[2].inputSchema).toBeDefined()
+    expect(json.result.tools[2].inputSchema.required).not.toBeDefined()
+    expect(json.result.tools[2].inputSchema.type).toBe('object')
+    expect(json.result.tools[2].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[2].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[2].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.id).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.id.type).toHaveLength(2)
+    expect(json.result.tools[2].inputSchema.properties.id.type[0]).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.id.type[1]).toBe('number')
+    expect(json.result.tools[2].inputSchema.properties.id.description).toContain(
+      'Optional: specific document ID to retrieve. If not provided, returns all documents',
+    )
+    expect(json.result.tools[2].inputSchema.properties.fallbackLocale).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.fallbackLocale.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.fallbackLocale.description).toBe(
+      'Optional: fallback locale code to use when requested locale is not available',
+    )
+    expect(json.result.tools[2].inputSchema.properties.limit).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.limit.type).toBe('integer')
+    expect(json.result.tools[2].inputSchema.properties.limit.minimum).toBe(1)
+    expect(json.result.tools[2].inputSchema.properties.limit.maximum).toBe(100)
+    expect(json.result.tools[2].inputSchema.properties.limit.default).toBe(10)
+    expect(json.result.tools[2].inputSchema.properties.limit.description).toContain(
+      'Maximum number of documents to return (default: 10, max: 100)',
+    )
+    expect(json.result.tools[2].inputSchema.properties.locale).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.locale.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.locale.description).toContain(
+      'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+    )
+    expect(json.result.tools[2].inputSchema.properties.page).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.page.type).toBe('integer')
+    expect(json.result.tools[2].inputSchema.properties.page.minimum).toBe(1)
+    expect(json.result.tools[2].inputSchema.properties.page.default).toBe(1)
+    expect(json.result.tools[2].inputSchema.properties.page.description).toContain(
+      'Page number for pagination (default: 1)',
+    )
+    expect(json.result.tools[2].inputSchema.properties.sort).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.sort.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.sort.description).toContain(
+      'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
+    )
+    expect(json.result.tools[2].inputSchema.properties.where).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.where.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.where.description).toContain(
+      'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+    )
+
+    expect(json.result.tools[3].inputSchema).toBeDefined()
+    expect(json.result.tools[3].inputSchema.required).not.toBeDefined()
+    expect(json.result.tools[3].inputSchema.type).toBe('object')
+    expect(json.result.tools[3].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[3].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[3].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[3].inputSchema.properties.sides).toBeDefined()
+    expect(json.result.tools[3].inputSchema.properties.sides.type).toBe('integer')
+    expect(json.result.tools[3].inputSchema.properties.sides.minimum).toBe(2)
+    expect(json.result.tools[3].inputSchema.properties.sides.maximum).toBe(1000)
+    expect(json.result.tools[3].inputSchema.properties.sides.default).toBe(6)
+    expect(json.result.tools[3].inputSchema.properties.sides.description).toContain(
+      'Number of sides on the dice (default: 6)',
+    )
   })
 
   it('should list resources', async () => {
@@ -586,6 +748,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Publicación Española',
           content: 'Contenido Español',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'es',
       })
 
@@ -637,6 +800,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Título Español',
           content: 'Contenido Español',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'es',
       })
 
@@ -647,6 +811,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Titre Français',
           content: 'Contenu Français',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'fr',
       })
 
@@ -693,6 +858,7 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           title: 'English Only Title',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'en',
       })
 
