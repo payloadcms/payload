@@ -46,6 +46,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
@@ -57,6 +58,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   trash?: boolean
+  unpublishAllLocales?: boolean
   where: Where
 }
 
@@ -103,6 +105,7 @@ export const updateOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -115,6 +118,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
+      unpublishAllLocales,
       where,
     } = args
 
@@ -243,7 +247,6 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         const updatedDoc = await updateDocument({
           id,
-          accessResults: accessResult,
           autosave,
           collectionConfig,
           config,
@@ -258,10 +261,12 @@ export const updateOperation = async <
           overrideLock: overrideLock!,
           payload,
           populate,
+          publishAllLocales,
           publishSpecificLocale,
           req,
           select: select!,
           showHiddenFields: showHiddenFields!,
+          unpublishAllLocales,
         })
 
         return updatedDoc

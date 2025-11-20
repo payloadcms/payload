@@ -3834,7 +3834,6 @@ describe('Localization', () => {
         id: doc.id,
         data: {
           text: 'es published',
-
           _status: 'published',
         },
         locale: spanishLocale,
@@ -3863,6 +3862,67 @@ describe('Localization', () => {
       expect(latestVersion.text!.es).toBe('es published')
       expect(latestVersion._status!.en).toBe('draft')
       expect(latestVersion.text!.en).toBe('en draft')
+    })
+
+    it('should allow updating the status of all locales at once', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          text: 'en draft',
+          _status: 'draft',
+        },
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        data: {
+          text: 'es draft',
+          _status: 'draft',
+        },
+        locale: spanishLocale,
+      })
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        data: {
+          text: 'en published',
+          _status: 'published',
+        },
+        locale: 'en',
+        publishAllLocales: true,
+      })
+
+      const mainDocument = await payload.findByID({
+        locale: 'all',
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        draft: false,
+      })
+
+      expect(mainDocument._status!.en).toBe('published')
+      expect(mainDocument.text!.en).toBe('en published')
+      expect(mainDocument._status!.es).toBe('published')
+      expect(mainDocument.text!.es).toBe('es draft')
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        unpublishAllLocales: true,
+        data: {},
+      })
+
+      const unpublishedDocument = await payload.findByID({
+        locale: 'all',
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        draft: false,
+      })
+
+      expect(unpublishedDocument._status!.en).toBe('draft')
+      expect(unpublishedDocument._status!.es).toBe('draft')
     })
   })
 })

@@ -45,11 +45,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
+  unpublishAllLocales?: boolean
 }
 
 export const updateByIDOperation = async <
@@ -95,6 +97,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -106,6 +109,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
+      unpublishAllLocales,
     } = args
 
     if (!id) {
@@ -203,7 +207,6 @@ export const updateByIDOperation = async <
 
     let result = await updateDocument<TSlug, TSelect>({
       id,
-      accessResults,
       autosave,
       collectionConfig,
       config,
@@ -218,10 +221,12 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,
+      unpublishAllLocales,
     })
 
     await unlinkTempFiles({
