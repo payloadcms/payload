@@ -457,7 +457,9 @@ export const enTranslations = {
     copyTo: 'Copy to',
     copyToLocale: 'Copy to locale',
     localeToPublish: 'Locale to publish',
+    selectedLocales: 'Selected Locales',
     selectLocaleToCopy: 'Select locale to copy',
+    selectLocaleToDuplicate: 'Select locales to duplicate',
   },
   operators: {
     contains: 'contains',
@@ -567,6 +569,7 @@ export const enTranslations = {
     currentlyViewing: 'Currently viewing',
     currentPublishedVersion: 'Current Published Version',
     draft: 'Draft',
+    draftHasPublishedVersion: 'Draft (has published version)',
     draftSavedSuccessfully: 'Draft saved successfully.',
     lastSavedAgo: 'Last saved {{distance}} ago',
     modifiedOnly: 'Modified only',

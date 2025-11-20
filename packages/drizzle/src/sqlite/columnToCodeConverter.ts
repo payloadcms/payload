@@ -115,7 +115,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     } else if (typeof column.default === 'string') {
       sanitizedDefault = JSON.stringify(column.default)
     } else if (column.type === 'numeric') {
-      sanitizedDefault = `'${column.default}'`
+      sanitizedDefault = `${column.default}`
     }
 
     code = `${code}.default(${sanitizedDefault})`

@@ -457,7 +457,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopier til',
     copyToLocale: 'Kopiere til språk',
     localeToPublish: 'Språk å publisere',
+    selectedLocales: 'Valgte lokaliteter',
     selectLocaleToCopy: 'Velg språk for å kopiere',
+    selectLocaleToDuplicate: 'Velg lokalinnstillinger for å duplisere',
   },
   operators: {
     contains: 'inneholder',
@@ -567,6 +569,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Ser på for øyeblikket',
     currentPublishedVersion: 'Nåværende publiserte versjon',
     draft: 'Utkast',
+    draftHasPublishedVersion: 'Utkast (har publisert versjon)',
     draftSavedSuccessfully: 'Utkast lagret.',
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     modifiedOnly: 'Kun endret',

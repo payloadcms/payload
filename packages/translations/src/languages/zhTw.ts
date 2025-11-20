@@ -436,7 +436,9 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     copyTo: '複製到',
     copyToLocale: '複製至語言地區',
     localeToPublish: '要發佈的語言地區',
+    selectedLocales: '選擇的地區設定',
     selectLocaleToCopy: '選取要複製的語言地區',
+    selectLocaleToDuplicate: '選擇要複製的地區設定',
   },
   operators: {
     contains: '包含',
@@ -538,6 +540,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     currentlyViewing: '目前檢視',
     currentPublishedVersion: '目前已發佈版本',
     draft: '草稿',
+    draftHasPublishedVersion: '草稿（有已發佈版本）',
     draftSavedSuccessfully: '草稿已成功儲存。',
     lastSavedAgo: '上次儲存時間：{{distance}} 前',
     modifiedOnly: '僅顯示已變更的內容',

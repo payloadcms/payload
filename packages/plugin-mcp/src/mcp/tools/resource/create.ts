@@ -50,8 +50,9 @@ export const createResourceTool = (
       // Create the resource
       const result = await payload.create({
         collection: collectionSlug,
-        // TODO: Move the override to a `beforeChange` hook and extend the payloadAPI context req to include MCP request info.
-        data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+        data: parsedData,
+        overrideAccess: false,
+        req,
         user,
       })
 
@@ -110,7 +111,7 @@ ${JSON.stringify(result, null, 2)}
 
     server.tool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
       convertedFields.shape,
       async (params: Record<string, unknown>) => {
         const data = JSON.stringify(params)

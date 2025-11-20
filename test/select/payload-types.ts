@@ -76,6 +76,7 @@ export interface Config {
     'force-select': ForceSelect;
     upload: Upload;
     rels: Rel;
+    'relationships-blocks': RelationshipsBlock;
     'custom-ids': CustomId;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -96,6 +97,7 @@ export interface Config {
     'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
+    'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -208,6 +210,7 @@ export interface Post {
  */
 export interface Rel {
   id: string;
+  text?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -473,6 +476,24 @@ export interface ForceSelect {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks".
+ */
+export interface RelationshipsBlock {
+  id: string;
+  blocks?:
+    | {
+        hasMany?: (string | Rel)[] | null;
+        hasOne?: (string | null) | Rel;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -549,6 +570,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rels';
         value: string | Rel;
+      } | null)
+    | ({
+        relationTo: 'relationships-blocks';
+        value: string | RelationshipsBlock;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -1036,6 +1061,27 @@ export interface UploadSelect<T extends boolean = true> {
  * via the `definition` "rels_select".
  */
 export interface RelsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks_select".
+ */
+export interface RelationshipsBlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              hasMany?: T;
+              hasOne?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1171,6 +1217,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

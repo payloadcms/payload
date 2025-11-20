@@ -224,10 +224,11 @@ export const TenantSelectionProviderClient = ({
         if (tenantOptions.length > 0) {
           setTenantOptions([])
         }
+        router.refresh()
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, tenantOptions, initialValue])
+  }, [userID, userChanged, syncTenants, tenantOptions, initialValue, router])
 
   /**
    * If there is no initial value, clear the tenant and refresh the router.

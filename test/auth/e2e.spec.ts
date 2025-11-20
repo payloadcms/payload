@@ -30,7 +30,7 @@ const dirname = path.dirname(filename)
 
 let payload: PayloadTestSDK<Config>
 
-const { beforeAll, afterAll, describe } = test
+const { beforeAll, beforeEach, afterAll, describe } = test
 
 const headers = {
   'Content-Type': 'application/json',
@@ -52,17 +52,17 @@ describe('Auth', () => {
     context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
   })
 
   describe('create first user', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       await reInitializeDB({
         serverURL,
         snapshotKey: 'create-first-user',
         deleteOnly: true,
       })
-
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
       await payload.delete({
         collection: slug,
@@ -167,8 +167,6 @@ describe('Auth', () => {
         snapshotKey: 'auth',
         deleteOnly: false,
       })
-
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
       await login({ page, serverURL })
     })

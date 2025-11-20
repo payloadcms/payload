@@ -3,6 +3,7 @@ import type {
   LocaleValue,
   Payload,
   RequestContext,
+  TypedFallbackLocale,
   TypedLocale,
 } from '../../../index.js'
 import type {
@@ -43,7 +44,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale | TypedLocale[]
+  fallbackLocale?: TypedFallbackLocale
   /**
    * Include info about the lock status to the result with fields: `_isLocked` and `_userEditing`
    */

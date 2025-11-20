@@ -53,7 +53,7 @@ The `options` object contains the following properties:
 | ------------ | ----------------------------------------------------- |
 | **`locale`** | The current locale of the Document being edited.      |
 | **`req`**    | The Payload Request object.                           |
-| **`token`**  | The JWT token of the currently authenticated in user. |
+| **`token`**  | The JWT token of the currently authenticated user.    |
 
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
 
@@ -81,10 +81,10 @@ import type { CollectionConfig } from 'payload'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
-    preview: ({ slug, collection }) => {
+    preview: ({ slug }) => {
       const encodedParams = new URLSearchParams({
         slug,
-        collection,
+        collection: 'pages',
         path: `/${slug}`,
         previewSecret: process.env.PREVIEW_SECRET || '',
       })
@@ -225,9 +225,38 @@ export default async function Page({ params: paramsPromise }) {
 ```
 
 <Banner type="success">
-  **Note:** For fully working example of this, check of the official [Draft
+  **Note:** For fully working example of this, check out the official [Draft
   Preview
   Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview)
   in the [Examples
   Directory](https://github.com/payloadcms/payload/tree/main/examples).
 </Banner>
+
+### Conditional Preview URLs
+
+You can also conditionally enable or disable the preview button based on the document's data. This is useful for scenarios where you only want to show the preview button when certain criteria are met.
+
+To do this, simply return `null` from the `preview` function when you want to hide the preview button:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    preview: (doc) => {
+      return doc?.enabled ? `http://localhost:3000/${doc.slug}` : null
+    },
+  },
+  fields: [
+    {
+      name: 'slug',
+      type: 'text',
+    },
+    {
+      name: 'enabled',
+      type: 'checkbox',
+    },
+  ],
+}
+```

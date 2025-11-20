@@ -1,5 +1,5 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
@@ -24,6 +24,37 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     mcpPlugin({
+      /**
+       * Override the authentication method.
+       * This allows you to use a custom authentication method instead of the default API key authentication.
+       * @param req - The request object.
+       * @returns The MCP access settings.
+       */
+      // overrideAuth: (req) => {
+      //   const { payload } = req
+
+      //   payload.logger.info('[Override MCP auth]:')
+
+      //   return {
+      //     posts: {
+      //       find: true,
+      //     },
+      //     products: {
+      //       find: true,
+      //       update: true,
+      //     },
+      //     'payload-mcp-tool': {
+      //       diceRoll: true,
+      //     },
+      //     'payload-mcp-prompt': {
+      //       echo: true,
+      //     },
+      //     'payload-mcp-resource': {
+      //       data: true,
+      //       dataByID: true,
+      //     },
+      //   } as MCPAccessSettings
+      // },
       overrideApiKeyCollection: (collection) => {
         collection.fields.push({
           name: 'override',
@@ -45,14 +76,6 @@ export default buildConfigWithDefaults({
             create: true,
           },
           description: 'This is a Payload collection with Post documents.',
-          override: (original: Record<string, unknown>, req) => {
-            const updatedOriginal = {
-              ...original,
-              title: `Title Override: ${original?.title as string}`,
-            }
-            req.payload.logger.info('[Override MCP call for Posts]:')
-            return updatedOriginal
-          },
           overrideResponse: (response, doc, req) => {
             req.payload.logger.info('[Override MCP response for Posts]:')
             response.content.push({

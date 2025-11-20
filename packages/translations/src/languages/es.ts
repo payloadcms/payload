@@ -462,7 +462,9 @@ export const esTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiar a',
     copyToLocale: 'Copiar a idioma',
     localeToPublish: 'Idioma para publicar',
+    selectedLocales: 'Idiomas seleccionados',
     selectLocaleToCopy: 'Selecciona el idioma a copiar',
+    selectLocaleToDuplicate: 'Seleccione los idiomas para duplicar',
   },
   operators: {
     contains: 'contiene',
@@ -572,6 +574,7 @@ export const esTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actualmente viendo',
     currentPublishedVersion: 'Versión publicada actual',
     draft: 'Borrador',
+    draftHasPublishedVersion: 'Borrador (tiene versión publicada)',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
     modifiedOnly: 'Modificado solamente',

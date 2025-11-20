@@ -305,11 +305,13 @@ const stripFields = ({
   config,
   data,
   fields,
+  parentIsLocalized = false,
   reservedKeys = [],
 }: {
   config: SanitizedConfig
   data: any
   fields: FlattenedField[]
+  parentIsLocalized?: boolean
   reservedKeys?: string[]
 }) => {
   for (const k in data) {
@@ -325,12 +327,14 @@ const stripFields = ({
       continue
     }
 
+    const shouldLocalizeField = fieldShouldBeLocalized({ field, parentIsLocalized })
+
     if (field.type === 'blocks') {
       reservedKeys.push('blockType')
     }
 
     if ('flattenedFields' in field || 'blocks' in field) {
-      if (field.localized && config.localization) {
+      if (shouldLocalizeField && config.localization) {
         for (const localeKey in fieldData) {
           if (!config.localization.localeCodes.some((code) => code === localeKey)) {
             delete fieldData[localeKey]
@@ -340,9 +344,6 @@ const stripFields = ({
           const localeData = fieldData[localeKey]
 
           if (!localeData || typeof localeData !== 'object') {
-            if (field.type === 'blocks') {
-              fieldData[localeKey] = []
-            }
             continue
           }
 
@@ -392,7 +393,13 @@ const stripFields = ({
                 continue
               }
 
-              stripFields({ config, data, fields, reservedKeys })
+              stripFields({
+                config,
+                data,
+                fields,
+                parentIsLocalized: parentIsLocalized || field.localized,
+                reservedKeys,
+              })
             }
 
             if (hasNull) {
@@ -401,7 +408,13 @@ const stripFields = ({
 
             continue
           } else {
-            stripFields({ config, data: localeData, fields: field.flattenedFields, reservedKeys })
+            stripFields({
+              config,
+              data: localeData,
+              fields: field.flattenedFields,
+              parentIsLocalized: parentIsLocalized || field.localized,
+              reservedKeys,
+            })
           }
         }
         continue
@@ -454,7 +467,13 @@ const stripFields = ({
             continue
           }
 
-          stripFields({ config, data, fields, reservedKeys })
+          stripFields({
+            config,
+            data,
+            fields,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            reservedKeys,
+          })
         }
 
         if (hasNull) {
@@ -463,7 +482,13 @@ const stripFields = ({
 
         continue
       } else {
-        stripFields({ config, data: fieldData, fields: field.flattenedFields, reservedKeys })
+        stripFields({
+          config,
+          data: fieldData,
+          fields: field.flattenedFields,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          reservedKeys,
+        })
       }
     }
   }
@@ -527,6 +552,7 @@ export const transform = ({
         config,
         data,
         fields: flattenAllFields({ cache: true, fields }),
+        parentIsLocalized: false,
         reservedKeys: ['id', 'globalType'],
       })
     }

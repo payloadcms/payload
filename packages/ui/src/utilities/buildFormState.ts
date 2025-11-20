@@ -17,6 +17,7 @@ import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 import { handleLivePreview } from './handleLivePreview.js'
+import { handlePreview } from './handlePreview.js'
 
 export type LockedState = {
   isLocked: boolean
@@ -30,12 +31,14 @@ type BuildFormStateSuccessResult = {
   indexPath?: string
   livePreviewURL?: string
   lockedState?: LockedState
+  previewURL?: string
   state: FormState
 }
 
 type BuildFormStateErrorResult = {
   livePreviewURL?: never
   lockedState?: never
+  previewURL?: never
   state?: never
 } & (
   | {
@@ -100,6 +103,7 @@ export const buildFormState = async (
     },
     returnLivePreviewURL,
     returnLockStatus,
+    returnPreviewURL,
     schemaPath = collectionSlug || globalSlug,
     select,
     skipClientConfigAuth,
@@ -251,6 +255,22 @@ export const buildFormState = async (
     // Otherwise it will travel through the network as `$undefined`
     if (livePreviewURL) {
       res.livePreviewURL = livePreviewURL
+    }
+  }
+
+  if (returnPreviewURL) {
+    const { previewURL } = await handlePreview({
+      collectionSlug,
+      config,
+      data,
+      globalSlug,
+      req,
+    })
+
+    // Important: only set this when not undefined,
+    // Otherwise it will travel through the network as `$undefined`
+    if (previewURL) {
+      res.previewURL = previewURL
     }
   }
 

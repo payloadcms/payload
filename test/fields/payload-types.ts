@@ -60,7 +60,8 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji'
-  | 'America/Monterrey';
+  | 'America/Monterrey'
+  | 'UTC';
 
 export interface Config {
   auth: {
@@ -106,6 +107,7 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPoly;
     'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -159,6 +161,7 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPolySelect<false> | UploadsMultiPolySelect<true>;
     'uploads-restricted': UploadsRestrictedSelect<false> | UploadsRestrictedSelect<true>;
     'ui-fields': UiFieldsSelect<false> | UiFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -1008,6 +1011,12 @@ export interface DateField {
    */
   dayAndTimeWithTimezone: string;
   dayAndTimeWithTimezone_tz: SupportedTimezones;
+  dayAndTimeWithTimezoneFixed?: string | null;
+  dayAndTimeWithTimezoneFixed_tz?: SupportedTimezones;
+  dayAndTimeWithTimezoneRequired?: string | null;
+  dayAndTimeWithTimezoneRequired_tz: SupportedTimezones;
+  dayAndTimeWithTimezoneReadOnly?: string | null;
+  dayAndTimeWithTimezoneReadOnly_tz?: SupportedTimezones;
   timezoneBlocks?:
     | {
         dayAndTime?: string | null;
@@ -1024,6 +1033,10 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  timezoneGroup?: {
+    dayAndTime?: string | null;
+    dayAndTime_tz?: SupportedTimezones;
+  };
   array?:
     | {
         date?: string | null;
@@ -1788,6 +1801,23 @@ export interface UiField {
   text: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3687,6 +3717,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
   defaultWithTimezone_tz?: T;
   dayAndTimeWithTimezone?: T;
   dayAndTimeWithTimezone_tz?: T;
+  dayAndTimeWithTimezoneFixed?: T;
+  dayAndTimeWithTimezoneFixed_tz?: T;
+  dayAndTimeWithTimezoneRequired?: T;
+  dayAndTimeWithTimezoneRequired_tz?: T;
+  dayAndTimeWithTimezoneReadOnly?: T;
+  dayAndTimeWithTimezoneReadOnly_tz?: T;
   timezoneBlocks?:
     | T
     | {
@@ -3705,6 +3741,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
         dayAndTime?: T;
         dayAndTime_tz?: T;
         id?: T;
+      };
+  timezoneGroup?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_tz?: T;
       };
   array?:
     | T
@@ -4415,6 +4457,14 @@ export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

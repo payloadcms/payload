@@ -456,7 +456,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
     localeToPublish: 'Lokacija za objavu',
+    selectedLocales: 'Odabrane lokalizacije',
     selectLocaleToCopy: 'Odaberite mjesto za kopiranje',
+    selectLocaleToDuplicate: 'Odaberite lokacije za duplikaciju',
   },
   operators: {
     contains: 'sadrži',
@@ -563,6 +565,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Trenutno pregledavate',
     currentPublishedVersion: 'Trenutno Objavljena Verzija',
     draft: 'Nacrt',
+    draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Nacrt uspješno spremljen.',
     lastSavedAgo: 'Zadnji put spremljeno prije {{distance}',
     modifiedOnly: 'Samo modificirano',

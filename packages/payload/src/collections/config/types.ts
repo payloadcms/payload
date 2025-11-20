@@ -765,6 +765,7 @@ export type BulkOperationResult<
   docs: TransformCollection<TSlug, TSelect, TLocale>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
+    isPublic: boolean
     message: string
   }[]
 }

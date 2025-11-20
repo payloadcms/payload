@@ -20,6 +20,7 @@ import type {
   RequestContext,
   TypedCollectionJoins,
   TypedCollectionSelect,
+  TypedFallbackLocale,
   TypedLocale,
   TypedUser,
 } from '../index.js'
@@ -29,7 +30,7 @@ export type { Payload } from '../index.js'
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string | string[]
+  fallbackLocale?: TypedFallbackLocale
   i18n: I18n
   /**
    * The requested locale if specified
@@ -117,10 +118,12 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = CustomPayloadRequestProperties &
-  Partial<Request> &
-  PayloadRequestData &
-  Required<Pick<Request, 'headers'>>
+export interface PayloadRequest
+  extends CustomPayloadRequestProperties,
+    Partial<Request>,
+    PayloadRequestData {
+  headers: Request['headers']
+}
 
 export type { Operator }
 
