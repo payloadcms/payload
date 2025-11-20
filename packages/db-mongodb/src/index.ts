@@ -343,4 +343,3 @@ export function mongooseAdapter({
 }
 
 export { compatibilityOptions } from './utilities/compatibilityOptions.js'
-export { transform } from './utilities/transform.js'
