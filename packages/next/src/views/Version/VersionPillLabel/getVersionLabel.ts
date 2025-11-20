@@ -26,10 +26,8 @@ export function getVersionLabel({ currentDoc, latestDraftVersion, t, version }: 
   name: 'currentDraft' | 'currentlyPublished' | 'draft' | 'previouslyPublished' | 'published'
   pillStyle: Parameters<typeof Pill>[0]['pillStyle']
 } {
-  const publishedNewerThanDraft = currentDoc?.updatedAt > latestDraftVersion?.updatedAt
-
   if (version?.version?._status === 'draft') {
-    if (publishedNewerThanDraft) {
+    if (currentDoc?.updatedAt > latestDraftVersion?.updatedAt) {
       return {
         name: 'draft',
         label: t('version:draft'),
@@ -44,13 +42,27 @@ export function getVersionLabel({ currentDoc, latestDraftVersion, t, version }: 
       }
     }
   } else {
-    const isCurrentlyPublished = version?.version?.updatedAt === currentDoc?.updatedAt
-    return {
-      name: isCurrentlyPublished ? 'currentlyPublished' : 'previouslyPublished',
-      label: isCurrentlyPublished
-        ? t('version:currentlyPublished')
-        : t('version:previouslyPublished'),
-      pillStyle: isCurrentlyPublished ? 'success' : 'light',
+    if (currentDoc.updatedAt < version?.version?.updatedAt) {
+      return {
+        name: 'currentlyPublished',
+        label: t('version:currentlyPublished'),
+        pillStyle: 'success',
+      }
+    } else if (
+      currentDoc?.updatedAt === version?.version?.updatedAt &&
+      latestDraftVersion.updatedAt > currentDoc.updatedAt
+    ) {
+      return {
+        name: 'currentlyPublished',
+        label: t('version:currentlyPublished'),
+        pillStyle: 'success',
+      }
+    } else {
+      return {
+        name: 'previouslyPublished',
+        label: t('version:previouslyPublished'),
+        pillStyle: 'light',
+      }
     }
   }
 }
