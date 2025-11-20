@@ -98,6 +98,7 @@ export interface Config {
     'list-view-select-api': ListViewSelectApi;
     virtuals: Virtual;
     'no-timestamps': NoTimestamp;
+    localized: Localized;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -136,6 +137,7 @@ export interface Config {
     'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
+    localized: LocalizedSelect<false> | LocalizedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -642,6 +644,17 @@ export interface NoTimestamp {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized".
+ */
+export interface Localized {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -787,6 +800,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'no-timestamps';
         value: string | NoTimestamp;
+      } | null)
+    | ({
+        relationTo: 'localized';
+        value: string | Localized;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1246,6 +1263,16 @@ export interface VirtualsSelect<T extends boolean = true> {
  */
 export interface NoTimestampsSelect<T extends boolean = true> {
   title?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_select".
+ */
+export interface LocalizedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
