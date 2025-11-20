@@ -192,8 +192,10 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
   )
 
+  // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
   const publishAll =
-    !localization || (localization && localization.defaultLocalePublishOption !== 'active')
+    !canPublishSpecificLocale ||
+    (localization && localization?.defaultLocalePublishOption !== 'active')
 
   const activeLocale =
     localization &&
@@ -256,7 +258,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         }
         type="button"
       >
-        {localization ? defaultLabel : label}
+        {canPublishSpecificLocale ? defaultLabel : label}
       </FormSubmit>
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
