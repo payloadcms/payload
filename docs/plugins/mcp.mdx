@@ -154,7 +154,7 @@ resources: [
     description: 'Company content creation guidelines',
     uri: 'guidelines://company',
     mimeType: 'text/markdown',
-    handler: (uri) => ({
+    handler: (uri, req) => ({
       contents: [
         {
           uri: uri.href,
@@ -171,7 +171,7 @@ resources: [
     description: 'Access user profile information',
     uri: new ResourceTemplate('users://profile/{userId}', { list: undefined }),
     mimeType: 'application/json',
-    handler: async (uri, { userId }) => {
+    handler: async (uri, { userId }, req) => {
       // Fetch user data from your system
       const userData = await getUserById(userId)
       return {
@@ -196,7 +196,9 @@ tools: [
   {
     name: 'getPostScores',
     description: 'Get useful scores about content in posts',
-    handler: async (args, { payload }) => {
+    handler: async (args, req) => {
+      const { payload } = req
+
       const stats = await payload.find({
         collection: 'posts',
         where: {
@@ -204,6 +206,9 @@ tools: [
             greater_than: args.since,
           },
         },
+        req,
+        overrideAccess: false,
+        user: req.user,
       })
 
       return {
