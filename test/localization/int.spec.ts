@@ -3618,7 +3618,7 @@ describe('Localization', () => {
     })
   })
 
-  describe('localizeMetadata', () => {
+  describe('localize status', () => {
     it('should not return fallback status data', async () => {
       // TODO: allow fields to opt out of using fallbackLocale
       const doc = await payload.create({
@@ -3808,11 +3808,11 @@ describe('Localization', () => {
       expect(enPublished.docs[0]!.text).toBe('Localized Metadata EN')
     })
 
-    it('should preserve published data when publishing other locales', async () => {
+    it('should preserve published and draft data when publishing other locales', async () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
-          text: 'Published EN',
+          text: 'en published',
           _status: 'published',
         },
         locale: defaultLocale,
@@ -3822,7 +3822,7 @@ describe('Localization', () => {
         collection: allFieldsLocalizedSlug,
         id: doc.id,
         data: {
-          text: 'New Draft EN',
+          text: 'en draft',
           _status: 'draft',
         },
         draft: true,
@@ -3833,23 +3833,36 @@ describe('Localization', () => {
         collection: allFieldsLocalizedSlug,
         id: doc.id,
         data: {
-          text: 'Published ES',
+          text: 'es published',
+
           _status: 'published',
         },
         locale: spanishLocale,
       })
 
-      const finalDoc = await payload.findByID({
+      const mainDocument = await payload.findByID({
         locale: 'all',
         id: doc.id,
         collection: allFieldsLocalizedSlug,
         draft: false,
       })
 
-      expect(finalDoc._status!.es).toBe('published')
-      expect(finalDoc.text!.es).toBe('Published ES')
-      expect(finalDoc._status!.en).toBe('published')
-      expect(finalDoc.text!.en).toBe('Published EN')
+      expect(mainDocument._status!.es).toBe('published')
+      expect(mainDocument.text!.es).toBe('es published')
+      expect(mainDocument._status!.en).toBe('published')
+      expect(mainDocument.text!.en).toBe('en published')
+
+      const latestVersion = await payload.findByID({
+        locale: 'all',
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        draft: true,
+      })
+
+      expect(latestVersion._status!.es).toBe('published')
+      expect(latestVersion.text!.es).toBe('es published')
+      expect(latestVersion._status!.en).toBe('draft')
+      expect(latestVersion.text!.en).toBe('en draft')
     })
   })
 })
