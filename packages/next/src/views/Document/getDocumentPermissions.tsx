@@ -16,6 +16,9 @@ export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   data: Data
   globalConfig?: SanitizedGlobalConfig
+  /**
+   * When called for creating a new document, id is not provided.
+   */
   id?: number | string
   req: PayloadRequest
 }): Promise<{
@@ -35,29 +38,27 @@ export const getDocumentPermissions = async (args: {
         collection: {
           config: collectionConfig,
         },
-        req: {
-          ...req,
-          data: {
-            ...data,
-            _status: 'draft',
-          },
+        data: {
+          ...data,
+          _status: 'draft',
         },
+        req,
       })
 
       if (collectionConfig.versions?.drafts) {
-        hasPublishPermission = await docAccessOperation({
-          id,
-          collection: {
-            config: collectionConfig,
-          },
-          req: {
-            ...req,
+        hasPublishPermission = (
+          await docAccessOperation({
+            id,
+            collection: {
+              config: collectionConfig,
+            },
             data: {
               ...data,
               _status: 'published',
             },
-          },
-        }).then((permissions) => permissions.update)
+            req,
+          })
+        ).update
       }
     } catch (err) {
       logError({ err, payload: req.payload })
@@ -67,24 +68,22 @@ export const getDocumentPermissions = async (args: {
   if (globalConfig) {
     try {
       docPermissions = await docAccessOperationGlobal({
+        data,
         globalConfig,
-        req: {
-          ...req,
-          data,
-        },
+        req,
       })
 
       if (globalConfig.versions?.drafts) {
-        hasPublishPermission = await docAccessOperationGlobal({
-          globalConfig,
-          req: {
-            ...req,
+        hasPublishPermission = (
+          await docAccessOperationGlobal({
             data: {
               ...data,
               _status: 'published',
             },
-          },
-        }).then((permissions) => permissions.update)
+            globalConfig,
+            req,
+          })
+        ).update
       }
     } catch (err) {
       logError({ err, payload: req.payload })
