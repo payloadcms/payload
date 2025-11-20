@@ -8,6 +8,7 @@ import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { AllFieldsLocalized } from './collections/AllFields/index.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
@@ -68,6 +69,7 @@ export default buildConfigWithDefaults({
     NestedFields,
     LocalizedDrafts,
     LocalizedDateFields,
+    AllFieldsLocalized,
     {
       admin: {
         listSearchableFields: 'name',

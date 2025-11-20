@@ -1,7 +1,7 @@
 ---
 title: Workflows
 label: Workflows
-order: 30
+order: 40
 desc: A Task is a distinct function declaration that can be run within Payload's Jobs Queue.
 keywords: jobs queue, application framework, typescript, node, react, nextjs
 ---
@@ -15,7 +15,31 @@ They're most helpful when you have multiple tasks in a row, and you want to conf
 
 If a task within a workflow fails, the Workflow will automatically "pick back up" on the task where it failed and **not re-execute any prior tasks that have already been executed**.
 
-#### Defining a workflow
+### Why use Workflows?
+
+#### Single Task vs Workflow
+
+If you only need to run one operation, use a single [Task](/docs/jobs-queue/tasks). But if you need multiple steps that depend on each other, use a Workflow.
+
+**Example scenario:** When a user signs up, you need to:
+
+1. Create their user profile
+2. Send a welcome email
+3. Add them to your email marketing list
+
+Without a workflow, if step 2 fails, you'd have to:
+
+- Re-run all three steps (wasting resources)
+- Manually track which steps succeeded
+- Risk creating duplicate profiles or sending duplicate emails
+
+**With a workflow:**
+
+- If step 2 fails, only step 2 retries (steps 1 and 3 don't re-run)
+- All task outputs are automatically tracked
+- The workflow "resumes" from the failure point
+
+### Defining a workflow
 
 The most important aspect of a Workflow is the `handler`, where you can declare when and how the tasks should run by simply calling the `runTask` function. If any task within the workflow, fails, the entire `handler` function will re-run.
 
@@ -149,4 +173,171 @@ export default buildConfig({
     ]
   }
 })
+```
+
+### Understanding Workflow failure & recovery
+
+One of the most powerful features of workflows is how they handle failures. Let's walk through what actually happens:
+
+**Example workflow:**
+
+```ts
+handler: async ({ job, tasks }) => {
+  await tasks.createProfile('step1', { input: { userId: '123' } })
+  await tasks.sendEmail('step2', { input: { userId: '123' } })
+  await tasks.addToList('step3', { input: { userId: '123' } })
+}
+```
+
+#### Scenario: Email service is down
+
+First execution attempt:
+
+- Step 1 (`createProfile`) succeeds → Profile created in database
+- Step 2 (`sendEmail`) fails → Email service timeout
+- Step 3 (`addToList`) never runs → Workflow pauses
+
+The job is marked for retry. Task 2 has `retries: 3`, so it will be attempted again.
+
+Second execution attempt (automatic retry):
+
+- Step 1 skipped → Returns cached output from first run (no duplicate profile)
+- Step 2 retries → Email service is back up, succeeds!
+- Step 3 runs → User added to mailing list
+
+<Banner type="default">
+  The entire handler function re-runs, but completed tasks return their cached
+  results immediately without re-executing their logic.
+</Banner>
+
+### Accessing Task outputs
+
+Tasks can pass data to subsequent tasks through their outputs:
+
+```ts
+handler: async ({ job, tasks }) => {
+  // Task 1: Create a document and return its ID
+  await tasks.createDocument('create-doc', {
+    input: { title: 'My Document' },
+  })
+
+  // Access the output from task 1 in two ways:
+
+  // Method 1: Through job.taskStatus
+  const docId = job.taskStatus.createDocument['create-doc'].output.documentId
+
+  // Method 2: Capture the return value directly
+  const result = await tasks.createDocument('create-doc', {
+    input: { title: 'My Document' },
+  })
+  const docId2 = result.output.documentId
+
+  // Use the output in task 2
+  await tasks.updateDocument('update-doc', {
+    input: {
+      documentId: docId,
+      status: 'published',
+    },
+  })
+}
+```
+
+**Task status structure:**
+
+```ts
+job.taskStatus = {
+  [taskSlug]: {
+    [taskId]: {
+      input: {
+        /* the input you passed */
+      },
+      output: {
+        /* the output returned by the task */
+      },
+      complete: true,
+      totalTried: 1,
+    },
+  },
+}
+```
+
+### Workflow best practices
+
+#### Use descriptive task IDs
+
+```ts
+// Hard to debug
+await tasks.sendEmail('1', { input })
+await tasks.updateUser('2', { input })
+
+// Clear and maintainable
+await tasks.sendEmail('send-welcome-email', { input })
+await tasks.updateUser('mark-onboarding-complete', { input })
+```
+
+#### Keep tasks small and focused
+
+```ts
+// Task does too much
+{
+  slug: 'onboardUser',
+  handler: async ({ input }) => {
+    await createProfile(input)
+    await sendEmail(input)
+    await addToMailingList(input)
+    // All-or-nothing - if email fails, everything fails
+  }
+}
+
+// Separate tasks with individual retry logic
+await tasks.createProfile('create-profile', { input })
+await tasks.sendEmail('send-email', { input }) // Can retry independently
+await tasks.addToMailingList('add-to-list', { input })
+```
+
+#### Pass IDs, not entire objects
+
+```ts
+// Passing large objects
+await tasks.processUser('process', {
+  input: {
+    user: {
+      /* entire user object with all fields */
+    },
+  },
+})
+
+// Pass just the ID
+await tasks.processUser('process', {
+  input: {
+    userId: '123',
+  },
+})
+// Task fetches what it needs: await req.payload.findByID(...)
+```
+
+#### Set appropriate retry counts
+
+- **External APIs** (email, payment processors): Higher retries (3-5) - services can be temporarily unavailable
+- **Database operations**: Lower retries (1-2) - usually succeed or fail permanently
+- **Idempotent operations** (safe to run multiple times): Higher retries are safe
+- **Non-idempotent operations** (creates, charges, sends): Lower retries to avoid duplicates
+
+#### Handle errors with context
+
+```ts
+handler: async ({ input, req }) => {
+  try {
+    const result = await fetch('https://api.example.com/data')
+    if (!result.ok) {
+      throw new Error(`API returned ${result.status}: ${result.statusText}`)
+    }
+    return { output: { success: true } }
+  } catch (error) {
+    // Provide context about what failed and why
+    throw new Error(
+      `Failed to sync data for user ${input.userId}: ${error.message}`,
+    )
+  }
+}
 ```

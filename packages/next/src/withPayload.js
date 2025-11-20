@@ -15,6 +15,43 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
+    // TODO: This warning is thrown because we cannot externalize the entry-point package for client-s3, so we patch the warning to not show it.
+    // We can remove this once Next.js implements https://github.com/vercel/next.js/discussions/76991
+    const turbopackWarningText =
+      'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running'
+
+    // TODO 4.0: Remove this once we drop support for Next.js 15.2.x
+    const turbopackConfigWarningText = "Unrecognized key(s) in object: 'turbopack'"
+
+    const consoleWarn = console.warn
+    console.warn = (...args) => {
+      // Force to disable serverExternalPackages warnings: https://github.com/vercel/next.js/issues/68805
+      if (
+        (typeof args[1] === 'string' && args[1].includes(turbopackWarningText)) ||
+        (typeof args[0] === 'string' && args[0].includes(turbopackWarningText))
+      ) {
+        return
+      }
+
+      // Add Payload-specific message after turbopack config warning in Next.js 15.2.x or lower.
+      // TODO 4.0: Remove this once we drop support for Next.js 15.2.x
+      const hasTurbopackConfigWarning =
+        (typeof args[1] === 'string' && args[1].includes(turbopackConfigWarningText)) ||
+        (typeof args[0] === 'string' && args[0].includes(turbopackConfigWarningText))
+
+      if (hasTurbopackConfigWarning) {
+        consoleWarn(...args)
+        consoleWarn(
+          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to Next.js 15.4.7 to resolve this warning.',
+        )
+        return
+      }
+
+      consoleWarn(...args)
+    }
+  }
+
   const poweredByHeader = {
     key: 'X-Powered-By',
     value: 'Next.js, Payload',
@@ -86,10 +123,15 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       '@payloadcms/db-sqlite',
       '@payloadcms/db-vercel-postgres',
       '@payloadcms/drizzle',
+      '@payloadcms/db-d1-sqlite',
       // External because they install @aws-sdk/client-s3:
       '@payloadcms/payload-cloud',
       // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
       '@sentry/nextjs',
+      // Can be externalized, because we require users to install graphql themselves - we only rely on it as a peer dependency.
+      // WHY: without externalizing graphql, a graphql version error will be thrown
+      // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
+      'graphql',
       // TODO: We need to externalize @payloadcms/storage-s3 as well, once Next.js has the ability to exclude @payloadcms/storage-s3/client from being externalized.
       // Do not bundle additional server-only packages during dev to improve compilation speed
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false

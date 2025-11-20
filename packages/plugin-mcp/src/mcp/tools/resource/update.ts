@@ -116,6 +116,7 @@ export const updateResourceTool = (
           draft,
           overrideAccess: false,
           overrideLock,
+          req,
           user,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
@@ -126,7 +127,7 @@ export const updateResourceTool = (
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+          data: parsedData,
         } as any)
 
         if (verboseLogs) {
@@ -162,6 +163,7 @@ ${JSON.stringify(result, null, 2)}
           draft,
           overrideAccess: false,
           overrideLock,
+          req,
           user,
           where: whereClause,
           ...(filePath && { filePath }),
@@ -173,7 +175,7 @@ ${JSON.stringify(result, null, 2)}
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+          data: parsedData,
         } as any)
 
         const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }

@@ -61,6 +61,7 @@ let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
   let page: Page
   let url: AdminUrlUtil
+  let usersUrl: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
   let unrestrictedURL: AdminUrlUtil
   let readOnlyCollectionUrl: AdminUrlUtil
@@ -81,6 +82,7 @@ describe('Access Control', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
+    usersUrl = new AdminUrlUtil(serverURL, 'users')
     restrictedUrl = new AdminUrlUtil(serverURL, fullyRestrictedSlug)
     richTextUrl = new AdminUrlUtil(serverURL, 'rich-text')
     unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
@@ -613,6 +615,29 @@ describe('Access Control', () => {
       await saveDocAndAssert(page)
       await openDocControls(page)
       await expect(page.locator('#action-delete')).toBeVisible()
+    })
+
+    test('can only unlock self when admin', async () => {
+      await page.goto(usersUrl.list)
+
+      const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
+      const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
+
+      // Ensure admin user cannot unlock other users
+      await adminUserRow.locator('.cell-id a').click()
+      await page.waitForURL(`**/collections/users/**`)
+
+      const unlockButton = page.locator('#force-unlock')
+      await expect(unlockButton).toBeVisible()
+      await unlockButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText('Successfully unlocked')
+
+      await page.goto(usersUrl.list)
+
+      // Ensure non-admin user cannot see unlock button
+      await nonAdminUserRow.locator('.cell-id a').click()
+      await page.waitForURL(`**/collections/users/**`)
+      await expect(page.locator('#force-unlock')).toBeHidden()
     })
   })
 

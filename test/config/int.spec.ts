@@ -34,9 +34,10 @@ describe('Config', () => {
     })
 
     it('allows a custom field in the root endpoints', () => {
-      const [endpoint] = payload.config.endpoints
+      const endpoints = payload.config.endpoints
+      const customEndpoint = endpoints?.find((endpoint) => endpoint.path === '/config')
 
-      expect(endpoint.custom).toEqual({
+      expect(customEndpoint?.custom).toEqual({
         description: 'Get the sanitized payload config',
       })
     })

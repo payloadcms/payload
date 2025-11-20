@@ -565,6 +565,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Поточний перегляд',
     currentPublishedVersion: 'Поточна опублікована версія',
     draft: 'Чернетка',
+    draftHasPublishedVersion: 'Чернетка (має опубліковану версію)',
     draftSavedSuccessfully: 'Чернетку успішно збережено.',
     lastSavedAgo: 'Востаннє збережено {{distance}} тому',
     modifiedOnly: 'Модифіковано тільки',

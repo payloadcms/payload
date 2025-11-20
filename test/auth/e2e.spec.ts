@@ -30,7 +30,7 @@ const dirname = path.dirname(filename)
 
 let payload: PayloadTestSDK<Config>
 
-const { beforeAll, afterAll, describe } = test
+const { beforeAll, beforeEach, afterAll, describe } = test
 
 const headers = {
   'Content-Type': 'application/json',
@@ -52,17 +52,17 @@ describe('Auth', () => {
     context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
   })
 
   describe('create first user', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       await reInitializeDB({
         serverURL,
         snapshotKey: 'create-first-user',
         deleteOnly: true,
       })
-
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
       await payload.delete({
         collection: slug,
@@ -167,8 +167,6 @@ describe('Auth', () => {
         snapshotKey: 'auth',
         deleteOnly: false,
       })
-
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
       await login({ page, serverURL })
     })
@@ -497,6 +495,39 @@ describe('Auth', () => {
         // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
         await expect(page.locator('#field-rel')).toBeVisible()
       })
+    })
+  })
+
+  describe('autoRefresh', () => {
+    beforeAll(async () => {
+      await reInitializeDB({
+        serverURL,
+        snapshotKey: 'auth',
+        deleteOnly: false,
+      })
+
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+      url = new AdminUrlUtil(serverURL, slug)
+
+      // Install clock before login so token expiration and clock are in sync
+      await page.clock.install({ time: Date.now() })
+
+      await login({ page, serverURL })
+    })
+
+    test('should automatically refresh token without showing modal', async () => {
+      await expect(page.locator('.nav')).toBeVisible()
+
+      // Fast forward time to just past the reminder timeout
+      await page.clock.fastForward(7141000) // 1 hour 59 minutes + 1 second
+
+      // Resume clock so timers can execute
+      await page.clock.resume()
+
+      await expect(page.locator('.confirmation-modal')).toBeHidden()
+
+      await expect(page.locator('.nav')).toBeVisible()
     })
   })
 })

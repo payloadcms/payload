@@ -564,6 +564,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Trenutno gledate',
     currentPublishedVersion: 'Trenutno Objavljena Verzija',
     draft: 'Нацрт',
+    draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Нацрт успешно сачуван.',
     lastSavedAgo: 'Задњи пут сачувано пре {{distance}',
     modifiedOnly: 'Samo izmenjen',
