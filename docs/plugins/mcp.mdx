@@ -31,8 +31,6 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
   - You can allow / disallow `find`, `create`, `update`, and `delete` operations for each collection
   - You can to allow / disallow capabilities in real time
   - You can define your own Prompts, Tools and Resources available over MCP
-- Full support for Payload's localization features with `locale` and `fallbackLocale` parameters
-- HTTP transport for MCP server connections
 
 ## Installation
 
@@ -69,122 +67,6 @@ const config = buildConfig({
 })
 
 export default config
-```
-
-## Connecting AI Tools
-
-After installing and configuring the plugin, you can connect AI tools that support the Model Context Protocol (MCP) to your Payload server.
-
-### Step 1: Create an API Key
-
-1. Start your Payload server
-2. Navigate to your admin panel at `http://localhost:3000/admin`
-3. Go to **MCP → API Keys**
-4. Click **Create New**
-5. Configure permissions for each collection (enable find, create, update, delete as needed)
-6. Click **Create** and copy the generated API key
-
-### Step 2: Configure Your MCP Client
-
-The recommended approach for most MCP clients is to use the `mcp-remote` package via `npx`. Below are configuration examples for popular MCP clients.
-
-#### VSCode MCP Extension
-
-Add your Payload MCP server to VSCode's settings (`.vscode/settings.json` or user settings):
-
-```json
-{
-  "mcp.servers": {
-    "Payload": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "http://127.0.0.1:3000/api/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY_HERE"
-      ]
-    }
-  }
-}
-```
-
-#### Cursor IDE
-
-Add your Payload MCP server to Cursor's configuration file:
-
-```json
-{
-  "mcpServers": {
-    "Payload": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "http://127.0.0.1:3000/api/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY_HERE"
-      ]
-    }
-  }
-}
-```
-
-#### Other MCP Clients
-
-For other MCP clients that support direct HTTP connections, you can use this configuration format:
-
-```json
-{
-  "mcpServers": {
-    "payload-cms": {
-      "type": "http",
-      "url": "http://localhost:3000/api/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY_HERE"
-      }
-    }
-  }
-}
-```
-
-Replace `YOUR_API_KEY_HERE` with the API key you created in Step 1.
-
-**Configuration Notes:**
-
-- **URL:** If you're using a custom `basePath` in your MCP plugin configuration, update the URL accordingly (e.g., `http://localhost:3000/custom-path/mcp`)
-- **Production:** For production deployments, use your domain instead of `localhost` (e.g., `https://yourdomain.com/api/mcp`)
-- **Headers:** The `Authorization` header with Bearer token is required for authentication
-- **Recommended:** The `npx mcp-remote` approach is recommended as it provides better compatibility across different MCP clients
-
-### Step 3: Restart Your MCP Client
-
-Restart your MCP client for the configuration to take effect. The Payload MCP server should now be available, and the AI tool will be able to interact with your configured collections.
-
-Refer to your specific MCP client's documentation for additional configuration options and setup instructions.
-
-## Connection Methods
-
-The MCP plugin supports different connection methods for communicating with AI tools:
-
-### HTTP (Currently Supported)
-
-The HTTP transport is the primary and currently supported connection method. As shown in the configuration example above, clients connect via HTTP requests to your Payload server's MCP endpoint (default: `/api/mcp`).
-
-**Configuration:**
-
-```json
-{
-  "mcpServers": {
-    "payload-cms": {
-      "type": "http",
-      "url": "http://localhost:3000/api/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY_HERE"
-      }
-    }
-  }
-}
 ```
 
 ### Options
@@ -230,208 +112,93 @@ The HTTP transport is the primary and currently supported connection method. As 
 | `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                              |
 
-## Localization Support
+## Connecting to MCP Clients
 
-The MCP plugin fully supports Payload's localization features, working the same way as Payload's REST API. All resource operations (create, update, find, delete) accept `locale` and `fallbackLocale` parameters, allowing you to manage multilingual content through MCP.
+After installing and configuring the plugin, you can connect apps with MCP client capabilities to Payload.
 
-### Prerequisites
+### Step 1: Create an API Key
 
-First, configure localization in your Payload config:
+1. Start your Payload server
+2. Navigate to your admin panel at `http://localhost:3000/admin`
+3. Go to the **MCP → API Keys** collection
+4. Click **Create New**
+5. Allow or Disallow MCP traffic permissions for each collection (enable find, create, update, delete as needed)
+6. Click **Create** and copy the uniquely generated API key
 
-```ts
-const config = buildConfig({
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: [
-      { code: 'en', label: 'English' },
-      { code: 'es', label: 'Spanish' },
-      { code: 'fr', label: 'French' },
-    ],
-  },
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          localized: true, // Enable localization for this field
-        },
-        {
-          name: 'content',
-          type: 'richText',
-          localized: true,
-        },
-      ],
-    },
-  ],
-  plugins: [
-    mcpPlugin({
-      collections: {
-        posts: {
-          enabled: true,
-        },
-      },
-    }),
-  ],
-})
-```
+### Step 2: Configure Your MCP Client
 
-### Creating Localized Content
+MCP Clients can be configured to interact with your MCP server.
+These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
 
-Create content in a specific locale using the `locale` parameter:
+<Banner type="warning">
+  Caution: the format of these JSON files may change over time. Please check the
+  client website for updates.
+</Banner>
+
+Our recommended approach to make your server available for most MCP clients is to use the [mcp-remote](https://www.npmjs.com/package/mcp-remote) package via `npx`.
+
+Below are configuration examples for popular MCP clients.
+
+#### [VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
 
 ```json
 {
-  "id": 1,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "createPosts",
-    "arguments": {
-      "title": "Hello World",
-      "content": "This is my first post in English",
-      "locale": "en"
+  "mcp.servers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
     }
   }
 }
 ```
 
-### Adding Translations
-
-Add translations to existing content by updating with a different locale:
-
-```json
-// First, create in English
-{
-  "id": 1,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "createPosts",
-    "arguments": {
-      "title": "Hello World",
-      "content": "English content"
-    }
-  }
-}
-
-// Then, add Spanish translation
-{
-  "id": 2,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "updatePosts",
-    "arguments": {
-      "id": "document-id",
-      "title": "Hola Mundo",
-      "content": "Contenido en español",
-      "locale": "es"
-    }
-  }
-}
-```
-
-### Retrieving Localized Content
-
-Retrieve content in a specific locale:
+#### [Cursor](https://cursor.com/docs/context/mcp)
 
 ```json
 {
-  "id": 1,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "findPosts",
-    "arguments": {
-      "id": "document-id",
-      "locale": "es"
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
     }
   }
 }
 ```
 
-Retrieve all translations at once using `locale: 'all'`:
+#### Other MCP Clients
+
+For connections without using `mcp-remote` you can use this configuration format:
 
 ```json
 {
-  "id": 1,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "findPosts",
-    "arguments": {
-      "id": "document-id",
-      "locale": "all"
+  "mcpServers": {
+    "Payload": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer API-KEY-HERE"
+      }
     }
   }
 }
-
-// Response will include all translations:
-// {
-//   "title": {
-//     "en": "Hello World",
-//     "es": "Hola Mundo",
-//     "fr": "Bonjour le Monde"
-//   },
-//   "content": { ... }
-
-// }
 ```
 
-### Fallback Locales
+## Customizations
 
-When requesting content in a locale that doesn't have a translation, Payload will automatically fall back to the default locale:
-
-```json
-{
-  "id": 1,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "findPosts",
-    "arguments": {
-      "id": "document-id",
-      "locale": "fr"
-    }
-  }
-}
-
-
-// Returns English content (default locale) as fallback
-```
-
-You can also specify a custom fallback locale:
-
-```json
-{
-  "id": 1,
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "findPosts",
-    "arguments": {
-      "id": "document-id",
-      "locale": "fr",
-      "fallbackLocale": "es"
-    }
-  }
-}
-
-
-// Use Spanish as fallback instead of default
-```
-
-### Locale Parameters
-
-All resource operation tools support these parameters:
-
-| Parameter        | Type     | Description                                                                                     |
-| ---------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| `locale`         | `string` | The locale code to use for the operation (e.g., 'en', 'es'). Use 'all' to retrieve all locales. |
-| `fallbackLocale` | `string` | Optional fallback locale code to use when the requested locale is not available.                |
+The plugin supports fully custom `prompts`, `tools` and `resources` that can be called or retrieved by MCP clients.
+After defining a custom method you can allow / disallow the feature from the admin panel by adjusting the `API Key` MCP Options checklist.
 
 ## Prompts
 
@@ -447,7 +214,7 @@ prompts: [
       content: z.string().describe('The content to review'),
       criteria: z.array(z.string()).describe('Review criteria'),
     },
-    handler: ({ content, criteria }) => ({
+    handler: ({ content, criteria }, req) => ({
       messages: [
         {
           content: {
@@ -475,7 +242,7 @@ resources: [
     description: 'Company content creation guidelines',
     uri: 'guidelines://company',
     mimeType: 'text/markdown',
-    handler: (uri) => ({
+    handler: (uri, req) => ({
       contents: [
         {
           uri: uri.href,
@@ -492,7 +259,7 @@ resources: [
     description: 'Access user profile information',
     uri: new ResourceTemplate('users://profile/{userId}', { list: undefined }),
     mimeType: 'application/json',
-    handler: async (uri, { userId }) => {
+    handler: async (uri, { userId }, req) => {
       // Fetch user data from your system
       const userData = await getUserById(userId)
       return {
@@ -517,7 +284,8 @@ tools: [
   {
     name: 'getPostScores',
     description: 'Get useful scores about content in posts',
-    handler: async (args, { payload }) => {
+    handler: async (args, req) => {
+      const { payload } = req
       const stats = await payload.find({
         collection: 'posts',
         where: {
@@ -564,6 +332,12 @@ mcpPlugin({
         { label: 'Development', value: 'dev' },
         { label: 'Marketing', value: 'marketing' },
       ],
+    })
+
+    // You can also add hooks
+    collection.hooks?.beforeRead?.push(({ doc, req }) => {
+      req.payload.logger.info('Before Read MCP hook!')
+      return doc
     })
     return collection
   },
@@ -678,44 +452,4 @@ const config = buildConfig({
     }),
   ],
 })
-```
-
-## MCP Clients
-
-MCP Clients can be configured to interact with your MCP server. These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
-
-> Caution: the format of these JSON files may change over time. Please check the client website for updates.
-
-[VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
-
-```json
-{
-  "mcp.servers": {
-    "Payload": {
-      "url": "http://localhost:3000/api/mcp",
-      "headers": {
-        "Authorization": "Bearer API-KEY-HERE"
-      }
-    }
-  }
-}
-```
-
-[Cursor](https://cursor.com/docs/context/mcp)
-
-```json
-{
-  "mcpServers": {
-    "Payload": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "http://localhost:3000/api/mcp",
-        "--header",
-        "Authorization: Bearer API-KEY-HERE"
-      ]
-    }
-  }
-}
 ```
