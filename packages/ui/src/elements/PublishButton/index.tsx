@@ -209,20 +209,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       ? activeLocale.label
       : (activeLocale.label?.[localeCode] ?? undefined))
 
-  const defaultPublish = isDefaultPublishAll
-    ? publish
-    : () => publishSpecificLocale(activeLocale.code)
-  const defaultLabel = isDefaultPublishAll
-    ? label
-    : t('version:publishIn', { locale: activeLocaleLabel })
-
-  const secondaryPublish = isDefaultPublishAll
-    ? () => publishSpecificLocale(activeLocale.code)
-    : publish
-  const secondaryLabel = isDefaultPublishAll
-    ? t('version:publishIn', { locale: activeLocaleLabel })
-    : t('version:publishAllLocales')
-
   if (!hasPublishPermission) {
     return null
   }
@@ -233,7 +219,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         buttonId="action-save"
         disabled={!canPublish}
         enableSubMenu={canSchedulePublish}
-        onClick={defaultPublish}
+        onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}
         size="medium"
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled || canSchedulePublish
@@ -252,8 +238,17 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                     )}
                     {isSpecificLocalePublishEnabled && (
                       <PopupList.ButtonGroup>
-                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
-                          {secondaryLabel}
+                        <PopupList.Button
+                          id="publish-locale"
+                          onClick={
+                            isDefaultPublishAll
+                              ? () => publishSpecificLocale(activeLocale.code)
+                              : publish
+                          }
+                        >
+                          {isDefaultPublishAll
+                            ? t('version:publishIn', { locale: activeLocaleLabel })
+                            : t('version:publishAllLocales')}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
@@ -264,7 +259,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         }
         type="button"
       >
-        {isSpecificLocalePublishEnabled ? defaultLabel : label}
+        {isSpecificLocalePublishEnabled
+          ? t('version:publishIn', { locale: activeLocaleLabel })
+          : label}
       </FormSubmit>
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
