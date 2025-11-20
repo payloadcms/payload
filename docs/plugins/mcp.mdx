@@ -243,6 +243,7 @@ resources: [
     uri: 'guidelines://company',
     mimeType: 'text/markdown',
     handler: (uri, req) => ({
+    handler: (uri, req) => ({
       contents: [
         {
           uri: uri.href,
@@ -293,6 +294,9 @@ tools: [
             greater_than: args.since,
           },
         },
+        req,
+        overrideAccess: false,
+        user: req.user,
       })
 
       return {

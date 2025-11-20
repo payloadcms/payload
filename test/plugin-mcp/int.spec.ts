@@ -450,6 +450,141 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.prompts[0].arguments[0].required).toBe(true)
   })
 
+  it('should get echo prompt', async () => {
+    const apiKey = await getApiKey()
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'prompts/get',
+        params: {
+          name: 'echo',
+          arguments: {
+            message: 'Hello, world!',
+          },
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.messages).toHaveLength(2)
+    expect(json.result.messages[0].content.type).toBe('text')
+    expect(json.result.messages[0].content.text).toContain('This prompt was sent: Hello, world!')
+    expect(json.result.messages[1].content.type).toBe('text')
+    expect(json.result.messages[1].content.text).toContain(
+      `This prompt was sent by userId: ${userId}`,
+    )
+
+    const { docs } = await payload.find({
+      collection: 'modified-prompts',
+      where: {
+        user: {
+          equals: userId,
+        },
+      },
+    })
+
+    const modifiedPrompt = docs?.[0]
+    expect(modifiedPrompt?.original).toBe('Hello, world!')
+    expect(modifiedPrompt?.modified).toBe('This prompt was sent: Hello, world!')
+    // @ts-expect-error - doc.user is a string | User
+    expect(modifiedPrompt?.user?.id).toBe(userId)
+  })
+
+  it('should read the data resource', async () => {
+    const apiKey = await getApiKey()
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'resources/read',
+        params: {
+          uri: 'data://app',
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.contents).toHaveLength(2)
+    expect(json.result.contents[0].uri).toBe('data://app')
+    expect(json.result.contents[0].text).toContain('My special data.')
+    expect(json.result.contents[1].text).toContain(`This was requested by user: ${userId}`)
+
+    const { docs } = await payload.find({
+      collection: 'returned-resources',
+      where: {
+        user: {
+          equals: userId,
+        },
+      },
+    })
+
+    const returnedResource = docs?.[0]
+    expect(returnedResource?.uri).toBe('data://app')
+    expect(returnedResource?.content).toBe('My special data.')
+    // @ts-expect-error - doc.user is a string | User
+    expect(returnedResource?.user?.id).toBe(userId)
+  })
+
+  it('should read the dataByID resource', async () => {
+    const apiKey = await getApiKey()
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'resources/read',
+        params: {
+          uri: 'data://app/1',
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.contents).toHaveLength(2)
+    expect(json.result.contents[0].uri).toBe('data://app/1')
+    expect(json.result.contents[0].text).toContain('My special data for ID: 1')
+    expect(json.result.contents[1].text).toContain(`This was requested by user: ${userId}`)
+
+    const { docs } = await payload.find({
+      collection: 'returned-resources',
+      where: {
+        user: {
+          equals: userId,
+        },
+      },
+    })
+
+    const returnedResource = docs?.[0]
+    expect(returnedResource?.uri).toBe('data://app/1')
+    expect(returnedResource?.content).toBe('My special data for ID: 1')
+    // @ts-expect-error - doc.user is a string | User
+    expect(returnedResource?.user?.id).toBe(userId)
+  })
+
   it('should call diceRoll', async () => {
     const apiKey = await getApiKey()
     const response = await restClient.POST('/mcp', {
@@ -481,6 +616,21 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain('**Result:**')
     expect(json.result.content[0].text).toContain('🎲 You rolled a **')
     expect(json.result.content[0].text).toContain('** on a 6-sided die!')
+
+    const { docs } = await payload.find({
+      collection: 'rolls',
+      where: {
+        user: {
+          equals: userId,
+        },
+      },
+    })
+
+    const roll = docs?.[0]
+    expect(roll?.sides).toBe(6)
+    expect(roll?.result).toBeDefined()
+    // @ts-expect-error - doc.user is a string | User
+    expect(roll?.user?.id).toBe(userId)
   })
 
   it('should call createPosts', async () => {
