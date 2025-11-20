@@ -228,6 +228,88 @@ await payload.sendEmail({
 })
 ```
 
+## Attaching files from Payload media collections
+
+If you store files in a Payload collection with `upload: true`, you can attach them to emails by fetching the document and using its file data.
+
+**Example: Attaching a file from a Media collection**
+
+```ts
+const mediaDoc = await payload.findByID({
+  collection: 'media',
+  id: 'your-file-id',
+})
+
+// For local storage adapter
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      path: mediaDoc.url, // Local file path when using local storage
+      contentType: mediaDoc.mimeType,
+    },
+  ],
+})
+
+// For cloud storage (S3, Azure, GCS, etc.)
+const response = await fetch(mediaDoc.url)
+const buffer = Buffer.from(await response.arrayBuffer())
+
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      content: buffer,
+      contentType: mediaDoc.mimeType,
+    },
+  ],
+})
+```
+
+**With Resend adapter:**
+
+```ts
+const mediaDoc = await payload.findByID({
+  collection: 'media',
+  id: 'your-file-id',
+})
+
+// If using cloud storage, Resend can fetch from the URL directly
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      path: mediaDoc.url, // Resend will fetch from this URL
+    },
+  ],
+})
+
+// For local storage, read the file and convert to Base64
+import { readFile } from 'node:fs/promises'
+const fileBuffer = await readFile(mediaDoc.url)
+
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      content: fileBuffer.toString('base64'),
+    },
+  ],
+})
+```
+
 ## Using multiple mail providers
 
 Payload supports the use of a single transporter of email, but there is nothing stopping you from having more. Consider a use case where sending bulk email is handled differently than transactional email and could be done using a [hook](/docs/hooks/overview).
