@@ -29,6 +29,8 @@ export function iterateGlobals({
       imports,
     })
 
+    addToImportMap(global.admin?.components?.elements?.beforeDocumentControls)
+    addToImportMap(global.admin?.components?.elements?.editMenuItems)
     addToImportMap(global.admin?.components?.elements?.Description)
     addToImportMap(global.admin?.components?.elements?.PreviewButton)
     addToImportMap(global.admin?.components?.elements?.PublishButton)
