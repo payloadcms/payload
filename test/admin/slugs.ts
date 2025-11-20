@@ -5,6 +5,8 @@ export const reorderTabsSlug = 'reorder-tabs'
 export const geoCollectionSlug = 'geo'
 export const arrayCollectionSlug = 'array'
 export const postsCollectionSlug = 'posts'
+
+export const localizedCollectionSlug = 'localized'
 export const group1Collection1Slug = 'group-one-collection-ones'
 export const group1Collection2Slug = 'group-one-collection-twos'
 export const group2Collection1Slug = 'group-two-collection-ones'
@@ -43,6 +45,7 @@ export const collectionSlugs = [
   listDrawerSlug,
   virtualsSlug,
   formatDocURLCollectionSlug,
+  localizedCollectionSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'
