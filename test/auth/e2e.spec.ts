@@ -497,4 +497,37 @@ describe('Auth', () => {
       })
     })
   })
+
+  describe('autoRefresh', () => {
+    beforeAll(async () => {
+      await reInitializeDB({
+        serverURL,
+        snapshotKey: 'auth',
+        deleteOnly: false,
+      })
+
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+      url = new AdminUrlUtil(serverURL, slug)
+
+      // Install clock before login so token expiration and clock are in sync
+      await page.clock.install({ time: Date.now() })
+
+      await login({ page, serverURL })
+    })
+
+    test('should automatically refresh token without showing modal', async () => {
+      await expect(page.locator('.nav')).toBeVisible()
+
+      // Fast forward time to just past the reminder timeout
+      await page.clock.fastForward(7141000) // 1 hour 59 minutes + 1 second
+
+      // Resume clock so timers can execute
+      await page.clock.resume()
+
+      await expect(page.locator('.confirmation-modal')).toBeHidden()
+
+      await expect(page.locator('.nav')).toBeVisible()
+    })
+  })
 })
