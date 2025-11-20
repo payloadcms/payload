@@ -30,6 +30,7 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
 
   // For Content API: Clear the database before each test suite
   if (process.env.PAYLOAD_DATABASE === 'content-api') {
+    console.log('[initPayloadInt] CONTENT_SYSTEM_ID:', process.env.CONTENT_SYSTEM_ID)
     try {
       const response = await fetch(
         `${process.env.CONTENT_API_URL || 'http://localhost:8080'}/dev/clear-db`,
@@ -40,10 +41,8 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
         },
       )
       if (response.ok) {
-        console.log(
-          'Cleared content-api database for content system:',
-          process.env.CONTENT_SYSTEM_ID,
-        )
+        const data = await response.json()
+        console.log('[initPayloadInt] Clear-db response:', JSON.stringify(data))
       } else {
         console.warn('Failed to clear content-api database:', response.status)
       }
@@ -61,6 +60,31 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
   }
 
   console.log('starting payload')
+
+  // For Content API: Check if users exist BEFORE getPayload
+  if (process.env.PAYLOAD_DATABASE === 'content-api') {
+    try {
+      const response = await fetch(
+        `${process.env.CONTENT_API_URL || 'http://localhost:8080'}/api/v0/documents:find`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            collectionKey: 'users',
+            contentSystemId: process.env.CONTENT_SYSTEM_ID,
+            limit: 10,
+            offset: 0,
+          }),
+        },
+      )
+      if (response.ok) {
+        const data = await response.json()
+        console.log('[initPayloadInt] Users BEFORE getPayload:', data.result.data.length)
+      }
+    } catch (error) {
+      console.log('[initPayloadInt] Could not check users:', error.message)
+    }
+  }
 
   const payload = await getPayload({ config, cron: true })
   console.log('initializing rest client')
