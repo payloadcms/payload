@@ -18,6 +18,7 @@ type Args = {
   params?: {
     collection: string
   }
+  payloadInstanceCacheKey?: string
   request: Request
 }
 
@@ -25,10 +26,15 @@ export const createPayloadRequest = async ({
   canSetHeaders,
   config: configPromise,
   params,
+  payloadInstanceCacheKey,
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise, cron: true })
+  const payload = await getPayload({
+    config: configPromise,
+    cron: true,
+    key: payloadInstanceCacheKey,
+  })
 
   const { config } = payload
   const localization = config.localization

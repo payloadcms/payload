@@ -21,6 +21,7 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    autoRefresh: true,
     components: {
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
       beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
