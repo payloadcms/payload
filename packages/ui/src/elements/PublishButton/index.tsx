@@ -259,9 +259,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         }
         type="button"
       >
-        {isSpecificLocalePublishEnabled
-          ? t('version:publishIn', { locale: activeLocaleLabel })
-          : label}
+        {!isDefaultPublishAll ? t('version:publishIn', { locale: activeLocaleLabel }) : label}
       </FormSubmit>
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
