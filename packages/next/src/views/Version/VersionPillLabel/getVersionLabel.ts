@@ -2,7 +2,7 @@ import type { TFunction } from '@payloadcms/translations'
 import type { Pill } from '@payloadcms/ui'
 
 type Args = {
-  currentlyPublishedVersion?: {
+  currentDoc?: {
     id: number | string
     updatedAt: string
   }
@@ -13,7 +13,7 @@ type Args = {
   t: TFunction
   version: {
     id: number | string
-    version: { _status?: string }
+    version: { _status?: string; updatedAt?: string }
   }
 }
 
@@ -21,20 +21,14 @@ type Args = {
  * Gets the appropriate version label and version pill styling
  * given existing versions and the current version status.
  */
-export function getVersionLabel({
-  currentlyPublishedVersion,
-  latestDraftVersion,
-  t,
-  version,
-}: Args): {
+export function getVersionLabel({ currentDoc, latestDraftVersion, t, version }: Args): {
   label: string
   name: 'currentDraft' | 'currentlyPublished' | 'draft' | 'previouslyPublished' | 'published'
   pillStyle: Parameters<typeof Pill>[0]['pillStyle']
 } {
-  const publishedNewerThanDraft =
-    currentlyPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+  const publishedNewerThanDraft = currentDoc?.updatedAt > latestDraftVersion?.updatedAt
 
-  if (version.version._status === 'draft') {
+  if (version?.version?._status === 'draft') {
     if (publishedNewerThanDraft) {
       return {
         name: 'draft',
@@ -50,7 +44,7 @@ export function getVersionLabel({
       }
     }
   } else {
-    const isCurrentlyPublished = version.id === currentlyPublishedVersion?.id
+    const isCurrentlyPublished = version?.version?.updatedAt === currentDoc?.updatedAt
     return {
       name: isCurrentlyPublished ? 'currentlyPublished' : 'previouslyPublished',
       label: isCurrentlyPublished

@@ -144,7 +144,17 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       return
     }
 
+    const params = qs.stringify({
+      depth: 0,
+      publishAllLocales: true,
+    })
+
+    const action = `${serverURL}${api}${
+      globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
+    }${params ? '?' + params : ''}`
+
     const result = await submit({
+      action,
       overrides: {
         _status: 'published',
       },
@@ -156,6 +166,11 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       setHasPublishedDoc(true)
     }
   }, [
+    api,
+    collectionSlug,
+    globalSlug,
+    id,
+    serverURL,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,

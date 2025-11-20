@@ -82,19 +82,13 @@ export async function VersionsView(props: DocumentViewServerProps) {
 
   const [currentlyPublishedVersion, latestDraftVersion] = await Promise.all([
     hasPublishedDoc
-      ? fetchLatestVersion({
-          collectionSlug,
+      ? req.payload.findByID({
+          id,
+          collection: collectionSlug,
           depth: 0,
-          globalSlug,
+          locale: req.locale,
           overrideAccess: false,
-          parentID: id,
-          req,
-          select: {
-            id: true,
-            updatedAt: true,
-          },
-          status: 'published',
-          user,
+          user: req.user,
         })
       : Promise.resolve(null),
     draftsEnabled

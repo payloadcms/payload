@@ -161,6 +161,7 @@ export const getVersions = async ({
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
           collection: collectionConfig.slug,
+          locale,
           user,
           where: combineQueries(
             {

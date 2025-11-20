@@ -68,7 +68,7 @@ export const VersionPillLabel: React.FC<{
   const { i18n, t } = useTranslation()
 
   const { label, pillStyle } = getVersionLabel({
-    currentlyPublishedVersion,
+    currentDoc: currentlyPublishedVersion,
     latestDraftVersion,
     t,
     version: doc,
