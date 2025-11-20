@@ -5251,56 +5251,51 @@ describe('database', () => {
     expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 
-  itMongo(
-    'ensure mongodb respects collation when using useCollation: true in the config',
-    async () => {
-      // Clear any existing documents
-      await payload.delete({ collection: 'simple', where: {} })
+  itMongo('ensure mongodb respects collation when using collection in the config', async () => {
+    // Clear any existing documents
+    await payload.delete({ collection: 'simple', where: {} })
 
-      const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
-      const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
+    const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
+    const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
 
-      const simple_1 = await payload.create({
-        collection: 'simple',
-        locale: 'uk',
-        data: { text: 'Роман' },
-      })
-      const simple_2 = await payload.create({
-        collection: 'simple',
-        locale: 'uk',
-        data: { text: 'Віктор' },
-      })
-      const simple_3 = await payload.create({
-        collection: 'simple',
-        locale: 'uk',
-        data: { text: 'Євген' },
-      })
+    const simple_1 = await payload.create({
+      collection: 'simple',
+      locale: 'uk',
+      data: { text: 'Роман' },
+    })
+    const simple_2 = await payload.create({
+      collection: 'simple',
+      locale: 'uk',
+      data: { text: 'Віктор' },
+    })
+    const simple_3 = await payload.create({
+      collection: 'simple',
+      locale: 'uk',
+      data: { text: 'Євген' },
+    })
 
-      const results = await payload.find({
-        collection: 'simple',
-        locale: 'uk',
-        sort: 'text',
-      })
+    const results = await payload.find({
+      collection: 'simple',
+      locale: 'uk',
+      sort: 'text',
+    })
 
-      const initialMappedResults = results.docs.map((doc) => doc.text)
+    const initialMappedResults = results.docs.map((doc) => doc.text)
 
-      expect(initialMappedResults).toEqual(expectedUnsortedItems)
+    expect(initialMappedResults).toEqual(expectedUnsortedItems)
 
-      payload.db.useCollation = true
+    payload.db.collation = { strength: 1 }
 
-      payload.db.collation = { strength: 1 }
+    const resultsWithCollation = await payload.find({
+      collection: 'simple',
+      locale: 'uk',
+      sort: 'text',
+    })
 
-      const resultsWithCollation = await payload.find({
-        collection: 'simple',
-        locale: 'uk',
-        sort: 'text',
-      })
+    const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
 
-      const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
+    console.log({ docs: JSON.stringify(collatedMappedResults) })
 
-      console.log({ docs: JSON.stringify(collatedMappedResults) })
-
-      expect(collatedMappedResults).toEqual(expectedSortedItems)
-    },
-  )
+    expect(collatedMappedResults).toEqual(expectedSortedItems)
+  })
 })
