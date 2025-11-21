@@ -196,8 +196,8 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
                     },
                   },
                   {
-                    latest: {
-                      equals: true,
+                    'version._status': {
+                      equals: 'draft',
                     },
                   },
                 ],

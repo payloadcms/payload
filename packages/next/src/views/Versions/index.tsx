@@ -66,8 +66,8 @@ export async function VersionsView(props: DocumentViewServerProps) {
               },
             },
             {
-              latest: {
-                equals: true,
+              'version._status': {
+                equals: 'draft',
               },
             },
           ],
@@ -143,10 +143,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
         })
       : Promise.resolve(null),
   ])
-
-  console.log({
-    currentlyPublishedVersion,
-  })
 
   const fetchURL = collectionSlug
     ? `${serverURL}${apiRoute}/${collectionSlug}/versions`

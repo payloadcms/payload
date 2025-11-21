@@ -52,21 +52,8 @@ export function getVersionLabel({
       }
     }
   } else {
-    const draftIsNewerThanPublished =
-      latestDraftVersion?.updatedAt > currentlyPublishedVersion?.updatedAt
-    if (draftIsNewerThanPublished) {
-      const isCurrentlyPublished =
-        version.version.updatedAt === currentlyPublishedVersion.version.updatedAt
-      if (isCurrentlyPublished) {
-        return {
-          name: 'currentlyPublished',
-          label: t('version:currentlyPublished'),
-          pillStyle: 'success',
-        }
-      }
-    }
-
-    const isCurrentlyPublished = version.id === currentlyPublishedVersion?.id
+    const isCurrentlyPublished =
+      currentlyPublishedVersion && version.id === currentlyPublishedVersion.id
     return {
       name: isCurrentlyPublished ? 'currentlyPublished' : 'previouslyPublished',
       label: isCurrentlyPublished
