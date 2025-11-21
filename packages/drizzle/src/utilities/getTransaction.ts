@@ -4,6 +4,9 @@ import type { DrizzleAdapter } from '../types.js'
 
 /**
  * Returns current db transaction instance from req or adapter.drizzle itself
+ *
+ * If a transaction session doesn't exist (e.g., it was already committed/rolled back),
+ * falls back to the default adapter.drizzle instance to prevent errors.
  */
 export const getTransaction = async <T extends DrizzleAdapter = DrizzleAdapter>(
   adapter: T,
