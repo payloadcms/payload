@@ -574,13 +574,13 @@ The most common issue is importing from our `@payloadcms/ui` package in the wron
 
 There's a few variations of this error that hint at the same problem, sometimes it will error on `useConfig` hook or any other Payload UI hook like `useAuth`, `useLocale` with the error message that the value being destructured is `undefined`.
 
+See [Troubleshooting Common Issues in Payload](../troubleshooting/troubleshooting#dependency-mismatches) for more details on resolving dependency mismatches.
+
 The most common cause for this is mismatched versions of `@payloadcms/ui` between your admin panel and your custom component dependencies. To resolve this ensure that your project's `package.json` has the same version of `@payloadcms/ui` as your `payload` package.
 
 In the case of monorepos or workspaces where multiple packages depend on `@payloadcms/ui`, ensure that all instances of `@payloadcms/ui` are the same version. The `pnpm why` (or `bun why` / `yarn why`) command can help identify multiple versions of the same package.
 
-However sometimes this can be misleading in complex monorepos where hoisting is involved as you will see the same version installed but different applications might use different instances of the packages, so it's best to check the lockfile directly to ensure only one version of `@payloadcms/ui` is present. We also recommend you install the Payload dependencies at the root of your monorepo/workspace to ensure only one version is installed across all packages.
-
-See [Troubleshooting Common Issues in Payload](../troubleshooting/troubleshooting#dependency-mismatches) for more details on resolving dependency mismatches.
+However sometimes this can be misleading in complex monorepos where multiple packages are installing Payload dependencies as you will see the same version installed but different applications might use different instances of the packages, so it's best to check the lockfile directly to ensure only one version of `@payloadcms/ui` is present. Installing the Payload dependencies at the root of your monorepo/workspace could help guarantee that only one version is installed across all packages.
 
 <Banner type="info">
   Generally we recommend pinning Payload packages to the exact same version in
