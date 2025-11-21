@@ -185,7 +185,14 @@ describe('Auth', () => {
         await saveDocAndAssert(page, '#action-save')
       })
 
-      test('should protect field schemas behind authentication', async () => {
+      // TODO: This test is unreliable. During development, the bundle sent to the client will include debug information.
+      // For example, arguments passed from one RSC to another RSC may be sent to the client by Next.js for debug reasons.
+      // In production however, this would never happen.
+      // In this case, simply using console.log on the permissions object
+      // may cause `shouldNotShowInClientConfigUnlessAuthenticated` to be included in the bundle,
+      // even though we're never actually sending it to the client.
+      // We'll need to run this test in production to ensure it passes.
+      test.skip('should protect field schemas behind authentication', async () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
@@ -495,6 +502,39 @@ describe('Auth', () => {
         // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
         await expect(page.locator('#field-rel')).toBeVisible()
       })
+    })
+  })
+
+  describe('autoRefresh', () => {
+    beforeAll(async () => {
+      await reInitializeDB({
+        serverURL,
+        snapshotKey: 'auth',
+        deleteOnly: false,
+      })
+
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+      url = new AdminUrlUtil(serverURL, slug)
+
+      // Install clock before login so token expiration and clock are in sync
+      await page.clock.install({ time: Date.now() })
+
+      await login({ page, serverURL })
+    })
+
+    test('should automatically refresh token without showing modal', async () => {
+      await expect(page.locator('.nav')).toBeVisible()
+
+      // Fast forward time to just past the reminder timeout
+      await page.clock.fastForward(7141000) // 1 hour 59 minutes + 1 second
+
+      // Resume clock so timers can execute
+      await page.clock.resume()
+
+      await expect(page.locator('.confirmation-modal')).toBeHidden()
+
+      await expect(page.locator('.nav')).toBeVisible()
     })
   })
 })

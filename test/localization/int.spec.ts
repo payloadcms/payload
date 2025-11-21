@@ -32,6 +32,7 @@ import {
   englishTitle,
   hungarianLocale,
   localizedDateFieldsSlug,
+  localizedDraftsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -3864,6 +3865,25 @@ describe('Localization', () => {
         pt: 'PT',
         xx: 'XX',
       })
+  describe('localized queries', () => {
+    it('should count versions with query on localized field', async () => {
+      await payload.create({
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Localized Drafts EN',
+        },
+        locale: defaultLocale,
+      })
+
+      const result2 = await payload.countVersions({
+        collection: localizedDraftsSlug,
+        where: {
+          'version.title': {
+            equals: 'Localized Drafts EN',
+          },
+        },
+      })
+      expect(result2.totalDocs).toBe(1)
     })
   })
 })
