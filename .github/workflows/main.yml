@@ -250,11 +250,16 @@ jobs:
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
-  tests-e2e:
+  tests-e2e-webpack:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
-    name: e2e-${{ matrix.suite }}
+    if: >-
+      needs.changes.outputs.needs_tests == 'true' &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'run-e2e-webpack') ||
+        github.event.label.name == 'run-e2e-webpack'
+      )
+    name: e2e-webpack-${{ matrix.suite }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -380,7 +385,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}
+          name: test-results-webpack-${{ matrix.suite }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -396,13 +401,9 @@ jobs:
   tests-e2e-turbo:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: >-
-      needs.changes.outputs.needs_tests == 'true' &&
-      (
-        contains(github.event.pull_request.labels.*.name, 'run-e2e-turbo') ||
-        github.event.label.name == 'run-e2e-turbo'
-      )
-    name: e2e-turbo-${{ matrix.suite }}
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    name: e2e-${{ matrix.suite }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -443,6 +444,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - fields__collections__UploadPoly
+          - fields__collections__UploadMultiPoly
           - group-by
           - folders
           - hooks
@@ -467,6 +470,7 @@ jobs:
           - plugin-import-export
           - plugin-multi-tenant
           - plugin-nested-docs
+          - plugin-redirects
           - plugin-seo
           - sort
           - trash
@@ -509,7 +513,7 @@ jobs:
 
       - name: Setup Playwright - Browsers and Dependencies
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium --no-shell
 
       - name: Setup Playwright - Dependencies-only
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
@@ -524,7 +528,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-turbo${{ matrix.suite }}
+          name: test-results-${{ matrix.suite }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -702,7 +706,7 @@ jobs:
       - build-and-test-templates
       - tests-unit
       - tests-int
-      - tests-e2e
+      - tests-e2e-turbo
       - tests-types
       - tests-type-generation
 
