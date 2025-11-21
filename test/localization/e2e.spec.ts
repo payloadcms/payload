@@ -783,13 +783,17 @@ describe('Localization', () => {
         await changeLocale(page, defaultLocale)
         await page.goto(urlAllFieldsLocalized.create)
 
+        // draft en
         await page.locator('#field-text').fill('EN Draft')
         await saveDocAndAssert(page, '#action-save-draft')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // publish en
         await page.locator('#field-text').fill('EN Published')
         await saveDocAndAssert(page, '#publish-locale')
 
-        const versionsURL = page.url() + '/versions'
-        await page.goto(versionsURL)
+        await page.goto(urlAllFieldsLocalized.versions(docID))
 
         const firstRow = page.locator('tbody tr').first()
         await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
@@ -799,21 +803,28 @@ describe('Localization', () => {
         await changeLocale(page, defaultLocale)
         await page.goto(urlAllFieldsLocalized.create)
 
+        // publish en
         await page.locator('#field-text').fill('EN Published')
         await saveDocAndAssert(page, '#publish-locale')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // draft en
         await page.locator('#field-text').fill('EN Draft')
         await saveDocAndAssert(page, '#action-save-draft')
 
         await changeLocale(page, spanishLocale)
+
+        // publish es
         await page.locator('#field-text').fill('ES Published')
         await saveDocAndAssert(page, '#publish-locale')
 
-        const versionsURL = page.url().replace(/\?locale=[^&]*/, '/versions')
-        await page.goto(versionsURL)
         await changeLocale(page, defaultLocale)
 
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Draft')
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
       })
     })
   })
