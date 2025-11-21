@@ -431,6 +431,31 @@ describe('Versions', () => {
       })
     })
 
+    describe('Duplicate', () => {
+      it('should duplicate a versioned document as a draft', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original description',
+            title: 'Original Title',
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        const duplicatedDoc = await payload.create({
+          duplicateFromID: originalDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        expect(duplicatedDoc._status).toBe('draft')
+      })
+    })
+
     describe('Query operations', () => {
       beforeAll(async () => {
         // Create test data for query-only tests (pagination, sorting)

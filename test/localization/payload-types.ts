@@ -126,6 +126,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
     'global-array': GlobalArray;
     'global-text': GlobalText;
@@ -433,6 +439,11 @@ export interface AllFieldsLocalized {
     localizedInNonLocalizedTab?: string | null;
   };
   unnamedTabLocalizedText?: string | null;
+  t1?: {
+    t2?: {
+      text?: string | null;
+    };
+  };
   g1?: {
     g2?: {
       g2a1?:
@@ -443,6 +454,7 @@ export interface AllFieldsLocalized {
         | null;
     };
   };
+  selfRelation?: (string | null) | AllFieldsLocalized;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -480,6 +492,11 @@ export interface User {
 export interface NoLocalizedField {
   id: string;
   text?: string | null;
+  group?: {
+    en?: {
+      text?: string | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1224,6 +1241,15 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
         localizedInNonLocalizedTab?: T;
       };
   unnamedTabLocalizedText?: T;
+  t1?:
+    | T
+    | {
+        t2?:
+          | T
+          | {
+              text?: T;
+            };
+      };
   g1?:
     | T
     | {
@@ -1238,6 +1264,7 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
                   };
             };
       };
+  selfRelation?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1291,6 +1318,15 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
  */
 export interface NoLocalizedFieldsSelect<T extends boolean = true> {
   text?: T;
+  group?:
+    | T
+    | {
+        en?:
+          | T
+          | {
+              text?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1736,6 +1772,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

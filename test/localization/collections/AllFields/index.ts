@@ -4,6 +4,9 @@ import { allFieldsLocalizedSlug } from '../../shared.js'
 
 export const AllFieldsLocalized: CollectionConfig = {
   slug: allFieldsLocalizedSlug,
+  admin: {
+    useAsTitle: 'text',
+  },
   fields: [
     // Simple localized fields
     {
@@ -204,6 +207,36 @@ export const AllFieldsLocalized: CollectionConfig = {
       ],
     },
 
+    // Deeply nested: localized tab
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 't1',
+          label: 'Deeply Nested Tab',
+          localized: true,
+          fields: [
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 't2',
+                  label: 'Nested Tab Level 2',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      localized: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
     // Deeply nested: localized group > non-localized group > localized array
     {
       name: 'g1',
@@ -230,6 +263,13 @@ export const AllFieldsLocalized: CollectionConfig = {
         },
       ],
       localized: true,
+    },
+
+    // relation to self
+    {
+      name: 'selfRelation',
+      type: 'relationship',
+      relationTo: allFieldsLocalizedSlug,
     },
   ],
   versions: {

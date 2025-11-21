@@ -4,7 +4,6 @@ import type { DeepPartial } from 'ts-essentials'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
-import type { PayloadRequest } from '../types/index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
@@ -164,6 +163,7 @@ export const createClientConfig = ({
       case 'admin':
         clientConfig.admin = {
           autoLogin: config.admin.autoLogin,
+          autoRefresh: config.admin.autoRefresh,
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,

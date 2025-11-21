@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
+import type { CollectionConfig, CollectionSlug, PayloadRequest, TypedUser } from 'payload'
 import type { z } from 'zod'
 
 import { type ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -135,7 +135,29 @@ export type PluginMCPServerConfig = {
       /**
        * Set the handler of the prompt. This is the function that will be called when the prompt is used.
        */
-      handler: (...args: any) => any
+      handler: (
+        args: Record<string, unknown>,
+        req: PayloadRequest,
+        _extra: unknown,
+      ) =>
+        | {
+            messages: Array<{
+              content: {
+                text: string
+                type: 'text'
+              }
+              role: 'assistant' | 'user'
+            }>
+          }
+        | Promise<{
+            messages: Array<{
+              content: {
+                text: string
+                type: 'text'
+              }
+              role: 'assistant' | 'user'
+            }>
+          }>
       /**
        * Set the function name of the prompt.
        */
@@ -157,8 +179,21 @@ export type PluginMCPServerConfig = {
       description: string
       /**
        * Set the handler of the resource. This is the function that will be called when the resource is used.
+       * The handler can have either 3 arguments (when no args are passed) or 4 arguments (when args are passed).
        */
-      handler: (...args: any) => any
+      handler: (...args: any[]) =>
+        | {
+            contents: Array<{
+              text: string
+              uri: string
+            }>
+          }
+        | Promise<{
+            contents: Array<{
+              text: string
+              uri: string
+            }>
+          }>
       /**
        * Set the mime type of the resource.
        * example: 'text/plain'
@@ -192,12 +227,25 @@ export type PluginMCPServerConfig = {
       /**
        * Set the handler of the tool. This is the function that will be called when the tool is used.
        */
-      handler: (args: Record<string, unknown>) => Promise<{
-        content: Array<{
-          text: string
-          type: 'text'
-        }>
-      }>
+      handler: (
+        args: Record<string, unknown>,
+        req: PayloadRequest,
+        _extra: unknown,
+      ) =>
+        | {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+            role?: string
+          }
+        | Promise<{
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+            role?: string
+          }>
       /**
        * Set the name of the tool. This is the name that will be used to identify the tool. LLMs will interperate the name to determine when to use the tool.
        */
@@ -309,6 +357,7 @@ export type MCPAccessSettings = {
   'payload-mcp-prompt'?: Record<string, boolean>
   'payload-mcp-resource'?: Record<string, boolean>
   'payload-mcp-tool'?: Record<string, boolean>
+  user: TypedUser
 } & Record<string, unknown>
 
 export type FieldDefinition = {
