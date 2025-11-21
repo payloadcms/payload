@@ -180,6 +180,7 @@ export {
 } from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
+export { BlockSelector } from '../../fields/Blocks/BlockSelector/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 
 // fields
