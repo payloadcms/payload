@@ -27,6 +27,18 @@ export const getTenantOptions = async ({
 
   const isOrderable = payload.collections[tenantsCollectionSlug]?.config?.orderable || false
 
+  const userTenantIds = !userHasAccessToAllTenants(user)
+    ? ((user[tenantsArrayFieldName] as { [key: string]: unknown }[]) || []).map((tenantRow) => {
+        const tenantField = tenantRow[tenantsArrayTenantFieldName]
+        if (typeof tenantField === 'string' || typeof tenantField === 'number') {
+          return tenantField
+        }
+        if (tenantField && typeof tenantField === 'object' && 'id' in tenantField) {
+          return tenantField.id as number | string
+        }
+      })
+    : undefined
+
   const tenants = await payload.find({
     collection: tenantsCollectionSlug,
     depth: 0,
@@ -38,6 +50,13 @@ export const getTenantOptions = async ({
     },
     sort: isOrderable ? '_order' : useAsTitle,
     user,
+    ...(userTenantIds && {
+      where: {
+        id: {
+          in: userTenantIds,
+        },
+      },
+    }),
   })
 
   tenantOptions = tenants.docs.map((doc) => ({
