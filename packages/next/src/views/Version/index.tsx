@@ -116,13 +116,16 @@ export async function VersionView(props: DocumentViewServerProps) {
       : Promise.resolve(null)) as Promise<null | TypeWithVersion<object>>,
     // Currently published version - do note: currently published != latest published, as an unpublished version can be the latest published
     hasPublishedDoc
-      ? req.payload.findByID({
-          id,
-          collection: collectionSlug,
+      ? fetchLatestVersion({
+          collectionSlug,
           depth: 0,
+          globalSlug,
           locale: req.locale,
           overrideAccess: false,
-          user: req.user,
+          parentID: id,
+          req,
+          status: 'published',
+          user,
         })
       : Promise.resolve(null),
     // Latest draft version
@@ -389,7 +392,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           const label =
             optionWithSameID.labelOverride ||
             getVersionLabel({
-              currentDoc: currentlyPublishedVersion,
+              currentlyPublishedVersion,
               latestDraftVersion,
               t: i18n.t,
               version: optionWithSameID.doc,

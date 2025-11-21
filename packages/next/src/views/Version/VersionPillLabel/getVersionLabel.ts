@@ -2,9 +2,12 @@ import type { TFunction } from '@payloadcms/translations'
 import type { Pill } from '@payloadcms/ui'
 
 type Args = {
-  currentDoc?: {
+  currentlyPublishedVersion?: {
     id: number | string
     updatedAt: string
+    version: {
+      updatedAt: string
+    }
   }
   latestDraftVersion?: {
     id: number | string
@@ -13,7 +16,7 @@ type Args = {
   t: TFunction
   version: {
     id: number | string
-    version: { _status?: string; updatedAt?: string }
+    version: { _status?: 'draft' | 'published'; updatedAt: string }
   }
 }
 
@@ -21,13 +24,20 @@ type Args = {
  * Gets the appropriate version label and version pill styling
  * given existing versions and the current version status.
  */
-export function getVersionLabel({ currentDoc, latestDraftVersion, t, version }: Args): {
+export function getVersionLabel({
+  currentlyPublishedVersion,
+  latestDraftVersion,
+  t,
+  version,
+}: Args): {
   label: string
   name: 'currentDraft' | 'currentlyPublished' | 'draft' | 'previouslyPublished' | 'published'
   pillStyle: Parameters<typeof Pill>[0]['pillStyle']
 } {
-  if (version?.version?._status === 'draft') {
-    if (currentDoc?.updatedAt > latestDraftVersion?.updatedAt) {
+  if (version.version._status === 'draft') {
+    const publishedNewerThanDraft =
+      currentlyPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+    if (publishedNewerThanDraft) {
       return {
         name: 'draft',
         label: t('version:draft'),
@@ -42,27 +52,27 @@ export function getVersionLabel({ currentDoc, latestDraftVersion, t, version }: 
       }
     }
   } else {
-    if (currentDoc.updatedAt < version?.version?.updatedAt) {
-      return {
-        name: 'currentlyPublished',
-        label: t('version:currentlyPublished'),
-        pillStyle: 'success',
+    const draftIsNewerThanPublished =
+      latestDraftVersion?.updatedAt > currentlyPublishedVersion?.updatedAt
+    if (draftIsNewerThanPublished) {
+      const isCurrentlyPublished =
+        version.version.updatedAt === currentlyPublishedVersion.version.updatedAt
+      if (isCurrentlyPublished) {
+        return {
+          name: 'currentlyPublished',
+          label: t('version:currentlyPublished'),
+          pillStyle: 'success',
+        }
       }
-    } else if (
-      currentDoc?.updatedAt === version?.version?.updatedAt &&
-      latestDraftVersion.updatedAt > currentDoc.updatedAt
-    ) {
-      return {
-        name: 'currentlyPublished',
-        label: t('version:currentlyPublished'),
-        pillStyle: 'success',
-      }
-    } else {
-      return {
-        name: 'previouslyPublished',
-        label: t('version:previouslyPublished'),
-        pillStyle: 'light',
-      }
+    }
+
+    const isCurrentlyPublished = version.id === currentlyPublishedVersion?.id
+    return {
+      name: isCurrentlyPublished ? 'currentlyPublished' : 'previouslyPublished',
+      label: isCurrentlyPublished
+        ? t('version:currentlyPublished')
+        : t('version:previouslyPublished'),
+      pillStyle: isCurrentlyPublished ? 'success' : 'light',
     }
   }
 }

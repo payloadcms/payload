@@ -21,6 +21,9 @@ export const VersionPillLabel: React.FC<{
   currentlyPublishedVersion?: {
     id: number | string
     updatedAt: string
+    version: {
+      updatedAt: string
+    }
   }
   disableDate?: boolean
 
@@ -31,7 +34,8 @@ export const VersionPillLabel: React.FC<{
     updatedAt?: string
     version: {
       [key: string]: unknown
-      _status: string
+      _status: 'draft' | 'published'
+      updatedAt: string
     }
   }
   /**
@@ -68,7 +72,7 @@ export const VersionPillLabel: React.FC<{
   const { i18n, t } = useTranslation()
 
   const { label, pillStyle } = getVersionLabel({
-    currentDoc: currentlyPublishedVersion,
+    currentlyPublishedVersion,
     latestDraftVersion,
     t,
     version: doc,
