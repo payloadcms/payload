@@ -47,6 +47,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
@@ -105,6 +106,7 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -120,7 +122,11 @@ export const createOperation = async <
 
     let { data } = args
 
-    const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts && !publishAllLocales)
+
+    if (isSavingDraft) {
+      data._status = 'draft'
+    }
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -236,6 +242,34 @@ export const createOperation = async <
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate,
     })
+
+    if (
+      config.localization &&
+      collectionConfig.versions &&
+      collectionConfig.versions.drafts &&
+      collectionConfig.versions.drafts.localizeStatus &&
+      publishAllLocales
+    ) {
+      let accessibleLocaleCodes = config.localization.localeCodes
+
+      if (config.localization.filterAvailableLocales) {
+        const filteredLocales = await config.localization.filterAvailableLocales({
+          locales: config.localization.locales,
+          req,
+        })
+        accessibleLocaleCodes = filteredLocales.map((locale) =>
+          typeof locale === 'string' ? locale : locale.code,
+        )
+      }
+
+      if (typeof resultWithLocales._status !== 'object' || resultWithLocales._status === null) {
+        resultWithLocales._status = {}
+      }
+
+      for (const localeCode of accessibleLocaleCodes) {
+        resultWithLocales._status[localeCode] = 'published'
+      }
+    }
 
     // /////////////////////////////////////
     // Write files to local storage

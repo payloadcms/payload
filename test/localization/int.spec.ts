@@ -3639,6 +3639,26 @@ describe('Localization', () => {
       expect(esDoc._status).toContain('draft')
     })
 
+    it('should allow publishing of all locales upon creation', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          text: 'Localized Metadata EN',
+          _status: 'published',
+        },
+        locale: defaultLocale,
+        publishAllLocales: true,
+      })
+
+      const esDoc = await payload.findByID({
+        locale: spanishLocale,
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+      })
+
+      expect(esDoc._status).toContain('published')
+    })
+
     it('should return correct data based on draft arg', async () => {
       // NOTE: passes in MongoDB, fails in PG
       // -> fails to query on version._status.[localeCode] in `replaceWithDraftIfAvailable` when locale = 'all'
