@@ -46,14 +46,13 @@ export function UnpublishButton() {
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
-      ; (async () => {
+      ;(async () => {
         let url
         let method
 
         const queryString = qs.stringify(
           {
-            depth: '0',
-            draft: true,
+            depth: 0,
             'fallback-locale': 'null',
             locale: unpublishAll ? undefined : localeCode,
             unpublishAllLocales: unpublishAll,
