@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { JoinQuery, PayloadRequest, SelectType, Where } from '../../types/index.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -17,6 +17,7 @@ type Arguments<T> = {
   doc: T
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
+  joins?: JoinQuery
   overrideAccess: boolean
   req: PayloadRequest
   select?: SelectType
@@ -27,6 +28,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   doc,
   entity,
   entityType,
+  joins,
   req,
   select,
 }: Arguments<T>): Promise<T> => {
@@ -76,6 +78,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   const findVersionsArgs: FindGlobalVersionsArgs & FindVersionsArgs = {
     collection: entity.slug,
     global: entity.slug,
+    joins,
     limit: 1,
     locale: locale!,
     pagination: false,
