@@ -106,7 +106,7 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
+      publishAllLocales: publishAllLocalesArg,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -122,6 +122,12 @@ export const createOperation = async <
 
     let { data } = args
 
+    const publishAllLocales =
+      !draft &&
+      (publishAllLocalesArg ??
+        (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus
+          ? false
+          : true))
     const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts && !publishAllLocales)
 
     if (isSavingDraft) {
