@@ -10,6 +10,7 @@ import {
   getFieldByPath,
   getQueryDraftsSort,
   type JoinQuery,
+  type RelationshipField,
   type SelectMode,
   type SelectType,
   type Where,
@@ -133,20 +134,6 @@ export const traverseFields = ({
       field,
       parentIsLocalized,
     })
-
-    // handle simple relationship
-    if (
-      depth > 0 &&
-      (field.type === 'upload' || field.type === 'relationship') &&
-      !field.hasMany &&
-      typeof field.relationTo === 'string'
-    ) {
-      if (isFieldLocalized) {
-        _locales.with[`${path}${field.name}`] = true
-      } else {
-        currentArgs.with[`${path}${field.name}`] = true
-      }
-    }
 
     switch (field.type) {
       case 'array': {
@@ -809,6 +796,135 @@ export const traverseFields = ({
         break
       }
 
+      case 'relationship':
+      case 'upload': {
+        if (select && !selectAllOnCurrentLevel) {
+          if (
+            (selectMode === 'include' && !select[field.name]) ||
+            (selectMode === 'exclude' && select[field.name] === false)
+          ) {
+            break
+          }
+        }
+
+        const fieldPath = `${path}${field.name}`
+        const isRelatedToManyCollections = Array.isArray(field.relationTo)
+        const relationshipSelect = isRelatedToManyCollections
+          ? (select?.[field.name] as SelectType)?.value
+          : select?.[field.name]
+
+        if (depth > 0 && !field.hasMany && !isRelatedToManyCollections) {
+          if ((isFieldLocalized || parentIsLocalized) && _locales) {
+            _locales.with = _locales.with || {}
+            _locales.with[fieldPath] = true
+          } else {
+            currentArgs.with = currentArgs.with || {}
+            currentArgs.with[fieldPath] = true
+          }
+        }
+
+        if (field.inline) {
+          ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
+            (relationTo) => {
+              const relationship = adapter.payload.collections[relationTo].config
+              const relationshipTableName = adapter.tableNameMap.get(toSnakeCase(relationTo))
+              const relationshipTableNameWithLocales = `${relationshipTableName}${adapter.localesSuffix}`
+              const selectAll = selectAllOnCurrentLevel || relationshipSelect === true
+
+              const withRelationship: Result = {
+                extras: {},
+                with: {},
+              }
+
+              if (typeof relationshipSelect === 'object') {
+                withRelationship.columns = Object.keys(relationshipSelect)
+                  .filter((key) =>
+                    selectMode === 'include'
+                      ? Boolean(relationshipSelect[key])
+                      : relationshipSelect[key] === false,
+                  )
+                  .reduce((acc, key) => {
+                    acc[key] = selectMode === 'include'
+                    return acc
+                  }, {})
+              }
+
+              if (field.hasMany || isRelatedToManyCollections) {
+                const _rels = adapter.relationshipsSuffix
+                const _with: Result = (currentArgs.with = currentArgs.with || {})
+                const _withRels: Result = (_with[_rels] =
+                  typeof _with[_rels] === 'object' ? _with[_rels] : {})
+
+                _withRels.with = _withRels.with || {}
+                _withRels.with[`${relationTo}ID`] = selectAll ? true : withRelationship
+              } else {
+                const _with: Result = (currentArgs.with = currentArgs.with || {})
+
+                _with[fieldPath] = selectAll ? true : withRelationship
+              }
+
+              if (adapter.tables[relationshipTableNameWithLocales]) {
+                withRelationship.with = withRelationship.with || {}
+                withRelationship.with._locales = {
+                  columns:
+                    typeof relationshipSelect === 'object'
+                      ? { _locale: true }
+                      : { id: false, _parentID: false },
+                  with: {},
+                }
+              }
+
+              // Needs a valid select to prevent an infinite loop in the case of inlined two-way relationships
+              if (depth > 0 || typeof relationshipSelect === 'object') {
+                traverseFields({
+                  _locales: withRelationship.with._locales,
+                  adapter,
+                  currentArgs: withRelationship,
+                  currentTableName: relationshipTableName,
+                  depth: depth - 1,
+                  draftsEnabled,
+                  fields: relationship.flattenedFields,
+                  joinQuery: false,
+                  locale,
+                  parentIsLocalized: parentIsLocalized || field.localized,
+                  path: '',
+                  select: typeof relationshipSelect === 'object' ? relationshipSelect : undefined,
+                  selectAllOnCurrentLevel: selectAll,
+                  selectMode,
+                  tablePath: '',
+                  topLevelArgs,
+                  topLevelTableName,
+                  withTabledFields,
+                })
+
+                if (
+                  withRelationship.with._locales &&
+                  Object.keys(withRelationship.with._locales.columns).length === 1
+                ) {
+                  delete withRelationship.with._locales
+                }
+              }
+            },
+          )
+        } else {
+          if (relationshipSelect) {
+            if ((isFieldLocalized || parentIsLocalized) && _locales) {
+              _locales.columns = _locales.columns || ({} as Result['columns'])
+              _locales.columns[fieldPath] = true
+            } else if (adapter.tables[currentTableName]?.[fieldPath]) {
+              currentArgs.columns = currentArgs.columns || {}
+              currentArgs.columns[fieldPath] = true
+            }
+
+            if (field.hasMany || isRelatedToManyCollections) {
+              withTabledFields.rels = true
+            }
+          }
+        }
+
+        break
+      }
+
       case 'select': {
         if (select && !selectAllOnCurrentLevel) {
           if (
@@ -864,14 +980,6 @@ export const traverseFields = ({
             currentArgs.columns[fieldPath] = true
           }
 
-          if (
-            !withTabledFields.rels &&
-            (field.type === 'relationship' || field.type === 'upload') &&
-            (field.hasMany || Array.isArray(field.relationTo))
-          ) {
-            withTabledFields.rels = true
-          }
-
           if (!withTabledFields.numbers && field.type === 'number' && field.hasMany) {
             withTabledFields.numbers = true
           }
@@ -885,6 +993,28 @@ export const traverseFields = ({
       }
     }
   })
+
+  // Don't select relationships that weren't selected
+  if (select && selectMode === 'include' && currentArgs.with?.[adapter.relationshipsSuffix]) {
+    const relationships = fields.filter(
+      (field) =>
+        field.type === 'relationship' && (field.hasMany || Array.isArray(field.relationTo)),
+    ) as RelationshipField[]
+
+    relationships.forEach((field) =>
+      (Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
+        (relationTo) => {
+          const _with = currentArgs.with
+          const _withRels = _with[adapter.relationshipsSuffix]
+
+          if (_withRels.with?.[`${relationTo}ID`] === undefined) {
+            _withRels.columns = _withRels.columns || {}
+            _withRels.columns[`${relationTo}ID`] = false
+          }
+        },
+      ),
+    )
+  }
 
   return topLevelArgs
 }

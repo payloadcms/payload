@@ -769,6 +769,7 @@ export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, Up
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
     event,
+    inline,
     maxRows,
     minRows,
     relationTo,
@@ -812,7 +813,9 @@ export const upload: UploadFieldValidation = async (value, options) => {
         collectionSlug = relationTo
 
         // custom id
-        if (val || typeof val === 'number') {
+        if (inline && typeof val === 'object') {
+          requestedID = val.id
+        } else if (val || typeof val === 'number') {
           requestedID = val
         }
       }

@@ -10,6 +10,7 @@ import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
+import { transform } from './index.js'
 import { transformRelationship } from './relationship.js'
 
 type TraverseFieldsArgs = {
@@ -409,15 +410,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
         Object.entries(relationsByLocale).forEach(([locale, relations]) => {
           transformRelationship({
+            adapter,
+            config,
             field,
+            joinQuery,
             locale,
+            parentIsLocalized,
             ref: result,
             relations,
           })
         })
       } else {
         transformRelationship({
+          adapter,
+          config,
           field,
+          joinQuery,
+          parentIsLocalized,
           ref: result,
           relations: relationPathMatch,
           withinArrayOrBlockLocale,
@@ -687,7 +696,25 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
         case 'relationship':
         case 'upload': {
-          if (
+          if (val && typeof val === 'object' && field.inline) {
+            const relationshipCollection =
+              typeof field.relationTo === 'string'
+                ? field.relationTo
+                : field.relationTo.find((value) => toSnakeCase(value) === fieldData['relationTo'])
+
+            const relationshipConfig = adapter.payload.collections[relationshipCollection].config
+            const relationshipTableName = toSnakeCase(relationshipCollection)
+
+            val = transform({
+              adapter,
+              config,
+              data: fieldData,
+              fields: relationshipConfig.flattenedFields,
+              joinQuery,
+              parentIsLocalized,
+              tableName: relationshipTableName,
+            })
+          } else if (
             val &&
             typeof field.relationTo === 'string' &&
             adapter.payload.collections[field.relationTo].customIDType === 'number'
