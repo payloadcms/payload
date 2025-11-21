@@ -89,7 +89,7 @@ export const updateDocument = async <
   overrideLock,
   payload,
   populate,
-  publishAllLocales: publishLocaleArg,
+  publishAllLocales: publishAllLocalesArg,
   publishSpecificLocale,
   req,
   select,
@@ -98,10 +98,11 @@ export const updateDocument = async <
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const publishAllLocales =
-    publishLocaleArg ??
-    (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus
-      ? false
-      : true)
+    !draftArg &&
+    (publishAllLocalesArg ??
+      (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus
+        ? false
+        : true))
   const isSavingDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) &&
     data._status !== 'published' &&
