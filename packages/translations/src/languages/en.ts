@@ -548,6 +548,7 @@ export const enTranslations = {
     aboutToRevertToPublished:
       "You are about to revert this document's changes to its published state. Are you sure?",
     aboutToUnpublish: 'You are about to unpublish this document. Are you sure?',
+    aboutToUnpublishIn: 'You are about to unpublish this document in {{locale}}. Are you sure?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Autosave',
@@ -595,6 +596,7 @@ export const enTranslations = {
     restoring: 'Restoring...',
     reverting: 'Reverting...',
     revertToPublished: 'Revert to published',
+    revertUnsuccessful: 'Revert unsuccessful. No previously published version found.',
     saveDraft: 'Save Draft',
     scheduledSuccessfully: 'Scheduled successfully.',
     schedulePublish: 'Schedule Publish',
@@ -605,6 +607,9 @@ export const enTranslations = {
     specificVersion: 'Specific Version',
     status: 'Status',
     unpublish: 'Unpublish',
+    unpublished: 'Unpublished',
+    unpublishedSuccessfully: 'Unpublished successfully.',
+    unpublishIn: 'Unpublish in {{locale}}',
     unpublishing: 'Unpublishing...',
     version: 'Version',
     versionAgo: '{{distance}} ago',
