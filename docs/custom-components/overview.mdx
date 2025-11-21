@@ -580,6 +580,8 @@ In the case of monorepos or workspaces where multiple packages depend on `@paylo
 
 However sometimes this can be misleading in complex monorepos where hoisting is involved as you will see the same version installed but different applications might use different instances of the packages, so it's best to check the lockfile directly to ensure only one version of `@payloadcms/ui` is present. We also recommend you install the Payload dependencies at the root of your monorepo/workspace to ensure only one version is installed across all packages.
 
+See [Troubleshooting Common Issues in Payload](../troubleshooting/troubleshooting#dependency-mismatches) for more details on resolving dependency mismatches.
+
 <Banner type="info">
   Generally we recommend pinning Payload packages to the exact same version in
   order to ensure that your package manager installs the same versions across
