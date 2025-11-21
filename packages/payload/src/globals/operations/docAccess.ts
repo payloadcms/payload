@@ -27,7 +27,6 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
   }
 
   try {
-    const shouldCommit = await initTransaction(req)
     const result = await getEntityPermissions({
       id: undefined,
       blockReferencesPermissions: {},
@@ -38,9 +37,7 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
       operations: globalOperations,
       req,
     })
-    if (shouldCommit) {
-      await commitTransaction(req)
-    }
+
     const sanitizedPermissions = sanitizePermissions({
       globals: {
         [globalConfig.slug]: result,

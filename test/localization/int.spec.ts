@@ -3620,8 +3620,7 @@ describe('Localization', () => {
   })
 
   describe('localize status', () => {
-    it('should not return fallback status data', async () => {
-      // TODO: allow fields to opt out of using fallbackLocale
+    it('should set other locales to draft upon creation', async () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
@@ -3637,7 +3636,27 @@ describe('Localization', () => {
         collection: allFieldsLocalizedSlug,
       })
 
-      expect(esDoc._status).toBeUndefined()
+      expect(esDoc._status).toContain('draft')
+    })
+
+    it('should allow publishing of all locales upon creation', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          text: 'Localized Metadata EN',
+          _status: 'published',
+        },
+        locale: defaultLocale,
+        publishAllLocales: true,
+      })
+
+      const esDoc = await payload.findByID({
+        locale: spanishLocale,
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+      })
+
+      expect(esDoc._status).toContain('published')
     })
 
     it('should return correct data based on draft arg', async () => {
