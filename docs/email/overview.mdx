@@ -188,7 +188,7 @@ await payload.sendEmail({
 
 Anything supported by Nodemailer’s attachments—streams, Buffers, URLs, content IDs for inline images (cid), etc.—will work here.
 
-**Resend adapter**
+### Resend adapter
 
 Works with @payloadcms/email-resend.
 
@@ -272,7 +272,7 @@ await payload.sendEmail({
 })
 ```
 
-**With Resend adapter:**
+### With Resend adapter:
 
 ```ts
 const mediaDoc = await payload.findByID({
