@@ -1138,8 +1138,6 @@ describe('Versions', () => {
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
-      const publishOptions = page.locator('.doc-controls__controls .popup')
-      await publishOptions.click()
 
       const publishSpecificLocale = page.locator('#publish-locale')
       await expect(publishSpecificLocale).toContainText('English')
