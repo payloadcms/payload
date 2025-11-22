@@ -1,11 +1,11 @@
 ---
 name: payload
-description: Use when working with Payload CMS projects, payload.config.ts, collections, fields, hooks, access control, or Payload API. Helpful for ValidationError, overrideAccess issues, relationship population, transaction failures, hook loops. Provides TypeScript patterns and examples for Payload 3.x development.
+description: Use when working with Payload CMS projects (payload.config.ts, collections, fields, hooks, access control, Payload API). Use when debugging validation errors, security issues, relationship queries, transactions, or hook behavior.
 ---
 
 # Payload CMS Application Development
 
-Payload 3.x is a Next.js native CMS with TypeScript-first architecture, providing admin panel, database management, REST/GraphQL APIs, authentication, and file storage.
+Payload is a Next.js native CMS with TypeScript-first architecture, providing admin panel, database management, REST/GraphQL APIs, authentication, and file storage.
 
 ## Quick Reference
 
