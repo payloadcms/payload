@@ -1,5 +1,7 @@
 import type { Plugin, SingleRelationshipField } from 'payload'
 
+import { flattenAllFields } from 'payload'
+
 import type { NestedDocsPluginConfig } from './types.js'
 
 import { createBreadcrumbsField } from './fields/breadcrumbs.js'
@@ -20,12 +22,14 @@ export const nestedDocsPlugin =
       if (pluginConfig.collections.indexOf(collection.slug) > -1) {
         const fields = [...(collection?.fields || [])]
 
-        const existingBreadcrumbField = collection.fields.find(
+        const flattenedFields = flattenAllFields({ fields: collection.fields })
+
+        const existingBreadcrumbField = flattenedFields.find(
           (field) =>
             'name' in field && field.name === (pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs'),
         )
 
-        const existingParentField = collection.fields.find(
+        const existingParentField = flattenedFields.find(
           (field) => 'name' in field && field.name === (pluginConfig?.parentFieldSlug || 'parent'),
         ) as SingleRelationshipField
 
