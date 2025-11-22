@@ -12,6 +12,7 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { SlideModeToggle } from '@/components/SlideModeToggle'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -41,11 +42,20 @@ type Args = {
   params: Promise<{
     slug?: string
   }>
+  searchParams: Promise<{
+    mode?: string
+  }>
 }
 
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = 'home' } = await paramsPromise
+  const searchParams = await searchParamsPromise
+  const slideMode = searchParams?.mode === 'slides'
+
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
@@ -69,13 +79,14 @@ export default async function Page({ params: paramsPromise }: Args) {
   return (
     <article className="pt-16 pb-24">
       <PageClient />
+      <SlideModeToggle />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
       {draft && <LivePreviewListener />}
 
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
+      {!slideMode && <RenderHero {...hero} />}
+      <RenderBlocks blocks={layout} hero={hero} slideMode={slideMode} />
     </article>
   )
 }
