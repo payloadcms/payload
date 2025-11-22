@@ -6,13 +6,12 @@ Custom REST API endpoints extend Payload's auto-generated CRUD operations with c
 
 ### Endpoint Configuration
 
-| Property  | Type                                              | Description                                                       |
-| --------- | ------------------------------------------------- | ----------------------------------------------------------------- |
-| `path`    | `string`                                          | Route path after collection/global slug (e.g., `/:id/tracking`)   |
-| `method`  | `'get' \| 'post' \| 'put' \| 'patch' \| 'delete'` | HTTP method (lowercase)                                           |
-| `handler` | `(req: PayloadRequest) => Promise<Response>`      | Async function returning Web API Response                         |
-| `root`    | `boolean`                                         | Mount on root app (bypasses `/api` prefix), top-level config only |
-| `custom`  | `Record<string, any>`                             | Extension point for plugins/metadata                              |
+| Property  | Type                                              | Description                                                     |
+| --------- | ------------------------------------------------- | --------------------------------------------------------------- |
+| `path`    | `string`                                          | Route path after collection/global slug (e.g., `/:id/tracking`) |
+| `method`  | `'get' \| 'post' \| 'put' \| 'patch' \| 'delete'` | HTTP method (lowercase)                                         |
+| `handler` | `(req: PayloadRequest) => Promise<Response>`      | Async function returning Web API Response                       |
+| `custom`  | `Record<string, any>`                             | Extension point for plugins/metadata                            |
 
 ### Request Context
 
@@ -521,28 +520,6 @@ export const Settings: GlobalConfig = {
 }
 ```
 
-### Root Endpoints
-
-Mounted at root level, bypasses `/api` prefix. **Only available in top-level config.**
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  endpoints: [
-    {
-      path: '/health',
-      method: 'get',
-      root: true, // Available at: /health (not /api/health)
-      handler: async (req) => {
-        return Response.json({ status: 'ok' })
-      },
-    },
-  ],
-})
-```
-
 ## Advanced Patterns
 
 ### Factory Functions
@@ -651,7 +628,7 @@ export const endpoint = {
 
 ## Resources
 
-- REST API Overview: https://payloadcms.com/docs/rest-api/overview
-- Custom Endpoints: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
-- Access Control: https://payloadcms.com/docs/access-control/overview
-- Local API: https://payloadcms.com/docs/local-api/overview
+- REST API Overview: <https://payloadcms.com/docs/rest-api/overview>
+- Custom Endpoints: <https://payloadcms.com/docs/rest-api/overview#custom-endpoints>
+- Access Control: <https://payloadcms.com/docs/access-control/overview>
+- Local API: <https://payloadcms.com/docs/local-api/overview>
