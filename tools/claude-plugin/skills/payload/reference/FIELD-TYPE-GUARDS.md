@@ -188,15 +188,8 @@ fieldShouldBeLocalized({
 }): boolean
 ```
 
-**⚠️ Use Instead of `fieldIsLocalized`:**
-
 ```ts
-// ❌ DEPRECATED - doesn't account for parent localization
-if (fieldIsLocalized(field)) {
-  /* ... */
-}
-
-// ✅ CORRECT - accounts for parent localization
+// Accounts for parent localization
 if (fieldShouldBeLocalized({ field, parentIsLocalized: false })) {
   /* ... */
 }
