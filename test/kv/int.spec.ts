@@ -1,6 +1,8 @@
 import type { KVAdapterResult, Payload } from 'payload'
 
+import { cloudflareKVAdapter } from '@payloadcms/kv-cloudflare'
 import { RedisKVAdapter, redisKVAdapter } from '@payloadcms/kv-redis'
+import { Miniflare } from 'miniflare'
 import path from 'path'
 import { inMemoryKVAdapter } from 'payload'
 import { fileURLToPath } from 'url'
@@ -8,6 +10,8 @@ import { fileURLToPath } from 'url'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
+let kvBinding: Awaited<ReturnType<Miniflare['getKVNamespace']>>
+let mf: Miniflare
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,6 +21,13 @@ describe('KV Adapters', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
+    mf = new Miniflare({
+      kvNamespaces: ['PAYLOAD_KV'],
+      modules: true,
+      script: 'export default {}',
+    })
+    kvBinding = await mf.getKVNamespace('PAYLOAD_KV')
+
     const initialized = await initPayloadInt(dirname)
     ;({ payload } = initialized)
   })
@@ -24,6 +35,9 @@ describe('KV Adapters', () => {
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
+    }
+    if (mf) {
+      await mf.dispose()
     }
   })
 
@@ -82,5 +96,9 @@ describe('KV Adapters', () => {
 
   it('redisKVAdapter', async () => {
     expect(await testKVAdapter(redisKVAdapter())).toBeTruthy()
+  })
+
+  it('cloudflareKVAdapter', async () => {
+    expect(await testKVAdapter(cloudflareKVAdapter({ binding: kvBinding }))).toBeTruthy()
   })
 })

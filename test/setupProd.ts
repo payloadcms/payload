@@ -21,6 +21,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/graphql': 'payloadcms-graphql-*',
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',
   '@payloadcms/live-preview-react': 'payloadcms-live-preview-react-*',
+  '@payloadcms/kv-cloudflare': 'payloadcms-kv-cloudflare-*',
   '@payloadcms/kv-redis': 'payloadcms-kv-redis-*',
   '@payloadcms/next': 'payloadcms-next-*',
   '@payloadcms/payload-cloud': 'payloadcms-payload-cloud-*',
