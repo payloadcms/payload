@@ -1,21 +1,7 @@
+import type { KVNamespace } from '@cloudflare/workers-types'
 import type { KVAdapter, KVAdapterResult, KVStoreValue } from 'payload'
 
-type CloudflareKVListResult = {
-  cursor?: string
-  keys: { name: string }[]
-  list_complete: boolean
-}
-
-export interface CloudflareKVNamespace {
-  delete(key: string): Promise<void>
-  get(key: string): Promise<null | string>
-  list(options?: {
-    cursor?: string
-    limit?: number
-    prefix?: string
-  }): Promise<CloudflareKVListResult>
-  put(key: string, value: string): Promise<void>
-}
+export type CloudflareKVNamespace = KVNamespace
 
 const defaultPrefix = 'payload-kv:'
 
@@ -46,7 +32,9 @@ export class CloudflareKVAdapter implements KVAdapter {
         await Promise.all(keys.map(({ name }) => this.binding.delete(name)))
       }
 
-      if (list_complete || !nextCursor) {break}
+      if (list_complete || !nextCursor) {
+        break
+      }
       cursor = nextCursor
     }
   }
@@ -58,7 +46,9 @@ export class CloudflareKVAdapter implements KVAdapter {
   async get<T extends KVStoreValue>(key: string): Promise<null | T> {
     const value = await this.binding.get(this.prefixKey(key))
 
-    if (value === null) {return null}
+    if (value === null) {
+      return null
+    }
 
     return JSON.parse(value) as T
   }
@@ -88,7 +78,9 @@ export class CloudflareKVAdapter implements KVAdapter {
         )
       }
 
-      if (list_complete || !nextCursor) {break}
+      if (list_complete || !nextCursor) {
+        break
+      }
       cursor = nextCursor
     }
 

@@ -1,3 +1,4 @@
+import type { CloudflareKVNamespace } from '@payloadcms/kv-cloudflare'
 import type { KVAdapterResult, Payload } from 'payload'
 
 import { cloudflareKVAdapter } from '@payloadcms/kv-cloudflare'
@@ -10,7 +11,7 @@ import { fileURLToPath } from 'url'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
-let kvBinding: Awaited<ReturnType<Miniflare['getKVNamespace']>>
+let kvBinding: CloudflareKVNamespace
 let mf: Miniflare
 
 const filename = fileURLToPath(import.meta.url)
@@ -26,7 +27,7 @@ describe('KV Adapters', () => {
       modules: true,
       script: 'export default {}',
     })
-    kvBinding = await mf.getKVNamespace('PAYLOAD_KV')
+    kvBinding = (await mf.getKVNamespace('PAYLOAD_KV')) as CloudflareKVNamespace
 
     const initialized = await initPayloadInt(dirname)
     ;({ payload } = initialized)

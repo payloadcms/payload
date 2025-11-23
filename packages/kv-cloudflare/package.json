@@ -41,6 +41,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251004.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
