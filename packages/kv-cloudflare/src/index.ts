@@ -19,14 +19,13 @@ export class CloudflareKVAdapter implements KVAdapter {
     let cursor: string | undefined
 
     while (true) {
-      const {
-        cursor: nextCursor,
-        keys,
-        list_complete,
-      } = await this.binding.list({
+      const result = await this.binding.list({
         cursor,
         prefix: this.keyPrefix || undefined,
       })
+
+      const { keys, list_complete } = result
+      const nextCursor = 'cursor' in result ? result.cursor : undefined
 
       if (keys.length) {
         await Promise.all(keys.map(({ name }) => this.binding.delete(name)))
@@ -63,14 +62,13 @@ export class CloudflareKVAdapter implements KVAdapter {
     let cursor: string | undefined
 
     while (true) {
-      const {
-        cursor: nextCursor,
-        keys: batch,
-        list_complete,
-      } = await this.binding.list({
+      const result = await this.binding.list({
         cursor,
         prefix: this.keyPrefix || undefined,
       })
+
+      const { keys: batch, list_complete } = result
+      const nextCursor = 'cursor' in result ? result.cursor : undefined
 
       if (batch.length) {
         keys.push(
