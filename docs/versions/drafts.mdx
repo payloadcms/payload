@@ -51,7 +51,7 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
 
 #### Using the `draft` parameter
 
-When drafts are enabled, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a `draft` parameter that controls validation and where data is written.
+When drafts are enabled, the `create`, `update`, `find`, and `findByID` operations for REST, GraphQL, and Local APIs expose a `draft` parameter. For write operations, it controls validation and where data is written. For read operations, it determines whether to return draft versions.
 
 ```ts
 // REST API
