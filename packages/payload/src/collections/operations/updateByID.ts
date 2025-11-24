@@ -3,6 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
+import type { AtomicOperations } from '../../types/atomic.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -24,6 +25,8 @@ import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { applyAtomicOperations } from '../../utilities/atomic/apply.js'
+import { validateAtomicOperations } from '../../utilities/atomic/validate.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -41,6 +44,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
+  operations?: AtomicOperations<TSlug>
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
@@ -178,13 +182,28 @@ export const updateByIDOperation = async <
     }
 
     // /////////////////////////////////////
+    // Handle atomic operations
+    // /////////////////////////////////////
+
+    const { operations } = args
+
+    validateAtomicOperations(operations, data, collectionConfig.flattenedFields)
+
+    const resolvedData = deepCopyObjectSimple(data)
+
+    if (operations) {
+      // Apply atomic operations to the data
+      applyAtomicOperations(docWithLocales, resolvedData, operations)
+    }
+
+    // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
     const { data: newFileData, files: filesToUpload } = await generateFileData({
       collection,
       config,
-      data,
+      data: resolvedData,
       operation: 'update',
       overwriteExistingFiles,
       req,

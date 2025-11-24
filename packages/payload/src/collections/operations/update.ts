@@ -3,6 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
+import type { AtomicOperations } from '../../types/atomic.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -21,6 +22,8 @@ import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { applyAtomicOperations } from '../../utilities/atomic/apply.js'
+import { validateAtomicOperations } from '../../utilities/atomic/validate.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
@@ -42,6 +45,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   limit?: number
+  operations?: AtomicOperations<TSlug>
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
@@ -99,6 +103,7 @@ export const updateOperation = async <
       depth,
       draft: draftArg = false,
       limit = 0,
+      operations,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
@@ -140,6 +145,12 @@ export const updateOperation = async <
       req,
       where,
     })
+
+    // /////////////////////////////////////
+    // Validate atomic operations
+    // /////////////////////////////////////
+
+    validateAtomicOperations(operations, bulkUpdateData, collectionConfig.flattenedFields)
 
     // /////////////////////////////////////
     // Retrieve documents
@@ -238,6 +249,16 @@ export const updateOperation = async <
           select: incomingSelect,
         })
 
+        // /////////////////////////////////////
+        // Apply atomic operations to this document's data
+        // /////////////////////////////////////
+
+        const docData = deepCopyObjectSimple(data)
+
+        if (operations) {
+          applyAtomicOperations(docWithLocales, docData, operations)
+        }
+
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
@@ -247,7 +268,7 @@ export const updateOperation = async <
           autosave,
           collectionConfig,
           config,
-          data: deepCopyObjectSimple(data),
+          data: docData,
           depth: depth!,
           docWithLocales,
           draftArg,
