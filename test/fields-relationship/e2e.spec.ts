@@ -575,6 +575,55 @@ describe('Relationship Field', () => {
     await expect(documentDrawer).toBeVisible()
   })
 
+  test('should open document from drawer by clicking on ID Label', async () => {
+    const relatedDoc = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'Drawer ID Label',
+      },
+    })
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        relationship: relatedDoc.id,
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const relationshipDrawerTrigger = page.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(relationshipDrawerTrigger).toBeVisible()
+
+    await relationshipDrawerTrigger.click()
+
+    const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
+    await expect(documentDrawer).toBeVisible()
+
+    const idLabel = documentDrawer.locator('.id-label')
+    await expect(idLabel).toBeVisible()
+
+    await idLabel.locator('a').click()
+
+    const closedModalLocator = page.locator(
+      '.payload__modal-container.payload__modal-container--exitDone',
+    )
+
+    await expect(closedModalLocator).toBeVisible()
+
+    await Promise.all([
+      payload.delete({
+        collection: relationOneSlug,
+        id: relatedDoc.id,
+      }),
+      payload.delete({
+        collection: slug,
+        id: doc.id,
+      }),
+    ])
+  })
+
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
     await wait(300)
