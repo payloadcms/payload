@@ -24,10 +24,11 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
     versionData,
   }: CreateGlobalVersionArgs,
 ): Promise<TypeWithVersion<T>> {
-  const db = await getTransaction(this, req)
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
   const tableName = this.tableNameMap.get(`_${toSnakeCase(global.slug)}${this.versionsSuffix}`)
+
+  const db = await getTransaction(this, req)
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
