@@ -553,6 +553,7 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Estás a punto de revertir los cambios de este documento a su estado publicado. ¿Estás seguro?',
     aboutToUnpublish: 'Estás a punto de despublicar este documento. ¿Estás seguro?',
+    aboutToUnpublishIn: 'Está a punto de despublicar este documento en {{locale}}. ¿Está seguro?',
     aboutToUnpublishSelection:
       'Estás a punto de despublicar todos los {{label}} seleccionados. ¿Estás seguro?',
     autosave: 'Autoguardado',
@@ -600,6 +601,8 @@ export const esTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurando...',
     reverting: 'Revirtiendo...',
     revertToPublished: 'Revertir a la versión publicada',
+    revertUnsuccessful:
+      'Reversión no exitosa. No se encontró ninguna versión previamente publicada.',
     saveDraft: 'Guardar borrador',
     scheduledSuccessfully: 'Programado con éxito.',
     schedulePublish: 'Programar publicación',
@@ -610,6 +613,9 @@ export const esTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versión Específica',
     status: 'Estado',
     unpublish: 'Despublicar',
+    unpublished: 'No publicado',
+    unpublishedSuccessfully: 'Sin publicar exitosamente.',
+    unpublishIn: 'Despublicar en {{locale}}',
     unpublishing: 'Despublicando...',
     version: 'Versión',
     versionAgo: 'hace {{distance}}',

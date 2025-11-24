@@ -552,6 +552,8 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Stai per ripristinare le modifiche di questo documento al suo stato pubblicato. Sei sicuro?',
     aboutToUnpublish: 'Stai per annullare la pubblicazione di questo documento. Sei sicuro?',
+    aboutToUnpublishIn:
+      'Stai per annullare la pubblicazione di questo documento in {{locale}}. Sei sicuro?',
     aboutToUnpublishSelection:
       'Stai per annullare la pubblicazione di tutte le {{label}} nella selezione. Sei sicuro?',
     autosave: 'Salvataggio automatico',
@@ -599,6 +601,8 @@ export const itTranslations: DefaultTranslationsObject = {
     restoring: 'Ripristino...',
     reverting: 'Ritorno...',
     revertToPublished: 'Ritorna alla versione pubblicata',
+    revertUnsuccessful:
+      'Annullamento non riuscito. Nessuna versione precedentemente pubblicata trovata.',
     saveDraft: 'Salva Bozza',
     scheduledSuccessfully: 'Programmato con successo.',
     schedulePublish: 'Pubblicazione Programmata',
@@ -609,6 +613,9 @@ export const itTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versione Specifica',
     status: 'Stato',
     unpublish: 'Annulla pubblicazione',
+    unpublished: 'Non pubblicato',
+    unpublishedSuccessfully: 'Pubblicazione annullata con successo.',
+    unpublishIn: 'Annulla pubblicazione in {{locale}}',
     unpublishing: 'Annullamento pubblicazione...',
     version: 'Versione',
     versionAgo: '{{distance}} fa',

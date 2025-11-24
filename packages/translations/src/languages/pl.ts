@@ -545,6 +545,7 @@ export const plTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Zamierzasz przywrócić zmiany w tym dokumencie do stanu opublikowanego. Jesteś pewien?',
     aboutToUnpublish: 'Zamierzasz cofnąć publikację tego dokumentu. Jesteś pewien?',
+    aboutToUnpublishIn: 'Za chwilę wycofasz publikację tego dokumentu w {{locale}}. Jesteś pewien?',
     aboutToUnpublishSelection:
       'Zamierzasz cofnąć publikację wszystkich {{label}} w zaznaczeniu. Jesteś pewny?',
     autosave: 'Autozapis',
@@ -592,6 +593,7 @@ export const plTranslations: DefaultTranslationsObject = {
     restoring: 'Przywracanie...',
     reverting: 'Cofanie...',
     revertToPublished: 'Przywróć do opublikowanego',
+    revertUnsuccessful: 'Cofnij nieudane. Nie znaleziono wcześniej opublikowanej wersji.',
     saveDraft: 'Zapisz szkic',
     scheduledSuccessfully: 'Zaplanowano pomyślnie.',
     schedulePublish: 'Zaplanuj publikację',
@@ -602,6 +604,9 @@ export const plTranslations: DefaultTranslationsObject = {
     specificVersion: 'Konkretna Wersja',
     status: 'Status',
     unpublish: 'Cofnij publikację',
+    unpublished: 'Nieopublikowane',
+    unpublishedSuccessfully: 'Pomyślnie wycofano publikację.',
+    unpublishIn: 'Cofnij publikację w {{locale}}',
     unpublishing: 'Cofanie publikacji...',
     version: 'Wersja',
     versionAgo: '{{distance}} temu',
