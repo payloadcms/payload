@@ -17,6 +17,7 @@ import React from 'react'
 import type { Theme } from '../Theme/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
+import { ModalCleanup } from '../../elements/ModalCleanup/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
@@ -116,6 +117,7 @@ export const RootProvider: React.FC<Props> = ({
                                                 id={dndContextID}
                                               >
                                                 {children}
+                                                <ModalCleanup />
                                               </DndContext>
                                             </UploadHandlersProvider>
                                           </NavProvider>

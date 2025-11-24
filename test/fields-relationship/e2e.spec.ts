@@ -588,29 +588,44 @@ describe('Relationship Field', () => {
         relationship: relatedDoc.id,
       },
     })
+    await payload.update({
+      collection: slug,
+      id: doc.id,
+      data: {
+        relationToSelf: doc.id,
+      },
+    })
 
     await page.goto(url.edit(doc.id))
+    // open first drawer (self-relation)
+    const selfRelationTrigger = page.locator(
+      '#field-relationToSelf button.relationship--single-value__drawer-toggler',
+    )
+    await expect(selfRelationTrigger).toBeVisible()
+    await selfRelationTrigger.click()
 
-    const relationshipDrawerTrigger = page.locator(
+    const drawer1 = page.locator('[id^=doc-drawer_fields-relationship_1_]')
+    await expect(drawer1).toBeVisible()
+
+    // open nested drawer (relation field inside self-relation)
+    const relationshipDrawerTrigger = drawer1.locator(
       '#field-relationship button.relationship--single-value__drawer-toggler',
     )
     await expect(relationshipDrawerTrigger).toBeVisible()
-
     await relationshipDrawerTrigger.click()
 
-    const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
-    await expect(documentDrawer).toBeVisible()
+    const drawer2 = page.locator('[id^=doc-drawer_relation-one_2_]')
+    await expect(drawer2).toBeVisible()
 
-    const idLabel = documentDrawer.locator('.id-label')
+    const idLabel = drawer2.locator('.id-label')
     await expect(idLabel).toBeVisible()
-
     await idLabel.locator('a').click()
 
     const closedModalLocator = page.locator(
       '.payload__modal-container.payload__modal-container--exitDone',
     )
 
-    await expect(closedModalLocator).toBeVisible()
+    await expect(closedModalLocator).toHaveCount(1)
 
     await Promise.all([
       payload.delete({
