@@ -64,6 +64,29 @@ describe('Lexical Fully Featured', () => {
     await expect(paragraph).toHaveText('')
   })
 
+  test('ensure upload node can be aligned', async ({ page }) => {
+    await lexical.slashCommand('upload')
+    await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
+    await lexical.drawer.getByText('Paste URL').click()
+    const url =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
+    await lexical.drawer.locator('.file-field__remote-file').fill(url)
+    await lexical.drawer.getByText('Add file').click()
+    await lexical.save('drawer')
+    const img = lexical.editor.locator('img').first()
+    await img.click()
+    const imgBoxBeforeCenter = await img.boundingBox()
+    await expect(() => {
+      expect(imgBoxBeforeCenter?.x).toBeLessThan(150)
+    }).toPass({ timeout: 100 })
+    await page.getByLabel('align dropdown').click()
+    await page.getByLabel('Align Center').click()
+    const imgBoxAfterCenter = await img.boundingBox()
+    await expect(() => {
+      expect(imgBoxAfterCenter?.x).toBeGreaterThan(150)
+    }).toPass({ timeout: 100 })
+  })
+
   test('ControlOrMeta+A inside input should select all the text inside the input', async ({
     page,
   }) => {
