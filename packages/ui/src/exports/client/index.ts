@@ -186,6 +186,7 @@ export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 // fields
 export { HiddenField } from '../../fields/Hidden/index.js'
 export { ArrayField } from '../../fields/Array/index.js'
+export { ArrayRow } from '../../fields/Array/ArrayRow.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
 export { CodeField } from '../../fields/Code/index.js'
