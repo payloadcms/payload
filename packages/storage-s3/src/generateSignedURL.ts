@@ -12,7 +12,6 @@ interface Args {
   access?: ClientUploadsAccess
   acl?: 'private' | 'public-read'
   bucket: string
-  cacheControl?: string
   collections: S3StorageOptions['collections']
   getStorageClient: () => AWS.S3
 }
@@ -23,7 +22,6 @@ export const getGenerateSignedURLHandler = ({
   access = defaultAccess,
   acl,
   bucket,
-  cacheControl,
   collections,
   getStorageClient,
 }: Args): PayloadHandler => {
@@ -57,7 +55,8 @@ export const getGenerateSignedURLHandler = ({
       new AWS.PutObjectCommand({
         ACL: acl,
         Bucket: bucket,
-        CacheControl: cacheControl,
+        CacheControl:
+          typeof collectionS3Config === 'object' ? collectionS3Config.cacheControl : undefined,
         ContentType: mimeType,
         Key: fileKey,
       }),

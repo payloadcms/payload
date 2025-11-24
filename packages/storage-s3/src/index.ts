@@ -36,12 +36,6 @@ export type S3StorageOptions = {
   bucket: string
 
   /**
-   * Cache-Control header value to set on uploaded files.
-   * For example: 'max-age=31536000, public'.
-   */
-  cacheControl?: string
-
-  /**
    * Optional cache key to identify the S3 storage client instance.
    * If not provided, a default key will be used.
    *
@@ -60,6 +54,11 @@ export type S3StorageOptions = {
     Record<
       UploadCollectionSlug,
       | ({
+          /**
+           * Cache-Control header value to set on uploaded files.
+           * For example: 'max-age=31536000, public'.
+           */
+          cacheControl?: string
           signedDownloads?: SignedDownloadsConfig
         } & Omit<CollectionOptions, 'adapter'>)
       | true
@@ -141,7 +140,6 @@ export const s3Storage: S3StoragePlugin =
             : undefined,
         acl: s3StorageOptions.acl,
         bucket: s3StorageOptions.bucket,
-        cacheControl: s3StorageOptions.cacheControl,
         collections: s3StorageOptions.collections,
         getStorageClient,
       }),
@@ -196,7 +194,6 @@ function s3StorageInternal(
   {
     acl,
     bucket,
-    cacheControl,
     clientUploads,
     collections,
     config = {},
@@ -223,8 +220,8 @@ function s3StorageInternal(
       handleUpload: getHandleUpload({
         acl,
         bucket,
-        cacheControl,
         collection,
+        collections,
         getStorageClient,
         prefix,
       }),
