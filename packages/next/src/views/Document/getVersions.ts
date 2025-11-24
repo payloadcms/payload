@@ -131,6 +131,7 @@ export const getVersions = async ({
           collection: collectionConfig.slug,
           depth: 0,
           limit: 1,
+          locale,
           select: {
             autosave: true,
           },
@@ -257,6 +258,7 @@ export const getVersions = async ({
         const mostRecentVersion = await payload.findGlobalVersions({
           slug: globalConfig.slug,
           limit: 1,
+          locale,
           select: {
             autosave: true,
           },
@@ -276,6 +278,7 @@ export const getVersions = async ({
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
           depth: 0,
           global: globalConfig.slug,
+          locale,
           user,
           where: combineQueries(
             {
@@ -301,6 +304,7 @@ export const getVersions = async ({
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
       depth: 0,
       global: globalConfig.slug,
+      locale,
       user,
     }))
   }
