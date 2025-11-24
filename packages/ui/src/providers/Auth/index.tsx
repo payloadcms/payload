@@ -139,6 +139,15 @@ export function AuthProvider({
     clearTimeout(refreshTokenTimeoutRef.current)
   }, [])
 
+  // Handler for reminder timeout - uses useEffectEvent to capture latest autoRefresh value
+  const handleReminderTimeout = useEffectEvent(() => {
+    if (autoRefresh) {
+      refreshCookieEvent()
+    } else {
+      openModal(stayLoggedInModalSlug)
+    }
+  })
+
   const setNewUser = useCallback(
     (userResponse: null | UserWithToken) => {
       clearTimeout(reminderTimeoutRef.current)
@@ -159,13 +168,7 @@ export function AuthProvider({
           setForceLogoutBufferMs(nextForceLogoutBufferMs)
 
           reminderTimeoutRef.current = setTimeout(
-            () => {
-              if (autoRefresh) {
-                refreshCookieEvent()
-              } else {
-                openModal(stayLoggedInModalSlug)
-              }
-            },
+            handleReminderTimeout,
             Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
           )
 
@@ -178,7 +181,7 @@ export function AuthProvider({
         revokeTokenAndExpire()
       }
     },
-    [autoRefresh, redirectToInactivityRoute, revokeTokenAndExpire, openModal],
+    [redirectToInactivityRoute, revokeTokenAndExpire],
   )
 
   const refreshCookie = useCallback(

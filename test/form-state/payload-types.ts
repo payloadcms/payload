@@ -69,7 +69,6 @@ export interface Config {
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
-    'draft-validation': DraftValidation;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -80,7 +79,6 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
-    'draft-validation': DraftValidationSelect<false> | DraftValidationSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -181,26 +179,6 @@ export interface AutosavePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-validation".
- */
-export interface DraftValidation {
-  id: string;
-  title: string;
-  /**
-   * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
-   */
-  failValidation?: boolean | null;
-  /**
-   * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
-   */
-  validatedField?: string | null;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -254,10 +232,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-posts';
         value: string | AutosavePost;
-      } | null)
-    | ({
-        relationTo: 'draft-validation';
-        value: string | DraftValidation;
       } | null)
     | ({
         relationTo: 'users';
@@ -355,19 +329,6 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-validation_select".
- */
-export interface DraftValidationSelect<T extends boolean = true> {
-  title?: T;
-  failValidation?: T;
-  validatedField?: T;
-  description?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

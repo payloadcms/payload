@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.63.0",
+  "version": "3.64.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -162,8 +162,8 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.31.5",
-    "drizzle-orm": "0.44.6",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",
@@ -174,8 +174,8 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
-    "next": "15.4.7",
     "mongoose": "8.15.1",
+    "next": "15.4.7",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",

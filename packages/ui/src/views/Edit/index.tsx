@@ -112,7 +112,6 @@ export function DefaultEditView({
     onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
-  const { closeModal } = useModal()
 
   const isInDrawer = Boolean(drawerSlug)
 
@@ -373,13 +372,25 @@ export function DefaultEditView({
 
         reportUpdate({
           id,
+          doc: document,
+          drawerSlug,
           entitySlug,
+          operation: 'update',
           updatedAt,
         })
 
         abortOnSaveRef.current = null
 
         return state
+      } else {
+        reportUpdate({
+          id,
+          doc: document,
+          drawerSlug,
+          entitySlug,
+          operation: 'create',
+          updatedAt,
+        })
       }
     },
     [
@@ -387,6 +398,7 @@ export function DefaultEditView({
       id,
       entitySlug,
       user,
+      drawerSlug,
       collectionSlug,
       userSlug,
       setLastUpdateTime,

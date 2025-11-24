@@ -23,6 +23,7 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -225,7 +226,7 @@ export const updateOperation = async <
       throwOnMissingFile: false,
     })
 
-    const errors: { id: number | string; message: string }[] = []
+    const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
@@ -265,8 +266,11 @@ export const updateOperation = async <
 
         return updatedDoc
       } catch (error) {
+        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+
         errors.push({
           id,
+          isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       }

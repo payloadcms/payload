@@ -99,6 +99,8 @@ export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export type {
   ListDrawerProps,
   ListTogglerProps,
+  RenderListServerFnArgs,
+  RenderListServerFnReturnType,
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
@@ -178,6 +180,7 @@ export {
 } from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
+export { BlockSelector } from '../../fields/Blocks/BlockSelector/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 
 // fields

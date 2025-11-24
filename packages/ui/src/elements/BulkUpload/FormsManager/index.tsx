@@ -333,6 +333,21 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       for (let i = 0; i < currentForms.length; i++) {
         try {
           const form = currentForms[i]
+          const fileValue = form.formState?.file?.value
+
+          // Skip upload if file is missing a filename
+          if (
+            fileValue &&
+            typeof fileValue === 'object' &&
+            'name' in fileValue &&
+            (!fileValue.name || fileValue.name === '')
+          ) {
+            currentForms[i] = {
+              ...currentForms[i],
+              errorCount: 1,
+            }
+            continue
+          }
 
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
