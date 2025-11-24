@@ -192,6 +192,7 @@ export const getVersions = async ({
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
       depth: 0,
+      locale,
       user,
       where: combineQueries(
         {
@@ -200,6 +201,29 @@ export const getVersions = async ({
               parent: {
                 equals: id,
               },
+            },
+            {
+              or: [
+                {
+                  snapshot: {
+                    not_equals: true,
+                  },
+                },
+                {
+                  and: [
+                    {
+                      snapshot: {
+                        equals: true,
+                      },
+                    },
+                    {
+                      'version._status': {
+                        equals: 'draft',
+                      },
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
