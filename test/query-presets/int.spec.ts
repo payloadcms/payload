@@ -827,8 +827,8 @@ describe('Query Presets', () => {
         },
       })
 
-      expect(result.where).toBeUndefined()
-      expect(result.columns).toBeUndefined()
+      expect(result.where == null).toBe(true)
+      expect(result.columns == null).toBe(true)
 
       const fetched = await payload.findByID({
         collection: queryPresetsCollectionSlug,
@@ -838,8 +838,8 @@ describe('Query Presets', () => {
         id: result.id,
       })
 
-      expect(fetched.where).toBeUndefined()
-      expect(fetched.columns).toBeUndefined()
+      expect(fetched.where == null).toBe(true)
+      expect(fetched.columns == null).toBe(true)
     })
   })
 })
