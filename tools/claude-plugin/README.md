@@ -1,6 +1,6 @@
 # Payload Skill for Claude Code
 
-Claude Code skill providing comprehensive guidance for Payload 3.x development with TypeScript patterns, field configurations, hooks, access control, and API examples.
+Claude Code skill providing comprehensive guidance for Payload development with TypeScript patterns, field configurations, hooks, access control, and API examples.
 
 ## Installation
 

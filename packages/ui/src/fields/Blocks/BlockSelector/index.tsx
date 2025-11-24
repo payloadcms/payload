@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientBlock, Labels } from 'payload'
+import type { ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useMemo, useState } from 'react'
@@ -15,7 +15,6 @@ import './index.scss'
 
 export type Props = {
   readonly blocks: (ClientBlock | string)[]
-  readonly labels: Labels
   readonly onSelect?: (blockType: string) => void
   /**
    * Control the search term state externally

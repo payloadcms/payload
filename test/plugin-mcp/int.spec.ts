@@ -49,13 +49,14 @@ async function parseStreamResponse(response: Response): Promise<any> {
   }
 }
 
-const getApiKey = async (): Promise<string> => {
+const getApiKey = async (enableUpdate = false, enableDelete = false): Promise<string> => {
   const doc = await payload.create({
     collection: 'payload-mcp-api-keys',
     data: {
       enableAPIKey: true,
       label: 'Test API Key',
-      posts: { find: true, create: true },
+      // @ts-expect-error - update is not a valid property
+      posts: { find: true, create: true, update: enableUpdate, delete: enableDelete },
       products: { find: true },
       apiKey: randomUUID(),
       user: userId,
@@ -79,7 +80,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
       .then((res) => res.json())
 
+    // @ts-expect-error - data is not a valid property
     token = data.token
+    // @ts-expect-error - data.user is a valid property
     userId = data.user.id
   })
 
@@ -133,9 +136,13 @@ describe('@payloadcms/plugin-mcp', () => {
       .then((res) => res.json())
 
     expect(data).toBeDefined()
+    // @ts-expect-error - data is a valid property
     expect(data.jsonrpc).toBe('2.0')
+    // @ts-expect-error - data is a valid property
     expect(data.error).toBeDefined()
+    // @ts-expect-error - data is a valid property
     expect(data.error.code).toBe(-32000)
+    // @ts-expect-error - data is a valid property
     expect(data.error.message).toBe('Method not allowed.')
   })
 
@@ -220,6 +227,161 @@ describe('@payloadcms/plugin-mcp', () => {
       'Rolls a virtual dice with a specified number of sides',
     )
     expect(json.result.tools[3].inputSchema).toBeDefined()
+
+    // Input Schemas
+    expect(json.result.tools[0].inputSchema).toBeDefined()
+    expect(json.result.tools[0].inputSchema.required).not.toBeDefined()
+    expect(json.result.tools[0].inputSchema.type).toBe('object')
+    expect(json.result.tools[0].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[0].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[0].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.id).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.id.type).toHaveLength(2)
+    expect(json.result.tools[0].inputSchema.properties.id.type[0]).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.id.type[1]).toBe('number')
+    expect(json.result.tools[0].inputSchema.properties.id.description).toContain(
+      'Optional: specific document ID to retrieve. If not provided, returns all documents',
+    )
+    expect(json.result.tools[0].inputSchema.properties.fallbackLocale).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.fallbackLocale.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.fallbackLocale.description).toContain(
+      'Optional: fallback locale code to use when requested locale is not available',
+    )
+    expect(json.result.tools[0].inputSchema.properties.limit).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.limit.type).toBe('integer')
+    expect(json.result.tools[0].inputSchema.properties.limit.minimum).toBe(1)
+    expect(json.result.tools[0].inputSchema.properties.limit.maximum).toBe(100)
+    expect(json.result.tools[0].inputSchema.properties.limit.default).toBe(10)
+    expect(json.result.tools[0].inputSchema.properties.limit.description).toContain(
+      'Maximum number of documents to return (default: 10, max: 100)',
+    )
+    expect(json.result.tools[0].inputSchema.properties.locale).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.locale.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.locale.description).toContain(
+      'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+    )
+    expect(json.result.tools[0].inputSchema.properties.page).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.page.type).toBe('integer')
+    expect(json.result.tools[0].inputSchema.properties.page.minimum).toBe(1)
+    expect(json.result.tools[0].inputSchema.properties.page.default).toBe(1)
+    expect(json.result.tools[0].inputSchema.properties.page.description).toContain(
+      'Page number for pagination (default: 1)',
+    )
+    expect(json.result.tools[0].inputSchema.properties.sort).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.sort.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.sort.description).toContain(
+      'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
+    )
+    expect(json.result.tools[0].inputSchema.properties.where).toBeDefined()
+    expect(json.result.tools[0].inputSchema.properties.where.type).toBe('string')
+    expect(json.result.tools[0].inputSchema.properties.where.description).toContain(
+      'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+    )
+
+    expect(json.result.tools[1].inputSchema).toBeDefined()
+    expect(json.result.tools[1].inputSchema.required).toBeDefined()
+    expect(json.result.tools[1].inputSchema.required).toHaveLength(1)
+    expect(json.result.tools[1].inputSchema.required[0]).toBe('title')
+    expect(json.result.tools[1].inputSchema.type).toBe('object')
+    expect(json.result.tools[1].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[1].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[1].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.title).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.title.type).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.title.description).toBe(
+      'The title of the post',
+    )
+    expect(json.result.tools[1].inputSchema.properties.content).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.content.type).toHaveLength(2)
+    expect(json.result.tools[1].inputSchema.properties.content.type[0]).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.content.type[1]).toBe('null')
+    expect(json.result.tools[1].inputSchema.properties.content.description).toBe(
+      'The content of the post',
+    )
+    expect(json.result.tools[1].inputSchema.properties.author).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.author.type).toBe(undefined)
+    expect(json.result.tools[1].inputSchema.properties.author.description).toBe(
+      'The author of the post',
+    )
+    expect(json.result.tools[1].inputSchema.properties.draft).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.draft.type).toBe('boolean')
+    expect(json.result.tools[1].inputSchema.properties.draft.description).toBe(
+      'Whether to create the document as a draft',
+    )
+    expect(json.result.tools[1].inputSchema.properties.fallbackLocale).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.fallbackLocale.type).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.fallbackLocale.description).toBe(
+      'Optional: fallback locale code to use when requested locale is not available',
+    )
+    expect(json.result.tools[1].inputSchema.properties.locale).toBeDefined()
+    expect(json.result.tools[1].inputSchema.properties.locale.type).toBe('string')
+    expect(json.result.tools[1].inputSchema.properties.locale.description).toBe(
+      'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+    )
+
+    expect(json.result.tools[2].inputSchema).toBeDefined()
+    expect(json.result.tools[2].inputSchema.required).not.toBeDefined()
+    expect(json.result.tools[2].inputSchema.type).toBe('object')
+    expect(json.result.tools[2].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[2].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[2].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.id).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.id.type).toHaveLength(2)
+    expect(json.result.tools[2].inputSchema.properties.id.type[0]).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.id.type[1]).toBe('number')
+    expect(json.result.tools[2].inputSchema.properties.id.description).toContain(
+      'Optional: specific document ID to retrieve. If not provided, returns all documents',
+    )
+    expect(json.result.tools[2].inputSchema.properties.fallbackLocale).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.fallbackLocale.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.fallbackLocale.description).toBe(
+      'Optional: fallback locale code to use when requested locale is not available',
+    )
+    expect(json.result.tools[2].inputSchema.properties.limit).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.limit.type).toBe('integer')
+    expect(json.result.tools[2].inputSchema.properties.limit.minimum).toBe(1)
+    expect(json.result.tools[2].inputSchema.properties.limit.maximum).toBe(100)
+    expect(json.result.tools[2].inputSchema.properties.limit.default).toBe(10)
+    expect(json.result.tools[2].inputSchema.properties.limit.description).toContain(
+      'Maximum number of documents to return (default: 10, max: 100)',
+    )
+    expect(json.result.tools[2].inputSchema.properties.locale).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.locale.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.locale.description).toContain(
+      'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+    )
+    expect(json.result.tools[2].inputSchema.properties.page).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.page.type).toBe('integer')
+    expect(json.result.tools[2].inputSchema.properties.page.minimum).toBe(1)
+    expect(json.result.tools[2].inputSchema.properties.page.default).toBe(1)
+    expect(json.result.tools[2].inputSchema.properties.page.description).toContain(
+      'Page number for pagination (default: 1)',
+    )
+    expect(json.result.tools[2].inputSchema.properties.sort).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.sort.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.sort.description).toContain(
+      'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
+    )
+    expect(json.result.tools[2].inputSchema.properties.where).toBeDefined()
+    expect(json.result.tools[2].inputSchema.properties.where.type).toBe('string')
+    expect(json.result.tools[2].inputSchema.properties.where.description).toContain(
+      'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+    )
+
+    expect(json.result.tools[3].inputSchema).toBeDefined()
+    expect(json.result.tools[3].inputSchema.required).not.toBeDefined()
+    expect(json.result.tools[3].inputSchema.type).toBe('object')
+    expect(json.result.tools[3].inputSchema.additionalProperties).toBe(false)
+    expect(json.result.tools[3].inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(json.result.tools[3].inputSchema.properties).toBeDefined()
+    expect(json.result.tools[3].inputSchema.properties.sides).toBeDefined()
+    expect(json.result.tools[3].inputSchema.properties.sides.type).toBe('integer')
+    expect(json.result.tools[3].inputSchema.properties.sides.minimum).toBe(2)
+    expect(json.result.tools[3].inputSchema.properties.sides.maximum).toBe(1000)
+    expect(json.result.tools[3].inputSchema.properties.sides.default).toBe(6)
+    expect(json.result.tools[3].inputSchema.properties.sides.description).toContain(
+      'Number of sides on the dice (default: 6)',
+    )
   })
 
   it('should list resources', async () => {
@@ -596,5 +758,290 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain(
       '"title": "Test Post for Finding (MCP Hook Override)"',
     )
+  })
+
+  describe('Localization', () => {
+    it('should include locale parameters in tool schemas', async () => {
+      const apiKey = await getApiKey(true, true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result.tools).toBeDefined()
+
+      // Check createPosts has locale parameters
+      const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
+      expect(createTool).toBeDefined()
+      expect(createTool.inputSchema.properties.locale).toBeDefined()
+      expect(createTool.inputSchema.properties.locale.type).toBe('string')
+      expect(createTool.inputSchema.properties.locale.description).toContain('locale code')
+      expect(createTool.inputSchema.properties.fallbackLocale).toBeDefined()
+
+      // Check updatePosts has locale parameters
+      const updateTool = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      expect(updateTool).toBeDefined()
+      expect(updateTool.inputSchema.properties.locale).toBeDefined()
+      expect(updateTool.inputSchema.properties.fallbackLocale).toBeDefined()
+
+      // Check findPosts has locale parameters
+      const findTool = json.result.tools.find((t: any) => t.name === 'findPosts')
+      expect(findTool).toBeDefined()
+      expect(findTool.inputSchema.properties.locale).toBeDefined()
+      expect(findTool.inputSchema.properties.fallbackLocale).toBeDefined()
+
+      // Check deletePosts has locale parameters
+      const deleteTool = json.result.tools.find((t: any) => t.name === 'deletePosts')
+      expect(deleteTool).toBeDefined()
+      expect(deleteTool.inputSchema.properties.locale).toBeDefined()
+      expect(deleteTool.inputSchema.properties.fallbackLocale).toBeDefined()
+    })
+
+    it('should create post with specific locale', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              title: 'Hello World',
+              content: 'This is my first post in English',
+              locale: 'en',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('Resource created successfully')
+      expect(json.result.content[0].text).toContain('"title": "Hello World"')
+      expect(json.result.content[0].text).toContain('"content": "This is my first post in English"')
+    })
+
+    it('should update post to add translation', async () => {
+      // First create a post in English
+      const englishPost = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Title',
+          content: 'English Content',
+        },
+      })
+
+      // Update with Spanish translation via MCP
+      const apiKey = await getApiKey(true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePosts',
+            arguments: {
+              id: englishPost.id,
+              title: 'Título Español',
+              content: 'Contenido Español',
+              locale: 'es',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('Document updated successfully')
+      expect(json.result.content[0].text).toContain('"title": "Título Español"')
+      expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
+    })
+
+    it('should find post in specific locale', async () => {
+      // Create a post with English and Spanish translations
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Post',
+          content: 'English Content',
+        },
+      })
+
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Publicación Española',
+          content: 'Contenido Español',
+        },
+        // @ts-expect-error - locale is a valid property
+        locale: 'es',
+      })
+
+      // Find in Spanish via MCP
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              locale: 'es',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain(
+        '"title": "Publicación Española (MCP Hook Override)"',
+      )
+      expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
+    })
+
+    it('should find post with locale "all"', async () => {
+      // Create a post with multiple translations
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Title',
+          content: 'English Content',
+        },
+      })
+
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Título Español',
+          content: 'Contenido Español',
+        },
+        // @ts-expect-error - locale is a valid property
+        locale: 'es',
+      })
+
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Titre Français',
+          content: 'Contenu Français',
+        },
+        // @ts-expect-error - locale is a valid property
+        locale: 'fr',
+      })
+
+      // Find with locale: all via MCP
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              locale: 'all',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      const responseText = json.result.content[0].text
+
+      // Should contain locale objects with all translations
+      expect(responseText).toContain('"en":')
+      expect(responseText).toContain('"es":')
+      expect(responseText).toContain('"fr":')
+      expect(responseText).toContain('English Title (MCP Hook Override)')
+      expect(responseText).toContain('Título Español (MCP Hook Override)')
+      expect(responseText).toContain('Titre Français (MCP Hook Override)')
+    })
+
+    it('should use fallback locale when translation does not exist', async () => {
+      // Create a post only in English with explicit content
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English Only Title',
+        },
+        // @ts-expect-error - locale is a valid property
+        locale: 'en',
+      })
+
+      // Try to find in French (which doesn't exist)
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              locale: 'fr',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      // Should fallback to English (with default value for content)
+      expect(json.result.content[0].text).toContain(
+        '"title": "English Only Title (MCP Hook Override)"',
+      )
+      expect(json.result.content[0].text).toContain('"content": "Hello World."')
+    })
   })
 })

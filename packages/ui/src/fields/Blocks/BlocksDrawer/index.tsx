@@ -37,7 +37,6 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
     >
       <BlockSelector
         blocks={blocks}
-        labels={labels}
         onSelect={(slug) => {
           void addRow(addRowIndex, slug)
           closeModal(drawerSlug)
