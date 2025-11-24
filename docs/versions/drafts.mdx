@@ -133,7 +133,7 @@ Setting `_status: "draft"` will not bypass required field validation. You need t
 
 In addition to the `draft` argument within `create` and `update` operations, a `draft` argument is also exposed for `find` and `findByID` operations.
 
-If `draft` is set to `true` while reading a document, **Payload will automatically replace returned document(s) with their newest drafts** if any newer drafts are available.
+When `draft` is set to `true` while reading a document, **Payload will return the most recent version from the versions table**, regardless of whether it's a draft or published document.
 
 **Example scenario:**
 
@@ -145,7 +145,9 @@ At this point, your published document remains unchanged in the main collection,
 
 When you fetch the document with a standard `find` or `findByID` operation, the published document from the main collection is returned and draft versions are ignored.
 
-However, if you pass `draft: true` to the read operation, Payload will return the most recent draft version if one exists. In the scenario above with two draft versions, you'll get the latest (second) draft instead of the published version.
+However, if you pass `draft: true` to the read operation, Payload will return the most recent version from the versions table. In the scenario above with two draft versions, you'll get the latest (second) draft.
+
+**Note:** If there are no newer drafts (e.g., you published a document and haven't made draft changes since), querying with `draft: true` will still return the latest version from the versions table, which would be the same published content as in the main collection.
 
 <Banner type="error">
   **Important:** the `draft` argument on its own will not restrict documents
