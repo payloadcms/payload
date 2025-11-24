@@ -8,9 +8,9 @@ import { useLocale } from '../providers/Locale/index.js'
 import { useTranslation } from '../providers/Translation/index.js'
 import { requests } from '../utilities/api.js'
 
-type Result = [
+type Result<T = any> = [
   {
-    data: any
+    data: T
     isError: boolean
     isLoading: boolean
   },
@@ -19,14 +19,12 @@ type Result = [
   },
 ]
 
-type Options = {
-  initialData?: any
+type Options<T = any> = {
+  initialData?: T
   initialParams?: unknown
 }
 
-type UsePayloadAPI = (url: string, options?: Options) => Result
-
-export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
+export const usePayloadAPI = <T = any>(url: string, options: Options<T> = {}): Result<T> => {
   const { initialData, initialParams = {} } = options
 
   const { i18n } = useTranslation()
