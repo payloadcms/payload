@@ -22,6 +22,13 @@ type Args = {
   tableName: string
 }
 
+// Update the return type at top of file
+export type BuildOrderByResult = {
+  column: GenericColumn
+  isArrayField?: boolean // NEW
+  order: typeof asc | typeof desc
+}[]
+
 /**
  * Gets the order by column and direction constructed from the sort argument adds the column to the select fields and joins if necessary
  */
@@ -36,8 +43,8 @@ export const buildOrderBy = ({
   selectFields,
   sort,
   tableName,
-}: Args): BuildQueryResult['orderBy'] => {
-  const orderBy: BuildQueryResult['orderBy'] = []
+}: Args): BuildOrderByResult => {
+  const orderBy: BuildOrderByResult = []
 
   const createdAt = adapter.tables[tableName]?.createdAt
 
@@ -76,7 +83,11 @@ export const buildOrderBy = ({
       sortDirection = 'asc'
     }
     try {
-      const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
+      const {
+        columnName: sortTableColumnName,
+        isArrayField, // NEW: capture the flag
+        table: sortTable,
+      } = getTableColumnFromPath({
         adapter,
         collectionPath: sortProperty,
         fields,
@@ -100,6 +111,7 @@ export const buildOrderBy = ({
             aliasTable && tableName === getNameFromDrizzleTable(sortTable)
               ? aliasTable[sortTableColumnName]
               : sortTable[sortTableColumnName],
+          isArrayField, // NEW: include in result
           order,
         })
 

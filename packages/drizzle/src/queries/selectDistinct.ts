@@ -1,6 +1,8 @@
 import type { QueryPromise, SQL } from 'drizzle-orm'
 import type { SQLiteColumn, SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
+import { asc, max, min } from 'drizzle-orm' // NEW: import aggregates
+
 import type {
   DrizzleAdapter,
   DrizzleTransaction,
@@ -9,13 +11,17 @@ import type {
   TransactionPg,
   TransactionSQLite,
 } from '../types.js'
+import type { BuildOrderByResult } from './buildOrderBy.js' // NEW
 import type { BuildQueryJoinAliases } from './buildQuery.js'
+
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 
 type Args = {
   adapter: DrizzleAdapter
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   forceRun?: boolean
   joins: BuildQueryJoinAliases
+  orderBy?: BuildOrderByResult // NEW: array field metadata
   query?: (args: { query: SQLiteSelect }) => SQLiteSelect
   selectFields: Record<string, GenericColumn>
   tableName: string
@@ -24,32 +30,119 @@ type Args = {
 
 /**
  * Selects distinct records from a table only if there are joins that need to be used, otherwise return null
+ *
+ * When sorting by array field columns, uses MIN/MAX aggregation to ensure one row per parent
+ * document before LIMIT is applied. This prevents incomplete pages caused by JOIN row multiplication
+ * (e.g., 10 docs × 3 array items = 30 rows, LIMIT 5 would return ~2 docs instead of 5).
+ *
+ * Strategy: For ascending sorts use MIN (smallest value), for descending sorts use MAX (largest value).
+ * GROUP BY parent ID collapses multiplied rows back to one-per-parent before pagination.
+ *
+ * @see https://github.com/payloadcms/payload/issues/14124
  */
 export const selectDistinct = ({
   adapter,
   db,
   forceRun,
   joins,
+  orderBy, // NEW
   query: queryModifier = ({ query }) => query,
   selectFields,
   tableName,
   where,
 }: Args): QueryPromise<{ id: number | string }[] & Record<string, GenericColumn>> => {
   if (forceRun || Object.keys(joins).length > 0) {
+    // NEW: Check if any sort column is from array field
+    const hasArrayFieldSort = orderBy?.some((o) => o.isArrayField) ?? false
+
     let query: SQLiteSelect
     const table = adapter.tables[tableName]
 
     if (adapter.name === 'postgres') {
-      query = (db as TransactionPg)
-        .selectDistinct(selectFields as Record<string, GenericPgColumn>)
-        .from(table)
-        .$dynamic() as unknown as SQLiteSelect
+      if (hasArrayFieldSort) {
+        // Array field sorts require aggregation to prevent pagination issues.
+        // JOINs with array tables multiply rows (e.g., parent × array items).
+        // Applying LIMIT to multiplied rows returns incomplete pages.
+        // Solution: MIN/MAX aggregation + GROUP BY parent ID = one row per parent before LIMIT.
+        const aggregatedFields: Record<string, GenericColumn> = {}
+
+        // Always select the ID (no aggregation needed)
+        aggregatedFields.id = table.id as GenericPgColumn
+
+        // For each select field, apply MIN or MAX if it's an array sort column
+        for (const [key, column] of Object.entries(selectFields)) {
+          if (key === 'id') {
+            continue
+          } // Already handled
+
+          const sortInfo = orderBy?.find(
+            (o) =>
+              o.column.name === column.name &&
+              getNameFromDrizzleTable(o.column.table) === getNameFromDrizzleTable(column.table),
+          )
+
+          if (sortInfo?.isArrayField) {
+            // Apply aggregate based on sort direction
+            const aggregateFn = sortInfo.order === asc ? min : max
+            aggregatedFields[key] = aggregateFn(column as GenericPgColumn).as(
+              key,
+            ) as unknown as GenericPgColumn
+          } else {
+            // Non-array fields: no aggregation
+            aggregatedFields[key] = column as GenericPgColumn
+          }
+        }
+
+        query = (db as TransactionPg)
+          .select(aggregatedFields as Record<string, GenericPgColumn>)
+          .from(table)
+          .$dynamic() as unknown as SQLiteSelect
+      } else {
+        // Original path: use selectDistinct
+        query = (db as TransactionPg)
+          .selectDistinct(selectFields as Record<string, GenericPgColumn>)
+          .from(table)
+          .$dynamic() as unknown as SQLiteSelect
+      }
     }
     if (adapter.name === 'sqlite') {
-      query = (db as TransactionSQLite)
-        .selectDistinct(selectFields as Record<string, SQLiteColumn>)
-        .from(table)
-        .$dynamic()
+      if (hasArrayFieldSort) {
+        // Array field aggregation for SQLite (same logic as Postgres)
+        const aggregatedFields: Record<string, GenericColumn> = {}
+
+        aggregatedFields.id = table.id as SQLiteColumn
+
+        for (const [key, column] of Object.entries(selectFields)) {
+          if (key === 'id') {
+            continue
+          }
+
+          const sortInfo = orderBy?.find(
+            (o) =>
+              o.column.name === column.name &&
+              getNameFromDrizzleTable(o.column.table) === getNameFromDrizzleTable(column.table),
+          )
+
+          if (sortInfo?.isArrayField) {
+            const aggregateFn = sortInfo.order === asc ? min : max
+            aggregatedFields[key] = aggregateFn(column as SQLiteColumn).as(
+              key,
+            ) as unknown as SQLiteColumn
+          } else {
+            aggregatedFields[key] = column as SQLiteColumn
+          }
+        }
+
+        query = (db as TransactionSQLite)
+          .select(aggregatedFields as Record<string, SQLiteColumn>)
+          .from(table)
+          .$dynamic()
+      } else {
+        query = (db as TransactionSQLite)
+          .selectDistinct(selectFields as Record<string, SQLiteColumn>)
+          .from(table)
+          .$dynamic()
+      }
     }
 
     if (where) {
@@ -59,6 +152,48 @@ export const selectDistinct = ({
     joins.forEach(({ type, condition, table }) => {
       query = query[type ?? 'leftJoin'](table, condition)
     })
+
+    // NEW: Add GROUP BY when aggregating
+    if (hasArrayFieldSort) {
+      // Group by ID and all non-aggregated columns
+      const groupByColumns = [table.id]
+
+      // Add non-aggregated select fields to GROUP BY
+      for (const [key, column] of Object.entries(selectFields)) {
+        if (key === 'id') {
+          continue
+        }
+
+        const sortInfo = orderBy?.find(
+          (o) =>
+            o.column.name === column.name &&
+            getNameFromDrizzleTable(o.column.table) === getNameFromDrizzleTable(column.table),
+        )
+
+        // Only add to GROUP BY if it's NOT an array field (array fields are aggregated)
+        if (!sortInfo?.isArrayField) {
+          groupByColumns.push(column)
+        }
+      }
+
+      query = query.groupBy(...groupByColumns)
+
+      // Apply ORDER BY before queryModifier when using aggregates
+      // This ensures we order by the aggregated expressions, not the raw columns
+      if (orderBy) {
+        query = query.orderBy(() =>
+          orderBy.map(({ column, isArrayField: isArray, order }) => {
+            if (isArray) {
+              // For array fields, order by the aggregate expression
+              const aggregateFn = order === asc ? min : max
+              return order(aggregateFn(column))
+            }
+            // For non-array fields, use the column directly
+            return order(column)
+          }),
+        )
+      }
+    }
 
     return queryModifier({
       query,

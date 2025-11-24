@@ -779,6 +779,128 @@ describe('Sort', () => {
         expect(orders[1]).toBeLessThan(orders[2])
       })
     })
+
+    describe('Sorting on array fields with pagination', () => {
+      const totalDocs = 10
+      const pageSize = 5
+
+      beforeAll(async () => {
+        // Clean up any existing posts from parent suite to ensure exactly 10 posts
+        await payload.delete({ collection: 'posts', where: {} })
+
+        // Create 10 posts, each with 3 array items = 30 rows after JOIN
+        // With page size 5, LIMIT 5 on 30 rows = incomplete results
+        const posts = Array.from({ length: totalDocs }, (_, i) => ({
+          text: `Post ${i + 1}`,
+          number: i + 1,
+          items: Array.from({ length: 3 }, (_, j) => ({
+            title: `Item ${String.fromCharCode(65 + ((i + j) % 26))}`,
+            priority: (i * 10 + j) % 100,
+          })),
+        }))
+
+        for (const post of posts) {
+          await payload.create({ collection: 'posts', data: post })
+        }
+      })
+
+      afterAll(async () => {
+        await payload.delete({ collection: 'posts', where: {} })
+      })
+
+      it('should return complete pages when sorting on array field', async () => {
+        // Fetch page 1
+        const page1 = await payload.find({
+          collection: 'posts',
+          sort: 'items.priority',
+          limit: pageSize,
+          page: 1,
+        })
+
+        // Fetch page 2
+        const page2 = await payload.find({
+          collection: 'posts',
+          sort: 'items.priority',
+          limit: pageSize,
+          page: 2,
+        })
+
+        // ASSERTIONS THAT WILL FAIL:
+
+        // 1. Each page should have exactly pageSize docs (or remaining for last page)
+        expect(page1.docs).toHaveLength(pageSize)
+        expect(page2.docs).toHaveLength(totalDocs - pageSize)
+
+        // 2. Total docs should match
+        expect(page1.totalDocs).toBe(totalDocs)
+        expect(page2.totalDocs).toBe(totalDocs)
+
+        // 3. No duplicate IDs across pages
+        const page1Ids = page1.docs.map((d) => d.id)
+        const page2Ids = page2.docs.map((d) => d.id)
+        const duplicates = page1Ids.filter((id) => page2Ids.includes(id))
+
+        expect(duplicates).toHaveLength(0)
+
+        // 4. All docs should be retrievable
+        const allIds = [...page1Ids, ...page2Ids]
+        expect(allIds).toHaveLength(totalDocs)
+        expect(new Set(allIds).size).toBe(totalDocs)
+      })
+
+      it('should match non-paginated results when sorting on array field', async () => {
+        // Get all results without pagination
+        const allResults = await payload.find({
+          collection: 'posts',
+          sort: 'items.priority',
+          pagination: false,
+        })
+
+        // Get paginated results
+        const page1 = await payload.find({
+          collection: 'posts',
+          sort: 'items.priority',
+          limit: pageSize,
+          page: 1,
+        })
+
+        const page2 = await payload.find({
+          collection: 'posts',
+          sort: 'items.priority',
+          limit: pageSize,
+          page: 2,
+        })
+
+        const paginatedIds = [...page1.docs.map((d) => d.id), ...page2.docs.map((d) => d.id)]
+
+        // Paginated results should contain same IDs as non-paginated
+        expect(paginatedIds.sort()).toEqual(allResults.docs.map((d) => d.id).sort())
+      })
+
+      it('should handle sorting on text array field', async () => {
+        const page1 = await payload.find({
+          collection: 'posts',
+          sort: 'items.title',
+          limit: pageSize,
+          page: 1,
+        })
+
+        const page2 = await payload.find({
+          collection: 'posts',
+          sort: 'items.title',
+          limit: pageSize,
+          page: 2,
+        })
+
+        const allPageIds = [...page1.docs.map((d) => d.id), ...page2.docs.map((d) => d.id)]
+
+        // Should retrieve all 10 docs across 2 pages
+        expect(allPageIds).toHaveLength(totalDocs)
+
+        // No duplicates
+        expect(new Set(allPageIds).size).toBe(totalDocs)
+      })
+    })
   })
 
   describe('REST API', () => {

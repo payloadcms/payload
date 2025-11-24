@@ -34,5 +34,19 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'priority',
+          type: 'number',
+        },
+      ],
+    },
   ],
 }
