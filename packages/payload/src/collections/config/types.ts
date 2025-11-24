@@ -163,6 +163,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
+  previousDocWithLocales: T
   req: PayloadRequest
 }) => any
 

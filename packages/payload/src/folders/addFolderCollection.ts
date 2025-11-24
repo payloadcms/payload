@@ -2,6 +2,7 @@ import type { Config, SanitizedConfig } from '../config/types.js'
 import type { CollectionConfig } from '../index.js'
 
 import { sanitizeCollection } from '../collections/config/sanitize.js'
+import { addHierarchyToCollection } from '../hierarchy/addHierarchyToCollection.js'
 import { createFolderCollection } from './createFolderCollection.js'
 
 export async function addFolderCollection({
@@ -27,6 +28,12 @@ export async function addFolderCollection({
     debug: config.folders!.debug,
     folderEnabledCollections,
     folderFieldName: config.folders!.fieldName as string,
+  })
+
+  addHierarchyToCollection({
+    collectionConfig: folderCollectionConfig,
+    config,
+    parentFieldName: config.folders!.fieldName as string,
   })
 
   const collectionIndex = config.collections!.push(folderCollectionConfig)
