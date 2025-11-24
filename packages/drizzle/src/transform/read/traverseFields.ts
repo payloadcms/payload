@@ -669,6 +669,15 @@ export const traverseFields = <T extends Record<string, unknown>>({
           return
         }
 
+        case 'json':
+        case 'richText': {
+          if (fieldData === null) {
+            val = undefined
+          }
+
+          break
+        }
+
         case 'number': {
           if (typeof fieldData === 'string') {
             val = Number.parseFloat(fieldData)
