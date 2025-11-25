@@ -3,7 +3,7 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
@@ -13,6 +13,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 export function UnpublishButton() {
@@ -30,7 +31,7 @@ export function UnpublishButton() {
   } = useDocumentInfo()
   const { toggleModal } = useModal()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { reset: resetForm } = useForm()
   const { code: localeCode, label: localeLabel } = useLocale()
   const [unpublishAll, setUnpublishAll] = useState(false)
@@ -43,6 +44,16 @@ export function UnpublishButton() {
   } = config
 
   const { i18n, t } = useTranslation()
+
+  const entityConfig = React.useMemo(() => {
+    if (collectionSlug) {
+      return getEntityConfig({ collectionSlug })
+    }
+
+    if (globalSlug) {
+      return getEntityConfig({ globalSlug })
+    }
+  }, [collectionSlug, globalSlug, getEntityConfig])
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
@@ -129,9 +140,15 @@ export function UnpublishButton() {
     ],
   )
 
+  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
+
+  useEffect(() => {
+    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
+    setHasLocalizedFields(hasLocalizedField)
+  }, [entityConfig?.fields])
+
   const canUnpublish = hasPublishedDoc && !isTrashed
-  const canUnpublishCurrentLocale = hasPublishedDoc
-  // const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
+  const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
 
   return (
     <React.Fragment>
@@ -146,22 +163,26 @@ export function UnpublishButton() {
               toggleModal(unPublishModalSlug)
             }}
             size="medium"
-            SubMenuPopupContent={({ close }) => {
-              return (
-                <PopupList.ButtonGroup>
-                  <PopupList.Button
-                    id="action-unpublish-locale"
-                    onClick={() => {
-                      setUnpublishAll(false)
-                      toggleModal(unPublishModalSlug)
-                      close()
-                    }}
-                  >
-                    {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
-                  </PopupList.Button>
-                </PopupList.ButtonGroup>
-              )
-            }}
+            SubMenuPopupContent={
+              canUnpublishCurrentLocale
+                ? ({ close }) => {
+                    return (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button
+                          id="action-unpublish-locale"
+                          onClick={() => {
+                            setUnpublishAll(false)
+                            toggleModal(unPublishModalSlug)
+                            close()
+                          }}
+                        >
+                          {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )
+                  }
+                : undefined
+            }
             type="button"
           >
             {t('version:unpublish')}

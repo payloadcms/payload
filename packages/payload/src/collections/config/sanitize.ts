@@ -16,6 +16,7 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
@@ -188,10 +189,12 @@ export const sanitizeCollection = async (
         }
       }
 
-      if (!config.localization) {
-        sanitized.versions.drafts.localizeStatus = false
-      } else {
+      const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
+
+      if (config.localization && hasLocalizedFields) {
         sanitized.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
+      } else {
+        sanitized.versions.drafts.localizeStatus = false
       }
 
       if (sanitized.versions.drafts.autosave === true) {

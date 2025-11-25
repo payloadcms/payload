@@ -244,7 +244,7 @@ export const updateOperation = async <
     // Handle Localized Data Merging
     // /////////////////////////////////////
 
-    if (config.localization && globalConfig.versions) {
+    if (config && config.localization && globalConfig.versions) {
       let isSnapshotRequired = false
 
       if (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus) {
