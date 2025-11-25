@@ -7,7 +7,7 @@ import { generateSlug } from './generateSlug.js'
 export type SlugFieldArgs = {
   /**
    * Override for the `generateSlug` checkbox field name.
-   * @default 'generateSlug'
+   * @default `{name}-generate`
    */
   checkboxName?: string
   /**
@@ -84,7 +84,7 @@ export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse' | 'slugify'>
  */
 export const slugField: SlugField = ({
   name: fieldName = 'slug',
-  checkboxName = 'generateSlug',
+  checkboxName,
   fieldToUse = 'title',
   localized,
   overrides,
@@ -99,7 +99,7 @@ export const slugField: SlugField = ({
     },
     fields: [
       {
-        name: checkboxName,
+        name: checkboxName ?? `${fieldName}-generate`,
         type: 'checkbox',
         admin: {
           description:
