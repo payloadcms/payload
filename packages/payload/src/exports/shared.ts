@@ -118,7 +118,7 @@ export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
-export { slugify } from '../utilities/slugify.js'
+export { slugify, type Slugify } from '../utilities/slugify.js'
 
 export { toKebabCase } from '../utilities/toKebabCase.js'
 

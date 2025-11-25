@@ -211,7 +211,6 @@ export { RowField } from '../../fields/Row/index.js'
 export { SelectField, SelectInput } from '../../fields/Select/index.js'
 export { TabsField, TabsProvider } from '../../fields/Tabs/index.js'
 export { TabComponent } from '../../fields/Tabs/Tab/index.js'
-export { SlugField } from '../../fields/Slug/index.js'
 
 export { TextField, TextInput } from '../../fields/Text/index.js'
 export { JoinField } from '../../fields/Join/index.js'

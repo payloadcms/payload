@@ -1,5 +1,6 @@
-import type { TextFieldClientProps } from '../../../admin/types.js'
+import type { TextFieldClientProps, TextFieldServerProps } from '../../../admin/types.js'
 import type { FieldAdmin, RowField, TextField } from '../../../fields/config/types.js'
+import type { Slugify } from '../../../utilities/slugify.js'
 
 import { generateSlug } from './generateSlug.js'
 
@@ -24,7 +25,7 @@ export type SlugFieldArgs = {
    */
   name?: string
   /**
-   * A function used to override te fields at a granular level.
+   * A function used to override the slug field(s) at a granular level.
    * Passes the row field to you to manipulate beyond the exposed options.
    * @example
    * ```ts
@@ -46,14 +47,25 @@ export type SlugFieldArgs = {
   /**
    * Provide your own slugify function to override the default.
    */
-  slugify?: (val?: string) => string
+  slugify?: Slugify
 }
 
-type SlugField = (args?: SlugFieldArgs) => RowField
+export type SlugField = (args?: SlugFieldArgs) => RowField
 
-export type SlugFieldClientProps = {} & Pick<SlugFieldArgs, 'fieldToUse'>
+type SlugFieldServerPropsBase = Pick<SlugFieldArgs, 'fieldToUse' | 'slugify'>
 
-export type SlugFieldProps = SlugFieldClientProps & TextFieldClientProps
+/**
+ * The `slugify` function provided here is passed to the server component,
+ * which then creates a _server function_ out of it which the client can execute.
+ */
+export type SlugFieldServerProps = SlugFieldServerPropsBase & TextFieldServerProps
+
+/**
+ * These are the props that the `SlugField` client component accepts.
+ * The `SlugField` server component is responsible for passing down the `slugify` function.
+ */
+export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse' | 'slugify'> &
+  TextFieldClientProps
 
 /**
  * A slug is a unique, indexed, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
@@ -110,10 +122,11 @@ export const slugField: SlugField = ({
         admin: {
           components: {
             Field: {
-              clientProps: {
+              path: '@payloadcms/ui/rsc#SlugField',
+              serverProps: {
                 fieldToUse,
-              } satisfies SlugFieldClientProps,
-              path: '@payloadcms/ui#SlugField',
+                slugify,
+              } satisfies SlugFieldServerPropsBase,
             },
           },
           width: '100%',

@@ -105,6 +105,7 @@ type GetFolderResultsComponentAndDataClient = (
 ) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
 
 type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
+
 export type ServerFunctionsContextType = {
   _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
