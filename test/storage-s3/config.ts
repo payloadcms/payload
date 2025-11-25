@@ -17,8 +17,10 @@ let uploadOptions
 
 // Load config to work with emulated services
 dotenv.config({
-  path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated'),
+  path: path.resolve(dirname, './.env.emulated'),
 })
+
+console.log(process.env.S3_BUCKET, process.env.S3_SECRET_ACCESS_KEY)
 
 export default buildConfigWithDefaults({
   admin: {
@@ -39,7 +41,10 @@ export default buildConfigWithDefaults({
   plugins: [
     s3Storage({
       collections: {
-        [mediaSlug]: true,
+        [mediaSlug]: {
+          // cacheControl: 'max-age=31536000, public',
+          disablePayloadAccessControl: true,
+        },
         [mediaWithPrefixSlug]: {
           prefix,
         },
@@ -51,15 +56,18 @@ export default buildConfigWithDefaults({
           },
         },
       },
-      bucket: process.env.S3_BUCKET,
+      bucket: process.env.S3_BUCKET!,
+      clientUploads: true,
+
       config: {
+        endpoint: 'https://nbg1.your-objectstorage.com',
         credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
         },
-        endpoint: process.env.S3_ENDPOINT,
-        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-        region: process.env.S3_REGION,
+        region: 'nbg1',
+        // forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+        // region: process.env.S3_REGION,
       },
     }),
   ],
