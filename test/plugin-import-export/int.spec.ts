@@ -759,6 +759,40 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Jobs 0')
     })
 
+    it('should export a large dataset without any duplicates', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'posts',
+          fields: ['id', 'title'],
+          format: 'csv',
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // check the data for any duplicate IDs
+      const seenIds = new Set<string>()
+      const duplicateIds: string[] = []
+      for (const row of data) {
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (seenIds.has(row.id)) {
+          duplicateIds.push(row.id)
+        } else {
+          seenIds.add(row.id)
+        }
+      }
+      expect(duplicateIds).toHaveLength(0)
+    })
+
     it('should export polymorphic relationship fields to CSV', async () => {
       const doc = await payload.create({
         collection: 'exports',
@@ -1483,23 +1517,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
       // Find each test case by title and verify
       const commaSeparated = importedPages.docs.find((d) => d?.title === 'HasMany Comma-Separated')
-      console.log('Comma-separated result:', commaSeparated?.hasManyNumber)
       expect(commaSeparated?.hasManyNumber).toEqual([1, 2, 3, 5, 8])
 
       const singleValue = importedPages.docs.find((d) => d?.title === 'HasMany Single Value')
-      console.log('Single value result:', singleValue?.hasManyNumber)
       expect(singleValue?.hasManyNumber).toEqual([42])
 
       const empty = importedPages.docs.find((d) => d?.title === 'HasMany Empty')
-      console.log('Empty result:', empty?.hasManyNumber)
-      expect(empty?.hasManyNumber).toEqual([])
+
+      // Mongo will have this field undefined but SQL will have it as an empty array
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (typeof empty?.hasManyNumber === 'undefined') {
+        expect(empty?.hasManyNumber).toBeUndefined()
+      } else {
+        expect(empty?.hasManyNumber).toEqual([])
+      }
 
       const withSpaces = importedPages.docs.find((d) => d?.title === 'HasMany With Spaces')
-      console.log('With spaces result:', withSpaces?.hasManyNumber)
       expect(withSpaces?.hasManyNumber).toEqual([10, 20, 30])
 
       const mixedEmpty = importedPages.docs.find((d) => d?.title === 'HasMany Mixed Empty')
-      console.log('Mixed empty result:', mixedEmpty?.hasManyNumber)
       expect(mixedEmpty?.hasManyNumber).toEqual([1, 3, 5])
     })
 

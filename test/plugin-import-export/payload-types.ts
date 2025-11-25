@@ -96,8 +96,9 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
@@ -139,7 +140,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -164,11 +165,11 @@ export interface User {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   title: string;
   localized?: string | null;
   custom?: string | null;
-  customRelationship?: (string | null) | User;
+  customRelationship?: (number | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -222,34 +223,34 @@ export interface Page {
           }
       )[]
     | null;
-  author?: (string | null) | User;
+  author?: (number | null) | User;
   virtualRelationship?: string | null;
   virtual?: string | null;
   hasManyNumber?: number[] | null;
-  relationship?: (string | null) | User;
+  relationship?: (number | null) | User;
   excerpt?: string | null;
   hasOnePolymorphic?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null);
   hasManyPolymorphic?:
     | (
         | {
             relationTo: 'users';
-            value: string | User;
+            value: number | User;
           }
         | {
             relationTo: 'posts';
-            value: string | Post;
+            value: number | Post;
           }
       )[]
     | null;
-  hasManyMonomorphic?: (string | Post)[] | null;
+  hasManyMonomorphic?: (number | Post)[] | null;
   textFieldInCollapsible?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -260,7 +261,7 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -271,7 +272,7 @@ export interface Post {
  * via the `definition` "exports".
  */
 export interface Export {
-  id: string;
+  id: number;
   name?: string | null;
   format?: ('csv' | 'json') | null;
   limit?: number | null;
@@ -309,7 +310,7 @@ export interface Export {
  * via the `definition` "imports".
  */
 export interface Import {
-  id: string;
+  id: number;
   collectionSlug: 'users' | 'pages' | 'posts';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -346,7 +347,7 @@ export interface Import {
  * via the `definition` "exports-tasks".
  */
 export interface ExportsTask {
-  id: string;
+  id: number;
   name?: string | null;
   format?: ('csv' | 'json') | null;
   limit?: number | null;
@@ -384,7 +385,7 @@ export interface ExportsTask {
  * via the `definition` "imports-tasks".
  */
 export interface ImportsTask {
-  id: string;
+  id: number;
   collectionSlug: 'pages';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -421,7 +422,7 @@ export interface ImportsTask {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -438,7 +439,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: string;
+  id: number;
   /**
    * Input data provided to the job
    */
@@ -530,40 +531,40 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'exports';
-        value: string | Export;
+        value: number | Export;
       } | null)
     | ({
         relationTo: 'imports';
-        value: string | Import;
+        value: number | Import;
       } | null)
     | ({
         relationTo: 'exports-tasks';
-        value: string | ExportsTask;
+        value: number | ExportsTask;
       } | null)
     | ({
         relationTo: 'imports-tasks';
-        value: string | ImportsTask;
+        value: number | ImportsTask;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -573,10 +574,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -596,7 +597,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

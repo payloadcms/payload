@@ -143,24 +143,24 @@ export const getImportCollection = ({
         }
 
         // Schedule update after transaction completes
-        setImmediate(async () => {
-          try {
-            await req.payload.update({
-              id: doc.id,
-              collection: collection.slug,
-              data: {
-                status,
-                summary: doc.summary,
-              },
-              overrideAccess: true,
-            })
-          } catch (updateErr) {
-            req.payload.logger.error({
-              err: updateErr,
-              msg: `Failed to update import document ${doc.id} with results`,
-            })
-          }
-        })
+
+        try {
+          await req.payload.update({
+            id: doc.id,
+            collection: collection.slug,
+            data: {
+              status,
+              summary: doc.summary,
+            },
+            overrideAccess: true,
+            req,
+          })
+        } catch (updateErr) {
+          req.payload.logger.error({
+            err: updateErr,
+            msg: `Failed to update import document ${doc.id} with results`,
+          })
+        }
 
         return doc
       } catch (err) {
@@ -180,25 +180,23 @@ export const getImportCollection = ({
           updated: 0,
         }
 
-        // Schedule update after transaction completes
-        setImmediate(async () => {
-          try {
-            await req.payload.update({
-              id: doc.id,
-              collection: collection.slug,
-              data: {
-                status: 'failed',
-                summary: doc.summary,
-              },
-              overrideAccess: true,
-            })
-          } catch (updateErr) {
-            req.payload.logger.error({
-              err: updateErr,
-              msg: `Failed to update import document ${doc.id} with error status`,
-            })
-          }
-        })
+        try {
+          await req.payload.update({
+            id: doc.id,
+            collection: collection.slug,
+            data: {
+              status: 'failed',
+              summary: doc.summary,
+            },
+            overrideAccess: true,
+            req,
+          })
+        } catch (updateErr) {
+          req.payload.logger.error({
+            err: updateErr,
+            msg: `Failed to update import document ${doc.id} with error status`,
+          })
+        }
 
         return doc
       }
