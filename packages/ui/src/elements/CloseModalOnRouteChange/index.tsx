@@ -2,7 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname } from 'next/navigation.js'
-import { useRef, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
