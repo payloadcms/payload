@@ -1,5 +1,7 @@
 'use client'
 
+import type { TypeWithVersion } from 'payload'
+
 import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React from 'react'
@@ -18,13 +20,7 @@ const renderPill = (label: React.ReactNode, pillStyle: Parameters<typeof Pill>[0
 }
 
 export const VersionPillLabel: React.FC<{
-  currentlyPublishedVersion?: {
-    id: number | string
-    updatedAt: string
-    version: {
-      updatedAt: string
-    }
-  }
+  currentlyPublishedVersion?: TypeWithVersion<any>
   disableDate?: boolean
 
   doc: {
@@ -49,10 +45,7 @@ export const VersionPillLabel: React.FC<{
    */
   labelStyle?: 'pill' | 'text'
   labelSuffix?: React.ReactNode
-  latestDraftVersion?: {
-    id: number | string
-    updatedAt: string
-  }
+  latestDraftVersion?: TypeWithVersion<any>
 }> = ({
   currentlyPublishedVersion,
   disableDate = false,
