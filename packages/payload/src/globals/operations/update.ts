@@ -301,7 +301,7 @@ export const updateOperation = async <
           dataWithLocales: result || {},
           docWithLocales: mostRecentPublishedDoc || {},
           fields: globalConfig.fields,
-          selectedLocales: [locale],
+          selectedLocales: [locale!],
         })
       }
     }
@@ -329,16 +329,13 @@ export const updateOperation = async <
         result = await payload.db.updateGlobal({
           slug,
           data: result,
-          publishAllLocales,
           req,
           select,
-          unpublishAllLocales,
         })
       } else {
         result = await payload.db.createGlobal({
           slug,
           data: result,
-          publishAllLocales,
           req,
         })
       }
