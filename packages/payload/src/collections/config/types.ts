@@ -181,6 +181,7 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  docWithLocales: T
   findMany?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest

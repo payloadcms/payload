@@ -113,6 +113,14 @@ export type RootFoldersConfiguration = {
    * @default "payload-folders"
    */
   slug?: string
+  /**
+   * When true, folder path fields (_prefixSlugPath and _prefixTitlePath) will be computed
+   * dynamically on read instead of being stored in the database.
+   * This reduces database writes and storage but requires computation on every read.
+   *
+   * @default false
+   */
+  virtualPaths?: boolean
 }
 
 export type CollectionFoldersConfiguration = {

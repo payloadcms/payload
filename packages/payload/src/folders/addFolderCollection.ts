@@ -34,6 +34,7 @@ export async function addFolderCollection({
     collectionConfig: folderCollectionConfig,
     config,
     parentFieldName: config.folders!.fieldName as string,
+    virtual: config.folders!.virtualPaths || false,
   })
 
   const collectionIndex = config.collections!.push(folderCollectionConfig)
