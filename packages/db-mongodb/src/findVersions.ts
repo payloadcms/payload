@@ -33,13 +33,6 @@ export const findVersions: FindVersions = async function findVersions(
     versions: true,
   })
 
-  const session = await getSession(this, req)
-  const options: QueryOptions = {
-    limit,
-    session,
-    skip,
-  }
-
   let hasNearConstraint = false
 
   if (where) {
@@ -67,6 +60,13 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
+    limit,
+    session,
+    skip,
+  }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
