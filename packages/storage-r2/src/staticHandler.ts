@@ -14,14 +14,19 @@ interface Args {
 const isMiniflare = process.env.NODE_ENV === 'development'
 
 export const getHandler = ({ bucket, prefix = '' }: Args): StaticHandler => {
-  return async (req, { params: { filename } }) => {
+  return async (req, { params: { clientUploadContext, filename } }) => {
     // Due to https://github.com/cloudflare/workers-sdk/issues/6047
     // We cannot send a Headers instance to Miniflare
     const obj: R2ObjectBody = await bucket?.get(path.posix.join(prefix, filename), {
       range: isMiniflare ? undefined : req.headers,
     })
+
     if (obj?.body == undefined) {
       return new Response(null, { status: 404 })
+    }
+    // Don't return large file uploads back to the client, or the Worker will run out of memory
+    if (obj?.size > 50 * 1024 * 1024 && clientUploadContext) {
+      return new Response(null, { status: 200 })
     }
 
     const headers = new Headers()
