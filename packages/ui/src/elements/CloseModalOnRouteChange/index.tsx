@@ -2,7 +2,9 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname } from 'next/navigation.js'
-import { useEffectEvent, useRef } from 'react'
+import { useRef, useEffect } from 'react'
+
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export function CloseModalOnRouteChange() {
   const { closeAllModals } = useModal()
