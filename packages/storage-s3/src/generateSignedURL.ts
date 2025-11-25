@@ -6,13 +6,17 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import path from 'path'
 import { APIError, Forbidden } from 'payload'
 
+import type { EncryptionConfig } from './encryptionParams.js'
 import type { S3StorageOptions } from './index.js'
+
+import { getEncryptionParams } from './encryptionParams.js'
 
 interface Args {
   access?: ClientUploadsAccess
   acl?: 'private' | 'public-read'
   bucket: string
   collections: S3StorageOptions['collections']
+  encryption?: EncryptionConfig
   getStorageClient: () => AWS.S3
 }
 
@@ -23,6 +27,7 @@ export const getGenerateSignedURLHandler = ({
   acl,
   bucket,
   collections,
+  encryption,
   getStorageClient,
 }: Args): PayloadHandler => {
   return async (req) => {
@@ -49,10 +54,18 @@ export const getGenerateSignedURLHandler = ({
 
     const fileKey = path.posix.join(prefix, filename)
 
+    const encryptionParams = getEncryptionParams(encryption)
+
     const url = await getSignedUrl(
       // @ts-expect-error mismatch versions or something
       getStorageClient(),
-      new AWS.PutObjectCommand({ ACL: acl, Bucket: bucket, ContentType: mimeType, Key: fileKey }),
+      new AWS.PutObjectCommand({
+        ACL: acl,
+        Bucket: bucket,
+        ContentType: mimeType,
+        Key: fileKey,
+        ...encryptionParams,
+      }),
       {
         expiresIn: 600,
       },
