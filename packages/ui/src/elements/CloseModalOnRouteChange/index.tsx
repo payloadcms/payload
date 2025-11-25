@@ -8,9 +8,20 @@ export function CloseModalOnRouteChange() {
   const { closeAllModals } = useModal()
   const pathname = usePathname()
 
-  useEffect(() => {
+  const closeAllModalsEffectEvent = useEffectEvent(() => {
     closeAllModals()
-  }, [pathname, closeAllModals])
+  })
+
+  const initialRenderRef = useRef(true)
+
+  useEffect(() => {
+    if (initialRenderRef.current) {
+      initialRenderRef.current = false
+      return
+    }
+
+    closeAllModalsEffectEvent()
+  }, [pathname])
 
   return null
 }
