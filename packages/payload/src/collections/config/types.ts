@@ -35,6 +35,8 @@ import type {
 } from '../../fields/config/types.js'
 import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
+  CollectionAdminCustom,
+  CollectionCustom,
   CollectionSlug,
   JsonObject,
   RequestContext,
@@ -383,7 +385,7 @@ export type CollectionAdminOptions = {
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
-  custom?: Record<string, any>
+  custom?: CollectionAdminCustom
   /**
    * Default columns to show in list view
    */
@@ -506,7 +508,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   auth?: boolean | IncomingAuthType
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: CollectionCustom
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
