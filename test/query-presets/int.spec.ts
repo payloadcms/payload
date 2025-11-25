@@ -803,5 +803,43 @@ describe('Query Presets', () => {
         ],
       })
     })
+
+    it('should handle empty where and columns fields', async () => {
+      const result = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user: adminUser,
+        overrideAccess: false,
+        data: {
+          title: 'Empty Where and Columns',
+          // Not including where or columns at all
+          access: {
+            read: {
+              constraint: 'everyone',
+            },
+            update: {
+              constraint: 'everyone',
+            },
+            delete: {
+              constraint: 'everyone',
+            },
+          },
+          relatedCollection: 'pages',
+        },
+      })
+
+      expect(result.where == null).toBe(true)
+      expect(result.columns == null).toBe(true)
+
+      const fetched = await payload.findByID({
+        collection: queryPresetsCollectionSlug,
+        depth: 0,
+        user: adminUser,
+        overrideAccess: false,
+        id: result.id,
+      })
+
+      expect(fetched.where == null).toBe(true)
+      expect(fetched.columns == null).toBe(true)
+    })
   })
 })
