@@ -28,7 +28,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     collectionSlug: 'payload-jobs',
   })
 
-  const sort: Record<string, unknown> | undefined = buildSortParam({
+  const { sorting: sort } = buildSortParam({
     adapter: this,
     config: this.payload.config,
     fields: collectionConfig.flattenedFields,

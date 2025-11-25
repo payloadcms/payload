@@ -108,6 +108,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       disableBulkEdit: true,
       hidden: true,
       readOnly: true,
+      sortCaseInsensitive: true,
     },
     index: true,
     label: ({ t }) => t('upload:fileName'),

@@ -1,7 +1,8 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
-import { asc, desc } from 'drizzle-orm'
+import { asc, desc, sql } from 'drizzle-orm'
+import { getFieldByPath } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryResult } from './buildQuery.js'
@@ -76,6 +77,10 @@ export const buildOrderBy = ({
       sortDirection = 'asc'
     }
     try {
+      // Check if field has sortCaseInsensitive enabled
+      const fieldResult = getFieldByPath({ fields, path: sortProperty })
+      const isCaseInsensitive = fieldResult?.field?.admin?.sortCaseInsensitive === true
+
       const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
         adapter,
         collectionPath: sortProperty,
@@ -95,11 +100,16 @@ export const buildOrderBy = ({
           order = () => rawSort
         }
 
+        const column =
+          aliasTable && tableName === getNameFromDrizzleTable(sortTable)
+            ? aliasTable[sortTableColumnName]
+            : sortTable[sortTableColumnName]
+
+        // Wrap in LOWER() for case-insensitive sorting
+        const sortColumn = isCaseInsensitive ? sql`LOWER(${column})` : column
+
         orderBy.push({
-          column:
-            aliasTable && tableName === getNameFromDrizzleTable(sortTable)
-              ? aliasTable[sortTableColumnName]
-              : sortTable[sortTableColumnName],
+          column: sortColumn,
           order,
         })
 

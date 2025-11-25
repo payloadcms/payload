@@ -1267,6 +1267,57 @@ describe('Collections - Uploads', () => {
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
     })
   })
+
+  describe('Media filename case-insensitive sorting', () => {
+    const testFilenames = ['Apple.png', 'banana.png', 'Cherry.png', 'date.png']
+    const createdIds: string[] = []
+
+    beforeAll(async () => {
+      // Create test media files with mixed-case names
+      const filePath = path.resolve(dirname, './image.png')
+      for (const filename of testFilenames) {
+        const file = await getFileByPath(filePath)
+        file.name = filename
+
+        const doc = await payload.create({
+          collection: 'media',
+          data: {
+            alt: filename,
+          },
+          file,
+        })
+        createdIds.push(doc.id)
+      }
+    })
+
+    afterAll(async () => {
+      await payload.delete({
+        collection: 'media',
+        where: {
+          id: {
+            in: createdIds,
+          },
+        },
+      })
+    })
+
+    it('should sort media by filename case-insensitively', async () => {
+      const result = await payload.find({
+        collection: 'media',
+        sort: 'filename',
+        where: {
+          id: {
+            in: createdIds,
+          },
+        },
+      })
+
+      const filenames = result.docs.map((doc) => doc.filename)
+
+      // Should be in case-insensitive alphabetical order
+      expect(filenames).toEqual(['Apple.png', 'banana.png', 'Cherry.png', 'date.png'])
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {

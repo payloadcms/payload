@@ -386,6 +386,12 @@ export type FieldAdmin = {
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
+  /**
+   * Enable case-insensitive sorting for this field. When true, sorting will ignore letter case.
+   * Only applies to text fields. Default: false
+   * @type boolean
+   */
+  sortCaseInsensitive?: boolean
   style?: CSSProperties
   width?: CSSProperties['width']
 }
@@ -415,6 +421,12 @@ export type AdminClient = {
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
+  /**
+   * Enable case-insensitive sorting for this field. When true, sorting will ignore letter case.
+   * Only applies to text fields. Default: false
+   * @type boolean
+   */
+  sortCaseInsensitive?: boolean
   style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
   width?: CSSProperties['width']
 }

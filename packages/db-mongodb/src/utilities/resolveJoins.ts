@@ -221,7 +221,7 @@ export async function resolveJoins({
         ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
         : targetConfig.flattenedFields
 
-      const sort = buildSortParam({
+      const { sorting: sort } = buildSortParam({
         adapter,
         config: adapter.payload.config,
         fields,
