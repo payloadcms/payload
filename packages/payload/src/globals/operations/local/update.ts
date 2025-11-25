@@ -1,27 +1,32 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
+  GlobalSlug,
+  LocaleValue,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
   Document,
   PayloadRequest,
   PopulateType,
   SelectType,
-  TransformGlobalWithSelect,
+  TransformGlobal,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DataFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import {
-  deepCopyObjectSimple,
-  type GlobalSlug,
-  type Payload,
-  type RequestContext,
-  type TypedLocale,
-} from '../../../index.js'
+import { deepCopyObjectSimple } from '../../../index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -32,7 +37,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * The global data to update.
    */
-  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
+  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug, TLocale>, 'id'>>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -48,7 +53,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: 'all' | TypedLocale
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -96,10 +101,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<TransformGlobal<TSlug, TSelect, TLocale>> {
   const {
     slug: globalSlug,
     data,
@@ -119,8 +125,9 @@ export async function updateGlobalLocal<
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  return updateOperation<TSlug, TSelect>({
+  return updateOperation<TSlug, TSelect, TLocale>({
     slug: globalSlug as string,
+    // @ts-expect-error
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     draft,

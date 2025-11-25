@@ -23,11 +23,25 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
-import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type {
+  GlobalSlug,
+  LocaleValue,
+  RequestContext,
+  TypedGlobal,
+  TypedGlobalSelect,
+  TypedLocale,
+  TypedLocalizedGlobal,
+} from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
-export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
+export type DataFromGlobalSlug<
+  TSlug extends GlobalSlug,
+  TLocale extends LocaleValue = TypedLocale,
+> = TLocale extends 'all' ? LocalizedDataFromGlobalSlug<TSlug> : TypedGlobal[TSlug]
+
+export type LocalizedDataFromGlobalSlug<TSlug extends GlobalSlug> =
+  TSlug extends keyof TypedLocalizedGlobal ? TypedLocalizedGlobal[TSlug] : TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 

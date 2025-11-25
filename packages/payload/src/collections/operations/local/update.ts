@@ -1,13 +1,19 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  LocaleValue,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
   PopulateType,
   SelectType,
   Sort,
-  TransformCollectionWithSelect,
+  TransformCollection,
   Where,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
@@ -24,7 +30,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = {
   /**
    * Whether the current update should be marked as from autosave.
    * `versions.drafts.autosave` should be specified.
@@ -44,7 +54,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   /**
    * The document / documents data to update.
    */
-  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
+  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug, TLocale>>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -73,7 +83,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -129,6 +139,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * The ID of the document to update.
@@ -148,11 +159,12 @@ export type ByIDOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TLocale>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * The ID of the document to update.
@@ -172,41 +184,50 @@ export type ManyOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TLocale>
 
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
+  TLocale extends LocaleValue = TypedLocale,
+> = ByIDOptions<TSlug, TSelect, TLocale> | ManyOptions<TSlug, TSelect, TLocale>
 
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: ByIDOptions<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  options: ByIDOptions<TSlug, TSelect, TLocale>,
+): Promise<TransformCollection<TSlug, TSelect, TLocale>>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: ManyOptions<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect>>
+  options: ManyOptions<TSlug, TSelect, TLocale>,
+): Promise<BulkOperationResult<TSlug, TSelect, TLocale>>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<
+  BulkOperationResult<TSlug, TSelect, TLocale> | TransformCollection<TSlug, TSelect, TLocale>
+>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<
+  BulkOperationResult<TSlug, TSelect, TLocale> | TransformCollection<TSlug, TSelect, TLocale>
+> {
   const {
     id,
     autosave,

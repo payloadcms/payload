@@ -37,17 +37,20 @@ import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
+  LocaleValue,
   RequestContext,
   TypedAuthOperations,
   TypedCollection,
   TypedCollectionSelect,
   TypedLocale,
+  TypedLocalizedCollection,
 } from '../../index.js'
 import type {
   PayloadRequest,
   SelectIncludeType,
   SelectType,
   Sort,
+  TransformCollection,
   TransformCollectionWithSelect,
   Where,
 } from '../../types/index.js'
@@ -60,6 +63,11 @@ import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.j
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
+export type LocalizedDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  TSlug extends keyof TypedLocalizedCollection
+    ? TypedLocalizedCollection[TSlug]
+    : DataFromCollectionSlug<TSlug>
+
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -70,8 +78,12 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
 >
 
-export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
-  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
+export type RequiredDataFromCollectionSlug<
+  TSlug extends CollectionSlug,
+  TLocale extends LocaleValue = TypedLocale,
+> = RequiredDataFromCollection<
+  TLocale extends 'all' ? LocalizedDataFromCollectionSlug<TSlug> : DataFromCollectionSlug<TSlug>
+>
 
 /**
  * Helper type for draft data - makes all fields optional except auto-generated ones
@@ -745,8 +757,12 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
-  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
+export type BulkOperationResult<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = {
+  docs: TransformCollection<TSlug, TSelect, TLocale>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     isPublic: boolean

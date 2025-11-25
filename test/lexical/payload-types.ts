@@ -109,6 +109,11 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    'lexical-localized-fields': LexicalLocalizedFieldLocalized;
+    'text-fields': TextFieldLocalized;
+    'array-fields': ArrayFieldLocalized;
+  };
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
@@ -141,6 +146,7 @@ export interface Config {
   globals: {
     tabsWithRichText: TabsWithRichText;
   };
+  globalsLocalized: {};
   globalsSelect: {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
@@ -1164,6 +1170,270 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-localized-fields_localized".
+ */
+export interface LexicalLocalizedFieldLocalized {
+  id: string;
+  title: {
+    en?: string;
+    es?: string;
+    he?: string;
+  };
+  /**
+   * Non-localized field with localized block subfields
+   */
+  lexicalBlocksSubLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lexicalBlocksLocalized?: {
+    /**
+     * Localized field with localized block subfields
+     */
+    en?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Localized field with localized block subfields
+     */
+    es?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Localized field with localized block subfields
+     */
+    he?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields_localized".
+ */
+export interface TextFieldLocalized {
+  id: string;
+  text: string;
+  hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
+  adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
+  disabledTextField?: string | null;
+  localizedText?: {
+    en?: string | null;
+    es?: string | null;
+    he?: string | null;
+  };
+  /**
+   * en description
+   */
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  hasMany?: string[] | null;
+  readOnlyHasMany?: string[] | null;
+  validatesHasMany?: string[] | null;
+  localizedHasMany?: {
+    en?: string[] | null;
+    es?: string[] | null;
+    he?: string[] | null;
+  };
+  withMinRows?: string[] | null;
+  withMaxRows?: string[] | null;
+  defaultValueFromReq?: string | null;
+  array?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithText';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields_localized".
+ */
+export interface ArrayFieldLocalized {
+  id: string;
+  title?: string | null;
+  items: {
+    text: string;
+    anotherText?: string | null;
+    localizedText?: {
+      en?: string | null;
+      es?: string | null;
+      he?: string | null;
+    };
+    subArray?:
+      | {
+          text?: string | null;
+          textTwo: string;
+          textInRow: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  collapsedArray?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  localized: {
+    en?: {
+      text: string;
+      id?: string | null;
+    }[];
+    es?: {
+      text: string;
+      id?: string | null;
+    }[];
+    he?: {
+      text: string;
+      id?: string | null;
+    }[];
+  };
+  readOnly?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  potentiallyEmptyArray?:
+    | {
+        text?: string | null;
+        groupInRow?: {
+          textInGroupInRow?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Row labels rendered as react components.
+   */
+  rowLabelAsComponent?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithMinRows?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disableSort?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: {
+                en?: string | null;
+                es?: string | null;
+                he?: string | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  externallyUpdatedArray?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  customArrayField?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

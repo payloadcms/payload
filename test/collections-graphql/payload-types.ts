@@ -86,6 +86,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    'cyclical-relationship': CyclicalRelationshipLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     point: PointSelect<false> | PointSelect<true>;
@@ -109,6 +112,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es';
   user: User & {
@@ -465,6 +469,22 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cyclical-relationship_localized".
+ */
+export interface CyclicalRelationshipLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  relationToSelf?: (string | null) | CyclicalRelationship;
+  media?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

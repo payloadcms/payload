@@ -174,6 +174,8 @@ export interface Collection2 {
   nestedGroup?: {
     meta?: SharedMeta;
   };
+  'some[text]'?: string | null;
+  spaceBottom?: ('mb-0' | 'mb-8' | 'mb-16' | 'mb-24' | 'mb-[150px]') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -210,6 +212,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -335,6 +344,8 @@ export interface Collection2Select<T extends boolean = true> {
     | {
         meta?: T | SharedMetaSelect<T>;
       };
+  'some[text]'?: T;
+  spaceBottom?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -369,6 +380,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

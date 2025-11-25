@@ -143,6 +143,7 @@ export interface Post {
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -150,6 +151,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  testAdminThumbnail?: string | null;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -353,12 +355,14 @@ export interface PostsSelect<T extends boolean = true> {
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  testAdminThumbnail?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;

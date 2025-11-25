@@ -78,6 +78,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    posts: PostLocalized;
+    search: SearchLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -93,6 +97,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -291,6 +296,64 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_localized".
+ */
+export interface PostLocalized {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search_localized".
+ */
+export interface SearchLocalized {
+  title?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  priority?: number | null;
+  doc:
+    | {
+        relationTo: 'pages';
+        value: string | Page;
+      }
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'custom-ids-1';
+        value: string | CustomIds1;
+      }
+    | {
+        relationTo: 'custom-ids-2';
+        value: string | CustomIds2;
+      };
+  id: string;
+  excerpt?: string | null;
+  slug?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }

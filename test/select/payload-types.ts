@@ -84,6 +84,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    'localized-posts': LocalizedPostLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
@@ -108,6 +111,7 @@ export interface Config {
     'global-post': GlobalPost;
     'force-select-global': ForceSelectGlobal;
   };
+  globalsLocalized: {};
   globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
@@ -623,6 +627,130 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_localized".
+ */
+export interface LocalizedPostLocalized {
+  id: string;
+  text?: {
+    en?: string | null;
+    de?: string | null;
+  };
+  number?: {
+    en?: number | null;
+    de?: number | null;
+  };
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
+  group?: {
+    en?: {
+      text?: string | null;
+      number?: number | null;
+    };
+    de?: {
+      text?: string | null;
+      number?: number | null;
+    };
+  };
+  groupSecond?: {
+    text?: {
+      en?: string | null;
+      de?: string | null;
+    };
+    number?: number | null;
+  };
+  array?: {
+    en?:
+      | {
+          text?: string | null;
+          number?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    de?:
+      | {
+          text?: string | null;
+          number?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  arraySecond?:
+    | {
+        text?: {
+          en?: string | null;
+          de?: string | null;
+        };
+        number?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: {
+    en?:
+      | (
+          | {
+              text?: string | null;
+              introText?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'intro';
+            }
+          | {
+              text?: string | null;
+              ctaText?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'cta';
+            }
+        )[]
+      | null;
+    de?:
+      | (
+          | {
+              text?: string | null;
+              introText?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'intro';
+            }
+          | {
+              text?: string | null;
+              ctaText?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'cta';
+            }
+        )[]
+      | null;
+  };
+  blocksSecond?:
+    | (
+        | {
+            text?: string | null;
+            firstText?: {
+              en?: string | null;
+              de?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'first';
+          }
+        | {
+            text?: {
+              en?: string | null;
+              de?: string | null;
+            };
+            secondText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'second';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -1089,6 +1217,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

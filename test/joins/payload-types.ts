@@ -104,6 +104,7 @@ export interface Config {
     };
     categories: {
       relatedPosts: 'posts';
+      noRowTypes: 'posts';
       hasManyPosts: 'posts';
       hasManyPostsLocalized: 'posts';
       'group.relatedPosts': 'posts';
@@ -121,6 +122,8 @@ export interface Config {
       joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
+      polymorphicJoin: 'posts' | 'versions';
+      polymorphicJoinNoRowTypes: 'posts' | 'versions';
     };
     uploads: {
       relatedPosts: 'posts';
@@ -156,6 +159,12 @@ export interface Config {
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'folderPoly1' | 'folderPoly2';
     };
+  };
+  collectionsLocalized: {
+    posts: PostLocalized;
+    categories: CategoryLocalized;
+    'localized-posts': LocalizedPostLocalized;
+    'localized-categories': LocalizedCategoryLocalized;
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -193,6 +202,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es';
   user: User & {
@@ -384,6 +394,11 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  noRowTypes?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   /**
    * Static Description
    */
@@ -431,6 +446,34 @@ export interface Category {
   };
   blocksPosts?: {
     docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoin?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoinNoRowTypes?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -491,16 +534,6 @@ export interface HiddenPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "singular".
- */
-export interface Singular {
-  id: string;
-  category?: (string | null) | Category;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
  */
 export interface Version {
@@ -533,6 +566,16 @@ export interface CategoriesVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular".
+ */
+export interface Singular {
+  id: string;
+  category?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -979,6 +1022,343 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_localized".
+ */
+export interface PostLocalized {
+  id: string;
+  title?: string | null;
+  localizedText?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  author?: (string | null) | User;
+  /**
+   * Hides posts for the `filtered` join field in categories
+   */
+  isFiltered?: boolean | null;
+  restrictedField?: string | null;
+  upload?: (string | null) | Upload;
+  category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoriesLocalized?: {
+    en?: (string | Category)[] | null;
+    es?: (string | Category)[] | null;
+  };
+  polymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  polymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+      )[]
+    | null;
+  localizedPolymorphic?: {
+    en?:
+      | ({
+          relationTo: 'categories';
+          value: string | Category;
+        } | null)
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null);
+    es?:
+      | ({
+          relationTo: 'categories';
+          value: string | Category;
+        } | null)
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null);
+  };
+  localizedPolymorphics?: {
+    en?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'users';
+              value: string | User;
+            }
+        )[]
+      | null;
+    es?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'users';
+              value: string | User;
+            }
+        )[]
+      | null;
+  };
+  group?: {
+    category?: (string | null) | Category;
+    camelCaseCategory?: (string | null) | Category;
+  };
+  array?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
+  arrayHasMany?:
+    | {
+        category?: (string | Category)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedArray?: {
+    en?:
+      | {
+          category?: (string | null) | Category;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          category?: (string | null) | Category;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  blocks?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  first?: {
+    tabText?: string | null;
+  };
+  tab?: {
+    category?: (string | null) | Category;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_localized".
+ */
+export interface CategoryLocalized {
+  id: string;
+  name?: string | null;
+  relatedPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  noRowTypes?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Static Description
+   */
+  hasManyPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  hasManyPostsLocalized?: {
+    en?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    es?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  hiddenPosts?: {
+    docs?: (string | HiddenPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  group?: {
+    relatedPosts?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    camelCasePosts?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  arrayPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  arrayHasManyPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  localizedArrayPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  blocksPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoin?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoinNoRowTypes?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphic?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphics?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  localizedPolymorphic?: {
+    en?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    es?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  localizedPolymorphics?: {
+    en?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    es?: {
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  singulars?: {
+    docs?: (string | Singular)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  filtered?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  inTab?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  joinWithError?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  enableErrorOnJoin?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_localized".
+ */
+export interface LocalizedPostLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  category?: {
+    en?: (string | null) | LocalizedCategory;
+    es?: (string | null) | LocalizedCategory;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories_localized".
+ */
+export interface LocalizedCategoryLocalized {
+  id: string;
+  name?: string | null;
+  relatedPosts?: {
+    en?: {
+      docs?: (string | LocalizedPost)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    es?: {
+      docs?: (string | LocalizedPost)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1073,6 +1453,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
+  noRowTypes?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
   hiddenPosts?: T;
@@ -1086,6 +1467,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   arrayHasManyPosts?: T;
   localizedArrayPosts?: T;
   blocksPosts?: T;
+  polymorphicJoin?: T;
+  polymorphicJoinNoRowTypes?: T;
   polymorphic?: T;
   polymorphics?: T;
   localizedPolymorphic?: T;

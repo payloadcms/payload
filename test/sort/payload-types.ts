@@ -87,6 +87,9 @@ export interface Config {
       'group.orderableJoinField': 'orderable';
     };
   };
+  collectionsLocalized: {
+    localized: LocalizedLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
@@ -104,6 +107,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'nb';
   user: User & {
@@ -349,6 +353,31 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_localized".
+ */
+export interface LocalizedLocalized {
+  id: string;
+  text?: {
+    en?: string | null;
+    nb?: string | null;
+  };
+  number?: {
+    en?: number | null;
+    nb?: number | null;
+  };
+  number2?: number | null;
+  group?: {
+    text?: string | null;
+    number?: {
+      en?: number | null;
+      nb?: number | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
 }

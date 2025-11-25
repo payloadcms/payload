@@ -1,6 +1,7 @@
 import type {
   CollectionSlug,
   JoinQuery,
+  LocaleValue,
   Payload,
   RequestContext,
   SelectType,
@@ -12,7 +13,7 @@ import type {
   Document,
   PayloadRequest,
   PopulateType,
-  TransformCollectionWithSelect,
+  TransformCollection,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'
@@ -25,6 +26,7 @@ export type Options<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
 > = {
   /**
    * the Collection slug to operate against.
@@ -80,7 +82,7 @@ export type Options<
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: 'all' | TypedLocale
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -124,10 +126,11 @@ export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: Options<TSlug, TDisableErrors, TSelect>,
-): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
+  options: Options<TSlug, TDisableErrors, TSelect, TLocale>,
+): Promise<ApplyDisableErrors<TransformCollection<TSlug, TSelect, TLocale>, TDisableErrors>> {
   const {
     id,
     collection: collectionSlug,
@@ -154,6 +157,7 @@ export async function findByIDLocal<
     )
   }
 
+  // @ts-expect-error
   return findByIDOperation<TSlug, TDisableErrors, TSelect>({
     id,
     collection,

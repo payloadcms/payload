@@ -76,6 +76,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    pages: PageLocalized;
+    pagesWithImportedFields: PagesWithImportedFieldLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -89,6 +93,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
+  globalsLocalized: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -132,6 +137,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -167,7 +179,7 @@ export interface Media {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -282,6 +294,89 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_localized".
+ */
+export interface PageLocalized {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug: string;
+  meta: {
+    title: {
+      en?: string;
+      es?: string;
+      de?: string;
+    };
+    description?: {
+      en?: string | null;
+      es?: string | null;
+      de?: string | null;
+    };
+    image?: {
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
+      en?: (string | null) | Media;
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
+      es?: (string | null) | Media;
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
+      de?: (string | null) | Media;
+    };
+    ogTitle?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagesWithImportedFields_localized".
+ */
+export interface PagesWithImportedFieldLocalized {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug: string;
+  metaAndSEO: {
+    title: {
+      en?: string;
+      es?: string;
+      de?: string;
+    };
+    innerMeta?: {
+      description?: {
+        en?: string | null;
+        es?: string | null;
+        de?: string | null;
+      };
+    };
+    innerMedia?: {
+      image?: {
+        /**
+         * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+         */
+        en?: (string | null) | Media;
+        /**
+         * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+         */
+        es?: (string | null) | Media;
+        /**
+         * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+         */
+        de?: (string | null) | Media;
+      };
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -294,6 +389,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

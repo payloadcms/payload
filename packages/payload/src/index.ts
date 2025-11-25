@@ -47,7 +47,9 @@ import type {
   ApplyDisableErrors,
   JsonObject,
   SelectType,
+  TransformCollection,
   TransformCollectionWithSelect,
+  TransformGlobal,
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
@@ -190,6 +192,10 @@ export interface GeneratedTypes {
       [schemaPath: string]: CollectionSlug
     }
   }
+
+  collectionsLocalizedUntyped: {
+    [slug: string]: JsonObject & TypeWithID
+  }
   collectionsSelectUntyped: {
     [slug: string]: SelectType
   }
@@ -201,12 +207,17 @@ export interface GeneratedTypes {
     defaultIDType: number | string
   }
   fallbackLocaleUntyped: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
+
+  globalsLocalizedUntyped: {
+    [slug: string]: JsonObject
+  }
   globalsSelectUntyped: {
     [slug: string]: SelectType
   }
   globalsUntyped: {
     [slug: string]: JsonObject
   }
+
   jobsUntyped: {
     tasks: {
       [slug: string]: {
@@ -230,6 +241,11 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   : // @ts-expect-error
     T['collectionsUntyped']
 
+type ResolveLocalizedCollectionType<T> = 'collectionsLocalized' extends keyof T
+  ? T['collectionsLocalized']
+  : // @ts-expect-error
+    T['collectionsLocalizedUntyped']
+
 type ResolveBlockType<T> = 'blocks' extends keyof T
   ? T['blocks']
   : // @ts-expect-error
@@ -250,6 +266,11 @@ type ResolveGlobalType<T> = 'globals' extends keyof T
   : // @ts-expect-error
     T['globalsUntyped']
 
+type ResolveLocalizedGlobalType<T> = 'globalsLocalized' extends keyof T
+  ? T['globalsLocalized']
+  : // @ts-expect-error
+    T['globalsLocalizedUntyped']
+
 type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
   ? T['globalsSelect']
   : // @ts-expect-error
@@ -257,6 +278,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedLocalizedCollection = ResolveLocalizedCollectionType<GeneratedTypes>
 
 export type TypedBlock = ResolveBlockType<GeneratedTypes>
 
@@ -275,6 +298,8 @@ export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
 
 export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+
+export type TypedLocalizedGlobal = ResolveLocalizedGlobalType<GeneratedTypes>
 
 export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>
 
@@ -309,6 +334,8 @@ type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+export type LocaleValue = 'all' | TypedLocale
 export type TypedFallbackLocale = ResolveFallbackLocaleType<GeneratedTypes>
 
 /**
@@ -408,10 +435,14 @@ export class BasePayload {
    * @param options
    * @returns created document
    */
-  create = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: CreateOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-    return createLocal<TSlug, TSelect>(this, options)
+  create = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: CreateOptions<TSlug, TSelect, TLocale>,
+  ): Promise<TransformCollection<TSlug, TSelect, TLocale>> => {
+    return createLocal<TSlug, TSelect, TLocale>(this, options)
   }
 
   crons: Cron[] = []
@@ -455,10 +486,14 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: FindOptions<TSlug, TSelect>,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
-    return findLocal<TSlug, TSelect>(this, options)
+  find = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: FindOptions<TSlug, TSelect, TLocale>,
+  ): Promise<PaginatedDocs<TransformCollection<TSlug, TSelect, TLocale>>> => {
+    return findLocal<TSlug, TSelect, TLocale>(this, options)
   }
 
   /**
@@ -470,10 +505,11 @@ export class BasePayload {
     TSlug extends CollectionSlug,
     TDisableErrors extends boolean,
     TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
   >(
-    options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
-  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
-    return findByIDLocal<TSlug, TDisableErrors, TSelect>(this, options)
+    options: FindByIDOptions<TSlug, TDisableErrors, TSelect, TLocale>,
+  ): Promise<ApplyDisableErrors<TransformCollection<TSlug, TSelect, TLocale>, TDisableErrors>> => {
+    return findByIDLocal<TSlug, TDisableErrors, TSelect, TLocale>(this, options)
   }
 
   /**
@@ -619,10 +655,14 @@ export class BasePayload {
     return unlockLocal<TSlug>(this, options)
   }
 
-  updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: UpdateGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-    return updateGlobalLocal<TSlug, TSelect>(this, options)
+  updateGlobal = async <
+    TSlug extends GlobalSlug,
+    TSelect extends SelectFromGlobalSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: UpdateGlobalOptions<TSlug, TSelect, TLocale>,
+  ): Promise<TransformGlobal<TSlug, TSelect, TLocale>> => {
+    return updateGlobalLocal<TSlug, TSelect, TLocale>(this, options)
   }
 
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
@@ -725,18 +765,32 @@ export class BasePayload {
    * @param options
    * @returns Updated document(s)
    */
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteByIDOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  delete<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: DeleteByIDOptions<TSlug, TSelect, TLocale>,
+  ): Promise<TransformCollection<TSlug, TSelect, TLocale>>
 
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteManyOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect>>
+  delete<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: DeleteManyOptions<TSlug, TSelect, TLocale>,
+  ): Promise<BulkOperationResult<TSlug, TSelect, TLocale>>
 
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
-    return deleteLocal<TSlug, TSelect>(this, options)
+  delete<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: DeleteOptions<TSlug, TSelect, TLocale>,
+  ): Promise<
+    BulkOperationResult<TSlug, TSelect, TLocale> | TransformCollection<TSlug, TSelect, TLocale>
+  > {
+    return deleteLocal<TSlug, TSelect, TLocale>(this, options)
   }
 
   /**
@@ -934,23 +988,37 @@ export class BasePayload {
     return this
   }
 
-  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: UpdateManyOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect>>
+  update<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: UpdateManyOptions<TSlug, TSelect, TLocale>,
+  ): Promise<BulkOperationResult<TSlug, TSelect, TLocale>>
 
   /**
    * @description Update one or more documents
    * @param options
    * @returns Updated document(s)
    */
-  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: UpdateByIDOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  update<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: UpdateByIDOptions<TSlug, TSelect, TLocale>,
+  ): Promise<TransformCollection<TSlug, TSelect, TLocale>>
 
-  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: UpdateOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
-    return updateLocal<TSlug, TSelect>(this, options)
+  update<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TLocale extends LocaleValue = TypedLocale,
+  >(
+    options: UpdateOptions<TSlug, TSelect, TLocale>,
+  ): Promise<
+    BulkOperationResult<TSlug, TSelect, TLocale> | TransformCollection<TSlug, TSelect, TLocale>
+  > {
+    return updateLocal<TSlug, TSelect, TLocale>(this, options)
   }
 }
 
