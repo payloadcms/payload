@@ -25,3 +25,22 @@ export interface R2Bucket {
   ): Promise<any>
   resumeMultipartUpload(key: string, uploadId: string): any
 }
+
+interface R2HTTPMetadata {
+  cacheControl?: string
+  cacheExpiry?: Date
+  contentDisposition?: string
+  contentEncoding?: string
+  contentLanguage?: string
+  contentType?: string
+}
+
+export interface R2Object {
+  readonly etag: string
+  readonly httpMetadata?: R2HTTPMetadata
+
+  writeHttpMetadata(headers: Headers): void
+}
+export interface R2ObjectBody extends R2Object {
+  get body(): ReadableStream
+}

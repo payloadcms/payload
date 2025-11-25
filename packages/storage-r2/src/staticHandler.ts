@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 
-import type { R2Bucket } from './types.js'
+import type { R2Bucket, R2ObjectBody } from './types.js'
 
 interface Args {
   bucket: R2Bucket
@@ -17,7 +17,7 @@ export const getHandler = ({ bucket, prefix = '' }: Args): StaticHandler => {
   return async (req, { params: { filename } }) => {
     // Due to https://github.com/cloudflare/workers-sdk/issues/6047
     // We cannot send a Headers instance to Miniflare
-    const obj = await bucket?.get(path.posix.join(prefix, filename), {
+    const obj: R2ObjectBody = await bucket?.get(path.posix.join(prefix, filename), {
       range: isMiniflare ? undefined : req.headers,
     })
     if (obj?.body == undefined) {
@@ -25,7 +25,25 @@ export const getHandler = ({ bucket, prefix = '' }: Args): StaticHandler => {
     }
 
     const headers = new Headers()
-    if (!isMiniflare) {
+    const metadata = obj.httpMetadata
+
+    if (isMiniflare) {
+      if (metadata?.cacheControl) {
+        headers.set('Cache-Control', metadata.cacheControl)
+      }
+      if (metadata?.contentDisposition) {
+        headers.set('Content-Disposition', metadata.contentDisposition)
+      }
+      if (metadata?.contentEncoding) {
+        headers.set('Content-Encoding', metadata.contentEncoding)
+      }
+      if (metadata?.contentLanguage) {
+        headers.set('Content-Language', metadata.contentLanguage)
+      }
+      if (metadata?.contentType) {
+        headers.set('Content-Type', metadata.contentType)
+      }
+    } else {
       obj.writeHttpMetadata(headers)
     }
 
