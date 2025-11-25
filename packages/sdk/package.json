@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/sdk",
-  "version": "3.59.1",
+  "version": "3.64.0",
   "description": "The official Payload REST API SDK",
   "homepage": "https://payloadcms.com",
   "repository": {

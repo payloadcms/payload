@@ -26,24 +26,23 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
-import './index.scss'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-
-const baseClass = 'lexical-upload'
+import './index.scss'
 
 const initialParams = {
   depth: 0,
 }
 
 export type ElementProps = {
+  className: string
   data: UploadData
   format?: ElementFormatType
   nodeKey: string
 }
 
-const Component: React.FC<ElementProps> = (props) => {
+export const UploadComponent: React.FC<ElementProps> = (props) => {
   const {
+    className: baseClass,
     data: { fields, relationTo, value },
     nodeKey,
   } = props
@@ -150,7 +149,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   return (
     <div
-      className={`${baseClass} ${baseClass}--${aspectRatio}`}
+      className={`${baseClass}__contents ${baseClass}__contents--${aspectRatio}`}
       data-filename={data?.filename}
       ref={uploadRef}
     >
@@ -242,13 +241,5 @@ const Component: React.FC<ElementProps> = (props) => {
         />
       ) : null}
     </div>
-  )
-}
-
-export const UploadComponent = (props: ElementProps): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition {...props} uploads>
-      <Component {...props} />
-    </EnabledRelationshipsCondition>
   )
 }

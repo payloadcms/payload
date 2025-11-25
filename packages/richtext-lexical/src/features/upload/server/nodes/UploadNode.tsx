@@ -2,10 +2,10 @@ import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecorat
 import type {
   DOMConversionMap,
   DOMExportOutput,
+  EditorConfig,
   ElementFormatType,
   LexicalNode,
   NodeKey,
-  Spread,
 } from 'lexical'
 import type {
   CollectionSlug,
@@ -17,8 +17,11 @@ import type {
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 import { $convertUploadElement } from './conversions.js'
 
@@ -76,10 +79,8 @@ export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonO
   }
 }[UploadCollectionSlug]
 
-export type SerializedUploadNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'upload'
-} & Spread<UploadData, SerializedDecoratorBlockNode>
+export type SerializedUploadNode = StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'upload'> &
+  UploadData
 
 export class UploadServerNode extends DecoratorBlockNode {
   __data: UploadData
@@ -143,6 +144,12 @@ export class UploadServerNode extends DecoratorBlockNode {
 
   static isInline(): false {
     return false
+  }
+
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.upload)
+    return element
   }
 
   override decorate(): JSX.Element {

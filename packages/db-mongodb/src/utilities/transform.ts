@@ -17,6 +17,8 @@ import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { isObjectID } from './isObjectID.js'
+
 interface RelationObject {
   relationTo: string
   value: number | string
@@ -36,6 +38,7 @@ const processRelationshipValues = (
   config: SanitizedConfig,
   operation: 'read' | 'write',
   validateRelationships: boolean,
+  adapter: MongooseAdapter,
 ) => {
   return items.map((item) => {
     // Handle polymorphic relationships
@@ -45,6 +48,7 @@ const processRelationshipValues = (
         return {
           relationTo: item.relationTo,
           value: convertRelationshipValue({
+            adapter,
             operation,
             relatedCollection,
             validateRelationships,
@@ -60,6 +64,7 @@ const processRelationshipValues = (
       const relatedCollection = config.collections?.find(({ slug }) => slug === field.relationTo)
       if (relatedCollection) {
         return convertRelationshipValue({
+          adapter,
           operation,
           relatedCollection,
           validateRelationships,
@@ -73,11 +78,13 @@ const processRelationshipValues = (
 }
 
 const convertRelationshipValue = ({
+  adapter,
   operation,
   relatedCollection,
   validateRelationships,
   value,
 }: {
+  adapter: MongooseAdapter
   operation: Args['operation']
   relatedCollection: CollectionConfig
   validateRelationships?: boolean
@@ -88,8 +95,16 @@ const convertRelationshipValue = ({
   )
 
   if (operation === 'read') {
-    if (value instanceof Types.ObjectId) {
+    if (isObjectID(value)) {
       return value.toHexString()
+    }
+
+    if (
+      customIDField?.type === 'number' &&
+      typeof value === 'bigint' &&
+      adapter.useBigIntForNumberIDs
+    ) {
+      return Number(value)
     }
 
     return value
@@ -114,6 +129,7 @@ const convertRelationshipValue = ({
 }
 
 const sanitizeRelationship = ({
+  adapter,
   config,
   field,
   locale,
@@ -122,6 +138,7 @@ const sanitizeRelationship = ({
   validateRelationships,
   value,
 }: {
+  adapter: MongooseAdapter
   config: SanitizedConfig
   field: JoinField | RelationshipField | UploadField
   locale?: string
@@ -141,7 +158,7 @@ const sanitizeRelationship = ({
       for (let i = 0; i < value.docs.length; i++) {
         const item = value.docs[i]
 
-        if (item instanceof Types.ObjectId) {
+        if (isObjectID(item)) {
           value.docs[i] = item.toHexString()
         } else if (Array.isArray(field.collection) && item) {
           // Fields here for polymorphic joins cannot be determinted, JSON.parse needed
@@ -173,6 +190,7 @@ const sanitizeRelationship = ({
           return {
             relationTo: val.relationTo,
             value: convertRelationshipValue({
+              adapter,
               operation,
               relatedCollection: relatedCollectionForSingleValue,
               validateRelationships,
@@ -184,6 +202,7 @@ const sanitizeRelationship = ({
 
       if (relatedCollection) {
         return convertRelationshipValue({
+          adapter,
           operation,
           relatedCollection,
           validateRelationships,
@@ -202,6 +221,7 @@ const sanitizeRelationship = ({
       result = {
         relationTo: value.relationTo,
         value: convertRelationshipValue({
+          adapter,
           operation,
           relatedCollection,
           validateRelationships,
@@ -213,6 +233,7 @@ const sanitizeRelationship = ({
   // Handle has one
   else if (relatedCollection) {
     result = convertRelationshipValue({
+      adapter,
       operation,
       relatedCollection,
       validateRelationships,
@@ -284,11 +305,13 @@ const stripFields = ({
   config,
   data,
   fields,
+  parentIsLocalized = false,
   reservedKeys = [],
 }: {
   config: SanitizedConfig
   data: any
   fields: FlattenedField[]
+  parentIsLocalized?: boolean
   reservedKeys?: string[]
 }) => {
   for (const k in data) {
@@ -304,12 +327,14 @@ const stripFields = ({
       continue
     }
 
+    const shouldLocalizeField = fieldShouldBeLocalized({ field, parentIsLocalized })
+
     if (field.type === 'blocks') {
       reservedKeys.push('blockType')
     }
 
     if ('flattenedFields' in field || 'blocks' in field) {
-      if (field.localized && config.localization) {
+      if (shouldLocalizeField && config.localization) {
         for (const localeKey in fieldData) {
           if (!config.localization.localeCodes.some((code) => code === localeKey)) {
             delete fieldData[localeKey]
@@ -319,9 +344,6 @@ const stripFields = ({
           const localeData = fieldData[localeKey]
 
           if (!localeData || typeof localeData !== 'object') {
-            if (field.type === 'blocks') {
-              fieldData[localeKey] = []
-            }
             continue
           }
 
@@ -371,7 +393,13 @@ const stripFields = ({
                 continue
               }
 
-              stripFields({ config, data, fields, reservedKeys })
+              stripFields({
+                config,
+                data,
+                fields,
+                parentIsLocalized: parentIsLocalized || field.localized,
+                reservedKeys,
+              })
             }
 
             if (hasNull) {
@@ -380,7 +408,13 @@ const stripFields = ({
 
             continue
           } else {
-            stripFields({ config, data: localeData, fields: field.flattenedFields, reservedKeys })
+            stripFields({
+              config,
+              data: localeData,
+              fields: field.flattenedFields,
+              parentIsLocalized: parentIsLocalized || field.localized,
+              reservedKeys,
+            })
           }
         }
         continue
@@ -433,7 +467,13 @@ const stripFields = ({
             continue
           }
 
-          stripFields({ config, data, fields, reservedKeys })
+          stripFields({
+            config,
+            data,
+            fields,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            reservedKeys,
+          })
         }
 
         if (hasNull) {
@@ -442,12 +482,22 @@ const stripFields = ({
 
         continue
       } else {
-        stripFields({ config, data: fieldData, fields: field.flattenedFields, reservedKeys })
+        stripFields({
+          config,
+          data: fieldData,
+          fields: field.flattenedFields,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          reservedKeys,
+        })
       }
     }
   }
 }
 
+/**
+ * A function that transforms Payload <-> MongoDB data.
+ * @internal - this function may be removed or receive breaking changes in minor releases.
+ */
 export const transform = ({
   $addToSet,
   $inc,
@@ -492,7 +542,7 @@ export const transform = ({
     data.id = data._id || data.id
     delete data['_id']
 
-    if (data.id instanceof Types.ObjectId) {
+    if (isObjectID(data.id)) {
       data.id = data.id.toHexString()
     }
 
@@ -506,6 +556,7 @@ export const transform = ({
         config,
         data,
         fields: flattenAllFields({ cache: true, fields }),
+        parentIsLocalized: false,
         reservedKeys: ['id', 'globalType'],
       })
     }
@@ -655,6 +706,7 @@ export const transform = ({
                 config,
                 operation,
                 validateRelationships,
+                adapter,
               )
               $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: processedLocaleItems }
             }
@@ -673,6 +725,7 @@ export const transform = ({
             config,
             operation,
             validateRelationships,
+            adapter,
           )
           $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
           delete ref[field.name]
@@ -719,6 +772,7 @@ export const transform = ({
                 config,
                 operation,
                 validateRelationships,
+                adapter,
               )
               $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: processedLocaleItems }
             }
@@ -737,6 +791,7 @@ export const transform = ({
             config,
             operation,
             validateRelationships,
+            adapter,
           )
           $pull[`${parentPath}${field.name}`] = { $in: processedItems }
           delete ref[field.name]
@@ -790,6 +845,7 @@ export const transform = ({
           const value = fieldRef[code]
           if (value) {
             sanitizeRelationship({
+              adapter,
               config,
               field,
               locale: code,
@@ -803,6 +859,7 @@ export const transform = ({
       } else {
         // handle non-localized relationships
         sanitizeRelationship({
+          adapter,
           config,
           field,
           locale: undefined,

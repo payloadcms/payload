@@ -123,7 +123,8 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
-import type { ClientConfig, CreateClientConfigArgs } from './config/client.js'
+import type { ClientConfig } from './config/client.js'
+import type { KVAdapter } from './kv/index.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -199,10 +200,10 @@ export interface GeneratedTypes {
   dbUntyped: {
     defaultIDType: number | string
   }
+  fallbackLocaleUntyped: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
   globalsSelectUntyped: {
     [slug: string]: SelectType
   }
-
   globalsUntyped: {
     [slug: string]: JsonObject
   }
@@ -299,10 +300,16 @@ export type GlobalSlug = StringKeyOf<TypedGlobal>
 
 // @ts-expect-error
 type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
+type ResolveFallbackLocaleType<T> = 'fallbackLocale' extends keyof T
+  ? T['fallbackLocale']
+  : // @ts-expect-error
+    T['fallbackLocaleUntyped']
 // @ts-expect-error
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+
+export type TypedFallbackLocale = ResolveFallbackLocaleType<GeneratedTypes>
 
 /**
  * @todo rename to `User` in 4.0
@@ -548,6 +555,11 @@ export class BasePayload {
   importMap!: ImportMap
 
   jobs = getJobsLocalAPI(this)
+
+  /**
+   * Key Value storage
+   */
+  kv!: KVAdapter
 
   logger!: Logger
 
@@ -814,6 +826,8 @@ export class BasePayload {
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this
 
+    this.kv = this.config.kv.init({ payload: this })
+
     if (this.db?.init) {
       await this.db.init()
     }
@@ -992,9 +1006,13 @@ export const reload = async (
     })
   }
 
-  // Generate component map
+  // Generate import map
   if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
+    // We don't want to throw an error in this case, as it would break the user's frontend.
+    // => just skip it => ignoreResolveError: true
     await generateImportMap(config, {
+      ignoreResolveError: true,
       log: true,
     })
   }
@@ -1090,7 +1108,18 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, !options.importMap, options)
+
+      // Reload the payload instance after a config change (triggered by HMR in development).
+      // The second parameter (false) forces import map regeneration rather than deciding based on options.importMap.
+      //
+      // Why we always regenerate import map: getPayload() may be called from multiple sources (admin panel, frontend, etc.)
+      // that share the same cache but may pass different importMap values. Since call order is unpredictable,
+      // we cannot rely on options.importMap to determine if regeneration is needed.
+      //
+      // Example scenario: If the frontend calls getPayload() without importMap first, followed by the admin
+      // panel calling it with importMap, we'd incorrectly skip generation for the admin panel's needs.
+      // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
+      await reload(config, cached.payload, false, options)
 
       resolve()
     }
@@ -1104,12 +1133,12 @@ export const getPayload = async (
     return cached.payload
   }
 
-  if (!cached.promise) {
-    // no need to await options.config here, as it's already awaited in the BasePayload.init
-    cached.promise = new BasePayload().init(options)
-  }
-
   try {
+    if (!cached.promise) {
+      // no need to await options.config here, as it's already awaited in the BasePayload.init
+      cached.promise = new BasePayload().init(options)
+    }
+
     cached.payload = await cached.promise
 
     if (
@@ -1136,7 +1165,11 @@ export const getPayload = async (
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
-            if ('action' in data && data.action === 'serverComponentChanges') {
+            if (
+              // On Next.js 15, we need to check for data.action. On Next.js 16, we need to check for data.type.
+              data.type === 'serverComponentChanges' ||
+              data.action === 'serverComponentChanges'
+            ) {
               cached.reload = true
             }
           }
@@ -1299,6 +1332,7 @@ export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
 export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
+export { findMigrationDir } from './database/migrations/findMigrationDir.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
 export { getPredefinedMigration } from './database/migrations/getPredefinedMigration.js'
 export { migrate } from './database/migrations/migrate.js'
@@ -1403,6 +1437,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  UnauthorizedError,
   UnverifiedEmail,
   ValidationError,
   ValidationErrorName,
@@ -1597,14 +1632,17 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
+
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export * from './kv/adapters/DatabaseKVAdapter.js'
+export * from './kv/adapters/InMemoryKVAdapter.js'
+export * from './kv/index.js'
 export type {
   CollapsedPreferences,
   CollectionPreferences,

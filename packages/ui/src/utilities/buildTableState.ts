@@ -11,8 +11,8 @@ import type {
   Where,
 } from 'payload'
 
-import { APIError, canAccessAdmin, formatErrors } from 'payload'
-import { isNumber } from 'payload/shared'
+import { APIError, canAccessAdmin, formatErrors, getAccessResults } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
 import { getColumns } from './getColumns.js'
@@ -99,6 +99,9 @@ const buildTableState = async (
     importMap: payload.importMap,
     user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
+
+  const permissions = await getAccessResults({ req })
 
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
@@ -205,9 +208,13 @@ const buildTableState = async (
       collectionSlug,
       columns: columnsFromArgs,
       i18n: req.i18n,
+      permissions,
     }),
     data,
     enableRowSelections,
+    fieldPermissions: Array.isArray(collectionSlug)
+      ? true
+      : permissions.collections[collectionSlug].fields,
     i18n: req.i18n,
     orderableFieldName,
     payload,

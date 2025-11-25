@@ -1,6 +1,7 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { JsonObject, UpdateGlobalVersionArgs } from 'payload'
 
-import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
+import { buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -10,7 +11,7 @@ import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
-export async function updateGlobalVersion<T extends TypeWithID>(
+export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
   this: MongooseAdapter,
   {
     id,

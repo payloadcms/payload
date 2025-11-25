@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.59.1",
+  "version": "3.64.0",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -29,6 +29,11 @@
       "import": "./src/exports/migration-utils.ts",
       "types": "./src/exports/migration-utils.ts",
       "default": "./src/exports/migration-utils.ts"
+    },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
     }
   },
   "main": "./src/index.ts",
@@ -75,6 +80,11 @@
         "import": "./dist/exports/migration-utils.js",
         "types": "./dist/exports/migration-utils.d.ts",
         "default": "./dist/exports/migration-utils.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
       }
     },
     "main": "./dist/index.js",

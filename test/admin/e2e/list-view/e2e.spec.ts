@@ -742,6 +742,33 @@ describe('List View', () => {
       await expect(valueInput).toHaveValue('Test')
     })
 
+    test('should show all documents when equals filter value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      // Wait for filter to be applied
+      await page.waitForTimeout(500)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      const valueInput = whereBuilder.locator('.condition__value >> input')
+      await valueInput.clear()
+
+      // Wait for debounce
+      await page.waitForTimeout(500)
+
+      // Should now show all 2 posts again (not 0 posts)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
@@ -834,27 +861,6 @@ describe('List View', () => {
       await expect(
         condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
       ).toBeHidden()
-    })
-
-    test('should show no results when queryin on a field a user cannot read', async () => {
-      await payload.create({
-        collection: postsCollectionSlug,
-        data: {
-          noReadAccessField: 'test',
-        },
-      })
-
-      await page.goto(postsUrl.list)
-
-      const { whereBuilder } = await addListFilter({
-        page,
-        fieldLabel: 'No Read Access Field',
-        operatorLabel: 'equals',
-        value: 'test',
-      })
-
-      await expect(whereBuilder.locator('.condition__value input')).toBeVisible()
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
 
     test('should properly paginate many documents', async () => {
@@ -1476,12 +1482,12 @@ describe('List View', () => {
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
-      // delete button should be present
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
+      const deleteBtn = page.locator('.delete-documents__toggle')
+      await expect(deleteBtn).toBeVisible()
 
       await page.locator('.row-2 .cell-_select input').check()
 
-      await page.locator('.delete-documents__toggle').click()
+      await deleteBtn.click()
       await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })

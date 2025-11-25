@@ -1,4 +1,5 @@
 export { AccountView } from '../views/Account/index.js'
+export { CreateFirstUserView } from '../views/CreateFirstUser/index.js'
 export {
   type DashboardViewClientProps,
   type DashboardViewServerProps,

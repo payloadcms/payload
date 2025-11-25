@@ -472,11 +472,13 @@ describe('@payloadcms/plugin-search', () => {
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
-        collections: [postsSlug, pagesSlug],
+        collections: [postsSlug],
       }),
     })
 
     expect(endpointRes.status).toBe(200)
+
+    await wait(200)
 
     const { docs: results } = await payload.find({
       collection: 'search',
@@ -533,6 +535,140 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
+  })
+
+  it('should exclude drafts from reindexing by default', async () => {
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page published',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page draft',
+          _status: 'draft',
+        },
+      }),
+    ])
+
+    await wait(200)
+
+    const { totalDocs: totalBeforeReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalBeforeReindex).toBe(1)
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [pagesSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { totalDocs: totalAfterReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalAfterReindex).toBe(totalBeforeReindex)
+
+    const data = await endpointRes.json()
+
+    const totalDocs = 2
+    const nonDrafts = 1
+    expect(data.message).toBe(
+      `Successfully reindexed ${nonDrafts} of ${totalDocs} documents from ${pagesSlug} and skipped ${totalDocs - nonDrafts} drafts.`,
+    )
+  })
+
+  it('should reindex all configured locales', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      locale: 'en',
+      data: {
+        title: 'Test page published',
+        _status: 'published',
+        slug: 'test-en',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'es',
+      data: {
+        _status: 'published',
+        slug: 'test-es',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'de',
+      data: {
+        _status: 'published',
+        slug: 'test-de',
+      },
+    })
+
+    const {
+      docs: [postBeforeReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postBeforeReindex?.slug).not.toBeFalsy()
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [postsSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const {
+      docs: [postAfterReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postAfterReindex?.slug).not.toBeFalsy()
+    expect(postAfterReindex?.slug).toStrictEqual(postBeforeReindex?.slug)
   })
 
   it('should sync trashed documents correctly with search plugin', async () => {

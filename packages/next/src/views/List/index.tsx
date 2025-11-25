@@ -28,6 +28,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
@@ -236,6 +237,7 @@ export const renderListView = async (
       collectionSlug,
       columns: collectionPreferences?.columns,
       i18n,
+      permissions,
     })
 
     const select = collectionConfig.admin.enableListViewSelectAPI
@@ -259,6 +261,7 @@ export const renderListView = async (
           customCellProps,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
           query,
           req,
           select,
@@ -267,6 +270,13 @@ export const renderListView = async (
           viewType,
           where: whereWithMergedSearch,
         }))
+
+        // Enrich documents with correct display status for drafts
+        data = await enrichDocsWithVersionStatus({
+          collectionConfig,
+          data,
+          req,
+        })
       } else {
         data = await req.payload.find({
           collection: collectionSlug,
@@ -285,6 +295,13 @@ export const renderListView = async (
           user,
           where: whereWithMergedSearch,
         })
+
+        // Enrich documents with correct display status for drafts
+        data = await enrichDocsWithVersionStatus({
+          collectionConfig,
+          data,
+          req,
+        })
         ;({ columnState, Table } = renderTable({
           clientCollectionConfig,
           collectionConfig,
@@ -293,6 +310,7 @@ export const renderListView = async (
           data,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
           i18n: req.i18n,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.59.1",
+  "version": "3.64.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -31,6 +31,7 @@
     "build:essentials:force": "pnpm clean:build && turbo build --filter=\"payload...\" --filter=\"@payloadcms/ui\" --filter=\"@payloadcms/next\" --filter=\"@payloadcms/db-mongodb\" --filter=\"@payloadcms/db-postgres\" --filter=\"@payloadcms/richtext-lexical\" --filter=\"@payloadcms/translations\" --filter=\"@payloadcms/plugin-cloud\" --filter=\"@payloadcms/graphql\" --no-cache --force",
     "build:force": "pnpm run build:core:force",
     "build:graphql": "turbo build --filter \"@payloadcms/graphql\"",
+    "build:kv-redis": "turbo build --filter \"@payloadcms/kv-redis\"",
     "build:live-preview": "turbo build --filter \"@payloadcms/live-preview\"",
     "build:live-preview-react": "turbo build --filter \"@payloadcms/live-preview-react\"",
     "build:live-preview-vue": "turbo build --filter \"@payloadcms/live-preview-vue\"",
@@ -42,6 +43,7 @@
     "build:plugin-ecommerce": "turbo build --filter \"@payloadcms/plugin-ecommerce\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-import-export": "turbo build --filter \"@payloadcms/plugin-import-export\"",
+    "build:plugin-mcp": "turbo build --filter \"@payloadcms/plugin-mcp\"",
     "build:plugin-multi-tenant": "turbo build --filter \"@payloadcms/plugin-multi-tenant\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
     "build:plugin-redirects": "turbo build --filter \"@payloadcms/plugin-redirects\"",
@@ -130,17 +132,18 @@
       "eslint --cache --fix"
     ],
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
-    "tsconfig.base.json": "node scripts/reset-tsconfig.js"
+    "tsconfig.base.json": "node scripts/reset-tsconfig.js",
+    "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "15.4.4",
+    "@next/bundle-analyzer": "15.4.7",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
-    "@playwright/test": "1.54.1",
+    "@playwright/test": "1.56.1",
     "@sentry/nextjs": "^8.33.1",
     "@sentry/node": "^8.33.1",
     "@swc-node/register": "1.10.10",
@@ -159,8 +162,8 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.2",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",
@@ -171,12 +174,13 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
-    "next": "15.4.4",
+    "mongoose": "8.15.1",
+    "next": "15.4.7",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",
-    "playwright": "1.54.1",
-    "playwright-core": "1.54.1",
+    "playwright": "1.56.1",
+    "playwright-core": "1.56.1",
     "prettier": "3.5.3",
     "react": "19.1.1",
     "react-dom": "19.1.1",
@@ -190,7 +194,8 @@
     "tstyche": "3.5.0",
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {

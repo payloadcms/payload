@@ -28,6 +28,9 @@ export const categories = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title'),
+    simple: integer('simple_id').references(() => simple.id, {
+      onDelete: 'set null',
+    }),
     hideout_camera1_time1Image: integer('hideout_camera1_time1_image_id').references(
       () => posts.id,
       {
@@ -43,6 +46,7 @@ export const categories = sqliteTable(
     _status: text('_status', { enum: ['draft', 'published'] }).default('draft'),
   },
   (columns) => [
+    index('categories_simple_idx').on(columns.simple),
     uniqueIndex('categories_hideout_camera1_hideout_camera1_time1_image_idx').on(
       columns.hideout_camera1_time1Image,
     ),
@@ -60,6 +64,9 @@ export const _categories_v = sqliteTable(
       onDelete: 'set null',
     }),
     version_title: text('version_title'),
+    version_simple: integer('version_simple_id').references(() => simple.id, {
+      onDelete: 'set null',
+    }),
     version_hideout_camera1_time1Image: integer(
       'version_hideout_camera1_time1_image_id',
     ).references(() => posts.id, {
@@ -84,6 +91,7 @@ export const _categories_v = sqliteTable(
   },
   (columns) => [
     index('_categories_v_parent_idx').on(columns.parent),
+    index('_categories_v_version_version_simple_idx').on(columns.version_simple),
     index('_categories_v_version_hideout_camera1_version_hideout_ca_idx').on(
       columns.version_hideout_camera1_time1Image,
     ),
@@ -103,7 +111,7 @@ export const simple = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     text: text('text'),
-    number: numeric('number'),
+    number: numeric('number', { mode: 'number' }),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -120,7 +128,7 @@ export const simple = sqliteTable(
 export const categories_custom_id = sqliteTable(
   'categories_custom_id',
   {
-    id: numeric('id').primaryKey(),
+    id: numeric('id', { mode: 'number' }).primaryKey(),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -140,7 +148,7 @@ export const _categories_custom_id_v = sqliteTable(
   '_categories_custom_id_v',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    parent: numeric('parent_id').references(() => categories_custom_id.id, {
+    parent: numeric('parent_id', { mode: 'number' }).references(() => categories_custom_id.id, {
       onDelete: 'set null',
     }),
     version_updatedAt: text('version_updated_at').default(
@@ -306,11 +314,15 @@ export const posts = sqliteTable(
     category: integer('category_id').references(() => categories.id, {
       onDelete: 'set null',
     }),
-    categoryCustomID: numeric('category_custom_i_d_id').references(() => categories_custom_id.id, {
-      onDelete: 'set null',
-    }),
+    categoryCustomID: numeric('category_custom_i_d_id', { mode: 'number' }).references(
+      () => categories_custom_id.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
     text: text('text'),
-    number: numeric('number'),
+    number: numeric('number', { mode: 'number' }),
+    numberDefault: numeric('number_default', { mode: 'number' }).default(1),
     testNestedGroup_nestedText1: text('test_nested_group_nested_text1'),
     testNestedGroup_nestedText2: text('test_nested_group_nested_text2'),
     D1_D2_D3_D4: text('d1_d2_d3_d4'),
@@ -361,6 +373,7 @@ export const posts_rels = sqliteTable(
     path: text('path').notNull(),
     locale: text('locale', { enum: ['en', 'es'] }),
     categoriesID: integer('categories_id'),
+    'categories-custom-idID': numeric('categories_custom_id_id', { mode: 'number' }),
     simpleID: integer('simple_id'),
   },
   (columns) => [
@@ -369,6 +382,10 @@ export const posts_rels = sqliteTable(
     index('posts_rels_path_idx').on(columns.path),
     index('posts_rels_locale_idx').on(columns.locale),
     index('posts_rels_categories_id_idx').on(columns.categoriesID, columns.locale),
+    index('posts_rels_categories_custom_id_id_idx').on(
+      columns['categories-custom-idID'],
+      columns.locale,
+    ),
     index('posts_rels_simple_id_idx').on(columns.simpleID, columns.locale),
     foreignKey({
       columns: [columns['parent']],
@@ -379,6 +396,11 @@ export const posts_rels = sqliteTable(
       columns: [columns['categoriesID']],
       foreignColumns: [categories.id],
       name: 'posts_rels_categories_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['categories-custom-idID']],
+      foreignColumns: [categories_custom_id.id],
+      name: 'posts_rels_categories_custom_id_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['simpleID']],
@@ -523,7 +545,7 @@ export const pg_migrations_my_array_my_sub_array_locales = sqliteTable(
       columns.relation3,
       columns._locale,
     ),
-    uniqueIndex('pg_migrations_my_array_my_sub_array_locales_locale_parent_id_unique').on(
+    uniqueIndex('pg_migrations_my_array_my_sub_array_locales_locale_parent_id').on(
       columns._locale,
       columns._parentID,
     ),
@@ -594,7 +616,7 @@ export const pg_migrations_blocks_my_block_locales = sqliteTable(
   },
   (columns) => [
     index('pg_migrations_blocks_my_block_relation6_idx').on(columns.relation6, columns._locale),
-    uniqueIndex('pg_migrations_blocks_my_block_locales_locale_parent_id_unique').on(
+    uniqueIndex('pg_migrations_blocks_my_block_locales_locale_parent_id_uniqu').on(
       columns._locale,
       columns._parentID,
     ),
@@ -688,13 +710,14 @@ export const _pg_migrations_v_version_my_array_my_sub_array_locales = sqliteTabl
       columns.relation3,
       columns._locale,
     ),
-    uniqueIndex(
-      '_pg_migrations_v_version_my_array_my_sub_array_locales_locale_parent_id_unique',
-    ).on(columns._locale, columns._parentID),
+    uniqueIndex('_pg_migrations_v_version_my_array_my_sub_array_locales_local').on(
+      columns._locale,
+      columns._parentID,
+    ),
     foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v_version_my_array_my_sub_array.id],
-      name: '_pg_migrations_v_version_my_array_my_sub_array_locales_parent_id_fk',
+      name: '_pg_migrations_v_version_my_array_my_sub_array_locales_pa_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -760,7 +783,7 @@ export const _pg_migrations_v_blocks_my_block_locales = sqliteTable(
   },
   (columns) => [
     index('_pg_migrations_v_blocks_my_block_relation6_idx').on(columns.relation6, columns._locale),
-    uniqueIndex('_pg_migrations_v_blocks_my_block_locales_locale_parent_id_unique').on(
+    uniqueIndex('_pg_migrations_v_blocks_my_block_locales_locale_parent_id_un').on(
       columns._locale,
       columns._parentID,
     ),
@@ -1744,7 +1767,7 @@ export const users = sqliteTable(
     ),
     salt: text('salt'),
     hash: text('hash'),
-    loginAttempts: numeric('login_attempts').default('0'),
+    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
     lockUntil: text('lock_until').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
   (columns) => [
@@ -1783,7 +1806,7 @@ export const payload_locked_documents_rels = sqliteTable(
     noTimeStampsID: integer('no_time_stamps_id'),
     categoriesID: integer('categories_id'),
     simpleID: integer('simple_id'),
-    'categories-custom-idID': numeric('categories_custom_id_id'),
+    'categories-custom-idID': numeric('categories_custom_id_id', { mode: 'number' }),
     postsID: integer('posts_id'),
     'error-on-unnamed-fieldsID': integer('error_on_unnamed_fields_id'),
     'default-valuesID': integer('default_values_id'),
@@ -2011,7 +2034,7 @@ export const payload_migrations = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     name: text('name'),
-    batch: numeric('batch'),
+    batch: numeric('batch', { mode: 'number' }),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -2167,6 +2190,11 @@ export const virtual_relation_global = sqliteTable(
 
 export const relations_no_time_stamps = relations(no_time_stamps, () => ({}))
 export const relations_categories = relations(categories, ({ one }) => ({
+  simple: one(simple, {
+    fields: [categories.simple],
+    references: [simple.id],
+    relationName: 'simple',
+  }),
   hideout_camera1_time1Image: one(posts, {
     fields: [categories.hideout_camera1_time1Image],
     references: [posts.id],
@@ -2178,6 +2206,11 @@ export const relations__categories_v = relations(_categories_v, ({ one }) => ({
     fields: [_categories_v.parent],
     references: [categories.id],
     relationName: 'parent',
+  }),
+  version_simple: one(simple, {
+    fields: [_categories_v.version_simple],
+    references: [simple.id],
+    relationName: 'version_simple',
   }),
   version_hideout_camera1_time1Image: one(posts, {
     fields: [_categories_v.version_hideout_camera1_time1Image],
@@ -2274,6 +2307,11 @@ export const relations_posts_rels = relations(posts_rels, ({ one }) => ({
     fields: [posts_rels.categoriesID],
     references: [categories.id],
     relationName: 'categories',
+  }),
+  'categories-custom-idID': one(categories_custom_id, {
+    fields: [posts_rels['categories-custom-idID']],
+    references: [categories_custom_id.id],
+    relationName: 'categories-custom-id',
   }),
   simpleID: one(simple, {
     fields: [posts_rels.simpleID],

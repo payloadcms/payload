@@ -89,4 +89,4 @@ export type NextAppDetails = {
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
-export type StorageAdapterType = 'localDisk' | 'vercelBlobStorage'
+export type StorageAdapterType = 'localDisk' | 'r2Storage' | 'vercelBlobStorage'

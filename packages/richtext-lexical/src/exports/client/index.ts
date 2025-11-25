@@ -135,6 +135,12 @@ export {
   InlineBlockNode,
 } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
+export {
+  $createHorizontalRuleNode,
+  $isHorizontalRuleNode,
+  HorizontalRuleNode,
+} from '../../features/horizontalRule/client/nodes/HorizontalRuleNode.js'
+
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
 export { useLexicalDocumentDrawer } from '../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 export { useLexicalDrawer } from '../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -155,4 +161,4 @@ export { CodeComponent } from '../../features/blocks/premade/CodeBlock/Component
 export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock/Component/Block.js'
 
 export { RenderLexical } from '../../field/RenderLexical/index.js'
-export { buildEditorState } from '../../utilities/buildEditorState.js'
+export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'
