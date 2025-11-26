@@ -1,6 +1,6 @@
 import type {
+  JsonObject,
   SanitizedGlobalConfig,
-  TypeWithID,
   TypeWithVersion,
   UpdateGlobalVersionArgs,
 } from 'payload'
@@ -14,7 +14,7 @@ import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function updateGlobalVersion<T extends TypeWithID>(
+export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     id,
@@ -27,7 +27,6 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
 ): Promise<TypeWithVersion<T>> {
-  const db = await getTransaction(this, req)
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )
@@ -46,6 +45,8 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     tableName,
     where: whereToUse,
   })
+
+  const db = await getTransaction(this, req)
 
   const result = await upsertRow<TypeWithVersion<T>>({
     id,

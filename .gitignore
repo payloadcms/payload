@@ -11,6 +11,7 @@ AGENTS.local.md
 CLAUDE.local.md
 .claude/commands/*.local.md
 .claude/artifacts
+.worktrees/
 
 # Custom actions
 !.github/actions/**/dist
@@ -341,6 +342,7 @@ test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
 /media-without-delete-access
+/media-documents
 
 
 licenses.csv

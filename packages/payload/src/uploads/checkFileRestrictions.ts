@@ -4,6 +4,7 @@ import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
+import { validatePDF } from '../utilities/validatePDF.js'
 import { detectSvgFromXml } from './detectSvgFromXml.js'
 
 /**
@@ -50,6 +51,7 @@ export const checkFileRestrictions = async ({
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
+  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -63,6 +65,14 @@ export const checkFileRestrictions = async ({
       ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
+  const expectsDetectableType = configMimeTypes.some(
+    (type) =>
+      type.startsWith('image/') ||
+      type === 'application/pdf' ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/'),
+  )
+
   // Skip validation if `allowRestrictedFileTypes` is true
   if (allowRestrictedFileTypes) {
     return
@@ -71,6 +81,10 @@ export const checkFileRestrictions = async ({
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
     let detected = await fileTypeFromBuffer(file.data)
+
+    if (!detected && expectsDetectableType && !useTempFiles) {
+      errors.push(`File buffer returned no detectable MIME type.`)
+    }
 
     // Handle SVG files that are detected as XML due to <?xml declarations
     if (
@@ -84,6 +98,13 @@ export const checkFileRestrictions = async ({
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
+
+    if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
+      const isValidPDF = validatePDF(file?.data)
+      if (!isValidPDF) {
+        errors.push('Invalid PDF file.')
+      }
+    }
 
     if (detected && !passesMimeTypeCheck) {
       errors.push(`Invalid MIME type: ${detected.mime}.`)

@@ -16,7 +16,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   this: MongooseAdapter,
   {
     global: globalSlug,
-    limit,
+    limit = 0,
     locale,
     page,
     pagination,
@@ -30,13 +30,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
 
   const versionFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
-
-  const session = await getSession(this, req)
-  const options: QueryOptions = {
-    limit,
-    session,
-    skip,
-  }
 
   let hasNearConstraint = false
 
@@ -63,6 +56,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
+    limit,
+    session,
+    skip,
+  }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -101,7 +101,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     }
   }
 
-  if (limit && limit >= 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
 

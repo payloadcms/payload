@@ -468,7 +468,9 @@ export const frTranslations: DefaultTranslationsObject = {
     copyTo: 'Copier à',
     copyToLocale: 'Copier vers le lieu',
     localeToPublish: 'Locale à publier',
+    selectedLocales: 'Langues sélectionnées',
     selectLocaleToCopy: 'Sélectionnez la locale à copier',
+    selectLocaleToDuplicate: 'Sélectionnez les paramètres régionaux à dupliquer',
   },
   operators: {
     contains: 'contient',
@@ -581,6 +583,7 @@ export const frTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actuellement en train de regarder',
     currentPublishedVersion: 'Version Publiée Actuelle',
     draft: 'Brouillon',
+    draftHasPublishedVersion: 'Brouillon (a une version publiée)',
     draftSavedSuccessfully: 'Brouillon enregistré avec succès.',
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     modifiedOnly: 'Modifié uniquement',

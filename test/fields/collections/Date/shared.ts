@@ -24,4 +24,11 @@ export const dateDoc: Partial<DateField> = {
       dayAndTime_tz: 'Europe/Berlin',
     },
   ],
+  timezoneGroup: {
+    dayAndTime: '2025-01-31T09:00:00.000Z',
+    dayAndTime_tz: 'Europe/Berlin',
+  },
+  dayAndTimeWithTimezoneReadOnly: '2027-08-12T01:00:00.000+00:00',
+  dayAndTimeWithTimezoneReadOnly_tz: 'Asia/Tokyo',
+  dayAndTimeWithTimezoneFixed: '2025-10-29T20:00:00.000+00:00',
 }

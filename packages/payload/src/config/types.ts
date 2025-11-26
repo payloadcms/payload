@@ -11,7 +11,7 @@ import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
-import type { DestinationStream, Level, pino } from 'pino'
+import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -43,8 +43,10 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  DefaultDocumentIDType,
   FlattenedBlock,
   JobsConfig,
+  KVAdapterResult,
   Payload,
   RequestContext,
   SelectField,
@@ -313,7 +315,7 @@ export type AccessArgs<TData = any> = {
    */
   data?: TData
   /** ID of the resource being accessed */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
@@ -439,7 +441,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezonesConfig = {
+export type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
@@ -1021,6 +1023,17 @@ export type Config = {
        * @default 5
        */
       limit?: number
+      /**
+       * The position of the toast on the screen.
+       * @default 'bottom-right'
+       */
+      position?:
+        | 'bottom-center'
+        | 'bottom-left'
+        | 'bottom-right'
+        | 'top-center'
+        | 'top-left'
+        | 'top-right'
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
@@ -1182,6 +1195,15 @@ export type Config = {
    */
   jobs?: JobsConfig
   /**
+   * Pass in a KV adapter for use on this project.
+   * @default `DatabaseKVAdapter` from:
+   * ```ts
+   * import { createDatabaseKVAdapter } from 'payload'
+   * createDatabaseKVAdapter()
+   * ```
+   */
+  kv?: KVAdapterResult
+  /**
    * Translate your content to different languages/locales.
    *
    * @default false // disable localization
@@ -1211,7 +1233,7 @@ export type Config = {
    *
    * ```
    */
-  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+  logger?: 'sync' | { destination?: DestinationStream; options: LoggerOptions } | PayloadLogger
 
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.

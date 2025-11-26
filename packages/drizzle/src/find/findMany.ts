@@ -37,7 +37,6 @@ export const findMany = async function find({
   versions,
   where: whereArg,
 }: Args) {
-  const db = await getTransaction(adapter, req)
   let limit = limitArg
   let totalDocs: number
   let totalPages: number
@@ -95,6 +94,8 @@ export const findMany = async function find({
       }
     }
   }
+
+  const db = await getTransaction(adapter, req)
 
   const selectDistinctResult = await selectDistinct({
     adapter,

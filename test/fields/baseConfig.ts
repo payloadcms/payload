@@ -41,7 +41,7 @@ import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
 import { seed } from './seed.js'
 
-export const collectionSlugs: CollectionConfig[] = [
+export const collections: CollectionConfig[] = [
   {
     slug: 'users',
     admin: {
@@ -92,7 +92,7 @@ export const collectionSlugs: CollectionConfig[] = [
 ]
 
 export const baseConfig: Partial<Config> = {
-  collections: collectionSlugs,
+  collections,
   blocks: [
     {
       slug: 'ConfigBlockTest',
@@ -148,6 +148,7 @@ export const baseConfig: Partial<Config> = {
       supportedTimezones: ({ defaultTimezones }) => [
         ...defaultTimezones,
         { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+        { label: 'Custom UTC', value: 'UTC' },
       ],
       defaultTimezone: 'America/Monterrey',
     },

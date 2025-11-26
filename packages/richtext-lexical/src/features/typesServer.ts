@@ -8,9 +8,9 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
-  Config,
   Field,
   FieldSchemaMap,
+  ImportMapGenerators,
   JsonObject,
   PayloadComponent,
   PayloadRequest,
@@ -20,6 +20,7 @@ import type {
   RichTextField,
   RichTextHooks,
   SanitizedConfig,
+  TypedFallbackLocale,
   ValidateOptions,
   ValidationFieldError,
 } from 'payload'
@@ -121,7 +122,7 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    */
   depth: number
   draft: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   /**
    *  Only available in `afterRead` field hooks.
    */
@@ -294,8 +295,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     | {
         [key: string]: PayloadComponent
       }
-    // @ts-expect-error - TODO: fix this
-    | Config['admin']['importMap']['generators'][0]
+    | ImportMapGenerators[0]
     | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: (args: {

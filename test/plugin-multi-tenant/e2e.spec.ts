@@ -9,7 +9,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  changeLocale,
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
@@ -43,7 +48,7 @@ test.describe('Multi Tenant', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit, payload: payloadFromInit } =
+    const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
@@ -56,14 +61,14 @@ test.describe('Multi Tenant', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
     await reInitializeDB({
       serverURL,
       snapshotKey: 'multiTenant',
     })
     if (seed) {
       await seed(payload as unknown as BasePayload)
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+      await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
     }
   })
 
@@ -71,9 +76,9 @@ test.describe('Multi Tenant', () => {
     test.describe('Tenants', () => {
       test('should show all tenants when tenant selector is empty', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await clearTenantFilter({ page })
@@ -98,15 +103,15 @@ test.describe('Multi Tenant', () => {
       })
       test('should show filtered tenants when tenant selector is set', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await setTenantFilter({
-          urlUtil: tenantsURL,
           page,
           tenant: 'Blue Dog',
+          urlUtil: tenantsURL,
         })
 
         await expect(
@@ -125,9 +130,9 @@ test.describe('Multi Tenant', () => {
     test.describe('Tenant Assigned Documents', () => {
       test('should show all tenant items when tenant selector is empty', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await page.goto(menuItemsURL.list)
@@ -146,15 +151,15 @@ test.describe('Multi Tenant', () => {
       })
       test('should show filtered tenant items when tenant selector is set', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await setTenantFilter({
-          urlUtil: menuItemsURL,
           page,
           tenant: 'Blue Dog',
+          urlUtil: menuItemsURL,
         })
 
         await expect(
@@ -170,9 +175,9 @@ test.describe('Multi Tenant', () => {
       })
       test('should show public tenant items to super admins', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await page.goto(menuItemsURL.list)
@@ -186,9 +191,9 @@ test.describe('Multi Tenant', () => {
       })
       test('should not show public tenant items to users with assigned tenants', async () => {
         await loginClientSide({
+          data: credentials.owner,
           page,
           serverURL,
-          data: credentials.owner,
         })
 
         await page.goto(menuItemsURL.list)
@@ -205,9 +210,9 @@ test.describe('Multi Tenant', () => {
     test.describe('Users', () => {
       test('should show all users when tenant selector is empty', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await page.goto(usersURL.list)
@@ -232,15 +237,15 @@ test.describe('Multi Tenant', () => {
 
       test('should show only tenant users when tenant selector is empty', async () => {
         await loginClientSide({
+          data: credentials.admin,
           page,
           serverURL,
-          data: credentials.admin,
         })
 
         await setTenantFilter({
-          urlUtil: usersURL,
           page,
           tenant: 'Blue Dog',
+          urlUtil: usersURL,
         })
 
         await expect(
@@ -260,22 +265,50 @@ test.describe('Multi Tenant', () => {
         ).toBeHidden()
       })
     })
+
+    test('should show correct filtered localized data', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+      })
+
+      await changeLocale(page, 'es')
+
+      await setTenantFilter({
+        page,
+        tenant: 'Anchor Bar',
+      })
+
+      await page.goto(menuItemsURL.list)
+
+      await expect(
+        page.locator('.collection-list .table .cell-localizedName', {
+          hasText: 'Popcorn EN',
+        }),
+      ).toBeVisible()
+    })
   })
 
   test.describe('Documents', () => {
     test('should set tenant upon entering document', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(menuItemsURL.list)
       await clearTenantFilter({ page })
 
       await goToListDoc({
-        page,
         cellClass: '.cell-name',
+        page,
         textToMatch: 'Spicy Mac',
         urlUtil: menuItemsURL,
       })
@@ -284,8 +317,8 @@ test.describe('Multi Tenant', () => {
       await expect
         .poll(async () => {
           return await getSelectInputValue<false>({
-            selectLocator: page.locator('.tenant-selector'),
             multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
           })
         })
         .toBe('Blue Dog')
@@ -293,26 +326,26 @@ test.describe('Multi Tenant', () => {
 
     test('should allow tenant switching cancellation', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(menuItemsURL.list)
       await clearTenantFilter({ page })
 
       await goToListDoc({
-        page,
         cellClass: '.cell-name',
+        page,
         textToMatch: 'Spicy Mac',
         urlUtil: menuItemsURL,
       })
 
       await selectDocumentTenant({
-        page,
-        tenant: 'Steel Cat',
         action: 'cancel',
+        page,
         payload,
+        tenant: 'Steel Cat',
       })
 
       await expect(page.locator('#action-save')).toBeDisabled()
@@ -327,17 +360,17 @@ test.describe('Multi Tenant', () => {
 
     test('should allow tenant switching confirmation', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(menuItemsURL.list)
       await clearTenantFilter({ page })
 
       await goToListDoc({
-        page,
         cellClass: '.cell-name',
+        page,
         textToMatch: 'Spicy Mac',
         urlUtil: menuItemsURL,
       })
@@ -353,9 +386,9 @@ test.describe('Multi Tenant', () => {
 
     test('should filter internal links in Lexical editor', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
       await page.goto(menuItemsURL.create)
       await selectDocumentTenant({
@@ -387,9 +420,9 @@ test.describe('Multi Tenant', () => {
   test.describe('Globals', () => {
     test('should redirect list view to edit view', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
       await page.goto(globalMenuURL.list)
       await expect(page.locator('.collection-edit')).toBeVisible()
@@ -397,14 +430,14 @@ test.describe('Multi Tenant', () => {
 
     test('should redirect from create to edit view when tenant already has content', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
       await setTenantFilter({
-        urlUtil: tenantsURL,
         page,
         tenant: 'Blue Dog',
+        urlUtil: tenantsURL,
       })
       await page.goto(globalMenuURL.list)
       await expect(page.locator('.collection-edit')).toBeVisible()
@@ -413,15 +446,15 @@ test.describe('Multi Tenant', () => {
 
     test('should prompt leave without saving changes modal when switching tenants', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await setTenantFilter({
-        urlUtil: tenantsURL,
         page,
         tenant: 'Blue Dog',
+        urlUtil: tenantsURL,
       })
 
       await page.goto(globalMenuURL.create)
@@ -447,8 +480,8 @@ test.describe('Multi Tenant', () => {
       await expect
         .poll(async () => {
           return await getSelectInputValue({
-            selectLocator: page.locator('.tenant-selector'),
             multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
           })
         })
         .toBe('Steel Cat')
@@ -456,9 +489,9 @@ test.describe('Multi Tenant', () => {
 
     test('should navigate to globals with autosave enabled', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
       await page.goto(tenantsURL.list)
       await clearTenantFilter({ page })
@@ -486,9 +519,9 @@ test.describe('Multi Tenant', () => {
   test.describe('Tenant Selector', () => {
     test('should populate tenant selector on login', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(tenantsURL.list)
@@ -502,15 +535,15 @@ test.describe('Multi Tenant', () => {
 
     test('should populate the tenant selector after logout with 1 tenant user', async () => {
       await loginClientSide({
+        data: credentials.blueDog,
         page,
         serverURL,
-        data: credentials.blueDog,
       })
 
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(tenantsURL.list)
@@ -524,9 +557,9 @@ test.describe('Multi Tenant', () => {
 
     test('should show all tenants for userHasAccessToAllTenants users', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(tenantsURL.list)
@@ -540,9 +573,9 @@ test.describe('Multi Tenant', () => {
 
     test('should only show users assigned tenants', async () => {
       await loginClientSide({
+        data: credentials.owner,
         page,
         serverURL,
-        data: credentials.owner,
       })
 
       await page.goto(tenantsURL.list)
@@ -556,9 +589,9 @@ test.describe('Multi Tenant', () => {
 
     test('should not show public tenants to users with assigned tenants', async () => {
       await loginClientSide({
+        data: credentials.owner,
         page,
         serverURL,
-        data: credentials.owner,
       })
 
       await page.goto(tenantsURL.list)
@@ -573,10 +606,11 @@ test.describe('Multi Tenant', () => {
 
     test('should update the tenant name in the selector when editing a tenant', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
+      await wait(1000)
 
       await goToListDoc({
         cellClass: '.cell-name',
@@ -584,12 +618,18 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Blue Dog',
         urlUtil: tenantsURL,
       })
+      await wait(1000)
 
       await expect(page.locator('#field-name')).toBeVisible()
       await page.locator('#field-name').fill('Red Dog')
+      await wait(1000)
+
       await saveDocAndAssert(page)
+      await wait(1000)
 
       await page.goto(tenantsURL.list)
+      // Wait for backend tenant cache to update after save operation
+      await wait(1000)
 
       // Check the tenant selector
       await expect
@@ -597,6 +637,7 @@ test.describe('Multi Tenant', () => {
           return (await getTenantOptions({ page })).sort()
         })
         .toEqual(['Red Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
+      await wait(1000)
 
       await goToListDoc({
         cellClass: '.cell-name',
@@ -604,12 +645,18 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Red Dog',
         urlUtil: tenantsURL,
       })
+      await wait(1000)
 
       // Change the tenant back to the original name
       await page.locator('#field-name').fill('Blue Dog')
+      await wait(1000)
+
       await saveDocAndAssert(page)
+      await wait(1000)
 
       await page.goto(tenantsURL.list)
+      // Wait for backend tenant cache to update after save operation
+      await wait(1000)
 
       await expect
         .poll(async () => {
@@ -620,9 +667,9 @@ test.describe('Multi Tenant', () => {
 
     test('should add tenant to the selector when creating a new tenant', async () => {
       await loginClientSide({
+        data: credentials.admin,
         page,
         serverURL,
-        data: credentials.admin,
       })
 
       await page.goto(tenantsURL.create)
@@ -685,10 +732,10 @@ async function openAssignTenantModal({
 }
 
 async function selectDocumentTenant({
-  page,
-  tenant,
   action = 'confirm',
+  page,
   payload,
+  tenant,
 }: {
   action?: 'cancel' | 'confirm'
   page: Page
@@ -698,9 +745,9 @@ async function selectDocumentTenant({
   await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
-    selectLocator: page.locator('.tenantField'),
-    option: tenant,
     multiSelect: false,
+    option: tenant,
+    selectLocator: page.locator('.tenantField'),
   })
 
   const assignTenantModal = page.locator('#assign-tenant-field-modal')
@@ -744,14 +791,17 @@ async function setTenantFilter({
 }: {
   page: Page
   tenant: string
-  urlUtil: AdminUrlUtil
+  urlUtil?: AdminUrlUtil
 }): Promise<void> {
-  await page.goto(urlUtil.list)
+  if (urlUtil) {
+    await page.goto(urlUtil.list)
+  }
+
   await openNav(page)
   await selectInput({
-    selectLocator: page.locator('.tenant-selector'),
-    option: tenant,
     multiSelect: false,
+    option: tenant,
+    selectLocator: page.locator('.tenant-selector'),
   })
 }
 
@@ -764,9 +814,9 @@ async function switchGlobalDocTenant({
 }): Promise<void> {
   await openNav(page)
   await selectInput({
-    selectLocator: page.locator('.tenant-selector'),
-    option: tenant,
     multiSelect: false,
+    option: tenant,
+    selectLocator: page.locator('.tenant-selector'),
   })
 }
 

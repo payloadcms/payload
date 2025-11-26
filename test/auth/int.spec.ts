@@ -1583,5 +1583,154 @@ describe('Auth', () => {
 
       expect(user2.docs[0]?.sessions).toHaveLength(1)
     })
+
+    it('should not update updatedAt when creating a session', async () => {
+      // Create a user
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.updatedAt.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const originalUpdatedAt = testUser.updatedAt
+
+      // Wait a moment to ensure timestamps would differ if updated
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Login to create a session
+      await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterLogin?.updatedAt).toEqual(originalUpdatedAt)
+      expect(Array.isArray(userAfterLogin?.sessions)).toBeTruthy()
+      expect(userAfterLogin?.sessions?.length).toBeGreaterThan(0)
+    })
+
+    it('should not update updatedAt when logging out', async () => {
+      // Create and login
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.logout.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      const updatedAtAfterLogin = userAfterLogin?.updatedAt
+
+      // Wait a moment
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Logout
+      await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterLogout = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterLogout?.updatedAt).toEqual(updatedAtAfterLogin)
+    })
+
+    it('should not update updatedAt when refreshing a session', async () => {
+      // Create and login
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.refresh.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      const updatedAtAfterLogin = userAfterLogin?.updatedAt
+
+      // Wait a moment
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Refresh token
+      await restClient.POST(`/${slug}/refresh-token`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterRefresh = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterRefresh?.updatedAt).toEqual(updatedAtAfterLogin)
+    })
   })
 })

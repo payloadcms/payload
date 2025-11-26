@@ -461,7 +461,9 @@ export const roTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiați în',
     copyToLocale: 'Copiați în localizare',
     localeToPublish: 'Localizare pentru publicare',
+    selectedLocales: 'Locații selectate',
     selectLocaleToCopy: 'Selectați localizarea pentru copiere',
+    selectLocaleToDuplicate: 'Selectați localizările pentru duplicare',
   },
   operators: {
     contains: 'conține',
@@ -575,6 +577,7 @@ export const roTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Vizualizare curentă',
     currentPublishedVersion: 'Versiunea Publicată Curentă',
     draft: 'Proiect',
+    draftHasPublishedVersion: 'Proiect (are versiune publicată)',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
     modifiedOnly: 'Modificat doar',

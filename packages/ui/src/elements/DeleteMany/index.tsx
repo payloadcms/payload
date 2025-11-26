@@ -230,6 +230,7 @@ export function DeleteMany_v4({
           {
             limit: 0,
             locale,
+            select: {},
             where: mergeListSearchAndWhere({
               collectionConfig,
               search,
