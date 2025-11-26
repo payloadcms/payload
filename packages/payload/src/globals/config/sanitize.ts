@@ -11,7 +11,6 @@ import { traverseForLocalizedFields } from '../../utilities/traverseForLocalized
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
-
 export const sanitizeGlobal = async (
   config: Config,
   global: GlobalConfig,

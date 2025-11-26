@@ -27,6 +27,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     draft,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
+    publishAllLocales,
     publishSpecificLocale,
     publishAllLocales,
     req,
