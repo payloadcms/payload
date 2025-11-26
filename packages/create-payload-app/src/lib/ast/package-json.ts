@@ -1,15 +1,16 @@
 import * as fs from 'fs'
 
-import type { DatabaseAdapter } from './types.js'
+import type { DatabaseAdapter, StorageAdapter } from './types.js'
 
 import { debug } from '../../utils/log.js'
-import { getDbPackageName } from './adapter-config.js'
-import { ALL_DATABASE_ADAPTERS } from './types.js'
+import { getDbPackageName, getStoragePackageName } from './adapter-config.js'
+import { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './types.js'
 
 type PackageJsonTransformOptions = {
   databaseAdapter?: DatabaseAdapter
   packageName?: string
   removeSharp?: boolean
+  storageAdapter?: StorageAdapter
 }
 
 type PackageJsonStructure = {
@@ -78,6 +79,38 @@ function transformPackageJson(
     transformed.dependencies[dbAdapterPackageName] = payloadVersion
 
     debug(`[AST] Added adapter package: ${dbAdapterPackageName}`)
+  }
+
+  // Update storage adapter
+  if (options.storageAdapter) {
+    debug(`[AST] Updating package.json storage adapter to: ${options.storageAdapter}`)
+
+    transformed.dependencies = { ...transformed.dependencies }
+
+    const removedAdapters: string[] = []
+    ALL_STORAGE_ADAPTERS.forEach((adapter) => {
+      const pkgName = getStoragePackageName(adapter)
+      if (pkgName && transformed.dependencies![pkgName]) {
+        removedAdapters.push(pkgName)
+      }
+      if (pkgName) {
+        delete transformed.dependencies![pkgName]
+      }
+    })
+
+    if (removedAdapters.length > 0) {
+      debug(`[AST] Removed old storage adapter packages: ${removedAdapters.join(', ')}`)
+    }
+
+    // Add new storage adapter (if not localDisk)
+    const storagePackageName = getStoragePackageName(options.storageAdapter)
+    if (storagePackageName) {
+      const payloadVersion = transformed.dependencies?.payload || '^3.0.0'
+      transformed.dependencies[storagePackageName] = payloadVersion
+      debug(`[AST] Added storage adapter package: ${storagePackageName}`)
+    } else {
+      debug(`[AST] Storage adapter is localDisk, no package needed`)
+    }
   }
 
   // Remove sharp

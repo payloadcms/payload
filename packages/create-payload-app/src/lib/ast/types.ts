@@ -107,14 +107,17 @@ export const ALL_DATABASE_ADAPTERS = [
   'd1-sqlite',
 ] as const
 
-export type StorageAdapter =
-  | 'azureStorage'
-  | 'gcsStorage'
-  | 'localDisk'
-  | 'r2Storage'
-  | 's3Storage'
-  | 'uploadthingStorage'
-  | 'vercelBlobStorage'
+export const ALL_STORAGE_ADAPTERS = [
+  'azureStorage',
+  'gcsStorage',
+  'localDisk',
+  'r2Storage',
+  's3Storage',
+  'uploadthingStorage',
+  'vercelBlobStorage',
+] as const
+
+export type StorageAdapter = (typeof ALL_STORAGE_ADAPTERS)[number]
 
 export type TransformOptions = {
   databaseAdapter?: {

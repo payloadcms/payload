@@ -57,6 +57,7 @@ export async function configurePayloadConfig(args: {
         databaseAdapter: mapDbType(args.dbType),
         packageName: args.packageJsonName,
         removeSharp: args.sharp === false,
+        storageAdapter: args.storageAdapter ? mapStorageAdapter(args.storageAdapter) : undefined,
       })
     } catch (err: unknown) {
       warning(`Unable to configure Payload in package.json`)

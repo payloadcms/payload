@@ -279,32 +279,34 @@ export function addDatabaseAdapter({
 
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
 
-  // Determine insert position before removing existing property
-  let insertIndex = 0
+  const newDbCode = `db: ${config.configTemplate(envVarName)}`
+
   if (dbProperty) {
-    // Preserve position of existing db property
-    const allProperties = objLiteral.getProperties()
-    insertIndex = allProperties.indexOf(dbProperty)
-    debug(`[AST] Replacing db property at index ${insertIndex}`)
-    dbProperty.remove()
+    // Replace existing db property
+    // NOTE: Using replaceWithText() instead of remove() + insertPropertyAssignment()
+    // to avoid double comma issues. When remove() is called, ts-morph doesn't always
+    // clean up trailing commas correctly, which can result in syntax like "},," when
+    // inserting a new property at that position. replaceWithText() preserves the
+    // surrounding punctuation correctly.
+    debug(`[AST] Replacing existing db property`)
+    dbProperty.replaceWithText(newDbCode)
     modifications.push({
-      type: 'property-removed',
-      description: `Removed existing db property`,
+      type: 'property-added',
+      description: `Replaced db property with ${adapter} adapter`,
     })
   } else {
     // No existing db property - insert at end
-    insertIndex = objLiteral.getProperties().length
+    const insertIndex = objLiteral.getProperties().length
     debug(`[AST] Adding db property at index ${insertIndex}`)
+    objLiteral.insertPropertyAssignment(insertIndex, {
+      name: 'db',
+      initializer: config.configTemplate(envVarName),
+    })
+    modifications.push({
+      type: 'property-added',
+      description: `Added db property with ${adapter} adapter`,
+    })
   }
-
-  objLiteral.insertPropertyAssignment(insertIndex, {
-    name: 'db',
-    initializer: config.configTemplate(envVarName),
-  })
-  modifications.push({
-    type: 'property-added',
-    description: `Added db property with ${adapter} adapter`,
-  })
 
   debug(`[AST] ✓ Database adapter ${adapter} added successfully`)
 
@@ -620,6 +622,10 @@ export async function writeTransformedFile(
 
   // Get file path and save to disk
   const filePath = sourceFile.getFilePath()
+
+  // Format with ts-morph before saving (fixes trailing commas, indentation)
+  debug('[AST] Formatting with ts-morph')
+  sourceFile.formatText()
 
   // Write file
   debug('[AST] Writing file to disk')
