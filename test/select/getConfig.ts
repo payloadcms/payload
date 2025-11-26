@@ -72,6 +72,9 @@ export const getConfig: () => Partial<Config> = () => ({
   globals: [
     {
       slug: 'global-post',
+      versions: {
+        drafts: true,
+      },
       fields: [
         {
           name: 'text',

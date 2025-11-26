@@ -24,6 +24,7 @@ import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/inde
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -140,6 +141,17 @@ export const findByIDOperation = async <
       req,
     })
 
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      draftEnabled &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       draftsEnabled: draftEnabled,
@@ -148,7 +160,7 @@ export const findByIDOperation = async <
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
-      select,
+      select: dbSelect,
       where: fullWhere,
     }
 

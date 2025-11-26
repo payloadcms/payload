@@ -95,11 +95,21 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
+    let dbSelect = select
+
+    if (
+      globalConfig.versions?.drafts &&
+      draftEnabled &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
     const docFromDB = await req.payload.db.findGlobal({
       slug,
       locale: locale!,
       req,
-      select,
+      select: dbSelect,
       where: overrideAccess ? undefined : (accessResult as Where),
     })
 
