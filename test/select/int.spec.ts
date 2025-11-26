@@ -1674,7 +1674,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(res_2.text).toBe('published')
+      expect(res_2).toStrictEqual({
+        text: 'published',
+        id: res_2.id,
+      })
     })
 
     it('should create versions with complete data when updating with select', async () => {
