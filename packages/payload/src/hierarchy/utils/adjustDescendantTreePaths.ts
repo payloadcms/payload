@@ -1,13 +1,10 @@
-import type { Document } from '../../types/index.js'
+import type { HierarchyDataT } from '../types.js'
 
 type AdjustAffectedTreePathsArgs = {
-  affectedDoc: Document
+  doc: HierarchyDataT
   fieldIsLocalized: boolean
   localeCodes?: string[]
-  newDoc: Document
-  previousDocWithLocales: Document
-  slugPathFieldName: string
-  titlePathFieldName: string
+  parentDoc: HierarchyDataT
 }
 
 /**
@@ -15,13 +12,10 @@ type AdjustAffectedTreePathsArgs = {
  * Handles both localized and non-localized fields
  */
 export function adjustDescendantTreePaths({
-  affectedDoc,
+  doc,
   fieldIsLocalized,
   localeCodes,
-  newDoc,
-  previousDocWithLocales,
-  slugPathFieldName,
-  titlePathFieldName,
+  parentDoc,
 }: AdjustAffectedTreePathsArgs): {
   slugPath: Record<string, string> | string
   titlePath: Record<string, string> | string
@@ -31,22 +25,19 @@ export function adjustDescendantTreePaths({
     const titlePathByLocale: Record<string, string> = {}
 
     for (const locale of localeCodes) {
-      const slugPathToRemove = (previousDocWithLocales[slugPathFieldName]?.[locale] as string) || ''
-      const slugPathToAdd = (newDoc[slugPathFieldName]?.[locale] as string) || ''
-      const titlePathToRemove =
-        (previousDocWithLocales[titlePathFieldName]?.[locale] as string) || ''
-      const titlePathToAdd = (newDoc[titlePathFieldName]?.[locale] as string) || ''
+      const parentSlugPath = (parentDoc.slugPath as Record<string, string>)?.[locale] || ''
+      const parentTitlePath = (parentDoc.titlePath as Record<string, string>)?.[locale] || ''
 
-      const affectedSlugPath = (affectedDoc[slugPathFieldName][locale] as string) || ''
-      const affectedTitlePath = (affectedDoc[titlePathFieldName][locale] as string) || ''
+      const affectedSlugPath = (doc.slugPath as Record<string, string>)?.[locale] || ''
+      const affectedTitlePath = (doc.titlePath as Record<string, string>)?.[locale] || ''
 
       slugPathByLocale[locale] =
-        `${slugPathToAdd}${affectedSlugPath.slice(slugPathToRemove.length)}`.replace(
+        `${parentSlugPath}${affectedSlugPath.slice(parentSlugPath.length)}`.replace(
           /^\/+|\/+$/g,
           '',
         )
       titlePathByLocale[locale] =
-        `${titlePathToAdd}${affectedTitlePath.slice(titlePathToRemove.length)}`.replace(
+        `${parentTitlePath}${affectedTitlePath.slice(parentTitlePath.length)}`.replace(
           /^\/+|\/+$/g,
           '',
         )
@@ -57,20 +48,18 @@ export function adjustDescendantTreePaths({
       titlePath: titlePathByLocale,
     }
   } else {
-    const slugPathToRemove = (previousDocWithLocales[slugPathFieldName] as string) || ''
-    const slugPathToAdd = (newDoc[slugPathFieldName] as string) || ''
-    const titlePathToRemove = (previousDocWithLocales[titlePathFieldName] as string) || ''
-    const titlePathToAdd = (newDoc[titlePathFieldName] as string) || ''
+    const parentSlugPath = (parentDoc.slugPath as string) || ''
+    const affectedSlugPath = (doc.slugPath as string) || ''
 
-    const affectedSlugPath = (affectedDoc[slugPathFieldName] as string) || ''
-    const affectedTitlePath = (affectedDoc[titlePathFieldName] as string) || ''
+    const parentTitlePath = (parentDoc.titlePath as string) || ''
+    const affectedTitlePath = (doc.titlePath as string) || ''
 
     return {
-      slugPath: `${slugPathToAdd}${affectedSlugPath.slice(slugPathToRemove.length)}`.replace(
+      slugPath: `${parentSlugPath}${affectedSlugPath.slice(parentSlugPath.length)}`.replace(
         /^\/+|\/+$/g,
         '',
       ),
-      titlePath: `${titlePathToAdd}${affectedTitlePath.slice(titlePathToRemove.length)}`.replace(
+      titlePath: `${parentTitlePath}${affectedTitlePath.slice(parentTitlePath.length)}`.replace(
         /^\/+|\/+$/g,
         '',
       ),

@@ -67,8 +67,8 @@ export const addHierarchyToCollection = ({
   }
   if (!collectionConfig.admin.listSearchableFields) {
     collectionConfig.admin.listSearchableFields = [titleField.name!]
-  } else if (!collectionConfig.admin.listSearchableFields.includes(titleField.name)) {
-    collectionConfig.admin.listSearchableFields.push(titleField.name)
+  } else if (!collectionConfig.admin.listSearchableFields.includes(titleField.name!)) {
+    collectionConfig.admin.listSearchableFields.push(titleField.name!)
   }
 
   collectionConfig.hooks = {

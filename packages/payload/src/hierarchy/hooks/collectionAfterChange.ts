@@ -1,7 +1,6 @@
 import type { CollectionAfterChangeHook } from '../../index.js'
 
-import { fetchParentAndComputeTree } from '../utils/fetchParentAndComputeTree.js'
-import { generateTreePaths } from '../utils/generateTreePaths.js'
+import { computeTreeData } from '../utils/fetchParentAndComputeTree.js'
 import { getTreeChanges } from '../utils/getTreeChanges.js'
 import { updateDescendants } from '../utils/updateDescendants.js'
 
@@ -51,7 +50,7 @@ export const hierarchyCollectionAfterChange =
       return
     }
 
-    const { newParentID, parentChanged, prevParentID, titleChanged } = getTreeChanges({
+    const { newParentID, parentChanged, titleChanged } = getTreeChanges({
       doc,
       parentFieldName,
       previousDoc,
@@ -60,45 +59,36 @@ export const hierarchyCollectionAfterChange =
     })
 
     if (parentChanged || titleChanged) {
-      const { newParentTree, parentDocument } = await fetchParentAndComputeTree({
+      const updatedTreeData = await computeTreeData({
         collection,
         doc,
+        fieldIsLocalized: isTitleLocalized,
+        localeCodes:
+          isTitleLocalized && req.payload.config.localization
+            ? req.payload.config.localization.localeCodes
+            : undefined,
         newParentID,
         parentChanged,
-        prevParentID,
-        req,
-        slugPathFieldName,
-        titlePathFieldName,
-      })
-
-      const treePaths = generateTreePaths({
-        newDoc: doc,
-        parentDocument,
         previousDocWithLocales,
+        req,
+        reqLocale:
+          reqLocale ||
+          (req.payload.config.localization ? req.payload.config.localization.defaultLocale : 'en'),
         slugify,
         slugPathFieldName,
         titleFieldName,
         titlePathFieldName,
-        ...(req.payload.config.localization && isTitleLocalized
-          ? {
-              localeCodes: req.payload.config.localization.localeCodes,
-              localized: true,
-              reqLocale: reqLocale || req.payload.config.localization.defaultLocale,
-            }
-          : {
-              localized: false,
-            }),
       })
 
       // NOTE: using the db directly, no hooks or access control here
-      const documentAfterUpdate = await req.payload.db.updateOne({
+      const updatedDocWithLocales = await req.payload.db.updateOne({
         id: doc.id,
         collection: collection.slug,
         data: {
-          _parentTree: newParentTree,
+          _parentTree: updatedTreeData._parentTree,
           [parentFieldName]: newParentID,
-          [slugPathFieldName]: treePaths.slugPath,
-          [titlePathFieldName]: treePaths.titlePath,
+          [slugPathFieldName]: updatedTreeData.slugPath,
+          [titlePathFieldName]: updatedTreeData.titlePath,
         },
         locale: 'all',
         req,
@@ -112,7 +102,6 @@ export const hierarchyCollectionAfterChange =
       // Update all descendants in batches to handle unlimited tree sizes
       await updateDescendants({
         collection,
-        documentAfterUpdate,
         fieldIsLocalized: isTitleLocalized,
         localeCodes:
           isTitleLocalized && req.payload.config.localization
@@ -120,6 +109,7 @@ export const hierarchyCollectionAfterChange =
             : undefined,
         newParentID: newParentID ?? undefined,
         parentDocID: doc.id,
+        parentDocWithLocales: updatedDocWithLocales,
         parentFieldName,
         previousDocWithLocales,
         req,
@@ -128,12 +118,12 @@ export const hierarchyCollectionAfterChange =
       })
 
       const updatedSlugPath = isTitleLocalized
-        ? documentAfterUpdate[slugPathFieldName][reqLocale!]
-        : documentAfterUpdate[slugPathFieldName]
+        ? updatedDocWithLocales[slugPathFieldName][reqLocale!]
+        : updatedDocWithLocales[slugPathFieldName]
       const updatedTitlePath = isTitleLocalized
-        ? documentAfterUpdate[titlePathFieldName][reqLocale!]
-        : documentAfterUpdate[titlePathFieldName]
-      const updatedParentTree = documentAfterUpdate._parentTree
+        ? updatedDocWithLocales[titlePathFieldName][reqLocale!]
+        : updatedDocWithLocales[titlePathFieldName]
+      const updatedParentTree = updatedDocWithLocales._parentTree
 
       if (updatedSlugPath) {
         doc[slugPathFieldName] = updatedSlugPath

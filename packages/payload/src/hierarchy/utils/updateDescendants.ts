@@ -6,11 +6,11 @@ import { adjustDescendantTreePaths } from './adjustDescendantTreePaths.js'
 type UpdateDescendantsArgs = {
   batchSize?: number
   collection: SanitizedCollectionConfig
-  documentAfterUpdate: JsonObject & TypeWithID
   fieldIsLocalized: boolean
   localeCodes?: string[]
   newParentID: number | string | undefined
   parentDocID: number | string
+  parentDocWithLocales: JsonObject & TypeWithID
   parentFieldName: string
   previousDocWithLocales: JsonObject & TypeWithID
   req: PayloadRequest
@@ -25,13 +25,12 @@ type UpdateDescendantsArgs = {
 export async function updateDescendants({
   batchSize = 100,
   collection,
-  documentAfterUpdate,
   fieldIsLocalized,
   localeCodes,
   newParentID,
   parentDocID,
+  parentDocWithLocales,
   parentFieldName,
-  previousDocWithLocales,
   req,
   slugPathFieldName,
   titlePathFieldName,
@@ -62,18 +61,23 @@ export async function updateDescendants({
     const updatePromises: Promise<JsonObject & TypeWithID>[] = []
     descendantDocsQuery.docs.forEach((affectedDoc) => {
       const newTreePaths = adjustDescendantTreePaths({
-        affectedDoc,
+        doc: {
+          _parentTree: affectedDoc._parentTree,
+          slugPath: affectedDoc[slugPathFieldName],
+          titlePath: affectedDoc[titlePathFieldName],
+        },
         fieldIsLocalized,
         localeCodes,
-        newDoc: documentAfterUpdate,
-        previousDocWithLocales,
-        slugPathFieldName,
-        titlePathFieldName,
+        parentDoc: {
+          _parentTree: parentDocWithLocales._parentTree || null,
+          slugPath: parentDocWithLocales[slugPathFieldName],
+          titlePath: parentDocWithLocales[titlePathFieldName],
+        },
       })
 
-      // Find the index of parentDocID in affectedDoc's parent tree
-      const docIndex = affectedDoc._parentTree?.indexOf(parentDocID) ?? -1
-      const descendants = docIndex >= 0 ? affectedDoc._parentTree.slice(docIndex) : []
+      const parentDocIndex = affectedDoc._parentTree?.indexOf(parentDocID) ?? -1
+      const unchangedParentTree =
+        parentDocIndex >= 0 ? affectedDoc._parentTree.slice(parentDocIndex) : []
 
       updatePromises.push(
         // this pattern has an issue bc it will not run hooks on the affected documents
@@ -83,7 +87,7 @@ export async function updateDescendants({
           id: affectedDoc.id,
           collection: collection.slug,
           data: {
-            _parentTree: [...(documentAfterUpdate._parentTree || []), ...descendants],
+            _parentTree: [...(parentDocWithLocales._parentTree || []), ...unchangedParentTree],
             [parentFieldName]: newParentID,
             [slugPathFieldName]: newTreePaths.slugPath,
             [titlePathFieldName]: newTreePaths.titlePath,

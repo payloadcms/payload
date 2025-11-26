@@ -13,7 +13,6 @@ type GetTreeChanges = {
 type GetTreeChangesResult = {
   newParentID: null | number | string | undefined
   parentChanged: boolean
-  prevParentID: null | number | string | undefined
   titleChanged: boolean
 }
 
@@ -42,7 +41,6 @@ export function getTreeChanges({
   return {
     newParentID,
     parentChanged: prevParentID !== newParentID,
-    prevParentID,
     titleChanged:
       prevTitleData?.slug !== newTitleData?.slug || prevTitleData?.title !== newTitleData?.title,
   }

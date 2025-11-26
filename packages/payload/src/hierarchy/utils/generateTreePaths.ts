@@ -1,13 +1,14 @@
 import type { Document } from '../../types/index.js'
 
 export type GenerateTreePathsArgs = {
-  newDoc: Document
-  parentDocument?: Document
+  docWithLocales: Document
   previousDocWithLocales: Document
   slugify: (text: string) => string
-  slugPathFieldName: string
   titleFieldName: string
-  titlePathFieldName: string
+  treeData?: {
+    parentSlugPath?: Record<string, string> | string
+    parentTitlePath?: Record<string, string> | string
+  }
 } & (
   | {
       defaultLocale?: never
@@ -22,16 +23,14 @@ export type GenerateTreePathsArgs = {
     }
 )
 export function generateTreePaths({
+  docWithLocales,
   localeCodes,
   localized,
-  newDoc,
-  parentDocument,
   previousDocWithLocales,
   reqLocale,
   slugify,
-  slugPathFieldName,
   titleFieldName,
-  titlePathFieldName,
+  treeData,
 }: GenerateTreePathsArgs): {
   slugPath: Record<string, string> | string
   titlePath: Record<string, string> | string
@@ -42,10 +41,15 @@ export function generateTreePaths({
       titlePath: Record<string, string>
     }>(
       (acc, locale: string) => {
-        const slugPrefix = parentDocument ? parentDocument?.[slugPathFieldName]?.[locale] : ''
-        const titlePrefix = parentDocument ? parentDocument?.[titlePathFieldName]?.[locale] : ''
-
-        let title = newDoc[titleFieldName]
+        const slugPrefix =
+          treeData && typeof treeData?.parentSlugPath === 'object'
+            ? treeData?.parentSlugPath?.[locale]
+            : ''
+        const titlePrefix =
+          treeData && typeof treeData?.parentTitlePath === 'object'
+            ? treeData?.parentTitlePath?.[locale]
+            : ''
+        let title = docWithLocales[titleFieldName]
         if (reqLocale !== locale && previousDocWithLocales?.[titleFieldName]?.[locale]) {
           title = previousDocWithLocales[titleFieldName][locale]
         }
@@ -60,9 +64,9 @@ export function generateTreePaths({
       },
     )
   } else {
-    const slugPrefix = parentDocument ? parentDocument?.[slugPathFieldName] : ''
-    const titlePrefix = parentDocument ? parentDocument?.[titlePathFieldName] : ''
-    const title = newDoc[titleFieldName]
+    const slugPrefix: string = treeData ? (treeData.parentSlugPath as string) : ''
+    const titlePrefix: string = treeData ? (treeData.parentTitlePath as string) : ''
+    const title = docWithLocales[titleFieldName]
 
     return {
       slugPath: `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(title)}`,
