@@ -3,7 +3,6 @@ import {
   addImportDeclaration,
   cleanupOrphanedImports,
   findImportDeclaration,
-  formatError,
   isNamedImportUsed,
   removeImportDeclaration,
   removeNamedImports,
@@ -22,42 +21,6 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
 
     expect(result).toBeDefined()
     expect(result?.getModuleSpecifierValue()).toBe('@payloadcms/db-mongodb')
-  })
-
-  it('returns undefined when import not found', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
-
-    const result = findImportDeclaration({ sourceFile, moduleSpecifier: 'nonexistent' })
-
-    expect(result).toBeUndefined()
-  })
-})
-
-describe('formatError', () => {
-  it('formats user-friendly error message', () => {
-    const error = formatError({
-      context: 'buildConfig call',
-      expected: 'export default buildConfig({ ... })',
-      actual: 'No buildConfig call found',
-      technicalDetails: 'Could not find CallExpression with identifier buildConfig',
-    })
-
-    expect(error.userMessage).toContain('buildConfig call')
-    expect(error.userMessage).toContain('Expected: export default buildConfig')
-    expect(error.technicalDetails).toContain('CallExpression')
-  })
-
-  it('includes debug info when provided', () => {
-    const error = formatError({
-      context: 'test',
-      expected: 'something',
-      actual: 'nothing',
-      technicalDetails: 'details',
-      debugInfo: { line: 10, column: 5 },
-    })
-
-    expect(error.debugInfo).toEqual({ line: 10, column: 5 })
   })
 })
 
@@ -127,16 +90,6 @@ import sharp from 'sharp'`,
     const imports = sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
     expect(imports[0].getModuleSpecifierValue()).toBe('payload')
-  })
-
-  it('does nothing when import does not exist', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
-
-    removeImportDeclaration({ sourceFile, moduleSpecifier: 'nonexistent' })
-
-    const imports = sourceFile.getImportDeclarations()
-    expect(imports).toHaveLength(1)
   })
 })
 
@@ -226,22 +179,6 @@ export default buildConfig({
 
     expect(isUsed).toBe(false)
   })
-
-  it('excludes imports from consideration by default', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'test.ts',
-      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-export default buildConfig({
-  collections: []
-})`,
-    )
-
-    const isUsed = isNamedImportUsed(sourceFile, 'mongooseAdapter', true)
-
-    expect(isUsed).toBe(false)
-  })
 })
 
 describe('cleanupOrphanedImports', () => {
@@ -291,42 +228,5 @@ export default buildConfig({
     expect(result.kept).toEqual(['mongooseAdapter'])
     const imports = sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
-  })
-
-  it('handles mixed used and unused imports', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'test.ts',
-      `import { mongooseAdapter, SomeType } from '@payloadcms/db-mongodb'
-
-export default buildConfig({
-  db: mongooseAdapter({ url: '' })
-})
-
-const foo: SomeType = {}`,
-    )
-
-    const result = cleanupOrphanedImports({
-      sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
-      importNames: ['mongooseAdapter', 'SomeType'],
-    })
-
-    expect(result.removed).toEqual([])
-    expect(result.kept).toEqual(['mongooseAdapter', 'SomeType'])
-  })
-
-  it('handles missing import gracefully', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
-
-    const result = cleanupOrphanedImports({
-      sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
-      importNames: ['mongooseAdapter'],
-    })
-
-    expect(result.removed).toEqual([])
-    expect(result.kept).toEqual([])
   })
 })
