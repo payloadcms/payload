@@ -10,20 +10,18 @@ export type GenerateTreePathsArgs = {
   titlePathFieldName: string
 } & (
   | {
-      defaultLocale: string
-      localeCodes: string[]
-      localized: true
-      reqLocale: string
-    }
-  | {
       defaultLocale?: never
       localeCodes?: never
       localized: false
       reqLocale?: never
     }
+  | {
+      localeCodes: string[]
+      localized: true
+      reqLocale: string
+    }
 )
 export function generateTreePaths({
-  defaultLocale,
   localeCodes,
   localized,
   newDoc,
@@ -39,24 +37,13 @@ export function generateTreePaths({
   titlePath: Record<string, string> | string
 } {
   if (localized) {
-    const fallbackSlugPrefix = parentDocument
-      ? parentDocument?.[slugPathFieldName]?.[defaultLocale] || ''
-      : ''
-    const fallbackTitlePrefix = parentDocument
-      ? parentDocument?.[titlePathFieldName]?.[defaultLocale] || ''
-      : ''
-
     return localeCodes.reduce<{
       slugPath: Record<string, string>
       titlePath: Record<string, string>
     }>(
       (acc, locale: string) => {
-        const slugPrefix = parentDocument
-          ? parentDocument?.[slugPathFieldName]?.[locale]
-          : fallbackSlugPrefix
-        const titlePrefix = parentDocument
-          ? parentDocument?.[titlePathFieldName]?.[locale]
-          : fallbackTitlePrefix
+        const slugPrefix = parentDocument ? parentDocument?.[slugPathFieldName]?.[locale] : ''
+        const titlePrefix = parentDocument ? parentDocument?.[titlePathFieldName]?.[locale] : ''
 
         let title = newDoc[titleFieldName]
         if (reqLocale !== locale && previousDocWithLocales?.[titleFieldName]?.[locale]) {

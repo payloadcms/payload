@@ -18,7 +18,6 @@ export default buildConfigWithDefaults({
     },
   },
   folders: {
-    virtualPaths: true,
     // debug: true,
     collectionOverrides: [
       ({ collection }) => {

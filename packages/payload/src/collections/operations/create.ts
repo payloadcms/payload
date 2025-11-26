@@ -345,6 +345,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            docWithLocales: result,
             req,
           })) || result
       }
@@ -379,6 +380,7 @@ export const createOperation = async <
             doc: result,
             operation: 'create',
             previousDoc: {},
+            previousDocWithLocales: {},
             req: args.req,
           })) || result
       }

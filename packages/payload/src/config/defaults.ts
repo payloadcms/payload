@@ -186,7 +186,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
       collectionSpecific: config.folders?.collectionSpecific ?? true,
       debug: config.folders?.debug ?? false,
       fieldName: config.folders?.fieldName ?? parentFolderFieldName,
-      virtualPaths: config.folders?.virtualPaths ?? false,
     }
   } else {
     config.folders = false

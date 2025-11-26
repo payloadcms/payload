@@ -1,8 +1,10 @@
 import type { Document } from '../../types/index.js'
 
+import { extractID } from '../../utilities/extractID.js'
+
 type GetTreeChanges = {
   doc: Document
-  parentDocFieldName: string
+  parentFieldName: string
   previousDoc: Document
   slugify: (text: string) => string
   titleFieldName: string
@@ -12,25 +14,36 @@ type GetTreeChangesResult = {
   newParentID: null | number | string | undefined
   parentChanged: boolean
   prevParentID: null | number | string | undefined
-  slugChanged: boolean
+  titleChanged: boolean
 }
 
 export function getTreeChanges({
   doc,
-  parentDocFieldName,
+  parentFieldName,
   previousDoc,
   slugify,
   titleFieldName,
 }: GetTreeChanges): GetTreeChangesResult {
-  const prevParentID = previousDoc[parentDocFieldName] || null
-  const newParentID = doc[parentDocFieldName] || null
-  const newSlug = doc[titleFieldName] ? slugify(doc[titleFieldName]) : undefined
-  const prevSlug = previousDoc[titleFieldName] ? slugify(previousDoc[titleFieldName]) : undefined
+  const prevParentID = extractID(previousDoc[parentFieldName]) || null
+  const newParentID = extractID(doc[parentFieldName]) || null
+  const prevTitleData = previousDoc[titleFieldName]
+    ? {
+        slug: slugify(previousDoc[titleFieldName]),
+        title: previousDoc[titleFieldName],
+      }
+    : undefined
+  const newTitleData = doc[titleFieldName]
+    ? {
+        slug: slugify(doc[titleFieldName]),
+        title: doc[titleFieldName],
+      }
+    : undefined
 
   return {
     newParentID,
     parentChanged: prevParentID !== newParentID,
     prevParentID,
-    slugChanged: newSlug !== prevSlug,
+    titleChanged:
+      prevTitleData?.slug !== newTitleData?.slug || prevTitleData?.title !== newTitleData?.title,
   }
 }
