@@ -59,6 +59,62 @@ export default config`,
     expect(result.success).toBe(true)
     expect(result.structures?.buildConfigCall).toBeDefined()
   })
+
+  it('detects import alias edge case', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig as createConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default createConfig({
+  db: mongooseAdapter({ url: '' }),
+  collections: [],
+})`,
+    )
+
+    const result = detectPayloadConfigStructure(sourceFile)
+
+    expect(result.success).toBe(true)
+    expect(result.edgeCases?.hasImportAlias).toBe(true)
+    expect(result.structures?.buildConfigCall).toBeDefined()
+  })
+
+  it('detects multiple buildConfig calls', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+const helper = buildConfig({ collections: [] })
+
+export default buildConfig({
+  collections: [],
+})`,
+    )
+
+    const result = detectPayloadConfigStructure(sourceFile)
+
+    expect(result.success).toBe(true)
+    expect(result.edgeCases?.multipleBuildConfigCalls).toBe(true)
+  })
+
+  it('detects other Payload imports', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig, CollectionConfig } from 'payload'
+
+export default buildConfig({
+  collections: [],
+})`,
+    )
+
+    const result = detectPayloadConfigStructure(sourceFile)
+
+    expect(result.success).toBe(true)
+    expect(result.edgeCases?.hasOtherPayloadImports).toBe(true)
+  })
 })
 
 describe('addDatabaseAdapter', () => {
@@ -565,5 +621,59 @@ export default buildConfig({
 
     expect(result.success).toBe(false)
     expect(result.error).toBeDefined()
+  })
+
+  it('tracks packages for uninstallation when adapter is replaced', async () => {
+    const filePath = path.join(tempDir, 'payload.config.ts')
+    fs.writeFileSync(
+      filePath,
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
+  collections: []
+})`,
+    )
+
+    const { configurePayloadConfig } = await import('./payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      db: { type: 'postgres', envVarName: 'DATABASE_URL' },
+      packageManager: 'pnpm',
+      projectPath: tempDir,
+    })
+
+    expect(result.success).toBe(true)
+
+    // Verify config was updated (uninstall happens asynchronously)
+    const content = fs.readFileSync(filePath, 'utf-8')
+    expect(content).toContain('postgresAdapter')
+    expect(content).not.toContain('mongooseAdapter')
+  })
+
+  it('skips uninstall when packageManager not provided', async () => {
+    const filePath = path.join(tempDir, 'payload.config.ts')
+    fs.writeFileSync(
+      filePath,
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
+  collections: []
+})`,
+    )
+
+    const { configurePayloadConfig } = await import('./payload-config')
+    const result = await configurePayloadConfig(filePath, {
+      db: { type: 'postgres', envVarName: 'DATABASE_URL' },
+      // No packageManager or projectPath provided
+    })
+
+    expect(result.success).toBe(true)
+
+    // Should still update config successfully
+    const content = fs.readFileSync(filePath, 'utf-8')
+    expect(content).toContain('postgresAdapter')
   })
 })

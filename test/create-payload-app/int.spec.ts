@@ -144,6 +144,173 @@ describe('create-payload-app', () => {
         payload: expect.any(String),
       })
     })
+
+    it('should install payload app with postgres adapter', async () => {
+      expect(fs.existsSync(projectDir)).toBe(true)
+
+      const firstResult = await initNext({
+        '--debug': true,
+        dbType: 'postgres',
+        packageManager: 'pnpm',
+        projectDir,
+        useDistFiles: true,
+      })
+
+      expect(firstResult.success).toEqual(false)
+
+      // Move files to (app) directory
+      if (firstResult.success === false && firstResult.nextAppDir) {
+        const nextAppDir = firstResult.nextAppDir
+        fs.mkdirSync(path.resolve(nextAppDir, '(app)'))
+        fs.readdirSync(path.resolve(nextAppDir)).forEach((file) => {
+          if (file === '(app)') {
+            return
+          }
+          fs.renameSync(path.resolve(nextAppDir, file), path.resolve(nextAppDir, '(app)', file))
+        })
+      }
+
+      // Rerun with postgres
+      const result = await initNext({
+        '--debug': true,
+        dbType: 'postgres',
+        packageManager: 'pnpm',
+        projectDir,
+        useDistFiles: true,
+      })
+
+      assertAndExpectToBeTrue(result.success)
+
+      const payloadConfig = path.resolve(
+        projectDir,
+        result.isSrcDir ? 'src/payload.config.ts' : 'payload.config.ts',
+      )
+      const configContent = fs.readFileSync(payloadConfig, 'utf-8')
+      expect(configContent).toContain('postgresAdapter')
+      expect(configContent).toContain('@payloadcms/db-postgres')
+
+      // Postgres dependencies should be installed
+      const packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
+        dependencies: Record<string, string>
+      }
+      expect(packageJson.dependencies).toMatchObject({
+        '@payloadcms/db-postgres': expect.any(String),
+        '@payloadcms/next': expect.any(String),
+        '@payloadcms/richtext-lexical': expect.any(String),
+        payload: expect.any(String),
+      })
+      expect(packageJson.dependencies['@payloadcms/db-mongodb']).toBeUndefined()
+    })
+  })
+
+  describe('adapter replacement', () => {
+    const projectDir = tempy.directory()
+
+    beforeEach(async () => {
+      if (fs.existsSync(projectDir)) {
+        fs.rmSync(projectDir, { recursive: true })
+      }
+
+      if (!fs.existsSync(projectDir)) {
+        fs.mkdirSync(projectDir)
+      }
+
+      // Create Next.js project
+      console.log(`Creating test project in ${projectDir}`)
+      const [cmd, ...args] = nextCreateCommands.srcDir.split(' ')
+      const { exitCode, stderr } = await execa(cmd as string, [...args], {
+        cwd: projectDir,
+        stdio: 'inherit',
+      })
+      if (exitCode !== 0) {
+        console.error({ exitCode, stderr })
+      }
+
+      // Fix tsconfig.json path issue
+      const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
+      let userTsConfigContent = await readFile(tsConfigPath, { encoding: 'utf8' })
+      userTsConfigContent = userTsConfigContent.replace('""@/*""', '"@/*"')
+      await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
+    })
+
+    afterEach(() => {
+      if (fs.existsSync(projectDir)) {
+        fs.rmSync(projectDir, { recursive: true })
+      }
+    })
+
+    it('should replace mongodb with postgres adapter', async () => {
+      // First install with mongodb
+      const firstResult = await initNext({
+        '--debug': true,
+        dbType: 'mongodb',
+        packageManager: 'pnpm',
+        projectDir,
+        useDistFiles: true,
+      })
+
+      expect(firstResult.success).toEqual(false)
+
+      // Move files to (app)
+      if (firstResult.success === false && firstResult.nextAppDir) {
+        const nextAppDir = firstResult.nextAppDir
+        fs.mkdirSync(path.resolve(nextAppDir, '(app)'))
+        fs.readdirSync(path.resolve(nextAppDir)).forEach((file) => {
+          if (file === '(app)') {
+            return
+          }
+          fs.renameSync(path.resolve(nextAppDir, file), path.resolve(nextAppDir, '(app)', file))
+        })
+      }
+
+      // Install with mongodb
+      const mongoResult = await initNext({
+        '--debug': true,
+        dbType: 'mongodb',
+        packageManager: 'pnpm',
+        projectDir,
+        useDistFiles: true,
+      })
+
+      assertAndExpectToBeTrue(mongoResult.success)
+
+      // Verify mongodb is installed
+      let packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
+        dependencies: Record<string, string>
+      }
+      expect(packageJson.dependencies['@payloadcms/db-mongodb']).toBeDefined()
+
+      // Now replace with postgres using AST
+      const { configurePayloadConfig } = await import(
+        '../../packages/create-payload-app/src/lib/ast/payload-config.js'
+      )
+      const payloadConfig = path.resolve(
+        projectDir,
+        mongoResult.isSrcDir ? 'src/payload.config.ts' : 'payload.config.ts',
+      )
+
+      const replaceResult = await configurePayloadConfig(payloadConfig, {
+        db: { type: 'postgres', envVarName: 'DATABASE_URL' },
+        packageManager: 'pnpm',
+        projectPath: projectDir,
+      })
+
+      expect(replaceResult.success).toBe(true)
+
+      // Verify config was updated
+      const configContent = fs.readFileSync(payloadConfig, 'utf-8')
+      expect(configContent).toContain('postgresAdapter')
+      expect(configContent).toContain('@payloadcms/db-postgres')
+      expect(configContent).not.toContain('mongooseAdapter')
+      expect(configContent).not.toContain('@payloadcms/db-mongodb')
+
+      // Verify package.json was updated (note: actual uninstall happens async)
+      packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
+        dependencies: Record<string, string>
+      }
+      // The config file should be updated, but we can't easily verify npm uninstall happened
+      // in this test without waiting or checking node_modules
+    })
   })
 })
 

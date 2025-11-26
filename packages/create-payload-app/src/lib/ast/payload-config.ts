@@ -26,28 +26,42 @@ import {
 export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
   debug(`[AST] Detecting payload config structure in ${sourceFile.getFilePath()}`)
 
-  // Find buildConfig call expression
+  // First find the actual name being used (might be aliased)
+  const payloadImport = sourceFile
+    .getImportDeclarations()
+    .find((imp) => imp.getModuleSpecifierValue() === 'payload')
+
+  const buildConfigImportSpec = payloadImport
+    ?.getNamedImports()
+    .find((spec) => spec.getName() === 'buildConfig')
+
+  const aliasNode = buildConfigImportSpec?.getAliasNode()
+  const buildConfigName = aliasNode ? aliasNode.getText() : 'buildConfig'
+
+  debug(`[AST] Looking for function call: ${buildConfigName}`)
+
+  // Find buildConfig call expression (using actual name in code)
   const buildConfigCall = sourceFile
     .getDescendantsOfKind(SyntaxKind.CallExpression)
     .find((call) => {
       const expression = call.getExpression()
-      return expression.getText() === 'buildConfig'
+      return expression.getText() === buildConfigName
     })
 
   if (!buildConfigCall) {
-    debug('[AST] ✗ buildConfig call not found')
+    debug(`[AST] ✗ ${buildConfigName} call not found`)
     return {
       error: formatError({
-        actual: 'No buildConfig call found in file',
+        actual: `No ${buildConfigName} call found in file`,
         context: 'buildConfig call',
-        expected: 'export default buildConfig({ ... })',
-        technicalDetails: 'Could not find CallExpression with identifier "buildConfig"',
+        expected: `export default ${buildConfigName}({ ... })`,
+        technicalDetails: `Could not find CallExpression with identifier "${buildConfigName}"`,
       }),
       success: false,
     }
   }
 
-  debug('[AST] ✓ buildConfig call found')
+  debug(`[AST] ✓ ${buildConfigName} call found`)
 
   // Get import statements
   const importStatements = sourceFile.getImportDeclarations()
@@ -85,24 +99,15 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
 
   debug(`[AST] plugins array: ${pluginsArray ? '✓ found' : '✗ not found'}`)
 
-  // Find all buildConfig calls for edge case detection
+  // Find all buildConfig calls for edge case detection (using actual name)
   const allBuildConfigCalls = sourceFile
     .getDescendantsOfKind(SyntaxKind.CallExpression)
     .filter((call) => {
       const expression = call.getExpression()
-      return expression.getText() === 'buildConfig'
+      return expression.getText() === buildConfigName
     })
 
-  // Check for import aliases
-  const payloadImport = sourceFile
-    .getImportDeclarations()
-    .find((imp) => imp.getModuleSpecifierValue() === 'payload')
-
-  const buildConfigImportSpec = payloadImport
-    ?.getNamedImports()
-    .find((spec) => spec.getName() === 'buildConfig')
-
-  const hasImportAlias = !!buildConfigImportSpec?.getAliasNode()
+  const hasImportAlias = !!aliasNode
 
   // Check for other Payload imports
   const payloadImports = payloadImport?.getNamedImports() || []
@@ -130,7 +135,9 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
   // Track storage adapter imports
   const storageAdapterImports = []
   for (const [, config] of Object.entries(STORAGE_ADAPTER_CONFIG)) {
-    if (!config.packageName || !config.adapterName) {continue}
+    if (!config.packageName || !config.adapterName) {
+      continue
+    }
 
     const importDecl = sourceFile
       .getImportDeclarations()
