@@ -117,16 +117,15 @@ export const slugField: SlugField = ({
                 fieldToUse,
               },
               path: '@payloadcms/ui#SlugField',
-              serverProps: {
-                /**
-                 * This is only needed so we can access it from the `slugifyHandler` server function.
-                 * The `SlugField` is a client component, so these server props are unused by the frontend.
-                 */
-                slugify,
-              },
             },
           },
           width: '100%',
+        },
+        custom: {
+          /**
+           * This is needed so we can access it from the `slugifyHandler` server function.
+           */
+          slugify,
         },
         index: true,
         localized,

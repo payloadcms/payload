@@ -40,15 +40,7 @@ export const slugifyHandler: ServerFunction<
     path: path || '',
   })
 
-  const CustomField = field.admin?.components?.Field
-
-  // This is required for type safety, rip
-  const customSlugify =
-    typeof CustomField === 'object' &&
-    'serverProps' in CustomField &&
-    'slugify' in CustomField.serverProps
-      ? (CustomField.serverProps.slugify as Slugify)
-      : undefined
+  const customSlugify = field.custom.slugify as Slugify | undefined
 
   const slugify = customSlugify || defaultSlugify
 
