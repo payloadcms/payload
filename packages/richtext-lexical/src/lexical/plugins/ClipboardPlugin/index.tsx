@@ -54,6 +54,7 @@ export function ClipboardPlugin() {
 
           const serializedNode = node?.exportJSON() as SerializedUnknownLexicalNode
           const deepCloneSerializedNode = JSON.parse(JSON.stringify(serializedNode))
+          changeIds(deepCloneSerializedNode)
 
           const lexicalClipboardData: LexicalClipboardData = {
             namespace: editor._config.namespace,
