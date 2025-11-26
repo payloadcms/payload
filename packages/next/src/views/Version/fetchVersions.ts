@@ -182,27 +182,9 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
             },
           },
           {
-            or: [
-              {
-                snapshot: {
-                  not_equals: true,
-                },
-              },
-              {
-                and: [
-                  {
-                    snapshot: {
-                      equals: true,
-                    },
-                  },
-                  {
-                    'version._status': {
-                      equals: 'draft',
-                    },
-                  },
-                ],
-              },
-            ],
+            snapshot: {
+              not_equals: true,
+            },
           },
         ]
       : []),

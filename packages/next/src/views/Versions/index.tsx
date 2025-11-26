@@ -52,27 +52,9 @@ export async function VersionsView(props: DocumentViewServerProps) {
   }
   if (localization && draftsEnabled) {
     whereQuery.and.push({
-      or: [
-        {
-          snapshot: {
-            not_equals: true,
-          },
-        },
-        {
-          and: [
-            {
-              snapshot: {
-                equals: true,
-              },
-            },
-            {
-              'version._status': {
-                equals: 'draft',
-              },
-            },
-          ],
-        },
-      ],
+      snapshot: {
+        not_equals: true,
+      },
     })
   }
 
