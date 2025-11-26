@@ -55,6 +55,42 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
   try {
     // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req!.context,
+            operation: 'read',
+            req: args.req!,
+          })) || args
+      }
+    }
+
+    const {
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      limit,
+      overrideAccess,
+      page,
+      pagination = true,
+      populate,
+      select: incomingSelect,
+      showHiddenFields,
+      sort: incomingSort,
+      trash = false,
+      where,
+    } = args
+
+    const req = args.req!
+    const { fallbackLocale, locale, payload } = req
+
+    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
