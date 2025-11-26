@@ -12,6 +12,7 @@ import type {
   RenderDocumentVersionsProperties,
   ServerFunction,
   ServerFunctionClient,
+  SlugifyServerFunctionArgs,
 } from 'payload'
 
 import React, { createContext, useCallback } from 'react'
@@ -28,6 +29,7 @@ import type {
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'
+import type { slugifyHandler } from '../../utilities/slugify.js'
 
 type GetFormStateClient = (
   args: {
@@ -46,6 +48,12 @@ type GetTableStateClient = (
     signal?: AbortSignal
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildTableStateHandler>
+
+type SlugifyClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<SlugifyServerFunctionArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof slugifyHandler>
 
 export type RenderDocumentResult = {
   data: any
@@ -116,6 +124,7 @@ export type ServerFunctionsContextType = {
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
+  slugify: SlugifyClient
 }
 
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
@@ -301,6 +310,24 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const slugify = useCallback<SlugifyClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'slugify',
+          args: { ...rest },
+        })) as Awaited<ReturnType<typeof slugifyHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
@@ -313,6 +340,7 @@ export const ServerFunctionsProvider: React.FC<{
         renderDocument,
         schedulePublish,
         serverFunction,
+        slugify,
       }}
     >
       {children}

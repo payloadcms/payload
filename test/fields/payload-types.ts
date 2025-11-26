@@ -1523,13 +1523,18 @@ export interface SlugField {
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  generateSlug?: boolean | null;
+  'slug-generate'?: boolean | null;
   slug: string;
   localizedTitle?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  generateLocalizedSlug?: boolean | null;
+  'customSlugify-generate'?: boolean | null;
+  customSlugify: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  'localizedSlug-generate'?: boolean | null;
   localizedSlug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -3192,10 +3197,12 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
-  generateSlug?: T;
+  'slug-generate'?: T;
   slug?: T;
   localizedTitle?: T;
-  generateLocalizedSlug?: T;
+  'customSlugify-generate'?: T;
+  customSlugify?: T;
+  'localizedSlug-generate'?: T;
   localizedSlug?: T;
   updatedAt?: T;
   createdAt?: T;

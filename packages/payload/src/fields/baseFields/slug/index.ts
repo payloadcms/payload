@@ -1,4 +1,4 @@
-import type { TextFieldClientProps, TextFieldServerProps } from '../../../admin/types.js'
+import type { TextFieldClientProps } from '../../../admin/types.js'
 import type { FieldAdmin, RowField, TextField } from '../../../fields/config/types.js'
 import type { Slugify } from '../../../utilities/slugify.js'
 
@@ -55,17 +55,10 @@ export type SlugField = (args?: SlugFieldArgs) => RowField
 type SlugFieldServerPropsBase = Pick<SlugFieldArgs, 'fieldToUse' | 'slugify'>
 
 /**
- * The `slugify` function provided here is passed to the server component,
- * which then creates a _server function_ out of it which the client can execute.
- */
-export type SlugFieldServerProps = SlugFieldServerPropsBase & TextFieldServerProps
-
-/**
  * These are the props that the `SlugField` client component accepts.
  * The `SlugField` server component is responsible for passing down the `slugify` function.
  */
-export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse' | 'slugify'> &
-  TextFieldClientProps
+export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse'> & TextFieldClientProps
 
 /**
  * A slug is a unique, indexed, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
@@ -122,11 +115,17 @@ export const slugField: SlugField = ({
         admin: {
           components: {
             Field: {
-              path: '@payloadcms/ui/rsc#SlugField',
-              serverProps: {
+              clientProps: {
                 fieldToUse,
+              },
+              path: '@payloadcms/ui#SlugField',
+              serverProps: {
+                /**
+                 * This is only needed so we can access it from the `slugifyHandler` server function.
+                 * The `SlugField` is a client component, so these server props are unused by the frontend.
+                 */
                 slugify,
-              } satisfies SlugFieldServerPropsBase,
+              },
             },
           },
           width: '100%',

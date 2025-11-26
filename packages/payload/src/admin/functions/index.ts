@@ -1,8 +1,15 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, ColumnPreference, FolderSortKeys } from '../../index.js'
+import type {
+  CollectionSlug,
+  ColumnPreference,
+  FieldPaths,
+  FolderSortKeys,
+  GlobalSlug,
+} from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
+import type { Slugify } from '../../utilities/slugify.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
 export type DefaultServerFunctionArgs = {
@@ -148,4 +155,11 @@ export type GetFolderResultsComponentAndDataArgs = {
    * The sort order for the results.
    */
   sort: FolderSortKeys
+}
+
+export type SlugifyServerFunctionArgs = {
+  collectionSlug?: CollectionSlug
+  globalSlug?: GlobalSlug
+  path?: FieldPaths['path']
+  val?: Parameters<Slugify>[0]
 }
