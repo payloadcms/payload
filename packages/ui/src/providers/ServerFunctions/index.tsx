@@ -14,6 +14,7 @@ import type {
   ServerFunctionClient,
   SlugifyServerFunctionArgs,
 } from 'payload'
+import type { Slugify } from 'payload/shared'
 
 import React, { createContext, useCallback } from 'react'
 
@@ -29,7 +30,6 @@ import type {
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'
-import type { slugifyHandler } from '../../utilities/slugify.js'
 
 type GetFormStateClient = (
   args: {
@@ -53,7 +53,7 @@ type SlugifyClient = (
   args: {
     signal?: AbortSignal
   } & Omit<SlugifyServerFunctionArgs, 'clientConfig' | 'req'>,
-) => ReturnType<typeof slugifyHandler>
+) => ReturnType<Slugify>
 
 export type RenderDocumentResult = {
   data: any
@@ -318,7 +318,7 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'slugify',
           args: { ...rest },
-        })) as Awaited<ReturnType<typeof slugifyHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+        })) as Awaited<ReturnType<Slugify>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
       } catch (_err) {
