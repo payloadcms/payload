@@ -84,45 +84,55 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const [currentlyPublishedVersion, latestDraftVersion] = await Promise.all([
     hasPublishedDoc
       ? fetchLatestVersion({
-          collectionSlug,
-          depth: 0,
-          globalSlug,
-          locale: req.locale,
-          overrideAccess: false,
-          parentID: id,
-          req,
-          select: {
-            id: true,
+        collectionSlug,
+        depth: 0,
+        globalSlug,
+        locale: req.locale,
+        overrideAccess: false,
+        parentID: id,
+        req,
+        select: {
+          id: true,
+          updatedAt: true,
+          version: {
+            _status: true,
             updatedAt: true,
-            version: {
-              _status: true,
-              updatedAt: true,
-            },
           },
-          status: 'published',
-          user,
-        })
+        },
+        status: 'published',
+        user,
+        where: {
+          snapshot: {
+            not_equals: true,
+          },
+        },
+      })
       : Promise.resolve(null),
     draftsEnabled
       ? fetchLatestVersion({
-          collectionSlug,
-          depth: 0,
-          globalSlug,
-          locale: req.locale,
-          overrideAccess: false,
-          parentID: id,
-          req,
-          select: {
-            id: true,
+        collectionSlug,
+        depth: 0,
+        globalSlug,
+        locale: req.locale,
+        overrideAccess: false,
+        parentID: id,
+        req,
+        select: {
+          id: true,
+          updatedAt: true,
+          version: {
+            _status: true,
             updatedAt: true,
-            version: {
-              _status: true,
-              updatedAt: true,
-            },
           },
-          status: 'draft',
-          user,
-        })
+        },
+        status: 'draft',
+        user,
+        where: {
+          snapshot: {
+            not_equals: true,
+          },
+        },
+      })
       : Promise.resolve(null),
   ])
 

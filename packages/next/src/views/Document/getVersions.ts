@@ -144,6 +144,11 @@ export const getVersions = async ({
                     equals: id,
                   },
                 },
+                {
+                  snapshot: {
+                    not_equals: true,
+                  },
+                },
               ],
             },
             extractAccessFromPermission(docPermissions.readVersions),
@@ -204,27 +209,9 @@ export const getVersions = async ({
               },
             },
             {
-              or: [
-                {
-                  snapshot: {
-                    not_equals: true,
-                  },
-                },
-                {
-                  and: [
-                    {
-                      snapshot: {
-                        equals: true,
-                      },
-                    },
-                    {
-                      'version._status': {
-                        equals: 'draft',
-                      },
-                    },
-                  ],
-                },
-              ],
+              snapshot: {
+                not_equals: true,
+              },
             },
           ],
         },
@@ -306,6 +293,11 @@ export const getVersions = async ({
       global: globalConfig.slug,
       locale,
       user,
+      where: {
+        snapshot: {
+          not_equals: true,
+        },
+      },
     }))
   }
 
