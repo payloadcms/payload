@@ -207,6 +207,34 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
+
+  test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello ')
+    await lexical.slashCommand('inline')
+    await lexical.drawer.locator('input').fill('World')
+    await lexical.drawer.getByText('Save changes').click()
+    await page.keyboard.press('ControlOrMeta+A')
+    const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__InlineBlock')
+    await expect(inlineBlock).toHaveCount(1)
+    await page.keyboard.press('ControlOrMeta+C')
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ControlOrMeta+V')
+    await expect(inlineBlock).toHaveCount(2)
+    await inlineBlock.nth(1).click()
+    await expect(lexical.drawer).toBeVisible()
+    await expect(lexical.drawer.locator('input')).toHaveValue('World')
+    await lexical.drawer.locator('input').fill('World changed')
+    await expect(lexical.drawer.locator('input')).toHaveValue('World changed')
+    await lexical.drawer.getByText('Save changes').click()
+    await inlineBlock.nth(0).click()
+    await expect(lexical.drawer.locator('input')).toHaveValue('World')
+    await lexical.drawer.getByLabel('Close').click()
+    await expect(lexical.drawer).toBeHidden()
+    await inlineBlock.nth(1).click()
+    await expect(lexical.drawer.locator('input')).toHaveValue('World changed')
+  })
 })
 
 describe('Lexical Fully Featured, admin panel in RTL', () => {
