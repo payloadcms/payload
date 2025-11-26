@@ -47,7 +47,6 @@ export function ClipboardPlugin() {
       COPY_COMMAND,
       (event) => {
         // Handle decorator node case
-        // editor.getEditorState().read(() => {
         const selection = $getSelection()
         if ($isNodeSelection(selection)) {
           const node = selection.getNodes()[0]
