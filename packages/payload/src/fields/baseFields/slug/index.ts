@@ -7,7 +7,7 @@ import { generateSlug } from './generateSlug.js'
 export type SlugFieldArgs = {
   /**
    * Override for the `generateSlug` checkbox field name.
-   * @default `{name}-generate`
+   * @default "generateSlug"
    */
   checkboxName?: string
   /**
@@ -52,8 +52,6 @@ export type SlugFieldArgs = {
 
 export type SlugField = (args?: SlugFieldArgs) => RowField
 
-type SlugFieldServerPropsBase = Pick<SlugFieldArgs, 'fieldToUse' | 'slugify'>
-
 /**
  * These are the props that the `SlugField` client component accepts.
  * The `SlugField` server component is responsible for passing down the `slugify` function.
@@ -77,7 +75,7 @@ export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse'> & TextField
  */
 export const slugField: SlugField = ({
   name: fieldName = 'slug',
-  checkboxName,
+  checkboxName = 'generateSlug',
   fieldToUse = 'title',
   localized,
   overrides,
@@ -92,7 +90,7 @@ export const slugField: SlugField = ({
     },
     fields: [
       {
-        name: checkboxName ?? `${fieldName}-generate`,
+        name: checkboxName,
         type: 'checkbox',
         admin: {
           description:

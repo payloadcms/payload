@@ -19,7 +19,6 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { slugFieldsSlug } from '../../slugs.js'
-import { slugFieldDoc } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -34,17 +33,17 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
 
-const unlockSlug = async (fieldID: `#field-${string}`) => {
+const unlockSlug = async (fieldName: string = 'slug') => {
+  const fieldID = `#field-${fieldName}`
   const unlockButton = page.locator(`${fieldID} + div .lock-button`)
   await unlockButton.click()
   const slugField = page.locator(fieldID)
   await expect(slugField).toBeEnabled()
 }
 
-const regenerateSlug = async (fieldID: `#field-${string}`) => {
-  await unlockSlug(fieldID)
-
-  const generateButton = page.locator(`${fieldID} + div .generate-button`)
+const regenerateSlug = async (fieldName: string = 'slug') => {
+  await unlockSlug(fieldName)
+  const generateButton = page.locator(`#field-${fieldName} + div .generate-button`)
   await generateButton.click()
 }
 
@@ -95,7 +94,7 @@ describe('SlugField', () => {
     await page.goto(url.create)
     await page.locator('#field-title').fill('Test title client side')
 
-    await regenerateSlug('#field-slug')
+    await regenerateSlug()
 
     await expect(page.locator('#field-slug')).toHaveValue('test-title-client-side')
   })
@@ -110,7 +109,7 @@ describe('SlugField', () => {
     await expect(slugField).toHaveValue('test-title-with-custom-slug')
     await expect(slugField).toBeDisabled()
 
-    await unlockSlug('#field-slug')
+    await unlockSlug('slug')
 
     await slugField.fill('custom-slug-value')
 
@@ -131,7 +130,7 @@ describe('SlugField', () => {
     const titleField = page.locator('#field-title')
     await titleField.fill('Another Custom Slugify')
 
-    await regenerateSlug('#field-customSlugify')
+    await regenerateSlug('customSlugify')
 
     await expect(page.locator('#field-customSlugify')).toHaveValue('ANOTHER CUSTOM SLUGIFY')
   })
