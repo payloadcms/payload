@@ -1,5 +1,3 @@
-import type { WidgetWidth } from 'payload'
-
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -9,6 +7,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { DashboardHelper } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -43,21 +42,17 @@ describe('Dashboard', () => {
   })
 
   test('initial dashboard', async ({ page }) => {
-    await expect(page.locator('.widget')).toHaveCount(7)
-    const widgetByPos = (pos: number) => page.locator(`.grid-layout > :nth-child(${pos})`)
-    const assertWidget = async (slug: string, pos: number, width: WidgetWidth) => {
-      const widget = widgetByPos(pos)
-      await expect(widget).toHaveAttribute('data-slug', new RegExp(`^${slug}`))
-      await expect(widget).toHaveAttribute('data-width', width)
-    }
+    const dashboard = new DashboardHelper(page)
+    await expect(dashboard.widgets).toHaveCount(7)
 
-    await assertWidget('collection-cards', 1, 'full')
-    await assertWidget('count', 2, 'x-small')
-    await assertWidget('count', 3, 'x-small')
-    await assertWidget('count', 4, 'x-small')
-    await assertWidget('count', 5, 'x-small')
-    await assertWidget('revenue', 6, 'full')
-    await assertWidget('private', 7, 'full')
+    await dashboard.assertIsEditing(false)
+    await dashboard.assertWidget('collection-cards', 1, 'full')
+    await dashboard.assertWidget('count', 2, 'x-small')
+    await dashboard.assertWidget('count', 3, 'x-small')
+    await dashboard.assertWidget('count', 4, 'x-small')
+    await dashboard.assertWidget('count', 5, 'x-small')
+    await dashboard.assertWidget('revenue', 6, 'full')
+    await dashboard.assertWidget('private', 7, 'full')
   })
 
   // test('add widget', async ({ page }) => {
