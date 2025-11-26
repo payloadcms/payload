@@ -12,6 +12,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { addSessionToUser } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -143,17 +144,67 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     await authenticateLocalStrategy({ doc, password: data.password })
 
-    const fieldsToSign = getFieldsToSign({
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: user.email,
       user,
+    }
+
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user,
     })
+
+    if (sid) {
+      fieldsToSignArgs.sid = sid
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
+
+    // /////////////////////////////////////
+    // beforeLogin - Collection
+    // /////////////////////////////////////
+
+    let userBeforeLogin = user
+
+    if (collectionConfig.hooks?.beforeLogin?.length) {
+      for (const hook of collectionConfig.hooks.beforeLogin) {
+        userBeforeLogin =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            user: userBeforeLogin,
+          })) || userBeforeLogin
+      }
+    }
 
     const { token } = await jwtSign({
       fieldsToSign,
       secret,
       tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
+
+    req.user = userBeforeLogin
+
+    // /////////////////////////////////////
+    // afterLogin - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.afterLogin?.length) {
+      for (const hook of collectionConfig.hooks.afterLogin) {
+        userBeforeLogin =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            token,
+            user: userBeforeLogin,
+          })) || userBeforeLogin
+      }
+    }
 
     const fullUser = await payload.findByID({
       id: user.id,

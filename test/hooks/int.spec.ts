@@ -14,6 +14,7 @@ import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
 import { hooksSlug } from './collections/Hook/index.js'
+import { nestedAfterChangeHooksSlug } from './collections/NestedAfterChangeHook/index.js'
 import {
   generatedAfterReadText,
   nestedAfterReadHooksSlug,
@@ -277,7 +278,7 @@ describe('Hooks', () => {
       const document = await payload.create({
         collection: contextHooksSlug,
         context: {
-          secretValue: 'data from local API',
+          secretValue: 'data from Local API',
         },
         data: {
           value: 'wrongvalue',
@@ -289,28 +290,28 @@ describe('Hooks', () => {
         collection: contextHooksSlug,
       })
 
-      expect(retrievedDoc.value).toEqual('data from local API')
+      expect(retrievedDoc.value).toEqual('data from Local API')
     })
 
-    it('should pass context from local API to global hooks', async () => {
+    it('should pass context from Local API to global hooks', async () => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
       })
 
-      expect(globalDocument.field_globalAndField).not.toEqual('data from local API context')
+      expect(globalDocument.field_globalAndField).not.toEqual('data from Local API context')
 
       const globalDocumentWithContext = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
         context: {
-          field_beforeChange_GlobalAndField_override: 'data from local API context',
+          field_beforeChange_GlobalAndField_override: 'data from Local API context',
         },
       })
-      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from local API context')
+      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
 
-    it('should pass context from rest API to hooks', async () => {
+    it('should pass context from REST API to hooks', async () => {
       const params = new URLSearchParams({
-        context_secretValue: 'data from rest API',
+        context_secretValue: 'data from REST API',
       })
       // send context as query params. It will be parsed by the beforeOperation hook
       const { doc } = await restClient
@@ -326,7 +327,41 @@ describe('Hooks', () => {
         id: doc.id,
       })
 
-      expect(retrievedDoc.value).toEqual('data from rest API')
+      expect(retrievedDoc.value).toEqual('data from REST API')
+    })
+
+    it('should populate previousValue in nested afterChange hooks', async () => {
+      // this collection will throw an error if previousValue is not defined in nested afterChange hook
+      const nestedAfterChangeDoc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'initial',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'initial',
+              },
+            ],
+          },
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        collection: 'nested-after-change-hooks',
+        id: nestedAfterChangeDoc.id,
+        data: {
+          text: 'updated',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'updated',
+              },
+            ],
+          },
+        },
+      })
+
+      expect(updatedDoc).toBeDefined()
     })
   })
 
@@ -373,6 +408,47 @@ describe('Hooks', () => {
 
       expect(user).toBeDefined()
       expect(user.afterLoginHook).toStrictEqual(true)
+      expect(result.afterLoginHook).toStrictEqual(true)
+    })
+
+    it('should call afterLogin hook on password reset', async () => {
+      const resetUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email: 'reset-test@payloadcms.com',
+          password: devUser.password,
+          roles: ['admin'],
+          afterLoginHook: false,
+        },
+      })
+
+      expect(resetUser.afterLoginHook).toStrictEqual(false)
+
+      const token = await payload.forgotPassword({
+        collection: hooksUsersSlug,
+        data: {
+          email: resetUser.email,
+        },
+        disableEmail: true,
+      })
+
+      const { user } = await payload.resetPassword({
+        collection: hooksUsersSlug,
+        overrideAccess: true,
+        data: {
+          password: 'newPassword123',
+          token,
+        },
+      })
+
+      expect(user).toBeDefined()
+      expect(user.afterLoginHook).toStrictEqual(true)
+
+      const result = await payload.findByID({
+        id: user.id,
+        collection: hooksUsersSlug,
+      })
+
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
@@ -426,15 +502,19 @@ describe('Hooks', () => {
       expect(JSON.parse(doc.collection_beforeOperation_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_beforeChange_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterChange_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterRead_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterOperation_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )

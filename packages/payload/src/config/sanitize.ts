@@ -1,4 +1,4 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages, Language } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
@@ -11,6 +11,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  WidgetInstance,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -52,6 +53,17 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
+    slug: 'collection-cards',
+    ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'collection-cards',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -94,7 +106,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
   // We're casting here because it's already been sanitised above but TS still thinks it could be a function
   ;(sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (!_internalSupportedTimezones.includes(timezone.value)) {
+    if (timezone.value !== 'UTC' && !_internalSupportedTimezones.includes(timezone.value)) {
       throw new InvalidConfiguration(
         `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
       )
@@ -395,14 +407,23 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ),
   )
 
-  configWithDefaults.collections!.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      migrationsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
+  const migrations = await sanitizeCollection(
+    config as unknown as Config,
+    migrationsCollection,
+    richTextSanitizationPromises,
+    validRelationships,
   )
+
+  // @ts-expect-error indexSortableFields is only valid for @payloadcms/db-mongodb
+  if (config?.db?.indexSortableFields) {
+    migrations.indexes = [
+      {
+        fields: ['batch', 'name'],
+        unique: false,
+      },
+    ]
+  }
+  configWithDefaults.collections!.push(migrations)
 
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(

@@ -26,5 +26,22 @@
   "bun.test.filePattern": "bun.test.ts",
   "playwright.env": {
     "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
-  }
+  },
+  "typescript.experimental.useTsgo": true,
+  "jest.virtualFolders": [
+    {
+      "name": "root",
+      "rootPath": ".",
+      "runMode": {
+        "type": "on-demand"
+      }
+    },
+    {
+      "name": "test",
+      "rootPath": "test",
+      "runMode": {
+        "type": "on-demand"
+      }
+    }
+  ]
 }

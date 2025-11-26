@@ -25,8 +25,10 @@ import {
   mediaSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -95,6 +97,31 @@ describe('Collections - Uploads', () => {
         expect(sizes).toHaveProperty('tablet')
         expect(sizes).toHaveProperty('mobile')
         expect(sizes).toHaveProperty('icon')
+      })
+
+      it('should URL encode filenames with spaces in both main url and size urls', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file!.name = 'my test image.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc.url).toBeDefined()
+        expect(mediaDoc.url).toContain('%20')
+        expect(mediaDoc.url).not.toContain(' ')
+
+        // Check that size URLs are also properly encoded
+        expect(mediaDoc.sizes?.tablet?.url).toBeDefined()
+        expect(mediaDoc.sizes?.tablet?.url).toContain('%20')
+        expect(mediaDoc.sizes?.tablet?.url).not.toContain(' ')
+
+        expect(mediaDoc.sizes?.icon?.url).toBeDefined()
+        expect(mediaDoc.sizes?.icon?.url).toContain('%20')
+        expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
       })
 
       it('creates from form data given an svg', async () => {
@@ -226,6 +253,36 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.filename).toBeDefined()
+      })
+
+      it('should not allow creation of corrupted PDF', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './fake-pdf.pdf')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow invalid mimeType to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './image.jpg')
+        const { file, handle } = await createStreamableFile(filePath, 'image/png')
+        formData.append('file', file)
+        formData.append('mime', 'image/png')
+        formData.append('contentType', 'image/png')
+
+        const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
       })
     })
     describe('update', () => {
@@ -602,6 +659,59 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+
+      it('should allow a localized upload relationship in a block', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+
+        const { id } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const { id: id_2 } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const res = await payload.create({
+          collection: 'relation',
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                blockType: 'localizedMediaBlock',
+                media: id,
+                relatedMedia: [id],
+              },
+            ],
+          },
+        })
+
+        expect(res.blocks[0]?.media).toBe(id)
+        expect(res.blocks[0]?.relatedMedia).toEqual([id])
+
+        const res_2 = await payload.update({
+          collection: 'relation',
+          id: res.id,
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                id: res.blocks[0]?.id,
+                blockType: 'localizedMediaBlock',
+                media: id_2,
+                relatedMedia: [id_2],
+              },
+            ],
+          },
+        })
+
+        expect(res_2.blocks[0]?.media).toBe(id_2)
+        expect(res_2.blocks[0]?.relatedMedia).toEqual([id_2])
       })
     })
 

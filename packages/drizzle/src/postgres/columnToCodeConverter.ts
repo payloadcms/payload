@@ -34,6 +34,10 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
       }
       break
     }
+    case 'numeric': {
+      columnBuilderArgsArray.push("mode: 'number'")
+      break
+    }
     case 'timestamp': {
       columnBuilderArgsArray.push(`mode: '${column.mode}'`)
       if (column.withTimezone) {
@@ -79,7 +83,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     } else if (column.type === 'jsonb') {
       sanitizedDefault = `sql\`'${JSON.stringify(column.default)}'::jsonb\``
     } else if (column.type === 'numeric') {
-      sanitizedDefault = `'${column.default}'`
+      sanitizedDefault = `${column.default}`
     } else if (typeof column.default === 'string') {
       sanitizedDefault = `${JSON.stringify(column.default)}`
     }

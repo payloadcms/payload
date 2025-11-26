@@ -38,6 +38,7 @@ const GlobalWithHooks: GlobalConfig = {
   // ...
   // highlight-start
   hooks: {
+    beforeOperation: [(args) => {...}],
     beforeValidate: [(args) => {...}],
     beforeChange: [(args) => {...}],
     beforeRead: [(args) => {...}],
@@ -47,6 +48,31 @@ const GlobalWithHooks: GlobalConfig = {
   // highlight-end
 }
 ```
+
+### beforeOperation
+
+The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
+
+```ts
+import type { GlobalBeforeOperationHook } from 'payload'
+
+const beforeOperationHook: GlobalBeforeOperationHook = async ({
+  args,
+  operation,
+  req,
+}) => {
+  return args // return modified operation arguments as necessary
+}
+```
+
+The following arguments are provided to the `beforeOperation` hook:
+
+| Option          | Description                                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**    | The [Global](../configuration/globals) in which this Hook is running against. Available operation include: `countVersions`, `read`, `restoreVersion`, and `update`. |
+| **`context`**   | Custom context passed between Hooks. [More details](./context).                                                                                                     |
+| **`operation`** | The name of the operation that this hook is running within.                                                                                                         |
+| **`req`**       | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.               |
 
 ### beforeValidate
 
@@ -169,7 +195,7 @@ const afterReadHook: GlobalAfterReadHook = async ({
 }) => {...}
 ```
 
-The following arguments are provided to the `beforeRead` hook:
+The following arguments are provided to the `afterRead` hook:
 
 | Option         | Description                                                                                                                                           |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |

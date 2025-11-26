@@ -12,6 +12,9 @@ import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
 
+/**
+ * @internal
+ */
 export const DefaultNavClient: React.FC<{
   groups: ReturnType<typeof groupNavItems>
   navPreferences: NavPreferences

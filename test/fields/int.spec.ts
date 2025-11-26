@@ -165,6 +165,43 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query multiple hasMany fields', async () => {
+      await payload.delete({ collection: 'text-fields', where: {} })
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['1', '2', '3'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['6'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: { equals: '3' },
+          hasManySecond: {
+            equals: '4',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
     it('should query like on value', async () => {
       const miss = await payload.create({
         collection: 'text-fields',
@@ -3131,7 +3168,10 @@ describe('Fields', () => {
           await payload.create({
             collection: 'json-fields',
             data: {
-              json: { value: i },
+              json: {
+                value: i,
+                isEven: i % 2 === 0,
+              },
             },
           })
         }
@@ -3335,6 +3375,30 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(1)
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
+      })
+
+      it('should query nested numbers with multiple clauses - equals_and_in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.isEven': { equals: true },
+              },
+              {
+                // Tests odd -> even order and even -> odd order for better coverage.
+                'json.value': { in: [1, 4, 2, 3] },
+              },
+            ],
+          },
+        })
+
+        const docIDs = docs.map(({ json }) => json.value)
+
+        expect(docIDs).not.toContain(1)
+        expect(docIDs).toContain(2)
+        expect(docIDs).not.toContain(3)
+        expect(docIDs).toContain(4)
       })
 
       it('should query deeply', async () => {

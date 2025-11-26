@@ -12,7 +12,7 @@ import type {
 export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
-  readonly fieldName: string
+  readonly fieldPath: string
   readonly filterOptions: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
@@ -42,7 +42,7 @@ export const Condition: React.FC<Props> = (props) => {
   const {
     addCondition,
     andIndex,
-    fieldName,
+    fieldPath,
     filterOptions,
     operator,
     orIndex,
@@ -55,7 +55,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   const { t } = useTranslation()
 
-  const reducedField = reducedFields.find((field) => field.value === fieldName)
+  const reducedField = reducedFields.find((field) => field.value === fieldPath)
 
   const [internalValue, setInternalValue] = useState<Value>(value)
 
@@ -74,14 +74,15 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent(async (debouncedValue) => {
+  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
       await updateCondition({
+        type: 'value',
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null ? '' : debouncedValue,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
       })
     }
   })
@@ -98,6 +99,7 @@ export const Condition: React.FC<Props> = (props) => {
     async (field: Option<string>) => {
       setInternalValue(undefined)
       await updateCondition({
+        type: 'field',
         andIndex,
         field: reducedFields.find((option) => option.value === field.value),
         operator,
@@ -124,6 +126,7 @@ export const Condition: React.FC<Props> = (props) => {
       }
 
       await updateCondition({
+        type: 'operator',
         andIndex,
         field: reducedField,
         operator: operator.value,

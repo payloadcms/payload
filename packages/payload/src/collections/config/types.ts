@@ -2,7 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload } from '../../admin/types.js'
+import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -35,6 +35,8 @@ import type {
 } from '../../fields/config/types.js'
 import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
+  CollectionAdminCustom,
+  CollectionCustom,
   CollectionSlug,
   JsonObject,
   RequestContext,
@@ -73,6 +75,18 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
   RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
+/**
+ * Helper type for draft data - makes all fields optional except auto-generated ones
+ * When creating a draft, required fields don't need to be provided as validation is skipped
+ */
+export type DraftDataFromCollection<TData extends JsonObject> = Partial<
+  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+>
+
+export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
+  DataFromCollectionSlug<TSlug>
+>
+
 export type HookOperationType =
   | 'autosave'
   | 'count'
@@ -92,7 +106,9 @@ type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
 export type BeforeOperationHook = (args: {
   args?: any
-  /** The collection which this hook is being run on */
+  /**
+   *  The collection which this hook is being run on
+   */
   collection: SanitizedCollectionConfig
   context: RequestContext
   /**
@@ -369,7 +385,7 @@ export type CollectionAdminOptions = {
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
-  custom?: Record<string, any>
+  custom?: CollectionAdminCustom
   /**
    * Default columns to show in list view
    */
@@ -383,8 +399,38 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
+  /**
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
+   * loading the list view to query only the active columns, as opposed to the entire documents.
+   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
+   * use `forceSelect` in conjunction with this property.
+   *
+   * @experimental This is an experimental feature and may change in the future. Use at your own risk.
+   */
+  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
+  /**
+   * Function to format the URL for document links in the list view.
+   * Return null to disable linking for that document.
+   * Return a string to customize the link destination.
+   * If not provided, uses the default admin edit URL.
+   */
+  formatDocURL?: (args: {
+    collectionSlug: string
+    /**
+     * The default URL that would normally be used for this document link.
+     * You can return this as-is, modify it, or completely replace it.
+     */
+    defaultURL: string
+    doc: Record<string, unknown>
+    req: PayloadRequest
+    /**
+     * The current view context where the link is being generated.
+     * Most relevant values for document linking are 'list' and 'trash'.
+     */
+    viewType?: ViewTypes
+  }) => null | string
   /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
@@ -393,10 +439,10 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @experimental This option is currently in beta and may change in future releases and/or contain bugs.
-   * Use at your own risk.
    * @description Enable grouping by a field in the list view.
    * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   *
+   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
    */
   groupBy?: boolean
   /**
@@ -412,7 +458,9 @@ export type CollectionAdminOptions = {
    */
   listSearchableFields?: string[]
   /**
-   * Live preview options
+   * Live Preview options.
+   *
+   * @see https://payloadcms.com/docs/live-preview/overview
    */
   livePreview?: LivePreviewConfig
   meta?: MetaConfig
@@ -460,7 +508,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   auth?: boolean | IncomingAuthType
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: CollectionCustom
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
@@ -703,6 +751,7 @@ export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends Se
   docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
+    isPublic: boolean
     message: string
   }[]
 }
@@ -711,9 +760,14 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig
 }
 
+export type LocalizedMeta = {
+  [locale: string]: {
+    status: 'draft' | 'published'
+    updatedAt: string
+  }
+}
+
 export type TypeWithID = {
-  deletedAt?: null | string
-  docId?: any
   id: number | string
 }
 

@@ -4,6 +4,7 @@ import type {
   JoinQuery,
   Payload,
   RequestContext,
+  TypedFallbackLocale,
   TypedLocale,
 } from '../../../index.js'
 import type {
@@ -54,7 +55,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: TypedFallbackLocale
   /**
    * Include info about the lock status to the result into all documents with fields: `_isLocked` and `_userEditing`
    */

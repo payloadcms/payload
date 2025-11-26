@@ -131,46 +131,75 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    /**
+     * Duplicates a row in an array or blocks field.
+     * It needs to manipulate two distinct parts of the form state:
+     *   - The `rows` property of the parent field, e.g. `array.rows`, `blocks.rows`, etc.
+     *   - The row's state, e.g. `array.0.id`, `array.0.text`, etc.
+     */
     case 'DUPLICATE_ROW': {
       const { path, rowIndex } = action
       const { remainingFields, rows } = separateRows(path, state)
-      const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObjectSimpleWithoutReactComponents(
-        rowsMetadata[rowIndex],
-      )
+      // 1. Duplicate the `rows` property of the parent field, e.g. `array.rows`, `blocks.rows`, etc.
+      const newRows = [...(state[path].rows || [])]
 
-      if (duplicateRowMetadata.id) {
-        duplicateRowMetadata.id = new ObjectId().toHexString()
+      const newRow = deepCopyObjectSimpleWithoutReactComponents(newRows[rowIndex])
+
+      const newRowID = new ObjectId().toHexString()
+
+      if (newRow.id) {
+        newRow.id = newRowID
       }
 
-      if (rowsMetadata[rowIndex]?.customComponents?.RowLabel) {
-        duplicateRowMetadata.customComponents = {
-          RowLabel: rowsMetadata[rowIndex].customComponents.RowLabel,
+      if (newRows[rowIndex]?.customComponents?.RowLabel) {
+        newRow.customComponents = {
+          RowLabel: newRows[rowIndex].customComponents.RowLabel,
         }
       }
 
-      const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
+      // 2. Duplicate the row's state, e.g. `array.0.id`, `array.0.text`, etc.
+      const newRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
 
-      if (duplicateRowState.id) {
-        duplicateRowState.id.value = new ObjectId().toHexString()
-        duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      // Ensure that `id` in form state exactly matches the row id on the parent field
+      if (newRowState.id) {
+        newRowState.id.value = newRowID
+        newRowState.id.initialValue = newRowID
       }
 
-      for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
-        const idState = duplicateRowState[key]
+      // Generate new ids for all nested id fields, e.g. `array.0.nestedArray.0.id`
+      for (const key of Object.keys(newRowState).filter((key) => key.endsWith('.id'))) {
+        const idState = newRowState[key]
+
+        const newNestedFieldID = new ObjectId().toHexString()
 
         if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
-          duplicateRowState[key].value = new ObjectId().toHexString()
-          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+          newRowState[key].value = newNestedFieldID
+          newRowState[key].initialValue = newNestedFieldID
+
+          // Apply the ID to its corresponding parent field's rows, e.g. `array.0.nestedArray.rows[0].id`
+          const segments = key.split('.')
+          const rowIndex = parseInt(segments[segments.length - 2], 10)
+          const parentFieldPath = segments.slice(0, segments.length - 2).join('.')
+          const parentFieldRows = newRowState?.[parentFieldPath]?.rows
+
+          if (newRowState[parentFieldPath] && Array.isArray(parentFieldRows)) {
+            if (!parentFieldRows[rowIndex]) {
+              parentFieldRows[rowIndex] = {
+                id: newNestedFieldID,
+              }
+            } else {
+              parentFieldRows[rowIndex].id = newNestedFieldID
+            }
+          }
         }
       }
 
       // If there are subfields
-      if (Object.keys(duplicateRowState).length > 0) {
+      if (Object.keys(newRowState).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
-        rows.splice(rowIndex + 1, 0, duplicateRowState)
-        rowsMetadata.splice(rowIndex + 1, 0, duplicateRowMetadata)
+        rows.splice(rowIndex + 1, 0, newRowState)
+        newRows.splice(rowIndex + 1, 0, newRow)
       }
 
       const newState = {
@@ -179,7 +208,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          rows: rowsMetadata,
+          rows: newRows,
           value: rows.length,
         },
       }

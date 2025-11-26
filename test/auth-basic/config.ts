@@ -5,12 +5,16 @@ const dirname = path.dirname(filename)
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
-// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   admin: {
     autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      views: {
+        dashboard: { Component: './Dashboard.js' },
+      },
     },
   },
   typescript: {

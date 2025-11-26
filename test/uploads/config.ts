@@ -30,15 +30,18 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -49,6 +52,7 @@ import {
   versionSlug,
   withoutEnlargeSlug,
 } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -58,9 +62,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  localization: {
+    locales: ['en', 'es', 'fr'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug: relationSlug,
+      versions: { drafts: { autosave: true } },
       fields: [
         {
           name: 'image',
@@ -76,6 +85,42 @@ export default buildConfigWithDefaults({
           name: 'hideFileInputOnCreate',
           type: 'upload',
           relationTo: hideFileInputOnCreateSlug,
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'a',
+              fields: [
+                {
+                  name: 'blocks',
+                  type: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'localizedMediaBlock',
+                      fields: [
+                        {
+                          name: 'media',
+                          type: 'upload',
+                          relationTo: 'media',
+                          localized: true,
+                          required: true,
+                        },
+                        {
+                          name: 'relatedMedia',
+                          type: 'relationship',
+                          relationTo: 'media',
+                          localized: true,
+                          hasMany: true,
+                          maxRows: 5,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -344,6 +389,11 @@ export default buildConfigWithDefaults({
           type: 'text',
           name: 'alt',
         },
+        {
+          type: 'text',
+          name: 'localized',
+          localized: true,
+        },
       ],
       upload: {
         staticDir: path.resolve(dirname, './media'),
@@ -509,6 +559,22 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         mimeTypes: ['text/html'],
+      },
+    },
+    {
+      slug: pdfOnlySlug,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        mimeTypes: ['application/pdf'],
+      },
+    },
+    {
+      slug: restrictedMimeTypesSlug,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        mimeTypes: ['image/png'],
       },
     },
     {
@@ -942,6 +1008,45 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: true,
       access: { delete: () => false },
+    },
+    {
+      slug: mediaWithImageSizeAdminPropsSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'one',
+            height: 200,
+            width: 200,
+            admin: {
+              disableListFilter: true,
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'two',
+            height: 300,
+            width: 300,
+            admin: {
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'three',
+            height: 400,
+            width: 400,
+            admin: {
+              disableListColumn: false,
+              disableListFilter: true,
+            },
+          },
+          {
+            name: 'four',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
     },
   ],
   onInit: async (payload) => {

@@ -3,12 +3,11 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { sortColumn, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
+import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy/index.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/sortColumn.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
@@ -166,8 +165,8 @@ test.describe('Group By', () => {
 
   test('should load group-by from user preferences', async () => {
     await deletePreferences({
-      payload,
       key: `${postsSlug}.list`,
+      payload,
       user,
     })
 
@@ -228,8 +227,8 @@ test.describe('Group By', () => {
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'My Post',
         category: null,
+        title: 'My Post',
       },
     })
 
@@ -248,8 +247,8 @@ test.describe('Group By', () => {
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'My Post',
         date: null,
+        title: 'My Post',
       },
     })
 
@@ -269,22 +268,22 @@ test.describe('Group By', () => {
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'Null Post',
           checkbox: null,
+          title: 'Null Post',
         },
       }),
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'True Post',
           checkbox: true,
+          title: 'True Post',
         },
       }),
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'False Post',
           checkbox: false,
+          title: 'False Post',
         },
       }),
     ])
@@ -344,9 +343,9 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
 
     await sortColumn(page, {
-      scope: table1,
       fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: table1,
       targetState: 'asc',
     })
 
@@ -366,9 +365,9 @@ test.describe('Group By', () => {
     await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
 
     await sortColumn(page, {
-      scope: table1,
       fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: table1,
       targetState: 'desc',
     })
 
@@ -416,9 +415,9 @@ test.describe('Group By', () => {
     })
 
     await addListFilter({
-      page,
       fieldLabel: 'Title',
       operatorLabel: 'equals',
+      page,
       value: 'Find me',
     })
 
@@ -448,9 +447,9 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Category',
       operatorLabel: 'equals',
+      page,
       value: 'Category 1',
     })
 
@@ -461,9 +460,9 @@ test.describe('Group By', () => {
     await page.goto(url.list)
 
     await addListFilter({
-      page,
       fieldLabel: 'Title',
       operatorLabel: 'equals',
+      page,
       value: 'This title does not exist',
     })
 
@@ -478,6 +477,39 @@ test.describe('Group By', () => {
     await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
     await expect(page.locator('.sticky-toolbar')).toBeVisible()
+  })
+
+  test('should paginate globally when grouping by virtual relationship field', async () => {
+    await page.goto(url.list)
+
+    // Open the group-by dropdown
+    const { groupByContainer } = await openGroupBy(page)
+
+    // Select the virtual field
+    const field = groupByContainer.locator('#group-by--field-select')
+    await field.click()
+    await field
+      .locator('.rs__option', {
+        hasText: exactText('Virtual Title From Page'),
+      })
+      .click()
+
+    // Wait for the field to be selected
+    await expect(field.locator('.react-select--single-value')).toHaveText('Virtual Title From Page')
+
+    // Virtual fields get transformed to their resolved path in the URL (page.title)
+    await expect(page).toHaveURL(/&groupBy=page\.title/)
+
+    // Should show sticky toolbar when there are 30 distinct page titles
+    await expect(page.locator('.sticky-toolbar')).toBeVisible()
+
+    // Verify the pagination controls are present
+    await expect(page.locator('.sticky-toolbar .page-controls')).toBeVisible()
+
+    // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
+    const pageInfo = page.locator('.sticky-toolbar .page-controls .page-controls__page-info')
+    await expect(pageInfo).toBeVisible()
+    await expect(pageInfo).toContainText('of 30')
   })
 
   test('should paginate per table', async () => {
@@ -511,8 +543,8 @@ test.describe('Group By', () => {
     await expect(table2.locator('.page-controls')).toBeVisible()
 
     await goToNextPage(page, {
-      scope: table1,
       affectsURL: false,
+      scope: table1,
     })
 
     await expect(page).toHaveURL(/queryByGroup=/)
@@ -524,7 +556,7 @@ test.describe('Group By', () => {
 
   test('should not render per table pagination controls when group-by is not active', async () => {
     // delete user prefs to ensure that group-by isn't populated after loading the page
-    await deletePreferences({ payload, key: `${postsSlug}.list`, user })
+    await deletePreferences({ key: `${postsSlug}.list`, payload, user })
     await page.goto(url.list)
     await expect(page.locator('.page-controls')).toHaveCount(1)
   })
@@ -584,9 +616,9 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      scope: firstTable,
       fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: firstTable,
       targetState: 'asc',
     })
 
@@ -629,9 +661,9 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      scope: firstTable,
       fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: firstTable,
       targetState: 'asc',
     })
 
@@ -692,6 +724,131 @@ test.describe('Group By', () => {
         hasText: exactText('Bulk edit across all pages'),
       }),
     ).toHaveCount(0)
+  })
+
+  test('should group by monomorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has One Relationship',
+      fieldPath: 'MonoHasOneRelationship',
+    })
+
+    // Should show populated values first, then "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
+
+    // Check that Category 1 appears as a group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check that "No value" appears last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by monomorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has Many Relationship',
+      fieldPath: 'MonoHasManyRelationship',
+    })
+
+    // Should flatten hasMany arrays - each category gets its own group
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Both categories should appear as separate groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has One Relationship',
+      fieldPath: 'PolyHasOneRelationship',
+    })
+
+    // Should show groups for both collection types plus "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Check for Category 1 group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check for Post group (should display the post's title as useAsTitle)
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has Many Relationship',
+      fieldPath: 'PolyHasManyRelationship',
+    })
+
+    // Should flatten polymorphic hasMany arrays - each relationship gets its own group
+    // Expecting: Category 1, Category 2, Post, and "No value" = 4 groups
+    await expect(page.locator('.table-wrap')).toHaveCount(4)
+    await expect(page.locator('.group-by-header')).toHaveCount(4)
+
+    // Check for both category groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // Check for post group
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last (documents without any relationships)
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should hide field from groupBy options when admin.disableGroupBy is true', async () => {
+    await page.goto(url.list)
+    const { groupByContainer } = await openGroupBy(page)
+
+    const field = groupByContainer.locator('#group-by--field-select')
+    await field.click()
+
+    await expect(
+      field.locator('.rs__option', {
+        hasText: exactText('Disabled Virtual Relationship From Category'),
+      }),
+    ).toBeHidden()
   })
 
   test.describe('Trash', () => {

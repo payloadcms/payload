@@ -39,8 +39,8 @@ export {
 } from '../fields/config/types.js'
 
 export { getFieldPaths } from '../fields/getFieldPaths.js'
-export * from '../fields/validations.js'
 
+export * from '../fields/validations.js'
 export type {
   FolderBreadcrumb,
   FolderDocumentItemKey,
@@ -52,40 +52,41 @@ export type {
 } from '../folders/types.js'
 
 export { buildFolderWhereConstraints } from '../folders/utils/buildFolderWhereConstraints.js'
+
 export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 export { validOperators, validOperatorSet } from '../types/constants.js'
-
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
-export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 
+export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
+export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
+export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
-
 export { extractID } from '../utilities/extractID.js'
 
-export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
+
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
-
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
+
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
-
+export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 
 export { getSelectMode } from '../utilities/getSelectMode.js'
@@ -116,6 +117,8 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
+
+export { slugify } from '../utilities/slugify.js'
 
 export { toKebabCase } from '../utilities/toKebabCase.js'
 

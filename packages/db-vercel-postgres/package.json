@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "3.54.0",
+  "version": "3.65.0",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -78,8 +78,8 @@
     "@payloadcms/drizzle": "workspace:*",
     "@vercel/postgres": "^0.9.0",
     "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.2",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "pg": "8.16.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",

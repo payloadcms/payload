@@ -9,6 +9,7 @@ import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
 
 import { getCollection } from '../utilities/getEntity.js'
+import { isObjectID } from '../utilities/isObjectID.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -41,7 +42,7 @@ export async function buildSearchParam({
   globalSlug?: string
   incomingPath: string
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   payload: Payload
   val: unknown
@@ -113,7 +114,7 @@ export async function buildSearchParam({
 
     const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
 
-    if (rawQuery) {
+    if (rawQuery && paths.length === 1) {
       return { value: rawQuery }
     }
 
@@ -199,11 +200,11 @@ export async function buildSearchParam({
 
               if (Array.isArray(ref)) {
                 for (const item of ref) {
-                  if (item instanceof Types.ObjectId) {
+                  if (isObjectID(item)) {
                     $in.push(item)
                   }
                 }
-              } else if (ref instanceof Types.ObjectId) {
+              } else if (isObjectID(ref)) {
                 $in.push(ref)
               }
             } else {

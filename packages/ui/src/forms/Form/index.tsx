@@ -25,7 +25,7 @@ import type {
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueues } from '../../hooks/useQueues.js'
+import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -60,6 +60,11 @@ export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
 
+  const validateDrafts =
+    docConfig?.versions?.drafts && typeof docConfig?.versions?.drafts === 'object'
+      ? (docConfig.versions.drafts.validate ?? false)
+      : false
+
   const {
     action,
     beforeSubmit,
@@ -93,7 +98,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
-  const { queueTask } = useQueues()
+  const { queueTask } = useQueue()
 
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
@@ -404,6 +409,16 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
           setSubmitted(true)
 
+          // When there was an error submitting a draft,
+          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+          // Also keep the form as modified so the save button remains enabled for retry.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setModified(true)
+            if (!validateDrafts) {
+              setSubmitted(false)
+            }
+          }
+
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
 
           if (json.message) {
@@ -483,6 +498,7 @@ export const Form: React.FC<FormProps> = (props) => {
       router,
       t,
       i18n,
+      validateDrafts,
       waitForAutocomplete,
     ],
   )

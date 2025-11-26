@@ -13,7 +13,7 @@ export async function assertToastErrors({
 }): Promise<void> {
   const isSingleError = errors.length === 1
   const message = isSingleError
-    ? 'The following field is invalid:'
+    ? 'The following field is invalid: '
     : `The following fields are invalid (${errors.length}):`
 
   // Check the intro message text

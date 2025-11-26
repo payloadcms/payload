@@ -12,6 +12,7 @@ import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
+import { FormatDocURL } from './collections/FormatDocURL/index.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -19,7 +20,10 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
+import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
+import { Localized } from './collections/Localized.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { NoTimestampsCollection } from './collections/NoTimestamps.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
@@ -28,6 +32,7 @@ import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { Virtuals } from './collections/Virtuals.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
@@ -77,6 +82,10 @@ export default buildConfigWithDefaults({
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
+      settingsMenu: [
+        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
+        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
+      ],
       providers: [
         '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
@@ -180,6 +189,7 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     DisableCopyToLocale,
     EditMenuItems,
+    FormatDocURL,
     BaseListFilter,
     with300Documents,
     ListDrawer,
@@ -187,6 +197,10 @@ export default buildConfigWithDefaults({
     UseAsTitleGroupField,
     DisableBulkEdit,
     CustomListDrawer,
+    ListViewSelectAPI,
+    Virtuals,
+    NoTimestampsCollection,
+    Localized,
   ],
   globals: [
     GlobalHidden,
