@@ -221,7 +221,7 @@ export const createOperation = async <
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const resultWithLocales = await beforeChange<JsonObject>({
+    const dataWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
@@ -259,13 +259,13 @@ export const createOperation = async <
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
-        resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
-        resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+        dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
+        dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
       }
 
       doc = await registerLocalStrategy({
         collection: collectionConfig,
-        doc: resultWithLocales,
+        doc: dataWithLocales,
         password: data.password as string,
         payload: req.payload,
         req,
@@ -273,13 +273,13 @@ export const createOperation = async <
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
-        data: resultWithLocales,
+        data: dataWithLocales,
         req,
       })
     }
 
     const verificationToken = doc._verificationToken
-    let result: Document = sanitizeInternalFields(doc)
+    const resultWithLocales: Document = sanitizeInternalFields(doc)
 
     // /////////////////////////////////////
     // Create version
@@ -287,10 +287,10 @@ export const createOperation = async <
 
     if (collectionConfig.versions) {
       await saveVersion({
-        id: result.id,
+        id: resultWithLocales.id,
         autosave,
         collection: collectionConfig,
-        docWithLocales: result,
+        docWithLocales: resultWithLocales,
         operation: 'create',
         payload,
         publishSpecificLocale,
@@ -302,7 +302,7 @@ export const createOperation = async <
     // Send verification email if applicable
     // /////////////////////////////////////
 
-    if (collectionConfig.auth && collectionConfig.auth.verify && result.email) {
+    if (collectionConfig.auth && collectionConfig.auth.verify && resultWithLocales.email) {
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
@@ -310,7 +310,7 @@ export const createOperation = async <
         email: payload.email,
         req,
         token: verificationToken,
-        user: result,
+        user: resultWithLocales,
       })
     }
 
@@ -318,11 +318,11 @@ export const createOperation = async <
     // afterRead - Fields
     // /////////////////////////////////////
 
-    result = await afterRead({
+    let result: Document = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: depth!,
-      doc: result,
+      doc: resultWithLocales,
       draft,
       fallbackLocale: fallbackLocale!,
       global: null,
@@ -345,7 +345,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
-            docWithLocales: result,
+            docWithLocales: resultWithLocales,
             req,
           })) || result
       }
@@ -378,6 +378,7 @@ export const createOperation = async <
             context: req.context,
             data,
             doc: result,
+            docWithLocales: resultWithLocales,
             operation: 'create',
             previousDoc: {},
             previousDocWithLocales: {},

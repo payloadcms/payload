@@ -12,7 +12,7 @@ type UpdateDescendantsArgs = {
   parentDocID: number | string
   parentDocWithLocales: JsonObject & TypeWithID
   parentFieldName: string
-  previousDocWithLocales: JsonObject & TypeWithID
+  previousParentDocWithLocales: JsonObject & TypeWithID
   req: PayloadRequest
   slugPathFieldName: string
   titlePathFieldName: string
@@ -31,6 +31,7 @@ export async function updateDescendants({
   parentDocID,
   parentDocWithLocales,
   parentFieldName,
+  previousParentDocWithLocales,
   req,
   slugPathFieldName,
   titlePathFieldName,
@@ -72,6 +73,11 @@ export async function updateDescendants({
           _h_parentTree: parentDocWithLocales._h_parentTree || null,
           slugPath: parentDocWithLocales[slugPathFieldName],
           titlePath: parentDocWithLocales[titlePathFieldName],
+        },
+        previousParentDoc: {
+          _h_parentTree: previousParentDocWithLocales._h_parentTree || null,
+          slugPath: previousParentDocWithLocales[slugPathFieldName],
+          titlePath: previousParentDocWithLocales[titlePathFieldName],
         },
       })
 

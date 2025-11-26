@@ -40,7 +40,15 @@ export const hierarchyCollectionAfterChange =
     titleFieldName,
     titlePathFieldName,
   }: Required<Args>): CollectionAfterChangeHook =>
-  async ({ collection, doc, previousDoc, previousDocWithLocales, req }) => {
+  async ({
+    collection,
+    doc,
+    docWithLocales,
+    operation,
+    previousDoc,
+    previousDocWithLocales,
+    req,
+  }) => {
     const reqLocale =
       req.locale ||
       (req.payload.config.localization ? req.payload.config.localization.defaultLocale : undefined)
@@ -58,18 +66,19 @@ export const hierarchyCollectionAfterChange =
       titleFieldName,
     })
 
-    if (parentChanged || titleChanged) {
+    const parentChangedOrCreate = parentChanged || operation === 'create'
+
+    if (parentChangedOrCreate || titleChanged) {
       const updatedTreeData = await computeTreeData({
         collection,
-        // TODO: need docWithLocales, not doc
-        doc,
+        docWithLocales,
         fieldIsLocalized: isTitleLocalized,
         localeCodes:
           isTitleLocalized && req.payload.config.localization
             ? req.payload.config.localization.localeCodes
             : undefined,
         newParentID,
-        parentChanged,
+        parentChanged: parentChangedOrCreate,
         previousDocWithLocales,
         req,
         reqLocale:
@@ -114,7 +123,7 @@ export const hierarchyCollectionAfterChange =
         parentDocID: doc.id,
         parentDocWithLocales: updatedDocWithLocales,
         parentFieldName,
-        previousDocWithLocales,
+        previousParentDocWithLocales: previousDocWithLocales,
         req,
         slugPathFieldName,
         titlePathFieldName,
@@ -134,7 +143,7 @@ export const hierarchyCollectionAfterChange =
       if (updatedTitlePath) {
         doc[titlePathFieldName] = updatedTitlePath
       }
-      if (parentChanged) {
+      if (parentChangedOrCreate) {
         doc._h_parentTree = updatedParentTree
         doc._h_depth = updatedParentTree ? updatedParentTree.length : 0
       }

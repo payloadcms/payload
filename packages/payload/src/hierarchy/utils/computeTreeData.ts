@@ -7,7 +7,7 @@ import { generateTreePaths } from './generateTreePaths.js'
 
 type FetchParentAndComputeTreeArgs = {
   collection: SanitizedCollectionConfig
-  doc: Document
+  docWithLocales: Document
   fieldIsLocalized: boolean
   localeCodes?: string[]
   newParentID: null | number | string | undefined
@@ -35,7 +35,7 @@ type FetchParentAndComputeTreeArgs = {
  */
 export async function computeTreeData({
   collection,
-  doc,
+  docWithLocales,
   fieldIsLocalized,
   localeCodes,
   newParentID,
@@ -86,12 +86,12 @@ export async function computeTreeData({
 
     parentSlugPath = derivedPaths?.slugPath
     parentTitlePath = derivedPaths?.titlePath
-    newParentTree = doc._h_parentTree
+    newParentTree = docWithLocales._h_parentTree
   }
 
   // Generate the new tree paths using the parent paths we fetched or derived
   const treePaths = generateTreePaths({
-    docWithLocales: doc,
+    docWithLocales,
     previousDocWithLocales,
     slugify,
     titleFieldName,

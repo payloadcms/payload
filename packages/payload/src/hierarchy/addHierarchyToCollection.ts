@@ -20,8 +20,8 @@ export const addHierarchyToCollection = ({
   slugPathFieldName?: string
   titlePathFieldName?: string
 }) => {
-  const titleField = findUseAsTitleField(collectionConfig)
-  const localizeField: boolean = Boolean(config.localization && titleField.localized)
+  const { localized, titleFieldName } = findUseAsTitleField(collectionConfig)
+  const localizeField: boolean = Boolean(config.localization && localized)
 
   collectionConfig.fields.push(
     {
@@ -75,9 +75,9 @@ export const addHierarchyToCollection = ({
     collectionConfig.admin = {}
   }
   if (!collectionConfig.admin.listSearchableFields) {
-    collectionConfig.admin.listSearchableFields = [titleField.name!]
-  } else if (!collectionConfig.admin.listSearchableFields.includes(titleField.name!)) {
-    collectionConfig.admin.listSearchableFields.push(titleField.name!)
+    collectionConfig.admin.listSearchableFields = [titleFieldName]
+  } else if (!collectionConfig.admin.listSearchableFields.includes(titleFieldName)) {
+    collectionConfig.admin.listSearchableFields.push(titleFieldName)
   }
 
   collectionConfig.hooks = {
@@ -85,11 +85,11 @@ export const addHierarchyToCollection = ({
     afterChange: [
       ...(collectionConfig.hooks?.afterChange || []),
       hierarchyCollectionAfterChange({
-        isTitleLocalized: Boolean(titleField.localized),
+        isTitleLocalized: localized,
         parentFieldName,
         slugify,
         slugPathFieldName,
-        titleFieldName: titleField.name!,
+        titleFieldName,
         titlePathFieldName,
       }),
     ],

@@ -1,21 +1,26 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
-import type { Field, FieldAffectingData } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 
-export function findUseAsTitleField(collectionConfig: CollectionConfig): FieldAffectingData {
+export function findUseAsTitleField(collectionConfig: CollectionConfig): {
+  localized: boolean
+  titleFieldName: string
+} {
   const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
-  const titleField = iterateFields({ fields: collectionConfig.fields, titleFieldName })
-
-  return titleField
+  return iterateFields({ fields: collectionConfig.fields, titleFieldName })
 }
 
-function iterateFields({
-  fields,
-  titleFieldName,
-}: {
-  fields: Field[]
+function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleFieldName: string }): {
+  localized: boolean
   titleFieldName: string
-}): FieldAffectingData {
-  let titleField: FieldAffectingData | undefined
+} {
+  let titleField: { localized: boolean; titleFieldName: string } | undefined
+
+  if (titleFieldName === 'id') {
+    return {
+      localized: false,
+      titleFieldName,
+    }
+  }
 
   for (const field of fields) {
     switch (field.type) {
@@ -23,32 +28,41 @@ function iterateFields({
       case 'number':
       case 'textarea':
         if (field.name === titleFieldName) {
-          return field
+          return {
+            localized: Boolean(field.localized),
+            titleFieldName: field.name,
+          }
         }
         break
       case 'row':
       case 'collapsible':
-        titleField = iterateFields({ fields: field.fields, titleFieldName })
+        {
+          const result = iterateFields({ fields: field.fields, titleFieldName })
+          if (result) {titleField = result}
+        }
         break
       case 'group':
         if (!('name' in field)) {
-          titleField = iterateFields({ fields: field.fields, titleFieldName })
+          const result = iterateFields({ fields: field.fields, titleFieldName })
+          if (result) {titleField = result}
         }
         break
       case 'tabs':
         for (const tab of field.tabs) {
           if (!('name' in tab)) {
-            titleField = iterateFields({ fields: tab.fields, titleFieldName })
+            const result = iterateFields({ fields: tab.fields, titleFieldName })
+            if (result) {titleField = result}
           }
         }
     }
+
+    // If we found the field in recursion, return it
+    if (titleField) {
+      return titleField
+    }
   }
 
-  if (!titleField) {
-    throw new Error(
-      `The Tree View title field "${titleFieldName}" was not found. It cannot be nested within named fields i.e. named groups, named tabs, etc.`,
-    )
-  }
-
-  return titleField
+  throw new Error(
+    `The hierarchy title field "${titleFieldName}" was not found. It cannot be nested within named fields i.e. named groups, named tabs, etc.`,
+  )
 }
