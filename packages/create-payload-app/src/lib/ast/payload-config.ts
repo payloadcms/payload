@@ -15,7 +15,6 @@ import type {
 
 import { debug } from '../../utils/log.js'
 import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
-import { uninstallPackage } from './uninstall-package.js'
 import {
   addImportDeclaration,
   cleanupOrphanedImports,
@@ -669,7 +668,6 @@ export async function configurePayloadConfig(
 
   const allModifications: Modification[] = []
   const allWarnings: string[] = []
-  const packagesToUninstall: string[] = []
 
   try {
     // Create Project and load source file with proper settings
@@ -763,10 +761,6 @@ export async function configurePayloadConfig(
               description: `Cleaned up unused import '${importName}' from '${config.packageName}'`,
             })
           })
-          // Track package for uninstallation
-          if (!packagesToUninstall.includes(config.packageName)) {
-            packagesToUninstall.push(config.packageName)
-          }
         }
       }
     }
@@ -787,36 +781,10 @@ export async function configurePayloadConfig(
     }
 
     // Write transformed file with validation and formatting
-    const writeResult = await writeTransformedFile(sourceFile, {
+    return await writeTransformedFile(sourceFile, {
       formatWithPrettier: options.formatWithPrettier,
       validateStructure: options.validateStructure ?? true,
     })
-
-    if (!writeResult.success) {
-      return writeResult
-    }
-
-    // Uninstall removed packages if package manager info is provided
-    if (packagesToUninstall.length > 0 && options.packageManager && options.projectPath) {
-      debug(`[AST] Uninstalling ${packagesToUninstall.length} removed package(s)...`)
-      for (const packageName of packagesToUninstall) {
-        try {
-          await uninstallPackage(options.projectPath, packageName, options.packageManager)
-          debug(`[AST] ✓ Uninstalled ${packageName}`)
-        } catch (error) {
-          debug(
-            `[AST] Failed to uninstall ${packageName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          )
-          // Don't fail on uninstall errors - orphaned package is better than broken config
-        }
-      }
-    } else if (packagesToUninstall.length > 0) {
-      debug(
-        `[AST] Skipping package uninstall (${packagesToUninstall.length} packages would be removed). Run package manager manually to clean up: ${packagesToUninstall.join(', ')}`,
-      )
-    }
-
-    return writeResult
   } catch (error) {
     debug(`[AST] ✗ Configuration failed: ${error instanceof Error ? error.message : String(error)}`)
     return {

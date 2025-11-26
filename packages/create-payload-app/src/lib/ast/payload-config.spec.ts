@@ -402,7 +402,7 @@ export default buildConfig({
     expect(result.error).toBeDefined()
   })
 
-  it('tracks packages for uninstallation when adapter is replaced', async () => {
+  it('replaces adapter in config file', async () => {
     const filePath = path.join(tempDir, 'payload.config.ts')
     fs.writeFileSync(
       filePath,
@@ -418,41 +418,15 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-      packageManager: 'pnpm',
-      projectPath: tempDir,
     })
 
     expect(result.success).toBe(true)
 
-    // Verify config was updated (uninstall happens asynchronously)
+    // Verify config was updated
     const content = fs.readFileSync(filePath, 'utf-8')
     expect(content).toContain('postgresAdapter')
+    expect(content).toContain('@payloadcms/db-postgres')
     expect(content).not.toContain('mongooseAdapter')
-  })
-
-  it('skips uninstall when packageManager not provided', async () => {
-    const filePath = path.join(tempDir, 'payload.config.ts')
-    fs.writeFileSync(
-      filePath,
-      `import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-export default buildConfig({
-  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
-  collections: []
-})`,
-    )
-
-    const { configurePayloadConfig } = await import('./payload-config')
-    const result = await configurePayloadConfig(filePath, {
-      db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-      // No packageManager or projectPath provided
-    })
-
-    expect(result.success).toBe(true)
-
-    // Should still update config successfully
-    const content = fs.readFileSync(filePath, 'utf-8')
-    expect(content).toContain('postgresAdapter')
+    expect(content).not.toContain('@payloadcms/db-mongodb')
   })
 })

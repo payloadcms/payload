@@ -10,6 +10,7 @@ import path from 'path'
 import { promisify } from 'util'
 
 import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } from '../types.js'
+import type { DatabaseAdapter } from './ast/types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
@@ -222,11 +223,13 @@ async function installAndConfigurePayload(
 }
 
 async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
+  const { getDbPackageName } = await import('./ast/adapter-config.js')
+
   const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
     (pkg) => `${pkg}@latest`,
   )
 
-  packagesToInstall.push(`@payloadcms/db-${dbType}@latest`)
+  packagesToInstall.push(`${getDbPackageName(dbType as DatabaseAdapter)}@latest`)
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')

@@ -181,6 +181,17 @@ describe('create-payload-app', () => {
 
       assertAndExpectToBeTrue(result.success)
 
+      // Configure payload config to use postgres (mimics main.ts flow)
+      const { configurePayloadConfig: configureFromLib } = await import(
+        '../../packages/create-payload-app/src/lib/configure-payload-config.js'
+      )
+      await configureFromLib({
+        dbType: 'postgres',
+        projectDirOrConfigPath: {
+          payloadConfigPath: result.payloadConfigPath,
+        },
+      })
+
       const payloadConfig = path.resolve(
         projectDir,
         result.isSrcDir ? 'src/payload.config.ts' : 'payload.config.ts',
@@ -275,12 +286,12 @@ describe('create-payload-app', () => {
       assertAndExpectToBeTrue(mongoResult.success)
 
       // Verify mongodb is installed
-      let packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
+      const packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
         dependencies: Record<string, string>
       }
       expect(packageJson.dependencies['@payloadcms/db-mongodb']).toBeDefined()
 
-      // Now replace with postgres using AST
+      // Now replace with postgres using AST (simulates manual adapter replacement)
       const { configurePayloadConfig } = await import(
         '../../packages/create-payload-app/src/lib/ast/payload-config.js'
       )
@@ -291,25 +302,16 @@ describe('create-payload-app', () => {
 
       const replaceResult = await configurePayloadConfig(payloadConfig, {
         db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-        packageManager: 'pnpm',
-        projectPath: projectDir,
       })
 
       expect(replaceResult.success).toBe(true)
 
-      // Verify config was updated
+      // Verify config file was updated
       const configContent = fs.readFileSync(payloadConfig, 'utf-8')
       expect(configContent).toContain('postgresAdapter')
       expect(configContent).toContain('@payloadcms/db-postgres')
       expect(configContent).not.toContain('mongooseAdapter')
       expect(configContent).not.toContain('@payloadcms/db-mongodb')
-
-      // Verify package.json was updated (note: actual uninstall happens async)
-      packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
-        dependencies: Record<string, string>
-      }
-      // The config file should be updated, but we can't easily verify npm uninstall happened
-      // in this test without waiting or checking node_modules
     })
   })
 })

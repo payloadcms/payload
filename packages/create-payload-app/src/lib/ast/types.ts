@@ -6,8 +6,6 @@ import type {
   SourceFile,
 } from 'ts-morph'
 
-import type { PackageManager } from '../../types.js'
-
 export type DetectionError = {
   debugInfo?: Record<string, unknown>
   technicalDetails: string
@@ -144,8 +142,6 @@ export type ConfigureOptions = {
     envVarName?: string
     type: DatabaseAdapter
   }
-  packageManager?: PackageManager
-  projectPath?: string
   removeSharp?: boolean
   storage?: StorageAdapter
 } & WriteOptions
