@@ -7,10 +7,10 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
-
 export const sanitizeGlobal = async (
   config: Config,
   global: GlobalConfig,
@@ -115,10 +115,12 @@ export const sanitizeGlobal = async (
         }
       }
 
-      if (!config.localization) {
-        global.versions.drafts.localizeStatus = false
-      } else {
+      const hasLocalizedFields = traverseForLocalizedFields(global.fields)
+
+      if (config.localization && hasLocalizedFields) {
         global.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
+      } else {
+        global.versions.drafts.localizeStatus = false
       }
 
       if (global.versions.drafts.autosave === true) {

@@ -94,7 +94,7 @@ export const updateDocument = async <
   req,
   select,
   showHiddenFields,
-  unpublishAllLocales,
+  unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const publishAllLocales =
@@ -103,6 +103,10 @@ export const updateDocument = async <
       (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus
         ? false
         : true))
+  const unpublishAllLocales =
+    typeof unpublishAllLocalesArg === 'string'
+      ? unpublishAllLocalesArg === 'true'
+      : !!unpublishAllLocalesArg
   const isSavingDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) &&
     data._status !== 'published' &&
