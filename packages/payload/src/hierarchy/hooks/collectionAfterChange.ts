@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook } from '../../index.js'
 
-import { computeTreeData } from '../utils/fetchParentAndComputeTree.js'
+import { computeTreeData } from '../utils/computeTreeData.js'
 import { getTreeChanges } from '../utils/getTreeChanges.js'
 import { updateDescendants } from '../utils/updateDescendants.js'
 
@@ -61,6 +61,7 @@ export const hierarchyCollectionAfterChange =
     if (parentChanged || titleChanged) {
       const updatedTreeData = await computeTreeData({
         collection,
+        // TODO: need docWithLocales, not doc
         doc,
         fieldIsLocalized: isTitleLocalized,
         localeCodes:
@@ -85,7 +86,8 @@ export const hierarchyCollectionAfterChange =
         id: doc.id,
         collection: collection.slug,
         data: {
-          _parentTree: updatedTreeData._parentTree,
+          _h_depth: updatedTreeData._h_parentTree?.length ?? 0,
+          _h_parentTree: updatedTreeData._h_parentTree,
           [parentFieldName]: newParentID,
           [slugPathFieldName]: updatedTreeData.slugPath,
           [titlePathFieldName]: updatedTreeData.titlePath,
@@ -93,7 +95,8 @@ export const hierarchyCollectionAfterChange =
         locale: 'all',
         req,
         select: {
-          _parentTree: true,
+          _h_depth: true,
+          _h_parentTree: true,
           [slugPathFieldName]: true,
           [titlePathFieldName]: true,
         },
@@ -123,7 +126,7 @@ export const hierarchyCollectionAfterChange =
       const updatedTitlePath = isTitleLocalized
         ? updatedDocWithLocales[titlePathFieldName][reqLocale!]
         : updatedDocWithLocales[titlePathFieldName]
-      const updatedParentTree = updatedDocWithLocales._parentTree
+      const updatedParentTree = updatedDocWithLocales._h_parentTree
 
       if (updatedSlugPath) {
         doc[slugPathFieldName] = updatedSlugPath
@@ -132,7 +135,8 @@ export const hierarchyCollectionAfterChange =
         doc[titlePathFieldName] = updatedTitlePath
       }
       if (parentChanged) {
-        doc._parentTree = updatedParentTree
+        doc._h_parentTree = updatedParentTree
+        doc._h_depth = updatedParentTree ? updatedParentTree.length : 0
       }
 
       return doc

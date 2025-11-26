@@ -47,12 +47,12 @@ export async function updateDescendants({
       page: currentPage,
       req,
       select: {
-        _parentTree: true,
+        _h_parentTree: true,
         [slugPathFieldName]: true,
         [titlePathFieldName]: true,
       },
       where: {
-        _parentTree: {
+        _h_parentTree: {
           in: [parentDocID],
         },
       },
@@ -62,22 +62,24 @@ export async function updateDescendants({
     descendantDocsQuery.docs.forEach((affectedDoc) => {
       const newTreePaths = adjustDescendantTreePaths({
         doc: {
-          _parentTree: affectedDoc._parentTree,
+          _h_parentTree: affectedDoc._h_parentTree,
           slugPath: affectedDoc[slugPathFieldName],
           titlePath: affectedDoc[titlePathFieldName],
         },
         fieldIsLocalized,
         localeCodes,
         parentDoc: {
-          _parentTree: parentDocWithLocales._parentTree || null,
+          _h_parentTree: parentDocWithLocales._h_parentTree || null,
           slugPath: parentDocWithLocales[slugPathFieldName],
           titlePath: parentDocWithLocales[titlePathFieldName],
         },
       })
 
-      const parentDocIndex = affectedDoc._parentTree?.indexOf(parentDocID) ?? -1
+      const parentDocIndex = affectedDoc._h_parentTree?.indexOf(parentDocID) ?? -1
       const unchangedParentTree =
-        parentDocIndex >= 0 ? affectedDoc._parentTree.slice(parentDocIndex) : []
+        parentDocIndex >= 0 ? affectedDoc._h_parentTree.slice(parentDocIndex) : []
+
+      const newParentTree = [...(parentDocWithLocales._h_parentTree || []), ...unchangedParentTree]
 
       updatePromises.push(
         // this pattern has an issue bc it will not run hooks on the affected documents
@@ -87,7 +89,8 @@ export async function updateDescendants({
           id: affectedDoc.id,
           collection: collection.slug,
           data: {
-            _parentTree: [...(parentDocWithLocales._parentTree || []), ...unchangedParentTree],
+            _h_depth: newParentTree.length,
+            _h_parentTree: newParentTree,
             [parentFieldName]: newParentID,
             [slugPathFieldName]: newTreePaths.slugPath,
             [titlePathFieldName]: newTreePaths.titlePath,

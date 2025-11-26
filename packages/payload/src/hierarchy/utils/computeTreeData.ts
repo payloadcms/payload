@@ -60,13 +60,13 @@ export async function computeTreeData({
       depth: 0,
       locale: 'all',
       select: {
-        _parentTree: true,
+        _h_parentTree: true,
         [slugPathFieldName]: true,
         [titlePathFieldName]: true,
       },
     })
 
-    newParentTree = [...(parentDoc?._parentTree || []), newParentID]
+    newParentTree = [...(parentDoc?._h_parentTree || []), newParentID]
     parentSlugPath = parentDoc ? parentDoc[slugPathFieldName] : undefined
     parentTitlePath = parentDoc ? parentDoc[titlePathFieldName] : undefined
   } else if (parentChanged && !newParentID) {
@@ -86,7 +86,7 @@ export async function computeTreeData({
 
     parentSlugPath = derivedPaths?.slugPath
     parentTitlePath = derivedPaths?.titlePath
-    newParentTree = doc._parentTree
+    newParentTree = doc._h_parentTree
   }
 
   // Generate the new tree paths using the parent paths we fetched or derived
@@ -111,7 +111,7 @@ export async function computeTreeData({
   })
 
   return {
-    _parentTree: newParentTree,
+    _h_parentTree: newParentTree,
     slugPath: treePaths.slugPath,
     titlePath: treePaths.titlePath,
   }

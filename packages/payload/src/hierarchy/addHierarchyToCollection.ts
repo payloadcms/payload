@@ -10,8 +10,8 @@ export const addHierarchyToCollection = ({
   config,
   parentFieldName,
   slugify = defaultSlugify,
-  slugPathFieldName = '_prefixSlugPath',
-  titlePathFieldName = '_prefixTitlePath',
+  slugPathFieldName = '_h_slugPath',
+  titlePathFieldName = '_h_titlePath',
 }: {
   collectionConfig: CollectionConfig
   config: Config
@@ -47,7 +47,7 @@ export const addHierarchyToCollection = ({
       localized: localizeField,
     },
     {
-      name: '_parentTree',
+      name: '_h_parentTree',
       type: 'relationship',
       admin: {
         allowEdit: false,
@@ -59,6 +59,15 @@ export const addHierarchyToCollection = ({
       index: true,
       maxDepth: 0,
       relationTo: collectionConfig.slug,
+    },
+    {
+      name: '_h_depth',
+      type: 'number',
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+      index: true,
     },
   )
 
