@@ -121,3 +121,124 @@ export function removeImportDeclaration({
     return undefined
   }
 }
+
+/**
+ * Remove specific named imports from an import declaration
+ * If all named imports are removed, removes the entire declaration
+ */
+export function removeNamedImports({
+  importDeclaration,
+  namedImportsToRemove,
+  sourceFile,
+}: {
+  importDeclaration: ImportDeclaration
+  namedImportsToRemove: string[]
+  sourceFile: SourceFile
+}): { fullyRemoved: boolean; index?: number } {
+  const namedImports = importDeclaration.getNamedImports()
+  const remainingImports = namedImports.filter((ni) => !namedImportsToRemove.includes(ni.getName()))
+
+  const moduleSpecifier = importDeclaration.getModuleSpecifierValue()
+
+  debug(
+    `[AST] Removing named imports [${namedImportsToRemove.join(', ')}] from '${moduleSpecifier}'`,
+  )
+  debug(`[AST] Remaining imports: ${remainingImports.length}`)
+
+  if (remainingImports.length === 0 && !importDeclaration.getDefaultImport()) {
+    // No imports left, remove entire declaration
+    const allImports = sourceFile.getImportDeclarations()
+    const index = allImports.indexOf(importDeclaration)
+    importDeclaration.remove()
+    debug(`[AST] ✓ Removed entire import from '${moduleSpecifier}' (no remaining imports)`)
+    return { fullyRemoved: true, index }
+  } else {
+    // Remove specific named imports
+    namedImports.forEach((ni) => {
+      if (namedImportsToRemove.includes(ni.getName())) {
+        ni.remove()
+      }
+    })
+    debug(
+      `[AST] ✓ Removed named imports, kept ${remainingImports.length} import(s) from '${moduleSpecifier}'`,
+    )
+    return { fullyRemoved: false }
+  }
+}
+
+/**
+ * Check if a named import is used in the source file
+ */
+export function isNamedImportUsed(
+  sourceFile: SourceFile,
+  importName: string,
+  excludeImports = true,
+): boolean {
+  const fullText = sourceFile.getFullText()
+
+  if (excludeImports) {
+    // Remove import declarations from consideration
+    const imports = sourceFile.getImportDeclarations()
+    let textWithoutImports = fullText
+
+    imports.forEach((imp) => {
+      const importText = imp.getFullText()
+      textWithoutImports = textWithoutImports.replace(importText, '')
+    })
+
+    // Check if import name appears in code (not in imports)
+    // Use word boundary to avoid partial matches
+    const regex = new RegExp(`\\b${importName}\\b`)
+    return regex.test(textWithoutImports)
+  }
+
+  // Simple check including imports
+  const regex = new RegExp(`\\b${importName}\\b`)
+  return regex.test(fullText)
+}
+
+/**
+ * Clean up orphaned imports - remove imports that are no longer used
+ */
+export function cleanupOrphanedImports({
+  importNames,
+  moduleSpecifier,
+  sourceFile,
+}: {
+  importNames: string[]
+  moduleSpecifier: string
+  sourceFile: SourceFile
+}): { kept: string[]; removed: string[] } {
+  const importDecl = findImportDeclaration({ moduleSpecifier, sourceFile })
+
+  if (!importDecl) {
+    debug(`[AST] No import found from '${moduleSpecifier}' to clean up`)
+    return { kept: [], removed: [] }
+  }
+
+  const removed: string[] = []
+  const kept: string[] = []
+
+  for (const importName of importNames) {
+    const isUsed = isNamedImportUsed(sourceFile, importName)
+
+    if (!isUsed) {
+      removed.push(importName)
+      debug(`[AST] Import '${importName}' from '${moduleSpecifier}' is orphaned (not used)`)
+    } else {
+      kept.push(importName)
+      debug(`[AST] Import '${importName}' from '${moduleSpecifier}' is still used`)
+    }
+  }
+
+  if (removed.length > 0) {
+    removeNamedImports({
+      importDeclaration: importDecl,
+      namedImportsToRemove: removed,
+      sourceFile,
+    })
+    debug(`[AST] ✓ Cleaned up ${removed.length} orphaned import(s) from '${moduleSpecifier}'`)
+  }
+
+  return { kept, removed }
+}

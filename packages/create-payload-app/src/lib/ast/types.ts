@@ -6,6 +6,8 @@ import type {
   SourceFile,
 } from 'ts-morph'
 
+import type { PackageManager } from '../../types.js'
+
 export type DetectionError = {
   debugInfo?: Record<string, unknown>
   technicalDetails: string
@@ -19,11 +21,83 @@ export type PayloadConfigStructures = {
   pluginsArray?: ArrayLiteralExpression
 }
 
+/**
+ * Detection result with edge case tracking and import source information
+ */
 export type DetectionResult = {
+  /** Edge case flags */
+  edgeCases?: {
+    /** Import uses an alias (e.g., import { buildConfig as bc }) */
+    hasImportAlias: boolean
+    /** Other Payload imports exist (e.g., CollectionConfig) */
+    hasOtherPayloadImports: boolean
+    /** Multiple buildConfig calls found in file */
+    multipleBuildConfigCalls: boolean
+    /** Needs manual intervention (can't be automatically handled) */
+    needsManualIntervention: boolean
+  }
   error?: DetectionError
+  /** Import source tracking */
+  importSources?: {
+    /** Current database adapter import info */
+    dbAdapter?: {
+      hasOtherImports: boolean
+      importDeclaration: ImportDeclaration
+      packageName: string
+    }
+    /** Current storage adapter import info */
+    storageAdapters?: Array<{
+      hasOtherImports: boolean
+      importDeclaration: ImportDeclaration
+      packageName: string
+    }>
+  }
+  /** Source file reference */
   sourceFile?: SourceFile
+  /** Detected structures */
   structures?: PayloadConfigStructures
   success: boolean
+}
+
+/**
+ * Tracks a single modification made to the AST
+ */
+export type Modification = {
+  description: string
+  location?: {
+    column: number
+    line: number
+  }
+  type:
+    | 'function-renamed'
+    | 'import-added'
+    | 'import-modified'
+    | 'import-removed'
+    | 'property-added'
+    | 'property-removed'
+}
+
+/**
+ * Result of transformation operations
+ */
+export type TransformationResult = {
+  error?: DetectionError
+  modifications: Modification[]
+  modified: boolean
+  success: boolean
+  warnings?: string[]
+}
+
+/**
+ * Final result after writing to disk
+ */
+export type ModificationResult = {
+  error?: DetectionError
+  filePath: string
+  formatted?: boolean
+  modifications: Modification[]
+  success: boolean
+  warnings?: string[]
 }
 export type DatabaseAdapter = (typeof ALL_DATABASE_ADAPTERS)[number]
 
@@ -70,6 +144,8 @@ export type ConfigureOptions = {
     envVarName?: string
     type: DatabaseAdapter
   }
+  packageManager?: PackageManager
+  projectPath?: string
   removeSharp?: boolean
   storage?: StorageAdapter
 } & WriteOptions

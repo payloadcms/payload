@@ -73,7 +73,15 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter({ sourceFile, adapter: 'mongodb', envVarName: 'DATABASE_URI' })
+    const result = addDatabaseAdapter({
+      sourceFile,
+      adapter: 'mongodb',
+      envVarName: 'DATABASE_URI',
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.modified).toBe(true)
+    expect(result.modifications.length).toBeGreaterThan(0)
 
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*mongooseAdapter.*from.*@payloadcms\/db-mongodb/)
@@ -92,7 +100,14 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
+    const result = addDatabaseAdapter({
+      sourceFile,
+      adapter: 'postgres',
+      envVarName: 'DATABASE_URI',
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.modified).toBe(true)
 
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
@@ -112,8 +127,13 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
+    const result = addDatabaseAdapter({
+      sourceFile,
+      adapter: 'postgres',
+      envVarName: 'DATABASE_URI',
+    })
 
+    expect(result.success).toBe(true)
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
     expect(text).toContain('db: postgresAdapter')
@@ -136,8 +156,13 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
+    const result = addDatabaseAdapter({
+      sourceFile,
+      adapter: 'postgres',
+      envVarName: 'DATABASE_URI',
+    })
 
+    expect(result.success).toBe(true)
     const text = sourceFile.getText()
     // Verify db property is still between collections and typescript
     const dbIndex = text.indexOf('db: postgresAdapter')
@@ -160,8 +185,13 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter({ sourceFile, adapter: 'mongodb', envVarName: 'DATABASE_URI' })
+    const result = addDatabaseAdapter({
+      sourceFile,
+      adapter: 'mongodb',
+      envVarName: 'DATABASE_URI',
+    })
 
+    expect(result.success).toBe(true)
     const text = sourceFile.getText()
     // Verify db property is after collections (at end)
     const dbIndex = text.indexOf('db: mongooseAdapter')
@@ -185,7 +215,11 @@ export default buildConfig({
 })`,
     )
 
-    addDatabaseAdapter({ sourceFile, adapter: 'postgres', envVarName: 'DATABASE_URI' })
+    const result = addDatabaseAdapter({
+      sourceFile,
+      adapter: 'postgres',
+      envVarName: 'DATABASE_URI',
+    })
 
     const text = sourceFile.getText()
     const lines = text.split('\n')
@@ -219,8 +253,10 @@ export default buildConfig({
 })`,
     )
 
-    addStorageAdapter({ sourceFile, adapter: 'vercelBlobStorage' })
+    const result = addStorageAdapter({ sourceFile, adapter: 'vercelBlobStorage' })
 
+    expect(result.success).toBe(true)
+    expect(result.modified).toBe(true)
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*vercelBlobStorage.*from.*@payloadcms\/storage-vercel-blob/)
     expect(text).toContain('vercelBlobStorage(')
@@ -237,8 +273,9 @@ export default buildConfig({
 })`,
     )
 
-    addStorageAdapter({ sourceFile, adapter: 'r2Storage' })
+    const result = addStorageAdapter({ sourceFile, adapter: 'r2Storage' })
 
+    expect(result.success).toBe(true)
     const text = sourceFile.getText()
     expect(text).toContain('plugins: [')
     expect(text).toContain('r2Storage(')
@@ -257,8 +294,9 @@ export default buildConfig({
 })`,
     )
 
-    addStorageAdapter({ sourceFile, adapter: 's3Storage' })
+    const result = addStorageAdapter({ sourceFile, adapter: 's3Storage' })
 
+    expect(result.success).toBe(true)
     const text = sourceFile.getText()
     expect(text).toContain('someOtherPlugin()')
     expect(text).toContain('s3Storage(')
@@ -279,8 +317,11 @@ export default buildConfig({
 })`,
     )
 
-    removeSharp(sourceFile)
+    const result = removeSharp(sourceFile)
 
+    expect(result.success).toBe(true)
+    expect(result.modified).toBe(true)
+    expect(result.modifications.length).toBeGreaterThan(0)
     const text = sourceFile.getText()
     expect(text).not.toContain("import sharp from 'sharp'")
     expect(text).not.toContain('sharp,')
@@ -297,10 +338,10 @@ export default buildConfig({
 })`,
     )
 
-    const originalText = sourceFile.getText()
-    removeSharp(sourceFile)
+    const result = removeSharp(sourceFile)
 
-    expect(sourceFile.getText()).toBe(originalText)
+    expect(result.success).toBe(true)
+    expect(result.modified).toBe(false)
   })
 })
 

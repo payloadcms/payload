@@ -6,14 +6,22 @@ import type {
   ConfigureOptions,
   DatabaseAdapter,
   DetectionResult,
+  Modification,
   StorageAdapter,
+  TransformationResult,
   WriteOptions,
   WriteResult,
 } from './types.js'
 
 import { debug } from '../../utils/log.js'
 import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
-import { addImportDeclaration, formatError, removeImportDeclaration } from './utils.js'
+import { uninstallPackage } from './uninstall-package.js'
+import {
+  addImportDeclaration,
+  cleanupOrphanedImports,
+  formatError,
+  removeImportDeclaration,
+} from './utils.js'
 
 export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionResult {
   debug(`[AST] Detecting payload config structure in ${sourceFile.getFilePath()}`)
@@ -77,7 +85,84 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
 
   debug(`[AST] plugins array: ${pluginsArray ? '✓ found' : '✗ not found'}`)
 
+  // Find all buildConfig calls for edge case detection
+  const allBuildConfigCalls = sourceFile
+    .getDescendantsOfKind(SyntaxKind.CallExpression)
+    .filter((call) => {
+      const expression = call.getExpression()
+      return expression.getText() === 'buildConfig'
+    })
+
+  // Check for import aliases
+  const payloadImport = sourceFile
+    .getImportDeclarations()
+    .find((imp) => imp.getModuleSpecifierValue() === 'payload')
+
+  const buildConfigImportSpec = payloadImport
+    ?.getNamedImports()
+    .find((spec) => spec.getName() === 'buildConfig')
+
+  const hasImportAlias = !!buildConfigImportSpec?.getAliasNode()
+
+  // Check for other Payload imports
+  const payloadImports = payloadImport?.getNamedImports() || []
+  const hasOtherPayloadImports =
+    payloadImports.length > 1 || payloadImports.some((imp) => imp.getName() !== 'buildConfig')
+
+  // Track database adapter imports
+  let dbAdapterImportInfo
+  for (const [, config] of Object.entries(DB_ADAPTER_CONFIG)) {
+    const importDecl = sourceFile
+      .getImportDeclarations()
+      .find((imp) => imp.getModuleSpecifierValue() === config.packageName)
+
+    if (importDecl) {
+      const namedImports = importDecl.getNamedImports()
+      dbAdapterImportInfo = {
+        hasOtherImports: namedImports.length > 1,
+        importDeclaration: importDecl,
+        packageName: config.packageName,
+      }
+      break
+    }
+  }
+
+  // Track storage adapter imports
+  const storageAdapterImports = []
+  for (const [, config] of Object.entries(STORAGE_ADAPTER_CONFIG)) {
+    if (!config.packageName || !config.adapterName) {continue}
+
+    const importDecl = sourceFile
+      .getImportDeclarations()
+      .find((imp) => imp.getModuleSpecifierValue() === config.packageName)
+
+    if (importDecl) {
+      const namedImports = importDecl.getNamedImports()
+      storageAdapterImports.push({
+        hasOtherImports: namedImports.length > 1,
+        importDeclaration: importDecl,
+        packageName: config.packageName,
+      })
+    }
+  }
+
+  const needsManualIntervention = hasImportAlias || allBuildConfigCalls.length > 2
+
+  debug(
+    `[AST] Edge cases: alias=${hasImportAlias}, multiple=${allBuildConfigCalls.length > 1}, otherImports=${hasOtherPayloadImports}, manual=${needsManualIntervention}`,
+  )
+
   return {
+    edgeCases: {
+      hasImportAlias,
+      hasOtherPayloadImports,
+      multipleBuildConfigCalls: allBuildConfigCalls.length > 1,
+      needsManualIntervention,
+    },
+    importSources: {
+      dbAdapter: dbAdapterImportInfo,
+      storageAdapters: storageAdapterImports.length > 0 ? storageAdapterImports : undefined,
+    },
     sourceFile,
     structures: {
       buildConfigCall,
@@ -97,13 +182,20 @@ export function addDatabaseAdapter({
   adapter: DatabaseAdapter
   envVarName?: string
   sourceFile: SourceFile
-}): void {
+}): TransformationResult {
   debug(`[AST] Adding database adapter: ${adapter} (envVar: ${envVarName})`)
+
+  const modifications: Modification[] = []
 
   const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success || !detection.structures) {
-    throw new Error('Cannot add database adapter: ' + detection.error?.userMessage)
+    return {
+      error: detection.error,
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const { buildConfigCall, dbProperty } = detection.structures
@@ -125,6 +217,10 @@ export function addDatabaseAdapter({
           importInsertIndex = removedIndex
         }
         removedAdapters.push(oldConfig.packageName)
+        modifications.push({
+          type: 'import-removed',
+          description: `Removed import from '${oldConfig.packageName}'`,
+        })
       }
     }
   })
@@ -140,6 +236,10 @@ export function addDatabaseAdapter({
     namedImports: [config.adapterName],
     sourceFile,
   })
+  modifications.push({
+    type: 'import-added',
+    description: `Added import: { ${config.adapterName} } from '${config.packageName}'`,
+  })
 
   // Add special imports for specific adapters
   if (adapter === 'd1-sqlite') {
@@ -149,12 +249,26 @@ export function addDatabaseAdapter({
       moduleSpecifier: './db/migrations',
       sourceFile,
     })
+    modifications.push({
+      type: 'import-added',
+      description: `Added import: migrations from './db/migrations'`,
+    })
   }
 
   // Get config object
   const configObject = buildConfigCall.getArguments()[0]
   if (!configObject || configObject.getKind() !== SyntaxKind.ObjectLiteralExpression) {
-    throw new Error('buildConfig must have an object literal argument')
+    return {
+      error: formatError({
+        actual: 'buildConfig has no object literal argument',
+        context: 'database adapter configuration',
+        expected: 'buildConfig({ ... })',
+        technicalDetails: 'buildConfig call must have an object literal as first argument',
+      }),
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
@@ -167,6 +281,10 @@ export function addDatabaseAdapter({
     insertIndex = allProperties.indexOf(dbProperty)
     debug(`[AST] Replacing db property at index ${insertIndex}`)
     dbProperty.remove()
+    modifications.push({
+      type: 'property-removed',
+      description: `Removed existing db property`,
+    })
   } else {
     // No existing db property - insert at end
     insertIndex = objLiteral.getProperties().length
@@ -177,8 +295,18 @@ export function addDatabaseAdapter({
     name: 'db',
     initializer: config.configTemplate(envVarName),
   })
+  modifications.push({
+    type: 'property-added',
+    description: `Added db property with ${adapter} adapter`,
+  })
 
   debug(`[AST] ✓ Database adapter ${adapter} added successfully`)
+
+  return {
+    modifications,
+    modified: true,
+    success: true,
+  }
 }
 
 export function addStorageAdapter({
@@ -187,13 +315,20 @@ export function addStorageAdapter({
 }: {
   adapter: StorageAdapter
   sourceFile: SourceFile
-}): void {
+}): TransformationResult {
   debug(`[AST] Adding storage adapter: ${adapter}`)
+
+  const modifications: Modification[] = []
 
   const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success || !detection.structures) {
-    throw new Error('Cannot add storage adapter: ' + detection.error?.userMessage)
+    return {
+      error: detection.error,
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const config = STORAGE_ADAPTER_CONFIG[adapter]
@@ -201,7 +336,11 @@ export function addStorageAdapter({
   // Local disk doesn't need any imports or plugins
   if (adapter === 'localDisk') {
     debug('[AST] localDisk storage adapter - no imports or plugins needed')
-    return
+    return {
+      modifications: [],
+      modified: false,
+      success: true,
+    }
   }
 
   // Add import
@@ -211,13 +350,27 @@ export function addStorageAdapter({
       namedImports: [config.adapterName],
       sourceFile,
     })
+    modifications.push({
+      type: 'import-added',
+      description: `Added import: { ${config.adapterName} } from '${config.packageName}'`,
+    })
   }
 
   const { buildConfigCall } = detection.structures
   const configObject = buildConfigCall.getArguments()[0]
 
   if (!configObject || configObject.getKind() !== SyntaxKind.ObjectLiteralExpression) {
-    throw new Error('buildConfig must have an object literal argument')
+    return {
+      error: formatError({
+        actual: 'buildConfig has no object literal argument',
+        context: 'storage adapter configuration',
+        expected: 'buildConfig({ ... })',
+        technicalDetails: 'buildConfig call must have an object literal as first argument',
+      }),
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
@@ -248,6 +401,10 @@ export function addStorageAdapter({
     })
 
     pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+    modifications.push({
+      type: 'property-added',
+      description: `Converted shorthand plugins property to array with spread syntax`,
+    })
   } else if (!pluginsProperty) {
     debug('[AST] Creating new plugins array')
     // Create plugins array
@@ -256,17 +413,41 @@ export function addStorageAdapter({
       initializer: '[]',
     })
     pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+    modifications.push({
+      type: 'property-added',
+      description: `Created plugins array`,
+    })
   } else {
     debug('[AST] Reusing existing plugins array')
   }
 
   if (!pluginsProperty) {
-    throw new Error('Failed to create plugins property')
+    return {
+      error: formatError({
+        actual: 'Failed to create or find plugins property',
+        context: 'storage adapter configuration',
+        expected: 'plugins array property',
+        technicalDetails: 'Could not create or access plugins property',
+      }),
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const initializer = pluginsProperty.getInitializer()
   if (!initializer || initializer.getKind() !== SyntaxKind.ArrayLiteralExpression) {
-    throw new Error('plugins must be an array')
+    return {
+      error: formatError({
+        actual: 'plugins property is not an array',
+        context: 'storage adapter configuration',
+        expected: 'plugins: [...]',
+        technicalDetails: 'plugins property must be an array literal expression',
+      }),
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const pluginsArray = initializer.asKindOrThrow(SyntaxKind.ArrayLiteralExpression)
@@ -275,29 +456,66 @@ export function addStorageAdapter({
   const configText = config.configTemplate()
   if (configText) {
     pluginsArray.addElement(configText)
+    modifications.push({
+      type: 'property-added',
+      description: `Added ${adapter} to plugins array`,
+    })
   }
 
   debug(`[AST] ✓ Storage adapter ${adapter} added successfully`)
+
+  return {
+    modifications,
+    modified: true,
+    success: true,
+  }
 }
 
-export function removeSharp(sourceFile: SourceFile): void {
+export function removeSharp(sourceFile: SourceFile): TransformationResult {
   debug('[AST] Removing sharp import and property')
 
+  const modifications: Modification[] = []
+
   // Remove import
-  removeImportDeclaration({ moduleSpecifier: 'sharp', sourceFile })
+  const removedIndex = removeImportDeclaration({ moduleSpecifier: 'sharp', sourceFile })
+  if (removedIndex !== undefined) {
+    modifications.push({
+      type: 'import-removed',
+      description: `Removed import from 'sharp'`,
+    })
+  }
 
   // Find and remove sharp property from buildConfig
   const detection = detectPayloadConfigStructure(sourceFile)
 
   if (!detection.success || !detection.structures) {
-    return
+    // If detection failed but we removed import, still count as partial success
+    if (modifications.length > 0) {
+      return {
+        modifications,
+        modified: true,
+        success: true,
+        warnings: ['Could not detect config structure to remove sharp property'],
+      }
+    }
+    return {
+      error: detection.error,
+      modifications: [],
+      modified: false,
+      success: false,
+    }
   }
 
   const { buildConfigCall } = detection.structures
   const configObject = buildConfigCall.getArguments()[0]
 
   if (!configObject || configObject.getKind() !== SyntaxKind.ObjectLiteralExpression) {
-    return
+    return {
+      modifications,
+      modified: modifications.length > 0,
+      success: true,
+      warnings: ['buildConfig has no object literal argument - could not remove sharp property'],
+    }
   }
 
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
@@ -305,9 +523,19 @@ export function removeSharp(sourceFile: SourceFile): void {
 
   if (sharpProperty) {
     sharpProperty.remove()
+    modifications.push({
+      type: 'property-removed',
+      description: `Removed sharp property from config`,
+    })
     debug('[AST] ✓ Sharp property removed from config')
   } else {
     debug('[AST] Sharp property not found (already absent)')
+  }
+
+  return {
+    modifications,
+    modified: modifications.length > 0,
+    success: true,
   }
 }
 
@@ -432,6 +660,10 @@ export async function configurePayloadConfig(
     `[AST] Options: db=${options.db?.type}, storage=${options.storage}, removeSharp=${options.removeSharp}`,
   )
 
+  const allModifications: Modification[] = []
+  const allWarnings: string[] = []
+  const packagesToUninstall: string[] = []
+
   try {
     // Create Project and load source file with proper settings
     const project = new Project({
@@ -450,31 +682,134 @@ export async function configurePayloadConfig(
     // Apply transformations based on options
     if (options.db) {
       debug('[AST] Applying database adapter transformation')
-      addDatabaseAdapter({
+      const result = addDatabaseAdapter({
         adapter: options.db.type,
         envVarName: options.db.envVarName,
         sourceFile,
       })
+
+      if (!result.success) {
+        return {
+          error: result.error,
+          success: false,
+        }
+      }
+
+      allModifications.push(...result.modifications)
+      if (result.warnings) {
+        allWarnings.push(...result.warnings)
+      }
     }
 
     if (options.storage) {
       debug('[AST] Applying storage adapter transformation')
-      addStorageAdapter({ adapter: options.storage, sourceFile })
+      const result = addStorageAdapter({ adapter: options.storage, sourceFile })
+
+      if (!result.success) {
+        return {
+          error: result.error,
+          success: false,
+        }
+      }
+
+      allModifications.push(...result.modifications)
+      if (result.warnings) {
+        allWarnings.push(...result.warnings)
+      }
     }
 
     if (options.removeSharp) {
       debug('[AST] Applying sharp removal')
-      removeSharp(sourceFile)
+      const result = removeSharp(sourceFile)
+
+      if (!result.success) {
+        return {
+          error: result.error,
+          success: false,
+        }
+      }
+
+      allModifications.push(...result.modifications)
+      if (result.warnings) {
+        allWarnings.push(...result.warnings)
+      }
     }
 
     // Remove comment markers from template
     removeCommentMarkers(sourceFile)
 
+    // Cleanup orphaned imports after all transformations
+    debug('[AST] Cleaning up orphaned imports')
+
+    // Cleanup database adapter imports if db was removed
+    for (const [, config] of Object.entries(DB_ADAPTER_CONFIG)) {
+      if (options.db && config.packageName !== DB_ADAPTER_CONFIG[options.db.type].packageName) {
+        const cleanup = cleanupOrphanedImports({
+          importNames: [config.adapterName],
+          moduleSpecifier: config.packageName,
+          sourceFile,
+        })
+        if (cleanup.removed.length > 0) {
+          cleanup.removed.forEach((importName) => {
+            allModifications.push({
+              type: 'import-removed',
+              description: `Cleaned up unused import '${importName}' from '${config.packageName}'`,
+            })
+          })
+          // Track package for uninstallation
+          if (!packagesToUninstall.includes(config.packageName)) {
+            packagesToUninstall.push(config.packageName)
+          }
+        }
+      }
+    }
+
+    // Log summary of modifications
+    if (allModifications.length > 0) {
+      debug(`[AST] Applied ${allModifications.length} modification(s):`)
+      allModifications.forEach((mod) => {
+        debug(`[AST]   - ${mod.type}: ${mod.description}`)
+      })
+    }
+
+    if (allWarnings.length > 0) {
+      debug(`[AST] ${allWarnings.length} warning(s):`)
+      allWarnings.forEach((warning) => {
+        debug(`[AST]   - ${warning}`)
+      })
+    }
+
     // Write transformed file with validation and formatting
-    return await writeTransformedFile(sourceFile, {
+    const writeResult = await writeTransformedFile(sourceFile, {
       formatWithPrettier: options.formatWithPrettier,
       validateStructure: options.validateStructure ?? true,
     })
+
+    if (!writeResult.success) {
+      return writeResult
+    }
+
+    // Uninstall removed packages if package manager info is provided
+    if (packagesToUninstall.length > 0 && options.packageManager && options.projectPath) {
+      debug(`[AST] Uninstalling ${packagesToUninstall.length} removed package(s)...`)
+      for (const packageName of packagesToUninstall) {
+        try {
+          await uninstallPackage(options.projectPath, packageName, options.packageManager)
+          debug(`[AST] ✓ Uninstalled ${packageName}`)
+        } catch (error) {
+          debug(
+            `[AST] Failed to uninstall ${packageName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          )
+          // Don't fail on uninstall errors - orphaned package is better than broken config
+        }
+      }
+    } else if (packagesToUninstall.length > 0) {
+      debug(
+        `[AST] Skipping package uninstall (${packagesToUninstall.length} packages would be removed). Run package manager manually to clean up: ${packagesToUninstall.join(', ')}`,
+      )
+    }
+
+    return writeResult
   } catch (error) {
     debug(`[AST] ✗ Configuration failed: ${error instanceof Error ? error.message : String(error)}`)
     return {

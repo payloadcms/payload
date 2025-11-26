@@ -1,9 +1,12 @@
 import { Project } from 'ts-morph'
 import {
   addImportDeclaration,
+  cleanupOrphanedImports,
   findImportDeclaration,
   formatError,
+  isNamedImportUsed,
   removeImportDeclaration,
+  removeNamedImports,
 } from './utils'
 
 describe('findImportDeclaration', () => {
@@ -134,5 +137,196 @@ import sharp from 'sharp'`,
 
     const imports = sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
+  })
+})
+
+describe('removeNamedImports', () => {
+  it('removes specific named imports', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter, SomeOtherType } from '@payloadcms/db-mongodb'`,
+    )
+
+    const importDecl = findImportDeclaration({
+      sourceFile,
+      moduleSpecifier: '@payloadcms/db-mongodb',
+    })!
+
+    const result = removeNamedImports({
+      sourceFile,
+      importDeclaration: importDecl,
+      namedImportsToRemove: ['mongooseAdapter'],
+    })
+
+    expect(result.fullyRemoved).toBe(false)
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+    const namedImports = imports[0].getNamedImports().map((ni) => ni.getName())
+    expect(namedImports).toEqual(['SomeOtherType'])
+  })
+
+  it('removes entire import when no named imports remain', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
+    )
+
+    const importDecl = findImportDeclaration({
+      sourceFile,
+      moduleSpecifier: '@payloadcms/db-mongodb',
+    })!
+
+    const result = removeNamedImports({
+      sourceFile,
+      importDeclaration: importDecl,
+      namedImportsToRemove: ['mongooseAdapter'],
+    })
+
+    expect(result.fullyRemoved).toBe(true)
+    expect(result.index).toBe(1)
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+    expect(imports[0].getModuleSpecifierValue()).toBe('payload')
+  })
+})
+
+describe('isNamedImportUsed', () => {
+  it('detects used import in code', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' })
+})`,
+    )
+
+    const isUsed = isNamedImportUsed(sourceFile, 'mongooseAdapter')
+
+    expect(isUsed).toBe(true)
+  })
+
+  it('detects unused import', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  db: postgresAdapter({ url: '' })
+})`,
+    )
+
+    const isUsed = isNamedImportUsed(sourceFile, 'mongooseAdapter')
+
+    expect(isUsed).toBe(false)
+  })
+
+  it('excludes imports from consideration by default', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  collections: []
+})`,
+    )
+
+    const isUsed = isNamedImportUsed(sourceFile, 'mongooseAdapter', true)
+
+    expect(isUsed).toBe(false)
+  })
+})
+
+describe('cleanupOrphanedImports', () => {
+  it('removes unused imports', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  db: postgresAdapter({ url: '' })
+})`,
+    )
+
+    const result = cleanupOrphanedImports({
+      sourceFile,
+      moduleSpecifier: '@payloadcms/db-mongodb',
+      importNames: ['mongooseAdapter'],
+    })
+
+    expect(result.removed).toEqual(['mongooseAdapter'])
+    expect(result.kept).toEqual([])
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+    expect(imports[0].getModuleSpecifierValue()).toBe('@payloadcms/db-postgres')
+  })
+
+  it('keeps used imports', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' })
+})`,
+    )
+
+    const result = cleanupOrphanedImports({
+      sourceFile,
+      moduleSpecifier: '@payloadcms/db-mongodb',
+      importNames: ['mongooseAdapter'],
+    })
+
+    expect(result.removed).toEqual([])
+    expect(result.kept).toEqual(['mongooseAdapter'])
+    const imports = sourceFile.getImportDeclarations()
+    expect(imports).toHaveLength(1)
+  })
+
+  it('handles mixed used and unused imports', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `import { mongooseAdapter, SomeType } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({ url: '' })
+})
+
+const foo: SomeType = {}`,
+    )
+
+    const result = cleanupOrphanedImports({
+      sourceFile,
+      moduleSpecifier: '@payloadcms/db-mongodb',
+      importNames: ['mongooseAdapter', 'SomeType'],
+    })
+
+    expect(result.removed).toEqual([])
+    expect(result.kept).toEqual(['mongooseAdapter', 'SomeType'])
+  })
+
+  it('handles missing import gracefully', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+
+    const result = cleanupOrphanedImports({
+      sourceFile,
+      moduleSpecifier: '@payloadcms/db-mongodb',
+      importNames: ['mongooseAdapter'],
+    })
+
+    expect(result.removed).toEqual([])
+    expect(result.kept).toEqual([])
   })
 })
