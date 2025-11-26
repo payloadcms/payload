@@ -411,6 +411,47 @@ describe('Hooks', () => {
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
+    it('should call afterLogin hook on password reset', async () => {
+      const resetUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email: 'reset-test@payloadcms.com',
+          password: devUser.password,
+          roles: ['admin'],
+          afterLoginHook: false,
+        },
+      })
+
+      expect(resetUser.afterLoginHook).toStrictEqual(false)
+
+      const token = await payload.forgotPassword({
+        collection: hooksUsersSlug,
+        data: {
+          email: resetUser.email,
+        },
+        disableEmail: true,
+      })
+
+      const { user } = await payload.resetPassword({
+        collection: hooksUsersSlug,
+        overrideAccess: true,
+        data: {
+          password: 'newPassword123',
+          token,
+        },
+      })
+
+      expect(user).toBeDefined()
+      expect(user.afterLoginHook).toStrictEqual(true)
+
+      const result = await payload.findByID({
+        id: user.id,
+        collection: hooksUsersSlug,
+      })
+
+      expect(result.afterLoginHook).toStrictEqual(true)
+    })
+
     it('deny user login', async () => {
       await expect(() =>
         payload.login({

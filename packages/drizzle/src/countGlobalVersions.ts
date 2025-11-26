@@ -20,8 +20,6 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const db = await getTransaction(this, req)
-
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   const { joins, where } = buildQuery({
@@ -31,6 +29,8 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     tableName,
     where: whereArg,
   })
+
+  const db = await getTransaction(this, req)
 
   const countResult = await this.countDistinct({
     db,
