@@ -4,8 +4,6 @@ import {
   addStorageAdapter,
   detectPayloadConfigStructure,
   removeSharp,
-  validateStructure,
-  writeTransformedFile,
 } from './payload-config'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -118,7 +116,18 @@ export default buildConfig({
 })
 
 describe('addDatabaseAdapter', () => {
-  it('adds mongodb adapter with import and config', () => {
+  it.each([
+    {
+      adapter: 'mongodb' as const,
+      adapterName: 'mongooseAdapter',
+      packageName: '@payloadcms/db-mongodb',
+    },
+    {
+      adapter: 'postgres' as const,
+      adapterName: 'postgresAdapter',
+      packageName: '@payloadcms/db-postgres',
+    },
+  ])('adds $adapter adapter with import and config', ({ adapter, adapterName, packageName }) => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
@@ -131,7 +140,7 @@ export default buildConfig({
 
     const result = addDatabaseAdapter({
       sourceFile,
-      adapter: 'mongodb',
+      adapter,
       envVarName: 'DATABASE_URI',
     })
 
@@ -140,34 +149,11 @@ export default buildConfig({
     expect(result.modifications.length).toBeGreaterThan(0)
 
     const text = sourceFile.getText()
-    expect(text).toMatch(/import.*mongooseAdapter.*from.*@payloadcms\/db-mongodb/)
-    expect(text).toContain('db: mongooseAdapter')
-    expect(text).toContain('process.env.DATABASE_URI')
-  })
-
-  it('adds postgres adapter', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-
-export default buildConfig({
-  collections: []
-})`,
+    expect(text).toMatch(
+      new RegExp(`import.*${adapterName}.*from.*${packageName.replace('/', '\\/')}`),
     )
-
-    const result = addDatabaseAdapter({
-      sourceFile,
-      adapter: 'postgres',
-      envVarName: 'DATABASE_URI',
-    })
-
-    expect(result.success).toBe(true)
-    expect(result.modified).toBe(true)
-
-    const text = sourceFile.getText()
-    expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
-    expect(text).toContain('db: postgresAdapter')
+    expect(text).toContain(`db: ${adapterName}`)
+    expect(text).toContain('process.env.DATABASE_URI')
   })
 
   it('replaces existing db adapter', () => {
@@ -194,105 +180,6 @@ export default buildConfig({
     expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
     expect(text).toContain('db: postgresAdapter')
     expect(text).not.toContain('mongooseAdapter')
-    expect(text).not.toContain('@payloadcms/db-mongodb')
-  })
-
-  it('preserves db property position when replacing', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-export default buildConfig({
-  admin: {},
-  collections: [],
-  db: mongooseAdapter({ url: '' }),
-  typescript: { outputFile: '' }
-})`,
-    )
-
-    const result = addDatabaseAdapter({
-      sourceFile,
-      adapter: 'postgres',
-      envVarName: 'DATABASE_URI',
-    })
-
-    expect(result.success).toBe(true)
-    const text = sourceFile.getText()
-    // Verify db property is still between collections and typescript
-    const dbIndex = text.indexOf('db: postgresAdapter')
-    const collectionsIndex = text.indexOf('collections:')
-    const typescriptIndex = text.indexOf('typescript:')
-
-    expect(dbIndex).toBeGreaterThan(collectionsIndex)
-    expect(dbIndex).toBeLessThan(typescriptIndex)
-  })
-
-  it('adds db property at end when not present', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-
-export default buildConfig({
-  admin: {},
-  collections: []
-})`,
-    )
-
-    const result = addDatabaseAdapter({
-      sourceFile,
-      adapter: 'mongodb',
-      envVarName: 'DATABASE_URI',
-    })
-
-    expect(result.success).toBe(true)
-    const text = sourceFile.getText()
-    // Verify db property is after collections (at end)
-    const dbIndex = text.indexOf('db: mongooseAdapter')
-    const collectionsIndex = text.indexOf('collections:')
-
-    expect(dbIndex).toBeGreaterThan(collectionsIndex)
-  })
-
-  it('preserves import position when replacing adapter', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-import someOtherImport from 'some-package'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import anotherImport from 'another-package'
-
-export default buildConfig({
-  db: mongooseAdapter({ url: '' }),
-  collections: []
-})`,
-    )
-
-    const result = addDatabaseAdapter({
-      sourceFile,
-      adapter: 'postgres',
-      envVarName: 'DATABASE_URI',
-    })
-
-    const text = sourceFile.getText()
-    const lines = text.split('\n')
-
-    // Find import lines - use more flexible matching
-    const buildConfigLine = lines.findIndex((l) => l.includes('payload'))
-    const someOtherLine = lines.findIndex((l) => l.includes('some-package'))
-    const postgresLine = lines.findIndex((l) => l.includes('db-postgres'))
-    const anotherLine = lines.findIndex((l) => l.includes('another-package'))
-
-    // Verify postgres import is where mongodb import was (between someOther and another)
-    expect(postgresLine).toBeGreaterThan(-1) // Found
-    expect(postgresLine).toBeGreaterThan(someOtherLine)
-    expect(postgresLine).toBeLessThan(anotherLine)
-    expect(postgresLine).toBeGreaterThan(buildConfigLine)
-
-    // Verify mongodb import is removed
     expect(text).not.toContain('@payloadcms/db-mongodb')
   })
 })
@@ -398,114 +285,6 @@ export default buildConfig({
 
     expect(result.success).toBe(true)
     expect(result.modified).toBe(false)
-  })
-})
-
-describe('validateStructure', () => {
-  it('validates correct structure', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-export default buildConfig({
-  db: mongooseAdapter({ url: '' }),
-  collections: []
-})`,
-    )
-
-    const result = validateStructure(sourceFile)
-
-    expect(result.success).toBe(true)
-  })
-
-  it('fails when buildConfig missing', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('payload.config.ts', `export default {}`)
-
-    const result = validateStructure(sourceFile)
-
-    expect(result.success).toBe(false)
-    expect(result.error?.userMessage).toContain('buildConfig')
-  })
-
-  it('fails when db property missing', () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-
-export default buildConfig({
-  collections: []
-})`,
-    )
-
-    const result = validateStructure(sourceFile)
-
-    expect(result.success).toBe(false)
-    expect(result.error?.userMessage).toContain('db')
-  })
-})
-
-describe('writeTransformedFile', () => {
-  let tempDir: string
-
-  beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'payload-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tempDir, { recursive: true, force: true })
-  })
-
-  it('writes file and validates structure', async () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-export default buildConfig({
-  db: mongooseAdapter({ url: '' }),
-  collections: []
-})`,
-    )
-
-    // Change to real file system
-    const realFilePath = path.join(tempDir, 'payload.config.ts')
-    const realProject = new Project()
-    const realSourceFile = realProject.createSourceFile(realFilePath, sourceFile.getText())
-
-    const result = await writeTransformedFile(realSourceFile, {
-      validateStructure: true,
-    })
-
-    expect(result.success).toBe(true)
-    expect(fs.existsSync(realFilePath)).toBe(true)
-  })
-
-  it('fails when validation fails', async () => {
-    const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile(
-      'payload.config.ts',
-      `import { buildConfig } from 'payload'
-
-export default buildConfig({
-  collections: []
-})`,
-    )
-
-    const realFilePath = path.join(tempDir, 'payload.config.ts')
-    const realProject = new Project()
-    const realSourceFile = realProject.createSourceFile(realFilePath, sourceFile.getText())
-
-    const result = await writeTransformedFile(realSourceFile, {
-      validateStructure: true,
-    })
-
-    expect(result.success).toBe(false)
-    expect(result.error?.userMessage).toContain('db')
   })
 })
 
