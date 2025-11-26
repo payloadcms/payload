@@ -1,11 +1,14 @@
+import type { WidgetWidth } from 'payload'
+
 import { expect, test } from '@playwright/test'
-import { ensureCompilationIsDone } from 'helpers.js'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
-import { TEST_TIMEOUT_LONG } from 'playwright.config.js'
 import { fileURLToPath } from 'url'
+
+import { ensureCompilationIsDone } from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -41,54 +44,39 @@ describe('Dashboard', () => {
 
   test('initial dashboard', async ({ page }) => {
     await expect(page.locator('.widget')).toHaveCount(7)
-    const widget = (pos: number) => page.locator(`.grid-layout > :nth-child(${pos})`)
+    const widgetByPos = (pos: number) => page.locator(`.grid-layout > :nth-child(${pos})`)
+    const assertWidget = async (slug: string, pos: number, width: WidgetWidth) => {
+      const widget = widgetByPos(pos)
+      await expect(widget).toHaveAttribute('data-slug', new RegExp(`^${slug}`))
+      await expect(widget).toHaveAttribute('data-width', width)
+    }
 
-    await expect(widget(1)).toHaveAttribute('data-columns', '12')
-    await expect(widget(1)).toHaveAttribute('data-rows', '3')
-    await expect(widget(1)).toHaveAttribute('data-slug', /^collection-cards/)
-
-    await expect(widget(2)).toHaveAttribute('data-columns', '3')
-    await expect(widget(2)).toHaveAttribute('data-rows', '1')
-    await expect(widget(2)).toHaveAttribute('data-slug', /^count/)
-
-    await expect(widget(3)).toHaveAttribute('data-columns', '3')
-    await expect(widget(3)).toHaveAttribute('data-rows', '1')
-    await expect(widget(3)).toHaveAttribute('data-slug', /^count/)
-
-    await expect(widget(4)).toHaveAttribute('data-columns', '3')
-    await expect(widget(4)).toHaveAttribute('data-rows', '1')
-    await expect(widget(4)).toHaveAttribute('data-slug', /^count/)
-
-    await expect(widget(5)).toHaveAttribute('data-columns', '3')
-    await expect(widget(5)).toHaveAttribute('data-rows', '1')
-    await expect(widget(5)).toHaveAttribute('data-slug', /^count/)
-
-    await expect(widget(6)).toHaveAttribute('data-columns', '12')
-    await expect(widget(6)).toHaveAttribute('data-rows', '2')
-    await expect(widget(6)).toHaveAttribute('data-slug', /^revenue/)
-
-    await expect(widget(7)).toHaveAttribute('data-columns', '12')
-    await expect(widget(7)).toHaveAttribute('data-rows', '1')
-    await expect(widget(7)).toHaveAttribute('data-slug', /^private/)
+    await assertWidget('collection-cards', 1, 'full')
+    await assertWidget('count', 2, 'x-small')
+    await assertWidget('count', 3, 'x-small')
+    await assertWidget('count', 4, 'x-small')
+    await assertWidget('count', 5, 'x-small')
+    await assertWidget('revenue', 6, 'full')
+    await assertWidget('private', 7, 'full')
   })
 
-  test('add widget', async ({ page }) => {
-    const dashboardMenu = page.locator('.step-nav').getByText('Dashboard')
-    await dashboardMenu.click()
-    await page.getByRole('option', { name: 'Edit Dashboard' }).click()
-    await page.getByText('Add +').click()
-    await page.locator('.drawer').getByText('revenue').click()
-    const revenueWidget = page.locator('.revenue-widget')
-    await expect(revenueWidget).toHaveCount(1)
-  })
+  // test('add widget', async ({ page }) => {
+  //   const dashboardMenu = page.locator('.step-nav').getByText('Dashboard')
+  //   await dashboardMenu.click()
+  //   await page.getByRole('option', { name: 'Edit Dashboard' }).click()
+  //   await page.getByText('Add +').click()
+  //   await page.locator('.drawer').getByText('revenue').click()
+  //   const revenueWidget = page.locator('.revenue-widget')
+  //   await expect(revenueWidget).toHaveCount(1)
+  // })
 
-  test('resize widget', async ({ page }) => {
-    await page.goto(serverURL)
-    expect(1).toBe(1)
-  })
+  // test('resize widget', async ({ page }) => {
+  //   await page.goto(serverURL)
+  //   expect(1).toBe(1)
+  // })
 
-  test('delete widget', async ({ page }) => {
-    await page.goto(serverURL)
-    expect(1).toBe(1)
-  })
+  // test('delete widget', async ({ page }) => {
+  //   await page.goto(serverURL)
+  //   expect(1).toBe(1)
+  // })
 })

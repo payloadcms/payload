@@ -123,6 +123,7 @@ export function GridLayoutDashboardClient({
                   width: `${WIDTH_TO_PERCENTAGE[widget.item.w]}%`,
                   padding: '6px',
                 }}
+                width={widget.item.w}
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
                   <div className="widget-content">{widget.component}</div>
@@ -268,6 +269,7 @@ function DraggableItem(props: {
   disabled?: boolean
   id: string
   style?: React.CSSProperties
+  width: WidgetWidth
 }) {
   const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
     id: props.id,
@@ -281,14 +283,13 @@ function DraggableItem(props: {
   }
 
   return (
-    <div className="widget" style={mergedStyles}>
+    <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
       <DroppableItem id={props.id} position="before" />
       <div
         id={props.id}
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className="widget"
         style={{
           width: '100%',
           height: '100%',
