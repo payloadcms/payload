@@ -35,7 +35,7 @@ let url: AdminUrlUtil
 
 const unlockSlug = async (fieldName: string = 'slug') => {
   const fieldID = `#field-${fieldName}`
-  const unlockButton = page.locator(`${fieldID} + div .lock-button`)
+  const unlockButton = page.locator(`#field-${fieldName}-lock`)
   await unlockButton.click()
   const slugField = page.locator(fieldID)
   await expect(slugField).toBeEnabled()
@@ -43,7 +43,7 @@ const unlockSlug = async (fieldName: string = 'slug') => {
 
 const regenerateSlug = async (fieldName: string = 'slug') => {
   await unlockSlug(fieldName)
-  const generateButton = page.locator(`#field-${fieldName} + div .generate-button`)
+  const generateButton = page.locator(`#field-${fieldName}-generate`)
   await generateButton.click()
 }
 
@@ -94,9 +94,12 @@ describe('SlugField', () => {
     await page.goto(url.create)
     await page.locator('#field-title').fill('Test title client side')
 
-    await regenerateSlug()
+    await saveDocAndAssert(page)
 
-    await expect(page.locator('#field-slug')).toHaveValue('test-title-client-side')
+    await page.locator('#field-title').fill('This should have regenerated')
+    await regenerateSlug('slug')
+
+    await expect(page.locator('#field-slug')).toHaveValue('this-should-have-regenerated')
   })
 
   test('custom values should be kept', async () => {

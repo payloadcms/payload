@@ -70,11 +70,21 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
       <div className="label-wrapper">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
         {!isLocked && (
-          <Button buttonStyle="none" className="lock-button" onClick={handleGenerate}>
+          <Button
+            buttonStyle="none"
+            className="generate-button"
+            id={`field-${path}-generate`}
+            onClick={handleGenerate}
+          >
             Generate
           </Button>
         )}
-        <Button buttonStyle="none" className="lock-button" onClick={toggleLock}>
+        <Button
+          buttonStyle="none"
+          className="lock-button"
+          id={`field-${path}-lock`}
+          onClick={toggleLock}
+        >
           {isLocked ? 'Unlock' : 'Lock'}
         </Button>
       </div>

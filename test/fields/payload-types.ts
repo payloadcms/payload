@@ -156,6 +156,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
@@ -1523,18 +1524,18 @@ export interface SlugField {
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  'slug-generate'?: boolean | null;
+  generateSlug?: boolean | null;
   slug: string;
   localizedTitle?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  'customSlugify-generate'?: boolean | null;
+  generateCustomSlug?: boolean | null;
   customSlugify: string;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  'localizedSlug-generate'?: boolean | null;
+  generateLocalizedSlug?: boolean | null;
   localizedSlug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -3197,12 +3198,12 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
-  'slug-generate'?: T;
+  generateSlug?: T;
   slug?: T;
   localizedTitle?: T;
-  'customSlugify-generate'?: T;
+  generateCustomSlug?: T;
   customSlugify?: T;
-  'localizedSlug-generate'?: T;
+  generateLocalizedSlug?: T;
   localizedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
