@@ -12,7 +12,6 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
-import { addHierarchyToCollection } from '../../hierarchy/addHierarchyToCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
@@ -26,6 +25,7 @@ import {
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { sanitizeHierarchy } from './sanitizeHierarchy.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
@@ -208,59 +208,7 @@ export const sanitizeCollection = async (
     sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
   }
 
-  // Process hierarchy configuration
-  if (sanitized.hierarchy) {
-    // Convert boolean to object with defaults
-    if (sanitized.hierarchy === true) {
-      // When true, parentFieldName will be inferred by addHierarchyToCollection
-      sanitized.hierarchy = {
-        parentFieldName: '', // Will be set by addHierarchyToCollection
-      }
-    }
-
-    // parentFieldName is required
-    if (!sanitized.hierarchy.parentFieldName) {
-      throw new Error(
-        `Hierarchy configuration for collection "${sanitized.slug}" requires a parentFieldName`,
-      )
-    }
-
-    // Apply hierarchy to collection (adds fields and hooks)
-    const hierarchyOptions: {
-      collectionConfig: typeof sanitized
-      config: typeof config
-      parentFieldName: string
-      slugify?: (text: string) => string
-      slugPathFieldName?: string
-      titlePathFieldName?: string
-    } = {
-      collectionConfig: sanitized,
-      config,
-      parentFieldName: sanitized.hierarchy.parentFieldName,
-    }
-
-    if (sanitized.hierarchy.slugify) {
-      hierarchyOptions.slugify = sanitized.hierarchy.slugify
-    }
-    if (sanitized.hierarchy.slugPathFieldName) {
-      hierarchyOptions.slugPathFieldName = sanitized.hierarchy.slugPathFieldName
-    }
-    if (sanitized.hierarchy.titlePathFieldName) {
-      hierarchyOptions.titlePathFieldName = sanitized.hierarchy.titlePathFieldName
-    }
-
-    addHierarchyToCollection(hierarchyOptions)
-
-    // Set sanitized hierarchy config with defaults
-    sanitized.hierarchy = {
-      depthFieldName: sanitized.hierarchy.depthFieldName || '_h_depth',
-      parentFieldName: sanitized.hierarchy.parentFieldName,
-      parentTreeFieldName: sanitized.hierarchy.parentTreeFieldName || '_h_parentTree',
-      slugPathFieldName: hierarchyOptions.slugPathFieldName || '_h_slugPath',
-      titlePathFieldName: hierarchyOptions.titlePathFieldName || '_h_titlePath',
-      ...(sanitized.hierarchy.slugify && { slugify: sanitized.hierarchy.slugify }),
-    }
-  }
+  sanitizeHierarchy(sanitized, config)
 
   if (sanitized.upload) {
     if (sanitized.upload === true) {
