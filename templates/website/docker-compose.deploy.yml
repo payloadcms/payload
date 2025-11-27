@@ -1,0 +1,37 @@
+services:
+  payload:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mongo:
+    image: mongo:latest
+    command:
+      - --storageEngine=wiredTiger
+    volumes:
+      - data:/data/db
+    network_mode: host
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  data:
+  node_modules:
