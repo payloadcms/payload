@@ -1,4 +1,4 @@
-import { sanitizeID } from '@payloadcms/ui/shared'
+import { sanitizeID, traverseForLocalizedFields } from '@payloadcms/ui/shared'
 import {
   combineQueries,
   extractAccessFromPermission,
@@ -55,7 +55,8 @@ export const getVersions = async ({
 
   const entityConfig = collectionConfig || globalConfig
   const versionsConfig = entityConfig?.versions
-  const localizationEnabled = typeof payload.config.localization === 'object'
+  const hasLocalizedFields = traverseForLocalizedFields(entityConfig.fields)
+  const localizationEnabled = typeof payload.config.localization === 'object' && hasLocalizedFields
 
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
