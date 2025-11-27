@@ -65,13 +65,20 @@ export const checkFileRestrictions = async ({
       ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
-  const expectsDetectableType = configMimeTypes.some(
-    (type) =>
-      type.startsWith('image/') ||
-      type === 'application/pdf' ||
-      type.startsWith('video/') ||
-      type.startsWith('audio/'),
-  )
+  const expectsDetectableType = (mimeType: string): boolean => {
+    const textBasedTypes = ['/svg', 'image/svg+xml', 'image/x-xbitmap', 'image/x-xpixmap']
+
+    if (textBasedTypes.includes(mimeType)) {
+      return false
+    }
+
+    return (
+      mimeType.startsWith('image/') ||
+      mimeType.startsWith('video/') ||
+      mimeType.startsWith('audio/') ||
+      mimeType === 'application/pdf'
+    )
+  }
 
   // Skip validation if `allowRestrictedFileTypes` is true
   if (allowRestrictedFileTypes) {
@@ -81,20 +88,22 @@ export const checkFileRestrictions = async ({
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
     let detected = await fileTypeFromBuffer(file.data)
+    const typeFromExtension = file.name.split('.').pop() || ''
 
-    if (!detected && expectsDetectableType && !useTempFiles) {
-      errors.push(`File buffer returned no detectable MIME type.`)
-    }
-
-    // Handle SVG files that are detected as XML due to <?xml declarations
+    // Handle SVG files as they are not detected by `file-type`
     if (
-      detected?.mime === 'application/xml' &&
       configMimeTypes.some(
         (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
-      ) &&
-      detectSvgFromXml(file.data)
+      )
     ) {
-      detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+      const isSvg = detectSvgFromXml(file.data)
+      if (isSvg) {
+        detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+      }
+    }
+
+    if (!detected && expectsDetectableType(typeFromExtension) && !useTempFiles) {
+      errors.push(`File buffer returned no detectable MIME type.`)
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
