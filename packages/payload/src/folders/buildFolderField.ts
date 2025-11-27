@@ -18,13 +18,6 @@ export const buildFolderField = ({
     name: folderFieldName,
     type: 'relationship',
     admin: {},
-    filterOptions: ({ id }) => {
-      return {
-        id: {
-          not_in: [id],
-        },
-      }
-    },
     hasMany: false,
     index: true,
     label: 'Folder',
@@ -45,7 +38,7 @@ export const buildFolderField = ({
         // value did not change, no validation required
         return true
       } else {
-        // need to validate the folder value allows this collection type
+        // need to validat the folder value allows this collection type
         let parentFolder: Document = null
         if (typeof value === 'string' || typeof value === 'number') {
           // need to populate the value with the document
