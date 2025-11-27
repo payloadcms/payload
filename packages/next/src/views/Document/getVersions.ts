@@ -55,6 +55,7 @@ export const getVersions = async ({
 
   const entityConfig = collectionConfig || globalConfig
   const versionsConfig = entityConfig?.versions
+  const localizationEnabled = typeof payload.config.localization === 'object'
 
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
@@ -127,6 +128,24 @@ export const getVersions = async ({
       }
 
       if (versionsConfig.drafts?.autosave) {
+        const where: Record<string, any> = {
+          and: [
+            {
+              parent: {
+                equals: id,
+              },
+            },
+          ],
+        }
+
+        if (localizationEnabled) {
+          where.and.push({
+            snapshot: {
+              not_equals: true,
+            },
+          })
+        }
+
         const mostRecentVersion = await payload.findVersions({
           collection: collectionConfig.slug,
           depth: 0,
@@ -136,23 +155,7 @@ export const getVersions = async ({
             autosave: true,
           },
           user,
-          where: combineQueries(
-            {
-              and: [
-                {
-                  parent: {
-                    equals: id,
-                  },
-                },
-                {
-                  snapshot: {
-                    not_equals: true,
-                  },
-                },
-              ],
-            },
-            extractAccessFromPermission(docPermissions.readVersions),
-          ),
+          where: combineQueries(where, extractAccessFromPermission(docPermissions.readVersions)),
         })
 
         if (
@@ -195,26 +198,31 @@ export const getVersions = async ({
       }
     }
 
+    const countVersionsWhere: Record<string, any> = {
+      and: [
+        {
+          parent: {
+            equals: id,
+          },
+        },
+      ],
+    }
+
+    if (localizationEnabled) {
+      countVersionsWhere.and.push({
+        snapshot: {
+          not_equals: true,
+        },
+      })
+    }
+
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
       depth: 0,
       locale,
       user,
       where: combineQueries(
-        {
-          and: [
-            {
-              parent: {
-                equals: id,
-              },
-            },
-            {
-              snapshot: {
-                not_equals: true,
-              },
-            },
-          ],
-        },
+        countVersionsWhere,
         extractAccessFromPermission(docPermissions.readVersions),
       ),
     }))
@@ -293,11 +301,13 @@ export const getVersions = async ({
       global: globalConfig.slug,
       locale,
       user,
-      where: {
-        snapshot: {
-          not_equals: true,
-        },
-      },
+      where: localizationEnabled
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : undefined,
     }))
   }
 
