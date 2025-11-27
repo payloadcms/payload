@@ -126,8 +126,8 @@ export interface UserAuthOperations {
  */
 export interface Page {
   id: string;
-  title: string;
   parent?: (string | null) | Page;
+  title: string;
   content?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -142,8 +142,8 @@ export interface Page {
  */
 export interface Category {
   id: string;
-  name: string;
   parentCategory?: (string | null) | Category;
+  name: string;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -157,8 +157,8 @@ export interface Category {
  */
 export interface Department {
   id: string;
-  deptName: string;
   parentDept?: (string | null) | Department;
+  deptName: string;
   updatedAt: string;
   createdAt: string;
   _breadcrumbSlug?: string | null;
@@ -277,8 +277,8 @@ export interface PayloadMigration {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
-  title?: T;
   parent?: T;
+  title?: T;
   content?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -292,8 +292,8 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
-  name?: T;
   parentCategory?: T;
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -306,8 +306,8 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "departments_select".
  */
 export interface DepartmentsSelect<T extends boolean = true> {
-  deptName?: T;
   parentDept?: T;
+  deptName?: T;
   updatedAt?: T;
   createdAt?: T;
   _breadcrumbSlug?: T;
