@@ -16,9 +16,6 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-// Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
-test.describe.configure({ mode: 'parallel' })
-
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
@@ -54,6 +51,7 @@ describe('Dashboard', () => {
     await d.assertWidget(5, 'count', 'x-small')
     await d.assertWidget(6, 'revenue', 'full')
     await d.assertWidget(7, 'private', 'full')
+    await d.validateLayout()
   })
 
   test('respects min and max width', async ({ page }) => {
@@ -75,7 +73,9 @@ describe('Dashboard', () => {
     await d.resizeWidget(2, 'medium')
     await d.assertWidget(2, 'count', 'medium')
     await d.saveChanges()
+    await d.validateLayout()
     await page.reload()
+    await d.validateLayout()
     await d.assertWidget(2, 'count', 'medium')
   })
 
@@ -85,7 +85,9 @@ describe('Dashboard', () => {
     await d.addWidget('revenue')
     await d.assertWidget(8, 'revenue', 'medium')
     await d.saveChanges()
+    await d.validateLayout()
     await page.reload()
+    await d.validateLayout()
     await d.assertWidget(8, 'revenue', 'medium')
   })
 

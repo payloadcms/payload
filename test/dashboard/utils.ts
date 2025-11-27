@@ -11,6 +11,10 @@ export class DashboardHelper {
     this.page = page
   }
 
+  get dashboard() {
+    return this.page.locator('.grid-layout')
+  }
+
   get widgets() {
     return this.page.locator('.widget')
   }
@@ -20,6 +24,52 @@ export class DashboardHelper {
   }
 
   widgetByPos = (pos: number) => this.page.locator(`.grid-layout > :nth-child(${pos})`)
+
+  validateLayout = async () => {
+    const WIDTH_TO_COLS = {
+      'x-small': 3,
+      small: 4,
+      medium: 6,
+      large: 8,
+      'x-large': 9,
+      full: 12,
+    }
+    const widgets = await this.widgets.all()
+    let currentPos = 0
+    for (let index = 0; index < widgets.length; index++) {
+      const widget = widgets[index]!
+      const width = await widget.getAttribute('data-width')
+      if (!width) {
+        throw new Error(`Widget has no width`)
+      }
+      const cols = WIDTH_TO_COLS[width as WidgetWidth]
+      const dashboardBox = await this.dashboard.boundingBox()
+      const widgetBox = await widget.boundingBox()
+      if (!widgetBox || !dashboardBox) {
+        throw new Error('Widget or dashboard box not found')
+      }
+
+      // Determine expected position
+      let expectedX: number
+      if (currentPos === 0 || currentPos + cols > 12) {
+        // Widget is at the start of a new row
+        expectedX = dashboardBox.x
+      } else {
+        // Widget continues on the same row
+        const previousWidgetBox = (await widgets[index - 1]!.boundingBox())!
+        expectedX = previousWidgetBox.x + previousWidgetBox.width
+      }
+
+      expect(widgetBox.x).toBe(expectedX)
+
+      // Update currentPos, wrapping to new row if needed
+      currentPos += cols
+      if (currentPos >= 12) {
+        expect(widgetBox.x + widgetBox.width).toBe(dashboardBox.x + dashboardBox.width)
+        currentPos = 0
+      }
+    }
+  }
 
   resizeWidget = async (position: number, width: WidgetWidth) => {
     const widget = this.widgetByPos(position)
