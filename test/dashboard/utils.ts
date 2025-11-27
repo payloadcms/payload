@@ -21,10 +21,19 @@ export class DashboardHelper {
 
   widgetByPos = (pos: number) => this.page.locator(`.grid-layout > :nth-child(${pos})`)
 
-  resizeWidget = async (widgetId: string, width: WidgetWidth) => {
-    await this.page.locator(`[data-slug="${widgetId}"]`).hover()
-    await this.page.locator(`[data-slug="${widgetId}"]`).getByRole('button').nth(1).click()
-    await this.page.getByRole('option', { name: width }).click()
+  resizeWidget = async (position: number, width: WidgetWidth) => {
+    const widget = this.widgetByPos(position)
+    await widget.hover()
+    const widthPopup = widget.locator('.popup')
+    await expect(widthPopup).toBeVisible()
+    await widthPopup.click()
+    const widthOptions = widthPopup.locator('.popup-button-list__button')
+    await widthOptions.getByText(width).click()
+    const slug = await widget.getAttribute('data-slug')
+    if (!slug) {
+      throw new Error(`Widget at position ${position} has no slug`)
+    }
+    await this.assertWidget(position, slug, width)
   }
 
   assertWidthRange = async (arg: { max: WidgetWidth; min: WidgetWidth; position: number }) => {

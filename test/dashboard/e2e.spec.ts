@@ -68,6 +68,17 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ position: 7, min: 'x-small', max: 'full' })
   })
 
+  test('resize widget', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.assertWidget(2, 'count', 'x-small')
+    await d.resizeWidget(2, 'medium')
+    await d.assertWidget(2, 'count', 'medium')
+    await d.saveChanges()
+    await page.reload()
+    await d.assertWidget(2, 'count', 'medium')
+  })
+
   test('add widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
@@ -77,8 +88,6 @@ describe('Dashboard', () => {
     await page.reload()
     await d.assertWidget(8, 'revenue', 'medium')
   })
-
-  test('resize widget', async ({ page }) => {})
 
   // add widget
   // resize widget
