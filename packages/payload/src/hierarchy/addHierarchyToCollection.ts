@@ -8,6 +8,7 @@ import { findUseAsTitleField } from './utils/findUseAsTitle.js'
 export const addHierarchyToCollection = ({
   collectionConfig,
   config,
+  generatePaths = true,
   parentFieldName,
   slugify = defaultSlugify,
   slugPathFieldName = '_h_slugPath',
@@ -15,6 +16,7 @@ export const addHierarchyToCollection = ({
 }: {
   collectionConfig: CollectionConfig
   config: Config
+  generatePaths?: boolean
   parentFieldName: string
   slugify?: (text: string) => string
   slugPathFieldName?: string
@@ -23,29 +25,36 @@ export const addHierarchyToCollection = ({
   const { localized, titleFieldName } = findUseAsTitleField(collectionConfig)
   const localizeField: boolean = Boolean(config.localization && localized)
 
+  // Conditionally add path fields
+  if (generatePaths) {
+    collectionConfig.fields.push(
+      {
+        name: slugPathFieldName,
+        type: 'text',
+        admin: {
+          readOnly: true,
+          // hidden: true,
+        },
+        index: true,
+        label: ({ t }) => t('general:prefixSlugPathFieldName'),
+        localized: localizeField,
+      },
+      {
+        name: titlePathFieldName,
+        type: 'text',
+        admin: {
+          readOnly: true,
+          // hidden: true,
+        },
+        index: true,
+        label: ({ t }) => t('general:prefixTitlePathFieldName'),
+        localized: localizeField,
+      },
+    )
+  }
+
+  // Always add parentTree and depth fields
   collectionConfig.fields.push(
-    {
-      name: slugPathFieldName,
-      type: 'text',
-      admin: {
-        readOnly: true,
-        // hidden: true,
-      },
-      index: true,
-      label: ({ t }) => t('general:prefixSlugPathFieldName'),
-      localized: localizeField,
-    },
-    {
-      name: titlePathFieldName,
-      type: 'text',
-      admin: {
-        readOnly: true,
-        // hidden: true,
-      },
-      index: true,
-      label: ({ t }) => t('general:prefixTitlePathFieldName'),
-      localized: localizeField,
-    },
     {
       name: '_h_parentTree',
       type: 'relationship',
@@ -85,6 +94,7 @@ export const addHierarchyToCollection = ({
     afterChange: [
       ...(collectionConfig.hooks?.afterChange || []),
       hierarchyCollectionAfterChange({
+        generatePaths,
         isTitleLocalized: localized,
         parentFieldName,
         slugify,

@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { JsonObject, PayloadRequest, TypeWithID } from '../../index.js'
+import type { JsonObject, PayloadRequest, SelectIncludeType, TypeWithID } from '../../index.js'
 
 import { adjustDescendantTreePaths } from './adjustDescendantTreePaths.js'
 
@@ -7,6 +7,7 @@ type UpdateDescendantsArgs = {
   batchSize?: number
   collection: SanitizedCollectionConfig
   fieldIsLocalized: boolean
+  generatePaths?: boolean
   localeCodes?: string[]
   newParentID: number | string | undefined
   parentDocID: number | string
@@ -26,6 +27,7 @@ export async function updateDescendants({
   batchSize = 100,
   collection,
   fieldIsLocalized,
+  generatePaths = true,
   localeCodes,
   newParentID,
   parentDocID,
@@ -40,6 +42,15 @@ export async function updateDescendants({
   let hasNextPage = true
 
   while (hasNextPage) {
+    // Build select fields
+    const selectFields: SelectIncludeType = {
+      _h_parentTree: true,
+    }
+    if (generatePaths) {
+      selectFields[slugPathFieldName] = true
+      selectFields[titlePathFieldName] = true
+    }
+
     const descendantDocsQuery = await req.payload.find({
       collection: collection.slug,
       depth: 0,
@@ -47,11 +58,7 @@ export async function updateDescendants({
       locale: 'all',
       page: currentPage,
       req,
-      select: {
-        _h_parentTree: true,
-        [slugPathFieldName]: true,
-        [titlePathFieldName]: true,
-      },
+      select: selectFields,
       where: {
         _h_parentTree: {
           in: [parentDocID],
@@ -61,31 +68,46 @@ export async function updateDescendants({
 
     const updatePromises: Promise<JsonObject & TypeWithID>[] = []
     descendantDocsQuery.docs.forEach((affectedDoc) => {
-      const newTreePaths = adjustDescendantTreePaths({
-        doc: {
-          _h_parentTree: affectedDoc._h_parentTree,
-          slugPath: affectedDoc[slugPathFieldName],
-          titlePath: affectedDoc[titlePathFieldName],
-        },
-        fieldIsLocalized,
-        localeCodes,
-        parentDoc: {
-          _h_parentTree: parentDocWithLocales._h_parentTree || null,
-          slugPath: parentDocWithLocales[slugPathFieldName],
-          titlePath: parentDocWithLocales[titlePathFieldName],
-        },
-        previousParentDoc: {
-          _h_parentTree: previousParentDocWithLocales._h_parentTree || null,
-          slugPath: previousParentDocWithLocales[slugPathFieldName],
-          titlePath: previousParentDocWithLocales[titlePathFieldName],
-        },
-      })
+      let newTreePaths
+      if (generatePaths) {
+        newTreePaths = adjustDescendantTreePaths({
+          doc: {
+            _h_parentTree: affectedDoc._h_parentTree,
+            slugPath: affectedDoc[slugPathFieldName],
+            titlePath: affectedDoc[titlePathFieldName],
+          },
+          fieldIsLocalized,
+          localeCodes,
+          parentDoc: {
+            _h_parentTree: parentDocWithLocales._h_parentTree || null,
+            slugPath: parentDocWithLocales[slugPathFieldName],
+            titlePath: parentDocWithLocales[titlePathFieldName],
+          },
+          previousParentDoc: {
+            _h_parentTree: previousParentDocWithLocales._h_parentTree || null,
+            slugPath: previousParentDocWithLocales[slugPathFieldName],
+            titlePath: previousParentDocWithLocales[titlePathFieldName],
+          },
+        })
+      }
 
       const parentDocIndex = affectedDoc._h_parentTree?.indexOf(parentDocID) ?? -1
       const unchangedParentTree =
         parentDocIndex >= 0 ? affectedDoc._h_parentTree.slice(parentDocIndex) : []
 
       const newParentTree = [...(parentDocWithLocales._h_parentTree || []), ...unchangedParentTree]
+
+      // Build update data
+      const updateData: Record<string, any> = {
+        _h_depth: newParentTree.length,
+        _h_parentTree: newParentTree,
+        [parentFieldName]: newParentID,
+      }
+
+      if (generatePaths && newTreePaths) {
+        updateData[slugPathFieldName] = newTreePaths.slugPath
+        updateData[titlePathFieldName] = newTreePaths.titlePath
+      }
 
       updatePromises.push(
         // this pattern has an issue bc it will not run hooks on the affected documents
@@ -94,13 +116,7 @@ export async function updateDescendants({
         req.payload.db.updateOne({
           id: affectedDoc.id,
           collection: collection.slug,
-          data: {
-            _h_depth: newParentTree.length,
-            _h_parentTree: newParentTree,
-            [parentFieldName]: newParentID,
-            [slugPathFieldName]: newTreePaths.slugPath,
-            [titlePathFieldName]: newTreePaths.titlePath,
-          },
+          data: updateData,
           locale: 'all',
           req,
         }),

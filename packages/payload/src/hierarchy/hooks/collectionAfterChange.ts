@@ -1,10 +1,14 @@
-import type { CollectionAfterChangeHook } from '../../index.js'
+import type { CollectionAfterChangeHook, SelectIncludeType } from '../../index.js'
 
 import { computeTreeData } from '../utils/computeTreeData.js'
 import { getTreeChanges } from '../utils/getTreeChanges.js'
 import { updateDescendants } from '../utils/updateDescendants.js'
 
 type Args = {
+  /**
+   * Whether to generate path fields
+   */
+  generatePaths?: boolean
   /**
    * Indicates whether the title field is localized
    */
@@ -33,6 +37,7 @@ type Args = {
 }
 export const hierarchyCollectionAfterChange =
   ({
+    generatePaths,
     isTitleLocalized,
     parentFieldName,
     slugify,
@@ -68,7 +73,8 @@ export const hierarchyCollectionAfterChange =
 
     const parentChangedOrCreate = parentChanged || operation === 'create'
 
-    if (parentChangedOrCreate || titleChanged) {
+    // Only process if parent changed/created, or if title changed and paths are enabled
+    if (parentChangedOrCreate || (titleChanged && generatePaths)) {
       const updatedTreeData = await computeTreeData({
         collection,
         docWithLocales,
@@ -90,31 +96,45 @@ export const hierarchyCollectionAfterChange =
         titlePathFieldName,
       })
 
+      // Build update data
+      const updateData: Record<string, any> = {
+        _h_depth: updatedTreeData._h_parentTree?.length ?? 0,
+        _h_parentTree: updatedTreeData._h_parentTree,
+        [parentFieldName]: newParentID,
+      }
+
+      // Only include path fields if generatePaths is true
+      if (generatePaths) {
+        updateData[slugPathFieldName] = updatedTreeData.slugPath
+        updateData[titlePathFieldName] = updatedTreeData.titlePath
+      }
+
+      // Build select fields
+      const selectFields: SelectIncludeType = {
+        _h_depth: true,
+        _h_parentTree: true,
+      }
+
+      if (generatePaths) {
+        selectFields[slugPathFieldName] = true
+        selectFields[titlePathFieldName] = true
+      }
+
       // NOTE: using the db directly, no hooks or access control here
       const updatedDocWithLocales = await req.payload.db.updateOne({
         id: doc.id,
         collection: collection.slug,
-        data: {
-          _h_depth: updatedTreeData._h_parentTree?.length ?? 0,
-          _h_parentTree: updatedTreeData._h_parentTree,
-          [parentFieldName]: newParentID,
-          [slugPathFieldName]: updatedTreeData.slugPath,
-          [titlePathFieldName]: updatedTreeData.titlePath,
-        },
+        data: updateData,
         locale: 'all',
         req,
-        select: {
-          _h_depth: true,
-          _h_parentTree: true,
-          [slugPathFieldName]: true,
-          [titlePathFieldName]: true,
-        },
+        select: selectFields,
       })
 
       // Update all descendants in batches to handle unlimited tree sizes
       await updateDescendants({
         collection,
         fieldIsLocalized: isTitleLocalized,
+        generatePaths,
         localeCodes:
           isTitleLocalized && req.payload.config.localization
             ? req.payload.config.localization.localeCodes
@@ -129,21 +149,25 @@ export const hierarchyCollectionAfterChange =
         titlePathFieldName,
       })
 
-      const updatedSlugPath = isTitleLocalized
-        ? updatedDocWithLocales[slugPathFieldName][reqLocale!]
-        : updatedDocWithLocales[slugPathFieldName]
-      const updatedTitlePath = isTitleLocalized
-        ? updatedDocWithLocales[titlePathFieldName][reqLocale!]
-        : updatedDocWithLocales[titlePathFieldName]
-      const updatedParentTree = updatedDocWithLocales._h_parentTree
+      // Update doc with new values
+      if (generatePaths) {
+        const updatedSlugPath = isTitleLocalized
+          ? updatedDocWithLocales[slugPathFieldName][reqLocale!]
+          : updatedDocWithLocales[slugPathFieldName]
+        const updatedTitlePath = isTitleLocalized
+          ? updatedDocWithLocales[titlePathFieldName][reqLocale!]
+          : updatedDocWithLocales[titlePathFieldName]
 
-      if (updatedSlugPath) {
-        doc[slugPathFieldName] = updatedSlugPath
+        if (updatedSlugPath) {
+          doc[slugPathFieldName] = updatedSlugPath
+        }
+        if (updatedTitlePath) {
+          doc[titlePathFieldName] = updatedTitlePath
+        }
       }
-      if (updatedTitlePath) {
-        doc[titlePathFieldName] = updatedTitlePath
-      }
+
       if (parentChangedOrCreate) {
+        const updatedParentTree = updatedDocWithLocales._h_parentTree
         doc._h_parentTree = updatedParentTree
         doc._h_depth = updatedParentTree ? updatedParentTree.length : 0
       }

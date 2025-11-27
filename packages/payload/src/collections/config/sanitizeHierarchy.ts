@@ -62,9 +62,12 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Co
   }
 
   // Apply hierarchy to collection (adds fields and hooks)
+  const generatePaths = collectionConfig.hierarchy.generatePaths ?? true
+
   const hierarchyOptions: {
     collectionConfig: typeof collectionConfig
     config: typeof config
+    generatePaths: boolean
     parentFieldName: string
     slugify?: (text: string) => string
     slugPathFieldName?: string
@@ -72,6 +75,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Co
   } = {
     collectionConfig,
     config,
+    generatePaths,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
   }
 
@@ -89,6 +93,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Co
 
   // Set sanitized hierarchy config with defaults
   collectionConfig.hierarchy = {
+    generatePaths,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
     slugPathFieldName: hierarchyOptions.slugPathFieldName || '_h_slugPath',
     titlePathFieldName: hierarchyOptions.titlePathFieldName || '_h_titlePath',

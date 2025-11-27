@@ -70,6 +70,7 @@ export interface Config {
     pages: Page;
     categories: Category;
     departments: Department;
+    organizations: Organization;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
+    organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -168,6 +170,20 @@ export interface Department {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organizations".
+ */
+export interface Organization {
+  id: string;
+  parentOrg?: (string | null) | Organization;
+  orgName: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_parentTree?: (string | Organization)[] | null;
+  _h_depth?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -225,6 +241,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'departments';
         value: string | Department;
+      } | null)
+    | ({
+        relationTo: 'organizations';
+        value: string | Organization;
       } | null)
     | ({
         relationTo: 'users';
@@ -312,6 +332,19 @@ export interface DepartmentsSelect<T extends boolean = true> {
   createdAt?: T;
   _breadcrumbSlug?: T;
   _breadcrumbTitle?: T;
+  _h_parentTree?: T;
+  _h_depth?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organizations_select".
+ */
+export interface OrganizationsSelect<T extends boolean = true> {
+  parentOrg?: T;
+  orgName?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
   _h_parentTree?: T;
   _h_depth?: T;
 }

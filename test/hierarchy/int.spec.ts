@@ -454,4 +454,199 @@ describe('Hierarchy', () => {
       expect(childDept._breadcrumbTitle).toBe('Engineering/Frontend')
     })
   })
+
+  describe('generatePaths: false', () => {
+    beforeEach(async () => {
+      // Clear existing data before each test
+      await payload.delete({ collection: 'organizations', where: {} })
+    })
+
+    afterEach(async () => {
+      // Clean up data after each test
+      await payload.delete({ collection: 'organizations', where: {} })
+    })
+
+    it('should not add path fields when generatePaths is false', () => {
+      const orgsCollection = payload.collections.organizations.config
+
+      // Check that path fields were NOT added
+      const slugPathField = orgsCollection.fields.find((f) => f.name === '_h_slugPath')
+      const titlePathField = orgsCollection.fields.find((f) => f.name === '_h_titlePath')
+
+      expect(slugPathField).toBeUndefined()
+      expect(titlePathField).toBeUndefined()
+
+      // But tree fields SHOULD exist
+      const depthField = orgsCollection.fields.find((f) => f.name === '_h_depth')
+      const parentTreeField = orgsCollection.fields.find((f) => f.name === '_h_parentTree')
+
+      expect(depthField).toBeDefined()
+      expect(parentTreeField).toBeDefined()
+
+      // Check hierarchy config
+      expect(orgsCollection.hierarchy).not.toBe(false)
+      if (orgsCollection.hierarchy !== false) {
+        expect(orgsCollection.hierarchy.generatePaths).toBe(false)
+        expect(orgsCollection.hierarchy.parentFieldName).toBe('parentOrg')
+      }
+    })
+
+    it('should track parent tree and depth without paths', async () => {
+      // Create root
+      const rootOrg = await payload.create({
+        collection: 'organizations',
+        data: {
+          orgName: 'Acme Corp',
+          parentOrg: null,
+        },
+      })
+
+      expect(rootOrg._h_depth).toBe(0)
+      expect(rootOrg._h_parentTree).toEqual([])
+      // Path fields should not exist
+      expect(rootOrg._h_slugPath).toBeUndefined()
+      expect(rootOrg._h_titlePath).toBeUndefined()
+
+      // Create child
+      const childOrg = await payload.create({
+        collection: 'organizations',
+        data: {
+          orgName: 'Engineering Division',
+          parentOrg: rootOrg.id,
+        },
+      })
+
+      expect(childOrg._h_depth).toBe(1)
+      expect(childOrg._h_parentTree).toEqual([rootOrg.id])
+      // Path fields should not exist
+      expect(childOrg._h_slugPath).toBeUndefined()
+      expect(childOrg._h_titlePath).toBeUndefined()
+
+      // Create grandchild
+      const grandchildOrg = await payload.create({
+        collection: 'organizations',
+        data: {
+          orgName: 'Frontend Team',
+          parentOrg: childOrg.id,
+        },
+      })
+
+      expect(grandchildOrg._h_depth).toBe(2)
+      expect(grandchildOrg._h_parentTree).toEqual([rootOrg.id, childOrg.id])
+      expect(grandchildOrg._h_slugPath).toBeUndefined()
+      expect(grandchildOrg._h_titlePath).toBeUndefined()
+    })
+
+    it('should update descendants without paths when parent changes', async () => {
+      // Create initial tree
+      const rootOrg = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Root', parentOrg: null },
+      })
+
+      const anotherRoot = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Another Root', parentOrg: null },
+      })
+
+      const childOrg = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Child', parentOrg: rootOrg.id },
+      })
+
+      const grandchildOrg = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Grandchild', parentOrg: childOrg.id },
+      })
+
+      // Move child to another root
+      const updatedChild = await payload.update({
+        id: childOrg.id,
+        collection: 'organizations',
+        data: { parentOrg: anotherRoot.id },
+      })
+
+      // Check child was updated
+      expect(updatedChild._h_parentTree).toEqual([anotherRoot.id])
+      expect(updatedChild._h_depth).toBe(1)
+      expect(updatedChild._h_slugPath).toBeUndefined()
+      expect(updatedChild._h_titlePath).toBeUndefined()
+
+      // Check grandchild was updated
+      const updatedGrandchild = await payload.findByID({
+        id: grandchildOrg.id,
+        collection: 'organizations',
+      })
+
+      expect(updatedGrandchild._h_parentTree).toEqual([anotherRoot.id, childOrg.id])
+      expect(updatedGrandchild._h_depth).toBe(2)
+      expect(updatedGrandchild._h_slugPath).toBeUndefined()
+      expect(updatedGrandchild._h_titlePath).toBeUndefined()
+    })
+
+    it('should support descendant queries without paths', async () => {
+      // Create test tree
+      const root = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Root', parentOrg: null },
+      })
+
+      const child1 = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Child 1', parentOrg: root.id },
+      })
+
+      const child2 = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Child 2', parentOrg: root.id },
+      })
+
+      const grandchild1 = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Grandchild 1', parentOrg: child1.id },
+      })
+
+      // Query descendants
+      const descendants = await payload.find({
+        collection: 'organizations',
+        where: {
+          _h_parentTree: {
+            in: [root.id],
+          },
+        },
+      })
+
+      expect(descendants.docs).toHaveLength(3) // child1, child2, grandchild1
+      const ids = descendants.docs.map((d) => d.id)
+      expect(ids).toContain(child1.id)
+      expect(ids).toContain(child2.id)
+      expect(ids).toContain(grandchild1.id)
+    })
+
+    it('should support depth queries without paths', async () => {
+      const root = await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Root', parentOrg: null },
+      })
+
+      await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Child 1', parentOrg: root.id },
+      })
+
+      await payload.create({
+        collection: 'organizations',
+        data: { orgName: 'Child 2', parentOrg: root.id },
+      })
+
+      const depthOne = await payload.find({
+        collection: 'organizations',
+        where: {
+          _h_depth: { equals: 1 },
+        },
+      })
+
+      expect(depthOne.docs).toHaveLength(2) // child1, child2
+    })
+  })
 })

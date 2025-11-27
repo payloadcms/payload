@@ -69,13 +69,36 @@ export const Departments: CollectionConfig = {
   },
 }
 
+// Organizations collection with generatePaths disabled
+export const Organizations: CollectionConfig = {
+  slug: 'organizations',
+  admin: {
+    useAsTitle: 'orgName',
+  },
+  fields: [
+    {
+      name: 'orgName',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'description',
+      type: 'text',
+    },
+  ],
+  hierarchy: {
+    generatePaths: false,
+    parentFieldName: 'parentOrg',
+  },
+}
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Pages, Categories, Departments],
+  collections: [Pages, Categories, Departments, Organizations],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -93,5 +116,6 @@ export default buildConfigWithDefaults({
 export {
   Categories as CategoriesCollection,
   Departments as DepartmentsCollection,
+  Organizations as OrganizationsCollection,
   Pages as PagesCollection,
 }

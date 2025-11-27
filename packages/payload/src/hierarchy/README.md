@@ -236,12 +236,47 @@ Otherwise, a validation error will be thrown.
 }
 ```
 
+### Without Path Generation
+
+If you only need the parent tree structure for queries (e.g., "find all descendants") without generating breadcrumb paths:
+
+```typescript
+{
+  slug: 'categories',
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    generatePaths: false,  // Skip path generation, only track parent tree
+  }
+}
+```
+
+**What you get:**
+
+- ✅ `parent` field (auto-created relationship)
+- ✅ `_h_parentTree` field (for descendant queries)
+- ✅ `_h_depth` field (for level tracking)
+- ❌ `_h_slugPath` and `_h_titlePath` fields (skipped)
+
+**Benefits:**
+
+- Faster operations (no path computation)
+- No dependency on `useAsTitle` field
+- Simpler data model when URLs/breadcrumbs aren't needed
+
 ### Available Options
 
 - **`parentFieldName`** (required): Name of the parent relationship field (auto-created if not defined)
-- **`slugify`** (optional): Custom function to slugify text for path generation
-- **`slugPathFieldName`** (optional): Name for slugified path field (default: `'_h_slugPath'`)
-- **`titlePathFieldName`** (optional): Name for title path field (default: `'_h_titlePath'`)
+- **`generatePaths`** (optional): Whether to generate path fields (`_h_slugPath` and `_h_titlePath`). Set to `false` if you only need parent tree tracking. (default: `true`)
+- **`slugify`** (optional): Custom function to slugify text for path generation (only used when `generatePaths` is `true`)
+- **`slugPathFieldName`** (optional): Name for slugified path field (default: `'_h_slugPath'`, only used when `generatePaths` is `true`)
+- **`titlePathFieldName`** (optional): Name for title path field (default: `'_h_titlePath'`, only used when `generatePaths` is `true`)
 
 ## Use Cases
 
