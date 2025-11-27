@@ -22,12 +22,6 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      name: 'parent',
-      type: 'relationship',
-      hasMany: false,
-      relationTo: 'pages',
-    },
-    {
       name: 'content',
       type: 'text',
     },
@@ -49,12 +43,6 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      name: 'parentCategory',
-      type: 'relationship',
-      hasMany: false,
-      relationTo: 'categories',
-    },
   ],
   hierarchy: {
     parentFieldName: 'parentCategory',
@@ -72,12 +60,6 @@ export const Departments: CollectionConfig = {
       name: 'deptName',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'parentDept',
-      type: 'relationship',
-      hasMany: false,
-      relationTo: 'departments',
     },
   ],
   hierarchy: {
