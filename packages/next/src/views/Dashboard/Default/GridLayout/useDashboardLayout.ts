@@ -53,7 +53,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         return arrayMove(prev, moveFromIndex, moveToIndex)
       })
     },
-    [isEditing],
+    [],
   )
 
   const addWidget = useCallback(
@@ -81,7 +81,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 
       setCurrentLayout((prev) => [...prev, newWidgetInstance])
     },
-    [isEditing, currentLayout],
+    [isEditing, widgets],
   )
 
   const deleteWidget = useCallback(

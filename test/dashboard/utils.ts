@@ -27,6 +27,12 @@ export class DashboardHelper {
     await expect(widget).toHaveAttribute('data-width', width)
   }
 
+  setEditing = async () => {
+    await this.stepNavLast.locator('button').click()
+    await this.stepNavLast.getByText('Edit Dashboard').click()
+    await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
+  }
+
   assertIsEditing = async (shouldBe: boolean) => {
     if (shouldBe) {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
@@ -42,7 +48,7 @@ export class DashboardHelper {
 
   addWidget = async (slug: string) => {
     await this.stepNavLast.locator('button').nth(0).click()
-    await this.page.getByText(slug).click()
+    await this.page.locator('.drawer__content').getByText(slug).click()
   }
 
   resizeWidget = async (widgetId: string, width: WidgetWidth) => {

@@ -45,10 +45,7 @@ export function DashboardStepNav({
       },
     ])
     // TODO: useEffectEvent
-    // Only depend on isEditing and drawerSlug - the functions are stable enough
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, drawerSlug])
+  }, [isEditing, drawerSlug, cancel, resetLayout, saveLayout, setIsEditing, setStepNav])
 
   return (
     <>

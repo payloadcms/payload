@@ -1,3 +1,4 @@
+/* eslint-disable playwright/expect-expect */
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -55,23 +56,22 @@ describe('Dashboard', () => {
     await dashboard.assertWidget('private', 7, 'full')
   })
 
-  // test('add widget', async ({ page }) => {
-  //   const dashboardMenu = page.locator('.step-nav').getByText('Dashboard')
-  //   await dashboardMenu.click()
-  //   await page.getByRole('option', { name: 'Edit Dashboard' }).click()
-  //   await page.getByText('Add +').click()
-  //   await page.locator('.drawer').getByText('revenue').click()
-  //   const revenueWidget = page.locator('.revenue-widget')
-  //   await expect(revenueWidget).toHaveCount(1)
-  // })
+  test('add widget', async ({ page }) => {
+    const dashboard = new DashboardHelper(page)
+    await dashboard.setEditing()
+    await dashboard.addWidget('revenue')
+    await dashboard.assertWidget('revenue', 8, 'medium')
+    await dashboard.saveChanges()
+    await page.reload()
+    await dashboard.assertWidget('revenue', 8, 'medium')
+  })
 
-  // test('resize widget', async ({ page }) => {
-  //   await page.goto(serverURL)
-  //   expect(1).toBe(1)
-  // })
+  // add widget
+  // resize widget
+  // delete widget
+  // cancel editing
+  // reset layout
+  // reorder widget positions 1, 2, last and before last
 
-  // test('delete widget', async ({ page }) => {
-  //   await page.goto(serverURL)
-  //   expect(1).toBe(1)
-  // })
+  // widgets should take the height of the highest widget in the row
 })
