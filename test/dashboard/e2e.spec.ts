@@ -56,6 +56,18 @@ describe('Dashboard', () => {
     await d.assertWidget(7, 'private', 'full')
   })
 
+  test('respects min and max width', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.assertWidthRange({ position: 1, min: 'full', max: 'full' })
+    await d.assertWidthRange({ position: 2, min: 'x-small', max: 'medium' })
+    await d.assertWidthRange({ position: 3, min: 'x-small', max: 'medium' })
+    await d.assertWidthRange({ position: 4, min: 'x-small', max: 'medium' })
+    await d.assertWidthRange({ position: 5, min: 'x-small', max: 'medium' })
+    await d.assertWidthRange({ position: 6, min: 'medium', max: 'full' })
+    await d.assertWidthRange({ position: 7, min: 'x-small', max: 'full' })
+  })
+
   test('add widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()

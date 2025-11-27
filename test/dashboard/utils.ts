@@ -39,8 +39,8 @@ export class DashboardHelper {
     }
     await widthPopup.click()
     const widthOptions = widthPopup.locator('.popup-button-list__button')
-    await expect(widthOptions.first()).toHaveText(arg.min)
-    await expect(widthOptions.last()).toHaveText(arg.max)
+    await expect(widthOptions.first().locator('span').first()).toHaveText(arg.min)
+    await expect(widthOptions.last().locator('span').first()).toHaveText(arg.max)
   }
 
   assertWidget = async (pos: number, slug: string, width: WidgetWidth) => {
