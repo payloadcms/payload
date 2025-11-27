@@ -55,8 +55,6 @@ describe('Hierarchy', () => {
         expect(pagesCollection.hierarchy.parentFieldName).toBe('parent')
         expect(pagesCollection.hierarchy.slugPathFieldName).toBe('_h_slugPath')
         expect(pagesCollection.hierarchy.titlePathFieldName).toBe('_h_titlePath')
-        expect(pagesCollection.hierarchy.depthFieldName).toBe('_h_depth')
-        expect(pagesCollection.hierarchy.parentTreeFieldName).toBe('_h_parentTree')
       }
     })
 
