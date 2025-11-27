@@ -30,6 +30,16 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
 
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
   const flattenedFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
+
+  const query = await buildQuery({
+    adapter: this,
+    fields: flattenedFields,
+    locale,
+    where: whereToUse,
+  })
+
+  transform({ adapter: this, data: versionData, fields, operation: 'write' })
+
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
@@ -43,15 +53,6 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     // Timestamps are manually added by the write transform
     timestamps: false,
   }
-
-  const query = await buildQuery({
-    adapter: this,
-    fields: flattenedFields,
-    locale,
-    where: whereToUse,
-  })
-
-  transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
   if (returning === false) {
     await Model.updateOne(query, versionData, options)

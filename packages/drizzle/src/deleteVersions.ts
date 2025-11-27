@@ -13,8 +13,6 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
   { collection: collectionSlug, globalSlug, locale, req, where: where },
 ) {
-  const db = await getTransaction(this, req)
-
   let tableName: string
   let fields: FlattenedField[]
 
@@ -53,6 +51,8 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   })
 
   if (ids.length > 0) {
+    const db = await getTransaction(this, req)
+
     await this.deleteWhere({
       db,
       tableName,

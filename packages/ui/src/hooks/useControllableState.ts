@@ -14,7 +14,9 @@ export function useControllableState<T, D>(
   propValue: T,
   fallbackValue: D,
 ): [T extends NonNullable<T> ? T : D | NonNullable<T>, (value: ((prev: T) => T) | T) => void]
+
 export function useControllableState<T>(propValue: T): [T, (value: ((prev: T) => T) | T) => void]
+
 export function useControllableState<T, D>(
   propValue: T,
   fallbackValue?: D,

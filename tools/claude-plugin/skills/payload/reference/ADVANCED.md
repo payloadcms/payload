@@ -156,6 +156,8 @@ Multi-step jobs that run in sequence:
 
 ## Custom Endpoints
 
+Add custom REST API routes to collections, globals, or root config. See [ENDPOINTS.md](ENDPOINTS.md) for detailed patterns, authentication, helpers, and real-world examples.
+
 ### Root Endpoints
 
 ```ts

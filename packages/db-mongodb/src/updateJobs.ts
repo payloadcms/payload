@@ -36,14 +36,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
     timestamps: true,
   })
 
-  const options: MongooseUpdateQueryOptions = {
-    lean: true,
-    new: true,
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
-  }
-
   let query = await buildQuery({
     adapter: this,
     collectionSlug: collectionConfig.slug,
@@ -86,6 +78,14 @@ export const updateJobs: UpdateJobs = async function updateMany(
   if (Object.keys(updateOps).length) {
     updateOps.$set = updateData
     updateData = updateOps
+  }
+
+  const options: MongooseUpdateQueryOptions = {
+    lean: true,
+    new: true,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   let result: Job[] = []
