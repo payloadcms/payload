@@ -31,7 +31,7 @@ export default buildConfigWithDefaults({
       defaultLayout: ({ req: { user } }) => {
         const baseWidgets: WidgetInstance[] = [
           {
-            widgetSlug: 'collection-cards',
+            widgetSlug: 'collections',
             width: 'full',
           },
           ...Array.from(

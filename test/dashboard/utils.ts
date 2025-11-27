@@ -21,7 +21,29 @@ export class DashboardHelper {
 
   widgetByPos = (pos: number) => this.page.locator(`.grid-layout > :nth-child(${pos})`)
 
-  assertWidget = async (slug: string, pos: number, width: WidgetWidth) => {
+  resizeWidget = async (widgetId: string, width: WidgetWidth) => {
+    await this.page.locator(`[data-slug="${widgetId}"]`).hover()
+    await this.page.locator(`[data-slug="${widgetId}"]`).getByRole('button').nth(1).click()
+    await this.page.getByRole('option', { name: width }).click()
+  }
+
+  assertWidthRange = async (arg: { max: WidgetWidth; min: WidgetWidth; position: number }) => {
+    const widget = this.widgetByPos(arg.position)
+    await widget.hover()
+    const widthPopup = widget.locator('.popup')
+    await expect(widthPopup).toBeVisible()
+    if (await widthPopup.isDisabled()) {
+      await expect(widget).toHaveAttribute('data-width', arg.min)
+      await expect(widget).toHaveAttribute('data-width', arg.max)
+      return
+    }
+    await widthPopup.click()
+    const widthOptions = widthPopup.locator('.popup-button-list__button')
+    await expect(widthOptions.first()).toHaveText(arg.min)
+    await expect(widthOptions.last()).toHaveText(arg.max)
+  }
+
+  assertWidget = async (pos: number, slug: string, width: WidgetWidth) => {
     const widget = this.widgetByPos(pos)
     await expect(widget).toHaveAttribute('data-slug', new RegExp(`^${slug}`))
     await expect(widget).toHaveAttribute('data-width', width)
@@ -49,12 +71,6 @@ export class DashboardHelper {
   addWidget = async (slug: string) => {
     await this.stepNavLast.locator('button').nth(0).click()
     await this.page.locator('.drawer__content').getByText(slug).click()
-  }
-
-  resizeWidget = async (widgetId: string, width: WidgetWidth) => {
-    await this.page.locator(`[data-slug="${widgetId}"]`).hover()
-    await this.page.locator(`[data-slug="${widgetId}"]`).getByRole('button').nth(1).click()
-    await this.page.getByRole('option', { name: width }).click()
   }
 
   deleteWidget = async (widgetId: string) => {

@@ -43,28 +43,30 @@ describe('Dashboard', () => {
   })
 
   test('initial dashboard', async ({ page }) => {
-    const dashboard = new DashboardHelper(page)
-    await expect(dashboard.widgets).toHaveCount(7)
+    const d = new DashboardHelper(page)
+    await expect(d.widgets).toHaveCount(7)
 
-    await dashboard.assertIsEditing(false)
-    await dashboard.assertWidget('collection-cards', 1, 'full')
-    await dashboard.assertWidget('count', 2, 'x-small')
-    await dashboard.assertWidget('count', 3, 'x-small')
-    await dashboard.assertWidget('count', 4, 'x-small')
-    await dashboard.assertWidget('count', 5, 'x-small')
-    await dashboard.assertWidget('revenue', 6, 'full')
-    await dashboard.assertWidget('private', 7, 'full')
+    await d.assertIsEditing(false)
+    await d.assertWidget(1, 'collections', 'full')
+    await d.assertWidget(2, 'count', 'x-small')
+    await d.assertWidget(3, 'count', 'x-small')
+    await d.assertWidget(4, 'count', 'x-small')
+    await d.assertWidget(5, 'count', 'x-small')
+    await d.assertWidget(6, 'revenue', 'full')
+    await d.assertWidget(7, 'private', 'full')
   })
 
   test('add widget', async ({ page }) => {
-    const dashboard = new DashboardHelper(page)
-    await dashboard.setEditing()
-    await dashboard.addWidget('revenue')
-    await dashboard.assertWidget('revenue', 8, 'medium')
-    await dashboard.saveChanges()
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('revenue')
+    await d.assertWidget(8, 'revenue', 'medium')
+    await d.saveChanges()
     await page.reload()
-    await dashboard.assertWidget('revenue', 8, 'medium')
+    await d.assertWidget(8, 'revenue', 'medium')
   })
+
+  test('resize widget', async ({ page }) => {})
 
   // add widget
   // resize widget

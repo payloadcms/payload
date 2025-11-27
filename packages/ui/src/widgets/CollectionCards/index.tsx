@@ -13,7 +13,7 @@ import { getNavGroups } from '../../utilities/getNavGroups.js'
 import './index.scss'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 
-const baseClass = 'collection-cards'
+const baseClass = 'collections'
 
 export async function CollectionCards(props: WidgetServerProps) {
   const { i18n, payload, user } = props.req

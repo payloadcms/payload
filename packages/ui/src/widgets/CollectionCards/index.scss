@@ -1,7 +1,7 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .collection-cards {
+  .collections {
     display: flex;
     width: 100%;
     --gap: var(--base);
