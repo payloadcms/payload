@@ -89,9 +89,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Co
 
   // Set sanitized hierarchy config with defaults
   collectionConfig.hierarchy = {
-    depthFieldName: collectionConfig.hierarchy.depthFieldName || '_h_depth',
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
-    parentTreeFieldName: collectionConfig.hierarchy.parentTreeFieldName || '_h_parentTree',
     slugPathFieldName: hierarchyOptions.slugPathFieldName || '_h_slugPath',
     titlePathFieldName: hierarchyOptions.titlePathFieldName || '_h_titlePath',
     ...(collectionConfig.hierarchy.slugify && { slugify: collectionConfig.hierarchy.slugify }),

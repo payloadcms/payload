@@ -9,20 +9,11 @@ export type HierarchyDataT = {
  */
 export type HierarchyConfig = {
   /**
-   * Name of the field to store the depth in the tree
-   * @default '_h_depth'
-   */
-  depthFieldName?: string
-  /**
    * Name of the field that references the parent document
+   * Will automatically create this field if it does not exist
    * (e.g., 'parent', 'parentPage', 'parentFolder')
    */
   parentFieldName: string
-  /**
-   * Name of the field to store the array of ancestor IDs
-   * @default '_h_parentTree'
-   */
-  parentTreeFieldName?: string
   /**
    * Custom function to slugify text for path generation
    * Defaults to internal slugify implementation

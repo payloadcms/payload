@@ -151,26 +151,35 @@ To use hierarchy, add the `hierarchy` property to your collection config.
 
 ### Basic Setup
 
-**Enable with defaults:**
+**Enable with defaults (parent field auto-created):**
 
 ```typescript
 {
   slug: 'pages',
   fields: [
     {
-      name: 'parent',
-      type: 'relationship',
-      relationTo: 'pages',  // Self-referential
-      hasMany: false,
+      name: 'title',
+      type: 'text',
+      required: true,
     }
   ],
   hierarchy: {
-    parentFieldName: 'parent',  // Name of your parent relationship field
+    parentFieldName: 'parent',  // Field will be auto-created
   }
 }
 ```
 
-### With Custom Options
+The parent relationship field is automatically created with these defaults:
+
+- `type: 'relationship'`
+- `relationTo: [collection slug]` (self-referential)
+- `hasMany: false`
+- `index: true`
+- `admin.position: 'sidebar'`
+
+### With Custom Parent Field
+
+If you need custom validation or UI configuration, define the parent field yourself:
 
 ```typescript
 {
@@ -181,6 +190,12 @@ To use hierarchy, add the `hierarchy` property to your collection config.
       type: 'relationship',
       relationTo: 'pages',
       hasMany: false,
+      validate: (value) => {
+        // Custom validation logic
+      },
+      admin: {
+        description: 'Select a parent page',
+      }
     },
     {
       name: 'title',
@@ -189,23 +204,44 @@ To use hierarchy, add the `hierarchy` property to your collection config.
   ],
   hierarchy: {
     parentFieldName: 'parentPage',
+  }
+}
+```
+
+**Note:** If you define the parent field manually, it **must** be configured as:
+
+- `type: 'relationship'`
+- `relationTo: [same collection slug]` (self-referential)
+- `hasMany: false`
+
+Otherwise, a validation error will be thrown.
+
+### With Custom Options
+
+```typescript
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
     slugify: (text) => customSlugify(text),  // Optional custom slugify function
-    slugPathFieldName: '_breadcrumbPath',     // Optional custom field name
-    titlePathFieldName: '_breadcrumbTitle',   // Optional custom field name
-    depthFieldName: '_level',                 // Optional custom field name
-    parentTreeFieldName: '_ancestors',        // Optional custom field name
+    slugPathFieldName: '_breadcrumbPath',    // Optional custom field name
+    titlePathFieldName: '_breadcrumbTitle',  // Optional custom field name
   }
 }
 ```
 
 ### Available Options
 
-- **`parentFieldName`** (required): Name of the field that references the parent document
+- **`parentFieldName`** (required): Name of the parent relationship field (auto-created if not defined)
 - **`slugify`** (optional): Custom function to slugify text for path generation
 - **`slugPathFieldName`** (optional): Name for slugified path field (default: `'_h_slugPath'`)
 - **`titlePathFieldName`** (optional): Name for title path field (default: `'_h_titlePath'`)
-- **`depthFieldName`** (optional): Name for depth field (default: `'_h_depth'`)
-- **`parentTreeFieldName`** (optional): Name for parent tree field (default: `'_h_parentTree'`)
 
 ## Use Cases
 
@@ -221,15 +257,10 @@ Create a hierarchical page structure:
       name: 'title',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'parent',
-      type: 'relationship',
-      relationTo: 'pages',
     }
   ],
   hierarchy: {
-    parentFieldName: 'parent',
+    parentFieldName: 'parent',  // Auto-created
   }
 }
 ```
@@ -246,15 +277,10 @@ Build nested category taxonomies:
       name: 'name',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'parentCategory',
-      type: 'relationship',
-      relationTo: 'categories',
     }
   ],
   hierarchy: {
-    parentFieldName: 'parentCategory',
+    parentFieldName: 'parentCategory',  // Auto-created
   },
   admin: {
     useAsTitle: 'name',
@@ -274,15 +300,10 @@ Model departments, locations, or organizational hierarchies:
       name: 'deptName',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'parentDept',
-      type: 'relationship',
-      relationTo: 'departments',
     }
   ],
   hierarchy: {
-    parentFieldName: 'parentDept',
+    parentFieldName: 'parentDept',  // Auto-created
   }
 }
 ```
@@ -471,6 +492,8 @@ This ensures descendants maintain their relative position in the tree while refl
 - Optimization for title-only changes
 - Explicit localization handling
 - Collection-level config option
+- Auto-creation of parent field with validation
+- Support for custom parent field definitions
 
 ⏳ **Future Work:**
 
@@ -484,38 +507,9 @@ This ensures descendants maintain their relative position in the tree while refl
 2. Build paths incrementally from parent paths
 3. Update directly via `db.updateOne()` (bypass hooks)
 4. Handle localization if needed
+5. Parent field auto-created if not defined by user
 
 ## Future Considerations
-
-### Collection-Level Config Option
-
-**Current approach:**
-
-```typescript
-addHierarchyToCollection({ collectionConfig, config, parentFieldName: 'parent' })
-```
-
-**Potential future approach:**
-
-```typescript
-{
-  slug: 'pages',
-  fields: [{ name: 'parent', type: 'relationship', relationTo: 'pages' }],
-  hierarchy: {
-    parentFieldName: 'parent',
-    slugify?: (text: string) => string,
-    slugPathFieldName?: '_prefixSlugPath',
-    titlePathFieldName?: '_prefixTitlePath',
-  }
-}
-```
-
-**Benefits:**
-
-- Declarative and discoverable
-- Type-safe (TS knows which collections have hierarchy)
-- Consistent with other collection features (auth, upload, versions)
-- Enables better validation
 
 ### Circular Reference Prevention
 
