@@ -250,7 +250,7 @@ export const updateOperation = async <
 
     if (config && config.localization && globalConfig.versions) {
       let isSnapshotRequired = false
-      console.log(publishAllLocales)
+
       if (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus) {
         if (publishAllLocales || unpublishAllLocales) {
           let accessibleLocaleCodes = config.localization.localeCodes
