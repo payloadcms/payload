@@ -117,6 +117,7 @@ describe('Dashboard', () => {
     await d.deleteWidget(1)
     await d.deleteWidget(1)
     await expect(d.widgets).toHaveCount(0)
+    await expect(page.getByText('There are no widgets on your dashboard')).toBeVisible()
   })
 
   // empty dashboard - delete all widgets

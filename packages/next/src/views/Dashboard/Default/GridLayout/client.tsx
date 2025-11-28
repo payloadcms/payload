@@ -114,6 +114,14 @@ export function GridLayoutDashboardClient({
             // to make sure all rows have the same width always.
           }}
         >
+          {currentLayout?.length === 0 && (
+            <div className="grid-layout__empty">
+              <p>
+                There are no widgets on your dashboard. You can add them from the "Dashboard" menu
+                located in the top bar.
+              </p>
+            </div>
+          )}
           {currentLayout?.map((widget, _index) => (
             <React.Fragment key={widget.item.i}>
               <DraggableItem
