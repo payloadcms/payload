@@ -1,7 +1,6 @@
 import type {
   BasePayload,
   DashboardConfig,
-  DashboardViewServerProps,
   PayloadRequest,
   TypedUser,
   Widget,
@@ -12,6 +11,7 @@ import type {
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import type { DashboardViewServerProps } from '../index.js'
 import type { WidgetInstanceClient, WidgetItem } from './client.js'
 
 import { getPreferences } from '../../../../utilities/getPreferences.js'

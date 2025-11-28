@@ -8,7 +8,6 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 
-/** @deprecated Import from `payload` instead */
 export enum EntityType {
   collection = 'collections',
   global = 'globals',
@@ -24,7 +23,6 @@ export type EntityToGroup =
       type: EntityType.global
     }
 
-/** @deprecated Import from `payload` instead */
 export type NavGroupType = {
   entities: {
     label: StaticLabel

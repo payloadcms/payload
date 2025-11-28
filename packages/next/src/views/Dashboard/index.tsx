@@ -1,13 +1,11 @@
-import type {
-  AdminViewServerProps,
-  DashboardViewClientProps,
-  DashboardViewServerPropsOnly,
-} from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
+
+import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
 
