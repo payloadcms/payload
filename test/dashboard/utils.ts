@@ -25,6 +25,16 @@ export class DashboardHelper {
 
   widgetByPos = (pos: number) => this.page.locator(`.grid-layout > :nth-child(${pos})`)
 
+  getSnapshot = async (): Promise<[slug: string, width: WidgetWidth][]> => {
+    const widgets: [slug: string, width: WidgetWidth][] = await Promise.all(
+      (await this.widgets.all()).map(async (widget) => [
+        (await widget.getAttribute('data-slug'))!,
+        (await widget.getAttribute('data-width')) as WidgetWidth,
+      ]),
+    )
+    return widgets
+  }
+
   /**
    * - Verify that flex wrap is working correctly (If a node exceeds 100% of the available width, it should go in the row below)
    * - Verify that the nodes are positioned without gaps or overlap
@@ -162,7 +172,90 @@ export class DashboardHelper {
     await this.assertIsEditing(false)
   }
 
-  saveChanges = async () => {
+  saveChangesAndValidate = async () => {
+    const snapshot = await this.getSnapshot()
+    await this.assertIsEditing(true)
     await this.stepNavLast.locator('button').nth(1).click()
+    await this.assertIsEditing(false)
+    await this.validateLayout()
+    await this.page.reload()
+    await this.validateLayout()
+    const snapshotAfter = await this.getSnapshot()
+    expect(snapshotAfter).toEqual(snapshot)
   }
+
+  moveWidget = async (from: number, to: number, place: 'after' | 'before' = 'before') => {
+    const srcWidget = this.widgetByPos(from)
+    const srcWidgetBox = (await srcWidget.boundingBox())!
+    const targetWidget = this.widgetByPos(to)
+    const snapshot = await this.getSnapshot()
+
+    // there are two droppable widgets for each widget: one before and one after
+    await expect(this.page.locator('.droppable-widget')).toHaveCount(snapshot.length * 2)
+
+    // all droppable widgets should be transparent
+    for (const droppable of await this.page.locator('.droppable-widget').all()) {
+      const bgColor = await droppable.evaluate((el) => window.getComputedStyle(el).backgroundColor)
+      expect(bgColor).toBe('rgba(0, 0, 0, 0)') // transparent
+    }
+
+    // here we make the DnD
+    await this.page.mouse.move(
+      srcWidgetBox.x + srcWidgetBox.width / 2,
+      srcWidgetBox.y + srcWidgetBox.height / 2,
+    )
+    await this.page.mouse.down()
+    await targetWidget.scrollIntoViewIfNeeded()
+    const targetWidgetBox = (await targetWidget.boundingBox())!
+    await this.page.mouse.move(
+      targetWidgetBox.x + targetWidgetBox.width / 2 + (place === 'after' ? 5 : -5),
+      targetWidgetBox.y + targetWidgetBox.height / 2,
+      {
+        // steps is important: move slightly to trigger the drag sensor of DnD-kit
+        steps: 10,
+      },
+    )
+    // the droppable widget should be highlighted
+    const droppable = this.page.getByTestId(`${snapshot[to - 1]![0]}-${place}`)
+    const bgColor = await droppable.evaluate((el) => window.getComputedStyle(el).backgroundColor)
+    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)')
+    await this.page.mouse.up()
+    await this.page.waitForTimeout(400) // dndkit animation
+
+    // validate that the move was successful with the new order
+    const snapshotAfter = await this.getSnapshot()
+    const expectedSnapshot = moveArrayItem(snapshot, from, to, place)
+    expect(snapshotAfter).toEqual(expectedSnapshot)
+  }
+}
+
+// utility function to move an item in an array
+// from and to are 1-based positions (not 0-based indices)
+function moveArrayItem<T>(
+  arr: T[],
+  from: number,
+  to: number,
+  place: 'after' | 'before' = 'before',
+): T[] {
+  const copy: T[] = [...arr]
+
+  // Convert 1-based positions to 0-based indices
+  const fromIndex = from - 1
+  const toIndex = to - 1
+
+  const item = copy.splice(fromIndex, 1)[0]!
+
+  let insertIndex = toIndex
+  if (place === 'after') {
+    insertIndex = toIndex + 1
+  }
+
+  // Adjust insert index if we removed an item before it
+  if (fromIndex < insertIndex) {
+    insertIndex -= 1
+  }
+
+  copy.splice(insertIndex, 0, item)
+
+  return copy
 }

@@ -316,6 +316,8 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
 
   return (
     <div
+      className="droppable-widget"
+      data-testid={`${id}-${position}`}
       ref={setNodeRef}
       style={{
         position: 'absolute',

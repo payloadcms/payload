@@ -72,11 +72,7 @@ describe('Dashboard', () => {
     await d.assertWidget(2, 'count', 'x-small')
     await d.resizeWidget(2, 'medium')
     await d.assertWidget(2, 'count', 'medium')
-    await d.saveChanges()
-    await d.validateLayout()
-    await page.reload()
-    await d.validateLayout()
-    await d.assertWidget(2, 'count', 'medium')
+    await d.saveChangesAndValidate()
   })
 
   test('add widget', async ({ page }) => {
@@ -84,11 +80,7 @@ describe('Dashboard', () => {
     await d.setEditing()
     await d.addWidget('revenue')
     await d.assertWidget(8, 'revenue', 'medium')
-    await d.saveChanges()
-    await d.validateLayout()
-    await page.reload()
-    await d.validateLayout()
-    await d.assertWidget(8, 'revenue', 'medium')
+    await d.saveChangesAndValidate()
   })
 
   test('delete widget', async ({ page }) => {
@@ -97,13 +89,8 @@ describe('Dashboard', () => {
     await d.deleteWidget(1)
     await d.assertWidget(1, 'count', 'x-small')
     await d.assertWidget(6, 'private', 'full')
-    await d.saveChanges()
-    await d.validateLayout()
-    await page.reload()
-    await d.validateLayout()
     await expect(d.widgets).toHaveCount(6)
-    await d.assertWidget(1, 'count', 'x-small')
-    await d.assertWidget(6, 'private', 'full')
+    await d.saveChangesAndValidate()
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {
@@ -118,6 +105,7 @@ describe('Dashboard', () => {
     await d.deleteWidget(1)
     await expect(d.widgets).toHaveCount(0)
     await expect(page.getByText('There are no widgets on your dashboard')).toBeVisible()
+    await d.saveChangesAndValidate()
   })
 
   test('Widgets should expand to the height of the tallest widget in the row', async ({ page }) => {
@@ -128,7 +116,7 @@ describe('Dashboard', () => {
     await d.deleteWidget(2)
     await d.resizeWidget(4, 'medium')
     // validateLayout already takes care of verifying that
-    await d.validateLayout()
+    await d.saveChangesAndValidate()
   })
 
   test('cancel editing', async ({ page }) => {
@@ -144,21 +132,25 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('revenue')
-    await d.saveChanges()
+    await d.saveChangesAndValidate()
     await d.resetLayout()
     await expect(d.widgets).toHaveCount(7)
-    await page.reload()
     await d.validateLayout()
   })
 
-  // empty dashboard - delete all widgets
+  test('move widgets', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    // moveWidget already contains validations
+    await d.moveWidget(2, 1) // to first position
+    await d.moveWidget(1, 2, 'after') // after last in row
+    await d.moveWidget(2, 7, 'after') // to last position
+    await d.moveWidget(3, 6, 'before') // before first in row
+    await d.saveChangesAndValidate()
+  })
 
-  // add widget
-  // resize widget
-  // delete widget
-  // cancel editing
-  // reset layout
-  // reorder widget positions 1, 2, last and before last
+  // cannot move or edit widgets when not editing
 
-  // widgets should take the height of the highest widget in the row
+  // TODO: reorder widgets with keyboard (for a11y reasons)
+  // It's already working. But I'd like to test it properly with a screen reader and everything.
 })
