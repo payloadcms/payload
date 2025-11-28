@@ -4112,7 +4112,7 @@ describe('Localization', () => {
               text: 'en published',
               _status: 'published',
             },
-            locale: 'en',
+            locale: defaultLocale,
             publishAllLocales: true,
           })
 
