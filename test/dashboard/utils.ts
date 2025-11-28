@@ -122,6 +122,11 @@ export class DashboardHelper {
     await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
   }
 
+  resetLayout = async () => {
+    await this.stepNavLast.locator('button').click()
+    await this.stepNavLast.getByText('Reset Layout').click()
+  }
+
   assertIsEditing = async (shouldBe: boolean) => {
     if (shouldBe) {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
@@ -136,8 +141,10 @@ export class DashboardHelper {
   }
 
   addWidget = async (slug: string) => {
+    const widgetsCount = await this.widgets.count()
     await this.stepNavLast.locator('button').nth(0).click()
     await this.page.locator('.drawer__content').getByText(slug).click()
+    await expect(this.widgets).toHaveCount(widgetsCount + 1)
   }
 
   deleteWidget = async (position: number) => {
@@ -152,10 +159,7 @@ export class DashboardHelper {
 
   cancelEditing = async () => {
     await this.stepNavLast.locator('button').nth(2).click()
-  }
-
-  resetLayout = async () => {
-    await this.stepNavLast.locator('button').nth(1).click()
+    await this.assertIsEditing(false)
   }
 
   saveChanges = async () => {

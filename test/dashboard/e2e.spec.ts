@@ -131,6 +131,26 @@ describe('Dashboard', () => {
     await d.validateLayout()
   })
 
+  test('cancel editing', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('revenue')
+    await d.cancelEditing()
+    await expect(d.widgets).toHaveCount(7)
+    await d.validateLayout()
+  })
+
+  test('reset layout', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('revenue')
+    await d.saveChanges()
+    await d.resetLayout()
+    await expect(d.widgets).toHaveCount(7)
+    await page.reload()
+    await d.validateLayout()
+  })
+
   // empty dashboard - delete all widgets
 
   // add widget
