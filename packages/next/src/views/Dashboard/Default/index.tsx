@@ -13,6 +13,15 @@ export type DashboardViewClientProps = {
   locale: Locale
 }
 
+// Neither DashboardViewClientProps, DashboardViewServerPropsOnly, nor
+// DashboardViewServerProps make much sense. They were created
+// before the modular dashboard existed, and they are tightly coupled to
+// the default layout of collection and global cards. All of their values
+// could have been derived from the req object, and the same likely applies
+// to other views. These types remain only for backward compatibility.
+// It is recommended to use the modular dashboard widgets, which have props
+// that are more agnostic to their content.
+
 export type DashboardViewServerPropsOnly = {
   globalData: Array<{
     data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
@@ -25,11 +34,6 @@ export type DashboardViewServerPropsOnly = {
    * Components now import their own `Link` directly from `next/link`.
    */
   Link?: React.ComponentType
-
-  /**
-   * @deprecated
-   * This prop is deprecated and will be removed in the next major version.
-   */
   navGroups?: ReturnType<typeof groupNavItems>
 } & AdminViewServerPropsOnly
 

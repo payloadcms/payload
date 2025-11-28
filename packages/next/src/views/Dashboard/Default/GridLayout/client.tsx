@@ -74,6 +74,8 @@ export function GridLayoutDashboardClient({
           },
         }}
         collisionDetection={closestInXAxis}
+        // https://github.com/clauderic/dnd-kit/issues/926#issuecomment-1640115665
+        id="dashboard-dnd-context"
         onDragCancel={() => {
           setDropTargetWidget(null)
           setActiveDragId(null)
