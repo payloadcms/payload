@@ -1,4 +1,4 @@
-import type { DashboardViewServerPropsOnly, PayloadRequest, TypedUser } from 'payload'
+import type { ClientUser, PayloadRequest, TypedUser } from 'payload'
 
 const globalLockDurationDefault = 300
 
@@ -8,7 +8,14 @@ export async function getGlobalData(req: PayloadRequest) {
     payload,
   } = req
   // Query locked global documents only if there are globals in the config
-  let globalData: DashboardViewServerPropsOnly['globalData'] = []
+  // This type is repeated from DashboardViewServerPropsOnly['globalData'].
+  // I thought about moving it to a payload to share it, but we're already
+  // exporting all the views props from the next package.
+  let globalData: Array<{
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
+    lockDuration?: number
+    slug: string
+  }> = []
 
   if (config.globals.length > 0) {
     const lockedDocuments = await payload.find({
