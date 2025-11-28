@@ -167,6 +167,8 @@ describe('Dashboard', () => {
     await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
   })
 
+  // TODO: test responsiveness. In mobile all widgets have a 100% width.
+
   // TODO: reorder widgets with keyboard (for a11y reasons)
   // It's already working. But I'd like to test it properly with a screen reader and everything.
 })
