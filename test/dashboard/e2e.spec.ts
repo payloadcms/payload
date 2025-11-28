@@ -91,6 +91,36 @@ describe('Dashboard', () => {
     await d.assertWidget(8, 'revenue', 'medium')
   })
 
+  test('delete widget', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.deleteWidget(1)
+    await d.assertWidget(1, 'count', 'x-small')
+    await d.assertWidget(6, 'private', 'full')
+    await d.saveChanges()
+    await d.validateLayout()
+    await page.reload()
+    await d.validateLayout()
+    await expect(d.widgets).toHaveCount(6)
+    await d.assertWidget(1, 'count', 'x-small')
+    await d.assertWidget(6, 'private', 'full')
+  })
+
+  test('empty dashboard - delete all widgets', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.deleteWidget(1)
+    await d.deleteWidget(1)
+    await d.deleteWidget(1)
+    await d.deleteWidget(1)
+    await d.deleteWidget(1)
+    await d.deleteWidget(1)
+    await d.deleteWidget(1)
+    await expect(d.widgets).toHaveCount(0)
+  })
+
+  // empty dashboard - delete all widgets
+
   // add widget
   // resize widget
   // delete widget

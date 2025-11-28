@@ -132,9 +132,14 @@ export class DashboardHelper {
     await this.page.locator('.drawer__content').getByText(slug).click()
   }
 
-  deleteWidget = async (widgetId: string) => {
-    await this.page.locator(`[data-slug="${widgetId}"]`).hover()
-    await this.page.locator(`[data-slug="${widgetId}"]`).getByRole('button').nth(2).click()
+  deleteWidget = async (position: number) => {
+    const widgetsCount = await this.widgets.count()
+    const widget = this.widgetByPos(position)
+    const widgetDomElem = await widget.elementHandle()
+    await widget.hover()
+    await widget.getByTitle('Delete widget').click()
+    expect(await widgetDomElem?.isHidden()).toBe(true)
+    await expect(this.widgets).toHaveCount(widgetsCount - 1)
   }
 
   cancelEditing = async () => {
