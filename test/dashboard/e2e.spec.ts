@@ -149,7 +149,23 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
   })
 
-  // cannot move or edit widgets when not editing
+  test('cannot move or edit widgets when not editing', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.assertIsEditing(false)
+
+    // Delete buttons should not be visible when not editing
+    const widget = d.widgetByPos(1)
+    await widget.hover()
+    await expect(widget.getByTitle('Delete widget')).toBeHidden()
+
+    // Widgets should have aria-disabled="true" when not editing
+    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'true')
+
+    // verify the opposite:
+    await d.setEditing()
+    await expect(widget.getByTitle('Delete widget')).toBeVisible()
+    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
+  })
 
   // TODO: reorder widgets with keyboard (for a11y reasons)
   // It's already working. But I'd like to test it properly with a screen reader and everything.
