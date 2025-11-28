@@ -294,6 +294,7 @@ function DraggableItem(props: {
     <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
       <DroppableItem id={props.id} position="before" />
       <div
+        className="draggable"
         id={props.id}
         ref={setNodeRef}
         {...listeners}

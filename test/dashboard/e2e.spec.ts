@@ -120,6 +120,17 @@ describe('Dashboard', () => {
     await expect(page.getByText('There are no widgets on your dashboard')).toBeVisible()
   })
 
+  test('Widgets should expand to the height of the tallest widget in the row', async ({ page }) => {
+    // For this test we need to put 2 widgets with different default heights in the same row
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.deleteWidget(2)
+    await d.deleteWidget(2)
+    await d.resizeWidget(4, 'medium')
+    // validateLayout already takes care of verifying that
+    await d.validateLayout()
+  })
+
   // empty dashboard - delete all widgets
 
   // add widget

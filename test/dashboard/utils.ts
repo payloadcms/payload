@@ -25,6 +25,11 @@ export class DashboardHelper {
 
   widgetByPos = (pos: number) => this.page.locator(`.grid-layout > :nth-child(${pos})`)
 
+  /**
+   * - Verify that flex wrap is working correctly (If a node exceeds 100% of the available width, it should go in the row below)
+   * - Verify that the nodes are positioned without gaps or overlap
+   * - Verify that all nodes in a row have the same height
+   */
   validateLayout = async () => {
     const WIDTH_TO_COLS = {
       'x-small': 3,
@@ -58,6 +63,9 @@ export class DashboardHelper {
         // Widget continues on the same row
         const previousWidgetBox = (await widgets[index - 1]!.boundingBox())!
         expectedX = previousWidgetBox.x + previousWidgetBox.width
+        expect(widgetBox.y + widgetBox.height).toBe(previousWidgetBox.y + previousWidgetBox.height)
+        const innerWidgetBox = (await widget.locator('.draggable').boundingBox())!
+        expect(innerWidgetBox.y + innerWidgetBox.height).toBe(widgetBox.y + widgetBox.height - 6) // 6px padding
       }
 
       expect(widgetBox.x).toBe(expectedX)

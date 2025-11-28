@@ -24,11 +24,8 @@
         pointer-events: none;
       }
 
-      .widget {
+      .draggable {
         cursor: grab;
-        &:active {
-          cursor: grabbing;
-        }
       }
     }
 
