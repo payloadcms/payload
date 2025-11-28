@@ -27,6 +27,7 @@ import {
   cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
+  globalWithDraftsSlug,
   hungarianLocale,
   localizedDateFieldsSlug,
   localizedPostsSlug,
@@ -440,7 +441,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      slug: 'global-drafts',
+      slug: globalWithDraftsSlug,
       versions: {
         drafts: true,
       },

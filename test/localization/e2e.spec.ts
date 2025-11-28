@@ -819,9 +819,8 @@ describe('Localization', () => {
         await page.locator('#field-text').fill('ES Published')
         await saveDocAndAssert(page, '#publish-locale')
 
-        await changeLocale(page, defaultLocale)
-
         await page.goto(urlAllFieldsLocalized.versions(docID))
+        await changeLocale(page, defaultLocale)
 
         const firstRow = page.locator('tbody tr').first()
         await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
