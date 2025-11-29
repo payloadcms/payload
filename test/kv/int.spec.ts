@@ -1,5 +1,5 @@
 import type { CloudflareKVNamespace } from '@payloadcms/kv-cloudflare'
-import type { KVAdapterResult, Payload } from 'payload'
+import type { KVAdapter, KVAdapterResult, Payload } from 'payload'
 
 import { cloudflareKVAdapter } from '@payloadcms/kv-cloudflare'
 import { RedisKVAdapter, redisKVAdapter } from '@payloadcms/kv-redis'
@@ -101,5 +101,90 @@ describe('KV Adapters', () => {
 
   it('cloudflareKVAdapter', async () => {
     expect(await testKVAdapter(cloudflareKVAdapter({ binding: kvBinding }))).toBeTruthy()
+  })
+
+  describe('Cloudflare KV Pagination', () => {
+    let kvAdapter: KVAdapter
+
+    beforeAll(() => {
+      kvAdapter = cloudflareKVAdapter({
+        binding: kvBinding,
+        keyPrefix: 'pagination-test:',
+      }).init({ payload })
+    })
+
+    beforeEach(async () => {
+      await kvAdapter.clear()
+    })
+
+    afterEach(async () => {
+      await kvAdapter.clear()
+    })
+
+    it('should handle pagination with >1000 keys', async () => {
+      const keyCount = 1500
+      await Promise.all(
+        Array.from({ length: keyCount }, (_, i) =>
+          kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
+        ),
+      )
+
+      const allKeys = await kvAdapter.keys()
+      expect(allKeys).toHaveLength(keyCount)
+      expect(allKeys).toContain('key-00000')
+      expect(allKeys).toContain('key-01499')
+    })
+
+    it('should handle exactly 1000 keys (boundary)', async () => {
+      const keyCount = 1000
+      await Promise.all(
+        Array.from({ length: keyCount }, (_, i) =>
+          kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
+        ),
+      )
+
+      const allKeys = await kvAdapter.keys()
+      expect(allKeys).toHaveLength(keyCount)
+    })
+
+    it('should handle list_complete flag correctly', async () => {
+      // Create just under 1000 keys (should complete in one page)
+      const keyCount = 999
+      await Promise.all(
+        Array.from({ length: keyCount }, (_, i) =>
+          kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
+        ),
+      )
+
+      const allKeys = await kvAdapter.keys()
+      expect(allKeys).toHaveLength(keyCount)
+    })
+
+    it('should respect keyPrefix during pagination', async () => {
+      const keyCount = 1200
+
+      // Create keys with pagination-test prefix
+      await Promise.all(
+        Array.from({ length: keyCount }, (_, i) =>
+          kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
+        ),
+      )
+
+      // Create keys with different prefix (noise)
+      const noiseAdapter = cloudflareKVAdapter({
+        binding: kvBinding,
+        keyPrefix: 'noise:',
+      }).init({ payload })
+
+      await noiseAdapter.set('noise-key-1', { data: 'noise' })
+      await noiseAdapter.set('noise-key-2', { data: 'noise' })
+
+      // Should only get keys with pagination-test prefix
+      const allKeys = await kvAdapter.keys()
+      expect(allKeys).toHaveLength(keyCount)
+      expect(allKeys.every((k: string) => !k.startsWith('noise'))).toBe(true)
+
+      await noiseAdapter.clear()
+    })
   })
 })
