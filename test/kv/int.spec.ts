@@ -121,8 +121,11 @@ describe('KV Adapters', () => {
       await kvAdapter.clear()
     })
 
-    it('should handle pagination with >1000 keys', async () => {
-      const keyCount = 1500
+    it.each([
+      { keyCount: 999, description: 'under boundary (list_complete: true)' },
+      { keyCount: 1000, description: 'exact boundary' },
+      { keyCount: 1500, description: 'over boundary (multiple pages)' },
+    ])('should handle pagination with $keyCount keys ($description)', async ({ keyCount }) => {
       await Promise.all(
         Array.from({ length: keyCount }, (_, i) =>
           kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
@@ -132,32 +135,7 @@ describe('KV Adapters', () => {
       const allKeys = await kvAdapter.keys()
       expect(allKeys).toHaveLength(keyCount)
       expect(allKeys).toContain('key-00000')
-      expect(allKeys).toContain('key-01499')
-    })
-
-    it('should handle exactly 1000 keys (boundary)', async () => {
-      const keyCount = 1000
-      await Promise.all(
-        Array.from({ length: keyCount }, (_, i) =>
-          kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
-        ),
-      )
-
-      const allKeys = await kvAdapter.keys()
-      expect(allKeys).toHaveLength(keyCount)
-    })
-
-    it('should handle list_complete flag correctly', async () => {
-      // Create just under 1000 keys (should complete in one page)
-      const keyCount = 999
-      await Promise.all(
-        Array.from({ length: keyCount }, (_, i) =>
-          kvAdapter.set(`key-${String(i).padStart(5, '0')}`, { index: i }),
-        ),
-      )
-
-      const allKeys = await kvAdapter.keys()
-      expect(allKeys).toHaveLength(keyCount)
+      expect(allKeys).toContain(`key-${String(keyCount - 1).padStart(5, '0')}`)
     })
 
     it('should respect keyPrefix during pagination', async () => {
