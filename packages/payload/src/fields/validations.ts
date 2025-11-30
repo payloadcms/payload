@@ -735,7 +735,7 @@ const validateFilterOptions: Validate<
         requestedID = val.value
       }
 
-      if (falseCollections.find((slug) => relationTo === slug)) {
+      if (falseCollections.find((slug) => collection === slug)) {
         return true
       }
 
@@ -747,11 +747,61 @@ const validateFilterOptions: Validate<
     })
 
     if (invalidRelationships.length > 0) {
-      return invalidRelationships.reduce((err, invalid, i) => {
-        return `${err} ${JSON.stringify(invalid)}${
-          invalidRelationships.length === i + 1 ? ',' : ''
-        } `
-      }, t('validation:invalidSelections')) as string
+      const formattedInvalidRelations = await Promise.all(
+        invalidRelationships.map(async (rel) => {
+          let collection: string
+          let requestedID: number | string
+
+          if (typeof relationTo === 'string') {
+            collection = relationTo
+
+            if (typeof rel === 'string' || typeof rel === 'number') {
+              requestedID = rel
+            }
+
+            if (typeof rel === 'object' && ObjectId.isValid(rel)) {
+              requestedID = new ObjectId(rel).toHexString()
+            }
+          }
+
+          if (Array.isArray(relationTo) && typeof rel === 'object' && rel?.relationTo) {
+            collection = rel.relationTo
+            requestedID = rel.value
+          }
+
+          collection = collection!
+          requestedID = requestedID!
+
+          try {
+            const titleField = req.payload.collections[collection]?.config?.admin?.useAsTitle
+            if (titleField) {
+              const result = await req.payloadDataLoader.find({
+                collection,
+                depth: 0,
+                limit: 0,
+                overrideAccess: false,
+                pagination: false,
+                req,
+                user,
+                where: {
+                  id: {
+                    equals: requestedID,
+                  },
+                },
+              })
+
+              if (result.docs[0] && result.docs[0][titleField]) {
+                rel = result.docs[0][titleField]
+              }
+            }
+          } catch (ignored) {
+            // If we cannot get the title, use the ID as default
+          }
+
+          return JSON.stringify(rel)
+        }),
+      )
+      return `${t('validation:invalidSelections')} ${formattedInvalidRelations.join(', ')}`
     }
 
     return true

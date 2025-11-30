@@ -13,6 +13,7 @@ import {
   defaultAccessRelSlug,
   polymorphicRelationshipsSlug,
   relationSlug,
+  relationWithRestrictedFilterOptionsSlug,
   slug,
   slugWithLocalizedRel,
   treeSlug,
@@ -224,10 +225,16 @@ export default buildConfigWithDefaults({
     {
       slug: 'movies',
       versions: { drafts: true },
+      admin: {
+        useAsTitle: 'name',
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
+          access: {
+            read: ({ req }) => (req.user as any).name !== 'UserWhoCannotReadMovieNames',
+          },
         },
         {
           name: 'select',
@@ -319,6 +326,19 @@ export default buildConfigWithDefaults({
           ],
           required: true,
           type: 'radio',
+        },
+      ],
+    },
+    {
+      slug: relationWithRestrictedFilterOptionsSlug,
+      fields: [
+        {
+          name: 'relationWithFilterOptions',
+          relationTo: ['movies', 'directors', customIdSlug],
+          required: true,
+          hasMany: true,
+          type: 'relationship',
+          filterOptions: ({ relationTo }) => relationTo === 'directors',
         },
       ],
     },
