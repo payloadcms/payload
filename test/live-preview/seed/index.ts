@@ -7,6 +7,7 @@ import { devUser } from '../../credentials.js'
 import removeFiles from '../../helpers/removeFiles.js'
 import {
   customLivePreviewSlug,
+  customTogglerSlug,
   pagesSlug,
   postsSlug,
   ssrAutosavePagesSlug,
@@ -153,6 +154,15 @@ export const seed: Config['onInit'] = async (payload) => {
       ),
       title: 'Custom Live Preview',
       slug: 'custom-live-preview',
+    },
+  })
+
+  await payload.create({
+    collection: customTogglerSlug,
+    data: {
+      title: 'Custom Toggler Test Page',
+      slug: 'custom-toggler-test',
+      content: 'This is a test page for custom live preview toggler',
     },
   })
 
