@@ -343,7 +343,6 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
 
     await sortColumn(page, {
-      fieldLabel: 'Title',
       fieldPath: 'title',
       scope: table1,
       targetState: 'asc',
@@ -365,7 +364,6 @@ test.describe('Group By', () => {
     await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
 
     await sortColumn(page, {
-      fieldLabel: 'Title',
       fieldPath: 'title',
       scope: table1,
       targetState: 'desc',
@@ -616,7 +614,6 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      fieldLabel: 'Title',
       fieldPath: 'title',
       scope: firstTable,
       targetState: 'asc',
@@ -661,7 +658,6 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      fieldLabel: 'Title',
       fieldPath: 'title',
       scope: firstTable,
       targetState: 'asc',

@@ -149,6 +149,65 @@ describe('Query Presets', () => {
     }
   })
 
+  test('can create and view preset with no filters or columns', async () => {
+    await page.goto(pagesUrl.list)
+
+    const presetTitle = 'Empty Preset'
+
+    // Create a new preset without setting any filters or columns
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    const currentURL = page.url()
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    await page.waitForURL(() => page.url() !== currentURL)
+
+    await expect(
+      page.locator('button#select-preset', {
+        hasText: exactText(presetTitle),
+      }),
+    ).toBeVisible()
+
+    // Open the edit modal to verify where/columns fields handle null values
+    await page.locator('#edit-preset').click()
+    const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(editModal).toBeVisible()
+
+    // Verify the Where field displays "No where query" instead of crashing
+    const whereFieldContent = editModal.locator('.query-preset-where-field .value-wrapper')
+    await expect(whereFieldContent).toBeVisible()
+    await expect(whereFieldContent).toContainText('No where query')
+
+    // Verify the Columns field displays "No columns selected" instead of crashing
+    const columnsFieldContent = editModal.locator('.query-preset-columns-field .value-wrapper')
+    await expect(columnsFieldContent).toBeVisible()
+    await expect(columnsFieldContent).toContainText('No columns selected')
+
+    await editModal.locator('button.doc-drawer__header-close').click()
+    await expect(editModal).toBeHidden()
+
+    await openQueryPresetDrawer({ page })
+    const drawer = page.locator('[id^=list-drawer_0_]')
+    await expect(drawer).toBeVisible()
+
+    const presetRow = drawer.locator('tbody tr', {
+      has: page.locator(`button:has-text("${presetTitle}")`),
+    })
+
+    await expect(presetRow).toBeVisible()
+
+    // Column order: title (0), isShared (1), access (2), where (3), columns (4)
+    const whereCell = presetRow.locator('td').nth(3)
+    await expect(whereCell).toContainText('No where query')
+
+    const columnsCell = presetRow.locator('td').nth(4)
+    await expect(columnsCell).toContainText('No columns selected')
+  })
+
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
 

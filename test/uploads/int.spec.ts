@@ -151,6 +151,24 @@ describe('Collections - Uploads', () => {
         expect(doc.height).toBeDefined()
       })
 
+      it('should upload svg in an image mimetype restricted collection', async () => {
+        const filePath = path.join(dirname, './image.svg')
+        const formData = new FormData()
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/any-images`, {
+          body: formData,
+          file,
+        })
+
+        const { doc } = await response.json()
+        await handle.close()
+
+        expect(response.status).toBe(201)
+        expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
       it('should have valid image url', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.svg')
