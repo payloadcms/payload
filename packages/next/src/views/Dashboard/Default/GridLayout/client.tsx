@@ -292,6 +292,10 @@ function DraggableItem(props: {
     position: 'relative',
   }
 
+  // Only apply draggable attributes and listeners when not disabled
+  // to prevent disabling interactive elements inside the widget
+  const draggableProps = props.disabled ? {} : { ...listeners, ...attributes }
+
   return (
     <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
       <DroppableItem id={props.id} position="before" />
@@ -299,8 +303,7 @@ function DraggableItem(props: {
         className="draggable"
         id={props.id}
         ref={setNodeRef}
-        {...listeners}
-        {...attributes}
+        {...draggableProps}
         style={{
           width: '100%',
           height: '100%',
