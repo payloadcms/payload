@@ -1,6 +1,5 @@
 import type {
   CollectionAfterChangeHook,
-  CollectionBeforeChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
   Config,
@@ -24,7 +23,6 @@ export const getImportCollection = ({
   const { overrideImportCollection } = pluginConfig
 
   const beforeOperation: CollectionBeforeOperationHook[] = []
-  const beforeChange: CollectionBeforeChangeHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
 
   let collection: CollectionOverride = {
@@ -45,7 +43,6 @@ export const getImportCollection = ({
     fields: getFields(config, pluginConfig),
     hooks: {
       afterChange,
-      beforeChange,
       beforeOperation,
     },
     upload: {
@@ -61,16 +58,13 @@ export const getImportCollection = ({
   }
 
   if (pluginConfig.disableJobsQueue) {
-    // Process the import after the document (with file) has been created
+    // Process the import synchronously after the document (with file) has been created
     afterChange.push(async ({ doc, operation, req }) => {
-      if (operation !== 'create') {
+      if (operation !== 'create' || doc.status !== 'pending') {
         return doc
       }
 
-      // Only process if status is still pending
-      if (doc.status !== 'pending') {
-        return doc
-      }
+      const debug = pluginConfig.debug || false
 
       try {
         // Get file data from the uploaded document
@@ -101,7 +95,7 @@ export const getImportCollection = ({
             id: doc.id,
             name: doc.filename || 'import',
             collectionSlug: doc.collectionSlug,
-            debug: pluginConfig.debug || false,
+            debug,
             file: {
               name: doc.filename,
               data: fileData,
@@ -110,6 +104,8 @@ export const getImportCollection = ({
             format: fileMimetype === 'text/csv' ? 'csv' : 'json',
             importMode: doc.importMode || 'create',
             matchField: doc.matchField,
+            user: req?.user?.id || req?.user?.user?.id,
+            userCollection: 'users',
           },
           req,
         })
@@ -124,10 +120,7 @@ export const getImportCollection = ({
           status = 'partial'
         }
 
-        // Update the document with results
-        // Store on doc object for immediate return
-        doc.status = status
-        doc.summary = {
+        const summary = {
           imported: result.imported,
           issueDetails:
             result.errors.length > 0
@@ -142,31 +135,36 @@ export const getImportCollection = ({
           updated: result.updated,
         }
 
-        // Schedule update after transaction completes
-
+        // Try to update the document with results (may fail due to transaction timing)
         try {
           await req.payload.update({
             id: doc.id,
             collection: collection.slug,
             data: {
               status,
-              summary: doc.summary,
+              summary,
             },
             overrideAccess: true,
             req,
           })
         } catch (updateErr) {
-          req.payload.logger.error({
-            err: updateErr,
-            msg: `Failed to update import document ${doc.id} with results`,
-          })
+          // Update may fail if document not yet committed, log but continue
+          if (debug) {
+            req.payload.logger.error({
+              err: updateErr,
+              msg: `Failed to update import document ${doc.id} with results`,
+            })
+          }
         }
 
-        return doc
+        // Return updated doc for immediate response
+        return {
+          ...doc,
+          status,
+          summary,
+        }
       } catch (err) {
-        // Store error status on doc for immediate return
-        doc.status = 'failed'
-        doc.summary = {
+        const summary = {
           imported: 0,
           issueDetails: [
             {
@@ -180,36 +178,52 @@ export const getImportCollection = ({
           updated: 0,
         }
 
+        // Try to update document with error status
         try {
           await req.payload.update({
             id: doc.id,
             collection: collection.slug,
             data: {
               status: 'failed',
-              summary: doc.summary,
+              summary,
             },
             overrideAccess: true,
             req,
           })
         } catch (updateErr) {
+          // Update may fail if document not yet committed, log but continue
+          if (debug) {
+            req.payload.logger.error({
+              err: updateErr,
+              msg: `Failed to update import document ${doc.id} with error status`,
+            })
+          }
+        }
+
+        if (debug) {
           req.payload.logger.error({
-            err: updateErr,
-            msg: `Failed to update import document ${doc.id} with error status`,
+            err,
+            msg: 'Import processing failed',
           })
         }
 
-        return doc
+        // Return error status for immediate response
+        return {
+          ...doc,
+          status: 'failed',
+          summary,
+        }
       }
     })
   } else {
     // When jobs queue is enabled, queue the import as a job
     afterChange.push(async ({ doc, operation, req }) => {
       if (operation !== 'create') {
-        return doc
+        return
       }
 
       try {
-        // Get file data for job
+        // Get file data for job - need to read from disk/URL since req.file is not available in afterChange
         let fileData: Buffer
         if (doc.url && doc.url.startsWith('http')) {
           const response = await fetch(doc.url)
@@ -246,31 +260,11 @@ export const getImportCollection = ({
           input,
           task: 'createCollectionImport',
         })
-
-        // Return doc with pending status for jobs
-        return {
-          ...doc,
-          status: 'pending',
-        }
       } catch (err) {
-        // Return document with error status
-        return {
-          ...doc,
-          status: 'failed',
-          summary: {
-            imported: 0,
-            issueDetails: [
-              {
-                data: {},
-                error: `Failed to queue job: ${err instanceof Error ? err.message : String(err)}`,
-                row: 0,
-              },
-            ],
-            issues: 1,
-            total: 0,
-            updated: 0,
-          },
-        }
+        req.payload.logger.error({
+          err,
+          msg: `Failed to queue import job for document ${doc.id}`,
+        })
       }
     })
   }

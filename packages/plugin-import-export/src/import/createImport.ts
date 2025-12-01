@@ -30,8 +30,8 @@ export type Import = {
   importMode: ImportMode
   matchField?: string
   name: string
-  // user: string
-  // userCollection: string
+  user?: string
+  userCollection?: string
 }
 
 export type CreateImportArgs = {
