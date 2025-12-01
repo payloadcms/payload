@@ -1,5 +1,6 @@
+import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook } from '../../config/types.js'
-import type { SlugFieldArgs } from './index.js'
+import type { SlugFieldArgs, Slugify } from './index.js'
 
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
@@ -12,6 +13,26 @@ type HookArgs = {
   fieldToUse: string
 } & Pick<SlugFieldArgs, 'slugify'>
 
+const slugify = ({
+  customSlugify,
+  data,
+  fieldToUse,
+  req,
+}: {
+  customSlugify?: Slugify
+  data: Record<string, unknown>
+  fieldToUse: string
+  req: PayloadRequest
+}) => {
+  const value = data?.[fieldToUse] as string
+
+  if (customSlugify) {
+    return customSlugify({ data, req, value })
+  }
+
+  return defaultSlugify(value)
+}
+
 /**
  * This is a `BeforeChange` field hook used to auto-generate the `slug` field.
  * See `slugField` for more details.
@@ -21,21 +42,11 @@ export const generateSlug =
   async (args) => {
     const { collection, data, global, operation, originalDoc, req, value: isChecked } = args
 
-    const slugify = () => {
-      const value = data?.[fieldToUse] as string
-
-      if (customSlugify) {
-        return customSlugify({ data, req, value })
-      }
-
-      return defaultSlugify(value)
-    }
-
     // Ensure user-defined slugs are not overwritten during create
     // Use a generic falsy check here to include empty strings
     if (operation === 'create') {
       if (data) {
-        data[fieldName] = slugify()
+        data[fieldName] = slugify({ customSlugify, data, fieldToUse, req })
       }
 
       return Boolean(!data?.[fieldName])
@@ -56,7 +67,7 @@ export const generateSlug =
       if (!autosaveEnabled) {
         // We can generate the slug at this point
         if (data) {
-          data[fieldName] = slugify()
+          data[fieldName] = slugify({ customSlugify, data, fieldToUse, req })
         }
 
         return Boolean(!data?.[fieldName])
@@ -71,7 +82,14 @@ export const generateSlug =
           if (data) {
             // If the fallback is an empty string, we want the slug to return to `null`
             // This will ensure that live preview conditions continue to run as expected
-            data[fieldName] = data?.[fieldToUse] ? slugify() : null
+            data[fieldName] = data?.[fieldToUse]
+              ? slugify({
+                  customSlugify,
+                  data,
+                  fieldToUse,
+                  req,
+                })
+              : null
           }
         }
 

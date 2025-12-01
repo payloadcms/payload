@@ -1,3 +1,5 @@
+import type { Slugify } from 'payload/shared'
+
 import {
   flattenAllFields,
   getFieldByPath,
@@ -5,7 +7,7 @@ import {
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
 } from 'payload'
-import { slugify as defaultSlugify, type Slugify } from 'payload/shared'
+import { slugify as defaultSlugify } from 'payload/shared'
 
 /**
  * This server function is directly related to the {@link https://payloadcms.com/docs/fields/text#slug-field | Slug Field}.

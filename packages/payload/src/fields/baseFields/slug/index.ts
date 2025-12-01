@@ -110,7 +110,9 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug({ fieldName, fieldToUse, slugify })],
+          beforeChange: [
+            (args) => generateSlug({ fieldToUse, slugFieldName: fieldName, slugify, ...args }),
+          ],
         },
         localized,
       },
