@@ -22,12 +22,27 @@ const SlugField: CollectionConfig = {
       localized: true,
     },
     slugField({
-      fieldToUse: 'localizedTitle',
+      useAsSlug: 'localizedTitle',
       name: 'localizedSlug',
       checkboxName: 'generateLocalizedSlug',
       localized: true,
       required: false,
     }),
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
+        },
+        slugField({
+          useAsSlug: 'nestedTitle',
+          name: 'nestedSlug',
+          checkboxName: 'generateNestedSlug',
+        }),
+      ],
+    },
   ],
 }
 
