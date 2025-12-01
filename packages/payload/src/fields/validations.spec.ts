@@ -4,6 +4,7 @@ import type { SelectField, ValidateOptions } from './config/types.js'
 
 import {
   blocks,
+  email,
   number,
   password,
   point,
@@ -197,37 +198,44 @@ describe('Field Validations', () => {
       expect(result).not.toBe(true)
     })
     it('should show required message when array', () => {
-      const val = []
+      const val: any[] = []
+      // @ts-expect-error
       const result = point(val, { ...pointOptions, required: true })
       expect(result).not.toBe(true)
     })
     it('should show required message when array of undefined', () => {
       const val = [undefined, undefined]
+      // @ts-expect-error
       const result = point(val, { ...pointOptions, required: true })
       expect(result).not.toBe(true)
     })
     it('should handle undefined not required', () => {
       const val = undefined
+      // @ts-expect-error
       const result = password(val, pointOptions)
       expect(result).toBe(true)
     })
     it('should handle empty array not required', () => {
-      const val = []
+      const val: any[] = []
+      // @ts-expect-error
       const result = point(val, pointOptions)
       expect(result).toBe(true)
     })
     it('should handle array of undefined not required', () => {
       const val = [undefined, undefined]
+      // @ts-expect-error
       const result = point(val, pointOptions)
       expect(result).toBe(true)
     })
     it('should prevent text input', () => {
       const val = ['bad', 'input']
+      // @ts-expect-error
       const result = point(val, pointOptions)
       expect(result).not.toBe(true)
     })
     it('should prevent missing value', () => {
       const val = [0.1]
+      // @ts-expect-error
       const result = point(val, pointOptions)
       expect(result).not.toBe(true)
     })
@@ -308,7 +316,8 @@ describe('Field Validations', () => {
       expect(result).not.toBe(true)
     })
     it('should handle required with hasMany', async () => {
-      const val = []
+      const val: any[] = []
+
       const result = await relationship(val, {
         ...relationshipOptions,
         hasMany: true,
@@ -684,16 +693,19 @@ describe('Field Validations', () => {
     })
     it('should show invalid number message', () => {
       const val = 'test'
+      // @ts-expect-error
       const result = number(val, { ...numberOptions })
       expect(result).toBe('validation:enterNumber')
     })
     it('should handle empty value', () => {
       const val = ''
+      // @ts-expect-error
       const result = number(val, { ...numberOptions })
       expect(result).toBe(true)
     })
     it('should handle required value', () => {
       const val = ''
+      // @ts-expect-error
       const result = number(val, { ...numberOptions, required: true })
       expect(result).toBe('validation:required')
     })
@@ -731,6 +743,83 @@ describe('Field Validations', () => {
       const val = [1.25, 2.5, 3.5]
       const result = number(val, { ...numberOptions, hasMany: true, maxRows: 2 })
       expect(result).toBe('validation:requiresNoMoreThan')
+    })
+  })
+
+  describe('email', () => {
+    const emailOptions = {
+      ...options,
+      req: {
+        ...options.req,
+        payload: {
+          ...options.req.payload,
+          collections: {},
+          config: {
+            ...options.req.payload.config,
+            collections: [],
+          },
+        },
+      },
+    }
+    it('should validate standard email', () => {
+      const val = 'user@example.com'
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate email with subdomains', () => {
+      const val = 'user@mail.example.com'
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate email with plus sign', () => {
+      const val = 'user+tag@example.com'
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate email with localhost', () => {
+      const val = 'mail@localhost'
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate email with domain without TLD', () => {
+      const val = 'admin@server'
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
+    })
+    it('should show required message', () => {
+      const val = undefined
+      const result = email(val, { ...emailOptions, required: true })
+      expect(result).toBe('validation:emailAddress')
+    })
+    it('should handle undefined when not required', () => {
+      const val = undefined
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
+    })
+    it('should reject null when required', () => {
+      const val = null
+      const result = email(val, { ...emailOptions, required: true })
+      expect(result).toBe('validation:emailAddress')
+    })
+    it('should reject invalid email format', () => {
+      const val = 'notanemail'
+      const result = email(val, emailOptions)
+      expect(result).toBe('validation:emailAddress')
+    })
+    it('should reject email with spaces', () => {
+      const val = 'user @example.com'
+      const result = email(val, emailOptions)
+      expect(result).toBe('validation:emailAddress')
+    })
+    it('should reject email with consecutive dots', () => {
+      const val = 'user..name@example.com'
+      const result = email(val, emailOptions)
+      expect(result).toBe('validation:emailAddress')
+    })
+    it('should validate email with hyphen in domain', () => {
+      const val = 'user@ex-ample.com'
+      const result = email(val, emailOptions)
+      expect(result).toBe(true)
     })
   })
 })

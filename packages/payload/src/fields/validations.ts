@@ -200,9 +200,10 @@ export const email: EmailFieldValidation = (
    * Allows standard email formats (e.g., user@example.com, user.name+alias@example.co.uk, user-name@example.org)
    * Allows domains with consecutive hyphens as long as they are not leading/trailing (e.g., user@ex--ample.com)
    * Supports multiple subdomains (e.g., user@sub.domain.example.com)
+   * Allows localhost and other domain names without TLDs (e.g., mail@localhost, admin@server)
    */
   const emailRegex =
-    /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+    /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/i
 
   if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
