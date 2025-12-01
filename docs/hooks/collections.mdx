@@ -67,8 +67,6 @@ export const CollectionWithHooks: CollectionConfig = {
 
 The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
 
-Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
-
 ```ts
 import type { CollectionBeforeOperationHook } from 'payload'
 
@@ -259,8 +257,6 @@ The following arguments are provided to the `afterDelete` hook:
 ### afterOperation
 
 The `afterOperation` hook can be used to modify the result of operations or execute side-effects that run after an operation has completed.
-
-Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
 import type { CollectionAfterOperationHook } from 'payload'
