@@ -4,7 +4,8 @@ import type { Collection, DataFromCollectionSlug } from '../../collections/confi
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError, Forbidden } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -61,18 +62,11 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
   try {
     const shouldCommit = await initTransaction(req)
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection?.config,
-            context: args.req.context,
-            operation: 'resetPassword',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'resetPassword',
+    })
 
     // /////////////////////////////////////
     // Reset Password

@@ -27,7 +27,8 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type FindByIDArgs = {
   collection: Collection
@@ -65,18 +66,11 @@ export const findByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'read',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'read',
+    })
 
     const {
       id,

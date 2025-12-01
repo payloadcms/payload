@@ -29,9 +29,10 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
-import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -79,18 +80,11 @@ export const updateOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'update',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'update',
+    })
 
     const {
       autosave = false,

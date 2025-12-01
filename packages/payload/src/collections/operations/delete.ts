@@ -27,7 +27,8 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -57,18 +58,11 @@ export const deleteOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'delete',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'delete',
+    })
 
     const {
       collection: { config: collectionConfig },

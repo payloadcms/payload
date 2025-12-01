@@ -56,7 +56,11 @@ import type {
   IncomingCollectionVersions,
   SanitizedCollectionVersions,
 } from '../../versions/types.js'
-import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
+import type {
+  AfterOperationArg,
+  BeforeOperationArg,
+  OperationMap,
+} from '../operations/utilities/types.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
@@ -102,19 +106,11 @@ export type HookOperationType =
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
-export type BeforeOperationHook = (args: {
-  args?: any
-  /**
-   *  The collection which this hook is being run on
-   */
-  collection: SanitizedCollectionConfig
-  context: RequestContext
-  /**
-   * Hook operation being performed
-   */
-  operation: HookOperationType
-  req: PayloadRequest
-}) => any
+export type BeforeOperationHook<TOperationGeneric extends CollectionSlug = string> = (
+  arg: BeforeOperationArg<TOperationGeneric>,
+) =>
+  | Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]
+  | Promise<Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]>
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -205,13 +201,9 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string> = (
   arg: AfterOperationArg<TOperationGeneric>,
 ) =>
-  | Awaited<
-      ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
-    >
+  | Awaited<ReturnType<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>>
   | Promise<
-      Awaited<
-        ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
-      >
+      Awaited<ReturnType<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>>
     >
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
@@ -575,7 +567,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     beforeChange?: BeforeChangeHook[]
     beforeDelete?: BeforeDeleteHook[]
     beforeLogin?: BeforeLoginHook[]
-    beforeOperation?: BeforeOperationHook[]
+    beforeOperation?: BeforeOperationHook<TSlug>[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
     /**
