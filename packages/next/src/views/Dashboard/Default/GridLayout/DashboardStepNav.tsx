@@ -1,3 +1,4 @@
+'use client'
 import type { Widget } from 'payload'
 
 import { useStepNav } from '@payloadcms/ui'
