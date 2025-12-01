@@ -156,6 +156,13 @@ describe('Types testing', () => {
     test('has global generated options interface based on radio field', () => {
       expect(asType<Post['radioField']>()).type.toBe<MyRadioOptions>()
     })
+
+    test('resolves external schema file references', () => {
+      // The externalType field uses a $ref to ./test/types/schemas/custom-type.json
+      expect<Post>().type.toHaveProperty('externalType')
+      expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalField')
+      expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalNumber')
+    })
   })
 
   describe('fields', () => {
