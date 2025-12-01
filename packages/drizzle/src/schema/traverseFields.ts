@@ -21,6 +21,7 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
+import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
@@ -201,18 +202,18 @@ export const traverseFields = ({
 
         const baseIndexes: Record<string, RawIndex> = {
           _orderIdx: {
-            name: `${arrayTableName}_order_idx`,
+            name: buildIndexName({ name: `${arrayTableName}_order`, adapter }),
             on: ['_order'],
           },
           _parentIDIdx: {
-            name: `${arrayTableName}_parent_id_idx`,
+            name: buildIndexName({ name: `${arrayTableName}_parent_id`, adapter }),
             on: '_parentID',
           },
         }
 
         const baseForeignKeys: Record<string, RawForeignKey> = {
           _parentIDFk: {
-            name: `${arrayTableName}_parent_id_fk`,
+            name: buildForeignKeyName({ name: `${arrayTableName}_parent_id`, adapter }),
             columns: ['_parentID'],
             foreignColumns: [
               {
@@ -238,7 +239,7 @@ export const traverseFields = ({
           }
 
           baseIndexes._localeIdx = {
-            name: `${arrayTableName}_locale_idx`,
+            name: buildIndexName({ name: `${arrayTableName}_locale`, adapter }),
             on: '_locale',
           }
         }
@@ -437,22 +438,22 @@ export const traverseFields = ({
 
             const baseIndexes: Record<string, RawIndex> = {
               _orderIdx: {
-                name: `${blockTableName}_order_idx`,
+                name: buildIndexName({ name: `${blockTableName}_order`, adapter }),
                 on: '_order',
               },
               _parentIDIdx: {
-                name: `${blockTableName}_parent_id_idx`,
+                name: buildIndexName({ name: `${blockTableName}_parent_id`, adapter }),
                 on: ['_parentID'],
               },
               _pathIdx: {
-                name: `${blockTableName}_path_idx`,
+                name: buildIndexName({ name: `${blockTableName}_path`, adapter }),
                 on: '_path',
               },
             }
 
             const baseForeignKeys: Record<string, RawForeignKey> = {
               _parentIdFk: {
-                name: `${blockTableName}_parent_id_fk`,
+                name: buildForeignKeyName({ name: `${blockTableName}_parent_id`, adapter }),
                 columns: ['_parentID'],
                 foreignColumns: [
                   {
@@ -478,7 +479,7 @@ export const traverseFields = ({
               }
 
               baseIndexes._localeIdx = {
-                name: `${blockTableName}_locale_idx`,
+                name: buildIndexName({ name: `${blockTableName}_locale`, adapter }),
                 on: '_locale',
               }
             }
@@ -824,18 +825,18 @@ export const traverseFields = ({
 
           const baseIndexes: Record<string, RawIndex> = {
             orderIdx: {
-              name: `${selectTableName}_order_idx`,
+              name: buildIndexName({ name: `${selectTableName}_order`, adapter }),
               on: 'order',
             },
             parentIdx: {
-              name: `${selectTableName}_parent_idx`,
+              name: buildIndexName({ name: `${selectTableName}_parent`, adapter }),
               on: 'parent',
             },
           }
 
           const baseForeignKeys: Record<string, RawForeignKey> = {
             parentFk: {
-              name: `${selectTableName}_parent_fk`,
+              name: buildForeignKeyName({ name: `${selectTableName}_parent`, adapter }),
               columns: ['parent'],
               foreignColumns: [
                 {
@@ -861,14 +862,14 @@ export const traverseFields = ({
             }
 
             baseIndexes.localeIdx = {
-              name: `${selectTableName}_locale_idx`,
+              name: buildIndexName({ name: `${selectTableName}_locale`, adapter }),
               on: 'locale',
             }
           }
 
           if (field.index) {
             baseIndexes.value = {
-              name: `${selectTableName}_value_idx`,
+              name: buildIndexName({ name: `${selectTableName}_value`, adapter }),
               on: 'value',
             }
           }
