@@ -167,7 +167,19 @@ describe('Dashboard', () => {
     await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
   })
 
-  // TODO: test responsiveness. In mobile all widgets have a 100% width.
+  test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {
+    // Set viewport to mobile size
+    await page.setViewportSize({ width: 500, height: 667 })
+    const d = new DashboardHelper(page)
+    const widgets = await d.widgets.all()
+    for (const widget of widgets) {
+      await expect(async () => {
+        const dashboardBox = (await d.dashboard.boundingBox())!
+        const widgetBox = (await widget.boundingBox())!
+        expect(widgetBox.width).toBe(dashboardBox.width)
+      }).toPass({ timeout: 1000 })
+    }
+  })
 
   // TODO: reorder widgets with keyboard (for a11y reasons)
   // It's already working. But I'd like to test it properly with a screen reader and everything.
