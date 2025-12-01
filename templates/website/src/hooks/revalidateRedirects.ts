@@ -1,11 +1,11 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-import { revalidateTag } from 'next/cache'
+import { revalidateRedirects as revalidateRedirectsAction } from '@/app/actions/revalidate'
 
 export const revalidateRedirects: CollectionAfterChangeHook = ({ doc, req: { payload } }) => {
   payload.logger.info(`Revalidating redirects`)
 
-  revalidateTag('redirects')
+  revalidateRedirectsAction().catch(console.error)
 
   return doc
 }
