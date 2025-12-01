@@ -346,7 +346,7 @@ export type Endpoint = {
    * Compatible with Web Request/Response Model
    */
   handler: PayloadHandler
-  /** HTTP method (or "all") */
+  /** HTTP method */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
