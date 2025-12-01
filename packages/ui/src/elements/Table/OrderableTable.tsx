@@ -161,9 +161,15 @@ export const OrderableTable: React.FC<Props> = ({
 
   const rowIds = localData.map((row) => row.id ?? row._id)
 
+  const hasFewColumns = activeColumns.length <= 4
+
   return (
     <div
-      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+      className={[
+        baseClass,
+        appearance && `${baseClass}--appearance-${appearance}`,
+        hasFewColumns && `${baseClass}--few-columns`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >
