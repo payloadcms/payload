@@ -22,15 +22,9 @@ export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data 
     return <div>No columns selected</div>
   }
 
-  const hasFewColumns = activeColumns.length <= 4
-
   return (
     <div
-      className={[
-        baseClass,
-        appearance && `${baseClass}--appearance-${appearance}`,
-        hasFewColumns && `${baseClass}--few-columns`,
-      ]
+      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
         .filter(Boolean)
         .join(' ')}
     >

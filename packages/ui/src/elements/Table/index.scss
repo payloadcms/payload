@@ -39,6 +39,11 @@
       &:last-child {
         padding-inline-end: base(0.8);
       }
+
+      &.cell-_select,
+      &.cell-_dragHandle {
+        width: var(--base);
+      }
     }
 
     tbody {
@@ -133,18 +138,6 @@
       th,
       td {
         max-width: 70vw;
-      }
-    }
-
-    &--few-columns {
-      th,
-      td {
-        &.cell-_select,
-        &.cell-_dragHandle {
-          width: 100px;
-          min-width: 100px;
-          max-width: 100px;
-        }
       }
     }
   }
