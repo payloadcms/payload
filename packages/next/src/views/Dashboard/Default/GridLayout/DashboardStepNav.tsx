@@ -1,11 +1,14 @@
 'use client'
 import type { Widget } from 'payload'
 
-import { useStepNav } from '@payloadcms/ui'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
-import { ItemsDrawer } from '@payloadcms/ui/elements/ItemsDrawer'
-import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
+import {
+  Button,
+  DrawerToggler,
+  ItemsDrawer,
+  type ReactSelectOption as Option,
+  ReactSelect,
+  useStepNav,
+} from '@payloadcms/ui'
 import { useEffect, useId } from 'react'
 
 export function DashboardStepNav({
