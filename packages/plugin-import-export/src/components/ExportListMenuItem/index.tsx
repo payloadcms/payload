@@ -6,6 +6,7 @@ import {
   Translation,
   useConfig,
   useDocumentDrawer,
+  useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
@@ -25,10 +26,12 @@ export const ExportListMenuItem: React.FC<{
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
   const { getEntityConfig } = useConfig()
+
   const { i18n, t } = useTranslation<
     PluginImportExportTranslations,
     PluginImportExportTranslationKeys
   >()
+
   const currentCollectionConfig = getEntityConfig({ collectionSlug })
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({

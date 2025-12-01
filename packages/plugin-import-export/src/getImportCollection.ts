@@ -36,6 +36,7 @@ export const getImportCollection = ({
           SaveButton: '@payloadcms/plugin-import-export/rsc#ImportSaveButton',
         },
       },
+      disableCopyToLocale: true,
       group: false,
       useAsTitle: 'filename',
     },

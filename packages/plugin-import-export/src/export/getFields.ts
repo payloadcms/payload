@@ -251,7 +251,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
       type: 'ui',
       admin: {
         components: {
-          Field: '@payloadcms/plugin-import-export/rsc#Preview',
+          Field: '@payloadcms/plugin-import-export/rsc#ExportPreview',
         },
       },
     },

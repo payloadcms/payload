@@ -22,9 +22,9 @@ import { buildDisabledFieldRegex } from '../../utilities/buildDisabledFieldRegex
 import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
-const baseClass = 'preview'
+const baseClass = 'export-preview'
 
-export const Preview = () => {
+export const ExportPreview: React.FC = () => {
   const { collection } = useImportExport()
   const { config } = useConfig()
   const { value: where } = useField({ path: 'where' })

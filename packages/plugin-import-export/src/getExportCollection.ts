@@ -38,6 +38,7 @@ export const getExportCollection = ({
         disableDownload: pluginConfig.disableDownload ?? false,
         disableSave: pluginConfig.disableSave ?? false,
       },
+      disableCopyToLocale: true,
       group: false,
       useAsTitle: 'name',
     },

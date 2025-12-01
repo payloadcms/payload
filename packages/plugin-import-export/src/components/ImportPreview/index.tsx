@@ -24,7 +24,7 @@ import './index.scss'
 
 const baseClass = 'import-preview'
 
-export const ImportPreview = () => {
+export const ImportPreview: React.FC = () => {
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { value: importMode } = useField<string>({ path: 'importMode' })
   const { value: matchField } = useField<string>({ path: 'matchField' })
@@ -392,6 +392,7 @@ export const ImportPreview = () => {
       <div className={baseClass}>
         <div className={`${baseClass}__header`}>
           <h3>
+            {/* @ts-expect-error - translations are not typed in plugins */}
             <Translation i18nKey="plugin-import-export:importResults" t={t} />
           </h3>
         </div>
@@ -437,6 +438,7 @@ export const ImportPreview = () => {
     return (
       <div className={baseClass}>
         <p style={{ opacity: 0.6 }}>
+          {/* @ts-expect-error - translations are not typed in plugins */}
           <Translation i18nKey="plugin-import-export:collectionRequired" t={t} />
         </p>
       </div>
@@ -457,6 +459,7 @@ export const ImportPreview = () => {
     return (
       <div className={baseClass}>
         <p style={{ opacity: 0.6 }}>
+          {/* @ts-expect-error - translations are not typed in plugins */}
           <Translation i18nKey="plugin-import-export:uploadFileToSeePreview" t={t} />
         </p>
       </div>
@@ -472,6 +475,7 @@ export const ImportPreview = () => {
         {resultCount > 0 && (
           <div>
             <Translation
+              // @ts-expect-error - translations are not typed in plugins
               i18nKey="plugin-import-export:totalDocumentsCount"
               t={t}
               variables={{
@@ -479,10 +483,12 @@ export const ImportPreview = () => {
               }}
             />
             {' | '}
+            {/* @ts-expect-error - translations are not typed in plugins */}
             <Translation i18nKey="plugin-import-export:mode" t={t} />: {importMode || 'create'}
             {importMode !== 'create' && (
               <>
                 {' | '}
+                {/* @ts-expect-error - translations are not typed in plugins */}
                 <Translation i18nKey="plugin-import-export:matchBy" t={t} />: {matchField || 'id'}
               </>
             )}
@@ -497,6 +503,7 @@ export const ImportPreview = () => {
       {!loading && dataToRender.length > 0 && <Table columns={columns} data={dataToRender} />}
       {!loading && dataToRender.length === 0 && collectionSlug && (
         <p>
+          {/* @ts-expect-error - translations are not typed in plugins */}
           <Translation i18nKey="plugin-import-export:noDataToPreview" t={t} />
         </p>
       )}
