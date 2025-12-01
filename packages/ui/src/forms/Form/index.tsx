@@ -515,7 +515,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const getDataByPath = useCallback<GetDataByPath>(
-    (path: string) => getDataByPathFunc(contextRef.current.fields, path),
+    (path: string) => getDataByPathFunc({ formState: contextRef.current.fields, path }),
     [],
   )
 
