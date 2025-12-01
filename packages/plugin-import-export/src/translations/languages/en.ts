@@ -33,6 +33,7 @@ export const enTranslations = {
     'selectionToUse-allDocuments': 'Use all documents',
     'selectionToUse-currentFilters': 'Use current filters',
     'selectionToUse-currentSelection': 'Use current selection',
+    startImport: 'Start Import',
     totalDocumentsCount: '{{count}} total documents',
     uploadFileToSeePreview: 'Upload a file to see preview',
   },
