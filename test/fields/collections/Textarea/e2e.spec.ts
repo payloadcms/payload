@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
@@ -25,8 +26,8 @@ import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { textFieldsSlug } from '../../slugs.js'
-import { textDoc } from './shared.js'
+import { textareaFieldsSlug } from '../../slugs.js'
+import { textareaDoc } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -41,7 +42,7 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
 
-describe('Text', () => {
+describe('Textarea', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -49,7 +50,7 @@ describe('Text', () => {
       dirname,
       // prebuild,
     }))
-    url = new AdminUrlUtil(serverURL, textFieldsSlug)
+    url = new AdminUrlUtil(serverURL, textareaFieldsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -153,17 +154,12 @@ describe('Text', () => {
 
       await expect(adminHiddenFieldOption).toBeVisible()
     })
-
-    test('hidden and disabled fields should not break subsequent field paths', async () => {
-      await page.goto(url.create)
-      await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
-    })
   })
 
   test('should display field in list view', async () => {
     await page.goto(url.list)
     const textCell = page.locator('.row-1 .cell-text')
-    await expect(textCell).toHaveText(textDoc.text)
+    await expect(textCell).toHaveText(textareaDoc.text)
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
@@ -225,127 +221,8 @@ describe('Text', () => {
     await expect(description).toHaveText('en description')
   })
 
-  test('should create hasMany with multiple texts', async () => {
-    const input = 'five'
-    const furtherInput = 'six'
-
-    await page.goto(url.create)
-    const requiredField = page.locator('#field-text')
-    const field = page.locator('.field-hasMany')
-
-    await requiredField.fill(String(input))
-    await field.click()
-    await page.keyboard.type(input)
-    await page.keyboard.press('Enter')
-    await page.keyboard.type(furtherInput)
-    await page.keyboard.press('Enter')
-    await saveDocAndAssert(page)
-    await expect(field.locator('.rs__value-container')).toContainText(input)
-    await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
-  })
-
-  test('should allow editing hasMany text field values by clicking', async () => {
-    const originalText = 'original'
-    const newText = 'new'
-
-    await page.goto(url.create)
-
-    // fill required field
-    const requiredField = page.locator('#field-text')
-    await requiredField.fill(String(originalText))
-
-    const field = page.locator('.field-hasMany')
-
-    // Add initial value
-    await field.click()
-    await page.keyboard.type(originalText)
-    await page.keyboard.press('Enter')
-
-    // Click to edit existing value
-    const value = field.locator('.multi-value-label__text')
-    await value.click()
-    await value.dblclick()
-    await page.keyboard.type(newText)
-    await page.keyboard.press('Enter')
-
-    await saveDocAndAssert(page)
-    await expect(field.locator('.rs__value-container')).toContainText(`${newText}`)
-  })
-
-  test('should not allow editing hasMany text field values when disabled', async () => {
-    await page.goto(url.create)
-    const field = page.locator('.field-readOnlyHasMany')
-
-    // Try to click to edit
-    const value = field.locator('.multi-value-label__text')
-    await value.click({ force: true })
-
-    // Verify it does not become editable
-    await expect(field.locator('.multi-value-label__text')).not.toHaveClass(/.*--editable/)
-  })
-
-  test('should filter Text field hasMany: false in the collection list view - in', async () => {
-    await page.goto(url.list)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
-
-    await addListFilter({
-      page,
-      fieldLabel: 'Text',
-      operatorLabel: 'is in',
-      value: 'Another text document',
-    })
-
-    await wait(300)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
-  })
-
-  test('should filter Text field hasMany: false in the collection list view - is not in', async () => {
-    await page.goto(url.list)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
-
-    await addListFilter({
-      page,
-      fieldLabel: 'Text',
-      operatorLabel: 'is not in',
-      value: 'Another text document',
-    })
-
-    await wait(300)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
-  })
-
-  test('should filter Text field hasMany: true in the collection list view - in', async () => {
-    await page.goto(url.list)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
-
-    await addListFilter({
-      page,
-      fieldLabel: 'Has Many',
-      operatorLabel: 'is in',
-      value: 'one',
-    })
-
-    await wait(300)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
-  })
-
-  test('should filter Text field hasMany: true in the collection list view - is not in', async () => {
-    await page.goto(url.list)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
-
-    await addListFilter({
-      page,
-      fieldLabel: 'Has Many',
-      operatorLabel: 'is not in',
-      value: 'four',
-    })
-
-    await wait(300)
-    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
-  })
-
   describe('A11y', () => {
-    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-text').waitFor()
 
@@ -353,10 +230,24 @@ describe('Text', () => {
         page,
         testInfo,
         include: ['.document-fields__main'],
-        exclude: ['[id*="react-select-"]'], // ignore react-select elements here
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
+    })
+
+    test('Textarea inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-text').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.document-fields__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
     })
   })
 })
