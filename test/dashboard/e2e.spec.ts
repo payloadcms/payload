@@ -158,8 +158,8 @@ describe('Dashboard', () => {
     await widget.hover()
     await expect(widget.getByTitle('Delete widget')).toBeHidden()
 
-    // Widgets should have aria-disabled="true" when not editing
-    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'true')
+    // Widgets should not have draggable attributes when not editing
+    await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
 
     // verify the opposite:
     await d.setEditing()
