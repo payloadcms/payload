@@ -19,15 +19,23 @@ type HookArgs = {
 export const generateSlug =
   ({ fieldName = 'slug', fieldToUse, slugify: customSlugify }: HookArgs): FieldHook =>
   async (args) => {
-    const { collection, data, global, operation, originalDoc, value: isChecked } = args
+    const { collection, data, global, operation, originalDoc, req, value: isChecked } = args
 
-    const slugify = customSlugify || defaultSlugify
+    const slugify = () => {
+      const value = data?.[fieldToUse] as string
+
+      if (customSlugify) {
+        return customSlugify({ data, req, value })
+      }
+
+      return defaultSlugify(value)
+    }
 
     // Ensure user-defined slugs are not overwritten during create
     // Use a generic falsy check here to include empty strings
     if (operation === 'create') {
       if (data) {
-        data[fieldName] = slugify(data?.[fieldName] || data?.[fieldToUse])
+        data[fieldName] = slugify()
       }
 
       return Boolean(!data?.[fieldName])
@@ -48,7 +56,7 @@ export const generateSlug =
       if (!autosaveEnabled) {
         // We can generate the slug at this point
         if (data) {
-          data[fieldName] = slugify(data?.[fieldToUse])
+          data[fieldName] = slugify()
         }
 
         return Boolean(!data?.[fieldName])
@@ -63,7 +71,7 @@ export const generateSlug =
           if (data) {
             // If the fallback is an empty string, we want the slug to return to `null`
             // This will ensure that live preview conditions continue to run as expected
-            data[fieldName] = data?.[fieldToUse] ? slugify(data[fieldToUse]) : null
+            data[fieldName] = data?.[fieldToUse] ? slugify() : null
           }
         }
 

@@ -1,8 +1,15 @@
 import type { TextFieldClientProps } from '../../../admin/types.js'
+import type { TypeWithID } from '../../../collections/config/types.js'
 import type { FieldAdmin, RowField, TextField } from '../../../fields/config/types.js'
-import type { Slugify } from '../../../utilities/slugify.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
 import { generateSlug } from './generateSlug.js'
+
+export type Slugify<T extends TypeWithID = any> = (args: {
+  data: T
+  req: PayloadRequest
+  value?: any
+}) => Promise<string | undefined> | string | undefined
 
 export type SlugFieldArgs = {
   /**

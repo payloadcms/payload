@@ -9,9 +9,10 @@ import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import './index.scss'
 import { TextInput } from '../Text/index.js'
+import './index.scss'
 
 /**
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
@@ -24,40 +25,59 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
 }) => {
   const { label } = field
 
+  const { t } = useTranslation()
+
   const { slugify } = useServerFunctions()
 
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const { setValue, value } = useField<string>({ path: path || field.name })
 
-  const { getDataByPath } = useForm()
+  const { getData, getDataByPath } = useForm()
 
   const [isLocked, setIsLocked] = useState(true)
 
+  /**
+   * This method allows the user to generate their slug on demand, e.g. when they click the "generate" button.
+   * It uses the `slugify` server function to gain access to their custom slugify function defined in their field config.
+   */
   const handleGenerate = useCallback(
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
       const targetFieldValue = getDataByPath(fieldToUse)
 
-      if (targetFieldValue) {
-        const formattedSlug = await slugify({
-          collectionSlug,
-          globalSlug,
-          path,
-          val: targetFieldValue as string,
-        })
+      const formattedSlug = await slugify({
+        collectionSlug,
+        data: getData(),
+        globalSlug,
+        path,
+        value: targetFieldValue,
+      })
 
-        if (value !== formattedSlug) {
-          setValue(formattedSlug)
-        }
-      } else {
-        if (value !== '') {
-          setValue('')
-        }
+      if (formattedSlug === null || formattedSlug === undefined) {
+        setValue('')
+        return
+      }
+
+      /**
+       * The result may be the same as the current value, and if so, we don't want to trigger a re-render.
+       */
+      if (value !== formattedSlug) {
+        setValue(formattedSlug)
       }
     },
-    [setValue, value, fieldToUse, getDataByPath, slugify, path, collectionSlug, globalSlug],
+    [
+      setValue,
+      value,
+      fieldToUse,
+      getData,
+      slugify,
+      path,
+      collectionSlug,
+      globalSlug,
+      getDataByPath,
+    ],
   )
 
   const toggleLock = useCallback((e: React.MouseEvent<Element>) => {
@@ -76,7 +96,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
             id={`field-${path}-generate`}
             onClick={handleGenerate}
           >
-            Generate
+            {t('authentication:generate')}
           </Button>
         )}
         <Button

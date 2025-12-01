@@ -22,7 +22,7 @@ export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,
   Promise<ReturnType<Slugify>>
 > = async (args) => {
-  const { collectionSlug, globalSlug, path, req, val } = args
+  const { collectionSlug, data, globalSlug, path, req, value } = args
 
   if (!req.user) {
     throw new UnauthorizedError()
@@ -40,11 +40,11 @@ export const slugifyHandler: ServerFunction<
     path: path || '',
   })
 
-  const customSlugify = field.custom.slugify as Slugify | undefined
+  const customSlugify = (
+    typeof field.custom.slugify === 'function' ? field.custom.slugify : undefined
+  ) as Slugify
 
-  const slugify = customSlugify || defaultSlugify
-
-  const result = await slugify(val)
+  const result = customSlugify ? await customSlugify({ data, req, value }) : defaultSlugify(value)
 
   return result
 }
