@@ -575,6 +575,70 @@ describe('Relationship Field', () => {
     await expect(documentDrawer).toBeVisible()
   })
 
+  test('should open document from drawer by clicking on ID Label', async () => {
+    const relatedDoc = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'Drawer ID Label',
+      },
+    })
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        relationship: relatedDoc.id,
+      },
+    })
+    await payload.update({
+      collection: slug,
+      id: doc.id,
+      data: {
+        relationToSelf: doc.id,
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    // open first drawer (self-relation)
+    const selfRelationTrigger = page.locator(
+      '#field-relationToSelf button.relationship--single-value__drawer-toggler',
+    )
+    await expect(selfRelationTrigger).toBeVisible()
+    await selfRelationTrigger.click()
+
+    const drawer1 = page.locator('[id^=doc-drawer_fields-relationship_1_]')
+    await expect(drawer1).toBeVisible()
+
+    // open nested drawer (relation field inside self-relation)
+    const relationshipDrawerTrigger = drawer1.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(relationshipDrawerTrigger).toBeVisible()
+    await relationshipDrawerTrigger.click()
+
+    const drawer2 = page.locator('[id^=doc-drawer_relation-one_2_]')
+    await expect(drawer2).toBeVisible()
+
+    const idLabel = drawer2.locator('.id-label')
+    await expect(idLabel).toBeVisible()
+    await idLabel.locator('a').click()
+
+    const closedModalLocator = page.locator(
+      '.payload__modal-container.payload__modal-container--exitDone',
+    )
+
+    await expect(closedModalLocator).toHaveCount(1)
+
+    await Promise.all([
+      payload.delete({
+        collection: relationOneSlug,
+        id: relatedDoc.id,
+      }),
+      payload.delete({
+        collection: slug,
+        id: doc.id,
+      }),
+    ])
+  })
+
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
     await wait(300)
