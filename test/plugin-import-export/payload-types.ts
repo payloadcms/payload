@@ -184,6 +184,9 @@ export interface Page {
   };
   tabToCSV?: string | null;
   namedTab?: {
+    /**
+     * Field inside a named tab
+     */
     tabToCSV?: string | null;
   };
   array?:
@@ -263,6 +266,21 @@ export interface Page {
 export interface Post {
   id: string;
   title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -700,6 +718,7 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

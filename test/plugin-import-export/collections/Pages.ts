@@ -135,6 +135,9 @@ export const Pages: CollectionConfig = {
             {
               name: 'tabToCSV',
               type: 'text',
+              admin: {
+                description: 'Field inside a named tab',
+              },
               defaultValue: 'my custom csv transformer',
               custom: {
                 'plugin-import-export': {
