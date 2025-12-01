@@ -3,15 +3,14 @@ import type { FieldAdmin, RowField, TextField } from '../../../fields/config/typ
 
 import { generateSlug } from './generateSlug.js'
 
-type SlugFieldArgs = {
+export type SlugFieldArgs = {
   /**
    * Override for the `generateSlug` checkbox field name.
    * @default 'generateSlug'
    */
   checkboxName?: string
   /**
-   * The name of the field to generate the slug from, when applicable.
-   * @default 'title'
+   * @deprecated use `useAsTitle` instead
    */
   fieldToUse?: string
   /**
@@ -43,11 +42,17 @@ type SlugFieldArgs = {
    * @default true
    */
   required?: TextField['required']
+  /**
+   * The path of the field to generate the slug from, when applicable.
+   * E.g. `title`, `array.0.group.text`, etc.
+   * @default 'title'
+   */
+  useAsSlug?: string
 }
 
 type SlugField = (args?: SlugFieldArgs) => RowField
 
-export type SlugFieldClientProps = {} & Pick<SlugFieldArgs, 'fieldToUse'>
+export type SlugFieldClientProps = {} & Pick<SlugFieldArgs, 'useAsSlug'>
 
 export type SlugFieldProps = SlugFieldClientProps & TextFieldClientProps
 
@@ -67,14 +72,17 @@ export type SlugFieldProps = SlugFieldClientProps & TextFieldClientProps
  * @experimental This field is experimental and may change or be removed in the future. Use at your own risk.
  */
 export const slugField: SlugField = ({
-  name: fieldName = 'slug',
+  name: slugFieldName = 'slug',
   checkboxName = 'generateSlug',
-  fieldToUse = 'title',
+  fieldToUse,
   localized,
   overrides,
   position = 'sidebar',
   required = true,
+  useAsSlug: useAsSlugFromArgs = 'title',
 } = {}) => {
+  const useAsSlug = fieldToUse || useAsSlugFromArgs
+
   const baseField: RowField = {
     type: 'row',
     admin: {
@@ -95,18 +103,18 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug({ fieldName, fieldToUse })],
+          beforeChange: [(args) => generateSlug({ slugFieldName, useAsSlug, ...args })],
         },
         localized,
       },
       {
-        name: fieldName,
+        name: slugFieldName,
         type: 'text',
         admin: {
           components: {
             Field: {
               clientProps: {
-                fieldToUse,
+                useAsSlug,
               } satisfies SlugFieldClientProps,
               path: '@payloadcms/ui#SlugField',
             },
