@@ -18,7 +18,8 @@ export type SlugFieldArgs = {
    */
   checkboxName?: string
   /**
-   * The name of the field to generate the slug from, when applicable.
+   * The path of the field to generate the slug from, when applicable.
+   * For example, `title`, `array.0.title`, etc.
    * @default 'title'
    */
   fieldToUse?: string
@@ -81,7 +82,7 @@ export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse'> & TextField
  * @experimental This field is experimental and may change or be removed in the future. Use at your own risk.
  */
 export const slugField: SlugField = ({
-  name: fieldName = 'slug',
+  name = 'slug',
   checkboxName = 'generateSlug',
   fieldToUse = 'title',
   localized,
@@ -110,14 +111,12 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [
-            (args) => generateSlug({ fieldToUse, slugFieldName: fieldName, slugify, ...args }),
-          ],
+          beforeChange: [(args) => generateSlug({ name, fieldToUse, slugify, ...args })],
         },
         localized,
       },
       {
-        name: fieldName,
+        name,
         type: 'text',
         admin: {
           components: {
