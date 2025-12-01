@@ -39,6 +39,7 @@ import {
   arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedDraftsSlug,
   localizedPostsSlug,
   relationshipLocalizedSlug,
@@ -405,7 +406,7 @@ describe('Localization', () => {
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
       await expect(page.locator('#field-title')).toHaveValue(title)
       await changeLocale(page, defaultLocale)
     })
@@ -420,7 +421,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
 
       await expect(richTextField).toContainText(richTextContent)
     })
@@ -439,7 +440,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'English')
-      await runCopy(page)
+      await runCopy({ page, toLocale: defaultLocale })
 
       await expect(arrayField).toHaveValue(sampleText)
     })
@@ -466,7 +467,7 @@ describe('Localization', () => {
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await expect(overwriteCheckbox).not.toBeChecked()
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
 
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue('Spanish description')
@@ -483,7 +484,7 @@ describe('Localization', () => {
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await overwriteCheckbox.click()
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, defaultLocale)
     })
@@ -509,7 +510,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
       await expect(page.locator('#field-title')).toHaveValue(title)
 
       const regexPattern = /locale=es/
@@ -517,7 +518,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Hungarian')
-      await runCopy(page)
+      await runCopy({ page, toLocale: hungarianLocale })
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
@@ -813,8 +814,11 @@ async function fillValues(data: Partial<LocalizedPost>) {
   }
 }
 
-async function runCopy(page) {
+async function runCopy({ page, toLocale }: { page: Page; toLocale: string }) {
   await page.locator('.copy-locale-data__sub-header button').click()
+
+  const regexPattern = new RegExp(`locale=${toLocale}`)
+  await expect(page).toHaveURL(regexPattern)
 }
 
 async function createAndSaveDoc(page, url, values) {

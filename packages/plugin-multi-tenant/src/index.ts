@@ -190,6 +190,11 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isDraftsEnabled: Boolean(
+                collection.versions &&
+                  typeof collection.versions === 'object' &&
+                  collection.versions.drafts,
+              ),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -376,6 +381,11 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isDraftsEnabled: Boolean(
+                collection.versions &&
+                  typeof collection.versions === 'object' &&
+                  collection.versions.drafts,
+              ),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},

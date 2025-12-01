@@ -408,7 +408,7 @@ export const sanitizeFields = async ({
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
 
-      const defaultTimezone =
+      let defaultTimezone =
         field.timezone && typeof field.timezone === 'object'
           ? field.timezone.defaultTimezone
           : config.admin?.timezones?.defaultTimezone
@@ -426,6 +426,10 @@ export const sanitizeFields = async ({
         typeof supportedTimezones === 'function'
           ? supportedTimezones({ defaultTimezones })
           : supportedTimezones
+
+      if (options && options.length === 1 && options[0]?.value) {
+        defaultTimezone = options[0].value
+      }
 
       // Need to set the options here manually so that any database enums are generated correctly
       // The UI component will import the options from the config

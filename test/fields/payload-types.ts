@@ -60,7 +60,8 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji'
-  | 'America/Monterrey';
+  | 'America/Monterrey'
+  | 'UTC';
 
 export interface Config {
   auth: {
@@ -1753,18 +1754,7 @@ export interface Uploads3 {
 export interface UploadsMulti {
   id: string;
   text?: string | null;
-  media?:
-    | (
-        | {
-            relationTo: 'uploads';
-            value: string | Upload;
-          }
-        | {
-            relationTo: 'uploads2';
-            value: string | Uploads2;
-          }
-      )[]
-    | null;
+  media?: (string | Upload)[] | null;
   updatedAt: string;
   createdAt: string;
 }

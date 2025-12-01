@@ -200,10 +200,10 @@ export interface GeneratedTypes {
   dbUntyped: {
     defaultIDType: number | string
   }
+  fallbackLocaleUntyped: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
   globalsSelectUntyped: {
     [slug: string]: SelectType
   }
-
   globalsUntyped: {
     [slug: string]: JsonObject
   }
@@ -300,10 +300,16 @@ export type GlobalSlug = StringKeyOf<TypedGlobal>
 
 // @ts-expect-error
 type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
+type ResolveFallbackLocaleType<T> = 'fallbackLocale' extends keyof T
+  ? T['fallbackLocale']
+  : // @ts-expect-error
+    T['fallbackLocaleUntyped']
 // @ts-expect-error
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+
+export type TypedFallbackLocale = ResolveFallbackLocaleType<GeneratedTypes>
 
 /**
  * @todo rename to `User` in 4.0
@@ -1127,12 +1133,12 @@ export const getPayload = async (
     return cached.payload
   }
 
-  if (!cached.promise) {
-    // no need to await options.config here, as it's already awaited in the BasePayload.init
-    cached.promise = new BasePayload().init(options)
-  }
-
   try {
+    if (!cached.promise) {
+      // no need to await options.config here, as it's already awaited in the BasePayload.init
+      cached.promise = new BasePayload().init(options)
+    }
+
     cached.payload = await cached.promise
 
     if (
@@ -1452,6 +1458,14 @@ export {
 } from './fields/config/client.js'
 
 export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
 
 export { sanitizeFields } from './fields/config/sanitize.js'
 

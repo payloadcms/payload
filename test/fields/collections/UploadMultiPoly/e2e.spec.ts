@@ -59,7 +59,7 @@ describe('Upload polymorphic with hasMany', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should upload in multi polymorphic field', async () => {
+  test('should upload in new doc', async () => {
     await page.goto(url.create)
 
     const multiPolyButton = page.locator('#field-media button', {
@@ -103,6 +103,85 @@ describe('Upload polymorphic with hasMany', () => {
 
     const svgItemInList = page.locator('.upload-field-card').nth(1)
     await expect(svgItemInList.locator('.pill')).toContainText('Upload 2')
+
+    await saveDocAndAssert(page)
+  })
+
+  test('can insert new media with existing values', async () => {
+    await page.goto(url.create)
+
+    const multiPolyButton = page.locator('#field-media button', {
+      hasText: exactText('Create New'),
+    })
+    await multiPolyButton.click()
+
+    const uploadModal = page.locator('#media-bulk-upload-drawer-slug-1')
+    await expect(uploadModal).toBeVisible()
+
+    await uploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
+
+    const saveButton = uploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+    await saveButton.click()
+
+    const firstFileInList = page.locator('.upload-field-card').first()
+    await expect(firstFileInList.locator('.pill')).toContainText('Upload')
+
+    await multiPolyButton.click()
+    await expect(uploadModal).toBeVisible()
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, './collections/Upload/payload.jpg'),
+    )
+
+    const collectionSelector = uploadModal.locator(
+      '.file-selections__header .file-selections__collectionSelect',
+    )
+
+    await expect(collectionSelector).toBeVisible()
+    const fieldSelector = collectionSelector.locator('.react-select')
+    await fieldSelector.click({ delay: 100 })
+    const options = uploadModal.locator('.rs__option')
+    // Select an option
+    await options.locator('text=Upload 2').click()
+
+    await expect(uploadModal.locator('.bulk-upload--drawer-header')).toContainText('Upload 2')
+    await saveButton.click()
+
+    const svgItemInList = page.locator('.upload-field-card').nth(1)
+    await expect(svgItemInList.locator('.pill')).toContainText('Upload 2')
+
+    await saveDocAndAssert(page)
+
+    const multiButton = page.locator('#field-media button', {
+      hasText: exactText('Create New'),
+    })
+
+    await multiButton.click()
+
+    await expect(uploadModal).toBeVisible()
+
+    await uploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
+
+    await saveButton.click()
+
+    await expect(firstFileInList.locator('.upload-relationship-details__filename')).toBeVisible()
+
+    await page
+      .locator('#field-media button', {
+        hasText: exactText('Create New'),
+      })
+      .first()
+      .click()
+    await expect(uploadModal).toBeVisible()
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, './collections/Upload/payload.jpg'),
+    )
+    await saveButton.click()
 
     await saveDocAndAssert(page)
   })

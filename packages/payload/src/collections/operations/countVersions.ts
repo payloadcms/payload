@@ -50,7 +50,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
       where,
     } = args
 
-    const { payload } = req!
+    const { locale, payload } = req!
 
     // /////////////////////////////////////
     // Access
@@ -90,6 +90,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     result = await payload.db.countVersions({
       collection: collectionConfig.slug,
+      locale: locale!,
       req,
       where: fullWhere,
     })

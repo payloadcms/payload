@@ -1,7 +1,13 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
-import type { AccessResult, CollectionSlug, FileToSave, SanitizedConfig } from '../../../index.js'
+import type {
+  AccessResult,
+  CollectionSlug,
+  FileToSave,
+  SanitizedConfig,
+  TypedFallbackLocale,
+} from '../../../index.js'
 import type {
   JsonObject,
   Payload,
@@ -39,7 +45,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   depth: number
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
