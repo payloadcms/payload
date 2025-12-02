@@ -1,6 +1,6 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
-import type { ClientField } from 'payload'
+import type { ClientField, ConditionalDateProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -246,7 +246,9 @@ export const ImportPreview: React.FC = () => {
                 } else if (field.type === 'date') {
                   // Format dates
                   const dateFormat =
-                    (field.admin && 'date' in field.admin && field.admin.date?.displayFormat) ||
+                    (field.admin &&
+                      'date' in field.admin &&
+                      (field.admin.date as ConditionalDateProps)?.displayFormat) ||
                     config.admin.dateFormat
 
                   return new Date(value as string).toLocaleString(i18n.language, {
@@ -302,7 +304,7 @@ export const ImportPreview: React.FC = () => {
             }
 
             // For tabs, process the fields within
-            if (field.type === 'tabs' && 'tabs' in field) {
+            if ('tabs' in field && Array.isArray(field.tabs)) {
               field.tabs.forEach((tab) => {
                 if ('name' in tab && tab.name) {
                   // Named tab
@@ -324,9 +326,11 @@ export const ImportPreview: React.FC = () => {
                   const tabCols = buildColumnsFromFields(
                     tab.fields,
                     parentPath,
-                    tabLabel && parentLabel
+                    tabLabel && typeof tabLabel === 'string' && parentLabel
                       ? `${parentLabel} > ${tabLabel}`
-                      : tabLabel || parentLabel,
+                      : typeof tabLabel === 'string'
+                        ? tabLabel
+                        : parentLabel,
                   )
                   cols.push(...tabCols)
                 }
