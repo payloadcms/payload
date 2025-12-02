@@ -13,7 +13,7 @@ export const emailFieldConfig: EmailField = {
   hooks: {
     beforeChange: [
       ({ value, field }) => {
-        if (value && 'steralize' in field && field.steralize) {
+        if (value && 'sterilize' in field && field.sterilize) {
           return value.toLowerCase().trim()
         }
       },
@@ -23,5 +23,5 @@ export const emailFieldConfig: EmailField = {
   required: true,
   unique: true,
   validate: email,
-  steralize: true,
+  sterilize: true,
 }

@@ -675,7 +675,7 @@ export type EmailField = {
   } & FieldAdmin
   type: 'email'
   validate?: EmailFieldValidation,
-  steralize?: boolean
+  sterilize?: boolean
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
