@@ -30,10 +30,18 @@ export type Export = {
   page?: number
   slug: string
   sort: Sort
-  user: string
-  userCollection: string
   where?: Where
 }
+
+/**
+ * Export input type for job queue serialization.
+ * When exports are queued as jobs, the user must be serialized as an ID string
+ * along with the collection name so it can be rehydrated when the job runs.
+ */
+export type ExportJobInput = {
+  user: string
+  userCollection: string
+} & Export
 
 export type CreateExportArgs = {
   /**
@@ -42,7 +50,7 @@ export type CreateExportArgs = {
   download?: boolean
   input: Export
   req: PayloadRequest
-  user?: TypedUser
+  user?: null | TypedUser
 }
 
 export const createExport = async (args: CreateExportArgs) => {
@@ -59,14 +67,18 @@ export const createExport = async (args: CreateExportArgs) => {
       format,
       locale: localeInput,
       sort,
-      user,
       page,
       limit: incomingLimit,
       where,
     },
     req: { locale: localeArg, payload },
     req,
+    user,
   } = args
+
+  if (!user) {
+    throw new APIError('User authentication is required to create exports')
+  }
 
   if (debug) {
     req.payload.logger.debug({

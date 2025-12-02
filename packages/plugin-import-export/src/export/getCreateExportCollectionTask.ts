@@ -1,7 +1,7 @@
-import type { Config, TaskConfig, TypedUser } from 'payload'
+import type { Config, PayloadRequest, TaskConfig, TypedUser } from 'payload'
 
 import type { ImportExportPluginConfig } from '../types.js'
-import type { CreateExportArgs, Export } from './createExport.js'
+import type { ExportJobInput } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -10,7 +10,7 @@ export const getCreateCollectionExportTask = (
   config: Config,
   pluginConfig?: ImportExportPluginConfig,
 ): TaskConfig<{
-  input: Export
+  input: ExportJobInput
   output: object
 }> => {
   const inputSchema = getFields(config, pluginConfig).concat(
@@ -30,7 +30,7 @@ export const getCreateCollectionExportTask = (
 
   return {
     slug: 'createCollectionExport',
-    handler: async ({ input, req }: CreateExportArgs) => {
+    handler: async ({ input, req }: { input: ExportJobInput; req: PayloadRequest }) => {
       let user: TypedUser | undefined
 
       if (input.userCollection && input.user) {
@@ -44,7 +44,10 @@ export const getCreateCollectionExportTask = (
         throw new Error('User not found')
       }
 
-      await createExport({ input, req, user })
+      // Strip out user and userCollection from input - they're only needed for rehydration
+      const { user: _userId, userCollection: _userCollection, ...exportInput } = input
+
+      await createExport({ input: exportInput, req, user })
 
       return {
         output: {},
