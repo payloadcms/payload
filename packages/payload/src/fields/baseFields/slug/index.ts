@@ -14,13 +14,11 @@ export type Slugify<T extends TypeWithID = any> = (args: {
 export type SlugFieldArgs = {
   /**
    * Override for the `generateSlug` checkbox field name.
-   * @default "generateSlug"
+   * @default 'generateSlug'
    */
   checkboxName?: string
   /**
-   * The path of the field to generate the slug from, when applicable.
-   * For example, `title`, `array.0.title`, etc.
-   * @default 'title'
+   * @deprecated use `useAsSlug` instead.
    */
   fieldToUse?: string
   /**
@@ -56,6 +54,11 @@ export type SlugFieldArgs = {
    * Provide your own slugify function to override the default.
    */
   slugify?: Slugify
+  /**
+   * The name of the top-level field to generate the slug from, when applicable.
+   * @default 'title'
+   */
+  useAsSlug?: string
 }
 
 export type SlugField = (args?: SlugFieldArgs) => RowField
@@ -82,15 +85,18 @@ export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse'> & TextField
  * @experimental This field is experimental and may change or be removed in the future. Use at your own risk.
  */
 export const slugField: SlugField = ({
-  name = 'slug',
+  name: slugFieldName = 'slug',
   checkboxName = 'generateSlug',
-  fieldToUse = 'title',
+  fieldToUse,
   localized,
   overrides,
   position = 'sidebar',
   required = true,
   slugify,
+  useAsSlug: useAsSlugFromArgs = 'title',
 } = {}) => {
+  const useAsSlug = fieldToUse || useAsSlugFromArgs
+
   const baseField: RowField = {
     type: 'row',
     admin: {
@@ -111,12 +117,12 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [(args) => generateSlug({ name, fieldToUse, slugify, ...args })],
+          beforeChange: [(args) => generateSlug({ slugFieldName, slugify, useAsSlug, ...args })],
         },
         localized,
       },
       {
-        name,
+        name: slugFieldName,
         type: 'text',
         admin: {
           components: {

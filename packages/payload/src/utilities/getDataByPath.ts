@@ -1,58 +1,23 @@
-/**
- * Gets a field's data by its path from a nested data object.
- * To get data from flattened form state, use `getFormStateDataByPath` instead.
- *
- * @example
- * ```ts
- * // From document data
- * const data = {
- *   group: {
- *     field: 'value',
- *   },
- * }
- * const value = getDataByPath({ data, path: 'group.field' })
- * // value is 'value'
- * ```
- */
-export const getDataByPath = <T = unknown>(args: {
-  data: Record<string, any>
-  /**
-   * Optional locale for localized fields, e.g. "en", etc.
-   */
-  locale?: string
-  /**
-   * The path to the desired field, e.g. "group.array.0.text", etc.
-   */
-  path: string
-}): T => {
-  const { data, path } = args
+import type { FormState } from '../admin/types.js'
 
-  const pathSegments = path.split('.')
+import { unflatten } from './unflatten.js'
 
-  let current: any = data
+export const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
+  const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1)
+  const name = path.split('.').pop()
 
-  for (const pathSegment of pathSegments) {
-    if (current === undefined || current === null) {
-      break
-    }
+  const data: Record<string, any> = {}
+  Object.keys(fields).forEach((key) => {
+    if (!fields[key]?.disableFormData && (key.indexOf(`${path}.`) === 0 || key === path)) {
+      data[key.replace(pathPrefixToRemove, '')] = fields[key]?.value
 
-    const rowIndex = Number(pathSegment)
-
-    if (!Number.isNaN(rowIndex) && Array.isArray(current)) {
-      current = current[rowIndex]
-    } else {
-      /**
-       * Effectively make "current" become "siblingData" for the next iteration
-       */
-      const value = current[pathSegment]
-
-      if (args.locale && value && typeof value === 'object' && value[args.locale]) {
-        current = value[args.locale]
-      } else {
-        current = value
+      if (fields[key]?.rows && fields[key].rows.length === 0) {
+        data[key.replace(pathPrefixToRemove, '')] = []
       }
     }
-  }
+  })
 
-  return current
+  const unflattenedData = unflatten(data)
+
+  return unflattenedData?.[name!]
 }

@@ -2,26 +2,28 @@ import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook } from '../../config/types.js'
 import type { SlugFieldArgs, Slugify } from './index.js'
 
-import { getDataByPath } from '../../../utilities/getDataByPath.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
 
-type HookArgs = {} & Pick<SlugFieldArgs, 'slugify'> &
-  Required<Pick<SlugFieldArgs, 'fieldToUse' | 'name'>>
+type HookArgs = {
+  slugFieldName: NonNullable<SlugFieldArgs['name']>
+} & Pick<SlugFieldArgs, 'slugify'> &
+  Required<Pick<SlugFieldArgs, 'useAsSlug'>>
 
 const slugify = ({
   customSlugify,
   data,
-  fieldToUse,
   req,
+  value,
 }: {
   customSlugify?: Slugify
   data: Record<string, unknown>
-  fieldToUse: string
   req: PayloadRequest
+  /**
+   * This is the value to be slugified.
+   */
+  value?: string
 }) => {
-  const value = getDataByPath<string>({ data, path: fieldToUse })
-
   if (customSlugify) {
     return customSlugify({ data, req, value })
   }
@@ -34,18 +36,23 @@ const slugify = ({
  * See `slugField` for more details.
  */
 export const generateSlug =
-  ({ name, fieldToUse, slugify: customSlugify }: HookArgs): FieldHook =>
+  ({ slugFieldName, slugify: customSlugify, useAsSlug }: HookArgs): FieldHook =>
   async (args) => {
     const { collection, data, global, operation, originalDoc, req, value: isChecked } = args
 
-    // Ensure user-defined slugs are not overwritten during create
-    // Use a generic falsy check here to include empty strings
     if (operation === 'create') {
       if (data) {
-        data[name] = slugify({ customSlugify, data, fieldToUse, req })
+        data[slugFieldName] = slugify({
+          customSlugify,
+          data,
+          req,
+          // Ensure user-defined slugs are not overwritten during create
+          // Use a generic falsy check here to include empty strings
+          value: data?.[slugFieldName] || originalDoc?.[useAsSlug],
+        })
       }
 
-      return Boolean(!data?.[name])
+      return Boolean(!data?.[slugFieldName])
     }
 
     if (operation === 'update') {
@@ -63,27 +70,27 @@ export const generateSlug =
       if (!autosaveEnabled) {
         // We can generate the slug at this point
         if (data) {
-          data[name] = slugify({ customSlugify, data, fieldToUse, req })
+          data[slugFieldName] = slugify({ customSlugify, data, req, value: data?.[useAsSlug] })
         }
 
-        return Boolean(!data?.[name])
+        return Boolean(!data?.[slugFieldName])
       } else {
         // If we're publishing, we can avoid querying as we can safely assume we've exceeded the version threshold (2)
         const isPublishing = data?._status === 'published'
 
         // Ensure the user can take over the generated slug themselves without it ever being overridden back
-        const userOverride = data?.[name] !== originalDoc?.[name]
+        const userOverride = data?.[slugFieldName] !== originalDoc?.[slugFieldName]
 
         if (!userOverride) {
           if (data) {
             // If the fallback is an empty string, we want the slug to return to `null`
             // This will ensure that live preview conditions continue to run as expected
-            data[name] = data?.[fieldToUse]
+            data[slugFieldName] = data?.[useAsSlug]
               ? slugify({
                   customSlugify,
                   data,
-                  fieldToUse,
                   req,
+                  value: data?.[useAsSlug],
                 })
               : null
           }

@@ -5,7 +5,7 @@ import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
-  getFormStateDataByPath,
+  getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
   wait,
@@ -515,7 +515,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const getDataByPath = useCallback<GetDataByPath>(
-    (path: string) => getFormStateDataByPath({ formState: contextRef.current.fields, path }),
+    (path: string) => getDataByPathFunc(contextRef.current.fields, path),
     [],
   )
 
