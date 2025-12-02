@@ -338,7 +338,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     loading: 'Učitavanje',
     locale: 'Jezik',
     locales: 'Prijevodi',
-    lock: 'Zaključaj',
+    lock: 'Brava',
     menu: 'Izbornik',
     moreOptions: 'Više opcija',
     move: 'Pomakni',

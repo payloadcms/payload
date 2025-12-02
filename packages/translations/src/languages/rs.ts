@@ -339,7 +339,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     loading: 'Учитавање',
     locale: 'Језик',
     locales: 'Преводи',
-    lock: 'Zaključavanje',
+    lock: 'Zaključaj',
     menu: 'Мени',
     moreOptions: 'Više opcija',
     move: 'Pomeri',

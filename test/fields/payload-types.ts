@@ -99,6 +99,7 @@ export interface Config {
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
+    'textarea-fields': TextareaField;
     uploads: Upload;
     uploads2: Uploads2;
     uploads3: Uploads3;
@@ -140,6 +141,7 @@ export interface Config {
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
+    'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     uploads2: Uploads2Select<false> | Uploads2Select<true>;
     uploads3: Uploads3Select<false> | Uploads3Select<true>;
@@ -1662,6 +1664,38 @@ export interface TabWithName {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "textarea-fields".
+ */
+export interface TextareaField {
+  id: string;
+  text: string;
+  hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
+  adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
+  disabledTextField?: string | null;
+  localizedText?: string | null;
+  /**
+   * en description
+   */
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  defaultValueFromReq?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads".
  */
 export interface Upload {
@@ -1921,6 +1955,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'text-fields';
         value: string | TextField;
+      } | null)
+    | ({
+        relationTo: 'textarea-fields';
+        value: string | TextareaField;
       } | null)
     | ({
         relationTo: 'uploads';
@@ -3384,6 +3422,28 @@ export interface TextFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "textarea-fields_select".
+ */
+export interface TextareaFieldsSelect<T extends boolean = true> {
+  text?: T;
+  hiddenTextField?: T;
+  adminHiddenTextField?: T;
+  disabledTextField?: T;
+  localizedText?: T;
+  i18nText?: T;
+  defaultString?: T;
+  defaultEmptyString?: T;
+  defaultFunction?: T;
+  defaultAsync?: T;
+  overrideLength?: T;
+  fieldWithDefaultValue?: T;
+  dependentOnFieldWithDefaultValue?: T;
+  defaultValueFromReq?: T;
   updatedAt?: T;
   createdAt?: T;
 }

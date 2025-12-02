@@ -336,7 +336,7 @@ export const isTranslations: DefaultTranslationsObject = {
     loading: 'Hleð',
     locale: 'Staðfærsla',
     locales: 'Staðfærslur',
-    lock: 'Læsa',
+    lock: 'Lás',
     menu: 'Valmynd',
     moreOptions: 'Fleiri valkostir',
     move: 'Færa',

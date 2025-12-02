@@ -419,7 +419,7 @@ export const arTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} تم نقلها إلى سلة المهملات.',
     true: 'صحيح',
     unauthorized: 'غير مصرح به',
-    unlock: 'فتح',
+    unlock: 'افتح',
     unsavedChanges: 'لديك تغييرات غير محفوظة. قم بالحفظ أو التجاهل قبل المتابعة.',
     unsavedChangesDuplicate: 'لديك تغييرات لم يتم حفظها. هل تريد الاستمرار في الاستنساخ؟',
     untitled: 'بدون عنوان',

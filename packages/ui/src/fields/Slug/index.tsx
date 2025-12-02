@@ -7,8 +7,6 @@ import React, { useCallback, useState } from 'react'
 import { Button } from '../../elements/Button/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { TextInput } from '../Text/index.js'
@@ -26,10 +24,6 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
   const { label } = field
 
   const { t } = useTranslation()
-
-  const { slugify } = useServerFunctions()
-
-  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const { setValue, value } = useField<string>({ path: path || field.name })
 
@@ -90,22 +84,12 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
       <div className="label-wrapper">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
         {!isLocked && (
-          <Button
-            buttonStyle="none"
-            className="generate-button"
-            id={`field-${path}-generate`}
-            onClick={handleGenerate}
-          >
+          <Button buttonStyle="none" className="lock-button" onClick={handleGenerate}>
             {t('authentication:generate')}
           </Button>
         )}
-        <Button
-          buttonStyle="none"
-          className="lock-button"
-          id={`field-${path}-lock`}
-          onClick={toggleLock}
-        >
-          {isLocked ? 'Unlock' : 'Lock'}
+        <Button buttonStyle="none" className="lock-button" onClick={toggleLock}>
+          {isLocked ? t('general:unlock') : t('general:lock')}
         </Button>
       </div>
       <TextInput

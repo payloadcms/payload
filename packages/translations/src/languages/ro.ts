@@ -343,7 +343,7 @@ export const roTranslations: DefaultTranslationsObject = {
     loading: 'Încărcare',
     locale: 'Localitate',
     locales: 'Localuri',
-    lock: 'Blocare',
+    lock: 'Încuietoare',
     menu: 'Meniu',
     moreOptions: 'Mai multe opțiuni',
     move: 'Mutați',

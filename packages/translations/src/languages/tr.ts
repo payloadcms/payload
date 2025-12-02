@@ -341,7 +341,7 @@ export const trTranslations: DefaultTranslationsObject = {
     loading: 'Yükleniyor',
     locale: 'Yerel ayar',
     locales: 'Diller',
-    lock: 'Kilit',
+    lock: 'Kilitle',
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
     move: 'Hareket et',
@@ -433,7 +433,7 @@ export const trTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} çöp kutusuna taşındı.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
-    unlock: 'Kilitleme',
+    unlock: 'Kilidi Aç',
     unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:
       'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',

@@ -347,7 +347,7 @@ export const deTranslations: DefaultTranslationsObject = {
     loading: 'Lädt',
     locale: 'Sprache',
     locales: 'Sprachen',
-    lock: 'Schloss',
+    lock: 'Sperren',
     menu: 'Menü',
     moreOptions: 'Mehr Optionen',
     move: 'Bewegen',

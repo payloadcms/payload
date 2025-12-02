@@ -339,7 +339,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     loading: 'Carregando',
     locale: 'Local',
     locales: 'Localizações',
-    lock: 'Bloqueio',
+    lock: 'Bloquear',
     menu: 'Cardápio',
     moreOptions: 'Mais opções',
     move: 'Mova',

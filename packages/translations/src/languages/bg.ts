@@ -428,7 +428,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} преместени в кошчето.',
     true: 'Вярно',
     unauthorized: 'Неоторизиран',
-    unlock: 'Отключи',
+    unlock: 'Отключете',
     unsavedChanges: 'Имате незапазени промени. Запазете или отхвърлете преди да продължите.',
     unsavedChangesDuplicate: 'Имаш незапазени промени. Искаш ли да продължиш да дупликираш?',
     untitled: 'Неозаглавен',

@@ -341,7 +341,7 @@ export const itTranslations: DefaultTranslationsObject = {
     loading: 'Caricamento',
     locale: 'Locale',
     locales: 'Localizzazioni',
-    lock: 'Blocco',
+    lock: 'Serratura',
     menu: 'Menù',
     moreOptions: 'Più opzioni',
     move: 'Muoviti',
