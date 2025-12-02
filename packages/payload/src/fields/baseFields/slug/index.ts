@@ -103,7 +103,7 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [(args) => generateSlug({ slugFieldName, useAsSlug, ...args })],
+          beforeChange: [generateSlug({ slugFieldName, useAsSlug })],
         },
         localized,
       },
