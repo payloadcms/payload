@@ -12,6 +12,9 @@ import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { getImportCollection } from './getImportCollection.js'
 import { getCreateCollectionImportTask } from './import/getCreateImportCollectionTask.js'
+import { parseCSV } from './import/parseCSV.js'
+import { parseJSON } from './import/parseJSON.js'
+import { unflattenObject } from './import/unflattenObject.js'
 import { translations } from './translations/index.js'
 import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
@@ -228,7 +231,6 @@ export const importExportPlugin =
           const buffer = Buffer.from(fileData, 'base64')
 
           if (format === 'csv') {
-            const { parseCSV } = await import('./import/parseCSV.js')
             const rawData = await parseCSV({ data: buffer, req })
 
             // Get fromCSV functions for field transformations
@@ -240,7 +242,6 @@ export const importExportPlugin =
             })
 
             // Unflatten CSV data
-            const { unflattenObject } = await import('./import/unflattenObject.js')
             parsedData = rawData
               .map((doc) => {
                 const unflattened = unflattenObject({
@@ -252,7 +253,6 @@ export const importExportPlugin =
               })
               .filter((doc) => doc && Object.keys(doc).length > 0)
           } else {
-            const { parseJSON } = await import('./import/parseJSON.js')
             parsedData = parseJSON({ data: buffer, req })
           }
 
