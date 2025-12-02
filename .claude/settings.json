@@ -50,6 +50,7 @@
       "Bash(pwd)",
       "Bash(which:*)",
       "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:executing-plans)",
       "Skill(superpowers:requesting-code-review)",
       "Skill(superpowers:subagent-driven-development)",
       "Skill(superpowers:systematic-debugging)",
