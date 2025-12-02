@@ -46,7 +46,7 @@ export const generateSlug =
           req,
           // Ensure user-defined slugs are not overwritten during create
           // Use a generic falsy check here to include empty strings
-          value: data?.[slugFieldName] || originalDoc?.[useAsSlug],
+          value: data?.[slugFieldName] || data?.[useAsSlug],
         })
       }
 

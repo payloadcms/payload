@@ -1,12 +1,13 @@
 import type { Slugify } from 'payload/shared'
 
 import {
-  flattenTopLevelFields,
+  flattenAllFields,
+  getFieldByPath,
   type ServerFunction,
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
 } from 'payload'
-import { slugify as defaultSlugify, fieldAffectsData } from 'payload/shared'
+import { slugify as defaultSlugify } from 'payload/shared'
 
 /**
  * This server function is directly related to the {@link https://payloadcms.com/docs/fields/text#slug-field | Slug Field}.
@@ -23,7 +24,7 @@ export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,
   Promise<ReturnType<Slugify>>
 > = async (args) => {
-  const { collectionSlug, data, globalSlug, req, useAsSlug, value } = args
+  const { collectionSlug, data, globalSlug, path, req, value } = args
 
   if (!req.user) {
     throw new UnauthorizedError()
@@ -39,20 +40,14 @@ export const slugifyHandler: ServerFunction<
     throw new Error()
   }
 
-  const topLevelFields = flattenTopLevelFields(docConfig.fields)
-
-  const useAsSlugField = topLevelFields.find((field) => {
-    if (fieldAffectsData(field)) {
-      return field.name === useAsSlug
-    }
-
-    return false
+  const { field } = getFieldByPath({
+    config: req.payload.config,
+    fields: flattenAllFields({ fields: docConfig.fields }),
+    path,
   })
 
   const customSlugify = (
-    typeof useAsSlugField?.custom?.slugify === 'function'
-      ? useAsSlugField.custom.slugify
-      : undefined
+    typeof field?.custom?.slugify === 'function' ? field.custom.slugify : undefined
   ) as Slugify
 
   const result = customSlugify ? await customSlugify({ data, req, value }) : defaultSlugify(value)

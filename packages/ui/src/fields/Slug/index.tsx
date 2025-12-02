@@ -51,7 +51,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
         collectionSlug,
         data: getData(),
         globalSlug,
-        useAsSlug,
+        path,
         value: targetFieldValue,
       })
 
@@ -67,7 +67,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
         setValue(formattedSlug)
       }
     },
-    [setValue, value, useAsSlug, getData, slugify, getDataByPath, collectionSlug, globalSlug],
+    [setValue, value, useAsSlug, getData, slugify, getDataByPath, collectionSlug, globalSlug, path],
   )
 
   const toggleLock = useCallback((e: React.MouseEvent<Element>) => {
