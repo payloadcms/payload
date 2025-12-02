@@ -1,0 +1,46 @@
+import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.js'
+
+export const bnInTranslations: PluginDefaultTranslationsObject = {
+  'plugin-import-export': {
+    allLocales: 'সমস্ত লোকেল',
+    collectionRequired: 'প্রিভিউ দেখাতে সংগ্রহ প্রয়োজন',
+    exportDocumentLabel: '{{label}} রপ্তানি করুন',
+    exportOptions: 'রপ্তানি বিকল্পগুলি',
+    'field-collectionSlug-label': 'সংগ্রহ',
+    'field-depth-label': 'গভীরতা',
+    'field-drafts-label': 'খসড়া অন্তর্ভুক্ত করুন',
+    'field-fields-label': 'ক্ষেত্র',
+    'field-format-label': 'রপ্তানি ফরম্যাট',
+    'field-importMode-create-label': 'নতুন দস্তাবেজ তৈরি করুন',
+    'field-importMode-label': 'আমদানি মোড',
+    'field-importMode-update-label': 'বিদ্যমান নথিপত্রগুলি আপডেট করুন',
+    'field-importMode-upsert-label': 'নথিগুলি তৈরি করুন বা আপডেট করুন',
+    'field-limit-label': 'সীমা',
+    'field-locale-label': 'ভাষাভূক্তি',
+    'field-matchField-description': 'বিদ্যমান ডকুমেন্টগুলির সাথে মিলনের জন্য ফিল্ড ব্যবহার করুন',
+    'field-matchField-label': 'মিল ক্ষেত্র',
+    'field-name-label': 'ফাইলের নাম',
+    'field-page-label': undefined,
+    'field-selectionToUse-label': 'ব্যবহার করার জন্য নির্বাচন করুন',
+    'field-sort-label': 'দ্বারা বাছাই করুন',
+    'field-sort-order-label': 'সাজানোর ক্রম',
+    'field-status-label': 'অবস্থা',
+    'field-summary-label': 'আমদানি সারসংক্ষেপ',
+    importDocumentLabel: '{{label}} আমদানি করুন',
+    importResults: 'নথি আমদানির ফলাফল',
+    matchBy: 'দ্বারা মিলান',
+    mode: 'মোড',
+    noDataToPreview: 'ডেটা পূর্বরূপ দেখানোর জন্য নেই',
+    'selectionToUse-allDocuments': 'সমস্ত ডকুমেন্ট ব্যবহার করুন',
+    'selectionToUse-currentFilters': 'বর্তমান ফিল্টারগুলি ব্যবহার করুন',
+    'selectionToUse-currentSelection': 'বর্তমান নির্বাচন ব্যবহার করুন',
+    startImport: 'আমদানি শুরু করুন',
+    totalDocumentsCount: '{{count}} মোট নথি',
+    uploadFileToSeePreview: 'প্রিভিউ দেখতে একটি ফাইল আপলোড করুন',
+  },
+}
+
+export const bnIn: PluginLanguage = {
+  dateFNSKey: 'bn-IN',
+  translations: bnInTranslations,
+}

@@ -1,0 +1,46 @@
+import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.js'
+
+export const idTranslations: PluginDefaultTranslationsObject = {
+  'plugin-import-export': {
+    allLocales: 'Semua lokasi',
+    collectionRequired: 'Koleksi diperlukan untuk menunjukkan pratinjau',
+    exportDocumentLabel: 'Ekspor {{label}}',
+    exportOptions: 'Opsi Ekspor',
+    'field-collectionSlug-label': 'Koleksi',
+    'field-depth-label': 'Kedalaman',
+    'field-drafts-label': 'Sertakan draf',
+    'field-fields-label': 'Bidang',
+    'field-format-label': 'Format Ekspor',
+    'field-importMode-create-label': 'Buat dokumen baru',
+    'field-importMode-label': 'Mode Impor',
+    'field-importMode-update-label': undefined,
+    'field-importMode-upsert-label': undefined,
+    'field-limit-label': undefined,
+    'field-locale-label': undefined,
+    'field-matchField-description': undefined,
+    'field-matchField-label': undefined,
+    'field-name-label': undefined,
+    'field-page-label': undefined,
+    'field-selectionToUse-label': undefined,
+    'field-sort-label': undefined,
+    'field-sort-order-label': undefined,
+    'field-status-label': undefined,
+    'field-summary-label': undefined,
+    importDocumentLabel: undefined,
+    importResults: undefined,
+    matchBy: undefined,
+    mode: undefined,
+    noDataToPreview: undefined,
+    'selectionToUse-allDocuments': undefined,
+    'selectionToUse-currentFilters': undefined,
+    'selectionToUse-currentSelection': undefined,
+    startImport: undefined,
+    totalDocumentsCount: undefined,
+    uploadFileToSeePreview: undefined,
+  },
+}
+
+export const id: PluginLanguage = {
+  dateFNSKey: 'id',
+  translations: idTranslations,
+}
