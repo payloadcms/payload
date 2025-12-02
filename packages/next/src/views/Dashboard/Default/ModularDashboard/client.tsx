@@ -59,7 +59,6 @@ export function ModularDashboardClient({
     setIsEditing,
   } = useDashboardLayout(initialLayout)
 
-  const [_dropTargetWidget, setDropTargetWidget] = useState<DropTargetWidget>(null)
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const sensors = useDashboardSensors()
 
@@ -77,7 +76,6 @@ export function ModularDashboardClient({
         // https://github.com/clauderic/dnd-kit/issues/926#issuecomment-1640115665
         id="dashboard-dnd-context"
         onDragCancel={() => {
-          setDropTargetWidget(null)
           setActiveDragId(null)
         }}
         onDragEnd={(event) => {
@@ -101,7 +99,6 @@ export function ModularDashboardClient({
             moveToIndex++
           }
           moveWidget({ moveFromIndex, moveToIndex })
-          setDropTargetWidget(null)
           setActiveDragId(null)
         }}
         onDragStart={(event) => {
