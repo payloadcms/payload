@@ -1,12 +1,32 @@
-import type { CollectionAdminOptions, CollectionConfig, UploadConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 /**
  * Type for overriding import/export collection configurations
  */
-export type CollectionOverride = {
-  admin: CollectionAdminOptions
-  upload: UploadConfig
-} & CollectionConfig
+export type CollectionOverride = ({
+  collection,
+}: {
+  collection: CollectionConfig
+}) => CollectionConfig | Promise<CollectionConfig>
+
+export type PluginCollectionConfig = {
+  /**
+   * Override the import collection for this collection or disable it entirely with `false`.
+   *
+   * @default true
+   */
+  export?: boolean | CollectionOverride
+  /**
+   * Override the export collection for this collection or disable it entirely with `false`.
+   *
+   * @default true
+   */
+  import?: boolean | CollectionOverride
+  /**
+   * Target collection's slug for import/export functionality
+   */
+  slug: CollectionSlug
+}
 
 /**
  * Configuration options for the Import/Export plugin
@@ -23,7 +43,7 @@ export type ImportExportPluginConfig = {
    * If not specified, all collections will have import/export enabled.
    * @default undefined (all collections)
    */
-  collections?: string[]
+  collections: PluginCollectionConfig[]
 
   /**
    * Enable debug logging for troubleshooting import/export operations
@@ -64,18 +84,6 @@ export type ImportExportPluginConfig = {
    * @default undefined
    */
   format?: 'csv' | 'json'
-
-  /**
-   * Override the default export collection configuration.
-   * This function receives the default collection config and should return the modified config.
-   */
-  overrideExportCollection?: (collection: CollectionOverride) => CollectionOverride
-
-  /**
-   * Override the default import collection configuration.
-   * This function receives the default collection config and should return the modified config.
-   */
-  overrideImportCollection?: (collection: CollectionOverride) => CollectionOverride
 }
 
 /**
