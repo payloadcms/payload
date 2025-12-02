@@ -7,6 +7,7 @@ import React, { useCallback, useState } from 'react'
 import { Button } from '../../elements/Button/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { TextInput } from '../Text/index.js'
 import './index.scss'
@@ -21,6 +22,8 @@ export const SlugField: React.FC<SlugFieldProps> = ({
   readOnly: readOnlyFromProps,
 }) => {
   const { label } = field
+
+  const { t } = useTranslation()
 
   const { setValue, value } = useField<string>({ path: path || field.name })
 
@@ -60,11 +63,11 @@ export const SlugField: React.FC<SlugFieldProps> = ({
         <FieldLabel htmlFor={`field-${path}`} label={label} />
         {!isLocked && (
           <Button buttonStyle="none" className="lock-button" onClick={handleGenerate}>
-            Generate
+            {t('authentication:generate')}
           </Button>
         )}
         <Button buttonStyle="none" className="lock-button" onClick={toggleLock}>
-          {isLocked ? 'Unlock' : 'Lock'}
+          {isLocked ? t('general:unlock') : t('general:lock')}
         </Button>
       </div>
       <TextInput
