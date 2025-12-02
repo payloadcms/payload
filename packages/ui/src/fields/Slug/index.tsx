@@ -7,6 +7,8 @@ import React, { useCallback, useState } from 'react'
 import { Button } from '../../elements/Button/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { TextInput } from '../Text/index.js'
@@ -17,13 +19,17 @@ import './index.scss'
  */
 export const SlugField: React.FC<SlugFieldClientProps> = ({
   field,
-  fieldToUse,
   path,
   readOnly: readOnlyFromProps,
+  useAsSlug,
 }) => {
   const { label } = field
 
   const { t } = useTranslation()
+
+  const { collectionSlug, globalSlug } = useDocumentInfo()
+
+  const { slugify } = useServerFunctions()
 
   const { setValue, value } = useField<string>({ path: path || field.name })
 
@@ -39,13 +45,13 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const targetFieldValue = getDataByPath(fieldToUse)
+      const targetFieldValue = getDataByPath(useAsSlug)
 
       const formattedSlug = await slugify({
         collectionSlug,
         data: getData(),
         globalSlug,
-        path,
+        useAsSlug,
         value: targetFieldValue,
       })
 
@@ -61,17 +67,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
         setValue(formattedSlug)
       }
     },
-    [
-      setValue,
-      value,
-      fieldToUse,
-      getData,
-      slugify,
-      path,
-      collectionSlug,
-      globalSlug,
-      getDataByPath,
-    ],
+    [setValue, value, useAsSlug, getData, slugify, getDataByPath, collectionSlug, globalSlug],
   )
 
   const toggleLock = useCallback((e: React.MouseEvent<Element>) => {

@@ -37,9 +37,7 @@ const slugify = ({
  */
 export const generateSlug =
   ({ slugFieldName, slugify: customSlugify, useAsSlug }: HookArgs): FieldHook =>
-  async (args) => {
-    const { collection, data, global, operation, originalDoc, req, value: isChecked } = args
-
+  async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
     if (operation === 'create') {
       if (data) {
         data[slugFieldName] = slugify({
@@ -106,7 +104,7 @@ export const generateSlug =
           collectionSlug: collection?.slug,
           globalSlug: global?.slug,
           parentID: originalDoc?.id,
-          req: args.req,
+          req,
         })
 
         if (versionCount <= 2) {

@@ -22,12 +22,12 @@ const SlugField: CollectionConfig = {
       localized: true,
     },
     slugField({
-      slugify: (value) => value?.toUpperCase(),
+      slugify: ({ value }) => value?.toUpperCase(),
       name: 'customSlugify',
       checkboxName: 'generateCustomSlug',
     }),
     slugField({
-      fieldToUse: 'localizedTitle',
+      useAsSlug: 'localizedTitle',
       name: 'localizedSlug',
       localized: true,
       required: false,

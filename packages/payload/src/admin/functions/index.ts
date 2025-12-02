@@ -1,7 +1,7 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { Slugify } from '../../fields/baseFields/slug/index.js'
+import type { SlugFieldArgs, Slugify } from '../../fields/baseFields/slug/index.js'
 import type {
   CollectionSlug,
   ColumnPreference,
@@ -160,5 +160,5 @@ export type GetFolderResultsComponentAndDataArgs = {
 export type SlugifyServerFunctionArgs = {
   collectionSlug?: CollectionSlug
   globalSlug?: GlobalSlug
-  path?: FieldPaths['path']
+  useAsSlug: NonNullable<SlugFieldArgs['useAsSlug']>
 } & Omit<Parameters<Slugify>[0], 'req'>

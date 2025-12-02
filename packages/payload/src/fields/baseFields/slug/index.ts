@@ -63,11 +63,12 @@ export type SlugFieldArgs = {
 
 export type SlugField = (args?: SlugFieldArgs) => RowField
 
+export type SlugFieldClientPropsOnly = Pick<SlugFieldArgs, 'useAsSlug'>
 /**
  * These are the props that the `SlugField` client component accepts.
  * The `SlugField` server component is responsible for passing down the `slugify` function.
  */
-export type SlugFieldClientProps = Pick<SlugFieldArgs, 'fieldToUse'> & TextFieldClientProps
+export type SlugFieldClientProps = SlugFieldClientPropsOnly & TextFieldClientProps
 
 /**
  * A slug is a unique, indexed, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
@@ -117,7 +118,7 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [(args) => generateSlug({ slugFieldName, slugify, useAsSlug, ...args })],
+          beforeChange: [generateSlug({ slugFieldName, slugify, useAsSlug })],
         },
         localized,
       },
@@ -128,8 +129,8 @@ export const slugField: SlugField = ({
           components: {
             Field: {
               clientProps: {
-                fieldToUse,
-              },
+                useAsSlug,
+              } satisfies SlugFieldClientPropsOnly,
               path: '@payloadcms/ui#SlugField',
             },
           },
