@@ -7,11 +7,17 @@ import type {
 
 import fs from 'fs'
 import path from 'path'
+import { addDataAndFileToRequest } from 'payload'
 
-import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
+import type { ImportExportPluginConfig } from '../types.js'
 
-import { createImport } from './import/createImport.js'
-import { getFields } from './import/getFields.js'
+import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
+import { createImport } from './createImport.js'
+import { getCustomFieldFunctions as getImportFieldFunctions } from './getCustomFieldFunctions.js'
+import { getFields } from './getFields.js'
+import { parseCSV } from './parseCSV.js'
+import { parseJSON } from './parseJSON.js'
+import { unflattenObject } from './unflattenObject.js'
 
 export const getImportCollection = ({
   config,
@@ -20,12 +26,10 @@ export const getImportCollection = ({
   config: Config
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
-  const { overrideImportCollection } = pluginConfig
-
   const beforeOperation: CollectionBeforeOperationHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
 
-  let collection: CollectionOverride = {
+  const collection: CollectionConfig = {
     slug: 'imports',
     access: {
       update: () => false,
@@ -41,6 +45,78 @@ export const getImportCollection = ({
       useAsTitle: 'filename',
     },
     disableDuplicate: true,
+    endpoints: [
+      {
+        handler: async (req) => {
+          await addDataAndFileToRequest(req)
+
+          const { collectionSlug, fileData, format } = req.data as {
+            collectionSlug: string
+            fileData?: string
+            format?: 'csv' | 'json'
+          }
+
+          const targetCollection = req.payload.collections[collectionSlug]
+          if (!targetCollection) {
+            return Response.json(
+              { error: `Collection with slug ${collectionSlug} not found` },
+              { status: 400 },
+            )
+          }
+
+          if (!fileData) {
+            return Response.json({ error: 'No file data provided' }, { status: 400 })
+          }
+
+          try {
+            // Parse the file data
+            let parsedData: Record<string, unknown>[]
+            const buffer = Buffer.from(fileData, 'base64')
+
+            if (format === 'csv') {
+              const rawData = await parseCSV({ data: buffer, req })
+
+              // Get fromCSV functions for field transformations
+              const fromCSVFunctions = getImportFieldFunctions({
+                fields: targetCollection.config.flattenedFields || [],
+              })
+
+              // Unflatten CSV data
+              parsedData = rawData
+                .map((doc) => {
+                  const unflattened = unflattenObject({
+                    data: doc,
+                    fields: targetCollection.config.flattenedFields ?? [],
+                    fromCSVFunctions,
+                  })
+                  return unflattened ?? {}
+                })
+                .filter((doc) => doc && Object.keys(doc).length > 0)
+            } else {
+              parsedData = parseJSON({ data: buffer, req })
+            }
+
+            // Remove disabled fields from the documents
+            const disabledFields =
+              targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+            if (disabledFields.length > 0) {
+              parsedData = parsedData.map((doc) => removeDisabledFields(doc, disabledFields))
+            }
+
+            return Response.json({
+              docs: parsedData,
+              totalDocs: parsedData.length,
+            })
+          } catch (error) {
+            req.payload.logger.error({ err: error, msg: 'Error parsing import preview data' })
+            return Response.json({ error: 'Failed to parse file data' }, { status: 500 })
+          }
+        },
+        method: 'post',
+        path: '/preview-data',
+      },
+    ],
     fields: getFields(config, pluginConfig),
     hooks: {
       afterChange,
@@ -52,10 +128,6 @@ export const getImportCollection = ({
       hideRemoveFile: true,
       mimeTypes: ['text/csv', 'application/json'],
     },
-  }
-
-  if (typeof overrideImportCollection === 'function') {
-    collection = overrideImportCollection(collection)
   }
 
   if (pluginConfig.disableJobsQueue) {
@@ -83,7 +155,8 @@ export const getImportCollection = ({
         } else {
           // File is stored locally - read from filesystem
           const filePath = doc.filename
-          const uploadDir = collection.upload?.staticDir || './uploads'
+          const uploadConfig = typeof collection.upload === 'object' ? collection.upload : undefined
+          const uploadDir = uploadConfig?.staticDir || './uploads'
           const fullPath = path.resolve(uploadDir, filePath)
           fileData = await fs.promises.readFile(fullPath)
           fileMimetype = doc.mimeType || 'text/csv'
@@ -234,7 +307,8 @@ export const getImportCollection = ({
           fileData = Buffer.from(await response.arrayBuffer())
         } else {
           const filePath = doc.filename
-          const uploadDir = collection.upload?.staticDir || './uploads'
+          const uploadConfig = typeof collection.upload === 'object' ? collection.upload : undefined
+          const uploadDir = uploadConfig?.staticDir || './uploads'
           const fullPath = path.resolve(uploadDir, filePath)
           fileData = await fs.promises.readFile(fullPath)
         }

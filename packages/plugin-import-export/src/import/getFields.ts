@@ -3,11 +3,17 @@ import type { Config, Field } from 'payload'
 import type { ImportExportPluginConfig } from '../types.js'
 
 export const getFields = (config: Config, pluginConfig: ImportExportPluginConfig): Field[] => {
+  // Get collection slugs from plugin config or fall back to all collections
+  const collectionOptions =
+    pluginConfig?.collections?.map((c) => c.slug) ||
+    config.collections?.map(({ slug }) => slug) ||
+    []
+
   return [
     {
       name: 'collectionSlug',
       type: 'select',
-      options: pluginConfig?.collections || config.collections?.map(({ slug }) => slug) || [],
+      options: collectionOptions,
       required: true,
 
       admin: {

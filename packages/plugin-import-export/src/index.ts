@@ -1,38 +1,49 @@
-import type { Config, FlattenedField } from 'payload'
+import type { Config } from 'payload'
 
-import { addDataAndFileToRequest, deepMergeSimple } from 'payload'
+import { deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
-import type { FromCSVFunction, ImportExportPluginConfig, ToCSVFunction } from './types.js'
+import type {
+  FromCSVFunction,
+  ImportExportPluginConfig,
+  PluginCollectionConfig,
+  ToCSVFunction,
+} from './types.js'
 
-import { flattenObject } from './export/flattenObject.js'
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
-import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
-import { getSelect } from './export/getSelect.js'
-import { getExportCollection } from './getExportCollection.js'
-import { getImportCollection } from './getImportCollection.js'
 import { getCreateCollectionImportTask } from './import/getCreateImportCollectionTask.js'
-import { parseCSV } from './import/parseCSV.js'
-import { parseJSON } from './import/parseJSON.js'
-import { unflattenObject } from './import/unflattenObject.js'
 import { translations } from './translations/index.js'
 import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
-import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
-import { getValueAtPath } from './utilities/getvalueAtPath.js'
-import { removeDisabledFields } from './utilities/removeDisabledFields.js'
-import { setNestedValue } from './utilities/setNestedValue.js'
+import { getPluginCollections } from './utilities/getPluginCollections.js'
 
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
-  (config: Config): Config => {
-    const exportCollection = getExportCollection({ config, pluginConfig })
-    const importCollection = getImportCollection({ config, pluginConfig })
+  async (config: Config): Promise<Config> => {
+    // Get all export/import collections (base at index 0, custom overrides after)
+    const { exportCollections, importCollections } = await getPluginCollections({
+      config,
+      pluginConfig,
+    })
 
-    if (config.collections) {
-      config.collections.push(exportCollection)
-      config.collections.push(importCollection)
-    } else {
-      config.collections = [exportCollection, importCollection]
+    // Base collections are at index 0 (always present)
+    const baseExportCollection = exportCollections[0]!
+    const baseImportCollection = importCollections[0]!
+
+    // Collect all export and import collection slugs for filtering
+    const allExportSlugs = new Set(exportCollections.map((c) => c.slug))
+    const allImportSlugs = new Set(importCollections.map((c) => c.slug))
+
+    // Initialize collections array if needed
+    if (!config.collections) {
+      config.collections = []
+    }
+
+    // Push all export/import collections if their slugs don't already exist
+    for (const collection of [...exportCollections, ...importCollections]) {
+      const slugExists = config.collections.some((c) => c.slug === collection.slug)
+      if (!slugExists) {
+        config.collections.push(collection)
+      }
     }
 
     // inject custom import export provider
@@ -47,17 +58,66 @@ export const importExportPlugin =
     ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config, pluginConfig))
     config.jobs.tasks.push(getCreateCollectionImportTask(config, pluginConfig))
 
-    let collectionsToUpdate = config.collections
-
-    const usePluginCollections = pluginConfig.collections && pluginConfig.collections?.length > 0
-
-    if (usePluginCollections) {
-      collectionsToUpdate = config.collections?.filter((collection) => {
-        return pluginConfig.collections?.includes(collection.slug)
-      })
+    // Build a map of collection configs for quick lookup
+    const collectionConfigMap = new Map<string, PluginCollectionConfig>()
+    if (pluginConfig.collections) {
+      for (const collectionConfig of pluginConfig.collections) {
+        collectionConfigMap.set(collectionConfig.slug, collectionConfig)
+      }
     }
 
-    collectionsToUpdate.forEach((collection) => {
+    // Build a map from target collection slug to custom export/import collection slugs
+    // Custom collections start at index 1 (index 0 is the base)
+    const customExportSlugMap = new Map<string, string>()
+    const customImportSlugMap = new Map<string, string>()
+
+    if (pluginConfig.collections) {
+      let exportIndex = 1 // Start at 1, skipping base
+      let importIndex = 1
+
+      for (const collectionConfig of pluginConfig.collections) {
+        const customExportColl = exportCollections[exportIndex]
+        if (typeof collectionConfig.export === 'function' && customExportColl) {
+          customExportSlugMap.set(collectionConfig.slug, customExportColl.slug)
+          exportIndex++
+        }
+        const customImportColl = importCollections[importIndex]
+        if (typeof collectionConfig.import === 'function' && customImportColl) {
+          customImportSlugMap.set(collectionConfig.slug, customImportColl.slug)
+          importIndex++
+        }
+      }
+    }
+
+    // Determine which collections to add import/export menu items to
+    // Exclude all export and import collections
+    const collectionsToUpdate = config.collections.filter(
+      (c) => !allExportSlugs.has(c.slug) && !allImportSlugs.has(c.slug),
+    )
+
+    for (const collection of collectionsToUpdate) {
+      // Get the plugin config for this collection (if specified)
+      const collectionPluginConfig = collectionConfigMap.get(collection.slug)
+
+      // If collections array is specified but this collection is not in it, skip
+      if (
+        pluginConfig.collections &&
+        pluginConfig.collections.length > 0 &&
+        !collectionPluginConfig
+      ) {
+        continue
+      }
+
+      // Determine which export/import collection to use for this collection
+      const exportSlugForCollection =
+        customExportSlugMap.get(collection.slug) || baseExportCollection.slug
+      const importSlugForCollection =
+        customImportSlugMap.get(collection.slug) || baseImportCollection.slug
+
+      // Check if export/import are disabled for this collection
+      const exportDisabled = collectionPluginConfig?.export === false
+      const importDisabled = collectionPluginConfig?.import === false
+
       if (!collection.admin) {
         collection.admin = { components: { listMenuItems: [] } }
       }
@@ -65,18 +125,26 @@ export const importExportPlugin =
       if (!components.listMenuItems) {
         components.listMenuItems = []
       }
-      components.listMenuItems.push({
-        clientProps: {
-          exportCollectionSlug: exportCollection.slug,
-        },
-        path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
-      })
-      components.listMenuItems.push({
-        clientProps: {
-          importCollectionSlug: importCollection.slug,
-        },
-        path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
-      })
+
+      // Add export menu item if not disabled
+      if (!exportDisabled) {
+        components.listMenuItems.push({
+          clientProps: {
+            exportCollectionSlug: exportSlugForCollection,
+          },
+          path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
+        })
+      }
+
+      // Add import menu item if not disabled
+      if (!importDisabled) {
+        components.listMenuItems.push({
+          clientProps: {
+            importCollectionSlug: importSlugForCollection,
+          },
+          path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
+        })
+      }
 
       // Find fields explicitly marked as disabled for import/export
       const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
@@ -91,191 +159,11 @@ export const importExportPlugin =
       }
 
       collection.admin.components = components
-    })
+    }
 
     if (!config.i18n) {
       config.i18n = {}
     }
-
-    // config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
-
-    // Inject custom REST endpoints into the config
-    config.endpoints = config.endpoints || []
-    config.endpoints.push({
-      handler: async (req) => {
-        await addDataAndFileToRequest(req)
-
-        const { collectionSlug, draft, fields, limit, locale, page, sort, where } = req.data as {
-          collectionSlug: string
-          draft?: 'no' | 'yes'
-          fields?: string[]
-          format?: 'csv' | 'json'
-          limit?: number
-          locale?: string
-          page?: number
-          sort?: any
-          where?: any
-        }
-
-        const collection = req.payload.collections[collectionSlug]
-        if (!collection) {
-          return Response.json(
-            { error: `Collection with slug ${collectionSlug} not found` },
-            { status: 400 },
-          )
-        }
-
-        const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
-
-        const result = await req.payload.find({
-          collection: collectionSlug,
-          depth: 1,
-          draft: draft === 'yes',
-          limit: limit && limit > 10 ? 10 : limit,
-          locale,
-          overrideAccess: false,
-          page,
-          req,
-          select,
-          sort,
-          where,
-        })
-
-        const isCSV = req?.data?.format === 'csv'
-        const docs = result.docs
-
-        let transformed: Record<string, unknown>[] = []
-
-        if (isCSV) {
-          const toCSVFunctions = getCustomFieldFunctions({
-            fields: collection.config.fields as FlattenedField[],
-          })
-
-          const possibleKeys = getFlattenedFieldKeys(collection.config.fields as FlattenedField[])
-
-          transformed = docs.map((doc) => {
-            const row = flattenObject({
-              doc,
-              fields,
-              toCSVFunctions,
-            })
-
-            for (const key of possibleKeys) {
-              if (!(key in row)) {
-                row[key] = null
-              }
-            }
-
-            return row
-          })
-        } else {
-          const disabledFields =
-            collection.config.admin.custom?.['plugin-import-export']?.disabledFields
-
-          transformed = docs.map((doc) => {
-            let output: Record<string, unknown> = { ...doc }
-
-            // Remove disabled fields first
-            output = removeDisabledFields(output, disabledFields)
-
-            // Then trim to selected fields only (if fields are provided)
-            if (Array.isArray(fields) && fields.length > 0) {
-              const trimmed: Record<string, unknown> = {}
-
-              for (const key of fields) {
-                const value = getValueAtPath(output, key)
-                setNestedValue(trimmed, key, value ?? null)
-              }
-
-              output = trimmed
-            }
-
-            return output
-          })
-        }
-
-        return Response.json({
-          docs: transformed,
-          totalDocs: result.totalDocs,
-        })
-      },
-      method: 'post',
-      path: '/preview-data',
-    })
-
-    config.endpoints.push({
-      handler: async (req) => {
-        await addDataAndFileToRequest(req)
-
-        const { collectionSlug, fileData, format } = req.data as {
-          collectionSlug: string
-          fileData?: string
-          format?: 'csv' | 'json'
-        }
-
-        const collection = req.payload.collections[collectionSlug]
-        if (!collection) {
-          return Response.json(
-            { error: `Collection with slug ${collectionSlug} not found` },
-            { status: 400 },
-          )
-        }
-
-        if (!fileData) {
-          return Response.json({ error: 'No file data provided' }, { status: 400 })
-        }
-
-        try {
-          // Parse the file data
-          let parsedData: Record<string, unknown>[]
-          const buffer = Buffer.from(fileData, 'base64')
-
-          if (format === 'csv') {
-            const rawData = await parseCSV({ data: buffer, req })
-
-            // Get fromCSV functions for field transformations
-            const { getCustomFieldFunctions: getImportFunctions } = await import(
-              './import/getCustomFieldFunctions.js'
-            )
-            const fromCSVFunctions = getImportFunctions({
-              fields: collection.config.flattenedFields || [],
-            })
-
-            // Unflatten CSV data
-            parsedData = rawData
-              .map((doc) => {
-                const unflattened = unflattenObject({
-                  data: doc,
-                  fields: collection.config.flattenedFields ?? [],
-                  fromCSVFunctions,
-                })
-                return unflattened ?? {}
-              })
-              .filter((doc) => doc && Object.keys(doc).length > 0)
-          } else {
-            parsedData = parseJSON({ data: buffer, req })
-          }
-
-          // Remove disabled fields from the documents
-          const disabledFields =
-            collection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
-
-          if (disabledFields.length > 0) {
-            parsedData = parsedData.map((doc) => removeDisabledFields(doc, disabledFields))
-          }
-
-          return Response.json({
-            docs: parsedData,
-            totalDocs: parsedData.length,
-          })
-        } catch (error) {
-          req.payload.logger.error({ err: error, msg: 'Error parsing import preview data' })
-          return Response.json({ error: 'Failed to parse file data' }, { status: 500 })
-        }
-      },
-      method: 'post',
-      path: '/import-preview-data',
-    })
 
     /**
      * Merge plugin translations
