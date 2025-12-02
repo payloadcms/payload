@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slugField } from 'payload'
 
-import { defaultText, slugFieldSlug } from './shared.js'
+import { slugFieldSlug } from './shared.js'
 
 const SlugField: CollectionConfig = {
   slug: slugFieldSlug,
