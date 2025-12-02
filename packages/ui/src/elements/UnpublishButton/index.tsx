@@ -57,7 +57,7 @@ export function UnpublishButton() {
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
-      ;(async () => {
+      ; (async () => {
         let url
         let method
 
@@ -83,7 +83,7 @@ export function UnpublishButton() {
 
         try {
           const res = await requests[method](url, {
-            body: JSON.stringify(unpublishAll ? {} : { _status: 'draft' }),
+            body: JSON.stringify({ _status: 'draft' }),
             headers: {
               'Accept-Language': i18n.language,
               'Content-Type': 'application/json',
@@ -166,21 +166,21 @@ export function UnpublishButton() {
             SubMenuPopupContent={
               canUnpublishCurrentLocale
                 ? ({ close }) => {
-                    return (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button
-                          id="action-unpublish-locale"
-                          onClick={() => {
-                            setUnpublishAll(false)
-                            toggleModal(unPublishModalSlug)
-                            close()
-                          }}
-                        >
-                          {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )
-                  }
+                  return (
+                    <PopupList.ButtonGroup>
+                      <PopupList.Button
+                        id="action-unpublish-locale"
+                        onClick={() => {
+                          setUnpublishAll(false)
+                          toggleModal(unPublishModalSlug)
+                          close()
+                        }}
+                      >
+                        {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )
+                }
                 : undefined
             }
             type="button"

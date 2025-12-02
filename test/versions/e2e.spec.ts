@@ -490,7 +490,7 @@ describe('Versions', () => {
       await assertNetworkRequests(
         page,
         // Important: assert that depth is 0 in this request
-        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`,
+        `${serverURL}/api/autosave-posts/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
         async () => {
           await page.locator('#field-title').fill('changed title')
         },
@@ -1139,6 +1139,9 @@ describe('Versions', () => {
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
+
+      const publishOptions = page.locator('#action-save-popup')
+      await publishOptions.click()
 
       const publishSpecificLocale = page.locator('#publish-locale')
       await expect(publishSpecificLocale).toContainText('English')
