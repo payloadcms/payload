@@ -34055,7 +34055,7 @@ function getCommentBody(pathOrComment) {
 function checkAreaLabels() {
     var _a, _b;
     return __awaiter(this, void 0, Promise, function () {
-        var _c, issue, action, sectionRe, match, labels, client, common, err_1;
+        var _c, issue, action, sectionRegex, match, labels, client, common, err_1;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
@@ -34066,8 +34066,8 @@ function checkAreaLabels() {
                     _c = github.context.payload, issue = _c.issue, action = _c.action;
                     if (action !== 'opened' || !(issue === null || issue === void 0 ? void 0 : issue.body))
                         return [2 /*return*/];
-                    sectionRe = new RegExp(config.areaLabels.section, 'is');
-                    match = (_b = (_a = issue.body.match(sectionRe)) === null || _a === void 0 ? void 0 : _a[1]) === null || _b === void 0 ? void 0 : _b.trim();
+                    sectionRegex = new RegExp(config.areaLabels.section, 'is');
+                    match = (_b = (_a = issue.body.match(sectionRegex)) === null || _a === void 0 ? void 0 : _a[1]) === null || _b === void 0 ? void 0 : _b.trim();
                     if (!match) {
                         (0,core.info)('Area labels - no matching section found in issue body');
                         return [2 /*return*/];

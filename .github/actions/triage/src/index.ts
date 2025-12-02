@@ -231,8 +231,8 @@ async function checkAreaLabels(): Promise<void> {
 
   if (action !== 'opened' || !issue?.body) return
 
-  const sectionRe = new RegExp(config.areaLabels.section, 'is')
-  const match = issue.body.match(sectionRe)?.[1]?.trim()
+  const sectionRegex = new RegExp(config.areaLabels.section, 'is')
+  const match = issue.body.match(sectionRegex)?.[1]?.trim()
 
   if (!match) {
     info('Area labels - no matching section found in issue body')
