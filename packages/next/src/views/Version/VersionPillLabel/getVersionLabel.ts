@@ -38,41 +38,48 @@ export function getVersionLabel({
   pillStyle: Parameters<typeof Pill>[0]['pillStyle']
 } {
   const { code: currentLocale } = useLocale()
+  const status = version.version._status
 
-  if (version.version._status === 'draft') {
+  if (status === 'draft') {
     const publishedNewerThanDraft =
       currentlyPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+
     if (publishedNewerThanDraft) {
       return {
         name: 'draft',
         label: t('version:draft'),
         pillStyle: 'light',
       }
-    } else {
-      return {
-        name: version.id === latestDraftVersion?.id ? 'currentDraft' : 'draft',
-        label:
-          version.id === latestDraftVersion?.id ? t('version:currentDraft') : t('version:draft'),
-        pillStyle: 'light',
-      }
-    }
-  } else {
-    if (version.version._status === 'published' && currentLocale !== version.publishedLocale) {
-      return {
-        name: 'currentDraft',
-        label: t('version:currentDraft'),
-        pillStyle: 'light',
-      }
     }
 
-    const isCurrentlyPublished =
-      currentlyPublishedVersion && version.id === currentlyPublishedVersion.id
+    const isCurrentDraft = version.id === latestDraftVersion?.id
+
     return {
-      name: isCurrentlyPublished ? 'currentlyPublished' : 'previouslyPublished',
-      label: isCurrentlyPublished
-        ? t('version:currentlyPublished')
-        : t('version:previouslyPublished'),
-      pillStyle: isCurrentlyPublished ? 'success' : 'light',
+      name: isCurrentDraft ? 'currentDraft' : 'draft',
+      label: isCurrentDraft ? t('version:currentDraft') : t('version:draft'),
+      pillStyle: 'light',
     }
+  }
+
+  const publishedInAnotherLocale =
+    status === 'published' && version.publishedLocale && currentLocale !== version.publishedLocale
+
+  if (publishedInAnotherLocale) {
+    return {
+      name: 'currentDraft',
+      label: t('version:currentDraft'),
+      pillStyle: 'light',
+    }
+  }
+
+  const isCurrentlyPublished =
+    currentlyPublishedVersion && version.id === currentlyPublishedVersion.id
+
+  return {
+    name: isCurrentlyPublished ? 'currentlyPublished' : 'previouslyPublished',
+    label: isCurrentlyPublished
+      ? t('version:currentlyPublished')
+      : t('version:previouslyPublished'),
+    pillStyle: isCurrentlyPublished ? 'success' : 'light',
   }
 }
