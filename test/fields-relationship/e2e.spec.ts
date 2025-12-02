@@ -284,6 +284,76 @@ describe('Relationship Field', () => {
     await expect(values).toHaveText([relationOneDoc.id, relationTwoDoc.id])
   })
 
+  test('should paginate polymorphic relationship correctly and not send NaN page parameter', async () => {
+    // Create 15 docs for each relation type
+    const relationOneIDs: string[] = []
+    const relationTwoIDs: string[] = []
+
+    // Create 15 relationOne docs
+    for (let i = 0; i < 15; i++) {
+      const doc = (await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: `relation-one-${i}`,
+        },
+      })) as any
+      relationOneIDs.push(doc.id)
+    }
+
+    // Create 15 relationTwo docs
+    for (let i = 0; i < 15; i++) {
+      const doc = (await payload.create({
+        collection: relationTwoSlug,
+        data: {
+          name: `relation-two-${i}`,
+        },
+      })) as any
+      relationTwoIDs.push(doc.id)
+    }
+
+    await loadCreatePage()
+
+    const field = page.locator('#field-relationshipHasManyMultiple')
+
+    // Click to open dropdown
+    await field.click({ delay: 100 })
+
+    // Wait for initial options to load and menu to be visible
+    const menu = page.locator('.rs__menu-list')
+    await expect(menu).toBeVisible()
+    await wait(300)
+
+    // Verify we have some initial options
+    const options = page.locator('.rs__option')
+    await expect(options.first()).toBeVisible()
+
+    // Scroll to the bottom multiple times to trigger pagination for both collection types
+    // First scroll loads more relationOne docs
+    await menu.evaluate((node) => {
+      node.scrollTop = node.scrollHeight
+    })
+    await wait(500)
+
+    // Second scroll should trigger loading more relationTwo docs (page 2)
+    await menu.evaluate((node) => {
+      node.scrollTop = node.scrollHeight
+    })
+    await wait(500)
+
+    // Third scroll to ensure we've loaded page 2 of relationTwo
+    await menu.evaluate((node) => {
+      node.scrollTop = node.scrollHeight
+    })
+    await wait(500)
+
+    // Check that we can see the 11th doc from relationTwo (which would be on page 2)
+    // Before the fix, page 2 of relationTwo wouldn't load because page parameter was NaN
+    const eleventhRelationTwoDoc = relationTwoIDs[10] // Index 10 = 11th doc (page 2, item 1)
+
+    // The 11th relationTwo doc should be visible in the dropdown
+    await expect(options.locator(`text=${eleventhRelationTwoDoc}`)).toBeVisible()
+  })
+
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
     await wait(300)
