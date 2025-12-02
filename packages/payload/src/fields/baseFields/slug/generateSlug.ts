@@ -14,21 +14,18 @@ const slugify = ({
   customSlugify,
   data,
   req,
-  value,
+  valueToSlugify,
 }: {
   customSlugify?: Slugify
   data: Record<string, unknown>
   req: PayloadRequest
-  /**
-   * This is the value to be slugified.
-   */
-  value?: string
+  valueToSlugify?: string
 }) => {
   if (customSlugify) {
-    return customSlugify({ data, req, value })
+    return customSlugify({ data, req, valueToSlugify })
   }
 
-  return defaultSlugify(value)
+  return defaultSlugify(valueToSlugify)
 }
 
 /**
@@ -46,7 +43,7 @@ export const generateSlug =
           req,
           // Ensure user-defined slugs are not overwritten during create
           // Use a generic falsy check here to include empty strings
-          value: data?.[slugFieldName] || data?.[useAsSlug],
+          valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
       }
 
@@ -68,7 +65,12 @@ export const generateSlug =
       if (!autosaveEnabled) {
         // We can generate the slug at this point
         if (data) {
-          data[slugFieldName] = slugify({ customSlugify, data, req, value: data?.[useAsSlug] })
+          data[slugFieldName] = slugify({
+            customSlugify,
+            data,
+            req,
+            valueToSlugify: data?.[useAsSlug],
+          })
         }
 
         return Boolean(!data?.[slugFieldName])
@@ -88,7 +90,7 @@ export const generateSlug =
                   customSlugify,
                   data,
                   req,
-                  value: data?.[useAsSlug],
+                  valueToSlugify: data?.[useAsSlug],
                 })
               : null
           }

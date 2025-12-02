@@ -241,6 +241,9 @@ export const ExampleCollection: CollectionConfig = {
         defaultField.fields[1].label = 'Custom Slug Label'
         return defaultField
       },
+      // You can also provide your own slugify function to support custom formatting, if needed
+      slugify: ({ valueToSlugify }) =>
+        valueToSlugify?.toLowerCase().replace(/\s+/g, '-'),
     }),
     // highlight-line
   ],

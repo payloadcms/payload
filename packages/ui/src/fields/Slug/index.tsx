@@ -45,14 +45,14 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const targetFieldValue = getDataByPath(useAsSlug)
+      const valueToSlugify = getDataByPath(useAsSlug)
 
       const formattedSlug = await slugify({
         collectionSlug,
         data: getData(),
         globalSlug,
         path,
-        value: targetFieldValue,
+        valueToSlugify,
       })
 
       if (formattedSlug === null || formattedSlug === undefined) {

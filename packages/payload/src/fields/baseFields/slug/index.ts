@@ -8,7 +8,7 @@ import { generateSlug } from './generateSlug.js'
 export type Slugify<T extends TypeWithID = any> = (args: {
   data: T
   req: PayloadRequest
-  value?: any
+  valueToSlugify?: any
 }) => Promise<string | undefined> | string | undefined
 
 export type SlugFieldArgs = {
