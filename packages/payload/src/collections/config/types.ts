@@ -113,6 +113,8 @@ export type BeforeOperationHook<TOperationGeneric extends CollectionSlug = strin
 ) =>
   | Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]
   | Promise<Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]>
+  | Promise<void>
+  | void
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
