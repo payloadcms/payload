@@ -36,6 +36,7 @@ export type Export = {
 }
 
 export type CreateExportArgs = {
+  batchSize?: number
   /**
    * If true, stream the file instead of saving it
    */
@@ -47,6 +48,7 @@ export type CreateExportArgs = {
 
 export const createExport = async (args: CreateExportArgs) => {
   const {
+    batchSize = 100,
     download,
     input: {
       id,
@@ -91,8 +93,6 @@ export const createExport = async (args: CreateExportArgs) => {
   if (debug) {
     req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
-
-  const batchSize = 100 // fixed per request
 
   const hardLimit =
     typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined

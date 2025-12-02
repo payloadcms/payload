@@ -44,7 +44,7 @@ export const getCreateCollectionExportTask = (
         throw new Error('User not found')
       }
 
-      await createExport({ input, req, user })
+      await createExport({ batchSize: pluginConfig?.batchSize, input, req, user })
 
       return {
         output: {},

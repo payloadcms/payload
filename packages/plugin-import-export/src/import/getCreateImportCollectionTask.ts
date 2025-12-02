@@ -82,7 +82,7 @@ export const getCreateCollectionImportTask = (
       }
 
       const result = await createImport({
-        batchSize: pluginConfig?.batchSize || 100,
+        batchSize: pluginConfig?.batchSize,
         defaultVersionStatus: pluginConfig?.defaultVersionStatus || 'published',
         input,
         req,
