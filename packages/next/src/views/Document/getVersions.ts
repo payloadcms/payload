@@ -56,7 +56,10 @@ export const getVersions = async ({
   const entityConfig = collectionConfig || globalConfig
   const versionsConfig = entityConfig?.versions
   const hasLocalizedFields = traverseForLocalizedFields(entityConfig.fields)
-  const localizationEnabled = typeof payload.config.localization === 'object' && hasLocalizedFields
+  const localizedDraftsEnabled =
+    entityConfig.versions.drafts !== false &&
+    typeof payload.config.localization === 'object' &&
+    hasLocalizedFields
 
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
@@ -139,7 +142,7 @@ export const getVersions = async ({
           ],
         }
 
-        if (localizationEnabled) {
+        if (localizedDraftsEnabled) {
           where.and.push({
             snapshot: {
               not_equals: true,
@@ -209,7 +212,7 @@ export const getVersions = async ({
       ],
     }
 
-    if (localizationEnabled) {
+    if (localizedDraftsEnabled) {
       countVersionsWhere.and.push({
         snapshot: {
           not_equals: true,
@@ -302,7 +305,7 @@ export const getVersions = async ({
       global: globalConfig.slug,
       locale,
       user,
-      where: localizationEnabled
+      where: localizedDraftsEnabled
         ? {
             snapshot: {
               not_equals: true,
