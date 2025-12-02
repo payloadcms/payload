@@ -1395,7 +1395,7 @@ export type Config = {
 export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']> // TODO: I am using only dashboard.widgets. Should I exclude dashboard.defaultLayout?
+  } & DeepRequired<Config['admin']>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
