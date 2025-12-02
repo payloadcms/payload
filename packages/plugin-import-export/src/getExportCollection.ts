@@ -86,7 +86,7 @@ export const getExportCollection = ({
         ...doc,
         exportsCollection: collection.slug,
         user: req?.user?.id || req?.user?.user?.id,
-        userCollection: 'users',
+        userCollection: req.payload.config.admin.user,
       }
       await req.payload.jobs.queue({
         input,

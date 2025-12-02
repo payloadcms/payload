@@ -8,7 +8,7 @@ import { getFields } from './getFields.js'
 
 /**
  * Export input type for job queue serialization.
- * When exports are queued as jobs, the user must be serialized as an ID string
+ * When exports are queued as jobs, the user must be serialized as an ID string or number
  * along with the collection name so it can be rehydrated when the job runs.
  */
 export type ExportJobInput = {
@@ -48,6 +48,8 @@ export const getCreateCollectionExportTask = (
           id: input.user,
           collection: input.userCollection,
         })) as TypedUser
+
+        req.user = user
       }
 
       if (!user) {
