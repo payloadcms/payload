@@ -10,8 +10,7 @@ keywords: plugins, plugin, import, export, csv, JSON, data, ETL, download
 
 <Banner type="warning">
   **Note**: This plugin is in **beta** as some aspects of it may change on any
-  minor releases. It is under development and currently only supports exporting
-  of collection data.
+  minor releases. It is under development.
 </Banner>
 
 This plugin adds features that give admin users the ability to download or create export data as an upload collection and import it back into a project.
@@ -22,7 +21,7 @@ This plugin adds features that give admin users the ability to download or creat
 - Download the export directly through the browser
 - Create a file upload of the export data
 - Use the jobs queue for large exports
-- (Coming soon) Import collection data
+- Import collection data
 
 ## Installation
 
@@ -64,6 +63,7 @@ export default config
 | `disableSave`              | boolean  | If true, disables the save button in the export preview UI.                                                                          |
 | `format`                   | string   | Forces a specific export format (`csv` or `json`), hides the format dropdown, and prevents the user from choosing the export format. |
 | `overrideExportCollection` | function | Function to override the default export collection; takes the default export collection and allows you to modify and return it.      |
+| `overrideImportCollection` | function | Function to override the default import collection; takes the default import collection and allows you to modify and return it.      |
 
 ## Field Options
 
