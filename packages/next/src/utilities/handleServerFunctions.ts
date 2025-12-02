@@ -6,7 +6,7 @@ import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
-import { renderWidgetHandler } from '../views/Dashboard/Default/GridLayout/renderWidget/renderWidgetServerFn.js'
+import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'

@@ -39,7 +39,7 @@ const WIDTH_TO_PERCENTAGE = {
   full: 100,
 } as const
 
-export function GridLayoutDashboardClient({
+export function ModularDashboardClient({
   clientLayout: initialLayout,
   widgets,
 }: {
@@ -108,7 +108,7 @@ export function GridLayoutDashboardClient({
         sensors={sensors}
       >
         <div
-          className={`grid-layout ${isEditing ? 'editing' : ''}`}
+          className={`modular-dashboard ${isEditing ? 'editing' : ''}`}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -117,7 +117,7 @@ export function GridLayoutDashboardClient({
           }}
         >
           {currentLayout?.length === 0 && (
-            <div className="grid-layout__empty">
+            <div className="modular-dashboard__empty">
               <p>
                 There are no widgets on your dashboard. You can add them from the "Dashboard" menu
                 located in the top bar.

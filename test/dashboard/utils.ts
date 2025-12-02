@@ -12,7 +12,7 @@ export class DashboardHelper {
   }
 
   get dashboard() {
-    return this.page.locator('.grid-layout')
+    return this.page.locator('.modular-dashboard')
   }
 
   get widgets() {
@@ -23,7 +23,7 @@ export class DashboardHelper {
     return this.page.locator('.step-nav__last')
   }
 
-  widgetByPos = (pos: number) => this.page.locator(`.grid-layout > :nth-child(${pos})`)
+  widgetByPos = (pos: number) => this.page.locator(`.modular-dashboard > :nth-child(${pos})`)
 
   getSnapshot = async (): Promise<[slug: string, width: WidgetWidth][]> => {
     const widgets: [slug: string, width: WidgetWidth][] = await Promise.all(

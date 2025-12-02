@@ -15,12 +15,12 @@ import type { DashboardViewServerProps } from '../index.js'
 import type { WidgetInstanceClient, WidgetItem } from './client.js'
 
 import { getPreferences } from '../../../../utilities/getPreferences.js'
-import { GridLayoutDashboardClient } from './client.js'
+import { ModularDashboardClient } from './client.js'
 import './index.scss'
 
 type ServerLayout = WidgetInstanceClient[]
 
-export async function GridLayoutDashboard(props: DashboardViewServerProps) {
+export async function ModularDashboard(props: DashboardViewServerProps) {
   const { defaultLayout = [], widgets } = props.payload.config.admin.dashboard || {}
   const { importMap } = props.payload
   const { user } = props
@@ -48,7 +48,7 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
 
   return (
     <div>
-      <GridLayoutDashboardClient clientLayout={serverLayout} widgets={widgets} />
+      <ModularDashboardClient clientLayout={serverLayout} widgets={widgets} />
     </div>
   )
 }

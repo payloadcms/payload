@@ -5,7 +5,7 @@ import { Gutter } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { GridLayoutDashboard } from './GridLayout/server.js'
+import { ModularDashboard } from './ModularDashboard/server.js'
 
 const baseClass = 'dashboard'
 
@@ -59,7 +59,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
             user,
           } satisfies ServerProps,
         })}
-      <GridLayoutDashboard {...props} />
+      <ModularDashboard {...props} />
       {afterDashboard &&
         RenderServerComponent({
           Component: afterDashboard,
