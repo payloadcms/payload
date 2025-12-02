@@ -33,16 +33,6 @@ export type Export = {
   where?: Where
 }
 
-/**
- * Export input type for job queue serialization.
- * When exports are queued as jobs, the user must be serialized as an ID string
- * along with the collection name so it can be rehydrated when the job runs.
- */
-export type ExportJobInput = {
-  user: number | string
-  userCollection: string
-} & Export
-
 export type CreateExportArgs = {
   /**
    * If true, stream the file instead of saving it
