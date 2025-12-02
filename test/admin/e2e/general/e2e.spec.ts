@@ -571,7 +571,7 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
-      await page.locator('.dashboard__card-list .card').first().click()
+      await page.locator('.collections__card-list .card').first().click()
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
@@ -964,7 +964,7 @@ describe('General', () => {
   describe('progress bar', () => {
     test('should show progress bar on page navigation', async () => {
       await page.goto(postsUrl.admin)
-      await page.locator('.dashboard__card-list .card').first().click()
+      await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
     })
   })
