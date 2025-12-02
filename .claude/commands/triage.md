@@ -1,6 +1,7 @@
 ---
 description: Triage a GitHub issue and present findings on validity, code locations, and optionally create a failing test or resolution plan.
 argument-hint: <issue-number-or-url>
+allowed-tools: Bash(gh issue view:*), Task, TodoWrite, Write, AskUserQuestion
 ---
 
 # Triage GitHub Issue
@@ -21,15 +22,15 @@ Quickly triage GitHub issues to determine validity and identify where the issue 
 ### Step 2: Investigate
 
 1. Use Task tool with subagent_type=Explore to examine relevant parts of codebase
-2. **Think** through the code until you have solid understanding of relevant files, functions, and logic
+2. Think step by step through the code paths involved until you understand the relevant files, functions, and logic
 3. Focus on understanding the problem space before judging validity
 
 ### Step 3: Analyze & Report
 
-1. **Think carefully** about whether issue is valid (be critical)
+1. Think step by step about whether this issue is valid - be critical and consider alternative explanations
 2. Determine verdict: Valid | Invalid | Needs Info
 3. Determine confidence: High | Medium | Low
-4. If valid: Identify root cause and potential fix direction
+4. If valid: Think deeply about the root cause before proposing fix direction
 5. Generate findings using output structure below
 6. Auto-save to `.claude/artifacts/triage-<issue-number>.md`
 7. Present findings to user
