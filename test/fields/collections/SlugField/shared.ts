@@ -10,4 +10,8 @@ export const slugFieldDoc: RequiredDataFromCollection<SlugField> = {
   slug: 'seeded-text-document',
   localizedTitle: 'Localized text',
   localizedSlug: 'localized-text',
+  group: {
+    nestedTitle: 'Nested title',
+    nestedSlug: 'nested-title',
+  },
 }

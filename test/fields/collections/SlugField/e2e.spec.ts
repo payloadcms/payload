@@ -149,4 +149,15 @@ describe('SlugField', () => {
       expect(scanResults.elementsWithoutIndicators).toBe(0)
     })
   })
+
+  describe('nested slugs', () => {
+    test('should generate slug for nested fields', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-group--nestedTitle').fill('Nested title value')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-group--nestedSlug')).toHaveValue('nested-title-value')
+    })
+  })
 })

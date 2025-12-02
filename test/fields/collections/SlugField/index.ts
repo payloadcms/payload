@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slugField } from 'payload'
 
-import { defaultText, slugFieldSlug } from './shared.js'
+import { slugFieldSlug } from './shared.js'
 
 const SlugField: CollectionConfig = {
   slug: slugFieldSlug,
@@ -22,12 +22,27 @@ const SlugField: CollectionConfig = {
       localized: true,
     },
     slugField({
-      fieldToUse: 'localizedTitle',
+      useAsSlug: 'localizedTitle',
       name: 'localizedSlug',
       checkboxName: 'generateLocalizedSlug',
       localized: true,
       required: false,
     }),
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
+        },
+        slugField({
+          useAsSlug: 'nestedTitle',
+          name: 'nestedSlug',
+          checkboxName: 'generateNestedSlug',
+        }),
+      ],
+    },
   ],
 }
 

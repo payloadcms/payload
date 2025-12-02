@@ -158,6 +158,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
@@ -1533,6 +1534,14 @@ export interface SlugField {
    */
   generateLocalizedSlug?: boolean | null;
   localizedSlug?: string | null;
+  group: {
+    nestedTitle?: string | null;
+    /**
+     * When enabled, the slug will auto-generate from the title field on save and autosave.
+     */
+    generateNestedSlug?: boolean | null;
+    nestedSlug: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -3235,6 +3244,13 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   localizedTitle?: T;
   generateLocalizedSlug?: T;
   localizedSlug?: T;
+  group?:
+    | T
+    | {
+        nestedTitle?: T;
+        generateNestedSlug?: T;
+        nestedSlug?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

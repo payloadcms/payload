@@ -17,9 +17,9 @@ import './index.scss'
  */
 export const SlugField: React.FC<SlugFieldProps> = ({
   field,
-  fieldToUse,
   path,
   readOnly: readOnlyFromProps,
+  useAsSlug,
 }) => {
   const { label } = field
 
@@ -35,7 +35,7 @@ export const SlugField: React.FC<SlugFieldProps> = ({
     (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const targetFieldValue = getDataByPath(fieldToUse)
+      const targetFieldValue = getDataByPath(useAsSlug)
 
       if (targetFieldValue) {
         const formattedSlug = slugify(targetFieldValue as string)
@@ -49,7 +49,7 @@ export const SlugField: React.FC<SlugFieldProps> = ({
         }
       }
     },
-    [setValue, value, fieldToUse, getDataByPath],
+    [setValue, value, useAsSlug, getDataByPath],
   )
 
   const toggleLock = useCallback((e: React.MouseEvent<Element>) => {
