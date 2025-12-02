@@ -508,7 +508,7 @@ const postProcessDocument = (doc: Record<string, unknown>, fields: FlattenedFiel
   const blockFields = fields.filter((field) => field.type === 'blocks')
   for (const field of blockFields) {
     if (field.name in doc && Array.isArray(doc[field.name])) {
-      const blocks = doc[field.name] as unknown[]
+      const blocks = doc[field.name] as any[]
       for (const block of blocks) {
         if (!block || typeof block !== 'object') {
           continue
