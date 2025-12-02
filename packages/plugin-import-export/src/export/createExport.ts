@@ -39,7 +39,7 @@ export type Export = {
  * along with the collection name so it can be rehydrated when the job runs.
  */
 export type ExportJobInput = {
-  user: string
+  user: number | string
   userCollection: string
 } & Export
 
