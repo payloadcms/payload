@@ -510,11 +510,11 @@ test.describe('Form State', () => {
       page,
       `/api/${autosavePostsSlug}/${autosavePost.id}`,
       async () => {
-        // Type "Hell" then pause for longer than debounce rate to trigger first onChange
-        await field.fill('Hell')
-        await wait(250) // wait for debounce to trigger
-        // Type "o" to trigger second onChange
-        await field.press('o')
+        // Type a partial word, then pause for longer than debounce rate to trigger first onChange
+        await field.fill('Tes')
+        await wait(250) // wait for debounce to elapse, but not long enough for the autosave network request to complete
+        // Finish the word, which importantly, should trigger a second onChange while the autosave is still in-flight
+        await field.press('t')
       },
       {
         allowedNumberOfRequests: 2,
