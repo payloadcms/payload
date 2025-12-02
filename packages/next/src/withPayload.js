@@ -2,6 +2,8 @@
  * @param {import('next').NextConfig} nextConfig
  * @param {Object} [options] - Optional configuration options
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
+ * @param {boolean} [options.experimentalTurbopackBuild] - Allow Turbopack production builds on Next 15/16 (experimental, may increase server bundle size).
+ *   May require adding your database adapter, `@payloadcms/drizzle`, `drizzle-kit`, `esbuild`, and `thread-stream` to `serverExternalPackages` in next.config. @default false
  *
  * @returns {import('next').NextConfig}
  * */
@@ -56,9 +58,16 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const isTurbopackNextjs15 = process.env.TURBOPACK === '1'
   const isTurbopackNextjs16 = process.env.TURBOPACK === 'auto'
 
-  if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
+  if (
+    isBuild &&
+    (isTurbopackNextjs15 || isTurbopackNextjs16) &&
+    !options.experimentalTurbopackBuild
+  ) {
     throw new Error(
-      'Payload does not support using Turbopack for production builds. If you are using Next.js 16, please use `next build --webpack` instead.',
+      'Payload does not support using Turbopack for production builds. If you are using Next.js 16, please use `next build --webpack` instead. ' +
+        'Alternatively, you can pass `experimentalTurbopackBuild: true` to withPayload() to bypass this check. ' +
+        'Note: this is experimental and may increase server bundle size. ' +
+        'See https://github.com/payloadcms/payload/pull/14696 for details.',
     )
   }
 
