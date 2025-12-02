@@ -47,7 +47,7 @@ export const unflattenObject = ({
       continue
     }
 
-    // Check if this is a _relationTo key for a polymorphic relationship that's already been processed
+    // Check if this is a _relationTo key for a polymorphic relationship
     if (flatKey.endsWith('_relationTo')) {
       const baseKey = flatKey.replace(/_relationTo$/, '')
       const idKey = `${baseKey}_id`
@@ -61,10 +61,39 @@ export const unflattenObject = ({
           Array.isArray(field.relationTo),
       )
 
-      if (isPolymorphic && idKey in data) {
+      if (isPolymorphic) {
         // Check if we've already processed this field
         if (baseKey in result) {
           // Skipping because already processed
+          continue
+        }
+
+        // If the corresponding _id key is undefined, skip processing entirely
+        // This prevents creating empty objects when we should preserve existing data
+        if (!(idKey in data) || data[idKey] === undefined) {
+          continue
+        }
+      }
+    }
+
+    // Check if this is a _id key for a polymorphic relationship where _relationTo is undefined
+    if (flatKey.endsWith('_id')) {
+      const baseKey = flatKey.replace(/_id$/, '')
+      const relationToKey = `${baseKey}_relationTo`
+
+      // Check if this is a polymorphic relationship field
+      const isPolymorphic = fields.some(
+        (field) =>
+          field.name === baseKey &&
+          field.type === 'relationship' &&
+          'relationTo' in field &&
+          Array.isArray(field.relationTo),
+      )
+
+      if (isPolymorphic) {
+        // If the corresponding _relationTo key is undefined, skip processing entirely
+        // This prevents creating empty objects when we should preserve existing data
+        if (!(relationToKey in data) || data[relationToKey] === undefined) {
           continue
         }
       }
@@ -444,34 +473,42 @@ const postProcessDocument = (doc: Record<string, unknown>, fields: FlattenedFiel
   for (const [key, value] of Object.entries(doc)) {
     // Handle arrays of polymorphic relationships
     if (Array.isArray(value)) {
-      // Filter out null/invalid polymorphic items and transform valid ones
-      const processedArray = []
-      for (let i = 0; i < value.length; i++) {
-        const item = value[i]
-        if (typeof item === 'object' && item !== null && 'relationTo' in item) {
-          const typedItem = item as Record<string, unknown>
+      // Check if this array contains polymorphic relationship objects
+      const hasPolymorphicItems = value.some(
+        (item) => typeof item === 'object' && item !== null && 'relationTo' in item,
+      )
 
-          // Skip if both relationTo and value/id are null/empty
-          if (!typedItem.relationTo || (!typedItem.id && !typedItem.value)) {
-            continue
+      if (hasPolymorphicItems) {
+        // Filter out null/invalid polymorphic items and transform valid ones
+        const processedArray = []
+        for (let i = 0; i < value.length; i++) {
+          const item = value[i]
+          if (typeof item === 'object' && item !== null && 'relationTo' in item) {
+            const typedItem = item as Record<string, unknown>
+
+            // Skip if both relationTo and value/id are null/empty
+            if (!typedItem.relationTo || (!typedItem.id && !typedItem.value)) {
+              continue
+            }
+
+            // Transform from {relationTo: 'collection', id: '123'} to {relationTo: 'collection', value: '123'}
+            if ('id' in typedItem) {
+              typedItem.value = typedItem.id
+              delete typedItem.id
+            }
+
+            processedArray.push(typedItem)
+          } else if (item !== null && item !== undefined) {
+            processedArray.push(item)
           }
+        }
 
-          // Transform from {relationTo: 'collection', id: '123'} to {relationTo: 'collection', value: '123'}
-          if ('id' in typedItem) {
-            typedItem.value = typedItem.id
-            delete typedItem.id
-          }
-
-          processedArray.push(typedItem)
-        } else if (item !== null && item !== undefined) {
-          processedArray.push(item)
+        // Update the array with filtered results
+        if (value.length !== processedArray.length) {
+          doc[key] = processedArray.length > 0 ? processedArray : []
         }
       }
-
-      // Update the array with filtered results
-      if (value.length !== processedArray.length) {
-        doc[key] = processedArray.length > 0 ? processedArray : []
-      }
+      // For non-polymorphic arrays, preserve null placeholders for sparse arrays
     }
     // Handle single polymorphic relationships
     else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
