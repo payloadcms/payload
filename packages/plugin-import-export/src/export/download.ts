@@ -2,6 +2,8 @@ import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
+import type { MockExportCollectionData } from '../types.js'
+
 import { createExport } from './createExport.js'
 
 export const download = async (req: PayloadRequest, debug = false) => {
@@ -15,13 +17,15 @@ export const download = async (req: PayloadRequest, debug = false) => {
       throw new APIError('Request data is required.')
     }
 
-    const { collectionSlug } = body.data || {}
+    const data = body.data as MockExportCollectionData
+    const { collectionSlug } = data || {}
 
     req.payload.logger.info(`Download request received ${collectionSlug}`)
 
     const res = await createExport({
+      debug,
       download: true,
-      input: { ...body.data, debug },
+      input: { ...data },
       req,
       user: req.user,
     })

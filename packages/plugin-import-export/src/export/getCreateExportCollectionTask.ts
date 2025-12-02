@@ -1,7 +1,6 @@
 import type { Config, PayloadRequest, TaskConfig, TypedUser } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
-import type { Export } from './createExport.js'
+import type { ExportJobInputData, ImportExportPluginConfig } from '../types.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -11,16 +10,12 @@ import { getFields } from './getFields.js'
  * When exports are queued as jobs, the user must be serialized as an ID string or number
  * along with the collection name so it can be rehydrated when the job runs.
  */
-export type ExportJobInput = {
-  user: number | string
-  userCollection: string
-} & Export
 
 export const getCreateCollectionExportTask = (
   config: Config,
   pluginConfig?: ImportExportPluginConfig,
 ): TaskConfig<{
-  input: ExportJobInput
+  input: ExportJobInputData
   output: object
 }> => {
   const inputSchema = getFields(config, pluginConfig).concat(
@@ -40,7 +35,7 @@ export const getCreateCollectionExportTask = (
 
   return {
     slug: 'createCollectionExport',
-    handler: async ({ input, req }: { input: ExportJobInput; req: PayloadRequest }) => {
+    handler: async ({ input, req }: { input: ExportJobInputData; req: PayloadRequest }) => {
       let user: TypedUser | undefined
 
       if (input.userCollection && input.user) {

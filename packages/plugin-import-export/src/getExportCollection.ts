@@ -5,7 +5,12 @@ import type {
   Config,
 } from 'payload'
 
-import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
+import type {
+  CollectionOverride,
+  ExportJobInputData,
+  ImportExportPluginConfig,
+  MockExportCollectionData,
+} from './types.js'
 
 import { createExport } from './export/createExport.js'
 import { download } from './export/download.js'
@@ -74,7 +79,12 @@ export const getExportCollection = ({
       }
       const { user } = req
       const debug = pluginConfig.debug
-      await createExport({ input: { ...args.data, debug }, req, user })
+      await createExport({
+        debug,
+        input: { ...(args.data as MockExportCollectionData) },
+        req,
+        user,
+      })
     })
   } else {
     afterChange.push(async ({ doc, operation, req }) => {
@@ -82,7 +92,7 @@ export const getExportCollection = ({
         return
       }
 
-      const input = {
+      const input: ExportJobInputData = {
         ...doc,
         exportsCollection: collection.slug,
         user: req?.user?.id || req?.user?.user?.id,

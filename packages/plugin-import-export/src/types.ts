@@ -77,3 +77,44 @@ export type ToCSVFunction = (args: {
    */
   value: unknown
 }) => unknown
+
+export type MockExportCollectionData = {
+  collectionSlug: string
+  createdAt: string
+  drafts?: ('no' | 'yes') | null
+  fields?: null | string[]
+  filename?: null | string
+  filesize?: null | number
+  focalX?: null | number
+  focalY?: null | number
+  format?: ('csv' | 'json') | null
+  height?: null | number
+  id: string
+  limit?: null | number
+  locale?: ('all' | 'de' | 'en' | 'es') | null
+  mimeType?: null | string
+  name?: null | string
+  page?: null | number
+  selectionToUse?: ('all' | 'currentFilters' | 'currentSelection') | null
+  sort?: null | string
+  sortOrder?: ('asc' | 'desc') | null
+  thumbnailURL?: null | string
+  updatedAt: string
+  url?: null | string
+  where?:
+    | {
+        [k: string]: unknown
+      }
+    | boolean
+    | null
+    | number
+    | string
+    | unknown[]
+  width?: null | number
+}
+
+export type ExportJobInputData = {
+  exportsCollection: string
+  user?: null | number | string
+  userCollection: string
+} & MockExportCollectionData

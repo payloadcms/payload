@@ -1,9 +1,11 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, TypedUser, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
+
+import type { MockExportCollectionData } from '../types.js'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
@@ -12,33 +14,23 @@ import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
-export type Export = {
-  collectionSlug: string
-  /**
-   * If true, enables debug logging
-   */
-  debug?: boolean
-  drafts?: 'no' | 'yes'
-  exportsCollection: string
-  fields?: string[]
-  format: 'csv' | 'json'
-  globals?: string[]
-  id: number | string
-  limit?: number
-  locale?: string
-  name: string
-  page?: number
-  slug: string
-  sort: Sort
-  where?: Where
-}
-
 export type CreateExportArgs = {
+  debug?: boolean
   /**
    * If true, stream the file instead of saving it
    */
   download?: boolean
-  input: Export
+  input: (
+    | {
+        exportsCollection?: never
+        id?: never
+      }
+    | {
+        exportsCollection?: string
+        id: number | string
+      }
+  ) &
+    Omit<MockExportCollectionData, 'id'>
   req: PayloadRequest
   user?: null | TypedUser
 }
@@ -46,14 +38,14 @@ export type CreateExportArgs = {
 export const createExport = async (args: CreateExportArgs) => {
   const {
     download,
+    debug = false,
     input: {
       id,
       name: nameArg,
       collectionSlug,
-      debug = false,
       drafts,
       exportsCollection,
-      fields,
+      fields: inputFields,
       format,
       locale: localeInput,
       sort,
@@ -65,6 +57,8 @@ export const createExport = async (args: CreateExportArgs) => {
     req,
     user,
   } = args
+
+  const fields = inputFields || undefined
 
   if (!user) {
     throw new APIError('User authentication is required to create exports')
@@ -119,9 +113,12 @@ export const createExport = async (args: CreateExportArgs) => {
     overrideAccess: false,
     page: 0, // The page will be incremented manually in the loop
     select,
-    sort,
+    sort: sort || undefined,
     user,
-    where,
+    where: undefined as undefined | Where,
+  }
+  if (where) {
+    findArgs.where = where as Where
   }
 
   if (debug) {
@@ -421,6 +418,9 @@ export const createExport = async (args: CreateExportArgs) => {
       size: buffer.length,
     }
   } else {
+    if (!exportsCollection) {
+      throw new APIError('exportsCollection is required when updating an existing export')
+    }
     if (debug) {
       req.payload.logger.debug(`Updating existing export with id: ${id}`)
     }
