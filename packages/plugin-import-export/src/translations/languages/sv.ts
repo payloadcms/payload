@@ -24,7 +24,7 @@ export const svTranslations: PluginDefaultTranslationsObject = {
     'field-selectionToUse-label': 'Val att använda',
     'field-sort-label': 'Sortera efter',
     'field-sort-order-label': 'Sortera i ordning',
-    'field-status-label': undefined,
+    'field-status-label': 'Status',
     'field-summary-label': 'Importöversikt',
     importDocumentLabel: 'Importera {{label}}',
     importResults: 'Importresultat',

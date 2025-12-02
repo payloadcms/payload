@@ -3,10 +3,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const zhTwTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: '所有語言地區',
-    collectionRequired: undefined,
+    collectionRequired: '需要的集合以顯示預覽',
     exportDocumentLabel: '匯出 {{label}}',
     exportOptions: '匯出選項',
-    'field-collectionSlug-label': undefined,
+    'field-collectionSlug-label': '收藏集',
     'field-depth-label': '層級深度',
     'field-drafts-label': '包含草稿',
     'field-fields-label': '欄位',
@@ -14,7 +14,7 @@ export const zhTwTranslations: PluginDefaultTranslationsObject = {
     'field-importMode-create-label': '創建新的文件',
     'field-importMode-label': '導入模式',
     'field-importMode-update-label': '更新現有的文件',
-    'field-importMode-upsert-label': undefined,
+    'field-importMode-upsert-label': '創建或更新文件',
     'field-limit-label': '筆數上限',
     'field-locale-label': '語言地區',
     'field-matchField-description': '用於匹配現有文檔的字段',

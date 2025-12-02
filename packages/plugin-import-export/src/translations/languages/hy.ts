@@ -30,14 +30,15 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     importDocumentLabel: 'Ներմուծել {{label}}',
     importResults: 'Ներմուծման արդյունքներ',
     matchBy: 'Համընկնեցվել է',
-    mode: undefined,
-    noDataToPreview: undefined,
+    mode: 'Ռեժիմ',
+    noDataToPreview:
+      'Հավելվածի իմաստը պետք է պահպանեք Payload-ի կոնտեքստում։ Ահա Payload-ի որոշ պահանջական տերմիններ',
     'selectionToUse-allDocuments': 'Օգտագործեք բոլոր փաստաթղթերը',
     'selectionToUse-currentFilters': 'Օգտագործեք ընթացիկ ֆիլտրերը',
     'selectionToUse-currentSelection': 'Օգտագործել ընթացիկ ընտրությունը',
-    startImport: undefined,
+    startImport: 'Սկսեք ներմուծումը',
     totalDocumentsCount: '{{count}} ընդհանուր փաստաթուղթեր',
-    uploadFileToSeePreview: undefined,
+    uploadFileToSeePreview: 'Վերբեռնեք ֆայլը նախադիտումը դիտելու համար:',
   },
 }
 

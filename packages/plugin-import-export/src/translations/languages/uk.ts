@@ -11,7 +11,7 @@ export const ukTranslations: PluginDefaultTranslationsObject = {
     'field-drafts-label': 'Включити чернетки',
     'field-fields-label': 'Поля',
     'field-format-label': 'Формат експорту',
-    'field-importMode-create-label': undefined,
+    'field-importMode-create-label': 'Створити нові документи',
     'field-importMode-label': 'Режим Імпорту',
     'field-importMode-update-label': 'Оновити існуючі документи',
     'field-importMode-upsert-label': 'Створіть або оновіть документи',

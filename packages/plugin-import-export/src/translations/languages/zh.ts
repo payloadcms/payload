@@ -36,7 +36,7 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
     'selectionToUse-currentSelection': '使用当前选择',
     startImport: '开始导入',
     totalDocumentsCount: '总共{{count}}份文件',
-    uploadFileToSeePreview: undefined,
+    uploadFileToSeePreview: '上传文件以查看预览',
   },
 }
 

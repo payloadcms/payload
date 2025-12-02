@@ -3,15 +3,15 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const itTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Tutte le località',
-    collectionRequired: undefined,
+    collectionRequired: "È necessaria una Collection per mostrare l'anteprima",
     exportDocumentLabel: 'Esporta {{label}}',
     exportOptions: 'Opzioni di Esportazione',
-    'field-collectionSlug-label': undefined,
+    'field-collectionSlug-label': 'Collezione',
     'field-depth-label': 'Profondità',
     'field-drafts-label': 'Includi bozze',
     'field-fields-label': 'Campi',
     'field-format-label': 'Formato di Esportazione',
-    'field-importMode-create-label': undefined,
+    'field-importMode-create-label': 'Crea nuovi documenti',
     'field-importMode-label': 'Modalità di Importazione',
     'field-importMode-update-label': 'Aggiorna i documenti esistenti',
     'field-importMode-upsert-label': 'Crea o aggiorna documenti',

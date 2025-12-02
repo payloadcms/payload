@@ -26,7 +26,7 @@ export const faTranslations: PluginDefaultTranslationsObject = {
     'field-sort-order-label': 'ترتیب',
     'field-status-label': 'وضعیت',
     'field-summary-label': 'خلاصه واردات',
-    importDocumentLabel: undefined,
+    importDocumentLabel: 'وارد کردن {{label}}',
     importResults: 'نتایج واردات',
     matchBy: 'همخوانی توسط',
     mode: 'حالت',

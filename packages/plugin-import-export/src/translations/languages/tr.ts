@@ -3,15 +3,15 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const trTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Tüm yerler',
-    collectionRequired: undefined,
+    collectionRequired: 'Önizlemeyi göstermek için Koleksiyon gereklidir.',
     exportDocumentLabel: '{{label}} dışa aktar',
     exportOptions: 'İhracat Seçenekleri',
-    'field-collectionSlug-label': undefined,
+    'field-collectionSlug-label': 'Koleksiyon',
     'field-depth-label': 'Derinlik',
     'field-drafts-label': 'Taslakları dahil et',
     'field-fields-label': 'Alanlar',
     'field-format-label': 'İhracat Formatı',
-    'field-importMode-create-label': undefined,
+    'field-importMode-create-label': 'Yeni belgeler oluşturun',
     'field-importMode-label': 'İçe Aktarma Modu',
     'field-importMode-update-label': 'Mevcut belgeleri güncelleştirin',
     'field-importMode-upsert-label': 'Belgeleri oluşturun veya güncelleyin',
