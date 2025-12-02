@@ -57,7 +57,7 @@ export const getVersions = async ({
   const versionsConfig = entityConfig?.versions
   const hasLocalizedFields = traverseForLocalizedFields(entityConfig.fields)
   const localizedDraftsEnabled =
-    entityConfig.versions.drafts !== false &&
+    entityConfig.versions?.drafts !== false &&
     typeof payload.config.localization === 'object' &&
     hasLocalizedFields
 
