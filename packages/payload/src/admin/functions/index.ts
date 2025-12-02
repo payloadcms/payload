@@ -149,3 +149,27 @@ export type GetFolderResultsComponentAndDataArgs = {
    */
   sort: FolderSortKeys
 }
+
+export type BuildCollectionTreeViewResult = {
+  View: React.ReactNode
+}
+
+export type GetTreeViewResultsComponentAndDataArgs = {
+  /**
+   * The slug of the collection to get tree view data for.
+   * i.e. 'posts'
+   */
+  collectionSlug: CollectionSlug
+  /**
+   * An array of item IDs that are currently expanded.
+   * This is used to determine which items to fetch from the database.
+   * i.e. ['123', '456']
+   */
+  expandedItemIDs?: (number | string)[]
+  // search?: string
+  req: PayloadRequest
+  /**
+   * The sort order for the results.
+   */
+  sort: any
+}

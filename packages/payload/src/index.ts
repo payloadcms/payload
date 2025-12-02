@@ -1641,8 +1641,8 @@ export type {
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
-export { findOneOperation } from './globals/operations/findOne.js'
 
+export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
@@ -1682,7 +1682,6 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
-
 export type {
   BaseJob,
   JobLog,
@@ -1693,15 +1692,17 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
+export { getTreeViewData } from './treeView/utils/getTreeViewData.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'

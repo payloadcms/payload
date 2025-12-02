@@ -54,6 +54,8 @@ export type {
 export { buildFolderWhereConstraints } from '../folders/utils/buildFolderWhereConstraints.js'
 
 export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
+export type { TreeViewItem, TreeViewItemKey } from '../treeView/types.js'
+
 export { validOperators, validOperatorSet } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 

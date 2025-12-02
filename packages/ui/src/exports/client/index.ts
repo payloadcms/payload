@@ -138,6 +138,9 @@ export { FolderTypeField } from '../../elements/FolderView/FolderTypeField/index
 export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 
+// tree view elements
+export { TreeViewTable } from '../../elements/TreeView/TreeViewTable/index.js'
+
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
 export { RenderTitle } from '../../elements/RenderTitle/index.js'
@@ -366,6 +369,7 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
+export { DefaultCollectionTreeView } from '../../views/CollectionTreeView/index.js'
 export { DefaultBrowseByFolderView } from '../../views/BrowseByFolder/index.js'
 
 export type {

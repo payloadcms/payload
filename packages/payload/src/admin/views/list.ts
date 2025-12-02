@@ -8,7 +8,7 @@ import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
-import type { Data, ViewTypes } from '../types.js'
+import type { Data, ListViewTypes, ViewTypes } from '../types.js'
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
@@ -59,7 +59,7 @@ export type ListViewClientProps = {
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
-  viewType: ViewTypes
+  viewType: ListViewTypes
 } & ListViewSlots
 
 export type ListViewSlotSharedClientProps = {

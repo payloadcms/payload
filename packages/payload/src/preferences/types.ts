@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType } from '../index.js'
+import type { DefaultDocumentIDType, ListViewTypes, ViewTypes } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
@@ -39,7 +39,7 @@ export type CollectionPreferences = {
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
   limit?: number
-  listViewType?: 'folders' | 'list'
+  listViewType?: Extract<ListViewTypes, 'collection-folders' | 'collection-tree-view' | 'folders'>
   preset?: DefaultDocumentIDType
   sort?: string
 }

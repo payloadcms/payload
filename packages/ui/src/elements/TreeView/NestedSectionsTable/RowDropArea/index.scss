@@ -1,0 +1,54 @@
+.row-drop-area {
+  min-width: 100%;
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 50%;
+  z-index: -1;
+
+  &--on-middle {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  &.is-dragging.is-over {
+    z-index: 1;
+  }
+
+  &--on-split-bottom,
+  &--on-split-top {
+    min-width: unset;
+
+    &.is-dragging.is-over {
+      .row-drop-area__split-marker {
+        opacity: 1;
+      }
+    }
+  }
+
+  &--on-split-bottom {
+    bottom: 0;
+    transform: translateY(50%);
+  }
+
+  &--on-split-top {
+    top: 0;
+    transform: translateY(-50%);
+  }
+}
+
+.row-drop-area__split-marker {
+  height: 4px;
+  z-index: 100;
+  opacity: 0;
+  background-color: var(--theme-success-400);
+  border-radius: var(--style-radius-l);
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  max-width: 100%;
+  transition:
+    opacity 0.1s ease-in-out,
+    left 0.1s ease-in-out;
+}
