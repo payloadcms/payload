@@ -21,7 +21,6 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { slugFieldsSlug } from '../../slugs.js'
-import { slugFieldDoc } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -35,6 +34,20 @@ let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
+
+const unlockSlug = async (fieldName: string = 'slug') => {
+  const fieldID = `#field-${fieldName}`
+  const unlockButton = page.locator(`#field-${fieldName}-lock`)
+  await unlockButton.click()
+  const slugField = page.locator(fieldID)
+  await expect(slugField).toBeEnabled()
+}
+
+const regenerateSlug = async (fieldName: string = 'slug') => {
+  await unlockSlug(fieldName)
+  const generateButton = page.locator(`#field-${fieldName}-generate`)
+  await generateButton.click()
+}
 
 describe('SlugField', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -52,6 +65,7 @@ describe('SlugField', () => {
 
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
@@ -62,19 +76,32 @@ describe('SlugField', () => {
     if (client) {
       await client.logout()
     }
+
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should generate slug for title field', async () => {
+  test('should generate slug for title field on save', async () => {
     await page.goto(url.create)
     await page.locator('#field-title').fill('Test title')
 
     await saveDocAndAssert(page)
 
     await expect(page.locator('#field-slug')).toHaveValue('test-title')
+  })
+
+  test('should generate slug on demand from client side', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('Test title client side')
+
+    await saveDocAndAssert(page)
+
+    await page.locator('#field-title').fill('This should have regenerated')
+    await regenerateSlug('slug')
+
+    await expect(page.locator('#field-slug')).toHaveValue('this-should-have-regenerated')
   })
 
   test('custom values should be kept', async () => {
@@ -87,15 +114,30 @@ describe('SlugField', () => {
     await expect(slugField).toHaveValue('test-title-with-custom-slug')
     await expect(slugField).toBeDisabled()
 
-    const unlockButton = page.locator('#field-generateSlug + div .lock-button')
-    await unlockButton.click()
-    await expect(slugField).toBeEnabled()
+    await unlockSlug('slug')
 
     await slugField.fill('custom-slug-value')
 
     await saveDocAndAssert(page)
 
     await expect(slugField).toHaveValue('custom-slug-value')
+  })
+
+  test('custom slugify functions are supported', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('Test Custom Slugify')
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('#field-customSlugify')).toHaveValue('TEST CUSTOM SLUGIFY')
+
+    // Ensure it can be regenerated from the client-side
+    const titleField = page.locator('#field-title')
+    await titleField.fill('Another Custom Slugify')
+
+    await regenerateSlug('customSlugify')
+
+    await expect(page.locator('#field-customSlugify')).toHaveValue('ANOTHER CUSTOM SLUGIFY')
   })
 
   describe('localized slugs', () => {
