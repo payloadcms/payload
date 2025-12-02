@@ -31,10 +31,10 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
     (await getItemsFromConfig(defaultLayout, req, widgets))
 
   const serverLayout: ServerLayout = layout.map((layoutItem) => {
-    const widgetSlug = layoutItem.i.slice(0, layoutItem.i.lastIndexOf('-'))
+    const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
     return {
       component: RenderServerComponent({
-        Component: widgets.find((w) => w.slug === widgetSlug)?.ComponentPath,
+        Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
         importMap,
         serverProps: {
           req,
@@ -87,12 +87,12 @@ async function getItemsFromConfig(
   }
 
   return widgetInstances.map((widgetInstance, index) => {
-    const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
+    const widget = widgets.find((widget) => widget.slug === widgetInstance.widgetSlug)
     return {
-      i: `${widgetInstance.widgetSlug}-${index}`,
-      maxW: widget?.maxWidth ?? 'full',
-      minW: widget?.minWidth ?? 'x-small',
-      w: widgetInstance.width || 'x-small',
+      id: `${widgetInstance.widgetSlug}-${index}`,
+      maxWidth: widget?.maxWidth ?? 'full',
+      minWidth: widget?.minWidth ?? 'x-small',
+      width: widgetInstance.width || 'x-small',
     }
   })
 }

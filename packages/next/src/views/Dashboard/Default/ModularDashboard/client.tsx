@@ -13,10 +13,10 @@ import { closestInXAxis } from './utils/collisionDetection.js'
 import { useDashboardSensors } from './utils/sensors.js'
 
 export type WidgetItem = {
-  i: string
-  maxW: WidgetWidth
-  minW: WidgetWidth
-  w: WidgetWidth
+  id: string
+  maxWidth: WidgetWidth
+  minWidth: WidgetWidth
+  width: WidgetWidth
 }
 
 export type WidgetInstanceClient = {
@@ -90,8 +90,10 @@ export function ModularDashboardClient({
             return
           }
 
-          const moveFromIndex = currentLayout?.findIndex((w) => w.item.i === event.active.id)
-          let moveToIndex = currentLayout?.findIndex((w) => w.item.i === slug)
+          const moveFromIndex = currentLayout?.findIndex(
+            (widget) => widget.item.id === event.active.id,
+          )
+          let moveToIndex = currentLayout?.findIndex((widget) => widget.item.id === slug)
           if (moveFromIndex < moveToIndex) {
             moveToIndex--
           }
@@ -125,15 +127,15 @@ export function ModularDashboardClient({
             </div>
           )}
           {currentLayout?.map((widget, _index) => (
-            <React.Fragment key={widget.item.i}>
+            <React.Fragment key={widget.item.id}>
               <DraggableItem
                 disabled={!isEditing}
-                id={widget.item.i}
+                id={widget.item.id}
                 style={{
-                  width: `${WIDTH_TO_PERCENTAGE[widget.item.w]}%`,
+                  width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
                   padding: '6px',
                 }}
-                width={widget.item.w}
+                width={widget.item.width}
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
                   <div className="widget-content">{widget.component}</div>
@@ -143,15 +145,15 @@ export function ModularDashboardClient({
                       onPointerDown={(e) => e.stopPropagation()}
                     >
                       <WidgetWidthDropdown
-                        currentWidth={widget.item.w}
-                        maxW={widget.item.maxW}
-                        minW={widget.item.minW}
-                        onResize={(width) => resizeWidget(widget.item.i, width)}
+                        currentWidth={widget.item.width}
+                        maxWidth={widget.item.maxWidth}
+                        minWidth={widget.item.minWidth}
+                        onResize={(width) => resizeWidget(widget.item.id, width)}
                       />
                       <button
                         className="widget-wrapper__delete-btn"
-                        onClick={() => deleteWidget(widget.item.i)}
-                        title={`Delete widget ${widget.item.i}`}
+                        onClick={() => deleteWidget(widget.item.id)}
+                        title={`Delete widget ${widget.item.id}`}
                         type="button"
                       >
                         <XIcon />
@@ -173,7 +175,9 @@ export function ModularDashboardClient({
           >
             {activeDragId
               ? (() => {
-                  const draggedWidget = currentLayout?.find((w) => w.item.i === activeDragId)
+                  const draggedWidget = currentLayout?.find(
+                    (widget) => widget.item.id === activeDragId,
+                  )
                   return draggedWidget ? (
                     <div
                       style={{
@@ -207,19 +211,19 @@ export function ModularDashboardClient({
 
 function WidgetWidthDropdown({
   currentWidth,
-  maxW,
-  minW,
+  maxWidth,
+  minWidth,
   onResize,
 }: {
   currentWidth: WidgetWidth
-  maxW: WidgetWidth
-  minW: WidgetWidth
+  maxWidth: WidgetWidth
+  minWidth: WidgetWidth
   onResize: (width: WidgetWidth) => void
 }) {
-  // Filter options based on minW and maxW
+  // Filter options based on minWidth and maxWidth
   const validOptions = useMemo(() => {
-    const minPercentage = WIDTH_TO_PERCENTAGE[minW]
-    const maxPercentage = WIDTH_TO_PERCENTAGE[maxW]
+    const minPercentage = WIDTH_TO_PERCENTAGE[minWidth]
+    const maxPercentage = WIDTH_TO_PERCENTAGE[maxWidth]
 
     return Object.entries(WIDTH_TO_PERCENTAGE)
       .map(([key, value]) => ({
@@ -227,7 +231,7 @@ function WidgetWidthDropdown({
         percentage: value,
       }))
       .filter((option) => option.percentage >= minPercentage && option.percentage <= maxPercentage)
-  }, [minW, maxW])
+  }, [minWidth, maxWidth])
 
   const isDisabled = validOptions.length <= 1
 

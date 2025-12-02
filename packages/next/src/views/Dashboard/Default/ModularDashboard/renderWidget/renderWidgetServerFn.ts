@@ -1,4 +1,4 @@
-import type { ServerFunction, Widget, WidgetServerProps } from 'payload'
+import type { ServerFunction, WidgetServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
@@ -7,7 +7,8 @@ export type RenderWidgetServerFnArgs = {
   /**
    * Instance-specific data for this widget
    */
-  widgetData?: Record<string, unknown>
+  // TODO
+  // widgetData?: Record<string, unknown>
   /**
    * The slug of the widget to render
    */
@@ -25,7 +26,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ req, widgetData, widgetSlug }) => {
+> = ({ req, /* widgetData, */ widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -34,7 +35,7 @@ export const renderWidgetHandler: ServerFunction<
   const { importMap } = req.payload
 
   // Find the widget configuration
-  const widgetConfig = widgets.find((w: Widget) => w.slug === widgetSlug)
+  const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
 
   if (!widgetConfig) {
     return {
@@ -59,7 +60,7 @@ export const renderWidgetHandler: ServerFunction<
     // Create server props for the widget
     const serverProps: WidgetServerProps = {
       req,
-      widgetData: widgetData || {},
+      // TODO: widgetData: widgetData || {},
       widgetSlug,
     }
 

@@ -63,7 +63,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       }
 
       const widgetId = `${widgetSlug}-${Date.now()}`
-      const widget = widgets.find((w) => w.slug === widgetSlug)
+      const widget = widgets.find((widget) => widget.slug === widgetSlug)
 
       // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
@@ -72,10 +72,10 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
           // TODO: widgetData can be added here for custom props
         }),
         item: {
-          i: widgetId,
-          maxW: widget?.maxWidth ?? 'full',
-          minW: widget?.minWidth ?? 'x-small',
-          w: widget?.minWidth ?? 'x-small',
+          id: widgetId,
+          maxWidth: widget?.maxWidth ?? 'full',
+          minWidth: widget?.minWidth ?? 'x-small',
+          width: widget?.minWidth ?? 'x-small',
         },
       }
 
@@ -89,7 +89,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       if (!isEditing) {
         return
       }
-      setCurrentLayout((prev) => prev.filter((item) => item.item.i !== widgetId))
+      setCurrentLayout((prev) => prev.filter((item) => item.item.id !== widgetId))
     },
     [isEditing],
   )
@@ -101,13 +101,13 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       }
       setCurrentLayout((prev) =>
         prev.map((item) =>
-          item.item.i === widgetId
+          item.item.id === widgetId
             ? {
                 ...item,
                 item: {
                   ...item.item,
-                  w: newWidth,
-                },
+                  width: newWidth,
+                } satisfies WidgetItem,
               }
             : item,
         ),

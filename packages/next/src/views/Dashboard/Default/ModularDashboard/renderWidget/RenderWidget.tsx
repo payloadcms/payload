@@ -15,12 +15,12 @@ export const RenderWidget: React.FC<{
   /**
    * Instance-specific data for this widget
    */
-  widgetData?: Record<string, unknown>
+  // TODO: widgetData?: Record<string, unknown>
   /**
    * Unique ID for this widget instance (format: "slug-timestamp")
    */
   widgetId: string
-}> = ({ widgetData, widgetId }) => {
+}> = ({ /* widgetData, */ widgetId }) => {
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const { serverFunction } = useServerFunctions()
 
@@ -32,7 +32,7 @@ export const RenderWidget: React.FC<{
         const result = (await serverFunction({
           name: 'render-widget',
           args: {
-            widgetData,
+            // widgetData,
             widgetSlug,
           } as RenderWidgetServerFnArgs,
         })) as RenderWidgetServerFnReturnType
@@ -61,7 +61,7 @@ export const RenderWidget: React.FC<{
       }
     }
     void render()
-  }, [serverFunction, widgetId, widgetData])
+  }, [serverFunction, widgetId /* widgetData, */])
 
   const mounted = useRef(false)
 
