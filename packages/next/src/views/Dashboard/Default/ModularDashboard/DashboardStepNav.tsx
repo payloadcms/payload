@@ -32,7 +32,6 @@ export function DashboardStepNav({
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
 
-  // Set step nav directly with minimal dependencies to avoid infinite loops
   useEffect(() => {
     setStepNav([
       {
@@ -48,7 +47,6 @@ export function DashboardStepNav({
         ),
       },
     ])
-    // TODO: useEffectEvent
   }, [isEditing, drawerSlug, cancel, resetLayout, saveLayout, setIsEditing, setStepNav])
 
   return (
