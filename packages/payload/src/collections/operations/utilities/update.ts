@@ -305,7 +305,16 @@ export const updateDocument = async <
       const currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         req,
-        where: { id: { equals: id } },
+        where: {
+          and: [
+            { id: { equals: id } },
+            {
+              _status: {
+                equals: 'published',
+              },
+            },
+          ],
+        },
       })
 
       result = mergeLocalizedData({

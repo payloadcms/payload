@@ -347,6 +347,7 @@ export const deTranslations: DefaultTranslationsObject = {
     loading: 'Lädt',
     locale: 'Sprache',
     locales: 'Sprachen',
+    lock: 'Sperren',
     menu: 'Menü',
     moreOptions: 'Mehr Optionen',
     move: 'Bewegen',
@@ -438,6 +439,7 @@ export const deTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unlock: 'Entsperren',
     unsavedChanges:
       'Du hast ungespeicherte Änderungen. Speichern oder verwerfe sie, bevor du fortfahrst.',
     unsavedChangesDuplicate:

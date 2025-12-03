@@ -71,7 +71,6 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * @default undefined
    */
   publishAllLocales?: boolean
-
   /**
    * Publish the document / documents with a specific locale.
    */

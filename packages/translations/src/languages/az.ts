@@ -340,6 +340,7 @@ export const azTranslations: DefaultTranslationsObject = {
     loading: 'Yüklənir',
     locale: 'Lokal',
     locales: 'Dillər',
+    lock: 'Kilid',
     menu: 'Menyu',
     moreOptions: 'Daha çox seçimlər',
     move: 'Hərəkət et',
@@ -430,6 +431,7 @@ export const azTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} zibilə köçürüldü.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unlock: 'Açın',
     unsavedChanges:
       'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',
     unsavedChangesDuplicate:
