@@ -83,6 +83,7 @@ export const QueryPresetBar: React.FC<{
       await refineListData(
         {
           columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
+          groupBy: preset.groupBy || '',
           preset: preset.id,
           where: preset.where,
         },
@@ -96,6 +97,7 @@ export const QueryPresetBar: React.FC<{
     await refineListData(
       {
         columns: [],
+        groupBy: '',
         preset: '',
         where: {},
       },
@@ -141,6 +143,7 @@ export const QueryPresetBar: React.FC<{
       await fetch(`${apiRoute}/payload-query-presets/${activePreset.id}`, {
         body: JSON.stringify({
           columns: transformColumnsToPreferences(query.columns),
+          groupBy: query.groupBy,
           where: query.where,
         }),
         credentials: 'include',
@@ -178,6 +181,7 @@ export const QueryPresetBar: React.FC<{
     apiRoute,
     activePreset?.id,
     query.columns,
+    query.groupBy,
     query.where,
     t,
     presetConfig?.labels?.singular,
@@ -216,6 +220,7 @@ export const QueryPresetBar: React.FC<{
                 await refineListData(
                   {
                     columns: transformColumnsToSearchParams(activePreset.columns),
+                    groupBy: activePreset.groupBy || '',
                     where: activePreset.where,
                   },
                   false,
@@ -263,6 +268,7 @@ export const QueryPresetBar: React.FC<{
       <CreateNewPresetDrawer
         initialData={{
           columns: transformColumnsToPreferences(query.columns),
+          groupBy: query.groupBy,
           relatedCollection: collectionSlug,
           where: query.where,
         }}
