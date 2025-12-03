@@ -164,8 +164,13 @@ export interface Post {
     insideNamedGroup?: string | null;
   };
   radioField: MyRadioOptions;
+  externalType?: CustomType;
   updatedAt: string;
   createdAt: string;
+}
+export interface CustomType {
+  externalField: string;
+  externalNumber?: number;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -298,6 +303,7 @@ export interface PostsSelect<T extends boolean = true> {
         insideNamedGroup?: T;
       };
   radioField?: T;
+  externalType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

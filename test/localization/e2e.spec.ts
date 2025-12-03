@@ -7,6 +7,7 @@ import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
@@ -38,6 +39,7 @@ import {
   arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedDraftsSlug,
   localizedPostsSlug,
   relationshipLocalizedSlug,
@@ -404,7 +406,7 @@ describe('Localization', () => {
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
       await expect(page.locator('#field-title')).toHaveValue(title)
       await changeLocale(page, defaultLocale)
     })
@@ -419,7 +421,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
 
       await expect(richTextField).toContainText(richTextContent)
     })
@@ -438,7 +440,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'English')
-      await runCopy(page)
+      await runCopy({ page, toLocale: defaultLocale })
 
       await expect(arrayField).toHaveValue(sampleText)
     })
@@ -465,7 +467,7 @@ describe('Localization', () => {
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await expect(overwriteCheckbox).not.toBeChecked()
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
 
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue('Spanish description')
@@ -482,7 +484,7 @@ describe('Localization', () => {
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await overwriteCheckbox.click()
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, defaultLocale)
     })
@@ -508,7 +510,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
-      await runCopy(page)
+      await runCopy({ page, toLocale: spanishLocale })
       await expect(page.locator('#field-title')).toHaveValue(title)
 
       const regexPattern = /locale=es/
@@ -516,7 +518,7 @@ describe('Localization', () => {
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Hungarian')
-      await runCopy(page)
+      await runCopy({ page, toLocale: hungarianLocale })
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
@@ -774,6 +776,21 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toHaveValue('Portuguese Title')
     })
   })
+
+  describe('A11y', () => {
+    test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.localizer'],
+        exclude: ['main'],
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+  })
 })
 
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
@@ -797,8 +814,11 @@ async function fillValues(data: Partial<LocalizedPost>) {
   }
 }
 
-async function runCopy(page) {
+async function runCopy({ page, toLocale }: { page: Page; toLocale: string }) {
   await page.locator('.copy-locale-data__sub-header button').click()
+
+  const regexPattern = new RegExp(`locale=${toLocale}`)
+  await expect(page).toHaveURL(regexPattern)
 }
 
 async function createAndSaveDoc(page, url, values) {

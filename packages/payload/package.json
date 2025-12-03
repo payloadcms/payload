@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.64.0",
+  "version": "3.65.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -44,6 +44,11 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
     },
     "./shared": {
       "import": "./src/exports/shared.ts",
@@ -149,6 +154,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
       },
       "./node": {
         "import": "./dist/exports/node.js",

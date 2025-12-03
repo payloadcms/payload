@@ -262,13 +262,15 @@ export const restoreVersionOperation = async <
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
     result._status = draftArg ? 'draft' : result._status
-    result = await req.payload.db.updateOne({
-      id: parentDocID,
-      collection: collectionConfig.slug,
-      data: result,
-      req,
-      select,
-    })
+    if (!draftArg) {
+      result = await req.payload.db.updateOne({
+        id: parentDocID,
+        collection: collectionConfig.slug,
+        data: result,
+        req,
+        select,
+      })
+    }
 
     // /////////////////////////////////////
     // Save restored doc as a new version

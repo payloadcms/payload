@@ -2,6 +2,7 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type {
   Block,
@@ -582,6 +583,7 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
+  SlugifyServerFunctionArgs,
 } from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
@@ -717,7 +719,10 @@ export type ClientFieldSchemaMap = Map<
 >
 
 export type DocumentEvent = {
+  doc?: TypeWithID
+  drawerSlug?: string
   entitySlug: string
   id?: number | string
+  operation: 'create' | 'update'
   updatedAt: string
 }

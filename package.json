@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.64.0",
+  "version": "3.65.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -136,6 +136,7 @@
     "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "15.4.7",
@@ -156,14 +157,15 @@
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "@types/shelljs": "0.8.15",
+    "axe-core": "4.11.0",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
     "copyfiles": "2.4.1",
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.31.5",
-    "drizzle-orm": "0.44.6",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",

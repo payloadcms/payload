@@ -2,6 +2,7 @@ import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
 import type { SanitizedConfig } from '../config/types.js'
+import type { TypedFallbackLocale } from '../index.js'
 import type { CustomPayloadRequestProperties, PayloadRequest } from '../types/index.js'
 
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
@@ -17,6 +18,7 @@ type Args = {
   params?: {
     collection: string
   }
+  payloadInstanceCacheKey?: string
   request: Request
 }
 
@@ -24,10 +26,15 @@ export const createPayloadRequest = async ({
   canSetHeaders,
   config: configPromise,
   params,
+  payloadInstanceCacheKey,
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise, cron: true })
+  const payload = await getPayload({
+    config: configPromise,
+    cron: true,
+    key: payloadInstanceCacheKey,
+  })
 
   const { config } = payload
   const localization = config.localization
@@ -62,10 +69,9 @@ export const createPayloadRequest = async ({
       })
     : {}
 
-  const fallbackFromRequest =
-    (query.fallbackLocale as string | string[]) ||
+  const fallbackFromRequest = (query.fallbackLocale ||
     searchParams.get('fallback-locale') ||
-    searchParams.get('fallbackLocale')
+    searchParams.get('fallbackLocale')) as TypedFallbackLocale
 
   let fallbackLocale = fallbackFromRequest
 

@@ -265,7 +265,7 @@ export class Main {
             break
           }
           case 'starter': {
-            const dbDetails = await selectDb(this.args, projectName)
+            const dbDetails = await selectDb(this.args, projectName, template)
 
             await createProject({
               cliArgs: this.args,

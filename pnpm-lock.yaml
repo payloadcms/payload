@@ -18,6 +18,9 @@ importers:
 
   .:
     devDependencies:
+      '@axe-core/playwright':
+        specifier: 4.11.0
+        version: 4.11.0(playwright-core@1.56.1)
       '@jest/globals':
         specifier: 29.7.0
         version: 29.7.0
@@ -78,6 +81,9 @@ importers:
       '@types/shelljs':
         specifier: 0.8.15
         version: 0.8.15
+      axe-core:
+        specifier: 4.11.0
+        version: 4.11.0
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -97,11 +103,11 @@ importers:
         specifier: 16.4.7
         version: 16.4.7
       drizzle-kit:
-        specifier: 0.31.5
-        version: 0.31.5
+        specifier: 0.31.7
+        version: 0.31.7
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -291,11 +297,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.31.5
-        version: 0.31.5
+        specifier: 0.31.7
+        version: 0.31.7
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -371,11 +377,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.31.5
-        version: 0.31.5
+        specifier: 0.31.7
+        version: 0.31.7
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -417,11 +423,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.31.5
-        version: 0.31.5
+        specifier: 0.31.7
+        version: 0.31.7
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -460,11 +466,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.31.5
-        version: 0.31.5
+        specifier: 0.31.7
+        version: 0.31.7
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -506,8 +512,8 @@ importers:
         specifier: 2.0.3
         version: 2.0.3
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -2499,11 +2505,11 @@ importers:
         specifier: 16.4.7
         version: 16.4.7
       drizzle-kit:
-        specifier: 0.31.5
-        version: 0.31.5
+        specifier: 0.31.7
+        version: 0.31.7
       drizzle-orm:
-        specifier: 0.44.6
-        version: 0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
+        specifier: 0.44.7
+        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3)
       escape-html:
         specifier: 1.0.3
         version: 1.0.3
@@ -3204,6 +3210,11 @@ packages:
   '@aws/lambda-invoke-store@0.0.1':
     resolution: {integrity: sha512-ORHRQ2tmvnBXc8t/X9Z8IcSbBA4xTLKuN873FopzklHMeqBst7YG0d+AX97inkvDX+NChYtSr+qGfcqGFaI8Zw==}
     engines: {node: '>=18.0.0'}
+
+  '@axe-core/playwright@4.11.0':
+    resolution: {integrity: sha512-70vBT/Ylqpm65RQz2iCG2o0JJCEG/WCNyefTr2xcOcr1CoSee60gNQYUMZZ7YukoKkFLv26I/jjlsvwwp532oQ==}
+    peerDependencies:
+      playwright-core: '>= 1.0.0'
 
   '@azure/abort-controller@1.1.0':
     resolution: {integrity: sha512-TrRLIoSQVzfAJX9H1JeFjzAoDGcoK1IYX1UImfceTZpsyYfWr09Ss1aHW1y5TrrR3iq6RZLBwJ3E24uwPhwahw==}
@@ -8799,6 +8810,10 @@ packages:
     resolution: {integrity: sha512-RE3mdQ7P3FRSe7eqCWoeQ/Z9QXrtniSjp1wUjt5nRC3WIpz5rSCve6o3fsZ2aCpJtrZjSZgjwXAoTO5k4tEI0w==}
     engines: {node: '>=4'}
 
+  axe-core@4.11.0:
+    resolution: {integrity: sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==}
+    engines: {node: '>=4'}
+
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
@@ -9635,12 +9650,12 @@ packages:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
-  drizzle-kit@0.31.5:
-    resolution: {integrity: sha512-+CHgPFzuoTQTt7cOYCV6MOw2w8vqEn/ap1yv4bpZOWL03u7rlVRQhUY0WYT3rHsgVTXwYQDZaSUJSQrMBUKuWg==}
+  drizzle-kit@0.31.7:
+    resolution: {integrity: sha512-hOzRGSdyKIU4FcTSFYGKdXEjFsncVwHZ43gY3WU5Bz9j5Iadp6Rh6hxLSQ1IWXpKLBKt/d5y1cpSPcV+FcoQ1A==}
     hasBin: true
 
-  drizzle-orm@0.44.6:
-    resolution: {integrity: sha512-uy6uarrrEOc9K1u5/uhBFJbdF5VJ5xQ/Yzbecw3eAYOunv5FDeYkR2m8iitocdHBOHbvorviKOW5GVw0U1j4LQ==}
+  drizzle-orm@0.44.7:
+    resolution: {integrity: sha512-quIpnYznjU9lHshEOAYLoZ9s3jweleHlZIAWR/jX9gAWNg/JhQ1wj0KGRf7/Zm+obRrYd9GjPVJg790QY9N5AQ==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -16604,6 +16619,11 @@ snapshots:
 
   '@aws/lambda-invoke-store@0.0.1': {}
 
+  '@axe-core/playwright@4.11.0(playwright-core@1.56.1)':
+    dependencies:
+      axe-core: 4.11.0
+      playwright-core: 1.56.1
+
   '@azure/abort-controller@1.1.0':
     dependencies:
       tslib: 2.8.1
@@ -23215,6 +23235,8 @@ snapshots:
 
   axe-core@4.10.2: {}
 
+  axe-core@4.11.0: {}
+
   axobject-query@4.1.0: {}
 
   b4a@1.6.7: {}
@@ -24057,7 +24079,7 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  drizzle-kit@0.31.5:
+  drizzle-kit@0.31.7:
     dependencies:
       '@drizzle-team/brocli': 0.10.2
       '@esbuild-kit/esm-loader': 2.6.5
@@ -24066,7 +24088,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3):
+  drizzle-orm@0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
       '@opentelemetry/api': 1.9.0
@@ -24077,7 +24099,7 @@ snapshots:
       gel: 2.0.1
       pg: 8.16.3
 
-  drizzle-orm@0.44.6(@libsql/client@0.14.0(bufferutil@4.0.8))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3):
+  drizzle-orm@0.44.7(@libsql/client@0.14.0(bufferutil@4.0.8))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(gel@2.0.1)(pg@8.16.3):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
       '@opentelemetry/api': 1.9.0

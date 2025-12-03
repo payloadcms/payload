@@ -742,6 +742,33 @@ describe('List View', () => {
       await expect(valueInput).toHaveValue('Test')
     })
 
+    test('should show all documents when equals filter value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      // Wait for filter to be applied
+      await page.waitForTimeout(500)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      const valueInput = whereBuilder.locator('.condition__value >> input')
+      await valueInput.clear()
+
+      // Wait for debounce
+      await page.waitForTimeout(500)
+
+      // Should now show all 2 posts again (not 0 posts)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
@@ -1589,12 +1616,12 @@ describe('List View', () => {
     test('should sort', async () => {
       await page.reload()
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'asc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'desc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'desc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
@@ -1611,7 +1638,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'asc',
       })
 
@@ -1625,7 +1651,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'desc',
       })
 
@@ -1649,7 +1674,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'asc',
       })
 
@@ -1663,7 +1687,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'desc',
       })
 

@@ -19,10 +19,6 @@ export const countVersions: CountVersions = async function countVersions(
     versions: true,
   })
 
-  const options: CountOptions = {
-    session: await getSession(this, req),
-  }
-
   let hasNearConstraint = false
 
   if (where) {
@@ -39,6 +35,10 @@ export const countVersions: CountVersions = async function countVersions(
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+
+  const options: CountOptions = {
+    session: await getSession(this, req),
+  }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding

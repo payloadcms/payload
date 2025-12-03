@@ -57,7 +57,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
         payload.logger.info('[payload-mcp] API Key is valid')
       }
 
-      return docs[0] as MCPAccessSettings
+      return docs[0] as unknown as MCPAccessSettings
     }
 
     const mcpAccessSettings = pluginOptions.overrideAuth

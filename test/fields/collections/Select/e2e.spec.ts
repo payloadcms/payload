@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -121,5 +123,52 @@ describe('Select', () => {
     await field.locator('input').fill('On')
     await expect(options.locator('text=One')).toBeVisible()
     await expect(options.locator('text=Two')).toBeHidden()
+  })
+
+  describe('A11y', () => {
+    test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+      const firstItem = page.locator('.cell-id a').nth(0)
+      await firstItem.click()
+
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Select fields have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.collection-edit__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })
