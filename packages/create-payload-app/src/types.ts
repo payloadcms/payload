@@ -1,5 +1,7 @@
 import type arg from 'arg'
 
+import type { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './lib/ast/types.js'
+
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
   '--branch': StringConstructor
@@ -68,7 +70,7 @@ interface Template {
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type DbType = 'd1-sqlite' | 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
+export type DbType = (typeof ALL_DATABASE_ADAPTERS)[number]
 
 export type DbDetails = {
   dbUri?: string
@@ -90,11 +92,4 @@ export type NextAppDetails = {
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
-export type StorageAdapterType =
-  | 'azureStorage'
-  | 'gcsStorage'
-  | 'localDisk'
-  | 'r2Storage'
-  | 's3Storage'
-  | 'uploadthingStorage'
-  | 'vercelBlobStorage'
+export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]

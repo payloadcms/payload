@@ -3,21 +3,10 @@ import globby from 'globby'
 import path from 'path'
 
 import type { DbType, StorageAdapterType } from '../types.js'
-import type { DatabaseAdapter, StorageAdapter } from './ast/types.js'
 
 import { warning } from '../utils/log.js'
 import { updatePackageJson } from './ast/package-json.js'
 import { configurePayloadConfig as configurePayloadConfigAST } from './ast/payload-config.js'
-
-/** Map DbType to DatabaseAdapter */
-function mapDbType(dbType: DbType): DatabaseAdapter {
-  return dbType as DatabaseAdapter
-}
-
-/** Map StorageAdapterType to StorageAdapter */
-function mapStorageAdapter(storageAdapter: StorageAdapterType): StorageAdapter {
-  return storageAdapter as StorageAdapter
-}
 
 /** Get default env var name for db type */
 function getEnvVarName(dbType: DbType, customEnvName?: string): string {
@@ -54,10 +43,10 @@ export async function configurePayloadConfig(args: {
   if (packageJsonPath && fse.existsSync(packageJsonPath)) {
     try {
       updatePackageJson(packageJsonPath, {
-        databaseAdapter: mapDbType(args.dbType),
+        databaseAdapter: args.dbType,
         packageName: args.packageJsonName,
         removeSharp: args.sharp === false,
-        storageAdapter: args.storageAdapter ? mapStorageAdapter(args.storageAdapter) : undefined,
+        storageAdapter: args.storageAdapter,
       })
     } catch (err: unknown) {
       warning(`Unable to configure Payload in package.json`)
@@ -88,12 +77,12 @@ export async function configurePayloadConfig(args: {
 
     const result = await configurePayloadConfigAST(payloadConfigPath, {
       db: {
-        type: mapDbType(args.dbType),
+        type: args.dbType,
         envVarName,
       },
       formatWithPrettier: true,
       removeSharp: args.sharp === false,
-      storage: args.storageAdapter ? mapStorageAdapter(args.storageAdapter) : undefined,
+      storage: args.storageAdapter,
       validateStructure: false,
     })
 
