@@ -547,7 +547,8 @@ export function removeSharp(sourceFile: SourceFile): TransformationResult {
   }
 }
 
-export function removeCommentMarkers(sourceFile: SourceFile): void {
+/** This shouldn't be necessary once the templates are updated. Can't hurt to keep in, though */
+export function removeCommentMarkers(sourceFile: SourceFile): SourceFile {
   // Get the full text and replace comment markers
   let text = sourceFile.getFullText()
 
@@ -565,6 +566,8 @@ export function removeCommentMarkers(sourceFile: SourceFile): void {
 
   // Replace the entire source file content
   sourceFile.replaceWithText(text)
+
+  return sourceFile
 }
 
 /**
@@ -682,7 +685,7 @@ export async function configurePayloadConfig(
         quoteKind: QuoteKind.Single,
       },
     })
-    const sourceFile = project.addSourceFileAtPath(filePath)
+    let sourceFile = project.addSourceFileAtPath(filePath)
 
     // Run detection
     const detection = detectPayloadConfigStructure(sourceFile)
@@ -747,7 +750,7 @@ export async function configurePayloadConfig(
     }
 
     // Remove comment markers from template
-    removeCommentMarkers(sourceFile)
+    sourceFile = removeCommentMarkers(sourceFile)
 
     // Cleanup orphaned imports after all transformations
     debug('[AST] Cleaning up orphaned imports')

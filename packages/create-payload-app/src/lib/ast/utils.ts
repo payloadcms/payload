@@ -210,12 +210,13 @@ export function isNamedImportUsed(
 export function cleanupOrphanedImports({
   importNames,
   moduleSpecifier,
-  sourceFile,
+  sourceFile: inputSourceFile,
 }: {
   importNames: string[]
   moduleSpecifier: string
   sourceFile: SourceFile
 }): ImportCleanupResult {
+  let sourceFile = inputSourceFile
   const importDecl = findImportDeclaration({ moduleSpecifier, sourceFile })
 
   if (!importDecl) {
@@ -239,11 +240,11 @@ export function cleanupOrphanedImports({
   }
 
   if (removed.length > 0) {
-    removeNamedImports({
+    ;({ sourceFile } = removeNamedImports({
       importDeclaration: importDecl,
       namedImportsToRemove: removed,
       sourceFile,
-    })
+    }))
     debug(`[AST] ✓ Cleaned up ${removed.length} orphaned import(s) from '${moduleSpecifier}'`)
   }
 
