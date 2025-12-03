@@ -9,6 +9,8 @@ import { es } from '@payloadcms/translations/languages/es'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
+import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
+import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 export default buildConfigWithDefaults({
@@ -17,7 +19,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Pages, Posts],
+  collections: [Users, Pages, Posts, PostsExportsOnly, PostsImportsOnly],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -35,38 +37,63 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     importExportPlugin({
-      overrideExportCollection: (collection) => {
-        collection.admin.group = 'System'
-        collection.upload.staticDir = path.resolve(dirname, 'uploads')
-        return collection
-      },
-      overrideImportCollection: (collection) => {
-        collection.admin.group = 'System'
-        collection.upload.staticDir = path.resolve(dirname, 'uploads')
-        return collection
-      },
-      disableJobsQueue: true,
       debug: true,
-    }),
-    importExportPlugin({
-      debug: true,
-      collections: ['pages'],
-      overrideExportCollection: (collection) => {
-        collection.slug = 'exports-tasks'
-        if (collection.admin) {
-          collection.admin.group = 'System'
-        }
-        collection.upload.staticDir = path.resolve(dirname, 'uploads')
-        return collection
-      },
-      overrideImportCollection: (collection) => {
-        collection.slug = 'imports-tasks'
-        if (collection.admin) {
-          collection.admin.group = 'System'
-        }
-        collection.upload.staticDir = path.resolve(dirname, 'uploads')
-        return collection
-      },
+      collections: [
+        {
+          slug: 'pages',
+          export: {
+            overrideCollection: ({ collection }) => {
+              if (collection.admin) {
+                collection.admin.group = 'System'
+              }
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: {
+            overrideCollection: ({ collection }) => {
+              if (collection.admin) {
+                collection.admin.group = 'System'
+              }
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+        },
+        {
+          slug: 'posts',
+          export: {
+            disableJobsQueue: true,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-export'
+              if (collection.admin) {
+                collection.admin.group = 'Posts'
+              }
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: {
+            disableJobsQueue: true,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-import'
+              if (collection.admin) {
+                collection.admin.group = 'Posts'
+              }
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+        },
+        {
+          slug: 'posts-exports-only',
+          import: false,
+        },
+        {
+          slug: 'posts-imports-only',
+          export: false,
+        },
+      ],
     }),
   ],
   typescript: {

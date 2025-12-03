@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { postsSlug } from '../shared.js'
+import { postsImportsOnlySlug } from '../shared.js'
 
-export const Posts: CollectionConfig = {
-  slug: postsSlug,
+export const PostsImportsOnly: CollectionConfig = {
+  slug: postsImportsOnlySlug,
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', '_status', 'content', 'updatedAt', 'createdAt'],
