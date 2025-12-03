@@ -87,9 +87,10 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   const draft = draftsFromInput === 'yes'
-  const publishedWhere: Where = {
-    _status: { equals: 'published' },
-  }
+  const hasVersions = Boolean(collectionConfig.versions)
+
+  // Only filter by _status for versioned collections
+  const publishedWhere: Where = hasVersions ? { _status: { equals: 'published' } } : {}
 
   const where: Where = {
     and: [whereFromInput, draft ? {} : publishedWhere],
@@ -441,6 +442,7 @@ export const createExport = async (args: CreateExportArgs) => {
         mimetype: isCSV ? 'text/csv' : 'application/json',
         size: buffer.length,
       },
+      overrideAccess: false,
       user,
     })
   }

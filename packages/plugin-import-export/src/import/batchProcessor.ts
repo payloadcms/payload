@@ -139,6 +139,10 @@ async function processBatch(
     successful: [],
   }
 
+  // Check if the collection has versions enabled
+  const collectionConfig = req.payload.collections[collectionSlug]?.config
+  const collectionHasVersions = Boolean(collectionConfig?.versions)
+
   // Calculate the starting row number for this batch
   const startingRowNumber = batchIndex * options.batchSize
 
@@ -158,22 +162,27 @@ async function processBatch(
         const createData = { ...document }
         delete createData.id
 
-        // Check if _status is set - use defaultVersionStatus from config
-        // If no _status field provided, use the configured default
-        const statusValue = createData._status || options.defaultVersionStatus
-        const isPublished = statusValue !== 'draft'
+        // Only handle _status for versioned collections
+        let draftOption: boolean | undefined
+        if (collectionHasVersions) {
+          // Check if _status is set - use defaultVersionStatus from config
+          // If no _status field provided, use the configured default
+          const statusValue = createData._status || options.defaultVersionStatus
+          const isPublished = statusValue !== 'draft'
+          draftOption = !isPublished
 
-        // Debug: log status handling
-        if (req.payload.config.debug) {
-          req.payload.logger.info({
-            _status: createData._status,
-            isPublished,
-            msg: 'Status handling in create',
-            willSetDraft: !isPublished,
-          })
+          // Debug: log status handling
+          if (req.payload.config.debug) {
+            req.payload.logger.info({
+              _status: createData._status,
+              isPublished,
+              msg: 'Status handling in create',
+              willSetDraft: draftOption,
+            })
+          }
+
+          delete createData._status // Remove _status from data - it's controlled via draft option
         }
-
-        delete createData._status // Remove _status from data
 
         // Debug: log what we're about to create
         if (req.payload.config.debug && 'title' in createData) {
@@ -193,8 +202,8 @@ async function processBatch(
           processedDoc = await req.payload.create({
             collection: collectionSlug,
             data: flatData,
-            draft: !isPublished,
-            overrideAccess: true,
+            draft: draftOption,
+            overrideAccess: false,
             req,
           })
 
@@ -207,8 +216,8 @@ async function processBatch(
                   id: processedDoc.id as number | string,
                   collection: collectionSlug,
                   data: localeData,
-                  draft: false,
-                  overrideAccess: true,
+                  draft: collectionHasVersions ? false : undefined,
+                  overrideAccess: false,
                   req: localeReq,
                 })
               } catch (error) {
@@ -225,8 +234,8 @@ async function processBatch(
           processedDoc = await req.payload.create({
             collection: collectionSlug,
             data: createData,
-            draft: !isPublished,
-            overrideAccess: true,
+            draft: draftOption,
+            overrideAccess: false,
             req,
           })
         }
@@ -261,7 +270,7 @@ async function processBatch(
             collection: collectionSlug,
             depth: 0,
             limit: 1,
-            overrideAccess: true,
+            overrideAccess: false,
             req,
             where: {
               [matchField || 'id']: {
@@ -338,7 +347,7 @@ async function processBatch(
               data: flatData,
               depth: 0,
               // Don't specify draft - this creates a new draft for versioned collections
-              overrideAccess: true,
+              overrideAccess: false,
               req,
             })
 
@@ -354,7 +363,7 @@ async function processBatch(
                     data: localeData,
                     depth: 0,
                     // Don't specify draft - this creates a new draft for versioned collections
-                    overrideAccess: true,
+                    overrideAccess: false,
                     req: localeReq,
                   })
                 } catch (error) {
@@ -387,7 +396,7 @@ async function processBatch(
                 data: updateData,
                 depth: 0,
                 // Don't specify draft - this creates a new draft for versioned collections
-                overrideAccess: true,
+                overrideAccess: false,
                 req,
               })
 
@@ -407,7 +416,7 @@ async function processBatch(
                   collection: collectionSlug,
                   depth: 0,
                   draft: false, // Get published version
-                  overrideAccess: true,
+                  overrideAccess: false,
                   req,
                 })
                 req.payload.logger.info({
@@ -424,7 +433,7 @@ async function processBatch(
                   collection: collectionSlug,
                   depth: 0,
                   draft: true, // Get draft version
-                  overrideAccess: true,
+                  overrideAccess: false,
                   req,
                 })
                 req.payload.logger.info({
@@ -459,10 +468,15 @@ async function processBatch(
           const createData = { ...document }
           delete createData.id
 
-          // Use defaultVersionStatus from config if _status not provided
-          const statusValue = createData._status || options.defaultVersionStatus
-          const isPublished = statusValue !== 'draft'
-          delete createData._status
+          // Only handle _status for versioned collections
+          let draftOption: boolean | undefined
+          if (collectionHasVersions) {
+            // Use defaultVersionStatus from config if _status not provided
+            const statusValue = createData._status || options.defaultVersionStatus
+            const isPublished = statusValue !== 'draft'
+            draftOption = !isPublished
+            delete createData._status // Remove _status from data - it's controlled via draft option
+          }
 
           // Check if we have multi-locale data and extract it
           const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(createData)
@@ -472,8 +486,8 @@ async function processBatch(
             processedDoc = await req.payload.create({
               collection: collectionSlug,
               data: flatData,
-              draft: !isPublished,
-              overrideAccess: true,
+              draft: draftOption,
+              overrideAccess: false,
               req,
             })
 
@@ -487,8 +501,8 @@ async function processBatch(
                     id: processedDoc.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
-                    draft: false,
-                    overrideAccess: true,
+                    draft: collectionHasVersions ? false : undefined,
+                    overrideAccess: false,
                     req: localeReq,
                   })
                 } catch (error) {
@@ -505,8 +519,8 @@ async function processBatch(
             processedDoc = await req.payload.create({
               collection: collectionSlug,
               data: createData,
-              draft: !isPublished,
-              overrideAccess: true,
+              draft: draftOption,
+              overrideAccess: false,
               req,
             })
           }

@@ -44,10 +44,10 @@ export const handlePreview = async (req: PayloadRequest) => {
 
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
   const draft = draftFromReq === 'yes'
+  const collectionHasVersions = Boolean(targetCollection.config.versions)
 
-  const publishedWhere: Where = {
-    _status: { equals: 'published' },
-  }
+  // Only filter by _status for versioned collections
+  const publishedWhere: Where = collectionHasVersions ? { _status: { equals: 'published' } } : {}
 
   const where: Where = {
     and: [whereFromReq, draft ? {} : publishedWhere],
