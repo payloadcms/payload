@@ -19,11 +19,12 @@ import { getPluginCollections } from './utilities/getPluginCollections.js'
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
   async (config: Config): Promise<Config> => {
-    // Get all export/import collections (base at index 0, custom overrides after)
-    const { exportCollections, importCollections } = await getPluginCollections({
-      config,
-      pluginConfig,
-    })
+    // Get all export/import collections and the mappings from target collections to custom collections
+    const { customExportSlugMap, customImportSlugMap, exportCollections, importCollections } =
+      await getPluginCollections({
+        config,
+        pluginConfig,
+      })
 
     // Base collections are at index 0 (always present)
     const baseExportCollection = exportCollections[0]!
@@ -63,34 +64,6 @@ export const importExportPlugin =
     if (pluginConfig.collections) {
       for (const collectionConfig of pluginConfig.collections) {
         collectionConfigMap.set(collectionConfig.slug, collectionConfig)
-      }
-    }
-
-    // Build a map from target collection slug to custom export/import collection slugs
-    // Custom collections start at index 1 (index 0 is the base)
-    const customExportSlugMap = new Map<string, string>()
-    const customImportSlugMap = new Map<string, string>()
-
-    if (pluginConfig.collections) {
-      let exportIndex = 1 // Start at 1, skipping base
-      let importIndex = 1
-
-      for (const collectionConfig of pluginConfig.collections) {
-        const exportConf =
-          typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
-        const customExportColl = exportCollections[exportIndex]
-        if (exportConf?.overrideCollection && customExportColl) {
-          customExportSlugMap.set(collectionConfig.slug, customExportColl.slug)
-          exportIndex++
-        }
-
-        const importConf =
-          typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
-        const customImportColl = importCollections[importIndex]
-        if (importConf?.overrideCollection && customImportColl) {
-          customImportSlugMap.set(collectionConfig.slug, customImportColl.slug)
-          importIndex++
-        }
       }
     }
 

@@ -17,7 +17,6 @@ import type {
 } from '../../translations/index.js'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
-import './index.scss'
 
 const baseClass = 'export-list-menu-item'
 

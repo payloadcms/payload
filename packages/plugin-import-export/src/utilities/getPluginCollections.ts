@@ -7,6 +7,16 @@ import { getImportCollection } from '../import/getImportCollection.js'
 
 export type PluginCollectionsResult = {
   /**
+   * Map from target collection slug to the export collection slug to use for it.
+   * Only contains entries for collections with custom export collection overrides.
+   */
+  customExportSlugMap: Map<string, string>
+  /**
+   * Map from target collection slug to the import collection slug to use for it.
+   * Only contains entries for collections with custom import collection overrides.
+   */
+  customImportSlugMap: Map<string, string>
+  /**
    * All export collections (base + any per-collection overrides)
    */
   exportCollections: CollectionConfig[]
@@ -47,6 +57,10 @@ export const getPluginCollections = async ({
   const exportCollections: CollectionConfig[] = []
   const importCollections: CollectionConfig[] = []
 
+  // Maps from target collection slug to the export/import collection slug to use
+  const customExportSlugMap = new Map<string, string>()
+  const customImportSlugMap = new Map<string, string>()
+
   // Process each collection config for custom collection overrides
   if (pluginConfig.collections && pluginConfig.collections.length > 0) {
     for (const collectionConfig of pluginConfig.collections) {
@@ -54,7 +68,7 @@ export const getPluginCollections = async ({
       const exportConf =
         typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
       if (exportConf?.overrideCollection) {
-        // Generate a collection with this export config's settings (like useJobsQueue)
+        // Generate a collection with this export config's settings (like disableJobsQueue)
         const collectionWithSettings = getExportCollection({
           config,
           exportConfig: exportConf,
@@ -67,6 +81,8 @@ export const getPluginCollections = async ({
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customExport.slug !== baseExportCollection.slug) {
           exportCollections.push(customExport)
+          // Map this target collection to its custom export collection
+          customExportSlugMap.set(collectionConfig.slug, customExport.slug)
         } else {
           baseExportCollection = customExport
         }
@@ -76,7 +92,7 @@ export const getPluginCollections = async ({
       const importConf =
         typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
       if (importConf?.overrideCollection) {
-        // Generate a collection with this import config's settings (like useJobsQueue)
+        // Generate a collection with this import config's settings (like disableJobsQueue)
         const collectionWithSettings = getImportCollection({
           config,
           importConfig: importConf,
@@ -89,6 +105,8 @@ export const getPluginCollections = async ({
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customImport.slug !== baseImportCollection.slug) {
           importCollections.push(customImport)
+          // Map this target collection to its custom import collection
+          customImportSlugMap.set(collectionConfig.slug, customImport.slug)
         } else {
           baseImportCollection = customImport
         }
@@ -101,6 +119,8 @@ export const getPluginCollections = async ({
   importCollections.unshift(baseImportCollection)
 
   return {
+    customExportSlugMap,
+    customImportSlugMap,
     exportCollections,
     importCollections,
   }
