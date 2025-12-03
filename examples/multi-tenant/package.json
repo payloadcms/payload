@@ -25,11 +25,11 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "graphql": "^16.9.0",
-    "next": "^15.2.3",
+    "next": "^15.4.8",
     "payload": "latest",
     "qs-esm": "7.0.2",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "sharp": "0.32.6"
   },
   "devDependencies": {
