@@ -33,7 +33,6 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
     _status?: 'draft'
   } & T = deepCopyObjectSimple<T>(data || ({} as T))
 
-  docData._status = 'draft'
   if (docData._id) {
     delete docData._id
   }

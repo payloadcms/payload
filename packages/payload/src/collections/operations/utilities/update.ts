@@ -28,7 +28,7 @@ import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
-import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
+import { deepCopyObjectSimple, getLatestCollectionVersion, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
@@ -268,6 +268,7 @@ export const updateDocument = async <
 
   if (config.localization && collectionConfig.versions) {
     let isSnapshotRequired = false
+    let currentDoc
 
     if (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus) {
       if (publishAllLocales || unpublishAllLocales) {
@@ -293,29 +294,33 @@ export const updateDocument = async <
       } else if (!isSavingDraft) {
         // publishing a single locale
         isSnapshotRequired = true
+
+        currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
+          collection: collectionConfig.slug,
+          req,
+          where: { id: { equals: id } },
+        })
       }
     } else if (publishSpecificLocale) {
       // previous way of publishing a single locale
       isSnapshotRequired = true
+      currentDoc = await getLatestCollectionVersion({
+        id,
+        config: collectionConfig,
+        payload,
+        published: true,
+        query: {
+          collection: collectionConfig.slug,
+          locale,
+          req,
+          where: { id: { equals: id } },
+        },
+        req,
+      })
     }
 
     if (isSnapshotRequired) {
       snapshotToSave = deepCopyObjectSimple(result)
-
-      const currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
-        collection: collectionConfig.slug,
-        req,
-        where: {
-          and: [
-            { id: { equals: id } },
-            {
-              _status: {
-                equals: 'published',
-              },
-            },
-          ],
-        },
-      })
 
       result = mergeLocalizedData({
         configBlockReferences: config.blocks,
