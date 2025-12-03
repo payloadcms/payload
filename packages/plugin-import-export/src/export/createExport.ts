@@ -55,7 +55,7 @@ export const createExport = async (args: CreateExportArgs) => {
       name: nameArg,
       collectionSlug,
       debug = false,
-      drafts,
+      drafts: draftsFromInput,
       exportsCollection,
       fields,
       format,
@@ -64,7 +64,7 @@ export const createExport = async (args: CreateExportArgs) => {
       user,
       page,
       limit: incomingLimit,
-      where,
+      where: whereFromInput = {},
     },
     req: { locale: localeArg, payload },
     req,
@@ -74,7 +74,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({
       message: 'Starting export process with args:',
       collectionSlug,
-      drafts,
+      draft: draftsFromInput,
       fields,
       format,
     })
@@ -84,6 +84,15 @@ export const createExport = async (args: CreateExportArgs) => {
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {
     throw new APIError(`Collection with slug ${collectionSlug} not found`)
+  }
+
+  const draft = draftsFromInput === 'yes'
+  const publishedWhere: Where = {
+    _status: { equals: 'published' },
+  }
+
+  const where: Where = {
+    and: [whereFromInput, draft ? {} : publishedWhere],
   }
 
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
@@ -111,7 +120,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const findArgs = {
     collection: collectionSlug,
     depth: 1,
-    draft: drafts === 'yes',
+    draft,
     limit: batchSize,
     locale,
     overrideAccess: false,
@@ -316,7 +325,7 @@ export const createExport = async (args: CreateExportArgs) => {
       },
     })
 
-    return new Response(stream as any, {
+    return new Response(Readable.toWeb(stream) as ReadableStream, {
       headers: {
         'Content-Disposition': `attachment; filename="${name}"`,
         'Content-Type': isCSV ? 'text/csv' : 'application/json',

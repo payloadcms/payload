@@ -55,8 +55,8 @@ export const importExportPlugin =
     )
 
     // inject the createExport and createImport jobs into the config
-    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config, pluginConfig))
-    config.jobs.tasks.push(getCreateCollectionImportTask(config, pluginConfig))
+    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config))
+    config.jobs.tasks.push(getCreateCollectionImportTask(config))
 
     // Build a map of collection configs for quick lookup
     const collectionConfigMap = new Map<string, PluginCollectionConfig>()
@@ -76,13 +76,18 @@ export const importExportPlugin =
       let importIndex = 1
 
       for (const collectionConfig of pluginConfig.collections) {
+        const exportConf =
+          typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
         const customExportColl = exportCollections[exportIndex]
-        if (typeof collectionConfig.export === 'function' && customExportColl) {
+        if (exportConf?.overrideCollection && customExportColl) {
           customExportSlugMap.set(collectionConfig.slug, customExportColl.slug)
           exportIndex++
         }
+
+        const importConf =
+          typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
         const customImportColl = importCollections[importIndex]
-        if (typeof collectionConfig.import === 'function' && customImportColl) {
+        if (importConf?.overrideCollection && customImportColl) {
           customImportSlugMap.set(collectionConfig.slug, customImportColl.slug)
           importIndex++
         }

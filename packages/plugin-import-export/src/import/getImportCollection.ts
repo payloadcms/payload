@@ -9,7 +9,7 @@ import fs from 'fs'
 import path from 'path'
 import { addDataAndFileToRequest } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
+import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
 
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { createImport } from './createImport.js'
@@ -21,13 +21,23 @@ import { unflattenObject } from './unflattenObject.js'
 
 export const getImportCollection = ({
   config,
+  importConfig,
   pluginConfig,
 }: {
   config: Config
+  importConfig?: ImportConfig
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
   const beforeOperation: CollectionBeforeOperationHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
+
+  // Extract import-specific settings
+  const disableJobsQueue = importConfig?.disableJobsQueue ?? false
+  const batchSize = importConfig?.batchSize ?? 100
+  const defaultVersionStatus = importConfig?.defaultVersionStatus ?? 'published'
+
+  // Get collection slugs for the dropdown
+  const collectionSlugs = pluginConfig.collections?.map((c) => c.slug)
 
   const collection: CollectionConfig = {
     slug: 'imports',
@@ -117,7 +127,7 @@ export const getImportCollection = ({
         path: '/preview-data',
       },
     ],
-    fields: getFields(config, pluginConfig),
+    fields: getFields(config, { collectionSlugs }),
     hooks: {
       afterChange,
       beforeOperation,
@@ -130,9 +140,9 @@ export const getImportCollection = ({
     },
   }
 
-  if (pluginConfig.disableJobsQueue) {
+  if (disableJobsQueue) {
     // Process the import synchronously after the document (with file) has been created
-    afterChange.push(async ({ doc, operation, req }) => {
+    afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
       if (operation !== 'create' || doc.status !== 'pending') {
         return doc
       }
@@ -155,7 +165,9 @@ export const getImportCollection = ({
         } else {
           // File is stored locally - read from filesystem
           const filePath = doc.filename
-          const uploadConfig = typeof collection.upload === 'object' ? collection.upload : undefined
+          // Get upload config from the actual sanitized collection config
+          const uploadConfig =
+            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
           const uploadDir = uploadConfig?.staticDir || './uploads'
           const fullPath = path.resolve(uploadDir, filePath)
           fileData = await fs.promises.readFile(fullPath)
@@ -163,8 +175,8 @@ export const getImportCollection = ({
         }
 
         const result = await createImport({
-          batchSize: pluginConfig.batchSize || 100,
-          defaultVersionStatus: pluginConfig.defaultVersionStatus || 'published',
+          batchSize,
+          defaultVersionStatus,
           input: {
             id: doc.id,
             name: doc.filename || 'import',
@@ -213,7 +225,7 @@ export const getImportCollection = ({
         try {
           await req.payload.update({
             id: doc.id,
-            collection: collection.slug,
+            collection: collectionConfig.slug,
             data: {
               status,
               summary,
@@ -256,7 +268,7 @@ export const getImportCollection = ({
         try {
           await req.payload.update({
             id: doc.id,
-            collection: collection.slug,
+            collection: collectionConfig.slug,
             data: {
               status: 'failed',
               summary,
@@ -291,7 +303,7 @@ export const getImportCollection = ({
     })
   } else {
     // When jobs queue is enabled, queue the import as a job
-    afterChange.push(async ({ doc, operation, req }) => {
+    afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
       if (operation !== 'create') {
         return
       }
@@ -307,15 +319,19 @@ export const getImportCollection = ({
           fileData = Buffer.from(await response.arrayBuffer())
         } else {
           const filePath = doc.filename
-          const uploadConfig = typeof collection.upload === 'object' ? collection.upload : undefined
+          // Get upload config from the actual sanitized collection config
+          const uploadConfig =
+            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
           const uploadDir = uploadConfig?.staticDir || './uploads'
           const fullPath = path.resolve(uploadDir, filePath)
           fileData = await fs.promises.readFile(fullPath)
         }
 
         const input = {
+          batchSize,
           collectionSlug: doc.collectionSlug,
           debug: pluginConfig.debug,
+          defaultVersionStatus,
           file: {
             name: doc.filename,
             data: fileData.toString('base64'),
@@ -325,7 +341,7 @@ export const getImportCollection = ({
           format: doc.mimeType === 'text/csv' ? 'csv' : 'json',
           importId: doc.id,
           importMode: doc.importMode || 'create',
-          importsCollection: collection.slug,
+          importsCollection: collectionConfig.slug,
           matchField: doc.matchField,
           user: req?.user?.id || req?.user?.user?.id,
           userCollection: 'users',

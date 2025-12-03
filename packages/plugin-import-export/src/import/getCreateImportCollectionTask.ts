@@ -1,6 +1,5 @@
 import type { Config, TaskConfig, TypedUser } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
 import type { Import } from './createImport.js'
 
 import { createImport } from './createImport.js'
@@ -8,7 +7,6 @@ import { getFields } from './getFields.js'
 
 export const getCreateCollectionImportTask = (
   config: Config,
-  pluginConfig?: ImportExportPluginConfig,
 ): TaskConfig<{
   input: {
     importId?: string
@@ -18,7 +16,7 @@ export const getCreateCollectionImportTask = (
   } & Import
   output: object
 }> => {
-  const inputSchema = getFields(config, pluginConfig!).concat(
+  const inputSchema = getFields(config).concat(
     {
       name: 'user',
       type: 'text',
@@ -81,9 +79,10 @@ export const getCreateCollectionImportTask = (
         input.file.data = Buffer.from(input.file.data, 'base64')
       }
 
+      // batchSize and defaultVersionStatus come from the input (set when job was queued)
       const result = await createImport({
-        batchSize: pluginConfig?.batchSize,
-        defaultVersionStatus: pluginConfig?.defaultVersionStatus || 'published',
+        batchSize: (input as any).batchSize,
+        defaultVersionStatus: (input as any).defaultVersionStatus || 'published',
         input,
         req,
       })

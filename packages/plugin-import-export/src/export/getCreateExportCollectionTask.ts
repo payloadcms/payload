@@ -1,6 +1,5 @@
 import type { Config, TaskConfig, TypedUser } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
 import type { CreateExportArgs, Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
@@ -8,12 +7,11 @@ import { getFields } from './getFields.js'
 
 export const getCreateCollectionExportTask = (
   config: Config,
-  pluginConfig?: ImportExportPluginConfig,
 ): TaskConfig<{
   input: Export
   output: object
 }> => {
-  const inputSchema = getFields(config, pluginConfig).concat(
+  const inputSchema = getFields(config).concat(
     {
       name: 'user',
       type: 'text',
@@ -44,7 +42,8 @@ export const getCreateCollectionExportTask = (
         throw new Error('User not found')
       }
 
-      await createExport({ batchSize: pluginConfig?.batchSize, input, req, user })
+      // batchSize comes from the input (set when job was queued)
+      await createExport({ batchSize: (input as any).batchSize, input, req, user })
 
       return {
         output: {},

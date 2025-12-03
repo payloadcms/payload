@@ -9,28 +9,37 @@ import type {
 
 import { addDataAndFileToRequest } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
+import type { ExportConfig, ImportExportPluginConfig } from '../types.js'
 
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
 import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 import { createExport } from './createExport.js'
-import { download } from './download.js'
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFields } from './getFields.js'
 import { getSelect } from './getSelect.js'
+import { handleDownload } from './handleDownload.js'
 
 export const getExportCollection = ({
   config,
+  exportConfig,
   pluginConfig,
 }: {
   config: Config
+  exportConfig?: ExportConfig
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
   const beforeOperation: CollectionBeforeOperationHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
+
+  // Extract export-specific settings
+  const disableDownload = exportConfig?.disableDownload ?? false
+  const disableSave = exportConfig?.disableSave ?? false
+  const disableJobsQueue = exportConfig?.disableJobsQueue ?? false
+  const batchSize = exportConfig?.batchSize ?? 100
+  const format = exportConfig?.format
 
   const collection: CollectionConfig = {
     slug: 'exports',
@@ -44,8 +53,9 @@ export const getExportCollection = ({
         },
       },
       custom: {
-        disableDownload: pluginConfig.disableDownload ?? false,
-        disableSave: pluginConfig.disableSave ?? false,
+        disableDownload,
+        disableSave,
+        format,
       },
       disableCopyToLocale: true,
       group: false,
@@ -55,7 +65,7 @@ export const getExportCollection = ({
     endpoints: [
       {
         handler: (req) => {
-          return download(req, pluginConfig.debug)
+          return handleDownload(req, pluginConfig.debug)
         },
         method: 'post',
         path: '/download',
@@ -184,7 +194,7 @@ export const getExportCollection = ({
         path: '/export-preview',
       },
     ],
-    fields: getFields(config, pluginConfig),
+    fields: getFields(config, { format }),
     hooks: {
       afterChange,
       beforeOperation,
@@ -196,24 +206,25 @@ export const getExportCollection = ({
     },
   }
 
-  if (pluginConfig.disableJobsQueue) {
+  if (disableJobsQueue) {
     beforeOperation.push(async ({ args, operation, req }) => {
       if (operation !== 'create') {
         return
       }
       const { user } = req
       const debug = pluginConfig.debug
-      await createExport({ input: { ...args.data, debug, user }, req })
+      await createExport({ batchSize, input: { ...args.data, debug, user }, req })
     })
   } else {
-    afterChange.push(async ({ doc, operation, req }) => {
+    afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
       if (operation !== 'create') {
         return
       }
 
       const input = {
         ...doc,
-        exportsCollection: collection.slug,
+        batchSize,
+        exportsCollection: collectionConfig.slug,
         user: req?.user?.id || req?.user?.user?.id,
         userCollection: 'users',
       }

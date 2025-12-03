@@ -1,6 +1,6 @@
 import type { CollectionConfig, Config } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
+import type { ExportConfig, ImportConfig, ImportExportPluginConfig } from '../types.js'
 
 import { getExportCollection } from '../export/getExportCollection.js'
 import { getImportCollection } from '../import/getImportCollection.js'
@@ -34,20 +34,37 @@ export const getPluginCollections = async ({
   config: Config
   pluginConfig: ImportExportPluginConfig
 }): Promise<PluginCollectionsResult> => {
-  // Get the base export and import collections
-  let baseExportCollection = getExportCollection({ config, pluginConfig })
-  let baseImportCollection = getImportCollection({ config, pluginConfig })
+  // Get the base export and import collections with default configs (no per-collection settings)
+  let baseExportCollection = getExportCollection({
+    config,
+    pluginConfig,
+  })
+  let baseImportCollection = getImportCollection({
+    config,
+    pluginConfig,
+  })
 
   const exportCollections: CollectionConfig[] = []
   const importCollections: CollectionConfig[] = []
 
-  // Process each collection config for custom overrides
+  // Process each collection config for custom collection overrides
   if (pluginConfig.collections && pluginConfig.collections.length > 0) {
     for (const collectionConfig of pluginConfig.collections) {
-      // Handle export override - apply to base collection
-      if (typeof collectionConfig.export === 'function') {
-        const customExport = await collectionConfig.export({ collection: baseExportCollection })
-        // If the slug changed, this is a separate collection; otherwise deep merge into base
+      // Handle export override - check for overrideCollection function
+      const exportConf =
+        typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
+      if (exportConf?.overrideCollection) {
+        // Generate a collection with this export config's settings (like useJobsQueue)
+        const collectionWithSettings = getExportCollection({
+          config,
+          exportConfig: exportConf,
+          pluginConfig,
+        })
+        // Apply the override on top
+        const customExport = await exportConf.overrideCollection({
+          collection: collectionWithSettings,
+        })
+        // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customExport.slug !== baseExportCollection.slug) {
           exportCollections.push(customExport)
         } else {
@@ -55,10 +72,21 @@ export const getPluginCollections = async ({
         }
       }
 
-      // Handle import override - apply to base collection
-      if (typeof collectionConfig.import === 'function') {
-        const customImport = await collectionConfig.import({ collection: baseImportCollection })
-        // If the slug changed, this is a separate collection; otherwise deep merge into base
+      // Handle import override - check for overrideCollection function
+      const importConf =
+        typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
+      if (importConf?.overrideCollection) {
+        // Generate a collection with this import config's settings (like useJobsQueue)
+        const collectionWithSettings = getImportCollection({
+          config,
+          importConfig: importConf,
+          pluginConfig,
+        })
+        // Apply the override on top
+        const customImport = await importConf.overrideCollection({
+          collection: collectionWithSettings,
+        })
+        // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customImport.slug !== baseImportCollection.slug) {
           importCollections.push(customImport)
         } else {

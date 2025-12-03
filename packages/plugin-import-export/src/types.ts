@@ -9,19 +9,82 @@ export type CollectionOverride = ({
   collection: CollectionConfig
 }) => CollectionConfig | Promise<CollectionConfig>
 
+export type ExportConfig = {
+  /**
+   * Number of documents to process in each batch during export. This config is applied to both jobs and synchronous exports.
+   *
+   * @default 100
+   */
+  batchSize?: number
+  /**
+   * If true, disables the download button in the export preview UI
+   * @default false
+   */
+  disableDownload?: boolean
+  /**
+   * If true, disables the jobs queue for exports and runs them synchronously.
+   * @default false
+   */
+  disableJobsQueue?: boolean
+  /**
+   * If true, disables the save button in the export preview UI
+   * @default false
+   */
+  disableSave?: boolean
+  /**
+   * Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI.
+   * When defined, this overrides the user's ability to choose a format manually.
+   * If not set, the user can choose between CSV and JSON in the export UI.
+   * @default undefined
+   */
+  format?: 'csv' | 'json'
+  /**
+   * Override the export collection for this collection.
+   *
+   * @default true
+   */
+  overrideCollection?: CollectionOverride
+}
+
+export type ImportConfig = {
+  /**
+   * Number of documents to process in each batch during import. This config is applied to both jobs and synchronous imports.
+   *
+   * @default 100
+   */
+  batchSize?: number
+  /**
+   * Default version status for imported documents when _status field is not provided.
+   * Only applies to collections with versions enabled.
+   * @default 'published'
+   */
+  defaultVersionStatus?: 'draft' | 'published'
+  /**
+   * If true, disables the jobs queue for imports and runs them synchronously.
+   * @default false
+   */
+  disableJobsQueue?: boolean
+  /**
+   * Override the import collection for this collection.
+   *
+   * @default true
+   */
+  overrideCollection?: CollectionOverride
+}
+
 export type PluginCollectionConfig = {
   /**
    * Override the import collection for this collection or disable it entirely with `false`.
    *
    * @default true
    */
-  export?: boolean | CollectionOverride
+  export?: boolean | ExportConfig
   /**
    * Override the export collection for this collection or disable it entirely with `false`.
    *
    * @default true
    */
-  import?: boolean | CollectionOverride
+  import?: boolean | ImportConfig
   /**
    * Target collection's slug for import/export functionality
    */
@@ -32,12 +95,6 @@ export type PluginCollectionConfig = {
  * Configuration options for the Import/Export plugin
  */
 export type ImportExportPluginConfig = {
-  /**
-   * Number of documents to process in each batch during import
-   * @default 100
-   */
-  batchSize?: number
-
   /**
    * Collections to include the Import/Export controls in.
    * If not specified, all collections will have import/export enabled.
@@ -50,40 +107,6 @@ export type ImportExportPluginConfig = {
    * @default false
    */
   debug?: boolean
-
-  /**
-   * Default version status for imported documents when _status field is not provided.
-   * Only applies to collections with versions enabled.
-   * @default 'published'
-   */
-  defaultVersionStatus?: 'draft' | 'published'
-
-  /**
-   * If true, disables the download button in the export preview UI
-   * @default false
-   */
-  disableDownload?: boolean
-
-  /**
-   * If true, forces exports and imports to run synchronously instead of using the jobs queue.
-   * Useful for simpler setups or when the jobs queue is not configured.
-   * @default false
-   */
-  disableJobsQueue?: boolean
-
-  /**
-   * If true, disables the save button in the export preview UI
-   * @default false
-   */
-  disableSave?: boolean
-
-  /**
-   * Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI.
-   * When defined, this overrides the user's ability to choose a format manually.
-   * If not set, the user can choose between CSV and JSON in the export UI.
-   * @default undefined
-   */
-  format?: 'csv' | 'json'
 }
 
 /**

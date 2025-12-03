@@ -4,9 +4,10 @@ import { APIError } from 'payload'
 
 import { createExport } from './createExport.js'
 
-export const download = async (req: PayloadRequest, debug = false) => {
+export const handleDownload = async (req: PayloadRequest, debug = false) => {
   try {
     let body
+
     if (typeof req?.json === 'function') {
       body = await req.json()
     }
@@ -19,6 +20,8 @@ export const download = async (req: PayloadRequest, debug = false) => {
 
     req.payload.logger.info(`Download request received ${collectionSlug}`)
     body.data.user = req.user
+
+    console.log({ downloadBody: body.data })
 
     const res = await createExport({
       download: true,
