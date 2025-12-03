@@ -24,8 +24,8 @@ export const download = async (req: PayloadRequest, debug = false) => {
 
     const res = await createExport({
       debug,
+      doc: { ...data },
       download: true,
-      input: { ...data },
       req,
       user: req.user,
     })

@@ -17,10 +17,9 @@ import { getSelect } from './getSelect.js'
 export type CreateExportArgs = {
   debug?: boolean
   /**
-   * If true, stream the file instead of saving it
+   * The fields on the export document
    */
-  download?: boolean
-  input: (
+  doc: (
     | {
         exportsCollection?: never
         id?: never
@@ -31,6 +30,10 @@ export type CreateExportArgs = {
       }
   ) &
     Omit<MockExportCollectionData, 'id'>
+  /**
+   * If true, stream the file instead of saving it
+   */
+  download?: boolean
   req: PayloadRequest
   user?: null | TypedUser
 }
@@ -39,7 +42,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const {
     download,
     debug = false,
-    input: {
+    doc: {
       id,
       name: nameArg,
       collectionSlug,

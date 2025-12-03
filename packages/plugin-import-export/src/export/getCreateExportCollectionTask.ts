@@ -52,9 +52,9 @@ export const getCreateCollectionExportTask = (
       }
 
       // Strip out user and userCollection from input - they're only needed for rehydration
-      const { user: _userId, userCollection: _userCollection, ...exportInput } = input
+      const { doc, user: _userId, userCollection: _userCollection } = input
 
-      await createExport({ input: exportInput, req, user })
+      await createExport({ doc, req, user })
 
       return {
         output: {},

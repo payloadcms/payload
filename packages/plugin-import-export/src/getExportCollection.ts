@@ -81,7 +81,7 @@ export const getExportCollection = ({
       const debug = pluginConfig.debug
       await createExport({
         debug,
-        input: { ...(args.data as MockExportCollectionData) },
+        doc: { ...(args.data as MockExportCollectionData) },
         req,
         user,
       })
@@ -93,7 +93,7 @@ export const getExportCollection = ({
       }
 
       const input: ExportJobInputData = {
-        ...doc,
+        doc,
         exportsCollection: collection.slug,
         user: req?.user?.id || req?.user?.user?.id,
         userCollection: req.payload.config.admin.user,

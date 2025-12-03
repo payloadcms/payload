@@ -114,7 +114,8 @@ export type MockExportCollectionData = {
 }
 
 export type ExportJobInputData = {
+  doc: MockExportCollectionData
   exportsCollection: string
   user?: null | number | string
   userCollection: string
-} & MockExportCollectionData
+}
