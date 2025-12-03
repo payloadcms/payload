@@ -92,6 +92,9 @@ export default buildConfigWithDefaults({
         {
           slug: 'posts-imports-only',
           export: false,
+          import: {
+            disableJobsQueue: true,
+          },
         },
       ],
     }),
