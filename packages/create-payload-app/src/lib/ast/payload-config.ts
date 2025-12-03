@@ -213,7 +213,7 @@ export function addDatabaseAdapter({
   let importInsertIndex: number | undefined
   oldAdapters.forEach((oldConfig) => {
     if (oldConfig.packageName !== config.packageName) {
-      const removedIndex = removeImportDeclaration({
+      const { removedIndex } = removeImportDeclaration({
         moduleSpecifier: oldConfig.packageName,
         sourceFile,
       })
@@ -485,7 +485,7 @@ export function removeSharp(sourceFile: SourceFile): TransformationResult {
   const modifications: Modification[] = []
 
   // Remove import
-  const removedIndex = removeImportDeclaration({ moduleSpecifier: 'sharp', sourceFile })
+  const { removedIndex } = removeImportDeclaration({ moduleSpecifier: 'sharp', sourceFile })
   if (removedIndex !== undefined) {
     modifications.push({
       type: 'import-removed',

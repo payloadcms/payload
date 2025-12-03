@@ -3,7 +3,12 @@ import type { ImportDeclaration, SourceFile } from 'ts-morph'
 import { existsSync } from 'fs'
 import path from 'path'
 
-import type { DetectionError } from './types.js'
+import type {
+  DetectionError,
+  ImportCleanupResult,
+  ImportRemovalResult,
+  NamedImportRemovalResult,
+} from './types.js'
 
 import { debug } from '../../utils/log.js'
 
@@ -56,7 +61,7 @@ export function addImportDeclaration({
   moduleSpecifier: string
   namedImports?: string[]
   sourceFile: SourceFile
-}): void {
+}): SourceFile {
   const existingImport = findImportDeclaration({ moduleSpecifier, sourceFile })
 
   if (existingImport) {
@@ -99,6 +104,8 @@ export function addImportDeclaration({
     }
     debug(`[AST] Import contents: ${parts.join(', ')}`)
   }
+
+  return sourceFile
 }
 
 export function removeImportDeclaration({
@@ -107,7 +114,7 @@ export function removeImportDeclaration({
 }: {
   moduleSpecifier: string
   sourceFile: SourceFile
-}): number | undefined {
+}): ImportRemovalResult {
   const importDecl = findImportDeclaration({ moduleSpecifier, sourceFile })
   if (importDecl) {
     // Get index before removing
@@ -115,10 +122,10 @@ export function removeImportDeclaration({
     const index = allImports.indexOf(importDecl)
     importDecl.remove()
     debug(`[AST] Removed import from '${moduleSpecifier}' at index ${index}`)
-    return index
+    return { removedIndex: index, sourceFile }
   } else {
     debug(`[AST] Import from '${moduleSpecifier}' not found (already absent)`)
-    return undefined
+    return { removedIndex: undefined, sourceFile }
   }
 }
 
@@ -134,7 +141,7 @@ export function removeNamedImports({
   importDeclaration: ImportDeclaration
   namedImportsToRemove: string[]
   sourceFile: SourceFile
-}): { fullyRemoved: boolean; index?: number } {
+}): NamedImportRemovalResult {
   const namedImports = importDeclaration.getNamedImports()
   const remainingImports = namedImports.filter((ni) => !namedImportsToRemove.includes(ni.getName()))
 
@@ -151,7 +158,7 @@ export function removeNamedImports({
     const index = allImports.indexOf(importDeclaration)
     importDeclaration.remove()
     debug(`[AST] ✓ Removed entire import from '${moduleSpecifier}' (no remaining imports)`)
-    return { fullyRemoved: true, index }
+    return { fullyRemoved: true, index, sourceFile }
   } else {
     // Remove specific named imports
     namedImports.forEach((ni) => {
@@ -162,7 +169,7 @@ export function removeNamedImports({
     debug(
       `[AST] ✓ Removed named imports, kept ${remainingImports.length} import(s) from '${moduleSpecifier}'`,
     )
-    return { fullyRemoved: false }
+    return { fullyRemoved: false, sourceFile }
   }
 }
 
@@ -208,12 +215,12 @@ export function cleanupOrphanedImports({
   importNames: string[]
   moduleSpecifier: string
   sourceFile: SourceFile
-}): { kept: string[]; removed: string[] } {
+}): ImportCleanupResult {
   const importDecl = findImportDeclaration({ moduleSpecifier, sourceFile })
 
   if (!importDecl) {
     debug(`[AST] No import found from '${moduleSpecifier}' to clean up`)
-    return { kept: [], removed: [] }
+    return { kept: [], removed: [], sourceFile }
   }
 
   const removed: string[] = []
@@ -240,5 +247,5 @@ export function cleanupOrphanedImports({
     debug(`[AST] ✓ Cleaned up ${removed.length} orphaned import(s) from '${moduleSpecifier}'`)
   }
 
-  return { kept, removed }
+  return { kept, removed, sourceFile }
 }

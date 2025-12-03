@@ -6,6 +6,24 @@ import type {
   SourceFile,
 } from 'ts-morph'
 
+// Result types for import utility functions
+export type ImportRemovalResult = {
+  removedIndex?: number
+  sourceFile: SourceFile
+}
+
+export type NamedImportRemovalResult = {
+  fullyRemoved: boolean
+  index?: number
+  sourceFile: SourceFile
+}
+
+export type ImportCleanupResult = {
+  kept: string[]
+  removed: string[]
+  sourceFile: SourceFile
+}
+
 export type DetectionError = {
   debugInfo?: Record<string, unknown>
   technicalDetails: string

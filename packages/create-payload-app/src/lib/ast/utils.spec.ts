@@ -29,13 +29,13 @@ describe('addImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
 
-    addImportDeclaration({
+    const result = addImportDeclaration({
       sourceFile,
       moduleSpecifier: '@payloadcms/db-postgres',
       namedImports: ['postgresAdapter'],
     })
 
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.getImportDeclarations()
     expect(imports).toHaveLength(2)
     expect(imports[1].getModuleSpecifierValue()).toBe('@payloadcms/db-postgres')
     expect(imports[1].getNamedImports()[0].getName()).toBe('postgresAdapter')
@@ -48,13 +48,13 @@ describe('addImportDeclaration', () => {
       `import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
     )
 
-    addImportDeclaration({
+    const result = addImportDeclaration({
       sourceFile,
       moduleSpecifier: '@payloadcms/db-mongodb',
       namedImports: ['mongooseAdapter'],
     })
 
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.getImportDeclarations()
     expect(imports).toHaveLength(1)
   })
 
@@ -62,13 +62,13 @@ describe('addImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
 
-    addImportDeclaration({
+    const result = addImportDeclaration({
       sourceFile,
       moduleSpecifier: 'payload',
       namedImports: ['Field'],
     })
 
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.getImportDeclarations()
     expect(imports).toHaveLength(1)
     const namedImports = imports[0].getNamedImports().map((ni) => ni.getName())
     expect(namedImports).toContain('buildConfig')
@@ -85,11 +85,21 @@ describe('removeImportDeclaration', () => {
 import sharp from 'sharp'`,
     )
 
-    removeImportDeclaration({ sourceFile, moduleSpecifier: 'sharp' })
+    const result = removeImportDeclaration({ sourceFile, moduleSpecifier: 'sharp' })
 
-    const imports = sourceFile.getImportDeclarations()
+    expect(result.removedIndex).toBe(1)
+    const imports = result.sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
     expect(imports[0].getModuleSpecifierValue()).toBe('payload')
+  })
+
+  it('returns undefined removedIndex when import not found', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+
+    const result = removeImportDeclaration({ sourceFile, moduleSpecifier: 'sharp' })
+
+    expect(result.removedIndex).toBeUndefined()
   })
 })
 
@@ -113,7 +123,7 @@ describe('removeNamedImports', () => {
     })
 
     expect(result.fullyRemoved).toBe(false)
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
     const namedImports = imports[0].getNamedImports().map((ni) => ni.getName())
     expect(namedImports).toEqual(['SomeOtherType'])
@@ -140,7 +150,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
 
     expect(result.fullyRemoved).toBe(true)
     expect(result.index).toBe(1)
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
     expect(imports[0].getModuleSpecifierValue()).toBe('payload')
   })
@@ -202,7 +212,7 @@ export default buildConfig({
 
     expect(result.removed).toEqual(['mongooseAdapter'])
     expect(result.kept).toEqual([])
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
     expect(imports[0].getModuleSpecifierValue()).toBe('@payloadcms/db-postgres')
   })
@@ -226,7 +236,7 @@ export default buildConfig({
 
     expect(result.removed).toEqual([])
     expect(result.kept).toEqual(['mongooseAdapter'])
-    const imports = sourceFile.getImportDeclarations()
+    const imports = result.sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
   })
 })
