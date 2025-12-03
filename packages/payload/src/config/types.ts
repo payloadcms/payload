@@ -736,6 +736,37 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
+export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
+
+export type Widget = {
+  ComponentPath: string
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
+  slug: string
+  // TODO: Add fields
+  // fields?: Field[]
+  // Maybe:
+  // ImageURL?: string // similar to Block
+}
+
+export type WidgetInstance = {
+  // TODO: should be inferred from Widget Fields
+  // data: Record<string, any>
+  widgetSlug: string
+  width?: WidgetWidth
+}
+
+export type DashboardConfig = {
+  defaultLayout?:
+    | ((args: { req: PayloadRequest }) => Array<WidgetInstance> | Promise<Array<WidgetInstance>>)
+    | Array<WidgetInstance>
+  widgets: Array<Widget>
+}
+
+export type SanitizedDashboardConfig = {
+  widgets: Array<Omit<Widget, 'ComponentPath'>>
+}
+
 /**
  * This is the central configuration
  *
@@ -859,6 +890,10 @@ export type Config = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Customize the dashboard widgets
+     */
+    dashboard?: DashboardConfig
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**

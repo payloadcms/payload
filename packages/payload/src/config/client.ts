@@ -7,6 +7,7 @@ import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
+  SanitizedDashboardConfig,
   ServerOnlyLivePreviewProperties,
 } from './types.js'
 
@@ -45,8 +46,9 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
+    dashboard?: SanitizedDashboardConfig
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
@@ -174,6 +176,15 @@ export const createClientConfig = ({
           timezones: config.admin.timezones,
           toast: config.admin.toast,
           user: config.admin.user,
+        }
+
+        if (config.admin.dashboard?.widgets) {
+          ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
+            (widget) => {
+              const { ComponentPath: _, ...rest } = widget
+              return rest
+            },
+          )
         }
 
         if (config.admin.livePreview) {
