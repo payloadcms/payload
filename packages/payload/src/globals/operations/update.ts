@@ -69,7 +69,7 @@ export const updateOperation = async <
     overrideAccess,
     overrideLock,
     populate,
-    publishAllLocales,
+    publishAllLocales: publishAllLocalesArg,
     publishSpecificLocale,
     req: { fallbackLocale, locale, payload, payload: { config } = {} },
     req,
@@ -77,11 +77,6 @@ export const updateOperation = async <
     showHiddenFields,
     unpublishAllLocales: unpublishAllLocalesArg,
   } = args
-
-  const unpublishAllLocales =
-    typeof unpublishAllLocalesArg === 'string'
-      ? unpublishAllLocalesArg === 'true'
-      : !!unpublishAllLocalesArg
 
   try {
     const shouldCommit = !disableTransaction && (await initTransaction(req))
@@ -105,8 +100,24 @@ export const updateOperation = async <
 
     let { data } = args
 
+    const publishAllLocales =
+      !draftArg &&
+      (publishAllLocalesArg ??
+        (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus
+          ? false
+          : true))
+    const unpublishAllLocales =
+      typeof unpublishAllLocalesArg === 'string'
+        ? unpublishAllLocalesArg === 'true'
+        : !!unpublishAllLocalesArg
     const isSavingDraft =
-      Boolean(draftArg && globalConfig.versions?.drafts) && data._status !== 'published'
+      Boolean(draftArg && globalConfig.versions?.drafts) &&
+      data._status !== 'published' &&
+      !publishAllLocales
+
+    if (isSavingDraft) {
+      data._status = 'draft'
+    }
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -250,7 +261,8 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     if (config && config.localization && globalConfig.versions) {
-      let isSnapshotRequired = false
+      let currentGlobal: JsonObject | null = null
+      let snapshotData: JsonObject | undefined
 
       if (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus) {
         if (publishAllLocales || unpublishAllLocales) {
@@ -275,36 +287,38 @@ export const updateOperation = async <
           }
         } else if (!isSavingDraft) {
           // publishing a single locale
-          isSnapshotRequired = true
+          currentGlobal = await payload.db.findGlobal({
+            slug: globalConfig.slug,
+            req,
+            where: query,
+          })
+          snapshotData = result
         }
       } else if (publishSpecificLocale) {
         // previous way of publishing a single locale
-        isSnapshotRequired = true
+        currentGlobal = (
+          await getLatestGlobalVersion({
+            slug,
+            config: globalConfig,
+            payload,
+            published: true,
+            req,
+            where: query,
+          })
+        ).global
+        snapshotData = {
+          ...result,
+          _status: 'draft',
+        }
       }
 
-      if (isSnapshotRequired) {
-        snapshotToSave = deepCopyObjectSimple(result)
-
-        // the published data to save to the main document
-        const mostRecentPublishedDoc = await beforeChange({
-          ...beforeChangeArgs,
-          docWithLocales:
-            (
-              await getLatestGlobalVersion({
-                slug,
-                config: globalConfig,
-                payload,
-                published: true,
-                req,
-                where: query,
-              })
-            )?.global || {},
-        })
+      if (snapshotData) {
+        snapshotToSave = deepCopyObjectSimple(snapshotData)
 
         result = mergeLocalizedData({
           configBlockReferences: config.blocks,
           dataWithLocales: result || {},
-          docWithLocales: mostRecentPublishedDoc || {},
+          docWithLocales: currentGlobal || {},
           fields: globalConfig.fields,
           selectedLocales: [locale!],
         })

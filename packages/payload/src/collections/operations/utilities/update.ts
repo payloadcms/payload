@@ -267,7 +267,7 @@ export const updateDocument = async <
   let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
-    let isSnapshotRequired = false
+    let snapshotData: JsonObject | undefined
     let currentDoc
 
     if (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus) {
@@ -293,17 +293,15 @@ export const updateDocument = async <
         }
       } else if (!isSavingDraft) {
         // publishing a single locale
-        isSnapshotRequired = true
-
         currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
           req,
           where: { id: { equals: id } },
         })
+        snapshotData = result
       }
     } else if (publishSpecificLocale) {
       // previous way of publishing a single locale
-      isSnapshotRequired = true
       currentDoc = await getLatestCollectionVersion({
         id,
         config: collectionConfig,
@@ -311,16 +309,20 @@ export const updateDocument = async <
         published: true,
         query: {
           collection: collectionConfig.slug,
-          locale,
+          locale: 'all',
           req,
           where: { id: { equals: id } },
         },
         req,
       })
+      snapshotData = {
+        ...result,
+        _status: 'draft',
+      }
     }
 
-    if (isSnapshotRequired) {
-      snapshotToSave = deepCopyObjectSimple(result)
+    if (snapshotData) {
+      snapshotToSave = deepCopyObjectSimple(snapshotData || {})
 
       result = mergeLocalizedData({
         configBlockReferences: config.blocks,
