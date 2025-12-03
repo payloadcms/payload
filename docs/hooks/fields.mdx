@@ -118,9 +118,7 @@ stored in a consistent format in the database.
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage,
-you can be confident that the field data that will be saved to the document is valid in accordance to your field
-validations.
+Immediately before validation, beforeChange hooks will run during create and update operations. At this stage, the data should be treated as unvalidated user input. There is no guarantee that required fields exist or that fields are in the correct format. As such, using this data for side effects requires manual validation. You can optionally modify the shape of the data to be saved.
 
 ```ts
 import type { Field } from 'payload'
