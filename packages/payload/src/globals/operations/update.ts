@@ -82,11 +82,6 @@ export const updateOperation = async <
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
 
-  const unpublishAllLocales =
-    typeof unpublishAllLocalesArg === 'string'
-      ? unpublishAllLocalesArg === 'true'
-      : !!unpublishAllLocalesArg
-
   try {
     const shouldCommit = !disableTransaction && (await initTransaction(req))
 
