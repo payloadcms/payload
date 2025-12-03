@@ -16,23 +16,19 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
     // Seed posts
     const posts = []
-    for (let i = 0; i < 2; i++) {
+    // create an absurd amount of posts - we need to test large data exports
+    for (let i = 2; i < 4000; i++) {
       const post = await payload.create({
         collection: 'posts',
         data: {
           title: `Post ${i}`,
+          _status: i % 2 === 0 ? 'published' : 'draft', // Evens published, odds draft
         },
       })
-      posts.push(post)
-    }
-    // create an absurd amount of posts - we need to test large data exports
-    for (let i = 2; i < 4000; i++) {
-      await payload.create({
-        collection: 'posts',
-        data: {
-          title: `Post ${i}`,
-        },
-      })
+
+      if (i < 3) {
+        posts.push(post)
+      }
     }
     // create pages
     for (let i = 0; i < 195; i++) {
