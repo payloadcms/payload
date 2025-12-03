@@ -14,6 +14,7 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -244,8 +245,7 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req,
-      skipValidation:
-        draftArg && collectionConfig.versions.drafts && !collectionConfig.versions.drafts.validate,
+      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////

@@ -729,7 +729,7 @@ export interface SanitizedCollectionConfig
 
   slug: CollectionSlug
   upload: SanitizedUploadConfig
-  versions: SanitizedCollectionVersions
+  versions?: SanitizedCollectionVersions
 }
 
 export type Collection = {

@@ -2,6 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -15,8 +16,8 @@ import { Button } from '../Button/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
-import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
+import { Tooltip } from '../Tooltip/index.js'
 
 const baseClass = 'relationship-add-new'
 
@@ -53,10 +54,7 @@ export const AddNewRelation: React.FC<Props> = ({
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
       // if autosave is enabled, the operation will be 'update'
-      const isAutosaveEnabled =
-        typeof collectionConfig?.versions?.drafts === 'object'
-          ? collectionConfig.versions.drafts.autosave
-          : false
+      const isAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
 
       if (operation === 'create' || (operation === 'update' && isAutosaveEnabled)) {
         // ensure the value is not already in the array
