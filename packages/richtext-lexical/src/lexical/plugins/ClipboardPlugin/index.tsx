@@ -5,7 +5,6 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { objectKlassEquals } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $getSelection, $isNodeSelection, COMMAND_PRIORITY_LOW, COPY_COMMAND } from 'lexical'
-import { deepCopyObjectSimple } from 'payload'
 import { useEffect } from 'react'
 
 type SerializedUnknownLexicalNode = {
@@ -53,7 +52,7 @@ export function ClipboardPlugin() {
           const node = selection.getNodes()[0]
 
           const serializedNode = node?.exportJSON() as SerializedUnknownLexicalNode
-          const deepCloneSerializedNode = deepCopyObjectSimple(serializedNode)
+          const deepCloneSerializedNode = JSON.parse(JSON.stringify(serializedNode))
           changeIds(deepCloneSerializedNode)
 
           const lexicalClipboardData: LexicalClipboardData = {
