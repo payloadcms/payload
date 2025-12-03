@@ -75,8 +75,13 @@ export const updateOperation = async <
     req,
     select: incomingSelect,
     showHiddenFields,
-    unpublishAllLocales,
+    unpublishAllLocales: unpublishAllLocalesArg,
   } = args
+
+  const unpublishAllLocales =
+    typeof unpublishAllLocalesArg === 'string'
+      ? unpublishAllLocalesArg === 'true'
+      : !!unpublishAllLocalesArg
 
   try {
     const shouldCommit = !disableTransaction && (await initTransaction(req))
