@@ -26,6 +26,8 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { postsCollectionSlug } from 'admin/slugs.js'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -854,6 +856,86 @@ describe('Versions', () => {
       await versionsTabUpdated.waitFor({ state: 'visible' })
 
       expect(versionsTabUpdated).toBeTruthy()
+    })
+
+    describe('A11y', () => {
+      test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        const scanResults = await runAxeScan({
+          page,
+          testInfo,
+          include: ['.versions'],
+        })
+
+        expect(scanResults.violations.length).toBe(0)
+      })
+
+      test('Versions list view elements have focus indicators', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        const scanResults = await checkFocusIndicators({
+          page,
+          testInfo,
+          selector: '.versions',
+        })
+
+        expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+        expect(scanResults.elementsWithoutIndicators).toBe(0)
+      })
+
+      test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        await page.locator('.cell-updatedAt a').first().click()
+
+        await page.locator('.view-version').waitFor()
+
+        const scanResults = await runAxeScan({
+          page,
+          testInfo,
+          include: ['.view-version'],
+        })
+
+        expect(scanResults.violations.length).toBe(0)
+      })
+
+      test('Version view elements have focus indicators', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        const scanResults = await checkFocusIndicators({
+          page,
+          testInfo,
+          selector: '.versions',
+        })
+
+        expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+        expect(scanResults.elementsWithoutIndicators).toBe(0)
+      })
     })
   })
 
