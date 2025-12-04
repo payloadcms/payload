@@ -10,7 +10,7 @@ type EntityConfig = Pick<CollectionConfig | GlobalConfig, 'versions'>
  * Check if an entity has drafts enabled
  */
 export const hasDraftsEnabled = (config: EntityConfig): boolean => {
-  return Boolean(config.versions && typeof config.versions === 'object' && config.versions.drafts)
+  return Boolean(config?.versions && typeof config.versions === 'object' && config.versions.drafts)
 }
 
 /**
