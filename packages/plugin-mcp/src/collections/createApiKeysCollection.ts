@@ -31,6 +31,7 @@ const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collectio
   return enabledCollectionSlugs.map((enabledCollectionSlug) => ({
     type: 'collapsible' as const,
     admin: {
+      description: `Manage client access to ${enabledCollectionSlug}`,
       position: 'sidebar' as const,
     },
     fields: [
@@ -169,6 +170,8 @@ export const createAPIKeysCollection = (
   return {
     slug: 'payload-mcp-api-keys',
     admin: {
+      description:
+        'API keys control which collections, resources, tools, and prompts MCP clients can access',
       group: 'MCP',
       useAsTitle: 'label',
     },
@@ -208,6 +211,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to tools',
                 position: 'sidebar' as const,
               },
               fields: [
@@ -228,6 +232,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to resources',
                 position: 'sidebar' as const,
               },
               fields: [
@@ -248,6 +253,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to prompts',
                 position: 'sidebar' as const,
               },
               fields: [
@@ -273,6 +279,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to experimental tools',
                 position: 'sidebar' as const,
               },
               fields: [

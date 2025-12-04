@@ -22,6 +22,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
@@ -138,7 +139,7 @@ export const deleteOperation = async <
       where: fullWhere,
     })
 
-    const errors: { id: number | string; message: string }[] = []
+    const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
     const promises = docs.map(async (doc) => {
       let result
@@ -281,8 +282,11 @@ export const deleteOperation = async <
 
         return result
       } catch (error) {
+        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+
         errors.push({
           id: doc.id,
+          isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       }

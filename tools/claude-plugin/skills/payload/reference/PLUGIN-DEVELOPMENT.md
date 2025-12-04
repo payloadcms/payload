@@ -149,10 +149,10 @@ plugin-<name>/
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.0.0",
-    "next": "^15.0.0",
+    "next": "^15.4.8",
     "payload": "^3.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "rimraf": "^5.0.0",
     "typescript": "^5.0.0",
     "vitest": "^3.0.0"

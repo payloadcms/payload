@@ -336,6 +336,7 @@ export const taTranslations: DefaultTranslationsObject = {
     loading: 'ஏற்றுகிறது',
     locale: 'மொழி அமைவு',
     locales: 'மொழி அமைவுகள்',
+    lock: 'பூட்டு',
     menu: 'மெனு',
     moreOptions: 'மேலும் விருப்பங்கள்',
     move: 'நகர்த்து',
@@ -426,6 +427,7 @@ export const taTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} குப்பைக்குச் செலுத்தப்பட்டது.',
     true: 'உண்மை',
     unauthorized: 'அனுமதி இல்லை',
+    unlock: 'திறக்க',
     unsavedChanges:
       'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. தொடருவதற்கு முன் சேமிக்கவும் அல்லது நிராகரிக்கவும்.',
     unsavedChangesDuplicate: 'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. நகலெடுக்கத் தொடர விரும்புகிறீர்களா?',
@@ -569,6 +571,7 @@ export const taTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'தற்போது காணப்படுகிறது',
     currentPublishedVersion: 'தற்போதைய வெளியிடப்பட்ட பதிப்பு',
     draft: 'வரைவு',
+    draftHasPublishedVersion: 'வரைவு (வெளியிடப்பட்ட பதிப்பு உள்ளது)',
     draftSavedSuccessfully: 'வரைவு வெற்றிகரமாக சேமிக்கப்பட்டது.',
     lastSavedAgo: 'கடைசியாக {{distance}} முன்பு சேமிக்கப்பட்டது',
     modifiedOnly: 'மாற்றப்பட்டவை மட்டும்',

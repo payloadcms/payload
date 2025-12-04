@@ -163,11 +163,48 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
+    // /////////////////////////////////////
+    // beforeLogin - Collection
+    // /////////////////////////////////////
+
+    let userBeforeLogin = user
+
+    if (collectionConfig.hooks?.beforeLogin?.length) {
+      for (const hook of collectionConfig.hooks.beforeLogin) {
+        userBeforeLogin =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            user: userBeforeLogin,
+          })) || userBeforeLogin
+      }
+    }
+
     const { token } = await jwtSign({
       fieldsToSign,
       secret,
       tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
+
+    req.user = userBeforeLogin
+
+    // /////////////////////////////////////
+    // afterLogin - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.afterLogin?.length) {
+      for (const hook of collectionConfig.hooks.afterLogin) {
+        userBeforeLogin =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            token,
+            user: userBeforeLogin,
+          })) || userBeforeLogin
+      }
+    }
 
     const fullUser = await payload.findByID({
       id: user.id,

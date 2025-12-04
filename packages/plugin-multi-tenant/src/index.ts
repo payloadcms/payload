@@ -190,6 +190,12 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isAutosaveEnabled: Boolean(
+                collection.versions &&
+                  typeof collection.versions === 'object' &&
+                  typeof collection.versions.drafts === 'object' &&
+                  Boolean(collection.versions.drafts.autosave),
+              ),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -376,6 +382,12 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isAutosaveEnabled: Boolean(
+                collection.versions &&
+                  typeof collection.versions === 'object' &&
+                  typeof collection.versions.drafts === 'object' &&
+                  Boolean(collection.versions.drafts.autosave),
+              ),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},

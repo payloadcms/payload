@@ -23,13 +23,16 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { tabSlug } from './collections/Tab/index.js'
 import {
+  allFieldsLocalizedSlug,
   defaultLocale,
   defaultLocale as englishLocale,
   englishTitle,
   hungarianLocale,
   localizedDateFieldsSlug,
+  localizedDraftsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -3440,6 +3443,201 @@ describe('Localization', () => {
 
         expect(localizedFallback.title).not.toBeDefined()
       })
+
+      it('should respect fallback: false on relationship values', async () => {
+        const originalPost = await payload.create({
+          collection: allFieldsLocalizedSlug,
+          data: {
+            text: 'Post EN',
+          },
+          locale: 'en',
+        })
+
+        await payload.update({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          data: {
+            selfRelation: originalPost.id,
+          },
+          locale: 'en',
+        })
+
+        const spanishPostWithEnglishFallback = await payload.findByID({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          locale: 'es',
+          fallbackLocale: 'en',
+        })
+
+        expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
+
+        const spanishPostWithNoFallback = await payload.findByID({
+          collection: allFieldsLocalizedSlug,
+          id: originalPost.id,
+          locale: 'es',
+          fallbackLocale: false,
+        })
+
+        expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
+      })
+    })
+  })
+
+  describe('Localized data shape', () => {
+    beforeEach(async () => {
+      await payload.delete({
+        collection: allFieldsLocalizedSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    })
+    it('should only nest the top level localized field values under locale keys', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          t1: {
+            t2: {
+              text: 'EN Deep Text',
+            },
+          },
+          g1: {
+            g2: {
+              g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
+            },
+          },
+          localizedArray: [{ item: 'EN Item 1' }, { item: 'EN Item 2' }],
+          localizedBlocks: [
+            { blockType: 'localizedTextBlock', text: 'EN Text' },
+            { blockType: 'nestedBlock', nestedArray: [{ item: 'EN Nested' }] },
+          ],
+          localizedGroup: {
+            description: 'EN Description',
+            title: 'EN Title',
+          },
+          localizedTab: {
+            tabText: 'EN Tab Text',
+          },
+          nonLocalizedArray: [{ localizedItem: 'EN Item 1' }, { localizedItem: 'EN Item 2' }],
+          nonLocalizedGroup: {
+            localizedText: 'EN Localized',
+            nonLocalizedText: 'Shared Text',
+          },
+          number: 100,
+          select: 'option1',
+          text: 'English text',
+          _status: 'draft',
+        },
+        locale: 'en',
+      })
+
+      const allLocalesDoc = await payload.findByID({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        locale: 'all',
+      })
+
+      // Verify simple localized fields have locale keys at top level
+      expect((allLocalesDoc.text as any).en).toBe('English text')
+      expect((allLocalesDoc.text as any).es).toBeUndefined()
+      expect((allLocalesDoc.number as any).en).toBe(100)
+      expect((allLocalesDoc.select as any).en).toBe('option1')
+
+      // Verify localized group has locale keys at top level, children do not
+      expect((allLocalesDoc.localizedGroup as any).en).toBeDefined()
+      expect((allLocalesDoc.localizedGroup as any).en.title).toBe('EN Title')
+      expect((allLocalesDoc.localizedGroup as any).en.description).toBe('EN Description')
+      expect((allLocalesDoc.localizedGroup as any).es).toBeUndefined()
+
+      // Verify non-localized group with localized children
+      expect(allLocalesDoc.nonLocalizedGroup!.nonLocalizedText).toBe('Shared Text')
+      expect((allLocalesDoc.nonLocalizedGroup!.localizedText as any).en).toBe('EN Localized')
+      expect((allLocalesDoc.nonLocalizedGroup!.localizedText as any).es).toBeUndefined()
+
+      // Verify localized array has locale keys at top level, items do not
+      expect((allLocalesDoc.localizedArray as any).en).toHaveLength(2)
+      expect((allLocalesDoc.localizedArray as any).en[0].item).toBe('EN Item 1')
+      expect((allLocalesDoc.localizedArray as any).en[1].item).toBe('EN Item 2')
+      expect((allLocalesDoc.localizedArray as any).es).toBeUndefined()
+
+      // Verify non-localized array with localized children
+      expect(allLocalesDoc.nonLocalizedArray).toHaveLength(2)
+      expect((allLocalesDoc.nonLocalizedArray?.[0]!.localizedItem as any).en).toBe('EN Item 1')
+      expect((allLocalesDoc.nonLocalizedArray?.[0]!.localizedItem as any).es).toBeUndefined()
+
+      // Verify localized blocks have locale keys at top level, nested fields do not
+      expect((allLocalesDoc.localizedBlocks as any).en).toHaveLength(2)
+      expect((allLocalesDoc.localizedBlocks as any).en[0].text).toBe('EN Text')
+      expect((allLocalesDoc.localizedBlocks as any).en[1].nestedArray[0].item).toBe('EN Nested')
+      expect((allLocalesDoc.localizedBlocks as any).es).toBeUndefined()
+
+      // Verify localized named tabs have locale keys at top level
+      expect((allLocalesDoc.localizedTab as any).en).toBeDefined()
+      expect((allLocalesDoc.localizedTab as any).en.tabText).toBe('EN Tab Text')
+      expect((allLocalesDoc.localizedTab as any).es).toBeUndefined()
+
+      // Verify deeply nested localization has locale keys only at topmost localized field
+      expect((allLocalesDoc.g1 as any).en).toBeDefined()
+      expect((allLocalesDoc.g1 as any).g2).toBeUndefined()
+      expect((allLocalesDoc.g1 as any).en.g2.g2a1).toHaveLength(2)
+      expect((allLocalesDoc.g1 as any).en.g2.g2a1[0].text).toBe('EN Deep 1')
+      expect((allLocalesDoc.g1 as any).es).toBeUndefined()
+
+      // Verify deeply nested localization in tab has locale keys only at topmost localized field
+      expect((allLocalesDoc.t1 as any).en).toBeDefined()
+      expect((allLocalesDoc.t1 as any).t2).toBeUndefined()
+      expect((allLocalesDoc.t1 as any).en.t2.text).toBe('EN Deep Text')
+      expect((allLocalesDoc.t1 as any).es).toBeUndefined()
+    })
+  })
+
+  describe('Localization like fields', () => {
+    it('should not localize fields that merely resemble localization fields', async () => {
+      const doc = await payload.create({
+        collection: noLocalizedFieldsCollectionSlug,
+        data: {
+          text: 'title',
+          group: {
+            en: {
+              text: 'some text',
+            },
+          },
+        },
+      })
+
+      const queriedDoc = await payload.find({
+        collection: noLocalizedFieldsCollectionSlug,
+        where: {
+          'group.en.text': { equals: 'some text' },
+        },
+      })
+
+      expect(queriedDoc.docs).toHaveLength(1)
+      expect(queriedDoc.docs[0]!.id).toBe(doc.id)
+    })
+  })
+
+  describe('localized queries', () => {
+    it('should count versions with query on localized field', async () => {
+      await payload.create({
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Localized Drafts EN',
+        },
+        locale: defaultLocale,
+      })
+
+      const result2 = await payload.countVersions({
+        collection: localizedDraftsSlug,
+        where: {
+          'version.title': {
+            equals: 'Localized Drafts EN',
+          },
+        },
+      })
+      expect(result2.totalDocs).toBe(1)
     })
   })
 })

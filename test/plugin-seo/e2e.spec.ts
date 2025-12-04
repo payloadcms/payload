@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { wait } from 'payload/shared'
@@ -164,6 +166,42 @@ describe('SEO Plugin', () => {
       await wait(600)
 
       await expect(autoGenButton).toContainText('Auto-génerar')
+    })
+  })
+
+  describe('A11y', () => {
+    test.fixme('SEO fields should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.edit(id))
+      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+
+      const secondTab = page.locator(contentTabsClass).nth(1)
+      await secondTab.click()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['#field-meta'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('SEO fields inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.edit(id))
+      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+
+      const secondTab = page.locator(contentTabsClass).nth(1)
+      await secondTab.click()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '#field-meta',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
     })
   })
 })
