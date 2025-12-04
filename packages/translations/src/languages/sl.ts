@@ -547,6 +547,8 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Spremembe tega dokumenta boste povrnili v objavljeno stanje. Ste prepričani?',
     aboutToUnpublish: 'Ta dokument boste umaknili iz objave. Ste prepričani?',
+    aboutToUnpublishIn:
+      'Ravno boste prenehali objavljati ta dokument v {{locale}}. Ali ste prepričani?',
     aboutToUnpublishSelection: 'Umaknili boste iz objave vse {{label}} v izboru. Ste prepričani?',
     autosave: 'Samodejno shranjevanje',
     autosavedSuccessfully: 'Samodejno shranjeno uspešno.',
@@ -593,6 +595,7 @@ export const slTranslations: DefaultTranslationsObject = {
     restoring: 'Obnavljanje...',
     reverting: 'Razveljavljanje...',
     revertToPublished: 'Vrni na objavljeno',
+    revertUnsuccessful: 'Razveljavitev ni uspela. Ni najdenih predhodno objavljenih verzij.',
     saveDraft: 'Shrani osnutek',
     scheduledSuccessfully: 'Uspešno načrtovano.',
     schedulePublish: 'Razporedi objavo',
@@ -603,6 +606,9 @@ export const slTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična različica',
     status: 'Status',
     unpublish: 'Razveljavi objavo',
+    unpublished: 'Neobjavljeno',
+    unpublishedSuccessfully: 'Uspešno nepobjavljeno.',
+    unpublishIn: 'Prekliči objavo v {{locale}}',
     unpublishing: 'Razveljavljanje objave...',
     version: 'Različica',
     versionAgo: 'pred {{distance}}',

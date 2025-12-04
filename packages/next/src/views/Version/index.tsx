@@ -121,7 +121,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
-          locale: 'all',
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,

@@ -43,7 +43,6 @@ export const Status: React.FC = () => {
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
 
   let statusToRender: 'changed' | 'draft' | 'published'
@@ -63,16 +62,9 @@ export const Status: React.FC = () => {
     : statusToRender
 
   const performAction = useCallback(
-    async (action: 'revert' | 'unpublish') => {
+    async () => {
       let url
       let method
-      let body
-
-      if (action === 'unpublish') {
-        body = {
-          _status: 'draft',
-        }
-      }
 
       if (collectionSlug) {
         url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
@@ -84,18 +76,17 @@ export const Status: React.FC = () => {
         method = 'post'
       }
 
-      if (action === 'revert') {
-        const publishedDoc = await requests
-          .get(url, {
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((res) => res.json())
 
-        body = publishedDoc
-      }
+      const publishedDoc = await requests
+        .get(url, {
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      const body = publishedDoc
 
       const res = await requests[method](url, {
         body: JSON.stringify(body),
@@ -121,11 +112,7 @@ export const Status: React.FC = () => {
         incrementVersionCount()
         setMostRecentVersionIsAutosaved(false)
 
-        if (action === 'unpublish') {
-          setHasPublishedDoc(false)
-        } else if (action === 'revert') {
-          setUnpublishedVersionCount(0)
-        }
+        setUnpublishedVersionCount(0)
       } else {
         try {
           const json = await res.json()
@@ -134,6 +121,7 @@ export const Status: React.FC = () => {
           } else if (json.error) {
             toast.error(json.error)
           } else {
+            // TODO: errors should say revert
             toast.error(t('error:unPublishingDocument'))
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -155,7 +143,6 @@ export const Status: React.FC = () => {
       setUnpublishedVersionCount,
       setMostRecentVersionIsAutosaved,
       t,
-      setHasPublishedDoc,
     ],
   )
 
@@ -170,26 +157,7 @@ export const Status: React.FC = () => {
         <div className={`${baseClass}__value-wrap`}>
           <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(`version:${displayStatusKey}`)}</span>
-          {!isTrashed && canUpdate && statusToRender === 'published' && (
-            <React.Fragment>
-              &nbsp;&mdash;&nbsp;
-              <Button
-                buttonStyle="none"
-                className={`${baseClass}__action`}
-                id={`action-unpublish`}
-                onClick={() => toggleModal(unPublishModalSlug)}
-              >
-                {t('version:unpublish')}
-              </Button>
-              <ConfirmationModal
-                body={t('version:aboutToUnpublish')}
-                confirmingLabel={t('version:unpublishing')}
-                heading={t('version:confirmUnpublish')}
-                modalSlug={unPublishModalSlug}
-                onConfirm={() => performAction('unpublish')}
-              />
-            </React.Fragment>
-          )}
+
           {!isTrashed &&
             canUpdate &&
             hasPublishedDoc &&
@@ -209,7 +177,7 @@ export const Status: React.FC = () => {
                   confirmingLabel={t('version:reverting')}
                   heading={t('version:confirmRevertToSaved')}
                   modalSlug={revertModalSlug}
-                  onConfirm={() => performAction('revert')}
+                  onConfirm={() => performAction()}
                 />
               </React.Fragment>
             )}
