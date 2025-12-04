@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-export const MediaWithDynamicPrefix: CollectionConfig = {
+export const MediaWithDynamicPrefix: CollectionConfig<'media-with-dynamic-prefix'> = {
   slug: 'media-with-dynamic-prefix',
   fields: [
     {
@@ -16,7 +16,7 @@ export const MediaWithDynamicPrefix: CollectionConfig = {
   hooks: {
     beforeOperation: [
       ({ args, operation }) => {
-        if (operation === 'create' && args?.data?.tenant) {
+        if (operation === 'create') {
           return {
             ...args,
             data: {
