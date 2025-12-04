@@ -86,8 +86,8 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@types/json-schema": "7.0.15",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.2",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "payload": "workspace:*",
     "stripe": "18.3.0"
   },
