@@ -24,6 +24,7 @@
     "build:db-postgres": "turbo build --filter \"@payloadcms/db-postgres\"",
     "build:db-sqlite": "turbo build --filter \"@payloadcms/db-sqlite\"",
     "build:db-vercel-postgres": "turbo build --filter \"@payloadcms/db-vercel-postgres\"",
+    "build:debug": "turbo build:debug --filter \"!@payloadcms/plugin-*\" --filter \"!@payloadcms/storage-*\" --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "build:drizzle": "turbo build --filter \"@payloadcms/drizzle\"",
     "build:email-nodemailer": "turbo build --filter \"@payloadcms/email-nodemailer\"",
     "build:email-resend": "turbo build --filter \"@payloadcms/email-resend\"",

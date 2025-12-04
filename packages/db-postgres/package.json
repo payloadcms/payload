@@ -64,6 +64,7 @@
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
+    "build:debug": "pnpm build",
     "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",

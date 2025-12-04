@@ -49,6 +49,7 @@
   ],
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
