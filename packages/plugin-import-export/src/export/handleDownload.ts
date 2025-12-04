@@ -19,9 +19,11 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
     const { collectionSlug } = body.data || {}
 
     req.payload.logger.info(`Download request received ${collectionSlug}`)
-    body.data.user = req.user
 
-    console.log({ downloadBody: body.data })
+    const { user } = req
+
+    body.data.userID = user?.id || user?.user?.id
+    body.data.userCollection = user?.collection || user?.user?.collection
 
     const res = await createExport({
       download: true,

@@ -1,6 +1,6 @@
-import type { Config, TaskConfig, TypedUser } from 'payload'
+import type { Config, TaskConfig } from 'payload'
 
-import type { CreateExportArgs, Export } from './createExport.js'
+import type { Export, ExportTaskInput } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -13,7 +13,7 @@ export const getCreateCollectionExportTask = (
 }> => {
   const inputSchema = getFields(config).concat(
     {
-      name: 'user',
+      name: 'userID',
       type: 'text',
     },
     {
@@ -28,22 +28,19 @@ export const getCreateCollectionExportTask = (
 
   return {
     slug: 'createCollectionExport',
-    handler: async ({ input, req }: CreateExportArgs) => {
-      let user: TypedUser | undefined
+    handler: async ({ input, req }) => {
+      if (!input) {
+        req.payload.logger.error('No input provided to createCollectionExport task')
 
-      if (input.userCollection && input.user) {
-        user = (await req.payload.findByID({
-          id: input.user,
-          collection: input.userCollection,
-        })) as TypedUser
-      }
-
-      if (!user) {
-        throw new Error('User not found')
+        return { output: {} }
       }
 
       // batchSize comes from the input (set when job was queued)
-      await createExport({ batchSize: (input as any).batchSize, input, req, user })
+      await createExport({
+        batchSize: (input as ExportTaskInput).batchSize,
+        input,
+        req,
+      })
 
       return {
         output: {},

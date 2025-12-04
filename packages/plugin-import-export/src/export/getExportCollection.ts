@@ -6,6 +6,7 @@ import type {
 } from 'payload'
 
 import type { ExportConfig, ImportExportPluginConfig } from '../types.js'
+import type { Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -69,6 +70,7 @@ export const getExportCollection = ({
       afterChange,
       beforeOperation,
     },
+    lockDocuments: false,
     upload: {
       filesRequiredOnCreate: false,
       hideFileInputOnCreate: true,
@@ -83,7 +85,17 @@ export const getExportCollection = ({
       }
       const { user } = req
       const debug = pluginConfig.debug
-      await createExport({ batchSize, input: { ...args.data, debug, user }, req })
+
+      await createExport({
+        batchSize,
+        input: {
+          ...args.data,
+          debug,
+          userCollection: user?.collection || user?.user?.collection,
+          userID: user?.id || user?.user?.id,
+        },
+        req,
+      })
     })
   } else {
     afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
@@ -91,13 +103,16 @@ export const getExportCollection = ({
         return
       }
 
-      const input = {
+      const { user } = req
+
+      const input: Export = {
         ...doc,
         batchSize,
         exportsCollection: collectionConfig.slug,
-        user: req?.user?.id || req?.user?.user?.id,
-        userCollection: 'users',
+        userCollection: user?.collection || user?.user?.collection,
+        userID: user?.id || user?.user?.id,
       }
+
       await req.payload.jobs.queue({
         input,
         task: 'createCollectionExport',

@@ -30,10 +30,14 @@ export type Export = {
   page?: number
   slug: string
   sort: Sort
-  user: string
   userCollection: string
+  userID: number | string
   where?: Where
 }
+
+export type ExportTaskInput = {
+  batchSize?: number
+} & Export
 
 export type CreateExportArgs = {
   batchSize?: number
@@ -43,7 +47,6 @@ export type CreateExportArgs = {
   download?: boolean
   input: Export
   req: PayloadRequest
-  user?: TypedUser
 }
 
 export const createExport = async (args: CreateExportArgs) => {
@@ -61,7 +64,8 @@ export const createExport = async (args: CreateExportArgs) => {
       format,
       locale: localeInput,
       sort,
-      user,
+      userID,
+      userCollection,
       page,
       limit: incomingLimit,
       where: whereFromInput = {},
@@ -82,8 +86,27 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const locale = localeInput ?? localeArg
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
+
   if (!collectionConfig) {
-    throw new APIError(`Collection with slug ${collectionSlug} not found`)
+    throw new APIError(`Collection with slug ${collectionSlug} not found.`)
+  }
+
+  let user: TypedUser | undefined
+
+  if (userCollection && userID) {
+    user = (await req.payload.findByID({
+      id: userID,
+      collection: userCollection,
+      overrideAccess: true,
+    })) as TypedUser
+  }
+
+  if (!user && req.user) {
+    user = req?.user?.id ? req.user : req?.user?.user
+  }
+
+  if (!user) {
+    throw new APIError('User not found.')
   }
 
   const draft = draftsFromInput === 'yes'
@@ -107,12 +130,28 @@ export const createExport = async (args: CreateExportArgs) => {
   const hardLimit =
     typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined
 
-  const { totalDocs } = await payload.count({
-    collection: collectionSlug,
-    user,
-    locale,
-    overrideAccess: false,
-  })
+  // Try to count documents - if access is denied, treat as 0 documents
+  let totalDocs = 0
+  let accessDenied = false
+  try {
+    const countResult = await payload.count({
+      collection: collectionSlug,
+      user,
+      locale,
+      overrideAccess: false,
+    })
+    totalDocs = countResult.totalDocs
+  } catch (error) {
+    // Access denied - user can't read from this collection
+    // We'll create an empty export file
+    accessDenied = true
+    if (debug) {
+      req.payload.logger.debug({
+        message: 'Access denied for collection, creating empty export',
+        collectionSlug,
+      })
+    }
+  }
 
   const totalPages = Math.max(1, Math.ceil(totalDocs / batchSize))
   const requestedPage = page || 1
@@ -251,7 +290,8 @@ export const createExport = async (args: CreateExportArgs) => {
 
         if (remaining === 0) {
           if (!isCSV) {
-            this.push(encoder.encode(']'))
+            // If first batch with no remaining, output empty array; otherwise just close
+            this.push(encoder.encode(isFirstBatch ? '[]' : ']'))
           }
           this.push(null)
           return
@@ -270,7 +310,8 @@ export const createExport = async (args: CreateExportArgs) => {
         if (result.docs.length === 0) {
           // Close JSON array properly if JSON
           if (!isCSV) {
-            this.push(encoder.encode(']'))
+            // If first batch with no docs, output empty array; otherwise just close
+            this.push(encoder.encode(isFirstBatch ? '[]' : ']'))
           }
           this.push(null)
           return
@@ -347,7 +388,8 @@ export const createExport = async (args: CreateExportArgs) => {
   // Start from the incoming page value, defaulting to 1 if undefined
   let currentPage = adjustedPage
   let fetched = 0
-  let hasNextPage = true
+  // Skip fetching if access was denied - we'll create an empty export
+  let hasNextPage = !accessDenied
   const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
   while (hasNextPage) {
@@ -397,23 +439,37 @@ export const createExport = async (args: CreateExportArgs) => {
 
   // Prepare final output
   if (isCSV) {
+    // If no documents were found and no columns discovered, use the requested fields as headers
+    // This ensures we create a valid CSV file even for empty exports
+    const finalColumns =
+      columns.length > 0
+        ? columns
+        : Array.isArray(fields) && fields.length > 0
+          ? fields.map((f) => f.replace(/\./g, '_'))
+          : []
+
     const paddedRows = rows.map((row) => {
       const fullRow: Record<string, unknown> = {}
-      for (const col of columns) {
+      for (const col of finalColumns) {
         fullRow[col] = row[col] ?? ''
       }
       return fullRow
     })
 
+    // Always output CSV with header, even if empty
     outputData.push(
       stringify(paddedRows, {
         header: true,
-        columns,
+        columns: finalColumns,
       }),
     )
   }
 
-  const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
+  // Ensure we always have valid content for the file
+  // For JSON, empty exports produce "[]"
+  // For CSV, if completely empty (no columns, no rows), produce at least a newline to ensure file creation
+  const content = format === 'json' ? `[${outputData.join(',')}]` : outputData.join('')
+  const buffer = Buffer.from(content.length > 0 ? content : '\n')
   if (debug) {
     req.payload.logger.debug(`${format} file generation complete`)
   }
@@ -442,8 +498,9 @@ export const createExport = async (args: CreateExportArgs) => {
         mimetype: isCSV ? 'text/csv' : 'application/json',
         size: buffer.length,
       },
-      overrideAccess: false,
-      user,
+      // Override access only here so that we can be sure the export collection itself is updated as expected
+      overrideAccess: true,
+      req,
     })
   }
   if (debug) {

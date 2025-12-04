@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 import { APIError } from 'payload'
 
@@ -30,9 +30,13 @@ export type Import = {
   importMode: ImportMode
   matchField?: string
   name: string
-  user?: string
   userCollection?: string
+  userID?: number | string
 }
+
+export type ImportTaskInput = {
+  batchSize?: number
+} & Import
 
 export type CreateImportArgs = {
   batchSize?: number
@@ -66,6 +70,19 @@ export const createImport = async ({
     importMode = 'create',
     matchField = 'id',
   } = input
+
+  let user: TypedUser | undefined
+
+  if (input.userCollection && input.userID) {
+    user = (await req.payload.findByID({
+      id: input.userID,
+      collection: input.userCollection,
+    })) as TypedUser
+  }
+
+  if (!user) {
+    throw new APIError('User is required for import operations', 401, null, true)
+  }
 
   if (debug) {
     req.payload.logger.debug({
@@ -229,6 +246,7 @@ export const createImport = async ({
     importMode,
     matchField,
     req,
+    user,
   })
 
   if (debug) {

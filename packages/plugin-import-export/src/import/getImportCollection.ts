@@ -9,6 +9,7 @@ import fs from 'fs'
 import path from 'path'
 
 import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
+import type { CreateImportArgs, Import, ImportTaskInput } from './createImport.js'
 
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
@@ -62,6 +63,7 @@ export const getImportCollection = ({
       afterChange,
       beforeOperation,
     },
+    lockDocuments: false,
     upload: {
       filesRequiredOnCreate: true,
       hideFileInputOnCreate: false,
@@ -120,8 +122,8 @@ export const getImportCollection = ({
             format: fileMimetype === 'text/csv' ? 'csv' : 'json',
             importMode: doc.importMode || 'create',
             matchField: doc.matchField,
-            user: req?.user?.id || req?.user?.user?.id,
             userCollection: 'users',
+            userID: req?.user?.id || req?.user?.user?.id,
           },
           req,
         })
@@ -257,14 +259,15 @@ export const getImportCollection = ({
           fileData = await fs.promises.readFile(fullPath)
         }
 
-        const input = {
+        const input: CreateImportArgs = {
           batchSize,
           collectionSlug: doc.collectionSlug,
           debug: pluginConfig.debug,
           defaultVersionStatus,
           file: {
             name: doc.filename,
-            data: fileData.toString('base64'),
+            // Convert to base64 for job serialization - will be converted back to Buffer in task handler
+            data: fileData.toString('base64') as unknown as Buffer,
             mimetype: doc.mimeType || 'text/csv',
           },
           filename: doc.filename,
@@ -273,8 +276,8 @@ export const getImportCollection = ({
           importMode: doc.importMode || 'create',
           importsCollection: collectionConfig.slug,
           matchField: doc.matchField,
-          user: req?.user?.id || req?.user?.user?.id,
-          userCollection: 'users',
+          userCollection: req.user?.collection || 'users',
+          userID: req?.user?.id || req?.user?.user?.id,
         }
 
         await req.payload.jobs.queue({

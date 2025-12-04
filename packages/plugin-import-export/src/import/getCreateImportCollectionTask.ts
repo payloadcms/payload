@@ -61,19 +61,6 @@ export const getCreateCollectionImportTask = (
   return {
     slug: 'createCollectionImport',
     handler: async ({ input, req }) => {
-      let user: TypedUser | undefined
-
-      if (input.userCollection && input.user) {
-        user = (await req.payload.findByID({
-          id: input.user,
-          collection: input.userCollection,
-        })) as TypedUser
-      }
-
-      if (!user) {
-        throw new Error('User not found')
-      }
-
       // Convert file data back to Buffer if it was serialized
       if (input.file && typeof input.file.data === 'string') {
         input.file.data = Buffer.from(input.file.data, 'base64')

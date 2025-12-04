@@ -54,8 +54,6 @@ export const ExportPreview: React.FC = () => {
     PluginImportExportTranslationKeys
   >()
 
-  console.log({ draft })
-
   const targetCollectionSlug = typeof collection === 'string' && collection
 
   const targetCollectionConfig = useMemo(

@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 import type { ImportMode, ImportResult } from './createImport.js'
 
@@ -32,6 +32,7 @@ export interface ProcessOptions {
   importMode: ImportMode
   matchField?: string
   req: PayloadRequest
+  user?: TypedUser
 }
 
 // Helper functions
@@ -125,15 +126,27 @@ function extractMultiLocaleData(data: Record<string, unknown>): {
   return { flatData, hasMultiLocale, localeUpdates }
 }
 
-async function processBatch(
-  batch: Record<string, unknown>[],
-  batchIndex: number,
-  collectionSlug: string,
-  importMode: ImportMode,
-  matchField: string | undefined,
-  req: PayloadRequest,
-  options: { batchSize: number; defaultVersionStatus: 'draft' | 'published' },
-): Promise<BatchResult> {
+type ProcessBatchOptions = {
+  batch: Record<string, unknown>[]
+  batchIndex: number
+  collectionSlug: string
+  importMode: ImportMode
+  matchField: string | undefined
+  options: { batchSize: number; defaultVersionStatus: 'draft' | 'published' }
+  req: PayloadRequest
+  user?: TypedUser
+}
+
+async function processBatch({
+  batch,
+  batchIndex,
+  collectionSlug,
+  importMode,
+  matchField,
+  options,
+  req,
+  user,
+}: ProcessBatchOptions): Promise<BatchResult> {
   const result: BatchResult = {
     failed: [],
     successful: [],
@@ -205,6 +218,7 @@ async function processBatch(
             draft: draftOption,
             overrideAccess: false,
             req,
+            user,
           })
 
           // Update for other locales
@@ -219,6 +233,7 @@ async function processBatch(
                   draft: collectionHasVersions ? false : undefined,
                   overrideAccess: false,
                   req: localeReq,
+                  user,
                 })
               } catch (error) {
                 // Log but don't fail the entire import if a locale update fails
@@ -237,6 +252,7 @@ async function processBatch(
             draft: draftOption,
             overrideAccess: false,
             req,
+            user,
           })
         }
       } else if (importMode === 'update' || importMode === 'upsert') {
@@ -272,6 +288,7 @@ async function processBatch(
             limit: 1,
             overrideAccess: false,
             req,
+            user,
             where: {
               [matchField || 'id']: {
                 equals: matchValue,
@@ -349,6 +366,7 @@ async function processBatch(
               // Don't specify draft - this creates a new draft for versioned collections
               overrideAccess: false,
               req,
+              user,
             })
 
             // Update for other locales
@@ -365,6 +383,7 @@ async function processBatch(
                     // Don't specify draft - this creates a new draft for versioned collections
                     overrideAccess: false,
                     req: localeReq,
+                    user,
                   })
                 } catch (error) {
                   // Log but don't fail the entire import if a locale update fails
@@ -398,6 +417,7 @@ async function processBatch(
                 // Don't specify draft - this creates a new draft for versioned collections
                 overrideAccess: false,
                 req,
+                user,
               })
 
               // Debug: log what was returned
@@ -418,6 +438,7 @@ async function processBatch(
                   draft: false, // Get published version
                   overrideAccess: false,
                   req,
+                  user,
                 })
                 req.payload.logger.info({
                   id: verifyPublished.id,
@@ -435,6 +456,7 @@ async function processBatch(
                   draft: true, // Get draft version
                   overrideAccess: false,
                   req,
+                  user,
                 })
                 req.payload.logger.info({
                   id: verifyDraft.id,
@@ -489,6 +511,7 @@ async function processBatch(
               draft: draftOption,
               overrideAccess: false,
               req,
+              user,
             })
 
             // Update for other locales
@@ -522,6 +545,7 @@ async function processBatch(
               draft: draftOption,
               overrideAccess: false,
               req,
+              user,
             })
           }
         } else {
@@ -600,7 +624,7 @@ export function createBatchProcessor(options: BatchProcessorOptions = {}) {
   }
 
   const processImport = async (processOptions: ProcessOptions): Promise<ImportResult> => {
-    const { collectionSlug, documents, importMode, matchField, req } = processOptions
+    const { collectionSlug, documents, importMode, matchField, req, user } = processOptions
     const batches = createBatches(documents, processorOptions.batchSize)
 
     const result: ImportResult = {
@@ -616,15 +640,16 @@ export function createBatchProcessor(options: BatchProcessorOptions = {}) {
         continue
       }
 
-      const batchResult = await processBatch(
-        currentBatch,
-        i,
+      const batchResult = await processBatch({
+        batch: currentBatch,
+        batchIndex: i,
         collectionSlug,
         importMode,
         matchField,
+        options: processorOptions,
         req,
-        processorOptions,
-      )
+        user,
+      })
 
       // Update results
       for (const success of batchResult.successful) {

@@ -64,31 +64,35 @@ export const getPluginCollections = async ({
   // Process each collection config for custom collection overrides
   if (pluginConfig.collections && pluginConfig.collections.length > 0) {
     for (const collectionConfig of pluginConfig.collections) {
-      // Handle export override - check for overrideCollection function
-      const exportConf =
+      // Handle export config - only process if overrideCollection is provided
+      // Settings like disableJobsQueue require a custom slug to work properly
+      const exportConfig =
         typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
-      if (exportConf?.overrideCollection) {
+      if (exportConfig?.overrideCollection) {
         // Generate a collection with this export config's settings (like disableJobsQueue)
         const collectionWithSettings = getExportCollection({
           config,
-          exportConfig: exportConf,
+          exportConfig,
           pluginConfig,
         })
-        // Apply the override on top
-        const customExport = await exportConf.overrideCollection({
+
+        const customExport = await exportConfig.overrideCollection({
           collection: collectionWithSettings,
         })
+
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customExport.slug !== baseExportCollection.slug) {
           exportCollections.push(customExport)
           // Map this target collection to its custom export collection
           customExportSlugMap.set(collectionConfig.slug, customExport.slug)
         } else {
+          // Full override - replace the base
           baseExportCollection = customExport
         }
       }
 
-      // Handle import override - check for overrideCollection function
+      // Handle import config - only process if overrideCollection is provided
+      // Settings like disableJobsQueue require a custom slug to work properly
       const importConf =
         typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
       if (importConf?.overrideCollection) {
@@ -98,16 +102,18 @@ export const getPluginCollections = async ({
           importConfig: importConf,
           pluginConfig,
         })
-        // Apply the override on top
+
         const customImport = await importConf.overrideCollection({
           collection: collectionWithSettings,
         })
+
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customImport.slug !== baseImportCollection.slug) {
           importCollections.push(customImport)
           // Map this target collection to its custom import collection
           customImportSlugMap.set(collectionConfig.slug, customImport.slug)
         } else {
+          // Full override - replace the base
           baseImportCollection = customImport
         }
       }
