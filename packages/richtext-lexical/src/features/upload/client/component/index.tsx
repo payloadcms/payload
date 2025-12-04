@@ -44,6 +44,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   const {
     className: baseClass,
     data: { fields, relationTo, value },
+    format,
     nodeKey,
   } = props
 
@@ -106,7 +107,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   }, [editor, nodeKey])
 
   const updateUpload = useCallback(
-    (data: Data) => {
+    (_data: Data) => {
       setParams({
         ...initialParams,
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
@@ -150,6 +151,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   return (
     <div
       className={`${baseClass}__contents ${baseClass}__contents--${aspectRatio}`}
+      data-align={format || undefined}
       data-filename={data?.filename}
       ref={uploadRef}
     >

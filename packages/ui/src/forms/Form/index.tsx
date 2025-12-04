@@ -7,6 +7,7 @@ import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
+  hasDraftValidationEnabled,
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
@@ -60,10 +61,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
 
-  const validateDrafts =
-    docConfig?.versions?.drafts && typeof docConfig?.versions?.drafts === 'object'
-      ? (docConfig.versions.drafts.validate ?? false)
-      : false
+  const validateDrafts = hasDraftValidationEnabled(docConfig)
 
   const {
     action,
@@ -411,8 +409,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
           // When there was an error submitting a draft,
           // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-          if (!validateDrafts && overridesFromArgs['_status'] === 'draft') {
-            setSubmitted(false)
+          // Also keep the form as modified so the save button remains enabled for retry.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setModified(true)
+            if (!validateDrafts) {
+              setSubmitted(false)
+            }
           }
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
@@ -494,6 +496,7 @@ export const Form: React.FC<FormProps> = (props) => {
       router,
       t,
       i18n,
+      validateDrafts,
       waitForAutocomplete,
     ],
   )

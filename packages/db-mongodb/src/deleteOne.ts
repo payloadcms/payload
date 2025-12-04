@@ -15,6 +15,13 @@ export const deleteOne: DeleteOne = async function deleteOne(
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
+    where,
+  })
+
   const options: MongooseUpdateQueryOptions = {
     projection: buildProjectionFromSelect({
       adapter: this,
@@ -23,13 +30,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
     }),
     session: await getSession(this, req),
   }
-
-  const query = await buildQuery({
-    adapter: this,
-    collectionSlug,
-    fields: collectionConfig.flattenedFields,
-    where,
-  })
 
   if (returning === false) {
     await Model.deleteOne(query, options)?.lean()

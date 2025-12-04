@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { TZDateMini } from '@date-fns/tz/date/mini'
 import { expect, test } from '@playwright/test'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -596,6 +597,22 @@ describe('Date', () => {
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
   })
+
+  describe('A11y', () => {
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-default').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+  })
 })
 
 /**
@@ -680,6 +697,48 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       await expect(async () => {
         await expect(dateTimeLocatorFixed).toHaveText('October 29th 2025, 8:00 PM')
       }).toPass({ timeout: 10000, intervals: [100] })
+    })
+
+    test('creates the expected UTC value when the selected timezone is UTC', async () => {
+      const expectedDateInput = 'Jan 1, 2025 6:00 PM'
+      const expectedUTCValue = '2025-01-01T18:00:00.000Z'
+
+      await page.goto(url.create)
+
+      const dateField = page.locator('#field-default input')
+      await dateField.fill('01/01/2025')
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Custom UTC")`
+
+      await page.click(dropdownControlSelector)
+      await page.click(timezoneOptionSelector)
+      await dateTimeLocator.fill(expectedDateInput)
+
+      await saveDocAndAssert(page)
+
+      const docID = page.url().split('/').pop()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(docID).toBeTruthy()
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          id: {
+            equals: docID,
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
     test('creates the expected UTC value when the selected timezone is Paris - no daylight savings', async () => {

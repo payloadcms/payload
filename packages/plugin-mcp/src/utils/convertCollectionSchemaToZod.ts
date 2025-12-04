@@ -30,6 +30,5 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
    * 5. No user input or external data is involved in the schema generation process
    */
   // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  const zodSchema = new Function('z', `return ${transpileResult.outputText}`)(z)
-  return zodSchema
+  return new Function('z', `return ${transpileResult.outputText}`)(z)
 }

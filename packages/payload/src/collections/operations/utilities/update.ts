@@ -1,7 +1,13 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
-import type { AccessResult, CollectionSlug, FileToSave, SanitizedConfig } from '../../../index.js'
+import type {
+  AccessResult,
+  CollectionSlug,
+  FileToSave,
+  SanitizedConfig,
+  TypedFallbackLocale,
+} from '../../../index.js'
 import type {
   JsonObject,
   Payload,
@@ -28,6 +34,10 @@ import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+} from '../../../utilities/getVersionsConfig.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -39,7 +49,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   depth: number
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
@@ -93,7 +103,7 @@ export const updateDocument = async <
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const isSavingDraft =
-    Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
+    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) && data._status !== 'published'
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
@@ -231,9 +241,8 @@ export const updateDocument = async <
     overrideAccess,
     req,
     skipValidation:
-      (isSavingDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate) ||
+      // only skip validation for drafts when draft validation is false
+      (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }

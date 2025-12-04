@@ -43,6 +43,7 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  DefaultDocumentIDType,
   FlattenedBlock,
   JobsConfig,
   KVAdapterResult,
@@ -314,7 +315,7 @@ export type AccessArgs<TData = any> = {
    */
   data?: TData
   /** ID of the resource being accessed */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
@@ -345,7 +346,7 @@ export type Endpoint = {
    * Compatible with Web Request/Response Model
    */
   handler: PayloadHandler
-  /** HTTP method (or "all") */
+  /** HTTP method */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
