@@ -8,6 +8,7 @@ import type {
 } from 'payload'
 
 import { SortColumn } from '@payloadcms/ui'
+import { hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'
@@ -78,10 +79,7 @@ export const buildVersionColumns = ({
     },
   ]
 
-  if (
-    entityConfig?.versions?.drafts ||
-    (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
-  ) {
+  if (hasDraftsEnabled(entityConfig)) {
     columns.push({
       accessor: '_status',
       active: true,

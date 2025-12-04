@@ -214,6 +214,8 @@ export const sanitizeCollection = async (
         }),
       )
     }
+  } else {
+    delete sanitized.versions
   }
 
   if (sanitized.folders === true) {

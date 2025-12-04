@@ -24,10 +24,10 @@
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
     "graphql": "^16.9.0",
-    "next": "^15.2.3",
+    "next": "^15.4.8",
     "payload": "latest",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@payloadcms/graphql": "latest",

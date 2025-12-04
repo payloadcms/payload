@@ -24,6 +24,11 @@ import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
+} from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
@@ -101,19 +106,13 @@ export const updateOperation = async <
     let { data } = args
 
     const publishAllLocales =
-      !draftArg &&
-      (publishAllLocalesArg ??
-        (globalConfig.versions &&
-        globalConfig.versions.drafts &&
-        globalConfig.versions.drafts.localizeStatus
-          ? false
-          : true))
+      !draftArg && (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(globalConfig) ? false : true))
     const unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
         : !!unpublishAllLocalesArg
     const isSavingDraft =
-      Boolean(draftArg && globalConfig.versions?.drafts) &&
+      Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
       data._status !== 'published' &&
       !publishAllLocales
 
@@ -251,8 +250,7 @@ export const updateOperation = async <
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation:
-        isSavingDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)

@@ -8,6 +8,7 @@ import {
   type SanitizedGlobalConfig,
   type TypedUser,
 } from 'payload'
+import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -57,7 +58,7 @@ export const getVersions = async ({
   const versionsConfig = entityConfig?.versions
   const hasLocalizedFields = traverseForLocalizedFields(entityConfig.fields)
   const localizedDraftsEnabled =
-    entityConfig.versions?.drafts !== false &&
+    hasDraftsEnabled(entityConfig) &&
     typeof payload.config.localization === 'object' &&
     hasLocalizedFields
 
@@ -84,7 +85,7 @@ export const getVersions = async ({
       }
     }
 
-    if (versionsConfig?.drafts) {
+    if (hasDraftsEnabled(collectionConfig)) {
       // Find out if a published document exists
       if (doc?._status === 'published') {
         publishedDoc = doc
@@ -131,7 +132,7 @@ export const getVersions = async ({
         hasPublishedDoc = true
       }
 
-      if (versionsConfig.drafts?.autosave) {
+      if (hasAutosaveEnabled(collectionConfig)) {
         const where: Record<string, any> = {
           and: [
             {
@@ -234,7 +235,7 @@ export const getVersions = async ({
 
   if (globalConfig) {
     // Find out if a published document exists
-    if (versionsConfig?.drafts) {
+    if (hasDraftsEnabled(globalConfig)) {
       if (doc?._status === 'published') {
         publishedDoc = doc
       } else {
@@ -253,7 +254,7 @@ export const getVersions = async ({
         hasPublishedDoc = true
       }
 
-      if (versionsConfig.drafts?.autosave) {
+      if (hasAutosaveEnabled(globalConfig)) {
         const mostRecentVersion = await payload.findGlobalVersions({
           slug: globalConfig.slug,
           limit: 1,

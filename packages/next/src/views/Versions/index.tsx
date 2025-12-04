@@ -1,7 +1,7 @@
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'payload'
-import { isNumber } from 'payload/shared'
+import { hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
 import { fetchLatestVersion, fetchVersions } from '../Version/fetchVersions.js'
@@ -32,7 +32,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     versions: { disableGutter = false, useVersionDrawerCreatedAtCell = false } = {},
   } = props
 
-  const draftsEnabled = (collectionConfig ?? globalConfig)?.versions?.drafts
+  const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
@@ -84,55 +84,55 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const [currentlyPublishedVersion, latestDraftVersion] = await Promise.all([
     hasPublishedDoc
       ? fetchLatestVersion({
-        collectionSlug,
-        depth: 0,
-        globalSlug,
-        locale: req.locale,
-        overrideAccess: false,
-        parentID: id,
-        req,
-        select: {
-          id: true,
-          updatedAt: true,
-          version: {
-            _status: true,
+          collectionSlug,
+          depth: 0,
+          globalSlug,
+          locale: req.locale,
+          overrideAccess: false,
+          parentID: id,
+          req,
+          select: {
+            id: true,
             updatedAt: true,
+            version: {
+              _status: true,
+              updatedAt: true,
+            },
           },
-        },
-        status: 'published',
-        user,
-        where: {
-          snapshot: {
-            not_equals: true,
+          status: 'published',
+          user,
+          where: {
+            snapshot: {
+              not_equals: true,
+            },
           },
-        },
-      })
+        })
       : Promise.resolve(null),
     draftsEnabled
       ? fetchLatestVersion({
-        collectionSlug,
-        depth: 0,
-        globalSlug,
-        locale: req.locale,
-        overrideAccess: false,
-        parentID: id,
-        req,
-        select: {
-          id: true,
-          updatedAt: true,
-          version: {
-            _status: true,
+          collectionSlug,
+          depth: 0,
+          globalSlug,
+          locale: req.locale,
+          overrideAccess: false,
+          parentID: id,
+          req,
+          select: {
+            id: true,
             updatedAt: true,
+            version: {
+              _status: true,
+              updatedAt: true,
+            },
           },
-        },
-        status: 'draft',
-        user,
-        where: {
-          snapshot: {
-            not_equals: true,
+          status: 'draft',
+          user,
+          where: {
+            snapshot: {
+              not_equals: true,
+            },
           },
-        },
-      })
+        })
       : Promise.resolve(null),
   ])
 
