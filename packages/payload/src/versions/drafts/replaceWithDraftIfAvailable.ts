@@ -8,6 +8,7 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
@@ -42,16 +43,15 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     ],
   }
 
-  if (
-    payload.config.localization &&
-    entity.versions.drafts &&
-    entity.versions.drafts.localizeStatus
-  ) {
+  if (hasLocalizeStatusEnabled(entity)) {
     if (locale === 'all') {
       queryToBuild = {
         and: [
           {
-            or: payload.config.localization.localeCodes.map((localeCode) => ({
+            or: (
+              (payload.config.localization && payload.config.localization.localeCodes) ||
+              []
+            ).map((localeCode) => ({
               [`version._status.${localeCode}`]: {
                 equals: 'draft',
               },
