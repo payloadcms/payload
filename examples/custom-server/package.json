@@ -25,8 +25,8 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^18.11.5",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
