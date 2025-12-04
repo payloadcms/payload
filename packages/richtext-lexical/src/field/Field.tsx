@@ -106,8 +106,8 @@ const RichTextComponent: React.FC<
   }, [isSmallWidthViewport])
 
   const classes = [
-    baseClass,
     'field-type',
+    baseClass,
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,

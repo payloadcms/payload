@@ -99,6 +99,7 @@ const buildTableState = async (
     importMap: payload.importMap,
     user,
   })
+
   await applyLocaleFiltering({ clientConfig, config, req })
 
   const permissions = await getAccessResults({ req })

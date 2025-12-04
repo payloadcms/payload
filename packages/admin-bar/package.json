@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/admin-bar",
-  "version": "3.64.0",
+  "version": "3.66.0",
   "description": "An admin bar for React apps using Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,8 +47,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
-    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {

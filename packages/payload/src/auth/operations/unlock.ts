@@ -7,6 +7,8 @@ import type {
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError } from '../../errors/index.js'
 import { combineQueries, Forbidden } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -57,6 +59,12 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
   }
 
   try {
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'unlock',
+    })
+
     const shouldCommit = await initTransaction(req)
     let whereConstraint: Where = {}
 
@@ -123,7 +131,14 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       await commitTransaction(req)
     }
 
-    return result
+    result = await buildAfterOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'unlock',
+      result,
+    })
+
+    return Boolean(result)
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

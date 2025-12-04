@@ -55,7 +55,7 @@ const sqliteReplacement: DbAdapterReplacement = {
 
 const d1SqliteReplacement: DbAdapterReplacement = {
   configReplacement: (envName = 'DATABASE_URI') => [
-    'db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),',
+    '  db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),',
   ],
   importReplacement: "import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'",
   packageName: '@payloadcms/db-d1-sqlite',
