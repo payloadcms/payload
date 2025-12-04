@@ -7,6 +7,7 @@ import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
+  hasDraftValidationEnabled,
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
@@ -60,10 +61,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
 
-  const validateDrafts =
-    docConfig?.versions?.drafts && typeof docConfig?.versions?.drafts === 'object'
-      ? (docConfig.versions.drafts.validate ?? false)
-      : false
+  const validateDrafts = hasDraftValidationEnabled(docConfig)
 
   const {
     action,
