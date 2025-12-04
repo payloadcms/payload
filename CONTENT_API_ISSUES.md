@@ -79,6 +79,26 @@ These are temporary fixes implemented in the `db-content-api` adapter that shoul
 
 ## ✅ Fixed Issues
 
+### #0: Invalid Content System ID - Not a Valid UUID (Dec 2, 2024)
+
+**Status:** ✅ Fixed
+**File:** `test/generateDatabaseAdapter.ts` (line 94)
+**Impact:** Critical - blocked ALL tests from starting
+
+**Problem:**
+Default `contentSystemId: 'test-system'` is not a valid UUID. PostgreSQL rejected it with:
+
+```
+ERROR: invalid input syntax for type uuid: "test-system"
+```
+
+**Fix:**
+Changed default to valid UUID: `'00000000-0000-4000-8000-000000000001'`
+
+**Result:** Collections can now be created, adapter can initialize.
+
+---
+
 ### #1: `findOne` Returns `undefined` Instead of `null`
 
 **Status:** ✅ Fixed
@@ -167,7 +187,98 @@ When users logged in, Payload tried to save their session by calling `adapter.up
 
 ## 🔴 Active Issues
 
-### #3: Where Clause Format Mismatch After Merge
+### #3: Content System Doesn't Exist
+
+**Status:** 🔴 Active - NEW ISSUE (Dec 2, 2024)
+**Impact:** Critical - blocks all adapter operations
+
+**Problem:**
+
+After fixing the UUID issue, the adapter now connects but the content system doesn't exist in the database:
+
+```
+[16:06:49] INFO: ---- DROPPING CONTENT API SYSTEM (00000000-0000-4000-8000-000000000001) ----
+[16:06:49] WARN: Failed to drop content system: 404 Not Found  ⬅️ Doesn't exist
+[16:06:49] ERROR: HTTP 500 from /api/v0/collections:
+[16:06:49] WARN: Failed to create collection posts: Content API HTTP 500:
+  {"message":"Transaction failed: Failed query: insert into \"collections\"
+   (\"id\", \"content_system_id\", \"key\", \"created_at\", \"updated_at\")
+   values (default, $1, $2, default, default) returning ..."}
+```
+
+**Root Cause:**
+
+The content system `00000000-0000-4000-8000-000000000001` was never created in the Content API database. When the adapter tries to create collections, they fail because of foreign key constraint - collections must belong to an existing content system.
+
+**Solutions:**
+
+**Option 1: Manual Creation** (Quick fix)
+Run the script to create the content system:
+
+```bash
+chmod +x test/create-content-system.sh
+CONTENT_API_URL=http://localhost:8080 ./test/create-content-system.sh
+```
+
+**Option 2: Adapter Auto-Creation** (Proper fix)
+The adapter's `init()` method should:
+
+1. Check if content system exists (GET /api/v0/content-systems/:id)
+2. If not found (404), create it (POST /api/v0/content-systems)
+3. Then proceed with collection creation
+
+**Option 3: Content API Default**
+Content API could create a default content system on startup if none exist.
+
+---
+
+### #3b: Invalid Content System ID - Not a Valid UUID
+
+**Status:** ✅ FIXED (Dec 2, 2024)
+**File:** `test/generateDatabaseAdapter.ts` (line 94)
+**Test:** All content-api tests fail on startup
+
+**Problem:**
+
+The adapter is configured with `contentSystemId: 'test-system'` (a plain string), but Content API expects a valid UUID format:
+
+```
+[postgres] ERROR: invalid input syntax for type uuid: "test-system"
+[postgres] STATEMENT: select "collections"."id" from "content_systems"
+  left join "collections" on "collections"."content_system_id" = "content_systems"."id"
+  where ("content_systems"."id" = $1 and "collections"."key" = $2)
+```
+
+**Root Cause:**
+
+In `test/generateDatabaseAdapter.ts`:
+
+```typescript
+contentSystemId: process.env.CONTENT_SYSTEM_ID || 'test-system',  // ❌ Invalid UUID
+```
+
+The PostgreSQL `content_systems.id` column is defined as type `uuid`, so it only accepts valid UUID formats like:
+
+- `00000000-0000-4000-8000-000000000001`
+- `7ab28301-508c-4a7e-a6c5-5061ec938253`
+
+**Fix:**
+
+Change the default to a valid UUID:
+
+```typescript
+contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+```
+
+**Impact:**
+
+- All collection creation fails with HTTP 500
+- All document queries fail with HTTP 404
+- Tests cannot initialize
+
+---
+
+### #4: Where Clause Format Mismatch After Merge
 
 **Status:** ✅ Fixed
 **File:** `db-content-api/src/index.ts` - `findMany`, `updateOne`, `deleteMany`, etc.
@@ -516,14 +627,23 @@ Most test suites cannot complete initialization because they have collections wi
 
 ## Next Actions
 
-**High Priority:**
+**Completed:**
 
-1. Fix Issue #2 (REST API permissions) - blocking basic functionality tests
-2. Wait for Issue #4 fix (versions) - blocking most test suites
+1. ✅ Issue #0 (Invalid UUID) - Fixed Dec 2, 2024
+2. ✅ Issue #1 (findOne returning undefined) - Fixed
+3. ✅ Issue #2 (REST API permissions) - Fixed
+4. ✅ Critical Bug (DocumentFinder WHERE clause) - Fixed Nov 19, 2024
 
-**Medium Priority:** 3. Fix Issue #3 (KV content system disappearing) - specific to KV tests
+**In Progress:**
 
-**Low Priority:** 4. Fix Issue #5 (Redis) - environment setup, not code issue
+1. 🔄 Issue #3 (Content System Creation) - Need to create content system in Content API
+   - Script created: `test/create-content-system.ts`
+   - Run: `tsx test/create-content-system.ts`
+
+**Blocked/Deferred:**
+
+1. ⚠️ Issue #4 (Document Versions) - Being fixed by other engineer
+2. ⚠️ Issue #5 (Redis KV) - Environment setup issue
 
 ---
 

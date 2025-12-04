@@ -91,7 +91,7 @@ export const allDatabaseAdapters = {
 import { contentAPIAdapter } from '@payloadcms/db-content-api'
 export const databaseAdapter = contentAPIAdapter({
   contentAPIURL: process.env.CONTENT_API_URL || 'http://localhost:8080',
-  contentSystemId: process.env.CONTENT_SYSTEM_ID || 'test-system',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
   apiKey: process.env.CONTENT_API_KEY,
 })
   `,
