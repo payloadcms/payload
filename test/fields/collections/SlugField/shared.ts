@@ -10,4 +10,5 @@ export const slugFieldDoc: RequiredDataFromCollection<SlugField> = {
   slug: 'seeded-text-document',
   localizedTitle: 'Localized text',
   localizedSlug: 'localized-text',
+  customSlugify: 'SEEDED-TEXT-DOCUMENT',
 }

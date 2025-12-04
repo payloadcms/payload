@@ -13,6 +13,8 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -51,6 +53,16 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   }
 
   try {
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    args = await buildBeforeOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'findVersionByID',
+    })
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -98,7 +110,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       where: fullWhere,
     })
 
-    const result = versionsQuery.docs[0]
+    let result = versionsQuery.docs[0]!
 
     if (!result) {
       if (!disableErrors) {
@@ -173,6 +185,17 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
           })) || result.version
       }
     }
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'findVersionByID',
+      result,
+    })
 
     // /////////////////////////////////////
     // Return results

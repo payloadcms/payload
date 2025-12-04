@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
-  "version": "3.65.0",
+  "version": "3.66.0",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
@@ -98,7 +98,6 @@
   },
   "peerDependencies": {
     "@payloadcms/ui": "workspace:*",
-    "next": "^15.2.3",
     "payload": "workspace:*"
   },
   "publishConfig": {

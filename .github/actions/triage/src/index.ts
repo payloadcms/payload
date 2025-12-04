@@ -20,6 +20,10 @@ interface Config {
     label: string
     linkSection: string
   }
+  areaLabels: {
+    section: string
+    skip: string[]
+  }
   actionsToPerform: ActionsToPerform[]
   token: string
   workspace: string
@@ -35,6 +39,13 @@ const config: Config = {
     label: getInput('reproduction_invalid_label') || 'invalid-reproduction',
     linkSection:
       getInput('reproduction_link_section') || '### Link to reproduction(.*)### To reproduce',
+  },
+  areaLabels: {
+    section: getInput('area_label_section') || '',
+    skip: (getInput('area_label_skip') || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
   },
   actionsToPerform: (getInput('actions_to_perform') || validActionsToPerform.join(','))
     .split(',')
@@ -204,11 +215,57 @@ async function getCommentBody(pathOrComment: string) {
   }
 }
 
+/**
+ * Apply area labels from the issue body dropdown selection
+ */
+async function checkAreaLabels(): Promise<void> {
+  if (!config.areaLabels.section) {
+    info('Area labels - skipped, no section regex configured')
+    return
+  }
+
+  const { issue, action } = context.payload as {
+    issue: { number: number; body: string } | undefined
+    action: string
+  }
+
+  if (action !== 'opened' || !issue?.body) return
+
+  const sectionRegex = new RegExp(config.areaLabels.section, 'is')
+  const match = issue.body.match(sectionRegex)?.[1]?.trim()
+
+  if (!match) {
+    info('Area labels - no matching section found in issue body')
+    return
+  }
+
+  const labels = match
+    .split(',')
+    .map((l) => l.trim())
+    .filter((l) => l && !config.areaLabels.skip.includes(l))
+
+  if (labels.length === 0) {
+    info('Area labels - no labels to apply after filtering')
+    return
+  }
+
+  const { rest: client } = getOctokit(config.token)
+  const common = { ...context.repo, issue_number: issue.number }
+
+  try {
+    await client.issues.addLabels({ ...common, labels })
+    info(`Applied area labels: ${labels.join(', ')}`)
+  } catch (err) {
+    error(`Failed to apply area labels: ${err instanceof Error ? err.message : err}`)
+  }
+}
+
 async function run() {
   const { token, workspace, ...safeConfig } = config
   info('Configuration:')
   info(JSON.stringify(safeConfig, null, 2))
 
+  await checkAreaLabels()
   await checkValidReproduction()
 }
 
