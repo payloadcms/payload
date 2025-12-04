@@ -102,6 +102,11 @@ type WithinEditorArgs = {
   node: LexicalNode
 }
 
+/**
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
 export type NodeMapValue<
   TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
 > = {
