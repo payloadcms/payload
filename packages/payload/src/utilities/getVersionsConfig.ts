@@ -1,5 +1,8 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { GlobalConfig } from '../globals/config/types.js'
+import type { Autosave, SanitizedDrafts } from '../versions/types.js'
+
+import { versionDefaults } from '../versions/defaults.js'
 
 type EntityConfig = Pick<CollectionConfig | GlobalConfig, 'versions'>
 
@@ -13,7 +16,13 @@ export const hasDraftsEnabled = (config: EntityConfig): boolean => {
 /**
  * Check if an entity has autosave enabled
  */
-export const hasAutosaveEnabled = (config: EntityConfig): boolean => {
+export const hasAutosaveEnabled = (
+  config: EntityConfig,
+): config is {
+  versions: {
+    drafts: { autosave: Autosave | false }
+  }
+} & EntityConfig => {
   return Boolean(
     config.versions &&
       typeof config.versions === 'object' &&
@@ -36,7 +45,13 @@ export const hasDraftValidationEnabled = (config: EntityConfig): boolean => {
   )
 }
 
-export const hasScheduledPublishEnabled = (config: EntityConfig): boolean => {
+export const hasScheduledPublishEnabled = (
+  config: EntityConfig,
+): config is {
+  versions: {
+    drafts: { schedulePublish: SanitizedDrafts['schedulePublish'] }
+  }
+} & EntityConfig => {
   return Boolean(
     config.versions &&
       typeof config.versions === 'object' &&
@@ -62,4 +77,19 @@ export const getVersionsMax = (config: EntityConfig): number => {
     return config.versions.max ?? 0
   }
   return 0
+}
+
+export const getAutosaveInterval = (config: EntityConfig): number => {
+  let interval = versionDefaults.autosaveInterval
+  if (
+    config.versions &&
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.autosave &&
+    typeof config.versions.drafts.autosave === 'object'
+  ) {
+    interval = config.versions.drafts.autosave.interval ?? versionDefaults.autosaveInterval
+  }
+  return interval
 }

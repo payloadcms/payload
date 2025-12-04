@@ -3,7 +3,11 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
+import {
+  getAutosaveInterval,
+  hasDraftValidationEnabled,
+  reduceFieldsToValues,
+} from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
@@ -62,16 +66,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const versionsConfig = docConfig?.versions
-  let interval = versionDefaults.autosaveInterval
-
-  if (versionsConfig.drafts && versionsConfig.drafts.autosave) {
-    interval = versionsConfig.drafts.autosave.interval
-  }
-
-  const validateOnDraft = Boolean(
-    docConfig?.versions?.drafts && docConfig?.versions?.drafts.validate,
-  )
+  const interval = getAutosaveInterval(docConfig)
+  const validateOnDraft = hasDraftValidationEnabled(docConfig)
 
   const [_saving, setSaving] = useState(false)
 
@@ -146,8 +142,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
 
-          const skipSubmission =
-            submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+          const skipSubmission = submitted && !valid && validateOnDraft
 
           if (!skipSubmission && modifiedRef.current && url) {
             const result = await submit<any, OnSaveContext>({
@@ -165,7 +160,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               overrides: {
                 _status: 'draft',
               },
-              skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
+              skipValidation: !validateOnDraft,
             })
 
             if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {

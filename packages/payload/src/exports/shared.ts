@@ -98,6 +98,7 @@ export { getSiblingData } from '../utilities/getSiblingData.js'
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export {
+  getAutosaveInterval,
   getVersionsMax,
   hasAutosaveEnabled,
   hasDraftsEnabled,
