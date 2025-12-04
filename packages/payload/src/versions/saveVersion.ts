@@ -4,6 +4,7 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
+import { getVersionsMax } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
@@ -177,7 +178,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
     return undefined!
   }
 
-  const max = collection ? collection.versions.maxPerDoc : global!.versions.max
+  const max = getVersionsMax(collection || global!)
 
   if (createNewVersion && max > 0) {
     await enforceMaxVersions({
