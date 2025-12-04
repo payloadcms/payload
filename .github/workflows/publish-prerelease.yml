@@ -34,14 +34,14 @@ jobs:
 
       - name: Determine release type and debug flag
         id: determine_release_type
-        # Use 'canary' for main branch, 'internal-debug' (if debug mode) or 'internal' for others
+        # Use 'internal-debug' if debug mode, 'canary' for main branch, 'internal' for others
         run: |
-          if [[ ${{ github.ref_name }} == "main" ]]; then
-            echo "release_type=canary" >> $GITHUB_OUTPUT
-            echo "debug_flag=" >> $GITHUB_OUTPUT
-          elif [[ "${{ inputs.debug_mode }}" == "true" ]]; then
+          if [[ "${{ inputs.debug_mode }}" == "true" ]]; then
             echo "release_type=internal-debug" >> $GITHUB_OUTPUT
             echo "debug_flag=--debug" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.ref_name }} == "main" ]]; then
+            echo "release_type=canary" >> $GITHUB_OUTPUT
+            echo "debug_flag=" >> $GITHUB_OUTPUT
           else
             echo "release_type=internal" >> $GITHUB_OUTPUT
             echo "debug_flag=" >> $GITHUB_OUTPUT
