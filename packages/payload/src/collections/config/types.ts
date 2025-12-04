@@ -73,7 +73,7 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
+  'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -84,7 +84,7 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
  * When creating a draft, required fields don't need to be provided as validation is skipped
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'>
 >
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
