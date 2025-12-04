@@ -87,14 +87,12 @@ export const getExportCollection = ({
       const debug = pluginConfig.debug
 
       await createExport({
+        ...args.data,
         batchSize,
-        input: {
-          ...args.data,
-          debug,
-          userCollection: user?.collection || user?.user?.collection,
-          userID: user?.id || user?.user?.id,
-        },
+        debug,
         req,
+        userCollection: user?.collection || user?.user?.collection,
+        userID: user?.id || user?.user?.id,
       })
     })
   } else {

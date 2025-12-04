@@ -5,15 +5,17 @@ import type { Import } from './createImport.js'
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
 
+export type ImportTaskInput = {
+  defaultVersionStatus?: 'draft' | 'published'
+  importId?: string
+  importsCollection?: string
+  user?: string
+} & Import
+
 export const getCreateCollectionImportTask = (
   config: Config,
 ): TaskConfig<{
-  input: {
-    importId?: string
-    importsCollection?: string
-    user?: string
-    userCollection?: string
-  } & Import
+  input: ImportTaskInput
   output: object
 }> => {
   const inputSchema = getFields(config).concat(
@@ -66,11 +68,8 @@ export const getCreateCollectionImportTask = (
         input.file.data = Buffer.from(input.file.data, 'base64')
       }
 
-      // batchSize and defaultVersionStatus come from the input (set when job was queued)
       const result = await createImport({
-        batchSize: (input as any).batchSize,
-        defaultVersionStatus: (input as any).defaultVersionStatus || 'published',
-        input,
+        ...input,
         req,
       })
 

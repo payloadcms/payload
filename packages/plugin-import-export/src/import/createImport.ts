@@ -12,6 +12,11 @@ import { unflattenObject } from './unflattenObject.js'
 export type ImportMode = 'create' | 'update' | 'upsert'
 
 export type Import = {
+  /**
+   * Number of documents to process in each batch during import
+   * @default 100
+   */
+  batchSize?: number
   collectionSlug: string
   /**
    * If true, enabled debug logging
@@ -34,16 +39,10 @@ export type Import = {
   userID?: number | string
 }
 
-export type ImportTaskInput = {
-  batchSize?: number
-} & Import
-
 export type CreateImportArgs = {
-  batchSize?: number
   defaultVersionStatus?: 'draft' | 'published'
-  input: Import
   req: PayloadRequest
-}
+} & Import
 
 export type ImportResult = {
   errors: Array<{
@@ -58,25 +57,23 @@ export type ImportResult = {
 
 export const createImport = async ({
   batchSize = 100,
+  collectionSlug,
+  debug = false,
   defaultVersionStatus = 'published',
-  input,
+  file,
+  format,
+  importMode = 'create',
+  matchField = 'id',
   req,
+  userCollection,
+  userID,
 }: CreateImportArgs): Promise<ImportResult> => {
-  const {
-    collectionSlug,
-    debug = false,
-    file,
-    format,
-    importMode = 'create',
-    matchField = 'id',
-  } = input
-
   let user: TypedUser | undefined
 
-  if (input.userCollection && input.userID) {
+  if (userCollection && userID) {
     user = (await req.payload.findByID({
-      id: input.userID,
-      collection: input.userCollection,
+      id: userID,
+      collection: userCollection,
     })) as TypedUser
   }
 

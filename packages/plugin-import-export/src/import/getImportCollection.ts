@@ -9,7 +9,8 @@ import fs from 'fs'
 import path from 'path'
 
 import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
-import type { CreateImportArgs, Import, ImportTaskInput } from './createImport.js'
+import type { Import } from './createImport.js'
+import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
@@ -107,25 +108,23 @@ export const getImportCollection = ({
         }
 
         const result = await createImport({
+          id: doc.id,
+          name: doc.filename || 'import',
           batchSize,
+          collectionSlug: doc.collectionSlug,
+          debug,
           defaultVersionStatus,
-          input: {
-            id: doc.id,
-            name: doc.filename || 'import',
-            collectionSlug: doc.collectionSlug,
-            debug,
-            file: {
-              name: doc.filename,
-              data: fileData,
-              mimetype: fileMimetype,
-            },
-            format: fileMimetype === 'text/csv' ? 'csv' : 'json',
-            importMode: doc.importMode || 'create',
-            matchField: doc.matchField,
-            userCollection: 'users',
-            userID: req?.user?.id || req?.user?.user?.id,
+          file: {
+            name: doc.filename,
+            data: fileData,
+            mimetype: fileMimetype,
           },
+          format: fileMimetype === 'text/csv' ? 'csv' : 'json',
+          importMode: doc.importMode || 'create',
+          matchField: doc.matchField,
           req,
+          userCollection: req?.user?.collection || req?.user?.user?.collection,
+          userID: req?.user?.id || req?.user?.user?.id,
         })
 
         // Determine status
@@ -259,7 +258,8 @@ export const getImportCollection = ({
           fileData = await fs.promises.readFile(fullPath)
         }
 
-        const input: CreateImportArgs = {
+        const input: ImportTaskInput = {
+          name: doc.filename,
           batchSize,
           collectionSlug: doc.collectionSlug,
           debug: pluginConfig.debug,
@@ -270,13 +270,12 @@ export const getImportCollection = ({
             data: fileData.toString('base64') as unknown as Buffer,
             mimetype: doc.mimeType || 'text/csv',
           },
-          filename: doc.filename,
           format: doc.mimeType === 'text/csv' ? 'csv' : 'json',
           importId: doc.id,
           importMode: doc.importMode || 'create',
           importsCollection: collectionConfig.slug,
           matchField: doc.matchField,
-          userCollection: req.user?.collection || 'users',
+          userCollection: req.user?.collection || req?.user?.user?.collection,
           userID: req?.user?.id || req?.user?.user?.id,
         }
 

@@ -13,6 +13,11 @@ import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
 export type Export = {
+  /**
+   * Number of documents to process in each batch during export
+   * @default 100
+   */
+  batchSize?: number
   collectionSlug: string
   /**
    * If true, enables debug logging
@@ -35,44 +40,36 @@ export type Export = {
   where?: Where
 }
 
-export type ExportTaskInput = {
-  batchSize?: number
-} & Export
-
 export type CreateExportArgs = {
-  batchSize?: number
   /**
    * If true, stream the file instead of saving it
    */
   download?: boolean
-  input: Export
   req: PayloadRequest
-}
+} & Export
 
 export const createExport = async (args: CreateExportArgs) => {
   const {
+    id,
+    name: nameArg,
     batchSize = 100,
+    collectionSlug,
+    debug = false,
     download,
-    input: {
-      id,
-      name: nameArg,
-      collectionSlug,
-      debug = false,
-      drafts: draftsFromInput,
-      exportsCollection,
-      fields,
-      format,
-      locale: localeInput,
-      sort,
-      userID,
-      userCollection,
-      page,
-      limit: incomingLimit,
-      where: whereFromInput = {},
-    },
-    req: { locale: localeArg, payload },
+    drafts: draftsFromInput,
+    exportsCollection,
+    fields,
+    format,
+    limit: incomingLimit,
+    locale: localeInput,
+    page,
     req,
+    sort,
+    userCollection,
+    userID,
+    where: whereFromInput = {},
   } = args
+  const { locale: localeArg, payload } = req
 
   if (debug) {
     req.payload.logger.debug({

@@ -1,6 +1,6 @@
 import type { Config, TaskConfig } from 'payload'
 
-import type { Export, ExportTaskInput } from './createExport.js'
+import type { Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -35,10 +35,8 @@ export const getCreateCollectionExportTask = (
         return { output: {} }
       }
 
-      // batchSize comes from the input (set when job was queued)
       await createExport({
-        batchSize: (input as ExportTaskInput).batchSize,
-        input,
+        ...input,
         req,
       })
 

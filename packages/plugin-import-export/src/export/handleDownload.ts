@@ -26,8 +26,9 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
     body.data.userCollection = user?.collection || user?.user?.collection
 
     const res = await createExport({
+      ...body.data,
+      debug,
       download: true,
-      input: { ...body.data, debug },
       req,
     })
 
