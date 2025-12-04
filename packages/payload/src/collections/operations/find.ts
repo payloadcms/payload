@@ -23,6 +23,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -169,7 +170,7 @@ export const findOperation = async <
       req,
     })
 
-    if (collectionConfig.versions?.drafts && draftsEnabled) {
+    if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
       fullWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({

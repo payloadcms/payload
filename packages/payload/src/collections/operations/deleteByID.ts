@@ -17,6 +17,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -169,7 +170,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
     // Delete scheduled posts
     // /////////////////////////////////////
-    if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+    if (hasScheduledPublishEnabled(collectionConfig)) {
       await deleteScheduledPublishJobs({
         id,
         slug: collectionConfig.slug,

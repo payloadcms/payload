@@ -1,7 +1,7 @@
 import type { Payload, TypedUser, ViewTypes } from 'payload'
 
 import { unauthorized } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -157,12 +157,8 @@ async function generateCreateRedirect({
   payload,
   tenantID,
 }: GenerateCreateArgs): Promise<`/${string}` | undefined> {
-  const collection = payload.collections[collectionSlug]
-  if (
-    collection?.config.versions?.drafts &&
-    typeof collection.config.versions.drafts === 'object' &&
-    collection.config.versions.drafts.autosave
-  ) {
+  const collectionConfig = payload.collections[collectionSlug]?.config
+  if (hasAutosaveEnabled(collectionConfig!)) {
     // Autosave is enabled, create a document first
     try {
       const doc = await payload.create({

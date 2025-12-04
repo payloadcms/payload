@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook } from '../../config/types.js'
 import type { SlugFieldArgs, Slugify } from './index.js'
 
+import { hasAutosaveEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
 
@@ -56,13 +57,7 @@ export const generateSlug =
         return false
       }
 
-      const autosaveEnabled = Boolean(
-        (typeof collection?.versions?.drafts === 'object' &&
-          collection?.versions?.drafts.autosave) ||
-          (typeof global?.versions?.drafts === 'object' && global?.versions?.drafts.autosave),
-      )
-
-      if (!autosaveEnabled) {
+      if (!hasAutosaveEnabled(collection || global!)) {
         // We can generate the slug at this point
         if (data) {
           data[slugFieldName] = slugify({
