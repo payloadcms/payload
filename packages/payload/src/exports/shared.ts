@@ -70,25 +70,25 @@ export {
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
-
 export { extractID } from '../utilities/extractID.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
+
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
-
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
+
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
-
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 
 export { getSelectMode } from '../utilities/getSelectMode.js'
@@ -96,6 +96,15 @@ export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
+
+export {
+  getAutosaveInterval,
+  getVersionsMax,
+  hasAutosaveEnabled,
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasScheduledPublishEnabled,
+} from '../utilities/getVersionsConfig.js'
 
 export { isNextBuild } from '../utilities/isNextBuild.js'
 
