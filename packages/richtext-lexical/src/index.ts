@@ -1055,10 +1055,12 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 
 export type {
+  LexicalEditorNodeMap,
   LexicalEditorProps,
   LexicalEditorViewMap,
   LexicalFieldAdminProps,
   LexicalRichTextAdapter,
+  NodeMapValue,
 } from './types.js'
 
 export { buildDefaultEditorState, buildEditorState } from './utilities/buildEditorState.js'
