@@ -32,6 +32,11 @@ import { deepCopyObjectSimple, getLatestCollectionVersion, saveVersion } from '.
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
+} from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
@@ -99,16 +104,13 @@ export const updateDocument = async <
   const password = data?.password
   const publishAllLocales =
     !draftArg &&
-    (publishAllLocalesArg ??
-      (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus
-        ? false
-        : true))
+    (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
   const isSavingDraft =
-    Boolean(draftArg && collectionConfig.versions.drafts) &&
+    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
   const shouldSavePassword = Boolean(
@@ -252,9 +254,8 @@ export const updateDocument = async <
     overrideAccess,
     req,
     skipValidation:
-      (isSavingDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate) ||
+      // only skip validation for drafts when draft validation is false
+      (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }
