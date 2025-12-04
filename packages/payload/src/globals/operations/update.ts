@@ -103,7 +103,9 @@ export const updateOperation = async <
     const publishAllLocales =
       !draftArg &&
       (publishAllLocalesArg ??
-        (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus
+        (globalConfig.versions &&
+        globalConfig.versions.drafts &&
+        globalConfig.versions.drafts.localizeStatus
           ? false
           : true))
     const unpublishAllLocales =
