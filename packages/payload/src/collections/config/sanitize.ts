@@ -197,6 +197,8 @@ export const sanitizeCollection = async (
 
       sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
     }
+  } else {
+    delete sanitized.versions
   }
 
   if (sanitized.folders === true) {

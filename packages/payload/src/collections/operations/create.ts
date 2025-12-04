@@ -29,6 +29,7 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -120,7 +121,7 @@ export const createOperation = async <
 
     let { data } = args
 
-    const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig))
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -231,10 +232,7 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess,
       req,
-      skipValidation:
-        isSavingDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////

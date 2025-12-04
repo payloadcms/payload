@@ -32,6 +32,7 @@ import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-pres
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { setupOrderable } from './orderable/index.js'
@@ -281,9 +282,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
-      const draftsConfig = config.globals![i]?.versions?.drafts
-
-      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+      if (hasScheduledPublishEnabled(config.globals![i]!)) {
         schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 
