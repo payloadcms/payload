@@ -506,31 +506,34 @@ test.describe('Form State', () => {
       delay: 'Slow 3G',
     })
 
-    await assertNetworkRequests(
-      page,
-      `/api/${autosavePostsSlug}/${autosavePost.id}`,
-      async () => {
-        // Type a partial word, then pause for longer than debounce rate to trigger first onChange
-        await field.fill('Tes')
-        await wait(250) // wait for debounce to elapse, but not long enough for the autosave network request to complete
-        // Finish the word, which importantly, should trigger a second onChange while the autosave is still in-flight
-        await field.press('t')
-      },
-      {
-        allowedNumberOfRequests: 2,
-        minimumNumberOfRequests: 2,
-        timeout: 10000,
-      },
-    )
+    try {
+      await assertNetworkRequests(
+        page,
+        `/api/${autosavePostsSlug}/${autosavePost.id}`,
+        async () => {
+          // Type a partial word, then pause for longer than debounce rate to trigger first onChange
+          await field.fill('Tes')
+          await wait(250) // wait for debounce to elapse, but not long enough for the autosave network request to complete
+          // Finish the word, which importantly, should trigger a second onChange while the autosave is still in-flight
+          await field.press('t')
+        },
+        {
+          allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
+    } finally {
+      // Ensure throttling is always cleaned up, even if the test fails
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        offline: false,
+        latency: 0,
+        downloadThroughput: -1,
+        uploadThroughput: -1,
+      })
 
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
-    })
-
-    await cdpSession.detach()
+      await cdpSession.detach()
+    }
   })
 
   describe('Throttled tests', () => {
