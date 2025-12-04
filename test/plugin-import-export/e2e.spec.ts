@@ -9,7 +9,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  runJobsQueue,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -55,6 +60,10 @@ test.describe('Import Export', () => {
       // Save the export
       await saveDocAndAssert(page, '#action-save')
 
+      await runJobsQueue({ serverURL })
+
+      await page.reload()
+
       // Verify export was created
       const exportFilename = page.locator('.file-details__main-detail')
       await expect(exportFilename).toBeVisible()
@@ -74,6 +83,10 @@ test.describe('Import Export', () => {
 
       // Save the export
       await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      await page.reload()
 
       // Verify export was created
       const exportFilename = page.locator('.file-details__main-detail')
@@ -205,6 +218,8 @@ test.describe('Import Export', () => {
           await expect(statusField).toContainText(/completed|partial/i)
         }
 
+        await runJobsQueue({ serverURL })
+
         // Verify imported documents exist
         const importedDocs = await payload.find({
           collection: 'pages',
@@ -265,6 +280,8 @@ test.describe('Import Export', () => {
 
         // Verify import completed
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+        await runJobsQueue({ serverURL })
 
         // Verify imported documents exist
         const importedDocs = await payload.find({
@@ -390,6 +407,8 @@ test.describe('Import Export', () => {
 
         // Save/submit the import
         await saveDocAndAssert(page)
+
+        await runJobsQueue({ serverURL })
 
         // Verify the document was updated
         const {

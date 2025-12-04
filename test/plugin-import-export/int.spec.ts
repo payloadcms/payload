@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
+import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
@@ -15,6 +15,7 @@ import { richTextData } from './seed/richTextData.js'
 let payload: Payload
 let restClient: NextRESTClient
 let user: any
+let restrictedUser: any
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -29,6 +30,16 @@ describe('@payloadcms/plugin-import-export', () => {
         password: devUser.password,
       },
     })
+    const userDocs = await payload.find({
+      collection: 'users',
+      where: {
+        email: { equals: regularUser.email },
+      },
+    })
+
+    if (userDocs.docs?.[0]) {
+      restrictedUser = { ...userDocs.docs[0], collection: 'users' }
+    }
   })
 
   afterAll(async () => {
@@ -61,6 +72,7 @@ describe('@payloadcms/plugin-import-export', () => {
         user,
         data: {
           collectionSlug: 'pages',
+          name: 'pages.csv',
           sort: 'createdAt',
           fields: ['id', 'title', 'group.value', 'group.array.field1', 'createdAt', 'updatedAt'],
           format: 'csv',
@@ -69,6 +81,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -99,6 +113,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -124,6 +140,8 @@ describe('@payloadcms/plugin-import-export', () => {
           format: 'csv',
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -153,6 +171,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -177,6 +197,8 @@ describe('@payloadcms/plugin-import-export', () => {
           page: 2,
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -242,6 +264,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -268,6 +292,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -315,6 +341,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -344,6 +372,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -372,6 +402,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -399,6 +431,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -429,6 +463,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       const exportDoc = await payload.findByID({
         collection: 'exports',
@@ -463,6 +499,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -490,6 +528,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -519,6 +559,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -550,6 +592,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -576,6 +620,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       const exportDoc = await payload.findByID({
         collection: 'exports',
@@ -615,6 +661,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -650,6 +698,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -670,6 +720,7 @@ describe('@payloadcms/plugin-import-export', () => {
             fields: ['id', 'title'],
             format: 'json',
             sort: 'title',
+            drafts: 'yes',
           },
         }),
         headers: { 'Content-Type': 'application/json' },
@@ -696,6 +747,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -713,7 +766,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
     it('should create jobs task for exports', async () => {
       const doc = await payload.create({
-        collection: 'exports-tasks' as CollectionSlug,
+        collection: 'exports' as CollectionSlug,
         user,
         data: {
           collectionSlug: 'pages',
@@ -726,29 +779,42 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      const { docs } = await payload.find({
-        collection: 'payload-jobs' as CollectionSlug,
+      const {
+        docs: [job],
+      } = await payload.find({
+        collection: 'payload-jobs',
+        sort: '-createdAt',
       })
-      const job = docs[0]
 
       expect(job).toBeDefined()
 
-      const { input } = job
+      const input = job?.input
 
+      expect(input).toBeDefined()
+
+      // @ts-ignore
       expect(input.id).toBeDefined()
+      // @ts-ignore
       expect(input.name).toBeDefined()
+      // @ts-ignore
       expect(input.format).toStrictEqual('csv')
+      // @ts-ignore
       expect(input.locale).toStrictEqual('all')
+      // @ts-ignore
       expect(input.fields).toStrictEqual(['id', 'title'])
+      // @ts-ignore
       expect(input.collectionSlug).toStrictEqual('pages')
-      expect(input.exportsCollection).toStrictEqual('exports-tasks')
-      expect(input.user).toBeDefined()
+      // @ts-ignore
+      expect(input.exportsCollection).toStrictEqual('exports')
+      // @ts-ignore
+      expect(input.userID).toBeDefined()
+      // @ts-ignore
       expect(input.userCollection).toBeDefined()
 
       await payload.jobs.run()
 
       const exportDoc = await payload.findByID({
-        collection: 'exports-tasks' as CollectionSlug,
+        collection: 'exports' as CollectionSlug,
         id: doc.id,
       })
 
@@ -769,6 +835,8 @@ describe('@payloadcms/plugin-import-export', () => {
           format: 'csv',
         },
       })
+
+      await payload.jobs.run()
 
       const exportDoc = await payload.findByID({
         collection: 'exports',
@@ -807,6 +875,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
@@ -840,6 +910,8 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         },
       })
+
+      await payload.jobs.run()
 
       const exportDoc = await payload.findByID({
         collection: 'exports',
@@ -889,8 +961,6 @@ describe('@payloadcms/plugin-import-export', () => {
       }
       await Promise.all(promises)
 
-      console.log('seeded')
-
       let doc = await payload.create({
         collection: 'exports',
         user,
@@ -900,6 +970,8 @@ describe('@payloadcms/plugin-import-export', () => {
           format: 'csv',
         },
       })
+
+      await payload.jobs.run()
 
       doc = await payload.findByID({
         collection: 'exports',
@@ -965,6 +1037,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
@@ -981,7 +1055,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Import the CSV back
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -996,7 +1070,16 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
+      })
+
       // Verify the import
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (importDoc.status !== 'completed') {
         console.log('Import did not complete (CSV test):', {
           status: importDoc.status,
@@ -1043,7 +1126,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const jsonBuffer = Buffer.from(JSON.stringify(testData))
 
       // Import the JSON
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1056,6 +1139,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'import-test.json',
           size: jsonBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1121,7 +1212,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import with update mode
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1135,6 +1226,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'update-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1153,9 +1252,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(updatedPage1.group?.value).toBe('updated value 1')
     })
 
-    // Skipped: Updates in versioned collections create drafts, not updating published version
-    // This is expected behavior but test needs adjustment
-    it.skip('should handle upsert mode correctly', async () => {
+    it('should handle upsert mode correctly', async () => {
       // Create one existing document with unique name
       const timestamp = Date.now()
       const existingPage = await payload.create({
@@ -1164,6 +1261,7 @@ describe('@payloadcms/plugin-import-export', () => {
         data: {
           title: `Upsert Test ${timestamp}`,
           excerpt: 'existing',
+          _status: 'published',
         },
       })
 
@@ -1181,8 +1279,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       ]
 
-      console.log('Existing page ID:', existingPage.id, typeof existingPage.id)
-
       const csvContent =
         'id,title,excerpt\n' +
         upsertData.map((row) => `${row.id},"${row.title}","${row.excerpt}"`).join('\n')
@@ -1190,7 +1286,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import with upsert mode
-      const importDoc = await payload.create({
+      const initialImportDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1206,12 +1302,13 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Verify the import
-      console.log('Upsert test import result:', {
-        status: importDoc.status,
-        summary: importDoc.summary,
-        issueDetails: importDoc.summary?.issueDetails,
+      await payload.jobs.run()
+
+      const importDoc = await payload.findByID({
+        collection: 'imports',
+        id: initialImportDoc.id,
       })
+
       expect(importDoc.status).toBe('completed')
       expect(importDoc.summary?.updated).toBe(1)
       expect(importDoc.summary?.imported).toBe(1)
@@ -1232,14 +1329,6 @@ describe('@payloadcms/plugin-import-export', () => {
         depth: 0,
         draft: true, // Get draft version
         overrideAccess: true,
-      })
-
-      // Debug output
-      console.log('Upsert update result:', {
-        publishedTitle: publishedPage.title,
-        draftTitle: draftPage.title,
-        publishedExcerpt: publishedPage.excerpt,
-        draftExcerpt: draftPage.excerpt,
       })
 
       // The update creates a new draft version, not updating published
@@ -1268,7 +1357,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import with single locale
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1281,6 +1370,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'localized-single-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1320,7 +1417,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import with multiple locales
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1333,6 +1430,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'localized-multi-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1377,7 +1482,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import array data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1390,6 +1495,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'array-import-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1423,7 +1536,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import blocks data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1436,6 +1549,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'blocks-import-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1475,7 +1596,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import hasMany data with debug enabled
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1491,7 +1612,16 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
+      })
+
       // Debug output if not completed
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (importDoc.status !== 'completed') {
         console.log('HasMany formats import failed:', {
           status: importDoc.status,
@@ -1559,7 +1689,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import relationship data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1572,6 +1702,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'relationship-import-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1635,7 +1773,7 @@ describe('@payloadcms/plugin-import-export', () => {
         `${existingPage.id},"Updated Title","Updated Excerpt","",""`,
       ].join('\n')
 
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1649,6 +1787,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'update-polymorphic-test.csv',
           size: csvUpdate.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Step 3: Verify import succeeded
@@ -1704,7 +1850,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import polymorphic data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1717,6 +1863,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'polymorphic-import-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1759,7 +1913,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import data with virtual fields
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1772,6 +1926,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'virtual-import-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import succeeded
@@ -1803,7 +1965,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import with status
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1816,6 +1978,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'status-import-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1863,7 +2033,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import without status
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1876,6 +2046,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'default-status-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -1906,7 +2084,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const missingFieldCsv = ''
       const missingFieldBuffer = Buffer.from(missingFieldCsv)
 
-      const importDoc1 = await payload.create({
+      let importDoc1 = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1921,6 +2099,14 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc1 = await payload.findByID({
+        collection: 'imports',
+        id: importDoc1.id,
+      })
+
       expect(importDoc1.status).toBe('completed')
       expect(importDoc1.summary?.issues).toBe(0)
       expect(importDoc1.summary?.imported).toBe(0) // No documents because empty CSV
@@ -1929,7 +2115,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const invalidTypeCsv = 'title,hasManyNumber_0\n"Invalid Type Test","not-a-number"'
       const invalidTypeBuffer = Buffer.from(invalidTypeCsv)
 
-      const importDoc2 = await payload.create({
+      let importDoc2 = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1944,6 +2130,14 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc2 = await payload.findByID({
+        collection: 'imports',
+        id: importDoc2.id,
+      })
+
       // "not-a-number" gets converted to 0 by our number conversion, so no errors
       expect(importDoc2.status).toBe('completed')
       expect(importDoc2.summary?.issues).toBe(0)
@@ -1953,7 +2147,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const nonExistentCsv = 'id,title\n"999999","Non-existent Update"'
       const nonExistentBuffer = Buffer.from(nonExistentCsv)
 
-      const importDoc3 = await payload.create({
+      let importDoc3 = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -1969,26 +2163,32 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc3 = await payload.findByID({
+        collection: 'imports',
+        id: importDoc3.id,
+      })
+
       expect(importDoc3.status).toBe('failed')
       expect(importDoc3.summary?.issues).toBe(1)
       expect(importDoc3.summary?.updated).toBe(0)
     })
 
-    // NOTE: This test works correctly in standalone execution but fails in the test suite
-    // Skipped: Environment-specific issues with document persistence
-    it.skip('should handle partial import success correctly', async () => {
+    it('should handle partial import success correctly', async () => {
       // Create a CSV with some valid and some invalid rows - use unique names
       const timestamp = Date.now()
       const mixedCsv =
-        'title,hasManyNumber_0\n' +
-        `"Partial Valid ${timestamp}-1","123"\n` +
-        ',\n' + // Invalid - missing title
-        `"Partial Valid ${timestamp}-2","456"\n` +
-        ',"789"' // Invalid - empty title
+        'title,hasManyNumber_0,_status\n' +
+        `"Partial Valid ${timestamp}-1","123",published\n` +
+        ',,published\n' + // Invalid - missing title
+        `"Partial Valid ${timestamp}-2","456",published\n` +
+        ',"789",published' // Invalid - empty title
 
       const mixedBuffer = Buffer.from(mixedCsv)
 
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -2001,6 +2201,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'mixed-import-test.csv',
           size: mixedBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Only valid documents should be imported (2 valid, 2 invalid)
@@ -2032,6 +2240,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Debug logging if the test is failing
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (validPage1.docs.length !== 1 || validPage2.docs.length !== 1) {
         console.log('DEBUG: Partial import test failed')
         console.log('  Import summary:', importDoc.summary)
@@ -2071,7 +2280,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import nested group data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -2084,6 +2293,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'nested-group-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -2117,7 +2334,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import tab and collapsible data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -2130,6 +2347,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'tabs-collapsible-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import
@@ -2173,7 +2398,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Import the data
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -2186,6 +2411,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'disabled-fields-test.csv',
           size: csvBuffer.length,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify the import succeeded
@@ -2224,8 +2457,9 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvBuffer = Buffer.from(csvContent)
 
       // Create import task (which should queue a job)
+      // Use 'imports' collection which has jobs queue enabled (unlike 'posts-import' which has disableJobsQueue: true)
       const doc = await payload.create({
-        collection: 'imports-tasks' as CollectionSlug,
+        collection: 'imports' as CollectionSlug,
         user,
         data: {
           collectionSlug: 'pages',
@@ -2269,8 +2503,8 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(input.importMode).toStrictEqual('create')
       expect(input.format).toStrictEqual('csv')
       expect(input.file).toBeDefined()
-      expect(input.importsCollection).toStrictEqual('imports-tasks')
-      expect(input.user).toBeDefined()
+      expect(input.importsCollection).toStrictEqual('imports')
+      // Note: The code passes userID, not user (which is defined in the task schema but not populated)
       expect(input.userCollection).toBeDefined()
 
       // Run the job
@@ -2278,7 +2512,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       // Verify the import task was updated with results
       const importDoc = await payload.findByID({
-        collection: 'imports-tasks' as CollectionSlug,
+        collection: 'imports' as CollectionSlug,
         id: doc.id,
       })
 
@@ -2354,6 +2588,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
@@ -2377,7 +2613,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Re-import the exported CSV
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -2390,6 +2626,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'roundtrip-test.csv',
           size: fs.statSync(csvPath).size,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       // Verify import succeeded
@@ -2495,6 +2739,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
+      await payload.jobs.run()
+
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
@@ -2509,7 +2755,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Re-import
-      const importDoc = await payload.create({
+      let importDoc = await payload.create({
         collection: 'imports',
         user,
         data: {
@@ -2522,6 +2768,14 @@ describe('@payloadcms/plugin-import-export', () => {
           name: 'complete-roundtrip.csv',
           size: fs.statSync(csvPath).size,
         },
+      })
+
+      await payload.jobs.run()
+
+      // Re-fetch the import document to get updated status after job runs
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -2576,7 +2830,7 @@ describe('@payloadcms/plugin-import-export', () => {
         const csvContent = rows.join('\n')
         const csvBuffer = Buffer.from(csvContent)
 
-        const importDoc = await payload.create({
+        let importDoc = await payload.create({
           collection: 'imports',
           user,
           data: {
@@ -2589,6 +2843,14 @@ describe('@payloadcms/plugin-import-export', () => {
             name: 'batch-test.csv',
             size: csvBuffer.length,
           },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
         })
 
         // Verify the import succeeded
@@ -2627,7 +2889,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const csvBuffer = Buffer.from(csvContent)
 
-        const importDoc = await payload.create({
+        let importDoc = await payload.create({
           collection: 'imports',
           user,
           data: {
@@ -2640,6 +2902,14 @@ describe('@payloadcms/plugin-import-export', () => {
             name: 'batch-errors-test.csv',
             size: csvBuffer.length,
           },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
         })
 
         // Should import valid documents and skip invalid ones
@@ -2674,7 +2944,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const csvBuffer = Buffer.from(csvContent)
 
-        const importDoc = await payload.create({
+        let importDoc = await payload.create({
           collection: 'imports',
           user,
           data: {
@@ -2687,6 +2957,14 @@ describe('@payloadcms/plugin-import-export', () => {
             name: 'row-numbers-test.csv',
             size: csvBuffer.length,
           },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
         })
 
         // Should have imported 3 valid documents and have 1 error
@@ -2717,7 +2995,7 @@ describe('@payloadcms/plugin-import-export', () => {
         const csvContent = rows.join('\n')
         const csvBuffer = Buffer.from(csvContent)
 
-        const importDoc = await payload.create({
+        let importDoc = await payload.create({
           collection: 'imports',
           user,
           data: {
@@ -2730,6 +3008,14 @@ describe('@payloadcms/plugin-import-export', () => {
             name: 'batch-localized-test.csv',
             size: csvBuffer.length,
           },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
         })
 
         // Verify the import succeeded
@@ -2779,7 +3065,7 @@ describe('@payloadcms/plugin-import-export', () => {
           'title,excerpt\n"Default Status Test 1","Test excerpt 1"\n"Default Status Test 2","Test excerpt 2"'
         const csvBuffer = Buffer.from(csvContent)
 
-        const importDoc = await payload.create({
+        let importDoc = await payload.create({
           collection: 'imports',
           user,
           data: {
@@ -2792,6 +3078,14 @@ describe('@payloadcms/plugin-import-export', () => {
             name: 'default-status-test.csv',
             size: csvBuffer.length,
           },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
         })
 
         // Verify the import succeeded
@@ -2825,7 +3119,7 @@ describe('@payloadcms/plugin-import-export', () => {
           'title,localized\n"Manual Locale Test 1","Default locale content 1"\n"Manual Locale Test 2","Default locale content 2"'
         const csvBuffer = Buffer.from(csvContent)
 
-        const importDoc = await payload.create({
+        let importDoc = await payload.create({
           collection: 'imports',
           user,
           data: {
@@ -2838,6 +3132,14 @@ describe('@payloadcms/plugin-import-export', () => {
             name: 'manual-locale-test.csv',
             size: csvBuffer.length,
           },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
         })
 
         // Verify the import succeeded
@@ -2869,6 +3171,265 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Manual Locale Test ' },
           },
         })
+      })
+    })
+  })
+
+  describe('posts-exports-only and posts-imports-only collections', () => {
+    describe('posts-exports-only', () => {
+      it('should export from posts-exports-only collection (no jobs queue)', async () => {
+        // This collection uses the base exports collection but should work
+        const doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'posts-exports-only',
+            format: 'csv',
+          },
+        })
+
+        await payload.jobs.run()
+
+        const exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: doc.id,
+        })
+
+        // Filename is generated with timestamp, just verify it exists and ends with .csv
+        expect(exportDoc.filename).toBeDefined()
+        expect(exportDoc.filename).toMatch(/\.csv$/)
+        const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const data = await readCSV(expectedPath)
+
+        expect(data.length).toBeGreaterThan(0)
+        expect(data[0].title).toContain('Export Only Post')
+      })
+
+      it('should not allow restricted user to export from posts-exports-only (access control)', async () => {
+        // Restricted user should not be able to read from posts-exports-only
+        // So an export should return no documents
+        const doc = await payload.create({
+          collection: 'exports',
+          user: restrictedUser,
+          data: {
+            collectionSlug: 'posts-exports-only',
+            format: 'csv',
+          },
+        })
+
+        const {
+          docs: [latestJob],
+        } = await payload.find({
+          collection: 'payload-jobs',
+          sort: '-createdAt',
+          limit: 1,
+        })
+
+        expect(latestJob).toBeDefined()
+
+        await payload.jobs.run()
+
+        // Job may be deleted after successful completion (deleteJobOnComplete: true is default)
+        // So we just verify the export document was updated
+        const exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: doc.id,
+        })
+
+        // The export should complete but have no documents due to access control
+        const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const data = await readCSV(expectedPath)
+
+        // Should be empty because restricted user can't read from posts-exports-only
+        expect(data).toHaveLength(0)
+      })
+    })
+
+    describe('posts-imports-only', () => {
+      it('should import to posts-imports-only collection (no jobs queue, synchronous)', async () => {
+        const csvContent = 'title\n"Sync Import Test 1"\n"Sync Import Test 2"\n"Sync Import Test 3"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        // Note: The base 'imports' collection uses jobs queue. disableJobsQueue config on
+        // the target collection only affects custom import collections with overrideCollection.
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'posts-imports-only',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'sync-import-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        // Verify the documents were created
+        const importedDocs = await payload.find({
+          collection: 'posts-imports-only',
+          where: {
+            title: { contains: 'Sync Import Test' },
+          },
+        })
+
+        expect(importedDocs.totalDocs).toBe(3)
+
+        // Clean up
+        await payload.delete({
+          collection: 'posts-imports-only',
+          where: {
+            title: { contains: 'Sync Import Test' },
+          },
+        })
+      })
+
+      it('should not allow restricted user to import to posts-imports-only (access control)', async () => {
+        const csvContent = 'title\n"Restricted Import Test 1"\n"Restricted Import Test 2"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        // Restricted user should not be able to create in posts-imports-only
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user: restrictedUser,
+          data: {
+            collectionSlug: 'posts-imports-only',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'restricted-import-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        // Re-fetch the import document to get updated status after job runs
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        // The import should fail or have errors due to access control
+        expect(importDoc.status).toBe('failed')
+        expect(importDoc.summary?.imported).toBe(0)
+        expect(importDoc.summary?.issues).toBeGreaterThan(0)
+
+        // Verify no documents were created
+        const importedDocs = await payload.find({
+          collection: 'posts-imports-only',
+          where: {
+            title: { contains: 'Restricted Import Test' },
+          },
+        })
+
+        expect(importedDocs.totalDocs).toBe(0)
+      })
+    })
+  })
+
+  describe('access control with jobs queue', () => {
+    it('should respect access control when export uses jobs queue', async () => {
+      // Create some test data first (the imports beforeEach clears pages)
+      for (let i = 0; i < 3; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Access Control Export Test ${i}`,
+          },
+        })
+      }
+
+      // pages collection uses the jobs queue (default behavior)
+      // Admin user should be able to export
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 100,
+        },
+      })
+
+      // Wait for job to complete
+      await payload.jobs.run()
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data.length).toBeGreaterThan(0)
+    })
+
+    it('should respect access control when import uses jobs queue', async () => {
+      // pages collection uses the jobs queue (default behavior)
+      const csvContent = 'title\n"Jobs Queue Import 1"\n"Jobs Queue Import 2"'
+      const csvBuffer = Buffer.from(csvContent)
+
+      const importDoc = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          name: 'jobs-queue-import-test.csv',
+          size: csvBuffer.length,
+        },
+      })
+
+      // Wait for job to complete
+      await payload.jobs.run()
+
+      const updatedImportDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
+      })
+
+      expect(updatedImportDoc.status).toBe('completed')
+      expect(updatedImportDoc.summary?.imported).toBe(2)
+
+      // Verify the documents were created
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Jobs Queue Import' },
+        },
+      })
+
+      expect(importedDocs.totalDocs).toBe(2)
+
+      // Clean up
+      await payload.delete({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Jobs Queue Import' },
+        },
       })
     })
   })

@@ -72,6 +72,7 @@ export interface Config {
     posts: Post;
     'posts-exports-only': PostsExportsOnly;
     'posts-imports-only': PostsImportsOnly;
+    'posts-no-jobs-queue': PostsNoJobsQueue;
     exports: Export;
     'posts-export': PostsExport;
     imports: Import;
@@ -89,6 +90,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'posts-exports-only': PostsExportsOnlySelect<false> | PostsExportsOnlySelect<true>;
     'posts-imports-only': PostsImportsOnlySelect<false> | PostsImportsOnlySelect<true>;
+    'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
@@ -343,6 +345,32 @@ export interface PostsImportsOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue".
+ */
+export interface PostsNoJobsQueue {
+  id: string;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
 export interface Export {
@@ -423,7 +451,7 @@ export interface PostsExport {
  */
 export interface Import {
   id: string;
-  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only';
+  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -460,7 +488,7 @@ export interface Import {
  */
 export interface PostsImport {
   id: string;
-  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only';
+  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -628,20 +656,8 @@ export interface PayloadLockedDocument {
         value: string | PostsImportsOnly;
       } | null)
     | ({
-        relationTo: 'exports';
-        value: string | Export;
-      } | null)
-    | ({
-        relationTo: 'posts-export';
-        value: string | PostsExport;
-      } | null)
-    | ({
-        relationTo: 'imports';
-        value: string | Import;
-      } | null)
-    | ({
-        relationTo: 'posts-import';
-        value: string | PostsImport;
+        relationTo: 'posts-no-jobs-queue';
+        value: string | PostsNoJobsQueue;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -803,6 +819,17 @@ export interface PostsExportsOnlySelect<T extends boolean = true> {
  * via the `definition` "posts-imports-only_select".
  */
 export interface PostsImportsOnlySelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue_select".
+ */
+export interface PostsNoJobsQueueSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   updatedAt?: T;
@@ -1024,7 +1051,7 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
-    user?: string | null;
+    userID?: string | null;
     userCollection?: string | null;
     exportsCollection?: string | null;
   };
@@ -1042,6 +1069,7 @@ export interface TaskCreateCollectionImport {
       | 'posts'
       | 'posts-exports-only'
       | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
       | 'exports'
       | 'posts-export'
       | 'imports'

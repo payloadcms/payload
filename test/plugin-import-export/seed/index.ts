@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../../credentials.js'
+import { devUser, regularUser } from '../../credentials.js'
+import { postsExportsOnlySlug, postsImportsOnlySlug, postsNoJobsQueueSlug } from '../shared.js'
 import { richTextData } from './richTextData.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
@@ -14,10 +15,18 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         name: 'name value',
       },
     })
+    const restricted = await payload.create({
+      collection: 'users',
+      data: {
+        email: regularUser.email,
+        password: regularUser.password,
+        name: 'restricted user',
+      },
+    })
     // Seed posts
     const posts = []
     // create an absurd amount of posts - we need to test large data exports
-    for (let i = 2; i < 4000; i++) {
+    for (let i = 0; i < 4000; i++) {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -148,6 +157,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             },
             {
               blockType: 'content',
+              // @ts-ignore
               richText: richTextData,
             },
           ],
@@ -202,6 +212,35 @@ export const seed = async (payload: Payload): Promise<boolean> => {
               value: posts[1]?.id ?? '',
             },
           ],
+        },
+      })
+    }
+
+    // Seed posts-exports-only collection
+    for (let i = 0; i < 250; i++) {
+      await payload.create({
+        collection: postsExportsOnlySlug,
+        data: {
+          title: `Export Only Post ${i}`,
+        },
+      })
+    }
+
+    // Seed posts-imports-only collection
+    for (let i = 0; i < 50; i++) {
+      await payload.create({
+        collection: postsImportsOnlySlug,
+        data: {
+          title: `Import Only Post ${i}`,
+        },
+      })
+    }
+
+    for (let i = 0; i < 250; i++) {
+      await payload.create({
+        collection: postsNoJobsQueueSlug,
+        data: {
+          title: `Post with no jobs queue active ${i}`,
         },
       })
     }

@@ -11,15 +11,17 @@ import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
 import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
+import { PostsNoJobsQueue } from './collections/PostsNoJobsQueue.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Pages, Posts, PostsExportsOnly, PostsImportsOnly],
+  collections: [Users, Pages, Posts, PostsExportsOnly, PostsImportsOnly, PostsNoJobsQueue],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -31,6 +33,16 @@ export default buildConfigWithDefaults({
       es,
     },
     fallbackLanguage: 'en',
+  },
+  jobs: {
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => {
+      if (defaultJobsCollection.admin) {
+        defaultJobsCollection.admin.group = 'Jobs'
+        defaultJobsCollection.admin.hidden = false
+      }
+
+      return defaultJobsCollection
+    },
   },
   onInit: async (payload) => {
     await seed(payload)
@@ -93,6 +105,15 @@ export default buildConfigWithDefaults({
           slug: 'posts-imports-only',
           export: false,
           import: {
+            disableJobsQueue: true,
+          },
+        },
+        {
+          slug: 'posts-no-jobs-queue',
+          import: {
+            disableJobsQueue: true,
+          },
+          export: {
             disableJobsQueue: true,
           },
         },
