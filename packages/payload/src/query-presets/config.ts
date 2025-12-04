@@ -14,7 +14,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   slug: queryPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
-    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns'],
+    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns', 'groupBy'],
     hidden: true,
     useAsTitle: 'title',
   },
@@ -93,6 +93,17 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
 
         return true
       },
+    },
+    {
+      name: 'groupBy',
+      type: 'text',
+      admin: {
+        components: {
+          Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
+          Field: '@payloadcms/ui#QueryPresetsGroupByField',
+        },
+      },
+      label: 'Group By',
     },
     {
       name: 'relatedCollection',
