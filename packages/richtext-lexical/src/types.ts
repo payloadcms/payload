@@ -224,11 +224,16 @@ export type LexicalEditorNodeMap<
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
-export type LexicalEditorViewMap = {
+export type LexicalEditorViewMap<
+  TNodes extends { [key: string]: any; type?: string } =
+    | DefaultNodeTypes
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+> = {
   [viewKey: string]: {
     admin?: LexicalFieldAdminClientProps
     lexical?: LexicalEditorConfig
-    nodes: LexicalEditorNodeMap
+    nodes: LexicalEditorNodeMap<TNodes>
   }
 }
 
