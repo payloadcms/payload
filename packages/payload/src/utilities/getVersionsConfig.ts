@@ -24,7 +24,7 @@ export const hasAutosaveEnabled = (
   }
 } & EntityConfig => {
   return Boolean(
-    config.versions &&
+    config?.versions &&
       typeof config.versions === 'object' &&
       config.versions.drafts &&
       typeof config.versions.drafts === 'object' &&
@@ -37,7 +37,7 @@ export const hasAutosaveEnabled = (
  */
 export const hasDraftValidationEnabled = (config: EntityConfig): boolean => {
   return Boolean(
-    config.versions &&
+    config?.versions &&
       typeof config.versions === 'object' &&
       config.versions.drafts &&
       typeof config.versions.drafts === 'object' &&
@@ -53,7 +53,7 @@ export const hasScheduledPublishEnabled = (
   }
 } & EntityConfig => {
   return Boolean(
-    config.versions &&
+    config?.versions &&
       typeof config.versions === 'object' &&
       config.versions.drafts &&
       typeof config.versions.drafts === 'object' &&
@@ -66,7 +66,7 @@ export const hasScheduledPublishEnabled = (
  * Returns maxPerDoc for collections or max for globals
  */
 export const getVersionsMax = (config: EntityConfig): number => {
-  if (!config.versions || typeof config.versions !== 'object') {
+  if (!config?.versions || typeof config.versions !== 'object') {
     return 0
   }
   // Collections have maxPerDoc, globals have max
@@ -82,7 +82,7 @@ export const getVersionsMax = (config: EntityConfig): number => {
 export const getAutosaveInterval = (config: EntityConfig): number => {
   let interval = versionDefaults.autosaveInterval
   if (
-    config.versions &&
+    config?.versions &&
     typeof config.versions === 'object' &&
     config.versions.drafts &&
     typeof config.versions.drafts === 'object' &&
