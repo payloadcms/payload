@@ -783,14 +783,10 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   }, [disabledFromProps])
 
-  const handleExternalSubmittedChange = useEffectEvent((submittedFromProps: boolean) => {
+  useEffect(() => {
     if (typeof submittedFromProps === 'boolean') {
       setSubmitted(submittedFromProps)
     }
-  })
-
-  useEffect(() => {
-    handleExternalSubmittedChange(submittedFromProps)
   }, [submittedFromProps])
 
   useEffect(() => {
