@@ -11,6 +11,7 @@ import { createExportBatchProcessor, type ExportFindArgs } from './batchProcesso
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
+import { getSchemaColumns, mergeColumns } from './getSchemaColumns.js'
 import { getSelect } from './getSelect.js'
 
 export type Export = {
@@ -220,36 +221,38 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (download) {
-    if (debug) {
-      req.payload.logger.debug('Pre-scanning all columns before streaming')
-    }
-
     const limitErrorMsg = validateLimitValue(incomingLimit, req.t)
     if (limitErrorMsg) {
       throw new APIError(limitErrorMsg)
     }
 
-    // Create batch processor for column discovery
-    const streamProcessor = createExportBatchProcessor({ batchSize, debug })
-
-    // Transform function for CSV flattening
-    const transformDocForCSV = (doc: unknown) =>
-      filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions }))
-
-    let allColumns: string[] = []
-
+    // Get schema-based columns first (provides base ordering and handles empty exports)
+    let schemaColumns: string[] = []
     if (isCSV) {
-      // Use batch processor to discover all columns
-      allColumns = await streamProcessor.discoverColumns({
-        collectionSlug,
-        findArgs: findArgs as ExportFindArgs,
-        format: 'csv',
-        maxDocs: typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY,
-        req,
-        startPage: adjustedPage,
-        transformDoc: transformDocForCSV,
+      const localeCodes =
+        locale === 'all' && payload.config.localization
+          ? payload.config.localization.localeCodes
+          : undefined
+
+      schemaColumns = getSchemaColumns({
+        collectionConfig,
+        disabledFields,
+        fields,
+        locale,
+        localeCodes,
       })
+
+      if (debug) {
+        req.payload.logger.debug({
+          columnCount: schemaColumns.length,
+          msg: 'Schema-based column inference complete',
+        })
+      }
     }
+
+    // allColumns will be finalized after first batch (schema + data columns merged)
+    let allColumns: string[] = []
+    let columnsFinalized = false
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
@@ -295,6 +298,31 @@ export const createExport = async (args: CreateExportArgs) => {
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions })),
           )
+
+          // On first batch, discover additional columns from data and merge with schema
+          if (!columnsFinalized) {
+            const dataColumns: string[] = []
+            const seenCols = new Set<string>()
+            for (const row of batchRows) {
+              for (const key of Object.keys(row)) {
+                if (!seenCols.has(key)) {
+                  seenCols.add(key)
+                  dataColumns.push(key)
+                }
+              }
+            }
+            // Merge schema columns with data-discovered columns
+            allColumns = mergeColumns(schemaColumns, dataColumns)
+            columnsFinalized = true
+
+            if (debug) {
+              req.payload.logger.debug({
+                dataColumnsCount: dataColumns.length,
+                finalColumnsCount: allColumns.length,
+                msg: 'Merged schema and data columns',
+              })
+            }
+          }
 
           const paddedRows = batchRows.map((row) => {
             const fullRow: Record<string, unknown> = {}
@@ -381,19 +409,28 @@ export const createExport = async (args: CreateExportArgs) => {
     })
   }
 
-  const { columns, docs: rows } = exportResult
+  const { columns: dataColumns, docs: rows } = exportResult
   const outputData: string[] = []
 
   // Prepare final output
   if (isCSV) {
-    // If no documents were found and no columns discovered, use the requested fields as headers
-    // This ensures we create a valid CSV file even for empty exports
-    const finalColumns =
-      columns.length > 0
-        ? columns
-        : Array.isArray(fields) && fields.length > 0
-          ? fields.map((f) => f.replace(/\./g, '_'))
-          : []
+    // Get schema-based columns for consistent ordering
+    const localeCodes =
+      locale === 'all' && payload.config.localization
+        ? payload.config.localization.localeCodes
+        : undefined
+
+    const schemaColumns = getSchemaColumns({
+      collectionConfig,
+      disabledFields,
+      fields,
+      locale,
+      localeCodes,
+    })
+
+    // Merge schema columns with data-discovered columns
+    // Schema provides ordering, data provides additional columns (e.g., array indices > 0)
+    const finalColumns = mergeColumns(schemaColumns, dataColumns)
 
     const paddedRows = rows.map((row) => {
       const fullRow: Record<string, unknown> = {}
