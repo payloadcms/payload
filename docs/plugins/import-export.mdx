@@ -133,6 +133,122 @@ export default buildConfig({
 })
 ```
 
+## Collection-Specific Import and Export targets
+
+By default, the plugin creates a single `exports` collection and a single `imports` collection that handle all import/export operations across your enabled collections. However, you can create separate import and export targets for specific collections by overriding the collection slug.
+
+When you change the slug using the `overrideCollection` function at the per-collection level, this creates an entirely separate uploads collection for that specific source collection. This is useful when you need:
+
+- Different access control rules for different data types
+- Separate storage locations for exports
+- Isolated import queues for specific workflows
+- Different admin UI organization
+
+### Example: Separate Export Targets
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+export default buildConfig({
+  plugins: [
+    importExportPlugin({
+      collections: [
+        {
+          slug: 'users',
+          export: {
+            // Create a separate 'user-exports' collection for user data
+            overrideCollection: ({ collection }) => {
+              return {
+                ...collection,
+                slug: 'user-exports',
+                labels: {
+                  singular: 'User Export',
+                  plural: 'User Exports',
+                },
+                access: {
+                  // Only super admins can access user exports
+                  read: ({ req }) => req.user?.role === 'superadmin',
+                  create: ({ req }) => req.user?.role === 'superadmin',
+                },
+              }
+            },
+          },
+          import: {
+            // Create a separate 'user-imports' collection
+            overrideCollection: ({ collection }) => {
+              return {
+                ...collection,
+                slug: 'user-imports',
+                labels: {
+                  singular: 'User Import',
+                  plural: 'User Imports',
+                },
+                access: {
+                  read: ({ req }) => req.user?.role === 'superadmin',
+                  create: ({ req }) => req.user?.role === 'superadmin',
+                },
+              }
+            },
+          },
+        },
+        {
+          slug: 'pages',
+          // Pages will use the default 'exports' and 'imports' collections
+        },
+        {
+          slug: 'posts',
+          // Posts will also use the default collections
+        },
+      ],
+    }),
+  ],
+})
+```
+
+In this example:
+
+- User exports are stored in `user-exports` collection with restricted access
+- User imports are tracked in `user-imports` collection
+- Pages and posts share the default `exports` and `imports` collections
+
+### Combining Top-Level and Per-Collection Overrides
+
+You can combine the top-level `overrideExportCollection` / `overrideImportCollection` functions with per-collection overrides. The top-level override is applied first, then the per-collection override:
+
+```ts
+importExportPlugin({
+  // Apply to ALL export collections (both default and custom slugs)
+  overrideExportCollection: ({ collection }) => {
+    return {
+      ...collection,
+      admin: {
+        ...collection.admin,
+        group: 'Data Management',
+      },
+    }
+  },
+
+  collections: [
+    {
+      slug: 'sensitive-data',
+      export: {
+        // This override is applied AFTER the top-level override
+        overrideCollection: ({ collection }) => {
+          return {
+            ...collection,
+            slug: 'sensitive-exports',
+            access: {
+              read: () => false, // Completely restrict read access
+              create: ({ req }) => req.user?.role === 'admin',
+            },
+          }
+        },
+      },
+    },
+  ],
+})
+```
+
 ## Field Options
 
 In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
