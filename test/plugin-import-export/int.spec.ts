@@ -688,7 +688,10 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].customRelationship_id).toBeDefined()
       expect(data[0].customRelationship_email).toBeDefined()
       expect(data[0].customRelationship_createdAt).toBeUndefined()
-      expect(data[0].customRelationship).toBeUndefined()
+      // customRelationship may be undefined (not in columns) or empty string (schema column but toCSV didn't set it)
+      expect(data[0].customRelationship === undefined || data[0].customRelationship === '').toBe(
+        true,
+      )
     })
 
     it('should create a JSON file for collection', async () => {
@@ -992,6 +995,145 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
       expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
+    })
+
+    describe('schema-based column inference', () => {
+      it('should generate columns from schema without scanning documents', async () => {
+        // This test verifies that columns are derived from schema, not data
+        // We create an export with specific fields and verify the columns are correct
+        // even if the data doesn't have all possible values
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'localized', 'hasOnePolymorphic', 'array'],
+            format: 'csv',
+            where: {
+              title: { equals: 'Title 0' },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({
+          collection: 'exports',
+          id: doc.id,
+        })
+
+        expect(doc.filename).toBeDefined()
+        const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(expectedPath)
+        const headerLine = buffer.toString().split('\n')[0]
+
+        // Schema-based columns should include these fields
+        expect(headerLine).toContain('id')
+        expect(headerLine).toContain('title')
+        expect(headerLine).toContain('localized')
+        expect(headerLine).toContain('hasOnePolymorphic_relationTo')
+        expect(headerLine).toContain('hasOnePolymorphic_id')
+        expect(headerLine).toContain('array_0_field1')
+        expect(headerLine).toContain('array_0_field2')
+      })
+
+      it('should include all locale columns when locale is all', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'localized'],
+            locale: 'all',
+            format: 'csv',
+            where: {
+              title: { contains: 'Localized ' },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({
+          collection: 'exports',
+          id: doc.id,
+        })
+
+        expect(doc.filename).toBeDefined()
+        const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(expectedPath)
+        const headerLine = buffer.toString().split('\n')[0]
+
+        // Should have locale-specific columns
+        expect(headerLine).toContain('localized_en')
+        expect(headerLine).toContain('localized_es')
+        expect(headerLine).toContain('localized_de')
+      })
+
+      it('should generate correct columns for empty export', async () => {
+        // Export with no matching documents should still have correct columns
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'excerpt'],
+            format: 'csv',
+            where: {
+              title: { equals: 'nonexistent-title-xyz' },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({
+          collection: 'exports',
+          id: doc.id,
+        })
+
+        expect(doc.filename).toBeDefined()
+        const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(expectedPath)
+        const content = buffer.toString()
+
+        // Should have header row with schema-derived columns even with no data
+        expect(content).toContain('id')
+        expect(content).toContain('title')
+        expect(content).toContain('excerpt')
+      })
+
+      it('should include virtual fields in export columns (they have values)', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: {
+              title: { contains: 'Virtual ' },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({
+          collection: 'exports',
+          id: doc.id,
+        })
+
+        expect(doc.filename).toBeDefined()
+        const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(expectedPath)
+        const headerLine = buffer.toString().split('\n')[0]
+
+        // Virtual fields SHOULD be in export (they have values from hooks)
+        // They just can't be imported back
+        expect(headerLine).toContain('virtual')
+        expect(headerLine).toContain('virtualRelationship')
+      })
     })
   })
 
