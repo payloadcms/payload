@@ -125,18 +125,23 @@ export const Form: React.FC<FormProps> = (props) => {
   const [backgroundProcessing, _setBackgroundProcessing] = useState(false)
 
   /**
-   * A ref that can be read immediately within `setBackgroundProcessing` without waiting for another render cycle
+   * A ref that can be read immediately within `setModified` without waiting for another render cycle.
+   * Dependents on this state can read it immediately without needing to wait for a render cycle.
    */
   const backgroundProcessingRef = useRef(backgroundProcessing)
 
   /**
-   * Flag to track if the form was modified during a submit.
-   * Useful in order to avoid setting the modified state to false after a submit.
-   * For example, if the user modifies while the previous submit is still processing.
-   * Conditions that watch the modified state rely on its accuracy, e.g. autosave.
+   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
+   * Useful in order to avoid resetting `modified` to false wrongfully after a submit.
+   * For example, if the user modifies a field while the a background process (autosave) is running,
+   * we need to ensure that after the submit completes, the `modified` state remains true.
    */
   const modifiedWhileProcessing = useRef(false)
 
+  /**
+   * Intercept the `setBackgroundProcessing` method to keep the ref in sync.
+   * See the `backgroundProcessingRef` for more details.
+   */
   const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
     backgroundProcessingRef.current = backgroundProcessing
     _setBackgroundProcessing(backgroundProcessing)
@@ -145,8 +150,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const [modified, _setModified] = useState(false)
 
   /**
-   * Intercept the `setModified` method to track if the form was modified during a submit.
-   * See the `modifiedDuringSubmit` ref for more details.
+   * Intercept the `setModified` method to track whether the event happened during background processing.
+   * See the `modifiedWhileProcessing` ref for more details.
    */
   const setModified = useCallback((modified: boolean) => {
     if (backgroundProcessingRef.current) {
