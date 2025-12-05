@@ -49,6 +49,7 @@ export const handlePreview = async (req: PayloadRequest) => {
             data: doc,
             fields: targetCollection.config.flattenedFields ?? [],
             fromCSVFunctions,
+            req,
           })
           return unflattened ?? {}
         })

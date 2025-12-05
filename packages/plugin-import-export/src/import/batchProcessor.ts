@@ -53,7 +53,10 @@ export interface ImportProcessOptions {
 }
 
 // Helper function to handle multi-locale data
-function extractMultiLocaleData(data: Record<string, unknown>): {
+function extractMultiLocaleData(
+  data: Record<string, unknown>,
+  configuredLocales?: string[],
+): {
   flatData: Record<string, unknown>
   hasMultiLocale: boolean
   localeUpdates: Record<string, Record<string, unknown>>
@@ -62,11 +65,18 @@ function extractMultiLocaleData(data: Record<string, unknown>): {
   const localeUpdates: Record<string, Record<string, unknown>> = {}
   let hasMultiLocale = false
 
+  // If no locales configured, skip multi-locale processing
+  if (!configuredLocales || configuredLocales.length === 0) {
+    return { flatData: { ...data }, hasMultiLocale: false, localeUpdates: {} }
+  }
+
+  const localeSet = new Set(configuredLocales)
+
   for (const [key, value] of Object.entries(data)) {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       const valueObj = value as Record<string, unknown>
-      // Check if this looks like locale data (has locale keys like 'en', 'es', etc.)
-      const localeKeys = Object.keys(valueObj).filter((k) => /^[a-z]{2}(?:_[A-Z]{2})?$/.test(k))
+      // Check if this object has keys matching configured locales
+      const localeKeys = Object.keys(valueObj).filter((k) => localeSet.has(k))
       if (localeKeys.length > 0) {
         hasMultiLocale = true
         // This is a localized field with explicit locale keys
@@ -127,6 +137,11 @@ async function processImportBatch({
   const collectionConfig = req.payload.collections[collectionSlug]?.config
   const collectionHasVersions = Boolean(collectionConfig?.versions)
 
+  // Get configured locales for multi-locale data detection
+  const configuredLocales = req.payload.config.localization
+    ? req.payload.config.localization.localeCodes
+    : undefined
+
   // Calculate the starting row number for this batch
   const startingRowNumber = batchIndex * options.batchSize
 
@@ -179,7 +194,10 @@ async function processImportBatch({
         }
 
         // Check if we have multi-locale data and extract it
-        const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(createData)
+        const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
+          createData,
+          configuredLocales,
+        )
 
         if (hasMultiLocale) {
           // Create with default locale data
@@ -307,7 +325,10 @@ async function processImportBatch({
           delete updateData.updatedAt
 
           // Check if we have multi-locale data and extract it
-          const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(updateData)
+          const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
+            updateData,
+            configuredLocales,
+          )
 
           if (req.payload.config.debug) {
             req.payload.logger.info({
@@ -395,47 +416,9 @@ async function processImportBatch({
               if (req.payload.config.debug && processedDoc) {
                 req.payload.logger.info({
                   id: processedDoc.id,
-                  excerpt: processedDoc.excerpt,
                   msg: 'Update completed',
                   status: processedDoc._status,
                   title: processedDoc.title,
-                })
-
-                // Extra debug: verify the update actually happened
-                const verifyPublished = await req.payload.findByID({
-                  id: existingDoc.id as number | string,
-                  collection: collectionSlug,
-                  depth: 0,
-                  draft: false, // Get published version
-                  overrideAccess: false,
-                  req,
-                  user,
-                })
-                req.payload.logger.info({
-                  id: verifyPublished.id,
-                  excerpt: verifyPublished.excerpt,
-                  matchesUpdate: verifyPublished.title === updateData.title,
-                  msg: 'Verification of published version',
-                  status: verifyPublished._status,
-                  title: verifyPublished.title,
-                })
-
-                const verifyDraft = await req.payload.findByID({
-                  id: existingDoc.id as number | string,
-                  collection: collectionSlug,
-                  depth: 0,
-                  draft: true, // Get draft version
-                  overrideAccess: false,
-                  req,
-                  user,
-                })
-                req.payload.logger.info({
-                  id: verifyDraft.id,
-                  excerpt: verifyDraft.excerpt,
-                  matchesUpdate: verifyDraft.title === updateData.title,
-                  msg: 'Verification of draft version',
-                  status: verifyDraft._status,
-                  title: verifyDraft.title,
                 })
               }
             } catch (updateError) {
@@ -472,7 +455,10 @@ async function processImportBatch({
           }
 
           // Check if we have multi-locale data and extract it
-          const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(createData)
+          const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
+            createData,
+            configuredLocales,
+          )
 
           if (hasMultiLocale) {
             // Create with default locale data

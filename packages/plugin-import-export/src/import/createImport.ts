@@ -165,6 +165,7 @@ export const createImport = async ({
           data: doc,
           fields: collectionConfig.flattenedFields ?? [],
           fromCSVFunctions,
+          req,
         })
         return unflattened ?? {}
       })

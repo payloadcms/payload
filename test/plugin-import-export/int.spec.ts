@@ -236,18 +236,26 @@ describe('@payloadcms/plugin-import-export', () => {
       ).rejects.toThrow(/Limit/)
     })
 
-    it('should not create a file for collection csv when limit is not a multiple of 100', async () => {
-      await expect(
-        payload.create({
-          collection: 'exports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            format: 'csv',
-            limit: 99,
-          },
-        }),
-      ).rejects.toThrow(/Limit/)
+    it('should create a file for collection csv with any positive limit value', async () => {
+      // Limit no longer needs to be a multiple of 100
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 99,
+        },
+      })
+
+      await payload.jobs.run()
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
     })
 
     it('should export results sorted ASC by title when sort="title"', async () => {

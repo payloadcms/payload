@@ -224,11 +224,7 @@ export const createExport = async (args: CreateExportArgs) => {
       req.payload.logger.debug('Pre-scanning all columns before streaming')
     }
 
-    const limitErrorMsg = validateLimitValue(
-      incomingLimit,
-      req.t,
-      batchSize, // step i.e. 100
-    )
+    const limitErrorMsg = validateLimitValue(incomingLimit, req.t)
     if (limitErrorMsg) {
       throw new APIError(limitErrorMsg)
     }

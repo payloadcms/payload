@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { FlattenedField, PayloadRequest } from 'payload'
 
 import type { FromCSVFunction } from '../types.js'
 
@@ -8,12 +8,14 @@ type UnflattenArgs = {
   data: Record<string, unknown>
   fields: FlattenedField[]
   fromCSVFunctions?: Record<string, FromCSVFunction>
+  req: PayloadRequest
 }
 
 export const unflattenObject = ({
   data,
   fields,
   fromCSVFunctions = {},
+  req,
 }: UnflattenArgs): Record<string, unknown> => {
   if (!data || typeof data !== 'object') {
     return {}
@@ -320,7 +322,11 @@ export const unflattenObject = ({
     postProcessDocument(result, fields)
   } catch (err) {
     // Log but don't throw - return partially processed result
-    // Log but don't throw - return partially processed result
+
+    req.payload.logger.error({
+      err,
+      msg: '[plugin-import-export] Error in postProcessDocument',
+    })
   }
 
   return result
