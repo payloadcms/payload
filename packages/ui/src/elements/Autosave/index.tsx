@@ -75,24 +75,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const debouncedFormState = useDebounce(formState, interval)
 
-  const formStateRef = useRef(formState)
-  const modifiedRef = useRef(modified)
-  const localeRef = useRef(locale)
-
-  // Store fields in ref so the autosave func
-  // can always retrieve the most to date copies
-  // after the timeout has executed
-  formStateRef.current = formState
-
-  // Store modified in ref so the autosave func
-  // can bail out if modified becomes false while
-  // timing out during autosave
-  modifiedRef.current = modified
-
-  // Store locale in ref so the autosave func
-  // can always retrieve the most to date locale
-  localeRef.current = locale
-
   const { queueTask } = useQueue()
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -130,21 +112,21 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${localeRef.current}&fallback-locale=null`
+            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${localeRef.current}&fallback-locale=null`
+            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
             method = 'POST'
           }
 
-          const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+          const { valid } = reduceFieldsToValuesWithValidation(formState, true)
 
           const skipSubmission = submitted && !valid && validateOnDraft
 
-          if (!skipSubmission && modifiedRef.current && url) {
+          if (!skipSubmission && modified && url) {
             const result = await submit<any, OnSaveContext>({
               acceptValues: {
                 overrideLocalChanges: false,
