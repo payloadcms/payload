@@ -6,8 +6,8 @@ on:
     - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
-      debug_mode:
-        description: 'Enable debug mode (uses internal-debug tag and pnpm build:debug)'
+      debug_build:
+        description: 'Enable debug build (uses internal-debug tag and pnpm build:debug)'
         required: false
         default: false
         type: boolean
@@ -36,7 +36,7 @@ jobs:
         id: determine_release_type
         # Use 'internal-debug' if debug mode, 'canary' for main branch, 'internal' for others
         run: |
-          if [[ "${{ inputs.debug_mode }}" == "true" ]]; then
+          if [[ "${{ inputs.debug_build }}" == "true" ]]; then
             echo "release_type=internal-debug" >> $GITHUB_OUTPUT
             echo "debug_flag=--debug" >> $GITHUB_OUTPUT
           elif [[ ${{ github.ref_name }} == "main" ]]; then
