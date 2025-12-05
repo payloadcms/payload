@@ -106,7 +106,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
-  const [modified, setModified] = useState(false)
+
+  const [submitted, setSubmitted] = useState(false)
 
   /**
    * Tracks wether the form state passes validation.
@@ -116,9 +117,45 @@ export const Form: React.FC<FormProps> = (props) => {
   const [initializing, setInitializing] = useState(initializingFromProps)
 
   const [processing, setProcessing] = useState(false)
-  const [backgroundProcessing, setBackgroundProcessing] = useState(false)
 
-  const [submitted, setSubmitted] = useState(false)
+  /**
+   * State that determines whether the form is processing asynchronously in the background, e.g. autosave is running.
+   * Useful to determine whether to disable the form while background processing, e.g. let user continue editing while autosaving.
+   */
+  const [backgroundProcessing, _setBackgroundProcessing] = useState(false)
+
+  /**
+   * A ref that can be read immediately within `setBackgroundProcessing` without waiting for another render cycle
+   */
+  const backgroundProcessingRef = useRef(backgroundProcessing)
+
+  /**
+   * Flag to track if the form was modified during a submit.
+   * Useful in order to avoid setting the modified state to false after a submit.
+   * For example, if the user modifies while the previous submit is still processing.
+   * Conditions that watch the modified state rely on its accuracy, e.g. autosave.
+   */
+  const modifiedWhileProcessing = useRef(false)
+
+  const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
+    backgroundProcessingRef.current = backgroundProcessing
+    _setBackgroundProcessing(backgroundProcessing)
+  }, [])
+
+  const [modified, _setModified] = useState(false)
+
+  /**
+   * Intercept the `setModified` method to track if the form was modified during a submit.
+   * See the `modifiedDuringSubmit` ref for more details.
+   */
+  const setModified = useCallback((modified: boolean) => {
+    if (backgroundProcessingRef.current) {
+      modifiedWhileProcessing.current = true
+    }
+
+    _setModified(modified)
+  }, [])
+
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
@@ -360,7 +397,12 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        setModified(false)
+        if (!modifiedWhileProcessing.current) {
+          setModified(false)
+        } else {
+          modifiedWhileProcessing.current = false
+        }
+
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
@@ -412,6 +454,7 @@ export const Form: React.FC<FormProps> = (props) => {
           // Also keep the form as modified so the save button remains enabled for retry.
           if (overridesFromArgs['_status'] === 'draft') {
             setModified(true)
+
             if (!validateDrafts) {
               setSubmitted(false)
             }
@@ -498,6 +541,8 @@ export const Form: React.FC<FormProps> = (props) => {
       i18n,
       validateDrafts,
       waitForAutocomplete,
+      setModified,
+      setSubmitted,
     ],
   )
 
@@ -612,6 +657,7 @@ export const Form: React.FC<FormProps> = (props) => {
       docPermissions,
       getDocPreferences,
       locale,
+      setModified,
     ],
   )
 
@@ -621,7 +667,7 @@ export const Form: React.FC<FormProps> = (props) => {
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields],
+    [dispatchFields, setModified],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -641,7 +687,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields, getDataByPath],
+    [dispatchFields, getDataByPath, setModified],
   )
 
   const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
@@ -655,7 +701,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields],
+    [dispatchFields, setModified],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -664,7 +710,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields],
+    [dispatchFields, setModified],
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
@@ -682,7 +728,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields, getDataByPath],
+    [dispatchFields, getDataByPath, setModified],
   )
 
   useEffect(() => {
@@ -737,10 +783,14 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   }, [disabledFromProps])
 
-  useEffect(() => {
+  const handleExternalSubmittedChange = useEffectEvent((submittedFromProps: boolean) => {
     if (typeof submittedFromProps === 'boolean') {
       setSubmitted(submittedFromProps)
     }
+  })
+
+  useEffect(() => {
+    handleExternalSubmittedChange(submittedFromProps)
   }, [submittedFromProps])
 
   useEffect(() => {
@@ -763,9 +813,13 @@ export const Form: React.FC<FormProps> = (props) => {
     [formState],
   )
 
-  useEffect(() => {
+  const handleLocaleChange = useEffectEvent(() => {
     contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
     setModified(false)
+  })
+
+  useEffect(() => {
+    handleLocaleChange()
   }, [locale])
 
   const classes = [className, baseClass].filter(Boolean).join(' ')

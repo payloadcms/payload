@@ -8,7 +8,7 @@ import type {
   ValidationFieldError,
 } from 'payload'
 import type React from 'react'
-import type { Dispatch } from 'react'
+import type { Dispatch, JSX } from 'react'
 
 import type { AcceptValues } from './mergeServerFormState.js'
 
