@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-nested-docs",
-  "version": "3.65.0",
+  "version": "3.67.0",
   "description": "The official Nested Docs plugin for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -38,6 +38,7 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",

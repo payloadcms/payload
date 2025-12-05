@@ -18,6 +18,7 @@ import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 
+import { hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 
 import { LocaleSelector } from './LocaleSelector/index.js'
@@ -53,12 +54,12 @@ export const APIViewClient: React.FC = () => {
   let docEndpoint: string = ''
 
   if (collectionConfig) {
-    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
+    draftsEnabled = hasDraftsEnabled(collectionConfig)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
   if (globalConfig) {
-    draftsEnabled = Boolean(globalConfig.versions?.drafts)
+    draftsEnabled = hasDraftsEnabled(globalConfig)
     docEndpoint = `/globals/${globalSlug}`
   }
 

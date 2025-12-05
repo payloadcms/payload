@@ -30,6 +30,7 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
       debug,
       download: true,
       req,
+      user: req.user,
     })
 
     return res as Response

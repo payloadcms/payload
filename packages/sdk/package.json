@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/sdk",
-  "version": "3.65.0",
+  "version": "3.67.0",
   "description": "The official Payload REST API SDK",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",

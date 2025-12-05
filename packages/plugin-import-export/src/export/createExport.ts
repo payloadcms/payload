@@ -105,7 +105,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (!user) {
-    throw new APIError('User not found.')
+    throw new APIError('User authentication is required to create exports.')
   }
 
   const draft = draftsFromInput === 'yes'

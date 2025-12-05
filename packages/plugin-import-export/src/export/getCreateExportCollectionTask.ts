@@ -5,10 +5,20 @@ import type { Export } from './createExport.js'
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
 
+/**
+ * Export input type for job queue serialization.
+ * When exports are queued as jobs, the user must be serialized as an ID string or number
+ * along with the collection name so it can be rehydrated when the job runs.
+ */
+export type ExportJobInput = {
+  user: number | string
+  userCollection: string
+} & Export
+
 export const getCreateCollectionExportTask = (
   config: Config,
 ): TaskConfig<{
-  input: Export
+  input: ExportJobInput
   output: object
 }> => {
   const inputSchema = getFields(config).concat(
