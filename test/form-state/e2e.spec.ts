@@ -540,15 +540,9 @@ test.describe('Form State', () => {
     let cdpSession: CDPSession
 
     beforeEach(async () => {
-      const post = await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Test',
-        },
-      })
-
-      await page.goto(postsUrl.edit(post.id))
+      await page.goto(postsUrl.create)
       const field = page.locator('#field-title')
+      await field.fill('Test')
       await expect(field).toBeEnabled()
 
       cdpSession = await throttleTest({
