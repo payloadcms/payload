@@ -27,7 +27,7 @@ body:
 
   - type: dropdown
     attributes:
-      label: Which area(s) are affected? (Select all that apply)
+      label: Which area(s) are affected?
       multiple: true
       options:
         - 'Not sure'
