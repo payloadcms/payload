@@ -136,7 +136,7 @@ export const Form: React.FC<FormProps> = (props) => {
    * For example, if the user modifies a field while the a background process (autosave) is running,
    * we need to ensure that after the submit completes, the `modified` state remains true.
    */
-  const modifiedWhileProcessing = useRef(false)
+  const modifiedWhileProcessingRef = useRef(false)
 
   /**
    * Intercept the `setBackgroundProcessing` method to keep the ref in sync.
@@ -151,11 +151,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   /**
    * Intercept the `setModified` method to track whether the event happened during background processing.
-   * See the `modifiedWhileProcessing` ref for more details.
+   * See the `modifiedWhileProcessingRef` ref for more details.
    */
   const setModified = useCallback((modified: boolean) => {
     if (backgroundProcessingRef.current) {
-      modifiedWhileProcessing.current = true
+      modifiedWhileProcessingRef.current = true
     }
 
     _setModified(modified)
@@ -402,10 +402,10 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        if (!modifiedWhileProcessing.current) {
+        if (!modifiedWhileProcessingRef.current) {
           setModified(false)
         } else {
-          modifiedWhileProcessing.current = false
+          modifiedWhileProcessingRef.current = false
         }
 
         setDisabled(false)
