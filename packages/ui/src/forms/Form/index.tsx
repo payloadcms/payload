@@ -119,14 +119,14 @@ export const Form: React.FC<FormProps> = (props) => {
   const [processing, setProcessing] = useState(false)
 
   /**
-   * State that determines whether the form is processing asynchronously in the background, e.g. autosave is running.
-   * Useful to determine whether to disable the form while background processing, e.g. let user continue editing while autosaving.
+   * Determines whether the form is processing asynchronously in the background, e.g. autosave is running.
+   * Useful to determine whether to disable the form or queue other processes while in flight, e.g. disable manual submits while an autosave is running.
    */
   const [backgroundProcessing, _setBackgroundProcessing] = useState(false)
 
   /**
-   * A ref that can be read immediately within `setModified` without waiting for another render cycle.
-   * Dependents on this state can read it immediately without needing to wait for a render cycle.
+   * A ref that can be read within the `setModified` interceptor.
+   * Dependents of this state can read it immediately without needing to wait for a render cycle.
    */
   const backgroundProcessingRef = useRef(backgroundProcessing)
 
