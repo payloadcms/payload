@@ -72,23 +72,46 @@ In addition to the above plugin configuration options, you can granularly set th
 | Property   | Type     | Description                                                                                                                   |
 | ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                   |
-| `toCSV`    | function | Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value. |
+| `toCSV`    | function | Custom function used to modify the outgoing CSV data by manipulating the data, siblingData or by returning the desired value. |
+| `fromCSV`  | function | Custom function used to transform incoming CSV data during import.                                                            |
 
-### Customizing the output of CSV data
+### Disabling Fields
 
-To manipulate the data that a field exports you can add `toCSV` custom functions. This allows you to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value.
+To completely exclude a field from import and export operations:
 
-The toCSV function argument is an object with the following properties:
+```ts
+{
+  name: 'internalField',
+  type: 'text',
+  custom: {
+    'plugin-import-export': {
+      disabled: true,
+    },
+  },
+}
+```
+
+When a field is disabled:
+
+- It will not appear in export CSV/JSON files
+- It will be ignored during import operations
+- Nested fields inside disabled parent fields are also excluded
+
+### Customizing Export Data with toCSV
+
+To manipulate the data that a field exports, you can add `toCSV` custom functions. This allows you to modify the outgoing CSV data by manipulating the row object or by returning the desired value.
+
+The `toCSV` function receives an object with the following properties:
 
 | Property     | Type    | Description                                                       |
 | ------------ | ------- | ----------------------------------------------------------------- |
 | `columnName` | string  | The CSV column name given to the field.                           |
-| `doc`        | object  | The top level document                                            |
+| `doc`        | object  | The top level document.                                           |
 | `row`        | object  | The object data that can be manipulated to assign data to the CSV |
-| `siblingDoc` | object  | The document data at the level where it belongs                   |
+| `siblingDoc` | object  | The document data at the level where it belongs.                  |
 | `value`      | unknown | The data for the field.                                           |
 
-Example function:
+Example - splitting a relationship into multiple columns:
 
 ```ts
 const pages: CollectionConfig = {
@@ -101,7 +124,7 @@ const pages: CollectionConfig = {
       custom: {
         'plugin-import-export': {
           toCSV: ({ value, columnName, row }) => {
-            // add both `author_id` and the `author_email` to the csv export
+            // Add both `author_id` and the `author_email` to the CSV export
             if (
               value &&
               typeof value === 'object' &&
@@ -118,6 +141,59 @@ const pages: CollectionConfig = {
   ],
 }
 ```
+
+### Customizing Import Data with fromCSV
+
+To transform data during import, add `fromCSV` custom functions. This allows you to transform incoming CSV data before it's saved to the database.
+
+The `fromCSV` function receives an object with the following properties:
+
+| Property      | Type    | Description                                 |
+| ------------- | ------- | ------------------------------------------- |
+| `columnName`  | string  | The CSV column name for the field.          |
+| `data`        | object  | The full document data being built.         |
+| `siblingData` | object  | The data at the sibling level of the field. |
+| `value`       | unknown | The raw CSV value for the field.            |
+
+Return values:
+
+- Return a value to use that value for the field
+- Return `undefined` to skip setting the field (keeps existing value)
+- Return `null` to explicitly set the field to null
+
+Example - reconstructing a relationship from split columns:
+
+```ts
+const pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          fromCSV: ({ data, columnName }) => {
+            // Reconstruct the relationship from the split columns created by toCSV
+            const id = data[`${columnName}_id`]
+            if (id) {
+              return id // Return just the ID for the relationship
+            }
+            return undefined // Skip if no ID provided
+          },
+        },
+      },
+    },
+  ],
+}
+```
+
+### Virtual Fields
+
+Virtual fields (fields with `virtual: true`) are handled differently during import and export:
+
+- **Export**: Virtual fields ARE included in exports. They contain computed values from hooks.
+- **Import**: Virtual fields are SKIPPED during import. Since they're computed, they cannot be imported.
 
 ## Exporting Data
 
@@ -153,3 +229,164 @@ The following parameters are used by the export function to handle requests:
 | `collectionSlug` | string   | The slug to query against                                                                                         |
 | `where`          | object   | The WhereObject used to query documents to export. This is set by making selections or filters from the list view |
 | `filename`       | text     | What to call the export being created                                                                             |
+
+## Importing Data
+
+The plugin allows importing data from CSV or JSON files. There are several ways to import:
+
+1. **Admin UI** - Use the Import drawer from the list view of a collection
+2. **File storage** - Create an import document in the `imports` collection with an uploaded file
+3. **Local API** - Create an import document: `payload.create({ collection: 'imports', data: { collectionSlug: 'pages', importMode: 'create' }, file: { ... } })`
+4. **Jobs Queue** - `payload.jobs.queue({ task: 'createCollectionImport', input: parameters })`
+
+### Import Parameters
+
+| Property         | Type   | Description                                         |
+| ---------------- | ------ | --------------------------------------------------- |
+| `collectionSlug` | string | The collection to import into                       |
+| `importMode`     | string | `create`, `update`, or `upsert` (default: `create`) |
+| `locale`         | string | The locale to use for localized fields              |
+
+### Import Modes
+
+- **create** - Only creates new documents. Documents with existing IDs will fail.
+- **update** - Only updates existing documents. Requires `id` column in CSV. Documents without matching IDs will fail.
+- **upsert** - Creates new documents or updates existing ones based on `id`. Most flexible option.
+
+### Import Results
+
+After an import completes, the import document is updated with a summary:
+
+| Property               | Type   | Description                                       |
+| ---------------------- | ------ | ------------------------------------------------- |
+| `status`               | string | `pending`, `processing`, `completed`, or `failed` |
+| `summary.total`        | number | Total number of rows processed                    |
+| `summary.imported`     | number | Number of successfully imported documents         |
+| `summary.updated`      | number | Number of updated documents (update/upsert modes) |
+| `summary.issues`       | number | Number of rows that failed                        |
+| `summary.issueDetails` | array  | Details about each failure                        |
+
+## CSV Format
+
+### Column Naming Convention
+
+CSV columns use underscore (`_`) notation to represent nested fields:
+
+| Field Path       | CSV Column Name                  |
+| ---------------- | -------------------------------- |
+| `title`          | `title`                          |
+| `group.value`    | `group_value`                    |
+| `array[0].field` | `array_0_field`                  |
+| `blocks[0]`      | `blocks_0_<blockSlug>_blockType` |
+| `localized` (en) | `localized_en`                   |
+
+### Relationship Columns
+
+For relationship fields, the column format varies based on the relationship type:
+
+| Relationship Type     | Column(s)                                  |
+| --------------------- | ------------------------------------------ |
+| hasOne (monomorphic)  | `fieldName`                                |
+| hasOne (polymorphic)  | `fieldName_relationTo`, `fieldName_id`     |
+| hasMany (monomorphic) | `fieldName_0`, `fieldName_1`, etc.         |
+| hasMany (polymorphic) | `fieldName_0_relationTo`, `fieldName_0_id` |
+
+### Value Handling
+
+During CSV import, certain values are automatically converted:
+
+| CSV Value        | Converted To      | Notes                                    |
+| ---------------- | ----------------- | ---------------------------------------- |
+| `true`, `TRUE`   | `true` (boolean)  | Case-insensitive                         |
+| `false`, `FALSE` | `false` (boolean) | Case-insensitive                         |
+| `null`, `NULL`   | `null`            | Use `fromCSV` hook to preserve as string |
+| Empty string     | `''` or omitted   | Depends on field type                    |
+| Numeric strings  | `number`          | Auto-detected for integers and floats    |
+
+To preserve literal strings like "null" or "true", use a `fromCSV` function:
+
+```ts
+{
+  name: 'specialField',
+  type: 'text',
+  custom: {
+    'plugin-import-export': {
+      fromCSV: ({ value }) => {
+        // Return raw value without automatic conversion
+        return value
+      },
+    },
+  },
+}
+```
+
+## Localized Fields
+
+### Single Locale Export
+
+When exporting with a specific locale selected, localized fields appear without a locale suffix:
+
+```csv
+title,description
+"English Title","English Description"
+```
+
+### Multi-Locale Export
+
+When exporting with locale set to `all`, each localized field gets a column per configured locale:
+
+```csv
+title_en,title_es,title_de,description_en,description_es,description_de
+"English","Español","Deutsch","Desc EN","Desc ES","Desc DE"
+```
+
+### Importing Localized Fields
+
+For single-locale import, data goes into the locale specified in the import settings:
+
+```csv
+title,description
+"New Title","New Description"
+```
+
+For multi-locale import, use locale suffixes in column names to import multiple locales at once:
+
+```csv
+title_en,title_es
+"English Title","Título en Español"
+```
+
+## JSON Format
+
+When using JSON format for import/export:
+
+- **Export**: Documents are exported as a JSON array, preserving their nested structure
+- **Import**: Expects a JSON array of document objects
+
+JSON format preserves the exact structure of your data, including:
+
+- Nested objects and arrays
+- Rich text (Lexical) structures with numeric properties
+- Relationship references
+- All field types in their native format
+
+Example JSON export:
+
+```json
+[
+  {
+    "id": "abc123",
+    "title": "My Page",
+    "group": {
+      "value": "nested value",
+      "array": [{ "field1": "item 1" }, { "field2": "item 2" }]
+    },
+    "blocks": [
+      {
+        "blockType": "hero",
+        "title": "Hero Title"
+      }
+    ]
+  }
+]
+```
