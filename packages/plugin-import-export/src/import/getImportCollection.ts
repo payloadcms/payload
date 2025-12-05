@@ -9,7 +9,6 @@ import fs from 'fs'
 import path from 'path'
 
 import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
-import type { Import } from './createImport.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
 import { createImport } from './createImport.js'

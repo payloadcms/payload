@@ -63,7 +63,7 @@ export const createExport = async (args: CreateExportArgs) => {
     fields,
     format,
     limit: incomingLimit,
-    locale: localeInput,
+    locale: localeFromInput,
     page,
     req,
     sort,
@@ -71,7 +71,7 @@ export const createExport = async (args: CreateExportArgs) => {
     userID,
     where: whereFromInput = {},
   } = args
-  const { locale: localeArg, payload } = req
+  const { locale: localeFromReq, payload } = req
 
   if (debug) {
     req.payload.logger.debug({
@@ -83,7 +83,7 @@ export const createExport = async (args: CreateExportArgs) => {
     })
   }
 
-  const locale = localeInput ?? localeArg
+  const locale = localeFromInput ?? localeFromReq
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
 
   if (!collectionConfig) {

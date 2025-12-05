@@ -54,16 +54,84 @@ export default config
 
 ## Options
 
-| Property                   | Type     | Description                                                                                                                          |
-| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `collections`              | string[] | Collections to include Import/Export controls in. Defaults to all collections.                                                       |
-| `debug`                    | boolean  | If true, enables debug logging.                                                                                                      |
-| `disableDownload`          | boolean  | If true, disables the download button in the export preview UI.                                                                      |
-| `disableJobsQueue`         | boolean  | If true, forces the export to run synchronously.                                                                                     |
-| `disableSave`              | boolean  | If true, disables the save button in the export preview UI.                                                                          |
-| `format`                   | string   | Forces a specific export format (`csv` or `json`), hides the format dropdown, and prevents the user from choosing the export format. |
-| `overrideExportCollection` | function | Function to override the default export collection; takes the default export collection and allows you to modify and return it.      |
-| `overrideImportCollection` | function | Function to override the default import collection; takes the default import collection and allows you to modify and return it.      |
+| Property                   | Type     | Description                                                                                                                 |
+| -------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `collections`              | array    | Collections to include Import/Export controls in. Array of collection configs with per-collection options. Defaults to all. |
+| `debug`                    | boolean  | If true, enables debug logging.                                                                                             |
+| `overrideExportCollection` | function | Function to override the default export collection. Receives `{ collection }` and returns modified collection config.       |
+| `overrideImportCollection` | function | Function to override the default import collection. Receives `{ collection }` and returns modified collection config.       |
+
+### Per-Collection Configuration
+
+Each item in the `collections` array can have the following properties:
+
+| Property | Type                    | Description                                                           |
+| -------- | ----------------------- | --------------------------------------------------------------------- |
+| `slug`   | string                  | The collection slug to configure.                                     |
+| `export` | boolean \| ExportConfig | Set to `false` to disable export, or provide export-specific options. |
+| `import` | boolean \| ImportConfig | Set to `false` to disable import, or provide import-specific options. |
+
+### ExportConfig Options
+
+| Property             | Type     | Description                                                     |
+| -------------------- | -------- | --------------------------------------------------------------- |
+| `batchSize`          | number   | Documents per batch during export. Default: `100`.              |
+| `disableDownload`    | boolean  | Disable download button for this collection.                    |
+| `disableJobsQueue`   | boolean  | Run exports synchronously for this collection.                  |
+| `disableSave`        | boolean  | Disable save button for this collection.                        |
+| `format`             | string   | Force format (`csv` or `json`) for this collection.             |
+| `overrideCollection` | function | Override the export collection config for this specific target. |
+
+### ImportConfig Options
+
+| Property               | Type     | Description                                                     |
+| ---------------------- | -------- | --------------------------------------------------------------- |
+| `batchSize`            | number   | Documents per batch during import. Default: `100`.              |
+| `defaultVersionStatus` | string   | Default status for imported docs (`draft` or `published`).      |
+| `disableJobsQueue`     | boolean  | Run imports synchronously for this collection.                  |
+| `overrideCollection`   | function | Override the import collection config for this specific target. |
+
+### Example Configuration
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+export default buildConfig({
+  plugins: [
+    importExportPlugin({
+      debug: true,
+
+      // Override default export collection (e.g., add access control)
+      // This will be used by all collections unless they further override the config
+      overrideExportCollection: ({ collection }) => {
+        collection.access = {
+          ...collection.access,
+          read: ({ req }) => req.user?.role === 'admin',
+        }
+        return collection
+      },
+
+      // Per-collection settings
+      collections: [
+        {
+          slug: 'pages',
+          export: {
+            format: 'csv',
+            disableDownload: true,
+          },
+          import: {
+            defaultVersionStatus: 'draft',
+          },
+        },
+        {
+          slug: 'posts',
+          export: false, // Disable export for posts
+        },
+      ],
+    }),
+  ],
+})
+```
 
 ## Field Options
 

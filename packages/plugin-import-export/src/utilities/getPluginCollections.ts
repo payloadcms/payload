@@ -30,6 +30,7 @@ export type PluginCollectionsResult = {
  * Processes the plugin config and returns export/import collections.
  *
  * - Creates the base export and import collections
+ * - Applies top-level overrideExportCollection/overrideImportCollection if provided
  * - For each collection in `pluginConfig.collections` that has a function override
  *   for `export` or `import`, applies the override to create customized collections
  *
@@ -53,6 +54,25 @@ export const getPluginCollections = async ({
     config,
     pluginConfig,
   })
+
+  // Apply top-level collection overrides if provided
+  if (
+    pluginConfig.overrideExportCollection &&
+    typeof pluginConfig.overrideExportCollection === 'function'
+  ) {
+    baseExportCollection = await pluginConfig.overrideExportCollection({
+      collection: baseExportCollection,
+    })
+  }
+
+  if (
+    pluginConfig.overrideImportCollection &&
+    typeof pluginConfig.overrideImportCollection === 'function'
+  ) {
+    baseImportCollection = await pluginConfig.overrideImportCollection({
+      collection: baseImportCollection,
+    })
+  }
 
   const exportCollections: CollectionConfig[] = []
   const importCollections: CollectionConfig[] = []

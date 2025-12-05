@@ -552,6 +552,8 @@ async function processImportBatch({
         type: categorizeError(error),
         documentData: document || {},
         error: extractErrorMessage(error),
+        item: document || {},
+        itemIndex: rowNumber - 1,
         rowNumber,
       }
 

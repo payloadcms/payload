@@ -18,7 +18,7 @@ export type GetSchemaColumnsArgs = {
   /**
    * The locale to export. When 'all', localized fields are expanded to include all locale suffixes.
    */
-  locale?: string
+  locale?: null | string
   /**
    * Available locale codes from config. Required when locale='all'.
    */
@@ -132,14 +132,16 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
       const match = col.match(/^(.+?)_(\d+)(_.*)?$/)
       if (match) {
         const [, basePath, index, suffix] = match
-        const prevIndex = parseInt(index, 10) - 1
-        const prevCol = `${basePath}_${prevIndex}${suffix}`
-        const prevIdx = result.indexOf(prevCol)
-        if (prevIdx !== -1) {
-          // Insert after the previous index column
-          result.splice(prevIdx + 1, 0, col)
-          schemaSet.add(col)
-          continue
+        if (basePath && index) {
+          const prevIndex = parseInt(index, 10) - 1
+          const prevCol = `${basePath}_${prevIndex}${suffix ?? ''}`
+          const prevIdx = result.indexOf(prevCol)
+          if (prevIdx !== -1) {
+            // Insert after the previous index column
+            result.splice(prevIdx + 1, 0, col)
+            schemaSet.add(col)
+            continue
+          }
         }
       }
       // Otherwise append at the end (before timestamps)

@@ -107,6 +107,24 @@ export type ImportExportPluginConfig = {
    * @default false
    */
   debug?: boolean
+
+  /**
+   * Function to override the default export collection configuration.
+   * Takes the default export collection and allows you to modify and return it.
+   * Useful for adding access control, changing upload directory, etc.
+   *
+   * This can also be set at the collection level via `export` config.
+   */
+  overrideExportCollection?: CollectionOverride
+
+  /**
+   * Function to override the default import collection configuration.
+   * Takes the default import collection and allows you to modify and return it.
+   * Useful for adding access control, changing upload directory, etc.
+   *
+   * This can also be set at the collection level via `import` config.
+   */
+  overrideImportCollection?: CollectionOverride
 }
 
 /**
