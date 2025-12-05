@@ -81,6 +81,11 @@ export class Main {
     try {
       const debugFlag = this.args['--debug']
 
+      // Set DEBUG env var for logger utility
+      if (debugFlag) {
+        process.env.DEBUG = 'true'
+      }
+
       const LATEST_VERSION = await getLatestPackageVersion({
         debug: debugFlag,
         packageName: 'payload',
