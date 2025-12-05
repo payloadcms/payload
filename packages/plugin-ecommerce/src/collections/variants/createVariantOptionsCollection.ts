@@ -3,10 +3,7 @@ import type { CollectionConfig, Field } from 'payload'
 import type { AccessConfig } from '../../types/index.js'
 
 type Props = {
-  access: {
-    adminOnly: NonNullable<AccessConfig['adminOnly']>
-    publicAccess: NonNullable<AccessConfig['publicAccess']>
-  }
+  access: Pick<AccessConfig, 'isAdmin' | 'publicAccess'>
   /**
    * Slug of the variant types collection, defaults to 'variantTypes'.
    */
@@ -14,10 +11,7 @@ type Props = {
 }
 
 export const createVariantOptionsCollection: (props: Props) => CollectionConfig = (props) => {
-  const {
-    access: { adminOnly, publicAccess },
-    variantTypesSlug = 'variantTypes',
-  } = props || {}
+  const { access, variantTypesSlug = 'variantTypes' } = props || {}
 
   const fields: Field[] = [
     {
@@ -47,10 +41,10 @@ export const createVariantOptionsCollection: (props: Props) => CollectionConfig 
   const baseConfig: CollectionConfig = {
     slug: 'variantOptions',
     access: {
-      create: adminOnly,
-      delete: adminOnly,
-      read: publicAccess,
-      update: adminOnly,
+      create: access.isAdmin,
+      delete: access.isAdmin,
+      read: access.publicAccess,
+      update: access.isAdmin,
     },
     admin: {
       group: false,
