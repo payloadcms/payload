@@ -49,6 +49,7 @@
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
