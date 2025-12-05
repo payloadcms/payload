@@ -70,8 +70,10 @@
     "figures": "^6.1.0",
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
+    "prettier": "^3.5.0",
     "tar": "^7.4.3",
-    "terminal-link": "^2.1.1"
+    "terminal-link": "^2.1.1",
+    "ts-morph": "^21.0.1"
   },
   "devDependencies": {
     "@types/esprima": "^4.0.6",

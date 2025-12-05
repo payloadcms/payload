@@ -8,7 +8,6 @@ import path from 'path'
 import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
 import { createProject, updatePackageJSONDependencies } from './create-project.js'
-import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
 
 describe('createProject', () => {
@@ -148,8 +147,6 @@ describe('createProject', () => {
           template: template as ProjectTemplate,
         })
 
-        const dbReplacement = dbReplacements[db as DbType]
-
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
 
@@ -170,13 +167,19 @@ describe('createProject', () => {
 
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 
-        // Check payload.config.ts
+        // Check payload.config.ts doesn't have placeholder comments
         expect(content).not.toContain('// database-adapter-import')
-        expect(content).toContain(dbReplacement.importReplacement)
-
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+
+        // Verify correct adapter import and usage based on db type
+        if (db === 'mongodb') {
+          expect(content).toContain("import { mongooseAdapter } from '@payloadcms/db-mongodb'")
+          expect(content).toContain('mongooseAdapter')
+        } else if (db === 'postgres') {
+          expect(content).toContain("import { postgresAdapter } from '@payloadcms/db-postgres'")
+          expect(content).toContain('postgresAdapter')
+        }
       })
     })
 
