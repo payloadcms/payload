@@ -7,7 +7,7 @@ import { useEffect } from 'react'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
 export const CollectionField: React.FC = () => {
-  const { id } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
   const { setValue } = useField({ path: 'collectionSlug' })
   const { collection } = useImportExport()
 
@@ -15,8 +15,12 @@ export const CollectionField: React.FC = () => {
     if (id) {
       return
     }
-    setValue(collection)
-  }, [id, collection, setValue])
+    if (collection) {
+      setValue(collection)
+    } else if (collectionSlug) {
+      setValue(collectionSlug)
+    }
+  }, [id, collection, setValue, collectionSlug])
 
   return null
 }
