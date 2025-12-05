@@ -74,7 +74,7 @@ export const getExportCollection = ({
       }
       const { user } = req
       const debug = pluginConfig.debug
-      await createExport({ input: { ...args.data, debug }, req, user })
+      await createExport({ input: { ...args.data, debug } as any, req, user })
     })
   } else {
     afterChange.push(async ({ doc, operation, req }) => {

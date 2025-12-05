@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.65.0",
+  "version": "3.66.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -130,8 +130,8 @@
     "@next/eslint-plugin-next": "15.4.7",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.25.5",
@@ -141,7 +141,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.2.3",
+    "next": "^15.4.8",
     "payload": "workspace:*"
   },
   "engines": {

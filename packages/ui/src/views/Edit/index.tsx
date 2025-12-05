@@ -2,9 +2,8 @@
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
@@ -39,8 +38,8 @@ import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
-import './index.scss'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
+import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -171,10 +170,7 @@ export function DefaultEditView({
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
 
-  const autosaveEnabled = Boolean(
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
-  )
+  const autosaveEnabled = hasAutosaveEnabled(docConfig)
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)

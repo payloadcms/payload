@@ -2,6 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
 import chalk from 'chalk'
+import { hasAutosaveEnabled } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
@@ -190,11 +191,7 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
-              isDraftsEnabled: Boolean(
-                collection.versions &&
-                  typeof collection.versions === 'object' &&
-                  collection.versions.drafts,
-              ),
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -381,11 +378,7 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
-              isDraftsEnabled: Boolean(
-                collection.versions &&
-                  typeof collection.versions === 'object' &&
-                  collection.versions.drafts,
-              ),
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},

@@ -60,6 +60,7 @@ export interface PluginTemplate extends Template {
 }
 
 interface Template {
+  dbType?: DbType
   description?: string
   name: string
   type: ProjectTemplate['type']
