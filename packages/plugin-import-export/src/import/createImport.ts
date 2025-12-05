@@ -3,7 +3,7 @@ import type { PayloadRequest, TypedUser } from 'payload'
 import { APIError } from 'payload'
 
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
-import { createBatchProcessor } from './batchProcessor.js'
+import { createImportBatchProcessor } from './batchProcessor.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { parseCSV } from './parseCSV.js'
 import { parseJSON } from './parseJSON.js'
@@ -231,7 +231,7 @@ export const createImport = async ({
   }
 
   // Create batch processor
-  const processor = createBatchProcessor({
+  const processor = createImportBatchProcessor({
     batchSize,
     defaultVersionStatus,
   })

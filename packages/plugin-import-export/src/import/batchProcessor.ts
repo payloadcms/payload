@@ -2,21 +2,35 @@ import type { PayloadRequest, TypedUser } from 'payload'
 
 import type { ImportMode, ImportResult } from './createImport.js'
 
-export interface BatchProcessorOptions {
+import {
+  type BatchError,
+  categorizeError,
+  createBatches,
+  extractErrorMessage,
+} from '../utilities/useBatchProcessor.js'
+
+/**
+ * Import-specific batch processor options
+ */
+export interface ImportBatchProcessorOptions {
   batchSize?: number
   defaultVersionStatus?: 'draft' | 'published'
 }
 
-export interface ImportError {
+/**
+ * Import-specific error type extending the generic BatchError
+ */
+export interface ImportError extends BatchError<Record<string, unknown>> {
   documentData: Record<string, unknown>
-  error: string
   field?: string
   fieldLabel?: string
   rowNumber: number // 1-indexed for user clarity
-  type: 'database' | 'duplicate' | 'notFound' | 'unknown' | 'validation'
 }
 
-export interface BatchResult {
+/**
+ * Result from processing a single import batch
+ */
+export interface ImportBatchResult {
   failed: Array<ImportError>
   successful: Array<{
     document: Record<string, unknown>
@@ -26,59 +40,16 @@ export interface BatchResult {
   }>
 }
 
-export interface ProcessOptions {
+/**
+ * Options for processing an import operation
+ */
+export interface ImportProcessOptions {
   collectionSlug: string
   documents: Record<string, unknown>[]
   importMode: ImportMode
   matchField?: string
   req: PayloadRequest
   user?: TypedUser
-}
-
-// Helper functions
-function createBatches(
-  documents: Record<string, unknown>[],
-  batchSize: number,
-): Record<string, unknown>[][] {
-  const batches: Record<string, unknown>[][] = []
-  for (let i = 0; i < documents.length; i += batchSize) {
-    batches.push(documents.slice(i, i + batchSize))
-  }
-  return batches
-}
-
-function extractErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
-  }
-
-  return String(error)
-}
-
-function categorizeError(error: unknown): ImportError['type'] {
-  const message = extractErrorMessage(error).toLowerCase()
-
-  if (message.includes('validation')) {
-    return 'validation'
-  }
-
-  if (message.includes('not found')) {
-    return 'notFound'
-  }
-
-  if (message.includes('duplicate') || message.includes('unique')) {
-    return 'duplicate'
-  }
-
-  if (message.includes('database') || message.includes('transaction')) {
-    return 'database'
-  }
-
-  return 'unknown'
 }
 
 // Helper function to handle multi-locale data
@@ -126,7 +97,7 @@ function extractMultiLocaleData(data: Record<string, unknown>): {
   return { flatData, hasMultiLocale, localeUpdates }
 }
 
-type ProcessBatchOptions = {
+type ProcessImportBatchOptions = {
   batch: Record<string, unknown>[]
   batchIndex: number
   collectionSlug: string
@@ -137,7 +108,7 @@ type ProcessBatchOptions = {
   user?: TypedUser
 }
 
-async function processBatch({
+async function processImportBatch({
   batch,
   batchIndex,
   collectionSlug,
@@ -146,8 +117,8 @@ async function processBatch({
   options,
   req,
   user,
-}: ProcessBatchOptions): Promise<BatchResult> {
-  const result: BatchResult = {
+}: ProcessImportBatchOptions): Promise<ImportBatchResult> {
+  const result: ImportBatchResult = {
     failed: [],
     successful: [],
   }
@@ -617,13 +588,13 @@ async function processBatch({
   return result
 }
 
-export function createBatchProcessor(options: BatchProcessorOptions = {}) {
+export function createImportBatchProcessor(options: ImportBatchProcessorOptions = {}) {
   const processorOptions = {
     batchSize: options.batchSize ?? 100,
     defaultVersionStatus: options.defaultVersionStatus ?? 'published',
   }
 
-  const processImport = async (processOptions: ProcessOptions): Promise<ImportResult> => {
+  const processImport = async (processOptions: ImportProcessOptions): Promise<ImportResult> => {
     const { collectionSlug, documents, importMode, matchField, req, user } = processOptions
     const batches = createBatches(documents, processorOptions.batchSize)
 
@@ -640,7 +611,7 @@ export function createBatchProcessor(options: BatchProcessorOptions = {}) {
         continue
       }
 
-      const batchResult = await processBatch({
+      const batchResult = await processImportBatch({
         batch: currentBatch,
         batchIndex: i,
         collectionSlug,

@@ -7,6 +7,7 @@ import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
+import { createExportBatchProcessor, type ExportFindArgs } from './batchProcessor.js'
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
@@ -232,47 +233,26 @@ export const createExport = async (args: CreateExportArgs) => {
       throw new APIError(limitErrorMsg)
     }
 
-    const allColumns: string[] = []
+    // Create batch processor for column discovery
+    const streamProcessor = createExportBatchProcessor({ batchSize, debug })
+
+    // Transform function for CSV flattening
+    const transformDocForCSV = (doc: unknown) =>
+      filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions }))
+
+    let allColumns: string[] = []
 
     if (isCSV) {
-      const allColumnsSet = new Set<string>()
-
-      // Use the incoming page value here, defaulting to 1 if undefined
-      let scanPage = adjustedPage
-      let hasMore = true
-      let fetched = 0
-      const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
-
-      while (hasMore) {
-        const remaining = Math.max(0, maxDocs - fetched)
-        if (remaining === 0) {
-          break
-        }
-
-        const result = await payload.find({
-          ...findArgs,
-          page: scanPage,
-          limit: Math.min(batchSize, remaining),
-        })
-
-        result.docs.forEach((doc) => {
-          const flat = filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions }))
-          Object.keys(flat).forEach((key) => {
-            if (!allColumnsSet.has(key)) {
-              allColumnsSet.add(key)
-              allColumns.push(key)
-            }
-          })
-        })
-
-        fetched += result.docs.length
-        scanPage += 1 // Increment page for next batch
-        hasMore = result.hasNextPage && fetched < maxDocs
-      }
-
-      if (debug) {
-        req.payload.logger.debug(`Discovered ${allColumns.length} columns`)
-      }
+      // Use batch processor to discover all columns
+      allColumns = await streamProcessor.discoverColumns({
+        collectionSlug,
+        findArgs: findArgs as ExportFindArgs,
+        format: 'csv',
+        maxDocs: typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY,
+        req,
+        startPage: adjustedPage,
+        transformDoc: transformDocForCSV,
+      })
     }
 
     const encoder = new TextEncoder()
@@ -377,62 +357,36 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug('Starting file generation')
   }
 
-  const outputData: string[] = []
-  const rows: Record<string, unknown>[] = []
-  const columnsSet = new Set<string>()
-  const columns: string[] = []
+  // Create export batch processor
+  const processor = createExportBatchProcessor({ batchSize, debug })
 
-  // Start from the incoming page value, defaulting to 1 if undefined
-  let currentPage = adjustedPage
-  let fetched = 0
+  // Transform function based on format
+  const transformDoc = (doc: unknown) =>
+    isCSV
+      ? filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions }))
+      : filterDisabledJSON(doc)
+
   // Skip fetching if access was denied - we'll create an empty export
-  let hasNextPage = !accessDenied
-  const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
-
-  while (hasNextPage) {
-    const remaining = Math.max(0, maxDocs - fetched)
-
-    if (remaining === 0) {
-      break
-    }
-
-    const result = await payload.find({
-      ...findArgs,
-      page: currentPage,
-      limit: Math.min(batchSize, remaining),
-    })
-
-    if (debug) {
-      req.payload.logger.debug(
-        `Processing batch ${currentPage} with ${result.docs.length} documents`,
-      )
-    }
-
-    if (isCSV) {
-      const batchRows = result.docs.map((doc) =>
-        filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions })),
-      )
-
-      // Track discovered column keys
-      batchRows.forEach((row) => {
-        Object.keys(row).forEach((key) => {
-          if (!columnsSet.has(key)) {
-            columnsSet.add(key)
-            columns.push(key)
-          }
-        })
-      })
-
-      rows.push(...batchRows)
-    } else {
-      const batchRows = result.docs.map((doc) => filterDisabledJSON(doc))
-      outputData.push(batchRows.map((doc) => JSON.stringify(doc)).join(',\n'))
-    }
-
-    fetched += result.docs.length
-    hasNextPage = result.hasNextPage && fetched < maxDocs
-    currentPage += 1 // Increment page for next batch
+  let exportResult = {
+    columns: [] as string[],
+    docs: [] as Record<string, unknown>[],
+    fetchedCount: 0,
   }
+
+  if (!accessDenied) {
+    exportResult = await processor.processExport({
+      collectionSlug,
+      findArgs: findArgs as ExportFindArgs,
+      format,
+      maxDocs: typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY,
+      req,
+      startPage: adjustedPage,
+      transformDoc,
+    })
+  }
+
+  const { columns, docs: rows } = exportResult
+  const outputData: string[] = []
 
   // Prepare final output
   if (isCSV) {
@@ -460,6 +414,9 @@ export const createExport = async (args: CreateExportArgs) => {
         columns: finalColumns,
       }),
     )
+  } else {
+    // JSON format
+    outputData.push(rows.map((doc) => JSON.stringify(doc)).join(',\n'))
   }
 
   // Ensure we always have valid content for the file

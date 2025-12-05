@@ -22,7 +22,7 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('Import Export', () => {
+test.describe('Import Export Plugin', () => {
   let page: Page
   let pagesURL: AdminUrlUtil
   let exportsURL: AdminUrlUtil
