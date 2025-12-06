@@ -353,6 +353,12 @@ export function DefaultEditView({
           skipValidation: true,
         })
 
+        // For upload collections, clear the file field from the returned state
+        // to prevent the File object from persisting in form state after save
+        if (upload && state) {
+          delete state.file
+        }
+
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)

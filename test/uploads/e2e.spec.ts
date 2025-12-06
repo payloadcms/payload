@@ -1842,4 +1842,29 @@ describe('Uploads', () => {
     await expect(menuList.getByText('Sizes > four > File Size', { exact: true })).toHaveCount(1)
     await expect(menuList.getByText('Sizes > four > File Name', { exact: true })).toHaveCount(1)
   })
+
+  test('should allow saving other fields after changing file', async () => {
+    await page.goto(uploadsTwo.create)
+
+    // Upload initial file with required field
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('button[data-close-button="true"]').click()
+
+    // Change the file
+    await page.locator('.file-details__remove').click()
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.jpg'))
+    await saveDocAndAssert(page)
+
+    await page.locator('button[data-close-button="true"]').click()
+
+    // Modify another field and save - this should work without errors
+    await page.locator('#field-title').fill('updated title')
+    await saveDocAndAssert(page)
+
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toHaveValue('updated title')
+  })
 })

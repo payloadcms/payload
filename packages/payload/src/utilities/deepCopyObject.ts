@@ -150,6 +150,10 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
       typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
     ) as T
   } else {
+    // Handle File objects by returning them as-is (don't serialize to plain object)
+    if (value instanceof File) {
+      return value as unknown as T
+    }
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
