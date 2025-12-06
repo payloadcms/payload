@@ -193,7 +193,7 @@
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "sort-package-json": "^2.10.0",
-    "swc-plugin-transform-remove-imports": "4.0.4",
+    "swc-plugin-transform-remove-imports": "8.3.0",
     "tempy": "1.0.1",
     "tstyche": "3.5.0",
     "tsx": "4.19.2",
