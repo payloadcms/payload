@@ -1598,6 +1598,52 @@ describe('List View', () => {
 
       expect(firstPageIds).not.toContain(secondPageIds[0])
     })
+
+    test('should persist per-page limit in list drawer', async () => {
+      await payload.delete({
+        collection: listDrawerSlug,
+        where: {},
+      })
+
+      await mapAsync([...Array(20)], async (_, i) => {
+        await payload.create({
+          collection: listDrawerSlug,
+          data: {
+            title: `List Drawer Item ${i + 1}`,
+            description: `Description ${i + 1}`,
+            number: i + 1,
+          },
+        })
+      })
+
+      await page.goto(withListViewUrl.list)
+
+      // Open the list drawer via the "Select posts" button
+      await page.locator('button:has-text("Select posts")').click()
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
+
+      // Change per-page to 5
+      await page.locator('.list-drawer .per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
+
+      await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
+      await expect(listDrawer).toBeHidden()
+
+      // Reopen the drawer
+      await page.locator('button:has-text("Select posts")').click()
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
+    })
   })
 
   // TODO: Troubleshoot flaky suite
