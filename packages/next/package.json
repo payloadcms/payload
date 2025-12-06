@@ -138,7 +138,7 @@
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "4.0.4"
+    "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
