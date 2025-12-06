@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
+import type { DefaultDocumentIDType, Payload, PayloadRequest, Where } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import { cache } from 'react'
@@ -83,20 +83,36 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
   let newPrefs = existingPrefs?.value
 
   if (!existingPrefs?.id) {
-    await req.payload.create({
-      collection: 'payload-preferences',
-      data: {
-        key,
-        user: {
-          collection: req.user.collection,
-          value: req.user.id,
-        },
-        value: incomingValue,
+    const { user } = req
+    if (!user) {
+      return newPrefs
+    }
+
+    const where: Where = {
+      and: [
+        { key: { equals: key } },
+        { 'user.value': { equals: user.id } },
+        { 'user.relationTo': { equals: user.collection } },
+      ],
+    }
+
+    const preference = {
+      key,
+      user: {
+        relationTo: user.collection,
+        value: user.id,
       },
-      depth: 0,
-      disableTransaction: true,
-      user: req.user,
+      value: incomingValue,
+    }
+
+    await req.payload.db.upsert({
+      collection: 'payload-preferences',
+      data: preference,
+      req,
+      where,
     })
+
+    newPrefs = incomingValue
   } else {
     let mergedPrefs: T
 
