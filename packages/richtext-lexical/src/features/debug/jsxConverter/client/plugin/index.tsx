@@ -9,7 +9,7 @@ import './style.scss'
 
 export function RichTextPlugin() {
   const [editor] = useLexicalComposerContext()
-  const [editorState, setEditorState] = useState(editor.getEditorState().toJSON())
+  const [editorState, setEditorState] = useState(() => editor.getEditorState().toJSON())
 
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
