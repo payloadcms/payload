@@ -10,7 +10,7 @@
     },
     "transform": {
       "react": {
-        "runtime": "automatic",
+        "runtime": "preserve",
         "pragmaFrag": "React.Fragment",
         "throwIfNamespace": true,
         "development": true,
