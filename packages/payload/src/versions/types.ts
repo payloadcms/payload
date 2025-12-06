@@ -39,6 +39,12 @@ export type IncomingDrafts = {
    */
   autosave?: Autosave | boolean
   /**
+   * If true, status will be localized
+   *
+   * @default false
+   */
+  localizeStatus?: boolean
+  /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
   schedulePublish?: boolean | SchedulePublish
@@ -56,6 +62,12 @@ export type SanitizedDrafts = {
    * To enable, set to true or pass an object with options.
    */
   autosave: Autosave | false
+  /**
+   * If true, status will be localized
+   *
+   * @default false
+   */
+  localizeStatus?: boolean
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */

@@ -16,6 +16,7 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
@@ -166,12 +167,15 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false, maxPerDoc: 100 }
-    }
-
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
+    }
+
+    if (sanitized.versions === true) {
+      sanitized.versions = {
+        drafts: false,
+        maxPerDoc: 100,
+      }
     }
 
     sanitized.versions.maxPerDoc =
@@ -185,6 +189,14 @@ export const sanitizeCollection = async (
         }
       }
 
+      const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
+
+      if (config.localization && hasLocalizedFields) {
+        sanitized.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
+      } else {
+        sanitized.versions.drafts.localizeStatus = false
+      }
+
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
@@ -195,7 +207,12 @@ export const sanitizeCollection = async (
         sanitized.versions.drafts.validate = false
       }
 
-      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
+      sanitized.fields = mergeBaseFields(
+        sanitized.fields,
+        baseVersionFields({
+          localized: sanitized.versions.drafts.localizeStatus,
+        }),
+      )
     }
   } else {
     delete sanitized.versions

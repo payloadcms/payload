@@ -66,6 +66,12 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
+   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   *
+   * @default undefined
+   */
+  publishAllLocales?: boolean
+  /**
    * Publish the document / documents with a specific locale.
    */
   publishSpecificLocale?: TypedLocale
@@ -88,6 +94,10 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
+   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   */
+  unpublishAllLocales?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -108,9 +118,11 @@ export async function updateGlobalLocal<
     overrideAccess = true,
     overrideLock,
     populate,
+    publishAllLocales,
     publishSpecificLocale,
     select,
     showHiddenFields,
+    unpublishAllLocales,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -128,9 +140,11 @@ export async function updateGlobalLocal<
     overrideAccess,
     overrideLock,
     populate,
+    publishAllLocales,
     publishSpecificLocale: publishSpecificLocale!,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    unpublishAllLocales,
   })
 }
