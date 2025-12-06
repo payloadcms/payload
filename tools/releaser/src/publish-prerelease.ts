@@ -20,6 +20,7 @@ async function main() {
   const workspace = await getWorkspace()
   await workspace.bumpVersion(tag)
   await workspace.build({ debug: debug ?? false })
+  console.log('Build successful. Publishing packages...')
   await workspace.publishSync({ dryRun: dryRun ?? false, tag })
 
   header('🎉 Done!')
