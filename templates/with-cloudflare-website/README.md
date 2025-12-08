@@ -48,12 +48,15 @@ pnpx create-payload-app my-project -t with-cloudflare-website
 ### Cloudflare Setup
 
 1. Create a D1 database:
+
    ```bash
    wrangler d1 create my-website
    ```
+
    Copy the `database_id` from the output and update `wrangler.jsonc`.
 
 2. Create an R2 bucket:
+
    ```bash
    wrangler r2 bucket create my-website
    ```
@@ -69,6 +72,59 @@ pnpx create-payload-app my-project -t with-cloudflare-website
 1. open `http://localhost:3000` to open the app in your browser
 
 That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user.
+
+### Database Migrations
+
+**Important:** Before deploying to Cloudflare, you must generate and apply database migrations to create all the necessary tables.
+
+1. Generate migrations (creates SQL files for your schema):
+
+   ```bash
+   pnpm payload migrate:create
+   ```
+
+   This will create migration files in `src/migrations/` based on your collections.
+
+2. Apply migrations to your remote D1 database:
+
+   ```bash
+   # Set your environment (production, staging, etc.)
+   export CLOUDFLARE_ENV=production
+
+   # Push migrations to D1
+   pnpm run deploy:database
+   ```
+
+   Or manually with wrangler:
+
+   ```bash
+   wrangler d1 migrations apply D1 --remote --env=production
+   ```
+
+3. For local development, migrations are automatically applied when you run `pnpm dev`.
+
+> **Note:** If you see "Failed query" errors after deployment, it usually means migrations haven't been applied. Run `pnpm run deploy:database` to fix this.
+
+### Deployment
+
+1. Generate migrations (if not done already):
+
+   ```bash
+   pnpm payload migrate:create
+   ```
+
+2. Set your Cloudflare environment variables in Cloudflare Pages dashboard:
+
+   - `PAYLOAD_SECRET` - Your secret key (generate with `openssl rand -hex 32`)
+
+3. Deploy:
+
+   ```bash
+   export CLOUDFLARE_ENV=production
+   pnpm run deploy
+   ```
+
+   This runs `deploy:database` (applies migrations) then `deploy:app` (builds and deploys).
 
 ## Cloudflare D1
 
@@ -282,6 +338,7 @@ This template is designed to be deployed to Cloudflare Workers. To deploy:
 2. Update `wrangler.jsonc` with your database and bucket configuration
 
 3. Set your `PAYLOAD_SECRET` environment variable in Cloudflare:
+
    ```bash
    wrangler secret put PAYLOAD_SECRET
    ```
@@ -292,6 +349,7 @@ This template is designed to be deployed to Cloudflare Workers. To deploy:
    ```
 
 This will:
+
 - Run database migrations
 - Build your Next.js application with OpenNext
 - Deploy to Cloudflare Workers
