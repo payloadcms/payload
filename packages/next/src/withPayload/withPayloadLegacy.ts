@@ -33,7 +33,7 @@ export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
       if (hasTurbopackConfigWarning) {
         consoleWarn(...args)
         consoleWarn(
-          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to Next.js 15.4.7 to resolve this warning.',
+          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to the latest supported Next.js version to resolve this warning.',
         )
         return
       }
@@ -48,7 +48,7 @@ export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
 
   if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
     throw new Error(
-      'Your Next.js and Payload versions do not support using Turbopack for production builds. Please upgrade to Next.js 16.1.0-canary.15 or higher if you want to use Turbopack for builds.',
+      'Your Next.js and Payload versions do not support using Turbopack for production builds. Please upgrade to Next.js 16.1.0-canary.3 or higher if you want to use Turbopack for builds.',
     )
   }
 

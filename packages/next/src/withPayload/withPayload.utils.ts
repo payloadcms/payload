@@ -101,11 +101,8 @@ export function getNextjsVersion(): SemVer | undefined {
 }
 
 /**
- * Checks if the current Next.js version supports native debug ids for turbopack.
- * This feature was first introduced in Next.js v15.6.0-canary.36 and marked stable in Next.js v16
- *
- * @param version - version string to check.
- * @returns true if Next.js version supports native debug ids for turbopack builds
+ * Checks if the current Next.js version supports Turbopack externalize transitive dependencies.
+ * This was introduced in Next.js v16.1.0-canary.3
  */
 export function supportsTurbopackExternalizeTransitiveDependencies(
   version: SemVer | undefined,
@@ -130,8 +127,8 @@ export function supportsTurbopackExternalizeTransitiveDependencies(
     }
     if (minor === 1) {
       if (canaryVersion !== undefined) {
-        // 16.1.0-canary.15+
-        return canaryVersion >= 15
+        // 16.1.0-canary.3+
+        return canaryVersion >= 3
       } else {
         // Assume that Next.js 16.1 inherits support for this feature from the canary release
         return true
