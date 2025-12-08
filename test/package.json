@@ -31,7 +31,7 @@
     "@next/env": "15.4.7",
     "@opennextjs/cloudflare": "1.9.2",
     "@payloadcms/admin-bar": "workspace:*",
-    "@payloadcms/db-content-api": "file:/Users/gjablonski/figma/figma/payload/db-content-api",
+    "@payloadcms/db-content-api": "file:/Users/gjablonski/Documents/GitHub/enterprise-plugins/packages/db-content-api",
     "@payloadcms/db-d1-sqlite": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
