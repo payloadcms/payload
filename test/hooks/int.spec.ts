@@ -10,6 +10,11 @@ import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
+import {
+  beforeOperationSlug,
+  clearLastOperation,
+  getLastOperation,
+} from './collections/BeforeOperation/index.js'
 import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
@@ -741,6 +746,243 @@ describe('Hooks', () => {
       })
 
       expect(updateResult).toBeDefined()
+    })
+  })
+
+  describe('beforeOperation', () => {
+    afterEach(() => {
+      clearLastOperation()
+    })
+
+    it('should pass correct operation arg on create', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      expect(getLastOperation()).toEqual('create')
+    })
+
+    it('should pass correct operation arg on update', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      expect(getLastOperation()).toEqual('update')
+    })
+
+    it('should pass correct operation arg on updateByID', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      expect(getLastOperation()).toEqual('update')
+    })
+
+    it('should pass correct operation arg on read (findByID)', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.findByID({
+        id: doc.id,
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on read (find)', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      clearLastOperation()
+
+      await payload.find({
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on readDistinct (findDistinct)', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'test1' },
+      })
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'test2' },
+      })
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'test1' },
+      })
+
+      await payload.findDistinct({
+        collection: beforeOperationSlug,
+        field: 'category',
+      })
+
+      expect(getLastOperation()).toEqual('readDistinct')
+    })
+
+    it('should pass correct operation arg on delete', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.delete({
+        id: doc.id,
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('delete')
+    })
+
+    it('should pass correct operation arg on deleteByID', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.delete({
+        id: doc.id,
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('delete')
+    })
+
+    it('should pass correct operation arg on count', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.count({
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('count')
+    })
+
+    it('should pass correct operation arg on countVersions', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.countVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(getLastOperation()).toEqual('countVersions')
+    })
+
+    it('should pass correct operation arg on findVersions', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.findVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on findVersionByID', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'v1' },
+      })
+
+      // Update to create a version
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: { category: 'v2' },
+      })
+
+      const versions = await payload.findVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(versions.docs.length).toBeGreaterThan(0)
+
+      await payload.findVersionByID({
+        collection: beforeOperationSlug,
+        id: versions.docs[0]!.id,
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on restoreVersion', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'v1' },
+      })
+
+      // Update to create a version
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: { category: 'v2' },
+      })
+
+      const versions = await payload.findVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(versions.docs.length).toBeGreaterThan(0)
+
+      await payload.restoreVersion({
+        collection: beforeOperationSlug,
+        id: versions.docs[0]!.id,
+      })
+
+      expect(getLastOperation()).toEqual('restoreVersion')
     })
   })
 })
