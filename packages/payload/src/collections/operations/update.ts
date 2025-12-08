@@ -171,7 +171,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (collectionConfig.versions?.drafts && shouldSaveDraft) {
+    if (hasDraftsEnabled(collectionConfig) && shouldSaveDraft) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
