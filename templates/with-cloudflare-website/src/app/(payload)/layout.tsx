@@ -9,6 +9,9 @@ import React from 'react'
 import { importMap } from './admin/importMap.js'
 import './custom.scss'
 
+// Cloudflare Workers don't support static generation at build time
+export const dynamic = 'force-dynamic'
+
 type Args = {
   children: React.ReactNode
 }
