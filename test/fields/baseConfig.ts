@@ -31,6 +31,7 @@ import SlugField from './collections/SlugField/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
+import TextareaFields from './collections/Textarea/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
@@ -41,7 +42,7 @@ import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
 import { seed } from './seed.js'
 
-export const collectionSlugs: CollectionConfig[] = [
+export const collections: CollectionConfig[] = [
   {
     slug: 'users',
     admin: {
@@ -81,6 +82,7 @@ export const collectionSlugs: CollectionConfig[] = [
   TabsFields2,
   TabsFields,
   TextFields,
+  TextareaFields,
   Uploads,
   Uploads2,
   Uploads3,
@@ -92,7 +94,7 @@ export const collectionSlugs: CollectionConfig[] = [
 ]
 
 export const baseConfig: Partial<Config> = {
-  collections: collectionSlugs,
+  collections,
   blocks: [
     {
       slug: 'ConfigBlockTest',
@@ -148,6 +150,7 @@ export const baseConfig: Partial<Config> = {
       supportedTimezones: ({ defaultTimezones }) => [
         ...defaultTimezones,
         { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+        { label: 'Custom UTC', value: 'UTC' },
       ],
       defaultTimezone: 'America/Monterrey',
     },

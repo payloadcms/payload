@@ -1,10 +1,12 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
 import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -911,6 +913,101 @@ describe('relationship', () => {
     await wait(400)
     await newButton.click()
     await expect(listDrawerContent).toBeHidden()
+  })
+
+  test('should update label for *all* relationship fields pointing to the same document, if the useAsTitle is updated from drawer', async () => {
+    const textDoc = await createTextFieldDoc()
+    const doc = await payload.create({
+      collection: 'relationship-fields',
+      data: {
+        relationship: {
+          relationTo: 'text-fields',
+          value: textDoc.id,
+        },
+        relationshipDrawer: textDoc.id,
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    //ensure page is loaded
+    await wait(100)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    await expect(page.locator('#field-relationship .relationship--single-value__text')).toHaveText(
+      textDoc.text,
+    )
+    await expect(
+      page.locator('#field-relationshipDrawer .relationship--single-value__text'),
+    ).toHaveText(textDoc.text)
+
+    await openDocDrawer({
+      page,
+      selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+    })
+
+    await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').fill('new text')
+
+    // save drawer
+    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    // close drawer
+    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+
+    await expect(page.locator('#field-relationship .relationship--single-value__text')).toHaveText(
+      'new text',
+    )
+
+    // The previous issue was that the label of *other* relationship fields pointing to the same document was not updated
+    await expect(
+      page.locator('#field-relationshipDrawer .relationship--single-value__text'),
+    ).toHaveText('new text')
+  })
+
+  describe('A11y', () => {
+    test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+      const firstItem = page.locator('.cell-id a').nth(0)
+      await firstItem.click()
+
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Relationship fields have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.collection-edit__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })
 

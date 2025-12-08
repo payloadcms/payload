@@ -94,43 +94,60 @@ export const initReq = async function ({
     }
   }, 'global')
 
-  return reqCache.get(async () => {
-    const { i18n, languageCode, payload, responseHeaders, user } = partialResult
+  return reqCache
+    .get(async () => {
+      const { i18n, languageCode, payload, responseHeaders, user } = partialResult
 
-    const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+      const { req: reqOverrides, ...optionsOverrides } = overrides || {}
 
-    const req = await createLocalReq(
-      {
-        req: {
-          headers,
-          host: headers.get('host'),
-          i18n: i18n as I18n,
-          responseHeaders,
-          user,
-          ...(reqOverrides || {}),
+      const req = await createLocalReq(
+        {
+          req: {
+            headers,
+            host: headers.get('host'),
+            i18n: i18n as I18n,
+            responseHeaders,
+            user,
+            ...(reqOverrides || {}),
+          },
+          ...(optionsOverrides || {}),
         },
-        ...(optionsOverrides || {}),
-      },
-      payload,
-    )
+        payload,
+      )
 
-    const locale = await getRequestLocale({
-      req,
+      const locale = await getRequestLocale({
+        req,
+      })
+
+      req.locale = locale?.code
+
+      const permissions = await getAccessResults({
+        req,
+      })
+
+      return {
+        cookies,
+        headers,
+        languageCode,
+        locale,
+        permissions,
+        req,
+      }
+    }, key)
+    .then((result) => {
+      // CRITICAL: Create a shallow copy of req before returning to prevent
+      // mutations from propagating to the cached req object.
+      // This ensures parallel operations using the same cache key don't affect each other.
+      return {
+        ...result,
+        req: {
+          ...result.req,
+          ...(result.req?.context
+            ? {
+                context: { ...result.req.context },
+              }
+            : {}),
+        },
+      }
     })
-
-    req.locale = locale?.code
-
-    const permissions = await getAccessResults({
-      req,
-    })
-
-    return {
-      cookies,
-      headers,
-      languageCode,
-      locale,
-      permissions,
-      req,
-    }
-  }, key)
 }

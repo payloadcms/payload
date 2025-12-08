@@ -339,6 +339,7 @@ export const idTranslations: DefaultTranslationsObject = {
     loading: 'Memuat',
     locale: 'Lokal',
     locales: 'Lokal',
+    lock: 'Kunci',
     menu: 'Menu',
     moreOptions: 'Opsi lainnya',
     move: 'Pindah',
@@ -429,6 +430,7 @@ export const idTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} dipindahkan ke tempat sampah.',
     true: 'Benar',
     unauthorized: 'Tidak Sah',
+    unlock: 'Buka Kunci',
     unsavedChanges:
       'Anda memiliki perubahan yang belum disimpan. Simpan atau buang sebelum melanjutkan.',
     unsavedChangesDuplicate:
@@ -569,6 +571,7 @@ export const idTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Sedang melihat',
     currentPublishedVersion: 'Versi Terbitan Saat Ini',
     draft: 'Draf',
+    draftHasPublishedVersion: 'Draf (memiliki versi yang dipublikasikan)',
     draftSavedSuccessfully: 'Draf berhasil disimpan.',
     lastSavedAgo: 'Terakhir disimpan {{distance}} yang lalu',
     modifiedOnly: 'Hanya yang diubah',

@@ -24,6 +24,7 @@ import {
   autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftUnlimitedGlobalSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -430,6 +431,31 @@ describe('Versions', () => {
       })
     })
 
+    describe('Duplicate', () => {
+      it('should duplicate a versioned document as a draft', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original description',
+            title: 'Original Title',
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        const duplicatedDoc = await payload.create({
+          duplicateFromID: originalDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        expect(duplicatedDoc._status).toBe('draft')
+      })
+    })
+
     describe('Query operations', () => {
       beforeAll(async () => {
         // Create test data for query-only tests (pagination, sorting)
@@ -528,6 +554,23 @@ describe('Versions', () => {
         expect(draftsAscending.docs[0]).toMatchObject(
           draftsDescending.docs[draftsDescending.docs.length - 1]!,
         )
+      })
+
+      it('should findVersions with limit: 0', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'a', title: 'test-doc' },
+        })
+
+        for (let i = 0; i < 100; i++) {
+          await payload.update({ collection: draftCollectionSlug, id: doc.id, data: {} })
+        }
+        const res = await payload.findVersions({
+          collection: draftCollectionSlug,
+          limit: 0,
+          where: { parent: { equals: doc.id } },
+        })
+        expect(res.docs).toHaveLength(101)
       })
     })
 
@@ -968,7 +1011,7 @@ describe('Versions', () => {
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: Group > Title' },
+          { id: doc.id, message: 'The following field is invalid: Group > Title', isPublic: true },
         ])
       })
 
@@ -2202,6 +2245,20 @@ describe('Versions', () => {
         })
 
         expect(version.id).toStrictEqual(globalVersionID)
+      })
+
+      it('should findGlobalVersions with limit: 0', async () => {
+        await payload.db.deleteVersions({ globalSlug: draftUnlimitedGlobalSlug, where: {} })
+        for (let i = 0; i < 100; i++) {
+          await payload.updateGlobal({ slug: draftUnlimitedGlobalSlug, data: { title: 'global' } })
+        }
+
+        const res = await payload.findGlobalVersions({
+          slug: draftUnlimitedGlobalSlug,
+          limit: 0,
+        })
+
+        expect(res.docs).toHaveLength(100)
       })
     })
 

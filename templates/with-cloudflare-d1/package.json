@@ -25,7 +25,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.6.5",
+    "@opennextjs/cloudflare": "^1.11.0",
     "@payloadcms/db-d1-sqlite": "3.63.0",
     "@payloadcms/next": "3.63.0",
     "@payloadcms/richtext-lexical": "3.63.0",
@@ -36,8 +36,8 @@
     "graphql": "^16.8.1",
     "next": "16.0.2-canary.17",
     "payload": "3.63.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
@@ -55,7 +55,7 @@
     "typescript": "5.7.3",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3",
-    "wrangler": "~4.42.0"
+    "wrangler": "~4.46.0"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",

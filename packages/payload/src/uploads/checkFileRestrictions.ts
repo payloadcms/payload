@@ -4,6 +4,7 @@ import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
+import { validatePDF } from '../utilities/validatePDF.js'
 import { detectSvgFromXml } from './detectSvgFromXml.js'
 
 /**
@@ -50,6 +51,7 @@ export const checkFileRestrictions = async ({
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
+  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -63,6 +65,21 @@ export const checkFileRestrictions = async ({
       ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
+  const expectsDetectableType = (mimeType: string): boolean => {
+    const textBasedTypes = ['/svg', 'image/svg+xml', 'image/x-xbitmap', 'image/x-xpixmap']
+
+    if (textBasedTypes.includes(mimeType)) {
+      return false
+    }
+
+    return (
+      mimeType.startsWith('image/') ||
+      mimeType.startsWith('video/') ||
+      mimeType.startsWith('audio/') ||
+      mimeType === 'application/pdf'
+    )
+  }
+
   // Skip validation if `allowRestrictedFileTypes` is true
   if (allowRestrictedFileTypes) {
     return
@@ -71,19 +88,33 @@ export const checkFileRestrictions = async ({
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
     let detected = await fileTypeFromBuffer(file.data)
+    const typeFromExtension = file.name.split('.').pop() || ''
 
     // Handle SVG files that are detected as XML due to <?xml declarations
     if (
       detected?.mime === 'application/xml' &&
       configMimeTypes.some(
         (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
-      ) &&
-      detectSvgFromXml(file.data)
+      )
     ) {
-      detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+      const isSvg = detectSvgFromXml(file.data)
+      if (isSvg) {
+        detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+      }
+    }
+
+    if (!detected && expectsDetectableType(typeFromExtension) && !useTempFiles) {
+      errors.push(`File buffer returned no detectable MIME type.`)
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
+
+    if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
+      const isValidPDF = validatePDF(file?.data)
+      if (!isValidPDF) {
+        errors.push('Invalid PDF file.')
+      }
+    }
 
     if (detected && !passesMimeTypeCheck) {
       errors.push(`Invalid MIME type: ${detected.mime}.`)

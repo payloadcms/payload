@@ -13,6 +13,8 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
     const MCPHandlerOptions = MCPOptions.handlerOptions || {}
     const useVerboseLogs = MCPHandlerOptions.verboseLogs ?? false
 
+    req.payloadAPI = 'MCP' as const
+
     const getDefaultMcpAccessSettings = async (overrideApiKey?: null | string) => {
       const apiKey =
         (overrideApiKey ?? req.headers.get('Authorization')?.startsWith('Bearer '))
@@ -55,7 +57,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
         payload.logger.info('[payload-mcp] API Key is valid')
       }
 
-      return docs[0] as MCPAccessSettings
+      return docs[0] as unknown as MCPAccessSettings
     }
 
     const mcpAccessSettings = pluginOptions.overrideAuth

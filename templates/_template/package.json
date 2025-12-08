@@ -26,8 +26,8 @@
     "graphql": "^16.8.1",
     "next": "16.0.2-canary.17",
     "payload": "latest",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
     "sharp": "0.34.2"
   },
   "devDependencies": {

@@ -340,6 +340,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     loading: 'Загрузка',
     locale: 'Локаль',
     locales: 'Локали',
+    lock: 'Замок',
     menu: 'Меню',
     moreOptions: 'Больше вариантов',
     move: 'Переместить',
@@ -429,6 +430,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} перемещено в корзину.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
+    unlock: 'Разблокировать',
     unsavedChanges:
       'У вас есть несохраненные изменения. Сохраните или отмените их перед продолжением.',
     unsavedChangesDuplicate:
@@ -570,6 +572,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'В настоящее время просматривается',
     currentPublishedVersion: 'Текущая опубликованная версия',
     draft: 'Черновик',
+    draftHasPublishedVersion: 'Черновик (имеет опубликованную версию)',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     modifiedOnly: 'Модифицирован только',

@@ -32,6 +32,7 @@ import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-pres
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { setupOrderable } from './orderable/index.js'
@@ -94,7 +95,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
   // We're casting here because it's already been sanitised above but TS still thinks it could be a function
   ;(sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (!_internalSupportedTimezones.includes(timezone.value)) {
+    if (timezone.value !== 'UTC' && !_internalSupportedTimezones.includes(timezone.value)) {
       throw new InvalidConfiguration(
         `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
       )
@@ -174,35 +175,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     i18nConfig.translations =
       (incomingConfig.i18n?.translations as SanitizedConfig['i18n']['translations']) ||
       i18nConfig.translations
-  }
-
-  // Inject custom translations from i18n.translations into supportedLanguages
-  // This allows label functions like ({ t }) => t('namespace:key') to work with custom translations
-  // that users define in their config, not just the default translations from @payloadcms/translations
-  if (i18nConfig.translations && typeof i18nConfig.translations === 'object') {
-    Object.keys(i18nConfig.translations).forEach((lang) => {
-      const langKey = lang as AcceptedLanguages
-      const customTranslations = i18nConfig.translations[langKey]
-
-      if (customTranslations && typeof customTranslations === 'object') {
-        const existingLang = i18nConfig.supportedLanguages[langKey]
-
-        if (existingLang) {
-          // Language exists - merge custom translations with existing
-          const merged = deepMergeSimple(existingLang.translations || {}, customTranslations)
-          // @ts-expect-error - merging custom translations into language config
-          i18nConfig.supportedLanguages[langKey] = { ...existingLang, translations: merged }
-        } else {
-          // Language doesn't exist - create it using 'en' as template
-          // Merge en.translations (general, authentication, etc.) with custom translations
-          const mergedTranslations = deepMergeSimple(en.translations, customTranslations)
-          i18nConfig.supportedLanguages[langKey] = {
-            ...en,
-            translations: mergedTranslations,
-          } as Language<typeof en.translations>
-        }
-      }
-    })
   }
 
   config.i18n = i18nConfig
@@ -310,9 +282,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
-      const draftsConfig = config.globals![i]?.versions?.drafts
-
-      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+      if (hasScheduledPublishEnabled(config.globals![i]!)) {
         schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 

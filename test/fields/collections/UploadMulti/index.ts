@@ -13,7 +13,7 @@ const Uploads: CollectionConfig = {
       name: 'media',
       type: 'upload',
       hasMany: true,
-      relationTo: [uploadsSlug, uploads2Slug],
+      relationTo: uploadsSlug,
     },
   ],
 }

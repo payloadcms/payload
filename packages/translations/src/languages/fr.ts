@@ -348,6 +348,7 @@ export const frTranslations: DefaultTranslationsObject = {
     loading: 'Chargement en cours',
     locale: 'Paramètres régionaux',
     locales: 'Paramètres régionaux',
+    lock: 'Verrou',
     menu: 'Menu',
     moreOptions: "Plus d'options",
     move: 'Déplacez-vous',
@@ -438,6 +439,7 @@ export const frTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} déplacé à la corbeille.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unlock: 'Déverrouiller',
     unsavedChanges:
       'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
     unsavedChangesDuplicate:
@@ -583,6 +585,7 @@ export const frTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actuellement en train de regarder',
     currentPublishedVersion: 'Version Publiée Actuelle',
     draft: 'Brouillon',
+    draftHasPublishedVersion: 'Brouillon (a une version publiée)',
     draftSavedSuccessfully: 'Brouillon enregistré avec succès.',
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     modifiedOnly: 'Modifié uniquement',

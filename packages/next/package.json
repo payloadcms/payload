@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.63.0",
+  "version": "3.67.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -86,6 +86,7 @@
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:debug": "pnpm build",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
@@ -137,11 +138,11 @@
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "4.0.4"
+    "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.2.3 || ^16.0.1",
+    "next": "^15.4.8 || ^16.0.1",
     "payload": "workspace:*"
   },
   "engines": {

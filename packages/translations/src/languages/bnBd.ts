@@ -342,6 +342,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     loading: 'লোড হচ্ছে',
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
+    lock: 'লক',
     menu: 'মেনু',
     moreOptions: 'আরও বিকল্পগুলি',
     move: 'স্থানান্তর করুন',
@@ -433,6 +434,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে মুভ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
     unsavedChangesDuplicate:
@@ -573,6 +575,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'বর্তমানে দেখছেন',
     currentPublishedVersion: 'বর্তমান প্রকাশিত সংস্করণ',
     draft: 'খসড়া',
+    draftHasPublishedVersion: 'খসড়া (প্রকাশিত সংস্করণ রয়েছে)',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
     lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',

@@ -336,6 +336,7 @@ export const isTranslations: DefaultTranslationsObject = {
     loading: 'Hleð',
     locale: 'Staðfærsla',
     locales: 'Staðfærslur',
+    lock: 'Lás',
     menu: 'Valmynd',
     moreOptions: 'Fleiri valkostir',
     move: 'Færa',
@@ -425,6 +426,7 @@ export const isTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} færð í rusl.',
     true: 'Satt',
     unauthorized: 'Óheimilt',
+    unlock: 'Opnaðu',
     unsavedChanges:
       'Þú ert með óvistaðar breytingar. Vistaðu eða hættu við áður en þú heldur áfram.',
     unsavedChangesDuplicate: 'Þú ert með óvistaðar breytingar. Viltu halda áfram við að tvöfalda?',
@@ -565,6 +567,7 @@ export const isTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Skoða núna',
     currentPublishedVersion: 'Núverandi útgefin útgáfa',
     draft: 'Drög',
+    draftHasPublishedVersion: 'Drög (hafa birt útgáfu)',
     draftSavedSuccessfully: 'Drög vistuð með góðum árangri.',
     lastSavedAgo: 'Síðast vistað {{distance}} síðan',
     modifiedOnly: 'Aðeins breytt',

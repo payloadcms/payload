@@ -150,6 +150,30 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
   }
 }
 
+function generateFallbackLocaleEntitySchemas(
+  localization: SanitizedConfig['localization'],
+): JSONSchema4 {
+  if (localization && 'localeCodes' in localization && localization?.localeCodes) {
+    const localeCodes = [...localization.localeCodes].map((localeCode) => {
+      return localeCode
+    }, [])
+
+    return {
+      oneOf: [
+        { type: 'string', enum: ['false', 'none', 'null'] },
+        { type: 'boolean', enum: [false] },
+        { type: 'null' },
+        { type: 'string', enum: localeCodes },
+        { type: 'array', items: { type: 'string', enum: localeCodes } },
+      ],
+    }
+  }
+
+  return {
+    type: 'null',
+  }
+}
+
 function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONSchema4 {
   const properties: JSONSchema4[] = [...entities]
     .filter(({ auth }) => Boolean(auth))
@@ -1241,6 +1265,7 @@ export function configToJSONSchema(
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
+      fallbackLocale: generateFallbackLocaleEntitySchemas(config.localization),
       globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
@@ -1249,6 +1274,7 @@ export function configToJSONSchema(
     required: [
       'user',
       'locale',
+      'fallbackLocale',
       'collections',
       'collectionsSelect',
       'collectionsJoins',
