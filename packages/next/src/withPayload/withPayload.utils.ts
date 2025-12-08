@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * This was taken and modified from https://github.com/getsentry/sentry-javascript/blob/15256034ee8150a5b7dcb97d23eca1a5486f0cae/packages/nextjs/src/config/util.ts
  *
@@ -82,7 +83,8 @@ export function getNextjsVersion(): SemVer | undefined {
     const pkgUrl = import.meta.resolve('next/package.json')
     const pkgJson = JSON.parse(readFileSync(new URL(pkgUrl), 'utf8'))
     return parseSemver(pkgJson.version)
-  } catch {
+  } catch (e) {
+    console.error('Payload: Error getting Next.js version', e)
     return undefined
   }
 }
