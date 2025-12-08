@@ -85,7 +85,7 @@
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
-    "build:cjs": "swc ./src/withPayload -d ./dist/cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:cjs": "node ./bundleWithPayload.js",
     "build:debug": "pnpm build",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
@@ -156,7 +156,7 @@
       },
       "./withPayload": {
         "import": "./dist/withPayload/withPayload.js",
-        "require": "./dist/cjs/withPayload/withPayload.cjs",
+        "require": "./dist/cjs/withPayload.cjs",
         "default": "./dist/withPayload/withPayload.js"
       },
       "./layouts": {
