@@ -120,11 +120,6 @@ export async function seedDB({
   }
 
   /**
-   *  Mongoose: No need to recreate indexes since we only delete documents now (not dropping the database)
-   *  Postgres: No need for any action here, since we only delete the table data and no schemas
-   */
-
-  /**
    * If a snapshot was restored, we don't need to seed the database
    */
   if (restored || deleteOnly) {
