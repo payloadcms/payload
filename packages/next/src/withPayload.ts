@@ -211,7 +211,7 @@ export const withPayload = (
   }
 
   if (!supportsTurbopackBuild) {
-    return withPayloadLegacy(nextConfig)
+    return withPayloadLegacy(baseConfig)
   } else {
     return {
       ...baseConfig,
@@ -222,6 +222,8 @@ export const withPayload = (
         'sharp',
         'libsql',
         'require-in-the-middle',
+        // Prevents turbopack build errors by the thread-stream package which is installed by pino
+        'pino',
       ],
     }
   }
