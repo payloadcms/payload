@@ -48,7 +48,7 @@ export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
 
   if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
     throw new Error(
-      'Payload does not support using Turbopack for production builds. If you are using Next.js 16, please use `next build --webpack` instead.',
+      'Your Next.js and Payload versions do not support using Turbopack for production builds. Please upgrade to Next.js 16.1.0-canary.15 or higher if you want to use Turbopack for builds.',
     )
   }
 
