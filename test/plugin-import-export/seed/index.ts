@@ -217,7 +217,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     }
 
     // Seed posts-exports-only collection
-    for (let i = 0; i < 250; i++) {
+    for (let i = 0; i < 25; i++) {
       await payload.create({
         collection: postsExportsOnlySlug,
         data: {
@@ -227,7 +227,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     }
 
     // Seed posts-imports-only collection
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 25; i++) {
       await payload.create({
         collection: postsImportsOnlySlug,
         data: {
@@ -236,7 +236,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       })
     }
 
-    for (let i = 0; i < 250; i++) {
+    for (let i = 0; i < 25; i++) {
       await payload.create({
         collection: postsNoJobsQueueSlug,
         data: {
