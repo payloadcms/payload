@@ -133,7 +133,7 @@ export const AddNewRelation: React.FC<Props> = ({
   }, [isDrawerOpen, relatedToMany])
 
   const label = t('fields:addNewLabel', {
-    label: getTranslation(collectionConfig?.labels.singular, i18n),
+    label: getTranslation(relatedCollections[0]?.labels.singular, i18n),
   })
 
   if (!show) {
