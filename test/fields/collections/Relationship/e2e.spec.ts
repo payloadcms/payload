@@ -98,6 +98,32 @@ describe('relationship', () => {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
+  test('should save correct relationTo when creating doc in second collection (bug #14728)', async () => {
+    await loadCreatePage()
+
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+
+    // Select the SECOND collection (array-fields) instead of the first (text-fields)
+    await page
+      .locator('#field-relationship .relationship-add-new__relation-button--array-fields')
+      .click()
+
+    await page.locator('[id^=doc-drawer_array-fields_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page.locator('[id^=close-drawer__doc-drawer_array-fields_1_]').click()
+
+    const relationshipValue = page.locator('#field-relationship .relationship--single-value__text')
+    await expect(relationshipValue).toBeVisible()
+    await expect(async () => {
+      const valueText = await relationshipValue.textContent()
+      expect(valueText).not.toContain('Another text document')
+      expect(valueText).not.toContain('Untitled')
+    }).toPass()
+
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
   test('should create nested inline relationships', async () => {
     await loadCreatePage()
 
