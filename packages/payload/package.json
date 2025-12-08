@@ -64,6 +64,11 @@
       "import": "./src/exports/i18n/*.ts",
       "types": "./src/exports/i18n/*.ts",
       "default": "./src/exports/i18n/*.ts"
+    },
+    "./migrations": {
+      "import": "./src/exports/migrations.ts",
+      "types": "./src/exports/migrations.ts",
+      "default": "./src/exports/migrations.ts"
     }
   },
   "main": "./src/index.ts",
@@ -174,6 +179,11 @@
         "import": "./dist/exports/i18n/*.js",
         "types": "./dist/exports/i18n/*.d.ts",
         "default": "./dist/exports/i18n/*.js"
+      },
+      "./migrations": {
+        "import": "./dist/exports/migrations.js",
+        "types": "./dist/exports/migrations.d.ts",
+        "default": "./dist/exports/migrations.js"
       }
     },
     "main": "./dist/index.js",
