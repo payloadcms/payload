@@ -79,7 +79,7 @@ export const AddNewRelation: React.FC<Props> = ({
             ])
           } else {
             onChange({
-              relationTo: relatedCollections[0].slug,
+              relationTo: collectionConfig?.slug,
               value: doc.id,
             })
           }
@@ -88,7 +88,7 @@ export const AddNewRelation: React.FC<Props> = ({
         setSelectedCollection(undefined)
       }
     },
-    [collectionConfig, hasMany, onChange, value, relatedCollections],
+    [collectionConfig, hasMany, onChange, value],
   )
 
   const onPopupToggle = useCallback((state) => {
