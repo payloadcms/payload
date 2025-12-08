@@ -82,8 +82,13 @@ unsupported `$facet` aggregation.
 
 ### CosmosDB
 
-When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all
-fields that may be sorted in the admin UI use the [indexSortableFields](/docs/configuration/overview) option.
+<Banner type="warning">
+  **Warning:**
+
+While Azure Cosmos DB offers a MongoDB API it is not fully compatible with Payload. Due to strict and limited indexing behavior, many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
+
+</Banner>
+To improve compatibility with Azure Cosmos DB, you can activate automatic indexing of all sortable top-level fields by adding the [`indexSortableFields`](/docs/configuration/overview) option to your database adapter configuration.
 
 ## File storage
 
