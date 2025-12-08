@@ -27,7 +27,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@swc-node/register": "1.10.10",
+    "@swc-node/register": "1.11.1",
     "@tools/constants": "workspace:*",
     "@tools/releaser": "workspace:*",
     "chalk": "^4.1.2",
