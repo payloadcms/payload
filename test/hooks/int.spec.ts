@@ -343,6 +343,38 @@ describe('Hooks', () => {
               },
             ],
           },
+          lexical: {
+            root: {
+              children: [
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '6936efd83bd1813d170dc585',
+                    blockName: '',
+                    nestedAfterChange: 'a',
+                    blockType: 'nestedBlock',
+                  },
+                },
+                {
+                  children: [],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
         },
       })
 
