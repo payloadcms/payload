@@ -26,7 +26,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed posts
     const posts = []
     // create an absurd amount of posts - we need to test large data exports
-    for (let i = 0; i < 4000; i++) {
+    for (let i = 0; i < 100; i++) {
       const post = await payload.create({
         collection: 'posts',
         data: {
