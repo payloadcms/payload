@@ -8,14 +8,8 @@ export const ImportCollectionField: SelectFieldClientComponent = (props) => {
 
   // If creating (no id) and have initialData with collectionSlug (e.g., from drawer),
   // hide the field to prevent user selection.
-  const shouldHide = !id && initialData?.collectionSlug
-
-  if (shouldHide) {
-    return (
-      <div style={{ display: 'none' }}>
-        <SelectField {...props} />
-      </div>
-    )
+  if (!id && initialData?.collectionSlug) {
+    return null
   }
 
   // Otherwise render the normal select field
