@@ -79,7 +79,7 @@ export const getExportCollection = ({
   }
 
   if (disableJobsQueue) {
-    beforeOperation.push(async ({ args, operation, req }) => {
+    beforeOperation.push(async ({ args, collection: collectionConfig, operation, req }) => {
       if (operation !== 'create') {
         return
       }
@@ -87,9 +87,10 @@ export const getExportCollection = ({
       const debug = pluginConfig.debug
 
       await createExport({
-        ...args.data,
+        ...(args.data as Export),
         batchSize,
         debug,
+        exportsCollection: collectionConfig.slug,
         req,
         userCollection: user?.collection || user?.user?.collection,
         userID: user?.id || user?.user?.id,

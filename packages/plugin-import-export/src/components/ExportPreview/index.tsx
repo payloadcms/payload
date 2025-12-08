@@ -13,7 +13,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useEffect, useMemo, useState, useTransition } from 'react'
+import React, { useMemo, useState, useTransition } from 'react'
 
 import type {
   PluginImportExportTranslationKeys,
