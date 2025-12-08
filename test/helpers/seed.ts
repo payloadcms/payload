@@ -4,7 +4,6 @@ import path from 'path'
 import { type Payload } from 'payload'
 
 import { isErrorWithCode } from './isErrorWithCode.js'
-import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
 
@@ -121,31 +120,9 @@ export async function seedDB({
   }
 
   /**
-   *  Mongoose: Re-create indexes
+   *  Mongoose: No need to recreate indexes since we only delete documents now (not dropping the database)
    *  Postgres: No need for any action here, since we only delete the table data and no schemas
    */
-  // Dropping the db breaks indexes (on mongoose - did not test extensively on postgres yet), so we recreate them here
-  try {
-    if (isMongoose(_payload)) {
-      await Promise.all([
-        ...collectionSlugs
-          .filter(
-            (collectionSlug) =>
-              ['payload-migrations', 'payload-preferences', 'payload-locked-documents'].indexOf(
-                collectionSlug,
-              ) === -1,
-          )
-          .map(async (collectionSlug) => {
-            await _payload.db.collections[collectionSlug]?.createIndexes({
-              // Blocks writes (doesn't matter here) but faster
-              background: false,
-            })
-          }),
-      ])
-    }
-  } catch (e) {
-    console.error('Error in operation (re-creating indexes):', e)
-  }
 
   /**
    * If a snapshot was restored, we don't need to seed the database
