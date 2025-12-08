@@ -80,8 +80,19 @@ export function parseSemver(input: string): SemVer {
  */
 export function getNextjsVersion(): SemVer | undefined {
   try {
-    const pkgUrl = import.meta.resolve('next/package.json')
-    const pkgJson = JSON.parse(readFileSync(new URL(pkgUrl), 'utf8'))
+    let pkgPath: string
+
+    // Check if we're in ESM or CJS environment
+    if (typeof import.meta?.resolve === 'function') {
+      // ESM environment - use import.meta.resolve
+      const pkgUrl = import.meta.resolve('next/package.json')
+      pkgPath = new URL(pkgUrl).pathname
+    } else {
+      // CJS environment - use require.resolve
+      pkgPath = require.resolve('next/package.json')
+    }
+
+    const pkgJson = JSON.parse(readFileSync(pkgPath, 'utf8'))
     return parseSemver(pkgJson.version)
   } catch (e) {
     console.error('Payload: Error getting Next.js version', e)
