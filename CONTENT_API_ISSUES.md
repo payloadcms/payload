@@ -8,8 +8,97 @@
 
 ## Development Guidelines
 
-1. **Prefer adapter-side fixes**: If something can be fixed in the `db-content-api` adapter, do it there instead of modifying Content API
-2. For inspiration, you can look at the other database adapters in the `payload` repository, such as `db-mongodb` or `db-postgres`.
+### Priority Framework
+
+1. **🔧 Adapter-fixable issues FIRST** - Logic errors, mapping bugs, edge cases
+2. **🚧 Content API limitations** - Document blockers, wait for upstream fixes
+3. **📋 Nice-to-haves** - Optimizations, better error messages
+
+### Workflow
+
+1. Run `pnpm run test:int:summary` to see all test results
+2. Pick a failing suite with high adapter-fix potential
+3. Run specific suite: `pnpm test:int <suite-name>`
+4. Debug by comparing with `db-mongodb` or `db-postgres` implementations
+5. Fix in adapter (`db-content-api/src/index.ts`)
+6. Test fix, update this document
+7. Repeat
+
+### When to Fix in Adapter vs Content API
+
+**Fix in Adapter if:**
+
+- Query conversion is wrong (WHERE, sort, pagination)
+- Response mapping is incorrect (field names, types)
+- Missing null/undefined handling
+- UUID vs string type mismatches
+
+**Fix in Content API if:**
+
+- Missing fundamental feature (joins, select, locale)
+- SQL query generation issue
+- Database schema problem
+
+## 🧪 Testing
+
+**Test Runner Script:** `pnpm run test:int:summary`
+
+A custom script (`test/runTestsWithSummary.ts`) runs all integration tests suite-by-suite and displays:
+
+- Pass/fail counts per suite
+- Duration per suite
+- Color-coded status (✅ all pass, ⚠️ partial pass, ❌ all fail)
+- Overall summary
+
+**To exclude suites:** Comment them out in the `TEST_SUITES` array in `runTestsWithSummary.ts`
+
+**Excluded from testing:**
+
+- `create-payload-app` - CLI tool, doesn't use db-adapter
+- `joins` - Not supported yet in Content API
+- `localization` - Not planned for EOY support
+- `select` - Not planned for EOY support
+
+## ⚠️ Known Content API Limitations
+
+**Source:** Anthony Salani (Dec 2024)
+
+### Not Currently Supported
+
+**Documents:**
+
+- ❌ `join` clause - **Will be supported** (Q1 2025 or post-break)
+- ❌ `returning` clause - Not planned for EOY
+- ❌ `select` clause - Not planned for EOY
+- ❌ `locale` clause - Not planned for EOY
+
+**Document Versions:**
+
+- ❌ No WHERE clauses supported yet
+
+**Query Operators:**
+
+- ❌ `near` - Not planned for EOY
+- ❌ `within` - Not planned for EOY
+- ❌ `intersects` - Not planned for EOY
+- ❌ `all` - Not planned for EOY
+
+### Impact on Test Suites
+
+**Excluded from testing (in `TEST_SUITES`):**
+
+- `joins` - Join clause not supported yet
+- `localization` - Locale clause not planned for EOY
+- `select` - Select clause not planned for EOY
+- `create-payload-app` - CLI tool, doesn't use db-adapter
+
+**Expected failures in active suites:**
+
+- Version-related WHERE queries will fail (no version support)
+- Operators: `near`, `within`, `intersects`, `all` will fail
+- Any tests using `returning` or `select` clauses
+
+**Don't debug these** - they're Content API limitations, not adapter bugs.
 
 ## 📚 Adapter Implementation Details
 
@@ -58,108 +147,104 @@ Content API uses two ID fields:
 
 ## 📊 Current Status
 
-**Test Suite:** `access-control`
-**Result:** 27/32 PASS, 5/32 FAIL (84.4% passing)
-**Latest:** Issue #1 (limit: 0) and Issue #3 (sort typo) fixed - expecting 28/32 after rebuild
+**Last Tested Suite:** `access-control`
+**Result:** 18/32 PASS, 14/32 FAIL (56% passing)
+**Recent Fixes:** Issues #1 (limit: 0) and #3 (sort typo) fixed - expecting improvement after rebuild
 
-**Command:** `pnpm test:int access-control`
+**Next Steps:**
+
+1. Run full test suite: `pnpm run test:int:summary`
+2. Identify adapter-fixable issues (🔧) vs Content API limitations (🚧)
+3. Focus on fixing adapter bugs first
+4. Document Content API blockers for future work
+
+**Commands:**
+
+- Full summary: `pnpm run test:int:summary`
+- Single suite: `pnpm test:int <suite-name>` (e.g., `pnpm test:int access-control`)
 
 ---
 
 ## 🔴 Active Issues
 
-### #1: update() with overrideAccess Returns Empty (4 tests failing)
-
-**Impact:** CRITICAL - blocks access control tests
-**Tests failing:**
-
-- Override Access > Fields > should allow overrideAccess: true - update many
-- Override Access > Fields > should allow overrideAccess by default - update many
-- Override Access > Collections > should allow overrideAccess: true - update many
-- Override Access > Collections > should allow overrideAccess by default - update many
-
-**Problem:** `payload.update({ overrideAccess: true, where: {...} })` returns empty `docs` array.
-
-**Important Discovery:**
-
-- ✅ Adapters (mongodb, postgres, sqlite) DON'T handle `overrideAccess` - verified
-- ✅ Payload handles it BEFORE calling adapter (in `update.ts` lines 132-148)
-- ✅ If `overrideAccess: true` → Payload doesn't add access control restrictions to WHERE
-- ✅ If `overrideAccess: false` → Payload combines WHERE with access restrictions
-
-**Root Cause Found:**
-
-✅ Payload's `update()` calls `find()` with `limit: 0` and `pagination: false` to get all matching docs
-✅ Adapter was passing `limit: 0` directly to Content API
-✅ Content API SQL query used `LIMIT 0`, returning 0 documents
-✅ **Fixed** by converting `limit: 0` → `undefined` when `pagination: false`
-
-**Status:** ✅ FIXED - Adapter now handles `limit: 0` correctly
+**Priority:** Focus on adapter-fixable issues first (marked with 🔧)
 
 ---
 
-### #2: Hidden Field WHERE Clauses (3 tests failing)
+### 🔧 #1: Hidden Field WHERE Clauses (2 tests failing)
 
-**Impact:** HIGH
+**Impact:** HIGH - **Likely fixable in adapter**
+**Fixable in:** DB Adapter
 **Tests failing:**
 
 - Querying > should respect query constraint using hidden field
 - Querying > should respect query constraint using hidden field on count
-- Querying > should respect query constraint using hidden field on versions
 
 **Problem:** WHERE clauses on fields with `admin.hidden: true` return 0 results.
 
-**Note:** User mentioned: "we don't have support for where queries on doc versions yet" - this might explain the versions tests.
-
 **TODO:**
 
-- [ ] Verify if Content API filters out hidden fields from WHERE processing
-- [ ] Check if hidden field values are stored/indexed correctly
-- [ ] Investigate the first test (non-versions) separately
+- [ ] Check if adapter is filtering out hidden fields from WHERE conversion
+- [ ] Verify Content API receives hidden field queries correctly
+- [ ] Compare with how `db-mongodb`/`db-postgres` handle hidden fields in WHERE
+- [ ] Hidden fields should still be queryable, just not returned in responses
+
+**Note:** The third test (versions) is a Content API limitation (see #3).
 
 ---
 
-### #3: Sort Direction Typo (1 test failing)
+### 🚧 #2: Version Query Returns Empty (2 tests failing)
 
-**Impact:** MEDIUM
-**Test failing:**
+**Impact:** MEDIUM - **Content API limitation**
+**Fixable in:** Content API
+**Tests failing:**
 
-- Querying > should ignore false access on query constraint added by top collection level access control
-
-**Error:**
-
-```
-ZodError: invalid_value
-Expected: ["asc", "desc"]
-```
-
-**Root Cause Found:**
-
-✅ Adapter's `convertPayloadSortToContentAPI()` was using `'dsc'` instead of `'desc'`
-✅ Fixed in lines 339, 346, and 351 of `db-content-api/src/index.ts`
-
-**Status:** ✅ FIXED - Changed `'asc' | 'dsc'` → `'asc' | 'desc'`
-
----
-
-### #4: Version Query Returns Empty (1 test failing)
-
-**Impact:** MEDIUM
-**Test failing:**
-
+- Querying > should respect query constraint using hidden field on versions
 - Querying > should ignore false access in versions on query constraint added by top collection level access control
 
-**Problem:** Similar to #2 but for version documents.
+**Problem:** WHERE clauses on document versions return 0 results.
 
-**Note:** Might be related to "no support for where queries on doc versions yet" mentioned by user.
+**Root Cause:** Content API doesn't support WHERE clauses on document versions yet (per Anthony's comment).
+
+**Status:** 🚧 BLOCKED - Waiting for Content API version query support (Q1 2025)
+
+---
+
+### 🔧 Potential Additional Issues (To Investigate)
+
+**Priority:** Run full test suite with `pnpm run test:int:summary` to identify:
+
+1. **Adapter bugs** - Logic errors in query conversion, response mapping, etc.
+2. **Edge cases** - Null handling, empty arrays, special characters, etc.
+3. **Type mismatches** - UUID vs string, number formatting, date handling
+
+**Focus areas:**
+
+- `fields` suite - Complex field types and nested structures
+- `relationships` suite - Relation handling and depth queries
+- `hooks` suite - Lifecycle hooks and data transformations
+- `database` suite - Core CRUD operations and transactions
 
 ---
 
 ## ✅ Completed
 
+### Adapter Fixes
+
+- ✅ **#1: update() with overrideAccess** - Fixed `limit: 0` handling (4 tests)
+- ✅ **#3: Sort direction typo** - Changed `'dsc'` → `'desc'` (1 test)
 - ✅ WHERE clause support merged - went from 0/32 to 22/32 passing
 - ✅ `returning: {}` fix - fixed 1 relationship test (23/32 now)
 - ✅ Invalid UUID fix, findOne returning null, REST API update endpoint
+
+### Test Infrastructure
+
+- ✅ **Test Summary Script** - Created `test/runTestsWithSummary.ts`
+  - Runs all integration tests suite-by-suite
+  - Shows pass/fail counts and duration per suite
+  - Color-coded status indicators (✅ ⚠️ ❌)
+  - Hardcoded suite list - easily exclude tests by commenting out
+  - Command: `pnpm run test:int:summary`
 
 ---
 
@@ -173,8 +258,45 @@ Expected: ["asc", "desc"]
 
 ---
 
-## Notes
+## 📝 Notes
+
+### Test Configuration
 
 - Tests run with `PAYLOAD_DROP_DATABASE=true` and `--runInBand` (sequential)
 - Content system ID: `00000000-0000-4000-8000-000000000001`
 - JWT authentication used (not API key)
+- Database adapter: `db-content-api` (set in `test/jest.setup.js`)
+
+### Test Summary Script Features
+
+Located at `test/runTestsWithSummary.ts`, provides:
+
+**Output:**
+
+```
+🧪 Running integration tests suite by suite...
+
+[1/54] Running _community... ✅ 2/2 (3.2s)
+[2/54] Running access-control... ⚠️ 18/32 (4.5s)
+[3/54] Running admin-root... ✅ 2/2 (3.3s)
+...
+
+📊 TEST SUMMARY
+✅ _community      2/2    3.2s
+⚠️ access-control  18/32  4.5s
+✅ admin-root      2/2    3.3s
+
+📈 Overall Results:
+   Suites: 52/54 passed
+   Tests:  450/500 passed
+   Time:   15m 23s
+```
+
+**Status Indicators:**
+
+- ✅ All tests passed (100%)
+- ⚠️ Partial pass (some tests failed)
+- ❌ Complete failure (0% passed)
+
+**Customization:**
+Edit `TEST_SUITES` array to exclude specific suites by commenting them out.
