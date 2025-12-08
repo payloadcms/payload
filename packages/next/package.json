@@ -142,7 +142,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.4.8 || ^16.1.0",
+    "next": "^15.4.8 || ^16.1.0 || ^16.1.0-canary.3",
     "payload": "workspace:*"
   },
   "engines": {
