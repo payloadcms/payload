@@ -85,9 +85,9 @@ export async function buildBeforeOperation<TOperationGeneric extends CollectionS
   let newArgs = args
 
   if (args.collection.config.hooks?.beforeOperation?.length) {
+    // TODO: v4 should not need this mapping
     // Map the operation to the hook operation type for backward compatibility
-    const hookOperation =
-      operationToHookOperation[operation as keyof typeof operationToHookOperation]
+    const hookOperation = operationToHookOperation[operation]
 
     for (const hook of args.collection.config.hooks.beforeOperation) {
       const hookResult = await hook({
