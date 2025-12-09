@@ -21,9 +21,10 @@ export const index = [
           // See comment in packages/eslint-config/index.mjs
           allowDefaultProject: [
             'bundleScss.js',
-            'createStubScss.js',
             'bundle.js',
             'babel.config.cjs',
+            'bundleWithPayload.js',
+            'createStubScss.js',
           ],
         },
       },
