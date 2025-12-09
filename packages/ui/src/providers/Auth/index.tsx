@@ -125,12 +125,13 @@ export function AuthProvider({
         formatAdminURL({
           adminRoute,
           path: `${logoutInactivityRoute}${window.location.pathname.startsWith(adminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
+          serverURL,
         }),
       ),
     )
 
     closeAllModals()
-  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
+  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition, serverURL])
 
   const revokeTokenAndExpire = useCallback(() => {
     setUserInMemory(null)

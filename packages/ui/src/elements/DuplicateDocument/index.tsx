@@ -116,6 +116,7 @@ export const DuplicateDocument: React.FC<Props> = ({
                 formatAdminURL({
                   adminRoute,
                   path: `/collections/${slug}/${doc.id}${localeCode ? `?locale=${localeCode}` : ''}`,
+                  serverURL,
                 }),
               ),
             )

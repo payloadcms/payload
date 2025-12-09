@@ -37,6 +37,7 @@ export const LoginForm: React.FC<{
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
+    serverURL,
   } = config
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
@@ -109,6 +110,7 @@ export const LoginForm: React.FC<{
         href={formatAdminURL({
           adminRoute,
           path: forgotRoute,
+          serverURL,
         })}
         prefetch={false}
       >

@@ -160,7 +160,7 @@ export const getRouteData = ({
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: formatAdminURL({ adminRoute, path: route }),
+            path: formatAdminURL({ adminRoute, path: route, serverURL: config.serverURL }),
           })
         })
 
