@@ -26,6 +26,12 @@ export const checkDocumentLockStatus = async ({
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
 
+  // Check if the locked-documents collection exists
+  if (!payload.collections?.[lockedDocumentsCollectionSlug]) {
+    // If the collection doesn't exist, locking is not available
+    return
+  }
+
   // Retrieve the lockDocuments property for either collection or global
   const lockDocumentsProp = collectionSlug
     ? payload.collections?.[collectionSlug]?.config?.lockDocuments

@@ -59,6 +59,7 @@ const DocumentInfo: React.FC<
   const {
     config: {
       admin: { dateFormat },
+      collections,
       routes: { api },
       serverURL,
     },
@@ -67,6 +68,11 @@ const DocumentInfo: React.FC<
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
+
+  // Check if the locked-documents collection exists in the config
+  const hasLockedDocumentsCollection = collections.some(
+    (collection) => collection.slug === 'payload-locked-documents',
+  )
 
   const abortControllerRef = useRef(new AbortController())
   const docConfig = collectionConfig || globalConfig
@@ -165,6 +171,11 @@ const DocumentInfo: React.FC<
 
   const unlockDocument = useCallback(
     async (docID: number | string, slug: string) => {
+      // Check if the locked-documents collection exists before making API calls
+      if (!hasLockedDocumentsCollection) {
+        return
+      }
+
       try {
         const isGlobal = slug === globalSlug
 
@@ -197,11 +208,16 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [serverURL, api, globalSlug, setDocumentIsLocked],
+    [serverURL, api, globalSlug, setDocumentIsLocked, hasLockedDocumentsCollection],
   )
 
   const updateDocumentEditor = useCallback(
     async (docID: number | string, slug: string, user: ClientUser | number | string) => {
+      // Check if the locked-documents collection exists before making API calls
+      if (!hasLockedDocumentsCollection) {
+        return
+      }
+
       try {
         const isGlobal = slug === globalSlug
 
@@ -244,7 +260,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to update the document editor', error)
       }
     },
-    [serverURL, api, globalSlug],
+    [serverURL, api, globalSlug, hasLockedDocumentsCollection],
   )
 
   const getDocPermissions = useGetDocPermissions({

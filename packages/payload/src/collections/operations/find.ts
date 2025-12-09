@@ -83,7 +83,7 @@ export const findOperation = async <
       depth,
       disableErrors,
       draft: draftsEnabled,
-      includeLockStatus,
+      includeLockStatus: includeLockStatusFromArgs,
       joins,
       limit,
       overrideAccess,
@@ -98,6 +98,10 @@ export const findOperation = async <
     } = args
 
     const req = args.req!
+
+    const includeLockStatus =
+      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
     const { fallbackLocale, locale, payload } = req
 
     const select = sanitizeSelect({

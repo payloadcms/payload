@@ -39,7 +39,7 @@ export async function DashboardView(props: AdminViewServerProps) {
   // Query locked global documents only if there are globals in the config
   let globalData: DashboardViewServerPropsOnly['globalData'] = []
 
-  if (config.globals.length > 0) {
+  if (config.globals.length > 0 && payload.collections?.['payload-locked-documents']) {
     const lockedDocuments = await payload.find({
       collection: 'payload-locked-documents',
       depth: 1,
@@ -73,6 +73,24 @@ export async function DashboardView(props: AdminViewServerProps) {
           _isLocked: !!lockedDoc,
           _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
           _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null,
+        },
+        lockDuration,
+      }
+    })
+  } else if (config.globals.length > 0) {
+    // If locked-documents collection doesn't exist, return globals without lock data
+    globalData = config.globals.map((global) => {
+      const lockDuration =
+        typeof global.lockDocuments === 'object'
+          ? global.lockDocuments.duration
+          : globalLockDurationDefault
+
+      return {
+        slug: global.slug,
+        data: {
+          _isLocked: false,
+          _lastEditedAt: null,
+          _userEditing: null,
         },
         lockDuration,
       }
