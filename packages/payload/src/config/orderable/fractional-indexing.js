@@ -114,13 +114,11 @@ function validateInteger(int) {
  */
 function getIntegerLength(head) {
   if (head >= '0' && head <= '9') {
-    // '0' = 11, '1' = 10, ..., '9' = 2
     return 11 - (head.charCodeAt(0) - '0'.charCodeAt(0))
   } else if (head >= 'a' && head <= 'z') {
-    // 'a' = 2, 'b' = 3, ..., 'z' = 27
     return head.charCodeAt(0) - 'a'.charCodeAt(0) + 2
   } else if (head >= 'A' && head <= 'Z') {
-    // Legacy: 'A' = 27, 'B' = 26, ..., 'Z' = 2
+    // Legacy encoding
     return 'Z'.charCodeAt(0) - head.charCodeAt(0) + 2
   } else {
     throw new Error('invalid order key head: ' + head)
@@ -190,33 +188,26 @@ function incrementInteger(x, digits) {
     }
   }
   if (carry) {
-    // Handle transitions between ranges
     if (head === '9') {
-      // '9z' (length 2, last in small range) -> 'a0' (length 2, first in large range)
       return 'a' + digits[0]
     }
     // Handle legacy uppercase transition
     if (head === 'Z') {
-      // Legacy: 'Zz' -> 'a0'
       return 'a' + digits[0]
     }
-    // Already at largest
     if (head === 'z') {
       return null
     }
 
-    // Move to next head character within same range
     let h
     if (head >= '0' && head <= '8') {
-      // Within digit range: length decreases
       h = String.fromCharCode(head.charCodeAt(0) + 1)
       digs.pop()
     } else if (head >= 'a' && head <= 'y') {
-      // Within lowercase range: length increases
       h = String.fromCharCode(head.charCodeAt(0) + 1)
       digs.push(digits[0])
     } else if (head >= 'A' && head <= 'Y') {
-      // Legacy uppercase: length decreases
+      // Legacy uppercase
       h = String.fromCharCode(head.charCodeAt(0) + 1)
       digs.pop()
     } else {
@@ -249,32 +240,26 @@ function decrementInteger(x, digits) {
     }
   }
   if (borrow) {
-    // Handle transitions between ranges
     if (head === 'a') {
-      // 'a0' (length 2, first in large range) -> '9z' (length 2, last in small range)
       return '9' + digits.slice(-1)
     }
-    // Already at smallest
     if (head === '0') {
       return null
     }
 
-    // Move to previous head character within same range
     let h
     if (head >= '1' && head <= '9') {
-      // Within digit range: length increases
       h = String.fromCharCode(head.charCodeAt(0) - 1)
       digs.push(digits.slice(-1))
     } else if (head >= 'b' && head <= 'z') {
-      // Within lowercase range: length decreases
       h = String.fromCharCode(head.charCodeAt(0) - 1)
       digs.pop()
     } else if (head >= 'B' && head <= 'Z') {
-      // Legacy uppercase: length increases, but redirect at boundary
+      // Legacy uppercase
       h = String.fromCharCode(head.charCodeAt(0) - 1)
       digs.push(digits.slice(-1))
     } else if (head === 'A') {
-      // Legacy: already at smallest in old format
+      // Legacy uppercase
       return null
     } else {
       throw new Error('invalid head: ' + head)
@@ -308,7 +293,7 @@ export function generateKeyBetween(a, b, digits = BASE_36_DIGITS) {
   }
   if (a == null) {
     if (b == null) {
-      return 'a' + digits[0] // Start with 'a0' (first "large" integer, same as before)
+      return 'a' + digits[0]
     }
 
     const ib = getIntegerPart(b)
