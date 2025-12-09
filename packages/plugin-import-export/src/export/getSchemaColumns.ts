@@ -91,8 +91,12 @@ export const getSchemaColumns = ({
     orderedColumns.push('id')
   }
 
-  // 2. Status field for versioned collections
-  if (hasVersions) {
+  // 2. Status field for versioned collections (only if selected or no field selection)
+  // _status is not in flattenedFields, so we need to check if it was explicitly selected
+  // or if no field selection was made (export all fields)
+  const statusSelected =
+    !selectedFields || selectedFields.length === 0 || selectedFields.includes('_status')
+  if (hasVersions && statusSelected) {
     orderedColumns.push('_status')
   }
 

@@ -872,6 +872,41 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(duplicateIds).toHaveLength(0)
     })
 
+    it('should only include selected fields in CSV export, nothing else', async () => {
+      // posts collection has versions.drafts enabled, so it has _status field
+      // when we select only 'title', the export should contain ONLY 'title' column
+      // and nothing else (no _status, id, createdAt, updatedAt, etc.)
+      const doc = await payload.create({
+        collection: 'posts-export',
+        user,
+        data: {
+          collectionSlug: 'posts',
+          fields: ['title'],
+          format: 'csv',
+          limit: 5,
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'posts-export',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Verify we have data
+      expect(data.length).toBeGreaterThan(0)
+
+      // Verify ONLY the selected field is present - nothing else
+      const columns = Object.keys(data[0])
+      expect(columns).toStrictEqual(['title'])
+
+      // Verify the data is correct
+      expect(data[0].title).toBeDefined()
+    })
+
     it('should export polymorphic relationship fields to CSV', async () => {
       const doc = await payload.create({
         collection: 'exports',
