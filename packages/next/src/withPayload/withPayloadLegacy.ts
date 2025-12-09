@@ -2,7 +2,7 @@
 import type { NextConfig } from 'next'
 
 /**
- * Applies config options required to support Next.js versions before 16.1.0 and 16.1.0-canary.15.
+ * Applies config options required to support Next.js versions before 16.1.0 and 16.1.0-canary.3.
  */
 export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
   if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
@@ -48,7 +48,7 @@ export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
 
   if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
     throw new Error(
-      'Your Next.js and Payload versions do not support using Turbopack for production builds. Please upgrade to Next.js 16.1.0-canary.3 or higher if you want to use Turbopack for builds.',
+      'Your Next.js and Payload versions do not support using Turbopack for production builds. Please upgrade to Next.js 16.1.0 or, if not yet released, the latest canary release.',
     )
   }
 
