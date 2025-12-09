@@ -16,7 +16,7 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
+import { formatAdminURL, formatApiURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
@@ -86,7 +86,11 @@ export const LoginForm: React.FC<{
 
   return (
     <Form
-      action={`${apiRoute}/${userSlug}/login`}
+      action={formatApiURL({
+        apiRoute,
+        path: `/${userSlug}/login`,
+        serverURL,
+      })}
       className={baseClass}
       disableSuccessStatus
       initialState={initialState}

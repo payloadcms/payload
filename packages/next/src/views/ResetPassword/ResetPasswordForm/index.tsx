@@ -11,7 +11,7 @@ import {
 } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import { type FormState } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, formatApiURL } from 'payload/shared'
 import React from 'react'
 
 type Args = {
@@ -69,7 +69,11 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
 
   return (
     <Form
-      action={`${serverURL}${apiRoute}/${userSlug}/reset-password`}
+      action={formatApiURL({
+        apiRoute,
+        path: `/${userSlug}/reset-password`,
+        serverURL,
+      })}
       initialState={initialState}
       method="POST"
       onSuccess={onSuccess}
