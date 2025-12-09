@@ -233,6 +233,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
     }
 
+    const adapterToDelete: Parameters<typeof adapter.deleteWhere>[0][] = []
+    const adapterToInsert: Parameters<typeof adapter.insert>[0][] = []
     const localesToInsert: Record<string, unknown>[] = []
     const relationsToInsert: Record<string, unknown>[] = []
     const textsToInsert: Record<string, unknown>[] = []
@@ -313,14 +315,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
       if (operation === 'update') {
-        await adapter.deleteWhere({
+        adapterToDelete.push({
           db,
           tableName: localeTableName,
           where: eq(localeTable._parentID, insertedRow.id),
         })
       }
 
-      await adapter.insert({
+      adapterToInsert.push({
         db,
         tableName: localeTableName,
         values: localesToInsert,
@@ -352,7 +354,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
 
     if (relationsToInsert.length > 0) {
-      await adapter.insert({
+      adapterToInsert.push({
         db,
         tableName: relationshipsTableName,
         values: relationsToInsert,
@@ -476,7 +478,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
           // Insert only non-duplicate relationships
           if (relationshipsToActuallyInsert.length > 0) {
-            await adapter.insert({
+            adapterToInsert.push({
               db,
               tableName: relationshipsTableName,
               values: relationshipsToActuallyInsert,
@@ -529,7 +531,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             }
 
             // Execute DELETE using Drizzle query builder
-            await adapter.deleteWhere({
+            adapterToDelete.push({
               db,
               tableName: relationshipsTableName,
               where: and(...conditions),
@@ -559,7 +561,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
 
     if (textsToInsert.length > 0) {
-      await adapter.insert({
+      adapterToInsert.push({
         db,
         tableName: textsTableName,
         values: textsToInsert,
@@ -586,7 +588,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
 
     if (numbersToInsert.length > 0) {
-      await adapter.insert({
+      adapterToInsert.push({
         db,
         tableName: numbersTableName,
         values: numbersToInsert,
@@ -694,7 +696,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     for (const [selectTableName, tableRows] of Object.entries(selectsToInsert)) {
       const selectTable = adapter.tables[selectTableName]
       if (operation === 'update') {
-        await adapter.deleteWhere({
+        adapterToDelete.push({
           db,
           tableName: selectTableName,
           where: eq(selectTable.parent, insertedRow.id),
@@ -710,13 +712,17 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
 
       if (tableRows.length) {
-        await adapter.insert({
+        adapterToInsert.push({
           db,
           tableName: selectTableName,
           values: tableRows,
         })
       }
     }
+
+    // Run updates in parallel
+    await Promise.all(adapterToDelete.map((value) => adapter.deleteWhere(value)))
+    await Promise.all(adapterToInsert.map((value) => adapter.insert(value)))
 
     // //////////////////////////////////
     // Error Handling
