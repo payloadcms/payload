@@ -24,6 +24,7 @@ export const index = [
             'bundle.js',
             'babel.config.cjs',
             'bundleWithPayload.js',
+            'createStubScss.js',
           ],
         },
       },

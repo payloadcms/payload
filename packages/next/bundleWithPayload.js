@@ -12,9 +12,7 @@ await esbuild.build({
   format: 'cjs',
   outfile: `dist/cjs/withPayload.cjs`,
   splitting: false,
-  minify: false,
-  // 18.20.2 is the lowest version of node supported by Payload
-  target: 'node18.20.2',
+  minify: true,
   metafile: true,
   tsconfig: path.resolve(import.meta.dirname, 'tsconfig.json'),
   sourcemap: true,
