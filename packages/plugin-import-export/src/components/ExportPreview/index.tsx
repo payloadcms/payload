@@ -109,8 +109,9 @@ export const ExportPreview: React.FC = () => {
           const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
 
           // Match CSV column ordering by building keys based on fields and regex
+          // Pattern matches: field name, optional array indices (_0, _1), and optional locale codes (_en, _es)
           const fieldToRegex = (field: string): RegExp => {
-            const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
+            const parts = field.split('.').map((part) => `${part}(?:_(?:\\d+|[a-z]{2,3}))?`)
             return new RegExp(`^${parts.join('_')}`)
           }
 

@@ -77,7 +77,17 @@ export const handlePreview = async (req: PayloadRequest) => {
       fields: targetCollection.config.fields as FlattenedField[],
     })
 
-    const possibleKeys = getFlattenedFieldKeys(targetCollection.config.fields as FlattenedField[])
+    // Get locale codes for locale expansion when locale='all'
+    const localeCodes =
+      locale === 'all' && req.payload.config.localization
+        ? req.payload.config.localization.localeCodes
+        : undefined
+
+    const possibleKeys = getFlattenedFieldKeys(
+      targetCollection.config.fields as FlattenedField[],
+      '',
+      { localeCodes },
+    )
 
     transformed = docs.map((doc) => {
       const row = flattenObject({
