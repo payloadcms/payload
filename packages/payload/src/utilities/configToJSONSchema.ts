@@ -533,13 +533,7 @@ export function fieldsToJSONSchema(
           case 'relationship':
           case 'upload': {
             if (Array.isArray(field.relationTo)) {
-              // Handle empty relationTo array - generate a null type
-              if (field.relationTo.length === 0) {
-                fieldSchema = {
-                  ...baseFieldSchema,
-                  type: 'null',
-                }
-              } else if (field.hasMany) {
+              if (field.hasMany) {
                 fieldSchema = {
                   ...baseFieldSchema,
                   type: withNullableJSONSchemaType('array', isRequired),

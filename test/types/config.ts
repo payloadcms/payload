@@ -28,11 +28,6 @@ export default buildConfigWithDefaults({
           name: 'title',
         },
         {
-          type: 'relationship',
-          relationTo: [],
-          name: 'emptyRelationTo',
-        },
-        {
           name: 'selectField',
           type: 'select',
           required: true,
