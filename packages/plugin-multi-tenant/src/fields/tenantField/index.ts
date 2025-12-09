@@ -32,7 +32,7 @@ const fieldValidation =
 
 type Args = {
   debug?: boolean
-  isDraftsEnabled?: boolean
+  isAutosaveEnabled?: boolean
   name: string
   overrides?: RootTenantFieldConfigOverrides
   tenantsArrayFieldName: string
@@ -43,7 +43,7 @@ type Args = {
 export const tenantField = ({
   name = defaults.tenantFieldName,
   debug,
-  isDraftsEnabled,
+  isAutosaveEnabled,
   overrides: _overrides = {},
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
@@ -104,7 +104,7 @@ export const tenantField = ({
           })
           return isValidTenant ? tenantFromCookie : null
         }
-        if (req.user && isDraftsEnabled) {
+        if (req.user && isAutosaveEnabled) {
           const userTenants = getUserTenantIDs(req.user, {
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,

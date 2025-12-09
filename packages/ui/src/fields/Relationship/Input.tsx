@@ -227,7 +227,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             if (search !== searchArg) {
               lastLoadedPageToUse = 1
             } else {
-              lastLoadedPageToUse = lastLoadedPageArg[relation] + 1
+              lastLoadedPageToUse = (lastLoadedPageArg[relation] || 0) + 1
             }
             await priorRelation
 

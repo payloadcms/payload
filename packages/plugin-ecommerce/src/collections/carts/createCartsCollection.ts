@@ -1,18 +1,22 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { Access, CollectionConfig, Field } from 'payload'
 
 import type { AccessConfig, CurrenciesConfig } from '../../types/index.js'
 
 import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'
 import { currencyField } from '../../fields/currencyField.js'
+import { accessOR, conditional } from '../../utilities/accessComposition.js'
 import { beforeChangeCart } from './beforeChange.js'
+import { hasCartSecretAccess } from './hasCartSecretAccess.js'
 import { statusBeforeRead } from './statusBeforeRead.js'
 
 type Props = {
-  access: {
-    adminOrCustomerOwner: NonNullable<AccessConfig['adminOrCustomerOwner']>
-    publicAccess: NonNullable<AccessConfig['publicAccess']>
-  }
+  access: Pick<Required<AccessConfig>, 'isAdmin' | 'isAuthenticated' | 'isDocumentOwner'>
+  /**
+   * Allow guest (unauthenticated) users to create carts.
+   * Defaults to false.
+   */
+  allowGuestCarts?: boolean
   currenciesConfig?: CurrenciesConfig
   /**
    * Slug of the customers collection, defaults to 'users'.
@@ -35,7 +39,8 @@ type Props = {
 
 export const createCartsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
-    access: { adminOrCustomerOwner, publicAccess },
+    access,
+    allowGuestCarts = false,
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
@@ -62,6 +67,24 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
       productsSlug,
       variantsSlug,
     }),
+    {
+      name: 'secret',
+      type: 'text',
+      access: {
+        create: () => false, // Users can't set it manually
+        read: () => false, // Never readable via field access (only through afterRead hook)
+        update: () => false, // Users can't update it
+      },
+      admin: {
+        hidden: true,
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:cartSecret'),
+    },
     {
       name: 'customer',
       type: 'relationship',
@@ -141,13 +164,28 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
       : []),
   ]
 
+  // Internal access function for guest users (unauthenticated)
+  const isGuest: Access = ({ req }) => !req.user
+
   const baseConfig: CollectionConfig = {
     slug: 'carts',
     access: {
-      create: publicAccess,
-      delete: adminOrCustomerOwner,
-      read: adminOrCustomerOwner,
-      update: adminOrCustomerOwner,
+      create: accessOR(
+        access.isAdmin,
+        access.isAuthenticated,
+        conditional(allowGuestCarts, isGuest),
+      ),
+      delete: accessOR(
+        access.isAdmin,
+        access.isDocumentOwner,
+        hasCartSecretAccess(allowGuestCarts),
+      ),
+      read: accessOR(access.isAdmin, access.isDocumentOwner, hasCartSecretAccess(allowGuestCarts)),
+      update: accessOR(
+        access.isAdmin,
+        access.isDocumentOwner,
+        hasCartSecretAccess(allowGuestCarts),
+      ),
     },
     admin: {
       description: ({ t }) =>
@@ -158,6 +196,16 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
     },
     fields,
     hooks: {
+      afterRead: [
+        ({ doc, req }) => {
+          // Include secret only if this was just created (stored in context by beforeChange)
+          if (req.context?.newCartSecret) {
+            doc.secret = req.context.newCartSecret
+          }
+          // Secret is otherwise never exposed (field access is locked)
+          return doc
+        },
+      ],
       beforeChange: [
         // This hook can be used to update the subtotal before saving the cart
         beforeChangeCart({ productsSlug, variantsSlug }),

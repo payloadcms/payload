@@ -40,7 +40,7 @@ export const Pages: CollectionConfig = {
     { name: 'title', type: 'text', required: true },
     slugField({
       name: 'slug', // defaults to 'slug'
-      fieldToUse: 'title', // defaults to 'title'
+      useAsSlug: 'title', // defaults to 'title'
       checkboxName: 'generateSlug', // defaults to 'generateSlug'
       localized: true,
       required: true,
