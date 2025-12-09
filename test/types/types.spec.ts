@@ -176,6 +176,13 @@ describe('Types testing', () => {
         expect<NonNullable<Post['namedGroup']>>().type.toHaveProperty('insideNamedGroup')
       })
     })
+
+    describe('Relationship', () => {
+      test('generates empty relationTo', () => {
+        expect<Post>().type.toHaveProperty('emptyRelationTo')
+        expect<NonNullable<Post['emptyRelationTo']>>().type.toBeAssignableTo<null | undefined>()
+      })
+    })
   })
 
   describe('views', () => {
