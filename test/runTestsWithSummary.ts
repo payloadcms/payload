@@ -17,12 +17,12 @@ const TEST_SUITES = [
   'collections-graphql',
   'collections-rest',
   'config',
-  //   'create-payload-app', unrelated with content api
+  //   'create-payload-app', // Does not use DB adapter - tests CLI tool
   'custom-graphql',
   'database',
   'dataloader',
-  'endpoints',
-  //   'fields', very slow, run separately
+  'endpoints', // Does not use DB adapter - only tests custom HTTP endpoints (but still useful for integration)
+  //   'fields', // Very slow, run separately
   'fields-relationship',
   'folders',
   'folders-browse-by-disabled',
@@ -32,14 +32,14 @@ const TEST_SUITES = [
   'hooks',
   //   'joins', not supported yet in content api
   'kv',
-  'lexical-mdx',
+  // 'lexical-mdx', Does not use DB adapter - only tests MDX ↔ JSON conversions (but still useful)
   'live-preview',
   'loader',
-  //   'localization', We do not plan to support before EOY.
+  //   'localization', We do not plan to support before EOY
   'locked-documents',
   'login-with-username',
-  'payload-cloud',
-  'plugin-cloud-storage',
+  // 'payload-cloud', Has no real tests (only it.todo) - shows 0/0
+  // 'plugin-cloud-storage', Tests skipped unless in CI or has localstack - shows 0/0
   'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
@@ -48,7 +48,7 @@ const TEST_SUITES = [
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
-  'plugin-sentry',
+  // 'plugin-sentry', Has no real tests (only it.todo) - shows 0/0
   'plugin-seo',
   'plugin-stripe',
   'plugins',
@@ -56,7 +56,7 @@ const TEST_SUITES = [
   'queues',
   'relationships',
   'sdk',
-  //   'select',  We do not plan to support before EOY.
+  //   'select', We do not plan to support before EOY
   'sort',
   'storage-azure',
   'storage-s3',
