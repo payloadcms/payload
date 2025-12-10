@@ -177,7 +177,7 @@ export const promise = async ({
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
-                previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || ({} as JsonObject),
+                previousSiblingDoc: previousValData?.[field.name]?.[rowIndex] || ({} as JsonObject),
                 req,
                 siblingData: siblingData?.[field.name]?.[rowIndex] || {},
                 siblingDoc: row ? { ...row } : {},

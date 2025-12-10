@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
 export const nestedAfterChangeHooksSlug = 'nested-after-change-hooks'
 
 const NestedAfterChangeHooks: CollectionConfig = {
@@ -60,6 +60,38 @@ const NestedAfterChangeHooks: CollectionConfig = {
                         },
                       ],
                     },
+                  },
+                ],
+              },
+            ],
+          }),
+          LinkFeature({
+            fields: [
+              {
+                type: 'blocks',
+                name: 'linkBlocks',
+                blocks: [
+                  {
+                    slug: 'nestedLinkBlock',
+                    fields: [
+                      {
+                        name: 'nestedRelationship',
+                        type: 'relationship',
+                        relationTo: 'relations',
+                        hooks: {
+                          afterChange: [
+                            ({ previousValue, operation }) => {
+                              console.log(previousValue)
+                              if (operation === 'update' && typeof previousValue === 'undefined') {
+                                throw new Error(
+                                  'previousValue is missing in nested beforeChange hook',
+                                )
+                              }
+                            },
+                          ],
+                        },
+                      },
+                    ],
                   },
                 ],
               },

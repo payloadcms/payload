@@ -112,8 +112,9 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     'data-hooks-global': DataHooksGlobal;
   };
@@ -152,7 +153,7 @@ export interface HooksUserAuthOperations {
  * via the `definition` "before-change-hooks".
  */
 export interface BeforeChangeHook {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -162,7 +163,7 @@ export interface BeforeChangeHook {
  * via the `definition` "before-validate".
  */
 export interface BeforeValidate {
-  id: number;
+  id: string;
   title?: string | null;
   selection?: ('a' | 'b') | null;
   updatedAt: string;
@@ -173,7 +174,7 @@ export interface BeforeValidate {
  * via the `definition` "afterOperation".
  */
 export interface AfterOperation {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -183,7 +184,7 @@ export interface AfterOperation {
  * via the `definition` "context-hooks".
  */
 export interface ContextHook {
-  id: number;
+  id: string;
   value?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -193,7 +194,7 @@ export interface ContextHook {
  * via the `definition` "transforms".
  */
 export interface Transform {
-  id: number;
+  id: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -212,7 +213,7 @@ export interface Transform {
  * via the `definition` "hooks".
  */
 export interface Hook {
-  id: number;
+  id: string;
   fieldBeforeValidate?: boolean | null;
   fieldBeforeChange?: boolean | null;
   fieldAfterChange?: boolean | null;
@@ -230,20 +231,20 @@ export interface Hook {
  * via the `definition` "nested-after-read-hooks".
  */
 export interface NestedAfterReadHook {
-  id: number;
+  id: string;
   text?: string | null;
   group?: {
     array?:
       | {
           input?: string | null;
           afterRead?: string | null;
-          shouldPopulate?: (number | null) | Relation;
+          shouldPopulate?: (string | null) | Relation;
           id?: string | null;
         }[]
       | null;
     subGroup?: {
       afterRead?: string | null;
-      shouldPopulate?: (number | null) | Relation;
+      shouldPopulate?: (string | null) | Relation;
     };
   };
   updatedAt: string;
@@ -254,7 +255,7 @@ export interface NestedAfterReadHook {
  * via the `definition` "relations".
  */
 export interface Relation {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -264,7 +265,7 @@ export interface Relation {
  * via the `definition` "nested-after-change-hooks".
  */
 export interface NestedAfterChangeHook {
-  id: number;
+  id: string;
   text?: string | null;
   group?: {
     array?:
@@ -274,6 +275,21 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -282,7 +298,7 @@ export interface NestedAfterChangeHook {
  * via the `definition` "chaining-hooks".
  */
 export interface ChainingHook {
-  id: number;
+  id: string;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -292,7 +308,7 @@ export interface ChainingHook {
  * via the `definition` "hooks-users".
  */
 export interface HooksUser {
-  id: number;
+  id: string;
   roles: ('admin' | 'user')[];
   afterLoginHook?: boolean | null;
   updatedAt: string;
@@ -318,7 +334,7 @@ export interface HooksUser {
  * via the `definition` "data-hooks".
  */
 export interface DataHook {
-  id: number;
+  id: string;
   field_collectionAndField?: string | null;
   collection_beforeOperation_collection?: string | null;
   collection_beforeChange_collection?: string | null;
@@ -334,7 +350,7 @@ export interface DataHook {
  * via the `definition` "before-delete-hooks".
  */
 export interface BeforeDeleteHook {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -344,7 +360,7 @@ export interface BeforeDeleteHook {
  * via the `definition` "before-delete-2-hooks".
  */
 export interface BeforeDelete2Hook {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -354,7 +370,7 @@ export interface BeforeDelete2Hook {
  * via the `definition` "field-paths".
  */
 export interface FieldPath {
-  id: number;
+  id: string;
   topLevelNamedField?: string | null;
   array?:
     | {
@@ -671,7 +687,7 @@ export interface FieldPath {
  * via the `definition` "value-hooks".
  */
 export interface ValueHook {
-  id: number;
+  id: string;
   slug?: string | null;
   beforeValidate_value?: string | null;
   beforeChange_value?: string | null;
@@ -683,7 +699,7 @@ export interface ValueHook {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -700,76 +716,76 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'before-change-hooks';
-        value: number | BeforeChangeHook;
+        value: string | BeforeChangeHook;
       } | null)
     | ({
         relationTo: 'before-validate';
-        value: number | BeforeValidate;
+        value: string | BeforeValidate;
       } | null)
     | ({
         relationTo: 'afterOperation';
-        value: number | AfterOperation;
+        value: string | AfterOperation;
       } | null)
     | ({
         relationTo: 'context-hooks';
-        value: number | ContextHook;
+        value: string | ContextHook;
       } | null)
     | ({
         relationTo: 'transforms';
-        value: number | Transform;
+        value: string | Transform;
       } | null)
     | ({
         relationTo: 'hooks';
-        value: number | Hook;
+        value: string | Hook;
       } | null)
     | ({
         relationTo: 'nested-after-read-hooks';
-        value: number | NestedAfterReadHook;
+        value: string | NestedAfterReadHook;
       } | null)
     | ({
         relationTo: 'nested-after-change-hooks';
-        value: number | NestedAfterChangeHook;
+        value: string | NestedAfterChangeHook;
       } | null)
     | ({
         relationTo: 'chaining-hooks';
-        value: number | ChainingHook;
+        value: string | ChainingHook;
       } | null)
     | ({
         relationTo: 'relations';
-        value: number | Relation;
+        value: string | Relation;
       } | null)
     | ({
         relationTo: 'hooks-users';
-        value: number | HooksUser;
+        value: string | HooksUser;
       } | null)
     | ({
         relationTo: 'data-hooks';
-        value: number | DataHook;
+        value: string | DataHook;
       } | null)
     | ({
         relationTo: 'before-delete-hooks';
-        value: number | BeforeDeleteHook;
+        value: string | BeforeDeleteHook;
       } | null)
     | ({
         relationTo: 'before-delete-2-hooks';
-        value: number | BeforeDelete2Hook;
+        value: string | BeforeDelete2Hook;
       } | null)
     | ({
         relationTo: 'field-paths';
-        value: number | FieldPath;
+        value: string | FieldPath;
       } | null)
     | ({
         relationTo: 'value-hooks';
-        value: number | ValueHook;
+        value: string | ValueHook;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'hooks-users';
-    value: number | HooksUser;
+    value: string | HooksUser;
   };
   updatedAt: string;
   createdAt: string;
@@ -779,10 +795,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'hooks-users';
-    value: number | HooksUser;
+    value: string | HooksUser;
   };
   key?: string | null;
   value?:
@@ -802,7 +818,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -915,6 +931,7 @@ export interface NestedAfterChangeHooksSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  lexical?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1111,7 +1128,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "data-hooks-global".
  */
 export interface DataHooksGlobal {
-  id: number;
+  id: string;
   field_globalAndField?: string | null;
   global_beforeChange_global?: string | null;
   global_afterChange_global?: string | null;

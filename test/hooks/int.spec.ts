@@ -343,6 +343,47 @@ describe('Hooks', () => {
               },
             ],
           },
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        collection: 'nested-after-change-hooks',
+        id: nestedAfterChangeDoc.id,
+        data: {
+          text: 'updated',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'updated',
+              },
+            ],
+          },
+        },
+      })
+
+      expect(updatedDoc).toBeDefined()
+    })
+
+    it('should populate previousValue in Lexical nested afterChange hooks', async () => {
+      const relationID = await payload.create({
+        collection: 'relations',
+        data: {
+          title: 'Relation for nested afterChange',
+        },
+      })
+
+      // this collection will throw an error if previousValue is not defined in nested afterChange hook
+      const nestedAfterChangeDoc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'initial',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'initial',
+              },
+            ],
+          },
           lexical: {
             root: {
               children: [
@@ -351,14 +392,41 @@ describe('Hooks', () => {
                   version: 2,
                   format: '',
                   fields: {
-                    id: '6936efd83bd1813d170dc585',
+                    id: '693994702cb0a2476e9bdddd',
                     blockName: '',
-                    nestedAfterChange: 'a',
+                    nestedAfterChange: 'initial block',
                     blockType: 'nestedBlock',
                   },
                 },
                 {
-                  children: [],
+                  children: [
+                    {
+                      children: [
+                        {
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'test',
+                          type: 'text',
+                          version: 1,
+                        },
+                      ],
+                      direction: null,
+                      format: '',
+                      indent: 0,
+                      type: 'link',
+                      version: 3,
+                      fields: {
+                        linkBlocks: [
+                          {
+                            blockType: 'nestedLinkBlock',
+                            nestedRelationship: relationID.id,
+                          },
+                        ],
+                      },
+                    },
+                  ],
                   direction: null,
                   format: '',
                   indent: 0,
@@ -383,16 +451,9 @@ describe('Hooks', () => {
         id: nestedAfterChangeDoc.id,
         data: {
           text: 'updated',
-          group: {
-            array: [
-              {
-                nestedAfterChange: 'updated',
-              },
-            ],
-          },
         },
       })
-
+      console.log(updatedDoc)
       expect(updatedDoc).toBeDefined()
     })
   })
