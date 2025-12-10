@@ -6,6 +6,16 @@ packages:
   - 'templates/website'
   - 'templates/ecommerce'
 
+catalog:
+  copyfiles: 2.4.1
+  cross-env: 7.0.3
+  dotenv: 16.4.7
+  graphql: ^16.8.1
+  mongodb-memory-server: 10.1.4
+  react: 19.2.1
+  react-dom: 19.2.1
+  typescript: 5.7.3
+
 updateNotifier: false
 symlink: true
 nodeLinker: isolated

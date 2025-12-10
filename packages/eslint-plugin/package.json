@@ -37,7 +37,7 @@
     "eslint-plugin-react-hooks": "0.0.0-experimental-d331ba04-20250307",
     "eslint-plugin-regexp": "2.7.0",
     "globals": "16.0.0",
-    "typescript": "5.7.3",
+    "typescript": "catalog:",
     "typescript-eslint": "8.26.1"
   }
 }

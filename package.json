@@ -173,10 +173,10 @@
     "axe-core": "4.11.0",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
-    "copyfiles": "2.4.1",
+    "copyfiles": "catalog:",
     "create-payload-app": "workspace:*",
-    "cross-env": "7.0.3",
-    "dotenv": "16.4.7",
+    "cross-env": "catalog:",
+    "dotenv": "catalog:",
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
@@ -188,6 +188,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
+    "mongodb-memory-server": "catalog:",
     "mongoose": "8.15.1",
     "next": "15.4.10",
     "open": "^10.1.0",
@@ -198,8 +199,8 @@
     "postcss": "^8.4.49",
     "postcss-scss": "^4.0.9",
     "prettier": "3.5.3",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "rimraf": "6.0.1",
     "sharp": "0.32.6",
     "shelljs": "0.8.5",
@@ -211,8 +212,7 @@
     "tstyche": "3.5.0",
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
-    "typescript": "5.7.3",
-    "vitest": "4.0.15",
+    "typescript": "catalog:",
     "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@10.27.0",
@@ -220,28 +220,5 @@
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^10.27.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@sentry/cli",
-      "@swc/core",
-      "@vercel/git-hooks",
-      "better-sqlite3",
-      "bufferutil",
-      "esbuild",
-      "mongodb-memory-server",
-      "sharp",
-      "unrs-resolver",
-      "utf-8-validate",
-      "workerd"
-    ],
-    "overrides": {
-      "copyfiles": "$copyfiles",
-      "cross-env": "$cross-env",
-      "dotenv": "$dotenv",
-      "graphql": "16.8.1",
-      "react": "$react",
-      "react-dom": "$react-dom",
-      "typescript": "$typescript"
-    }
-  }
+  "pnpm": {}
 }
