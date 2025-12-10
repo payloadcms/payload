@@ -630,6 +630,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           const docUrl = formatAdminURL({
             adminRoute: config.routes.admin,
             path: `/collections/${collectionSlug}/${id}`,
+            serverURL,
           })
 
           window.open(docUrl, '_blank')
@@ -644,7 +645,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         })
       }
     },
-    [config.routes.admin],
+    [config.routes.admin, serverURL],
   )
 
   const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
