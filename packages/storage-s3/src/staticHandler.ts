@@ -2,7 +2,6 @@ import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
-import * as AWS from '@aws-sdk/client-s3'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -188,7 +187,12 @@ export const getHandler = ({
       streamed = true
       return new Response(stream, { headers, status: rangeResult.status })
     } catch (err) {
-      if (err instanceof AWS.NoSuchKey) {
+      if (
+        err &&
+        typeof err === 'object' &&
+        (('name' in err && (err.name === 'NoSuchKey' || err.name === 'NotFound')) ||
+          ('httpStatusCode' in err && err.httpStatusCode === 404))
+      ) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
       req.payload.logger.error(err)
