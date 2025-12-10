@@ -94,34 +94,18 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     user,
   }
 
-  const {
-    Actions,
-  }: {
-    Actions: Record<string, React.ReactNode>
-  } = {
-    Actions: viewActions
-      ? viewActions.reduce((acc, action) => {
-          if (action) {
-            if (typeof action === 'object') {
-              acc[action.path] = RenderServerComponent({
-                clientProps,
-                Component: action,
-                importMap: payload.importMap,
-                serverProps,
-              })
-            } else {
-              acc[action] = RenderServerComponent({
-                clientProps,
-                Component: action,
-                importMap: payload.importMap,
-                serverProps,
-              })
-            }
-          }
-
-          return acc
-        }, {})
-      : undefined,
+  const Actions: Record<string, React.ReactNode> = {}
+  for (const action of viewActions ?? []) {
+    if (!action) {
+      continue
+    }
+    const key = typeof action === 'object' ? action.path : action
+    Actions[key] = RenderServerComponent({
+      clientProps,
+      Component: action,
+      importMap: payload.importMap,
+      serverProps,
+    })
   }
 
   const NavComponent = RenderServerComponent({
