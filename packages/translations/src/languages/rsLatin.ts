@@ -82,6 +82,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Dodaj widget',
+    deleteWidget: 'Obriši widget {{id}}',
     searchWidgets: 'Pretraži dodatke...',
   },
   error: {

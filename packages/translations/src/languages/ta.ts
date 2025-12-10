@@ -80,6 +80,7 @@ export const taTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'விக்கெட் சேர்',
+    deleteWidget: '{{id}} விட்ஜெடை நீக்கு',
     searchWidgets: 'தேடல் கருவிகள்...',
   },
   error: {

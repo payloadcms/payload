@@ -81,6 +81,7 @@ export const hyTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Ավելացնել վիճակագրություն',
+    deleteWidget: 'Ջնջել վիդջեթը {{id}}',
     searchWidgets: 'Որոնել վիջեթներ...',
   },
   error: {

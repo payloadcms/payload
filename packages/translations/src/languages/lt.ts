@@ -82,6 +82,7 @@ export const ltTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Pridėti valdiklį',
+    deleteWidget: 'Ištrinti valdiklį {{id}}',
     searchWidgets: 'Ieškokite valdiklių...',
   },
   error: {

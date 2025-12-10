@@ -82,6 +82,7 @@ export const ukTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Додати віджет',
+    deleteWidget: 'Видалити віджет {{id}}',
     searchWidgets: 'Пошук віджетів...',
   },
   error: {

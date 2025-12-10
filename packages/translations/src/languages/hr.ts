@@ -82,6 +82,7 @@ export const hrTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Dodaj widget',
+    deleteWidget: 'Izbriši widget {{id}}',
     searchWidgets: 'Pretraži widgete...',
   },
   error: {

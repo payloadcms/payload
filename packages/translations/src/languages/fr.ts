@@ -83,6 +83,7 @@ export const frTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Ajouter un Widget',
+    deleteWidget: 'Supprimer le widget {{id}}',
     searchWidgets: 'Rechercher des widgets...',
   },
   error: {

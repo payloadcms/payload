@@ -81,6 +81,7 @@ export const bgTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Добави джаджа',
+    deleteWidget: 'Изтрийте джаджа {{id}}',
     searchWidgets: 'Търсене на джаджи...',
   },
   error: {

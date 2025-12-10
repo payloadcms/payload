@@ -81,6 +81,7 @@ export const svTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Lägg till Widget',
+    deleteWidget: 'Radera widget {{id}}',
     searchWidgets: 'Sök widgetar...',
   },
   error: {

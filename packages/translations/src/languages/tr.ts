@@ -82,6 +82,7 @@ export const trTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Widget Ekle',
+    deleteWidget: "Widget'i sil {{id}}",
     searchWidgets: "Arama widget'ları...",
   },
   error: {

@@ -83,6 +83,7 @@ export const huTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Adjon hozzá widgetet',
+    deleteWidget: 'Törölje a(z) {{id}} widgetet',
     searchWidgets: 'Keresés widgetek...',
   },
   error: {

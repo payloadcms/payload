@@ -82,6 +82,7 @@ export const jaTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'ウィジェットを追加する',
+    deleteWidget: 'ウィジェット{{id}}を削除します',
     searchWidgets: 'ウィジェットを検索...',
   },
   error: {

@@ -81,6 +81,7 @@ export const nbTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Legg til widget',
+    deleteWidget: 'Slett widget {{id}}',
     searchWidgets: 'Søk widgets...',
   },
   error: {

@@ -81,6 +81,7 @@ export const caTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Afegeix Widget',
+    deleteWidget: 'Esborra el widget {{id}}',
     searchWidgets: 'Cerca de ginys...',
   },
   error: {

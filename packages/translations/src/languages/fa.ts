@@ -80,6 +80,7 @@ export const faTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'اضافه کردن ویجت',
+    deleteWidget: 'حذف ابزارک {{id}}',
     searchWidgets: 'جستجوی ابزارک‌ها...',
   },
   error: {

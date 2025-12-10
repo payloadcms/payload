@@ -83,6 +83,7 @@ export const roTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Adaugați widget',
+    deleteWidget: 'Ștergeți widget-ul {{id}}',
     searchWidgets: 'Caută widgeturi...',
   },
   error: {

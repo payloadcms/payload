@@ -81,6 +81,7 @@ export const itTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Aggiungi Widget',
+    deleteWidget: 'Elimina widget {{id}}',
     searchWidgets: 'Cerca widget...',
   },
   error: {

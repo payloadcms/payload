@@ -80,6 +80,7 @@ export const etTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Lisa vidin',
+    deleteWidget: 'Kustuta vidin {{id}}',
     searchWidgets: 'Otsi vidinaid...',
   },
   error: {

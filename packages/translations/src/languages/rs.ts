@@ -82,6 +82,7 @@ export const rsTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Dodaj Widget',
+    deleteWidget: 'Obriši vidžet {{id}}',
     searchWidgets: 'Pretraži widgete...',
   },
   error: {

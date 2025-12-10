@@ -81,6 +81,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'উইজেট যোগ করুন',
+    deleteWidget: 'উইজেট মুছুন {{id}}',
     searchWidgets: 'উইজেট অনুসন্ধান করুন...',
   },
   error: {

@@ -80,6 +80,7 @@ export const thTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'เพิ่มวิดเจ็ต',
+    deleteWidget: 'ลบวิดเจ็ต {{id}}',
     searchWidgets: 'ค้นหาวิดเจ็ต...',
   },
   error: {

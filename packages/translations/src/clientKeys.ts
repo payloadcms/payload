@@ -63,6 +63,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:youAreInactive',
 
   'dashboard:addWidget',
+  'dashboard:deleteWidget',
   'dashboard:searchWidgets',
 
   'error:autosaving',

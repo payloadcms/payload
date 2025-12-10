@@ -79,6 +79,7 @@ export const zhTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: '添加小部件',
+    deleteWidget: '删除小部件 {{id}}',
     searchWidgets: '搜索小工具...',
   },
   error: {

@@ -81,6 +81,7 @@ export const viTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Thêm Widget',
+    deleteWidget: 'Xóa widget {{id}}',
     searchWidgets: 'Tìm kiếm các widget...',
   },
   error: {

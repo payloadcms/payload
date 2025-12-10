@@ -81,6 +81,7 @@ export const myTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Tambah Widget',
+    deleteWidget: 'Padam widget {{id}}',
     searchWidgets: 'Cari widget...',
   },
   error: {

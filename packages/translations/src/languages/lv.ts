@@ -81,6 +81,7 @@ export const lvTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Pievienot logrīku',
+    deleteWidget: 'Dzēst logrīku {{id}}',
     searchWidgets: 'Meklēt logrīkus...',
   },
   error: {

@@ -82,6 +82,7 @@ export const enTranslations = {
   },
   dashboard: {
     addWidget: 'Add Widget',
+    deleteWidget: 'Delete widget {{id}}',
     searchWidgets: 'Search widgets...',
   },
   error: {

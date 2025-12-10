@@ -82,6 +82,7 @@ export const nlTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Widget toevoegen',
+    deleteWidget: 'Verwijder widget {{id}}',
     searchWidgets: 'Zoek widgets...',
   },
   error: {

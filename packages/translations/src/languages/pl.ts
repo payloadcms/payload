@@ -81,6 +81,7 @@ export const plTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Dodaj Widżet',
+    deleteWidget: 'Usuń widget {{id}}',
     searchWidgets: 'Szukaj widgetów...',
   },
   error: {

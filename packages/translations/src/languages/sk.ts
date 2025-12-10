@@ -82,6 +82,7 @@ export const skTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Pridať Widget',
+    deleteWidget: 'Odstrániť widget {{id}}',
     searchWidgets: 'Hľadať doplnky...',
   },
   error: {

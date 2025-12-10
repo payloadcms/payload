@@ -82,6 +82,7 @@ export const ruTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Добавить виджет',
+    deleteWidget: 'Удалить виджет {{id}}',
     searchWidgets: 'Поиск виджетов...',
   },
   error: {

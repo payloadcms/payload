@@ -81,6 +81,7 @@ export const azTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Vidjet əlavə et',
+    deleteWidget: 'Vidgeti silin {{id}}',
     searchWidgets: 'Widgetləri axtarın...',
   },
   error: {

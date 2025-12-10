@@ -81,6 +81,7 @@ export const slTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Dodaj pripomoček',
+    deleteWidget: 'Izbriši pripomoček {{id}}',
     searchWidgets: 'Išči gradnike...',
   },
   error: {

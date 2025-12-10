@@ -81,6 +81,7 @@ export const arTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'أضف الواجهة البيانية',
+    deleteWidget: 'حذف الودجت {{id}}',
     searchWidgets: 'ابحث عن الأدوات...',
   },
   error: {

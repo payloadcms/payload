@@ -80,6 +80,7 @@ export const daTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Tilføj Widget',
+    deleteWidget: 'Slet widget {{id}}',
     searchWidgets: 'Søg widgets...',
   },
   error: {

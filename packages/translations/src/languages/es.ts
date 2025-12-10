@@ -81,6 +81,7 @@ export const esTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Agregar Widget',
+    deleteWidget: 'Eliminar widget {{id}}',
     searchWidgets: 'Buscar widgets...',
   },
   error: {

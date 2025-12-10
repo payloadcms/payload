@@ -81,6 +81,7 @@ export const koTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: '위젯 추가',
+    deleteWidget: '위젯 {{id}} 삭제',
     searchWidgets: '위젯 검색...',
   },
   error: {

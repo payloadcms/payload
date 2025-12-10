@@ -4,7 +4,7 @@ import type { Widget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import { ChevronIcon, Popup, PopupList, XIcon } from '@payloadcms/ui'
+import { ChevronIcon, Popup, PopupList, useTranslation, XIcon } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
 import { DashboardStepNav } from './DashboardStepNav.js'
@@ -46,6 +46,7 @@ export function ModularDashboardClient({
   clientLayout: WidgetInstanceClient[]
   widgets: Widget[]
 }) {
+  const { t } = useTranslation()
   const {
     addWidget,
     cancel,
@@ -154,9 +155,11 @@ export function ModularDashboardClient({
                       <button
                         className="widget-wrapper__delete-btn"
                         onClick={() => deleteWidget(widget.item.id)}
-                        title={`Delete widget ${widget.item.id}`}
                         type="button"
                       >
+                        <span className="sr-only">
+                          {t('dashboard:deleteWidget', { id: widget.item.id })}
+                        </span>
                         <XIcon />
                       </button>
                     </div>

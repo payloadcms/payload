@@ -80,6 +80,7 @@ export const heTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: "הוסף וידג'ט",
+    deleteWidget: "מחק וידג'ט {{id}}",
     searchWidgets: "חפש ווידג'טים...",
   },
   error: {

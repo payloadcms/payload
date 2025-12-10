@@ -82,6 +82,7 @@ export const idTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Tambah Widget',
+    deleteWidget: 'Hapus widget {{id}}',
     searchWidgets: 'Cari widget...',
   },
   error: {

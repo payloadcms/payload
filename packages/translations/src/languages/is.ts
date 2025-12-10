@@ -82,6 +82,7 @@ export const isTranslations: DefaultTranslationsObject = {
   },
   dashboard: {
     addWidget: 'Bæta við smáforriti',
+    deleteWidget: 'Eyða græju {{id}}',
     searchWidgets: 'Leita að græjum...',
   },
   error: {
