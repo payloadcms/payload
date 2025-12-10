@@ -8,6 +8,7 @@ import {
   type ReactSelectOption as Option,
   ReactSelect,
   useStepNav,
+  useTranslation,
 } from '@payloadcms/ui'
 import { useEffect, useId } from 'react'
 
@@ -28,6 +29,7 @@ export function DashboardStepNav({
   setIsEditing: (isEditing: boolean) => void
   widgets: Widget[]
 }) {
+  const { t } = useTranslation()
   const { setStepNav } = useStepNav()
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
@@ -56,8 +58,8 @@ export function DashboardStepNav({
           drawerSlug={drawerSlug}
           items={widgets}
           onItemClick={(widget) => addWidget(widget.slug)}
-          searchPlaceholder="Search widgets..."
-          title="Add Widget"
+          searchPlaceholder={t('dashboard:searchWidgets')}
+          title={t('dashboard:addWidget')}
         />
       )}
     </>

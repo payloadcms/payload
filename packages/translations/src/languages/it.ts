@@ -79,6 +79,10 @@ export const itTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
+  dashboard: {
+    addWidget: 'Aggiungi Widget',
+    searchWidgets: 'Cerca widget...',
+  },
   error: {
     accountAlreadyActivated: 'Questo account è già stato attivato.',
     autosaving:

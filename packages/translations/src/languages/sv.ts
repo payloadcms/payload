@@ -79,6 +79,10 @@ export const svTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
+  dashboard: {
+    addWidget: 'Lägg till Widget',
+    searchWidgets: 'Sök widgetar...',
+  },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',
     autosaving: 'Det uppstod ett problem när det här dokumentet skulle sparas automatiskt.',

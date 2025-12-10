@@ -80,6 +80,10 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  dashboard: {
+    addWidget: 'Dodaj widget',
+    searchWidgets: 'Pretraži widgete...',
+  },
   error: {
     accountAlreadyActivated: 'Ovaj račun je već aktiviran.',
     autosaving: 'Nastao je problem pri automatskom spremanju ovog dokumenta.',

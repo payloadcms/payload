@@ -80,6 +80,10 @@ export const isTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
+  dashboard: {
+    addWidget: 'Bæta við smáforriti',
+    searchWidgets: 'Leita að græjum...',
+  },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',
     autosaving: 'Villa kom upp við sjálfvirka vistun á færslu.',

@@ -79,6 +79,10 @@ export const plTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
+  dashboard: {
+    addWidget: 'Dodaj Widżet',
+    searchWidgets: 'Szukaj widgetów...',
+  },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',
     autosaving: 'Wystąpił problem podczas automatycznego zapisywania tego dokumentu.',

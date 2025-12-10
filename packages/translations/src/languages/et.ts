@@ -78,6 +78,10 @@ export const etTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
+  dashboard: {
+    addWidget: 'Lisa vidin',
+    searchWidgets: 'Otsi vidinaid...',
+  },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',
     autosaving: 'Dokumendi automaatsel salvestamisel tekkis probleem.',

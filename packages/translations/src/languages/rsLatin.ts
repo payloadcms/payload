@@ -80,6 +80,10 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
+  dashboard: {
+    addWidget: 'Dodaj widget',
+    searchWidgets: 'Pretraži dodatke...',
+  },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',
     autosaving: 'Nastao je problem pri automatskom čuvanju ovog dokumenta.',

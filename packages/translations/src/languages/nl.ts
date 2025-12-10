@@ -80,6 +80,10 @@ export const nlTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
+  dashboard: {
+    addWidget: 'Widget toevoegen',
+    searchWidgets: 'Zoek widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',
     autosaving: 'Er is een probleem opgetreden bij het automatisch bewaren van dit document.',

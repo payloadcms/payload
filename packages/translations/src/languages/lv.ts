@@ -79,6 +79,10 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  dashboard: {
+    addWidget: 'Pievienot logrīku',
+    searchWidgets: 'Meklēt logrīkus...',
+  },
   error: {
     accountAlreadyActivated: 'Šis konts jau ir aktivizēts.',
     autosaving: 'Radās problēma, automātiski saglabājot šo dokumentu.',

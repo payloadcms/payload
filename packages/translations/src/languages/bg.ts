@@ -79,6 +79,10 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  dashboard: {
+    addWidget: 'Добави джаджа',
+    searchWidgets: 'Търсене на джаджи...',
+  },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',
     autosaving: 'Имаше проблем в автоматичното запазване на този документ.',

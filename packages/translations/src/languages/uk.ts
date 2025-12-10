@@ -80,6 +80,10 @@ export const ukTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
+  dashboard: {
+    addWidget: 'Додати віджет',
+    searchWidgets: 'Пошук віджетів...',
+  },
   error: {
     accountAlreadyActivated: 'Цей обліковий запис вже активований',
     autosaving: 'Виникла проблема під час автозбереження цього документа.',

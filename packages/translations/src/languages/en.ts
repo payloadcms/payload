@@ -80,6 +80,10 @@ export const enTranslations = {
     youDidNotRequestPassword:
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
+  dashboard: {
+    addWidget: 'Add Widget',
+    searchWidgets: 'Search widgets...',
+  },
   error: {
     accountAlreadyActivated: 'This account has already been activated.',
     autosaving: 'There was a problem while autosaving this document.',

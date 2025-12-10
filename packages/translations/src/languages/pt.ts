@@ -80,6 +80,10 @@ export const ptTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
+  dashboard: {
+    addWidget: 'Adicionar Widget',
+    searchWidgets: 'Pesquisar widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',
     autosaving: 'Ocorreu um problema ao salvar automaticamente esse documento.',

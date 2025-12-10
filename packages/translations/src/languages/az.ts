@@ -79,6 +79,10 @@ export const azTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
+  dashboard: {
+    addWidget: 'Vidjet əlavə et',
+    searchWidgets: 'Widgetləri axtarın...',
+  },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',
     autosaving: 'Bu sənədin avto yadda saxlanılması zamanı problem yarandı.',
