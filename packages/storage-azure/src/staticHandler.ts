@@ -5,8 +5,7 @@ import type { CollectionConfig } from 'payload'
 import { RestError } from '@azure/storage-blob'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
-
-import { getRangeFromHeader } from './utils/getRangeFromHeader.js'
+import { getRangeRequestInfo } from 'payload/internal'
 
 interface Args {
   collection: CollectionConfig
@@ -21,31 +20,48 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
         path.posix.join(prefix, filename),
       )
 
-      const { end, start } = await getRangeFromHeader(
-        blockBlobClient,
-        String(req.headers.get('range')),
-      )
+      // Get file size for range validation
+      const properties = await blockBlobClient.getProperties()
+      const fileSize = properties.contentLength
 
-      const blob = await blockBlobClient.download(start, end)
-
-      const response = blob._response
-
-      let initHeaders: Headers = {
-        ...(response.headers.rawHeaders() as unknown as Headers),
+      if (!fileSize) {
+        return new Response('Internal Server Error', { status: 500 })
       }
 
-      // Typescript is difficult here with merging these types from Azure
-      if (incomingHeaders) {
-        initHeaders = {
-          ...initHeaders,
-          ...incomingHeaders,
-        }
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
       }
 
-      let headers = new Headers(initHeaders)
+      // Download with range if partial
+      const blob =
+        rangeResult.type === 'partial'
+          ? await blockBlobClient.download(
+              rangeResult.rangeStart,
+              rangeResult.rangeEnd - rangeResult.rangeStart + 1,
+            )
+          : await blockBlobClient.download()
+
+      let headers = new Headers(incomingHeaders)
+
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
+      }
+
+      // Add Azure-specific headers
+      headers.append('Content-Type', String(properties.contentType))
+      if (properties.etag) {
+        headers.append('ETag', String(properties.etag))
+      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-      const objectEtag = response.headers.get('etag')
 
       if (
         collection.upload &&
@@ -55,7 +71,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
         headers = collection.upload.modifyResponseHeaders({ headers }) || headers
       }
 
-      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+      if (etagFromHeaders && etagFromHeaders === properties.etag) {
         return new Response(null, {
           headers,
           status: 304,
@@ -84,7 +100,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
 
       return new Response(readableStream, {
         headers,
-        status: response.status,
+        status: rangeResult.status,
       })
     } catch (err: unknown) {
       if (err instanceof RestError && err.statusCode === 404) {
