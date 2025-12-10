@@ -944,6 +944,9 @@ importers:
       qs-esm:
         specifier: 7.0.2
         version: 7.0.2
+      range-parser:
+        specifier: 1.2.1
+        version: 1.2.1
       sanitize-filename:
         specifier: 1.6.3
         version: 1.6.3
@@ -987,6 +990,9 @@ importers:
       '@types/pluralize':
         specifier: 0.0.33
         version: 0.0.33
+      '@types/range-parser':
+        specifier: 1.2.7
+        version: 1.2.7
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -12206,6 +12212,7 @@ packages:
   next@15.5.4:
     resolution: {integrity: sha512-xH4Yjhb82sFYQfY3vbkJfgSDgXvBB6a8xPs9i35k6oZJRoQRihZH+4s9Yo2qsWpzBmZ3lPXaJ2KPXLfkvW4LnA==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
