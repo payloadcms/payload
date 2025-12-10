@@ -755,6 +755,12 @@ describe('General', () => {
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })
+
+    test('should render custom footer', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const footer = page.locator('.custom-footer')
+      await expect(footer).toContainText('Here is a custom footer')
+    })
   })
 
   describe('i18n', () => {

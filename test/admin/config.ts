@@ -79,6 +79,7 @@ export default buildConfigWithDefaults({
         Icon: '/components/graphics/Icon.js#Icon',
       },
       header: ['/components/CustomHeader/index.js#CustomHeader'],
+      footer: ['/components/CustomFooter/index.js#CustomFooter'],
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
