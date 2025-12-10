@@ -16,12 +16,13 @@ export const Account = () => {
         routes: { account: accountRoute },
       },
       routes: { admin: adminRoute },
+      serverURL,
     },
   } = useConfig()
 
   const { user } = useAuth()
   const pathname = usePathname()
-  const isOnAccountPage = pathname === formatAdminURL({ adminRoute, path: accountRoute })
+  const isOnAccountPage = pathname === formatAdminURL({ adminRoute, path: accountRoute, serverURL })
 
   if (!user?.email || avatar === 'default') {
     return <DefaultAccountIcon active={isOnAccountPage} />
