@@ -24,6 +24,7 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
       routes: { account: accountRoute, login: loginRoute },
     },
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   if (user) {
@@ -38,6 +39,7 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
                     href={formatAdminURL({
                       adminRoute,
                       path: accountRoute,
+                      serverURL,
                     })}
                     prefetch={false}
                   >
@@ -65,6 +67,7 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
         href={formatAdminURL({
           adminRoute,
           path: loginRoute,
+          serverURL,
         })}
         prefetch={false}
       >
