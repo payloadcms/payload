@@ -6,6 +6,7 @@ import {
   Translation,
   useConfig,
   useDocumentDrawer,
+  useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
@@ -16,7 +17,6 @@ import type {
 } from '../../translations/index.js'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
-import './index.scss'
 
 const baseClass = 'export-list-menu-item'
 
@@ -25,10 +25,12 @@ export const ExportListMenuItem: React.FC<{
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
   const { getEntityConfig } = useConfig()
+
   const { i18n, t } = useTranslation<
     PluginImportExportTranslations,
     PluginImportExportTranslationKeys
   >()
+
   const currentCollectionConfig = getEntityConfig({ collectionSlug })
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
