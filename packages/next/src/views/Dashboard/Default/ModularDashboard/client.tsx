@@ -79,6 +79,10 @@ export function ModularDashboardClient({
           setActiveDragId(null)
         }}
         onDragEnd={(event) => {
+          if (!event.over) {
+            setActiveDragId(null)
+            return
+          }
           const droppableId = event.over.id as string
           const i = droppableId.lastIndexOf('-')
           const slug = droppableId.slice(0, i)
