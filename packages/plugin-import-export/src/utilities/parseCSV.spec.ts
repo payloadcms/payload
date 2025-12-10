@@ -1,5 +1,6 @@
+import { PayloadRequest } from 'payload'
+
 import { parseCSV } from './parseCSV.js'
-import type { PayloadRequest } from 'payload'
 
 describe('parseCSV', () => {
   const mockReq = {

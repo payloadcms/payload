@@ -6,7 +6,11 @@ type Args = {
   fields: FlattenedField[]
 }
 
-export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
+/**
+ * Gets custom toCSV field functions for export.
+ * These functions transform field values when flattening documents for CSV export.
+ */
+export const getExportFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
   const result: Record<string, ToCSVFunction> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {

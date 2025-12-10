@@ -1,6 +1,6 @@
 /**
- * Process rich text fields to ensure proper data types for Lexical editor
- * Lexical expects certain properties to be numbers, not strings
+ * Process rich text fields to ensure proper data types for Lexical editor.
+ * Lexical expects certain properties to be numbers, not strings.
  */
 export const processRichTextField = (value: unknown): unknown => {
   if (!value || typeof value !== 'object') {

@@ -907,6 +907,37 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toBeDefined()
     })
 
+    it('should preserve user-specified field order in CSV export', async () => {
+      // User specifies fields in custom order: title first, then id, then createdAt
+      // Export should respect this order, not reorder to default (id first, timestamps last)
+      const doc = await payload.create({
+        collection: 'posts-export',
+        user,
+        data: {
+          collectionSlug: 'posts',
+          fields: ['title', 'id', 'createdAt'],
+          format: 'csv',
+          limit: 1,
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'posts-export',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Verify we have data
+      expect(data.length).toBeGreaterThan(0)
+
+      // Verify columns are in user's specified order, not default order
+      const columns = Object.keys(data[0])
+      expect(columns).toStrictEqual(['title', 'id', 'createdAt'])
+    })
+
     it('should export polymorphic relationship fields to CSV', async () => {
       const doc = await payload.create({
         collection: 'exports',

@@ -1,7 +1,16 @@
-import type { FlattenedField } from 'payload'
+import { FlattenedField, PayloadRequest } from 'payload'
+
 import { unflattenObject } from './unflattenObject.js'
 
 describe('unflattenObject', () => {
+  const mockReq = {
+    payload: {
+      logger: {
+        error: jest.fn(),
+      },
+    },
+  } as unknown as PayloadRequest
+
   describe('hasMany number fields', () => {
     const fields: FlattenedField[] = [
       {
@@ -16,7 +25,7 @@ describe('unflattenObject', () => {
         hasManyNumber: '1,2,3,5,8',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [1, 2, 3, 5, 8],
@@ -28,7 +37,7 @@ describe('unflattenObject', () => {
         hasManyNumber: ' 10 , 20 , 30 ',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [10, 20, 30],
@@ -40,7 +49,7 @@ describe('unflattenObject', () => {
         hasManyNumber: '1,,3,,5',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [1, 3, 5],
@@ -52,7 +61,7 @@ describe('unflattenObject', () => {
         hasManyNumber: 42,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [42],
@@ -64,7 +73,7 @@ describe('unflattenObject', () => {
         hasManyNumber: '42',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [42],
@@ -78,7 +87,7 @@ describe('unflattenObject', () => {
         hasManyNumber_2: 3,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [1, 2, 3],
@@ -93,7 +102,7 @@ describe('unflattenObject', () => {
         hasManyNumber_3: 3,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyNumber: [1, 3],
@@ -102,11 +111,13 @@ describe('unflattenObject', () => {
 
     it('should handle empty, null, and undefined values', () => {
       // explicit null gets converted to empty array in postProcess for hasMany
-      expect(unflattenObject({ data: { hasManyNumber: null }, fields })).toEqual({
+      expect(unflattenObject({ data: { hasManyNumber: null }, fields, req: mockReq })).toEqual({
         hasManyNumber: [],
       })
       // undefined is skipped entirely (preserves existing data)
-      expect(unflattenObject({ data: { hasManyNumber: undefined }, fields })).toEqual({})
+      expect(unflattenObject({ data: { hasManyNumber: undefined }, fields, req: mockReq })).toEqual(
+        {},
+      )
     })
   })
 
@@ -125,7 +136,7 @@ describe('unflattenObject', () => {
         hasManyRelationship: 'id1,id2,id3',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyRelationship: ['id1', 'id2', 'id3'],
@@ -137,7 +148,7 @@ describe('unflattenObject', () => {
         hasManyRelationship: ' id1 , id2 , id3 ',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyRelationship: ['id1', 'id2', 'id3'],
@@ -149,7 +160,7 @@ describe('unflattenObject', () => {
         hasManyRelationship: 'id1,,id3,,id5',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyRelationship: ['id1', 'id3', 'id5'],
@@ -161,7 +172,7 @@ describe('unflattenObject', () => {
         hasManyRelationship: 'singleId',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyRelationship: ['singleId'],
@@ -175,7 +186,7 @@ describe('unflattenObject', () => {
         hasManyRelationship_2: 'id3',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyRelationship: ['id1', 'id2', 'id3'],
@@ -187,7 +198,7 @@ describe('unflattenObject', () => {
         hasManyRelationship: '507f1f77bcf86cd799439011,507f191e810c19729de860ea',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         hasManyRelationship: ['507f1f77bcf86cd799439011', '507f191e810c19729de860ea'],
@@ -210,7 +221,7 @@ describe('unflattenObject', () => {
         title_es: 'Título en Español',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         title: {
@@ -225,7 +236,7 @@ describe('unflattenObject', () => {
         title_en: 'English Title',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         title: {
@@ -250,7 +261,7 @@ describe('unflattenObject', () => {
         blocks_0_hero_blockType: 'hero',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         blocks: [
@@ -271,7 +282,7 @@ describe('unflattenObject', () => {
         blocks_1_text_blockType: 'text',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         blocks: [
@@ -304,7 +315,7 @@ describe('unflattenObject', () => {
         items_1_value: 20,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         items: [
@@ -320,7 +331,7 @@ describe('unflattenObject', () => {
         items_2_name: 'Item 3',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         items: [{ name: 'Item 1' }, null, { name: 'Item 3' }],
@@ -342,7 +353,7 @@ describe('unflattenObject', () => {
         group_field2: 'Value 2',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         group: {
@@ -368,7 +379,7 @@ describe('unflattenObject', () => {
         polymorphic_relationTo: 'posts',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         polymorphic: {
@@ -384,7 +395,7 @@ describe('unflattenObject', () => {
         polymorphic_relationTo: null,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         polymorphic: null,
@@ -397,7 +408,7 @@ describe('unflattenObject', () => {
         polymorphic_relationTo: undefined,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       // Both undefined means field is not set (preserves existing data)
       expect(result).toEqual({})
@@ -409,7 +420,7 @@ describe('unflattenObject', () => {
         polymorphic_relationTo: 'posts',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       // Undefined ID means don't update this field
       expect(result).toEqual({})
@@ -421,7 +432,7 @@ describe('unflattenObject', () => {
         polymorphic_relationTo: undefined,
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       // Undefined relationTo means don't update this field
       expect(result).toEqual({})
@@ -444,7 +455,7 @@ describe('unflattenObject', () => {
         polymorphicMany_1_relationTo: 'pages',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         polymorphicMany: [
@@ -479,7 +490,7 @@ describe('unflattenObject', () => {
         polymorphicMany_2_relationTo: 'pages',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         polymorphicMany: [
@@ -512,7 +523,7 @@ describe('unflattenObject', () => {
         polymorphicMany_1_relationTo: '',
       }
 
-      const result = unflattenObject({ data, fields })
+      const result = unflattenObject({ data, fields, req: mockReq })
 
       expect(result).toEqual({
         polymorphicMany: [],
@@ -522,12 +533,12 @@ describe('unflattenObject', () => {
 
   describe('edge cases', () => {
     it('should handle empty data', () => {
-      const result = unflattenObject({ data: {}, fields: [] })
+      const result = unflattenObject({ data: {}, fields: [], req: mockReq })
       expect(result).toEqual({})
     })
 
     it('should handle null data', () => {
-      const result = unflattenObject({ data: null as any, fields: [] })
+      const result = unflattenObject({ data: null as any, fields: [], req: mockReq })
       expect(result).toEqual({})
     })
 
@@ -537,7 +548,7 @@ describe('unflattenObject', () => {
         field2: 'value',
       }
 
-      const result = unflattenObject({ data, fields: [] })
+      const result = unflattenObject({ data, fields: [], req: mockReq })
       expect(result).toEqual({ field2: 'value' })
     })
 
@@ -547,7 +558,7 @@ describe('unflattenObject', () => {
         field2: 'value',
       }
 
-      const result = unflattenObject({ data, fields: [] })
+      const result = unflattenObject({ data, fields: [], req: mockReq })
       // null values are preserved for validation
       expect(result).toEqual({ field1: null, field2: 'value' })
     })

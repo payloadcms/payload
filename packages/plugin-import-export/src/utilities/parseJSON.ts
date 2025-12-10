@@ -7,6 +7,10 @@ export type ParseJSONArgs = {
   req: PayloadRequest
 }
 
+/**
+ * Parses JSON data into an array of record objects.
+ * Validates that the input is an array of documents.
+ */
 export const parseJSON = ({ data, req }: ParseJSONArgs): Record<string, unknown>[] => {
   try {
     const content = typeof data === 'string' ? data : data.toString('utf-8')

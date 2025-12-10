@@ -1,6 +1,6 @@
-import type { FlattenedField, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
-import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
+import { getFlattenedFieldKeys } from './getFlattenedFieldKeys.js'
 
 export type GetSchemaColumnsArgs = {
   /**
@@ -83,20 +83,22 @@ export const getSchemaColumns = ({
     })
   }
 
-  // Build final ordered column list
+  // When user has selected specific fields, preserve their ordering
+  // filterToSelectedFields() already returns columns in user's specified order
+  if (selectedFields && selectedFields.length > 0) {
+    return schemaColumns
+  }
+
+  // No fields selected - apply default ordering (id first, timestamps last)
   const orderedColumns: string[] = []
 
-  // 1. ID always first (if selected or no field selection)
+  // 1. ID always first
   if (schemaColumns.includes('id')) {
     orderedColumns.push('id')
   }
 
-  // 2. Status field for versioned collections (only if selected or no field selection)
-  // _status is not in flattenedFields, so we need to check if it was explicitly selected
-  // or if no field selection was made (export all fields)
-  const statusSelected =
-    !selectedFields || selectedFields.length === 0 || selectedFields.includes('_status')
-  if (hasVersions && statusSelected) {
+  // 2. Status field for versioned collections
+  if (hasVersions) {
     orderedColumns.push('_status')
   }
 

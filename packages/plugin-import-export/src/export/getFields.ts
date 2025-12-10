@@ -1,8 +1,8 @@
 import type { TFunction } from '@payloadcms/translations'
 import type { Config, Field, SelectField } from 'payload'
 
+import { getFilename } from '../utilities/getFilename.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
-import { getFilename } from './getFilename.js'
 
 type GetFieldsOptions = {
   /**

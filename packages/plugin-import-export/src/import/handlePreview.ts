@@ -2,11 +2,11 @@ import type { PayloadRequest } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
+import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
+import { parseCSV } from '../utilities/parseCSV.js'
+import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
-import { getCustomFieldFunctions as getImportFieldFunctions } from './getCustomFieldFunctions.js'
-import { parseCSV } from './parseCSV.js'
-import { parseJSON } from './parseJSON.js'
-import { unflattenObject } from './unflattenObject.js'
+import { unflattenObject } from '../utilities/unflattenObject.js'
 
 export const handlePreview = async (req: PayloadRequest) => {
   await addDataAndFileToRequest(req)

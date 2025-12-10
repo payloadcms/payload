@@ -2,12 +2,12 @@ import type { PayloadRequest, TypedUser } from 'payload'
 
 import { APIError } from 'payload'
 
+import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
+import { parseCSV } from '../utilities/parseCSV.js'
+import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
+import { unflattenObject } from '../utilities/unflattenObject.js'
 import { createImportBatchProcessor } from './batchProcessor.js'
-import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
-import { parseCSV } from './parseCSV.js'
-import { parseJSON } from './parseJSON.js'
-import { unflattenObject } from './unflattenObject.js'
 
 export type ImportMode = 'create' | 'update' | 'upsert'
 
@@ -125,7 +125,7 @@ export const createImport = async ({
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
   // Get fromCSV functions for field transformations
-  const fromCSVFunctions = getCustomFieldFunctions({
+  const fromCSVFunctions = getImportFieldFunctions({
     fields: collectionConfig.flattenedFields || [],
   })
 

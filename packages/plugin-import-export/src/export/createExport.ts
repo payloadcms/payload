@@ -6,13 +6,13 @@ import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
+import { flattenObject } from '../utilities/flattenObject.js'
+import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
+import { getFilename } from '../utilities/getFilename.js'
+import { getSchemaColumns, mergeColumns } from '../utilities/getSchemaColumns.js'
+import { getSelect } from '../utilities/getSelect.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
 import { createExportBatchProcessor, type ExportFindArgs } from './batchProcessor.js'
-import { flattenObject } from './flattenObject.js'
-import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
-import { getFilename } from './getFilename.js'
-import { getSchemaColumns, mergeColumns } from './getSchemaColumns.js'
-import { getSelect } from './getSelect.js'
 
 export type Export = {
   /**
@@ -174,7 +174,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Find arguments:', findArgs })
   }
 
-  const toCSVFunctions = getCustomFieldFunctions({
+  const toCSVFunctions = getExportFieldFunctions({
     fields: collectionConfig.flattenedFields,
   })
 

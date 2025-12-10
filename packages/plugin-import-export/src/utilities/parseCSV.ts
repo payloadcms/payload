@@ -7,6 +7,10 @@ export type ParseCSVArgs = {
   req: PayloadRequest
 }
 
+/**
+ * Parses CSV data into an array of record objects.
+ * Handles type coercion for booleans, numbers, and null values.
+ */
 export const parseCSV = async ({ data, req }: ParseCSVArgs): Promise<Record<string, unknown>[]> => {
   return new Promise((resolve, reject) => {
     const records: Record<string, unknown>[] = []

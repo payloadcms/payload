@@ -2,13 +2,13 @@ import type { FlattenedField, PayloadRequest, Where } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
+import { flattenObject } from '../utilities/flattenObject.js'
+import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
+import { getSelect } from '../utilities/getSelect.js'
 import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
-import { flattenObject } from './flattenObject.js'
-import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
-import { getSelect } from './getSelect.js'
 
 export const handlePreview = async (req: PayloadRequest) => {
   await addDataAndFileToRequest(req)
@@ -73,7 +73,7 @@ export const handlePreview = async (req: PayloadRequest) => {
   let transformed: Record<string, unknown>[] = []
 
   if (isCSV) {
-    const toCSVFunctions = getCustomFieldFunctions({
+    const toCSVFunctions = getExportFieldFunctions({
       fields: targetCollection.config.fields as FlattenedField[],
     })
 
