@@ -4,6 +4,7 @@ import type { CollectionConfig } from 'payload'
 import { ApiError, type Storage } from '@google-cloud/storage'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+import { getRangeRequestInfo } from 'payload/internal'
 
 interface Args {
   bucket: string
@@ -19,12 +20,28 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
 
       const [metadata] = await file.getMetadata()
 
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const fileSize = Number(metadata.size)
+      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
+      }
+
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = metadata.etag
 
       let headers = new Headers(incomingHeaders)
 
-      headers.append('Content-Length', String(metadata.size))
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
+      }
+
       headers.append('Content-Type', String(metadata.contentType))
       headers.append('ETag', String(metadata.etag))
 
@@ -46,7 +63,11 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       // Manually create a ReadableStream for the web from a Node.js stream.
       const readableStream = new ReadableStream({
         start(controller) {
-          const nodeStream = file.createReadStream()
+          const streamOptions =
+            rangeResult.type === 'partial'
+              ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
+              : {}
+          const nodeStream = file.createReadStream(streamOptions)
           nodeStream.on('data', (chunk) => {
             controller.enqueue(new Uint8Array(chunk))
           })
@@ -61,7 +82,7 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
 
       return new Response(readableStream, {
         headers,
-        status: 200,
+        status: rangeResult.status,
       })
     } catch (err: unknown) {
       if (err instanceof ApiError && err.code === 404) {

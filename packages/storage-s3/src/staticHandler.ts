@@ -7,6 +7,7 @@ import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+import { getRangeRequestInfo } from 'payload/internal'
 
 export type SignedDownloadsConfig =
   | {
@@ -98,10 +99,38 @@ export const getHandler = ({
         }
       }
 
+      // Get file size first for range validation
+      const headObject = await getStorageClient().headObject({
+        Bucket: bucket,
+        Key: key,
+      })
+      const fileSize = headObject.ContentLength
+
+      if (!fileSize) {
+        return new Response('Internal Server Error', { status: 500 })
+      }
+
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
+      }
+
+      const rangeForS3 =
+        rangeResult.type === 'partial'
+          ? `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`
+          : undefined
+
       object = await getStorageClient().getObject(
         {
           Bucket: bucket,
           Key: key,
+          Range: rangeForS3,
         },
         { abortSignal: abortController.signal },
       )
@@ -112,16 +141,12 @@ export const getHandler = ({
 
       let headers = new Headers(incomingHeaders)
 
-      // Only include Content-Length when it’s present and strictly numeric.
-      // This prevents "Parse Error: Invalid character in Content-Length" when providers (e.g., MinIO)
-      // return undefined or a non-numeric value.
-      const contentLength = String(object.ContentLength);
-      if (contentLength && !isNaN(Number(contentLength))) {
-        headers.append('Content-Length', contentLength);
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
       }
 
       headers.append('Content-Type', String(object.ContentType))
-      headers.append('Accept-Ranges', String(object.AcceptRanges))
       headers.append('ETag', String(object.ETag))
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
@@ -161,7 +186,7 @@ export const getHandler = ({
       })
 
       streamed = true
-      return new Response(stream, { headers, status: 200 })
+      return new Response(stream, { headers, status: rangeResult.status })
     } catch (err) {
       if (err instanceof AWS.NoSuchKey) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
