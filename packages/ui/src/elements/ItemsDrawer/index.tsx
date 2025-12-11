@@ -134,7 +134,9 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
 
   const finalTitle =
     title ||
-    (labels ? t('fields:addLabel', { label: getTranslation(labels.singular, i18n) }) : 'Add Item')
+    (labels
+      ? t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })
+      : t('fields:addNew'))
 
   return (
     <Drawer slug={drawerSlug} title={finalTitle}>
