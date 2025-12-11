@@ -24,7 +24,6 @@ const NestedAfterChangeHooks: CollectionConfig = {
               hooks: {
                 afterChange: [
                   ({ previousValue, operation }) => {
-                    console.log(previousValue)
                     if (operation === 'update' && typeof previousValue === 'undefined') {
                       throw new Error('previousValue is missing in nested beforeChange hook')
                     }
@@ -53,7 +52,6 @@ const NestedAfterChangeHooks: CollectionConfig = {
                     hooks: {
                       afterChange: [
                         ({ previousValue, operation }) => {
-                          console.log(previousValue)
                           if (operation === 'update' && typeof previousValue === 'undefined') {
                             throw new Error('previousValue is missing in nested beforeChange hook')
                           }
@@ -81,7 +79,6 @@ const NestedAfterChangeHooks: CollectionConfig = {
                         hooks: {
                           afterChange: [
                             ({ previousValue, operation }) => {
-                              console.log(previousValue)
                               if (operation === 'update' && typeof previousValue === 'undefined') {
                                 throw new Error(
                                   'previousValue is missing in nested beforeChange hook',
