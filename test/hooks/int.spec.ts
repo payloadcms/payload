@@ -393,17 +393,6 @@ describe('Hooks', () => {
             root: {
               children: [
                 {
-                  type: 'block',
-                  version: 2,
-                  format: '',
-                  fields: {
-                    id: '693994702cb0a2476e9bdddd',
-                    blockName: '',
-                    nestedAfterChange: 'initial block',
-                    blockType: 'nestedBlock',
-                  },
-                },
-                {
                   children: [
                     {
                       children: [
@@ -412,7 +401,7 @@ describe('Hooks', () => {
                           format: 0,
                           mode: 'normal',
                           style: '',
-                          text: 'test',
+                          text: 'link',
                           type: 'text',
                           version: 1,
                         },
@@ -425,13 +414,36 @@ describe('Hooks', () => {
                       fields: {
                         linkBlocks: [
                           {
+                            id: '693ade72068ea07ba13edcab',
                             blockType: 'nestedLinkBlock',
                             nestedRelationship: relationID.id,
                           },
                         ],
                       },
+                      id: '693ade70068ea07ba13edca9',
                     },
                   ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693adf3c068ea07ba13edcae',
+                    blockName: '',
+                    nestedAfterChange: 'test',
+                    blockType: 'nestedBlock',
+                  },
+                },
+                {
+                  children: [],
                   direction: null,
                   format: '',
                   indent: 0,
