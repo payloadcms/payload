@@ -3,7 +3,7 @@ import type { Config } from '../config/types.js'
 import { getLockedDocumentsCollection } from './config.js'
 
 describe('getLockedDocumentsCollection', () => {
-  it('should return null when no lockable collections exist', () => {
+  it('should return null when no lockable collections or globals exist', () => {
     const config: Config = {
       collections: [
         {
@@ -13,6 +13,13 @@ describe('getLockedDocumentsCollection', () => {
         },
         {
           slug: 'pages',
+          lockDocuments: false,
+          fields: [],
+        },
+      ],
+      globals: [
+        {
+          slug: 'settings',
           lockDocuments: false,
           fields: [],
         },
@@ -177,5 +184,128 @@ describe('getLockedDocumentsCollection', () => {
 
     expect(result).not.toBeNull()
     expect(result?.lockDocuments).toBe(false)
+  })
+
+  it('should create collection when only globals have lockDocuments enabled', () => {
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          lockDocuments: false,
+          fields: [],
+        },
+        {
+          slug: 'users',
+          auth: true,
+          lockDocuments: false,
+          fields: [],
+        },
+      ],
+      globals: [
+        {
+          slug: 'settings',
+          lockDocuments: true,
+          fields: [],
+        },
+        {
+          slug: 'menu',
+          lockDocuments: { duration: 600 },
+          fields: [],
+        },
+      ],
+    } as Config
+
+    const result = getLockedDocumentsCollection(config)
+
+    expect(result).not.toBeNull()
+    expect(result?.slug).toBe('payload-locked-documents')
+
+    // Should NOT have a document field since no lockable collections
+    const documentField = result?.fields.find((f) => 'name' in f && f.name === 'document')
+    expect(documentField).toBeUndefined()
+
+    // Should have globalSlug field
+    const globalSlugField = result?.fields.find((f) => 'name' in f && f.name === 'globalSlug')
+    expect(globalSlugField).toBeDefined()
+
+    // Should have user field
+    const userField = result?.fields.find((f) => 'name' in f && f.name === 'user')
+    expect(userField).toBeDefined()
+  })
+
+  it('should include document field when lockable collections exist', () => {
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          lockDocuments: true,
+          fields: [],
+        },
+        {
+          slug: 'users',
+          auth: true,
+          fields: [],
+        },
+      ],
+      globals: [
+        {
+          slug: 'settings',
+          lockDocuments: false,
+          fields: [],
+        },
+      ],
+    } as Config
+
+    const result = getLockedDocumentsCollection(config)
+
+    expect(result).not.toBeNull()
+
+    // Should have document field
+    const documentField = result?.fields.find((f) => 'name' in f && f.name === 'document')
+    expect(documentField).toBeDefined()
+    expect(documentField?.type).toBe('relationship')
+    if (documentField?.type === 'relationship') {
+      expect(documentField.relationTo).toEqual(['posts', 'users'])
+    }
+
+    // Should have globalSlug field
+    const globalSlugField = result?.fields.find((f) => 'name' in f && f.name === 'globalSlug')
+    expect(globalSlugField).toBeDefined()
+  })
+
+  it('should include document field when both lockable collections and globals exist', () => {
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          lockDocuments: true,
+          fields: [],
+        },
+        {
+          slug: 'users',
+          auth: true,
+          fields: [],
+        },
+      ],
+      globals: [
+        {
+          slug: 'settings',
+          lockDocuments: true,
+          fields: [],
+        },
+      ],
+    } as Config
+
+    const result = getLockedDocumentsCollection(config)
+
+    expect(result).not.toBeNull()
+
+    // Should have document field for collections
+    const documentField = result?.fields.find((f) => 'name' in f && f.name === 'document')
+    expect(documentField).toBeDefined()
+
+    // Should have globalSlug field for globals
+    const globalSlugField = result?.fields.find((f) => 'name' in f && f.name === 'globalSlug')
+    expect(globalSlugField).toBeDefined()
   })
 })

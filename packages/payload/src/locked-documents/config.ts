@@ -10,12 +10,16 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
     .collections!.filter((collectionConfig) => collectionConfig.lockDocuments !== false)
     .map((collectionConfig) => collectionConfig.slug)
 
+  const lockableGlobals = config.globals
+    ? config.globals.filter((globalConfig) => globalConfig.lockDocuments !== false)
+    : []
+
   const authCollections = config
     .collections!.filter((collectionConfig) => collectionConfig.auth)
     .map((collectionConfig) => collectionConfig.slug)
 
-  // If there are no lockable collections, don't create the locked-documents collection
-  if (lockableCollections.length === 0) {
+  // If there are no lockable collections AND no lockable globals, don't create the collection
+  if (lockableCollections.length === 0 && lockableGlobals.length === 0) {
     return null
   }
 
@@ -24,6 +28,35 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
   if (authCollections.length === 0) {
     return null
   }
+
+  const fields: CollectionConfig['fields'] = []
+
+  // Only include the document field if there are lockable collections
+  if (lockableCollections.length > 0) {
+    fields.push({
+      name: 'document',
+      type: 'relationship',
+      index: true,
+      maxDepth: 0,
+      relationTo: lockableCollections,
+    })
+  }
+
+  // Always include globalSlug field for tracking global locks
+  fields.push({
+    name: 'globalSlug',
+    type: 'text',
+    index: true,
+  })
+
+  // Always include user field
+  fields.push({
+    name: 'user',
+    type: 'relationship',
+    maxDepth: 1,
+    relationTo: authCollections,
+    required: true,
+  })
 
   return {
     slug: lockedDocumentsCollectionSlug,
@@ -36,27 +69,7 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
     admin: {
       hidden: true,
     },
-    fields: [
-      {
-        name: 'document',
-        type: 'relationship',
-        index: true,
-        maxDepth: 0,
-        relationTo: lockableCollections,
-      },
-      {
-        name: 'globalSlug',
-        type: 'text',
-        index: true,
-      },
-      {
-        name: 'user',
-        type: 'relationship',
-        maxDepth: 1,
-        relationTo: authCollections,
-        required: true,
-      },
-    ],
+    fields,
     lockDocuments: false,
   }
 }
