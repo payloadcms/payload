@@ -242,6 +242,7 @@ export const findByIDOperation = async <
         doc: result,
         entity: collectionConfig,
         entityType: 'collection',
+        joins,
         overrideAccess,
         req,
         select,
