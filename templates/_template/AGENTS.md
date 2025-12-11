@@ -18,7 +18,7 @@ src/
 │   ├── (frontend)/          # Frontend routes
 │   └── (payload)/           # Payload admin routes
 ├── collections/             # Collection configs
-├── globals/                 # Global configs  
+├── globals/                 # Global configs
 ├── components/              # Custom React components
 ├── hooks/                   # Hook functions
 ├── access/                  # Access control functions
@@ -250,7 +250,7 @@ const authenticated: Access = ({ req: { user } }) => Boolean(user)
 const ownPostsOnly: Access = ({ req: { user } }) => {
   if (!user) return false
   if (user?.roles?.includes('admin')) return true
-  
+
   return {
     author: { equals: user.id },
   }
@@ -259,16 +259,16 @@ const ownPostsOnly: Access = ({ req: { user } }) => {
 // Async access check
 const projectMemberAccess: Access = async ({ req, id }) => {
   const { user, payload } = req
-  
+
   if (!user) return false
   if (user.roles?.includes('admin')) return true
-  
+
   const project = await payload.findByID({
     collection: 'projects',
     id: id as string,
     depth: 0,
   })
-  
+
   return project.members?.includes(user.id)
 }
 ```
@@ -357,7 +357,7 @@ export const Posts: CollectionConfig = {
       async ({ doc, req, operation, previousDoc, context }) => {
         // Check context to prevent loops
         if (context.skipNotification) return
-        
+
         if (operation === 'create') {
           await sendNotification(doc)
         }
@@ -396,10 +396,7 @@ export const Posts: CollectionConfig = {
 const posts = await payload.find({
   collection: 'posts',
   where: {
-    and: [
-      { status: { equals: 'published' } },
-      { 'author.name': { contains: 'john' } },
-    ],
+    and: [{ status: { equals: 'published' } }, { 'author.name': { contains: 'john' } }],
   },
   depth: 2, // Populate relationships
   limit: 10,
@@ -496,11 +493,11 @@ import config from '@payload-config'
 
 export async function GET() {
   const payload = await getPayload({ config })
-  
+
   const posts = await payload.find({
     collection: 'posts',
   })
-  
+
   return Response.json(posts)
 }
 
@@ -511,7 +508,7 @@ import config from '@payload-config'
 export default async function Page() {
   const payload = await getPayload({ config })
   const { docs } = await payload.find({ collection: 'posts' })
-  
+
   return <div>{docs.map(post => <h1 key={post.id}>{post.title}</h1>)}</div>
 }
 ```
@@ -530,13 +527,13 @@ export const protectedEndpoint: Endpoint = {
     if (!req.user) {
       throw new APIError('Unauthorized', 401)
     }
-    
+
     // Use req.payload for database operations
     const data = await req.payload.find({
       collection: 'posts',
       where: { author: { equals: req.user.id } },
     })
-    
+
     return Response.json(data)
   },
 }
@@ -547,13 +544,13 @@ export const trackingEndpoint: Endpoint = {
   method: 'get',
   handler: async (req) => {
     const { id } = req.routeParams
-    
+
     const tracking = await getTrackingInfo(id)
-    
+
     if (!tracking) {
       return Response.json({ error: 'not found' }, { status: 404 })
     }
-    
+
     return Response.json(tracking)
   },
 }
@@ -614,17 +611,17 @@ function processField(field: Field) {
   if (fieldAffectsData(field)) {
     console.log(field.name) // Safe to access
   }
-  
+
   // Check if field has nested fields
   if (fieldHasSubFields(field)) {
     field.fields.forEach(processField) // Safe to access
   }
-  
+
   // Check field type
   if (fieldIsArrayType(field)) {
     console.log(field.minRows, field.maxRows)
   }
-  
+
   // Check capabilities
   if (fieldSupportsMany(field) && field.hasMany) {
     console.log('Multiple values supported')
@@ -670,10 +667,7 @@ export const myPlugin =
       if (options.collections?.includes(collection.slug)) {
         return {
           ...collection,
-          fields: [
-            ...collection.fields,
-            { name: 'pluginField', type: 'text' },
-          ],
+          fields: [...collection.fields, { name: 'pluginField', type: 'text' }],
         }
       }
       return collection
@@ -684,6 +678,7 @@ export const myPlugin =
 ## Best Practices
 
 ### Security
+
 1. Always set `overrideAccess: false` when passing `user` to Local API
 2. Field-level access only returns boolean (no query constraints)
 3. Default to restrictive access, gradually add permissions
@@ -691,6 +686,7 @@ export const myPlugin =
 5. Use `saveToJWT: true` for roles to avoid database lookups
 
 ### Performance
+
 1. Index frequently queried fields
 2. Use `select` to limit returned fields
 3. Set `maxDepth` on relationships to prevent over-fetching
@@ -698,6 +694,7 @@ export const myPlugin =
 5. Cache expensive operations in `req.context`
 
 ### Data Integrity
+
 1. Always pass `req` to nested operations in hooks
 2. Use context flags to prevent infinite hook loops
 3. Enable transactions for MongoDB (requires replica set) and Postgres
@@ -705,6 +702,7 @@ export const myPlugin =
 5. Use `beforeChange` for business logic
 
 ### Type Safety
+
 1. Run `generate:types` after schema changes
 2. Import types from generated `payload-types.ts`
 3. Type your user object: `import type { User } from '@/payload-types'`
@@ -712,6 +710,7 @@ export const myPlugin =
 5. Use field type guards for runtime type checking
 
 ### Organization
+
 1. Keep collections in separate files
 2. Extract access control to `access/` directory
 3. Extract hooks to `hooks/` directory
@@ -731,31 +730,93 @@ export const myPlugin =
 9. **SQLite Transactions**: Disabled by default, enable with `transactionOptions: {}`
 10. **Point Fields**: Not supported in SQLite
 
-## Quick Reference
+## Additional Context Files
 
-| Task | Solution |
-|------|----------|
-| Auto-generate slugs | `slugField()` |
-| Restrict by user | Access control with query |
-| Local API user ops | `user` + `overrideAccess: false` |
-| Draft/publish | `versions: { drafts: true }` |
-| Computed fields | `virtual: true` with afterRead |
-| Conditional fields | `admin.condition` |
-| Custom validation | `validate` function |
-| Filter relationships | `filterOptions` on field |
-| Select fields | `select` parameter |
-| Auto-set dates | beforeChange hook |
-| Prevent loops | `req.context` check |
-| Cascading deletes | beforeDelete hook |
-| Geospatial queries | `point` field with `near`/`within` |
-| Reverse relationships | `join` field type |
-| Query relationships | Nested property syntax |
-| Complex queries | AND/OR logic |
-| Transactions | Pass `req` to operations |
-| Background jobs | Jobs queue with tasks |
-| Custom routes | Collection custom endpoints |
-| Cloud storage | Storage adapter plugins |
-| Multi-language | `localization` + `localized: true` |
+For deeper exploration of specific topics, refer to the context files located in `.cursor/rules/`:
+
+### Available Context Files
+
+1. **`payload-overview.md`** - High-level architecture and core concepts
+
+   - Payload structure and initialization
+   - Configuration fundamentals
+   - Database adapters overview
+
+2. **`security-critical.md`** - Critical security patterns (⚠️ IMPORTANT)
+
+   - Local API access control
+   - Transaction safety in hooks
+   - Preventing infinite hook loops
+
+3. **`collections.md`** - Collection configurations
+
+   - Basic collection patterns
+   - Auth collections with RBAC
+   - Upload collections
+   - Drafts and versioning
+   - Globals
+
+4. **`fields.md`** - Field types and patterns
+
+   - All field types with examples
+   - Conditional fields
+   - Virtual fields
+   - Field validation
+   - Common field patterns
+
+5. **`field-type-guards.md`** - TypeScript field type utilities
+
+   - Field type checking utilities
+   - Safe type narrowing
+   - Runtime field validation
+
+6. **`access-control.md`** - Permission patterns
+
+   - Collection-level access
+   - Field-level access
+   - Row-level security
+   - RBAC patterns
+   - Multi-tenant access control
+
+7. **`access-control-advanced.md`** - Complex access patterns
+
+   - Nested document access
+   - Cross-collection permissions
+   - Dynamic role hierarchies
+   - Performance optimization
+
+8. **`hooks.md`** - Lifecycle hooks
+
+   - Collection hooks
+   - Field hooks
+   - Hook context patterns
+   - Common hook recipes
+
+9. **`queries.md`** - Database operations
+
+   - Local API usage
+   - Query operators
+   - Complex queries with AND/OR
+   - Performance optimization
+
+10. **`endpoints.md`** - Custom API endpoints
+
+    - REST endpoint patterns
+    - Authentication in endpoints
+    - Error handling
+    - Route parameters
+
+11. **`adapters.md`** - Database and storage adapters
+
+    - MongoDB, PostgreSQL, SQLite patterns
+    - Storage adapter usage (S3, Azure, GCS, etc.)
+    - Custom adapter development
+
+12. **`plugin-development.md`** - Creating plugins
+    - Plugin architecture
+    - Modifying configuration
+    - Plugin hooks
+    - Best practices
 
 ## Resources
 
@@ -764,4 +825,3 @@ export const myPlugin =
 - GitHub: https://github.com/payloadcms/payload
 - Examples: https://github.com/payloadcms/payload/tree/main/examples
 - Templates: https://github.com/payloadcms/payload/tree/main/templates
-
