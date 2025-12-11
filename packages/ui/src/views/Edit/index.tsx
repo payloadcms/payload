@@ -121,6 +121,7 @@ export function DefaultEditView({
     config: {
       admin: { user: userSlug },
       routes: { admin: adminRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -321,6 +322,7 @@ export function DefaultEditView({
         const redirectRoute = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
+          serverURL,
         })
 
         startRouteTransition(() => router.push(redirectRoute))
@@ -396,26 +398,22 @@ export function DefaultEditView({
       }
     },
     [
-      reportUpdate,
-      id,
-      entitySlug,
       user,
-      drawerSlug,
       collectionSlug,
       userSlug,
+      id,
       setLastUpdateTime,
       setData,
       onSaveFromContext,
       isEditing,
       depth,
       redirectAfterCreate,
-      setLivePreviewURL,
-      setPreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
       adminRoute,
       locale,
+      serverURL,
       startRouteTransition,
       router,
       resetUploadEdits,
@@ -425,11 +423,17 @@ export function DefaultEditView({
       docPermissions,
       operation,
       isLivePreviewEnabled,
-      isPreviewEnabled,
       typeofLivePreviewURL,
+      isPreviewEnabled,
       schemaPathSegments,
+      upload,
       isLockingEnabled,
+      reportUpdate,
+      drawerSlug,
+      entitySlug,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -558,7 +562,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
-              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
+              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router, serverURL })}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -584,7 +588,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
-              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
+              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router, serverURL })}
               isActive={showTakeOverModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)

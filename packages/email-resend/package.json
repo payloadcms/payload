@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -39,7 +39,6 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "jest"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "description": "The official live preview JavaScript SDK for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -39,8 +39,7 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

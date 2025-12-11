@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-d1-sqlite",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "description": "The officially supported D1 SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -68,9 +68,7 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",

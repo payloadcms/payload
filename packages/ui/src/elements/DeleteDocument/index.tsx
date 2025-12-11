@@ -111,10 +111,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         if (redirectAfterDelete) {
           return startRouteTransition(() =>
             router.push(
-              formatAdminURL({
-                adminRoute,
-                path: `/collections/${collectionSlug}`,
-              }),
+              formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}`, serverURL }),
             ),
           )
         }

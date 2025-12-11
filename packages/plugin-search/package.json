@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "description": "Search plugin for Payload",
   "keywords": [
     "payload",
@@ -57,7 +57,6 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"Error: no tests specified\""
   },
   "dependencies": {

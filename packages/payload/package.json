@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -87,7 +87,6 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
   "dependencies": {

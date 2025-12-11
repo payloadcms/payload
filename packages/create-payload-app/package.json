@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -55,7 +55,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
-    "prepublishOnly": "pnpm clean && pnpm build",
     "test": "jest",
     "typecheck": "tsc"
   },

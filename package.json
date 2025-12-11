@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -12,6 +12,7 @@
     "build": "pnpm run build:core",
     "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",
     "build:all": "turbo build --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
+    "build:all:force": "pnpm clean && pnpm build:all",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
     "build:bundle-for-analysis": "turbo run build:bundle-for-analysis",

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "3.67.0",
+  "version": "3.68.2",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -59,7 +59,6 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""
   },
   "dependencies": {

@@ -80,6 +80,7 @@ export function renderCell({
       const defaultURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(String(doc.id))}`,
+        serverURL: req.payload.config.serverURL,
       })
 
       const customURL = formatDocURL({
