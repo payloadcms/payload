@@ -163,10 +163,10 @@
     "axe-core": "4.11.0",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
-    "copyfiles": "2.4.1",
+    "copyfiles": "catalog:",
     "create-payload-app": "workspace:*",
-    "cross-env": "7.0.3",
-    "dotenv": "16.4.7",
+    "cross-env": "catalog:",
+    "dotenv": "catalog:",
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
@@ -178,7 +178,7 @@
     "jest": "29.7.0",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
-    "mongodb-memory-server": "10.1.4",
+    "mongodb-memory-server": "catalog:",
     "mongoose": "8.15.1",
     "next": "15.4.8",
     "open": "^10.1.0",
@@ -187,8 +187,8 @@
     "playwright": "1.56.1",
     "playwright-core": "1.56.1",
     "prettier": "3.5.3",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "rimraf": "6.0.1",
     "sharp": "0.32.6",
     "shelljs": "0.8.5",
@@ -199,7 +199,7 @@
     "tstyche": "3.5.0",
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
-    "typescript": "5.7.3",
+    "typescript": "catalog:",
     "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@9.7.1",
@@ -207,16 +207,5 @@
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9.7.0"
   },
-  "pnpm": {
-    "overrides": {
-      "copyfiles": "$copyfiles",
-      "cross-env": "$cross-env",
-      "dotenv": "$dotenv",
-      "graphql": "^16.8.1",
-      "mongodb-memory-server": "$mongodb-memory-server",
-      "react": "$react",
-      "react-dom": "$react-dom",
-      "typescript": "$typescript"
-    }
-  }
+  "pnpm": {}
 }

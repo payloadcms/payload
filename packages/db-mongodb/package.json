@@ -63,7 +63,7 @@
     "@types/prompts": "^2.4.5",
     "@types/uuid": "10.0.0",
     "mongodb": "6.16.0",
-    "mongodb-memory-server": "10.1.4",
+    "mongodb-memory-server": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {
