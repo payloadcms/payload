@@ -446,15 +446,15 @@ describe('Hooks', () => {
         },
       })
 
-      const updatedDoc = await payload.update({
-        collection: 'nested-after-change-hooks',
-        id: nestedAfterChangeDoc.id,
-        data: {
-          text: 'updated',
-        },
-      })
-      console.log(updatedDoc)
-      expect(updatedDoc).toBeDefined()
+      await expect(
+        payload.update({
+          collection: 'nested-after-change-hooks',
+          id: nestedAfterChangeDoc.id,
+          data: {
+            text: 'updated',
+          },
+        }),
+      ).resolves.not.toThrow()
     })
   })
 
