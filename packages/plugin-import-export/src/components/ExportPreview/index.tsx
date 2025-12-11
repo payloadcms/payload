@@ -102,47 +102,24 @@ export const ExportPreview: React.FC = () => {
             return
           }
 
-          const { docs, totalDocs }: { docs: Record<string, unknown>[]; totalDocs: number } =
-            await res.json()
+          const {
+            columns: serverColumns,
+            docs,
+            totalDocs,
+          }: {
+            columns?: string[]
+            docs: Record<string, unknown>[]
+            totalDocs: number
+          } = await res.json()
 
+          // For CSV: use server-provided columns (from getSchemaColumns) for consistent ordering
+          // For JSON: derive keys from docs
           const allKeys = Array.from(new Set(docs.flatMap((doc) => Object.keys(doc))))
-          const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
 
-          // Match CSV column ordering by building keys based on fields and regex
-          // Pattern matches: field name, optional array indices (_0, _1), and optional locale codes (_en, _es)
-          const fieldToRegex = (field: string): RegExp => {
-            const parts = field.split('.').map((part) => `${part}(?:_(?:\\d+|[a-z]{2,3}))?`)
-            return new RegExp(`^${parts.join('_')}`)
-          }
+          // Use server columns if available (CSV format), otherwise fall back to data-derived keys
+          const fieldKeys = serverColumns && serverColumns.length > 0 ? serverColumns : allKeys
 
-          // Construct final list of field keys to match field order + meta order
-          const selectedKeys =
-            Array.isArray(fields) && fields.length > 0
-              ? fields.flatMap((field) => {
-                  const regex = fieldToRegex(field)
-                  return allKeys.filter(
-                    (key) =>
-                      regex.test(key) &&
-                      !disabledFieldRegexes.some((disabledRegex) => disabledRegex.test(key)),
-                  )
-                })
-              : allKeys.filter(
-                  (key) =>
-                    !defaultMetaFields.includes(key) &&
-                    !disabledFieldRegexes.some((regex) => regex.test(key)),
-                )
-
-          const fieldKeys =
-            Array.isArray(fields) && fields.length > 0
-              ? selectedKeys // strictly use selected fields only
-              : [
-                  ...selectedKeys,
-                  ...defaultMetaFields.filter(
-                    (key) => allKeys.includes(key) && !selectedKeys.includes(key),
-                  ),
-                ]
-
-          // Build columns based on flattened keys
+          // Build columns based on field keys
           const newColumns: Column[] = fieldKeys.map((key) => ({
             accessor: key,
             active: true,

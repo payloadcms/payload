@@ -3887,6 +3887,104 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
     })
+
+    it('should have matching column order between preview and export when no fields selected', async () => {
+      // Get preview response (no fields selected - uses default ordering)
+      const previewResponse: { columns: string[]; docs: unknown[] } = await restClient
+        .POST('/posts-export/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'posts',
+            format: 'csv',
+            limit: 5,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(previewResponse.columns).toBeDefined()
+      expect(previewResponse.columns.length).toBeGreaterThan(0)
+
+      // Create actual export (no fields selected)
+      const exportDoc = await payload.create({
+        collection: 'posts-export',
+        user,
+        data: {
+          collectionSlug: 'posts',
+          format: 'csv',
+          limit: 5,
+        },
+      })
+
+      const finalExportDoc = await payload.findByID({
+        collection: 'posts-export',
+        id: exportDoc.id,
+      })
+
+      expect(finalExportDoc.filename).toBeDefined()
+      const exportPath = path.join(dirname, './uploads', finalExportDoc.filename as string)
+      const exportData = await readCSV(exportPath)
+
+      // Get column order from exported CSV
+      const exportColumns = Object.keys(exportData[0])
+
+      // Preview and export should have the same column order
+      expect(previewResponse.columns).toStrictEqual(exportColumns)
+    })
+
+    it('should have matching column order between preview and export with selected fields', async () => {
+      // User-specified field order: title first, then id, then createdAt
+      const selectedFields = ['title', 'id', 'createdAt']
+
+      // Get preview response with selected fields
+      const previewResponse: { columns: string[]; docs: unknown[] } = await restClient
+        .POST('/posts-export/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'posts',
+            fields: selectedFields,
+            format: 'csv',
+            limit: 5,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(previewResponse.columns).toBeDefined()
+      expect(previewResponse.columns.length).toBeGreaterThan(0)
+
+      // Create actual export with same selected fields
+      const exportDoc = await payload.create({
+        collection: 'posts-export',
+        user,
+        data: {
+          collectionSlug: 'posts',
+          fields: selectedFields,
+          format: 'csv',
+          limit: 5,
+        },
+      })
+
+      const finalExportDoc = await payload.findByID({
+        collection: 'posts-export',
+        id: exportDoc.id,
+      })
+
+      expect(finalExportDoc.filename).toBeDefined()
+      const exportPath = path.join(dirname, './uploads', finalExportDoc.filename as string)
+      const exportData = await readCSV(exportPath)
+
+      // Get column order from exported CSV
+      const exportColumns = Object.keys(exportData[0])
+
+      // Preview and export should have the same column order
+      expect(previewResponse.columns).toStrictEqual(exportColumns)
+
+      // Both should respect user's specified order (title first, not id first)
+      expect(exportColumns).toStrictEqual(selectedFields)
+    })
   })
 
   describe('rich text field handling', () => {

@@ -5,6 +5,7 @@ import { addDataAndFileToRequest } from 'payload'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
+import { getSchemaColumns } from '../utilities/getSchemaColumns.js'
 import { getSelect } from '../utilities/getSelect.js'
 import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
@@ -71,6 +72,7 @@ export const handlePreview = async (req: PayloadRequest) => {
   const docs = result.docs
 
   let transformed: Record<string, unknown>[] = []
+  let columns: string[] = []
 
   if (isCSV) {
     const toCSVFunctions = getExportFieldFunctions({
@@ -82,6 +84,19 @@ export const handlePreview = async (req: PayloadRequest) => {
       locale === 'all' && req.payload.config.localization
         ? req.payload.config.localization.localeCodes
         : undefined
+
+    // Get disabled fields configuration
+    const disabledFields =
+      targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+    // Use getSchemaColumns for consistent ordering with actual export
+    columns = getSchemaColumns({
+      collectionConfig: targetCollection.config,
+      disabledFields,
+      fields,
+      locale: locale ?? undefined,
+      localeCodes,
+    })
 
     const possibleKeys = getFlattenedFieldKeys(
       targetCollection.config.fields as FlattenedField[],
@@ -131,6 +146,7 @@ export const handlePreview = async (req: PayloadRequest) => {
   }
 
   return Response.json({
+    columns: isCSV ? columns : undefined,
     docs: transformed,
     page: result.page,
     totalDocs: result.totalDocs,
