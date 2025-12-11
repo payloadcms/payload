@@ -80,6 +80,7 @@
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "pg": "8.16.3",
+    "pg-cloudflare": "1.2.7",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "10.0.0"
