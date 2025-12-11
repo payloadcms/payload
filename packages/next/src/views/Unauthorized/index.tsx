@@ -20,6 +20,7 @@ export function UnauthorizedView({ initPageResult }: AdminViewServerProps) {
             routes: { logout: logoutRoute },
           },
           routes: { admin: adminRoute },
+          serverURL,
         },
       },
       user,
@@ -41,6 +42,7 @@ export function UnauthorizedView({ initPageResult }: AdminViewServerProps) {
         to={formatAdminURL({
           adminRoute,
           path: logoutRoute,
+          serverURL,
         })}
       >
         {i18n.t('authentication:logOut')}

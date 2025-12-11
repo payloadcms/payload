@@ -3,6 +3,7 @@ import {
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
 } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
@@ -101,7 +102,7 @@ export const buildRawSchema = ({
     buildTable({
       adapter,
       blocksTableNameMap: {},
-      disableNotNull: !!global?.versions?.drafts,
+      disableNotNull: hasDraftsEnabled(global),
       disableUnique: false,
       fields: global.flattenedFields,
       parentIsLocalized: false,

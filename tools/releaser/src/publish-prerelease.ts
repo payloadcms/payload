@@ -6,19 +6,21 @@ import { getWorkspace } from './lib/getWorkspace.js'
 async function main() {
   const args = minimist(process.argv.slice(2))
 
-  const { bump = 'minor', 'dry-run': dryRun, tag } = args
+  const { bump = 'minor', 'dry-run': dryRun, tag, debug } = args
 
-  if (!tag || !['canary', 'internal'].includes(tag)) {
-    abort('Tag is required. Use --tag <canary|internal>')
+  if (!tag || !['canary', 'internal', 'internal-debug'].includes(tag)) {
+    abort('Tag is required. Use --tag <canary|internal|internal-debug>')
   }
 
   console.log(`\n  Bump: ${bump}`)
   console.log(`  Tag: ${tag}`)
+  console.log(`  Debug: ${debug ? 'Enabled' : 'Disabled'}`)
   console.log(`  Dry Run: ${dryRun ? 'Enabled' : 'Disabled'}`)
 
   const workspace = await getWorkspace()
   await workspace.bumpVersion(tag)
-  await workspace.build()
+  await workspace.build({ debug: debug ?? false })
+  console.log('Build successful. Publishing packages...')
   await workspace.publishSync({ dryRun: dryRun ?? false, tag })
 
   header('🎉 Done!')
