@@ -1,4 +1,4 @@
-import type { AcceptedLanguages, Language } from '@payloadcms/translations'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
@@ -54,13 +54,13 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ...(sanitizedConfig.loggingLevels || {}),
   }
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
-    slug: 'collections',
+    slug: 'colle-ctions',
     ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
     minWidth: 'full',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
     {
-      widgetSlug: 'collections',
+      widgetSlug: 'colle-ctions',
       width: 'full',
     } satisfies WidgetInstance,
   ]
