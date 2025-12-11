@@ -14,7 +14,7 @@ import {
   type SelectType,
   type Where,
 } from 'payload'
-import { blocks, fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
@@ -622,7 +622,7 @@ export const traverseFields = ({
         } else {
           const useDrafts =
             (versions || draftsEnabled) &&
-            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
+            hasDraftsEnabled(adapter.payload.collections[field.collection].config)
 
           const fields = useDrafts
             ? buildVersionCollectionFields(

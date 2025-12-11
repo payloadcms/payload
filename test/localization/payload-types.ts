@@ -492,6 +492,11 @@ export interface User {
 export interface NoLocalizedField {
   id: string;
   text?: string | null;
+  group?: {
+    en?: {
+      text?: string | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -954,6 +959,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'payload-kv';
+        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1313,6 +1322,15 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
  */
 export interface NoLocalizedFieldsSelect<T extends boolean = true> {
   text?: T;
+  group?:
+    | T
+    | {
+        en?:
+          | T
+          | {
+              text?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

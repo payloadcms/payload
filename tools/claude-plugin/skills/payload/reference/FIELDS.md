@@ -40,7 +40,7 @@ export const Pages: CollectionConfig = {
     { name: 'title', type: 'text', required: true },
     slugField({
       name: 'slug', // defaults to 'slug'
-      fieldToUse: 'title', // defaults to 'title'
+      useAsSlug: 'title', // defaults to 'title'
       checkboxName: 'generateSlug', // defaults to 'generateSlug'
       localized: true,
       required: true,
@@ -698,3 +698,47 @@ const ctaButton = link({
   },
 })
 ```
+
+## Field Type Guards
+
+Type guards for runtime field type checking and safe type narrowing.
+
+| Type Guard                  | Checks For                                                  | Use When                                 |
+| --------------------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| `fieldAffectsData`          | Field stores data (has name, not UI-only)                   | Need to access field data or name        |
+| `fieldHasSubFields`         | Field contains nested fields (group/array/row/collapsible)  | Need to recursively traverse fields      |
+| `fieldIsArrayType`          | Field is array type                                         | Distinguish arrays from other containers |
+| `fieldIsBlockType`          | Field is blocks type                                        | Handle blocks-specific logic             |
+| `fieldIsGroupType`          | Field is group type                                         | Handle group-specific logic              |
+| `fieldSupportsMany`         | Field can have multiple values (select/relationship/upload) | Check for `hasMany` support              |
+| `fieldHasMaxDepth`          | Field supports population depth control                     | Control relationship/upload/join depth   |
+| `fieldIsPresentationalOnly` | Field is UI-only (no data storage)                          | Exclude from data operations             |
+| `fieldIsSidebar`            | Field positioned in sidebar                                 | Separate sidebar rendering               |
+| `fieldIsID`                 | Field name is 'id'                                          | Special ID field handling                |
+| `fieldIsHiddenOrDisabled`   | Field is hidden or disabled                                 | Filter from UI operations                |
+| `fieldShouldBeLocalized`    | Field needs localization handling                           | Proper locale table checks               |
+| `fieldIsVirtual`            | Field is virtual (computed/no DB column)                    | Skip in database transforms              |
+| `tabHasName`                | Tab is named (stores data)                                  | Distinguish named vs unnamed tabs        |
+| `groupHasName`              | Group is named (stores data)                                | Distinguish named vs unnamed groups      |
+| `optionIsObject`            | Option is `{label, value}` format                           | Access option properties safely          |
+| `optionsAreObjects`         | All options are objects                                     | Batch option processing                  |
+| `optionIsValue`             | Option is string value                                      | Handle string options                    |
+| `valueIsValueWithRelation`  | Value is polymorphic relationship                           | Handle polymorphic relationships         |
+
+```ts
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload'
+
+function processField(field: Field) {
+  if (fieldAffectsData(field)) {
+    // Safe to access field.name
+    console.log(field.name)
+  }
+
+  if (fieldHasSubFields(field)) {
+    // Safe to access field.fields
+    field.fields.forEach(processField)
+  }
+}
+```
+
+See [FIELD-TYPE-GUARDS.md](FIELD-TYPE-GUARDS.md) for detailed usage patterns.

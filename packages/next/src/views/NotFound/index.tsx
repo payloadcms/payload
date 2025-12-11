@@ -65,7 +65,7 @@ export const NotFoundPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
-      urlSuffix: `${formatAdminURL({ adminRoute, path: '/not-found' })}${searchParams ? queryString : ''}`,
+      urlSuffix: `${formatAdminURL({ adminRoute, path: '/not-found', serverURL: config.serverURL })}${searchParams ? queryString : ''}`,
     },
   })
 

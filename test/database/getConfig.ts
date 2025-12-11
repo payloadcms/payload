@@ -1091,7 +1091,7 @@ export const getConfig: () => Partial<Config> = () => ({
   ],
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    locales: ['en', 'es', 'uk'],
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {

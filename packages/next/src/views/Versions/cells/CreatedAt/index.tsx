@@ -26,6 +26,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
     config: {
       admin: { dateFormat },
       routes: { admin: adminRoute },
+      serverURL,
     },
   } = useConfig()
 
@@ -39,6 +40,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
     to = formatAdminURL({
       adminRoute,
       path: `/collections/${collectionSlug}/${trashedDocPrefix}${docID}/versions/${id}`,
+      serverURL,
     })
   }
 
@@ -46,6 +48,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
     to = formatAdminURL({
       adminRoute,
       path: `/globals/${globalSlug}/versions/${id}`,
+      serverURL,
     })
   }
 
