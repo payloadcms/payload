@@ -68,6 +68,9 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           onInput={onToggle}
           ref={inputRef}
           required={required}
+          // TODO: due to a bug in Next.js or react, the id from useId() occasionally does not match the server side rendering, even though it should.
+          // Issue: https://github.com/vercel/next.js/issues/84029 - revisit this when the issue is fixed.
+          suppressHydrationWarning
           title={name}
           type="checkbox"
         />
