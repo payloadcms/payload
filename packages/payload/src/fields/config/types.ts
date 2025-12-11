@@ -306,8 +306,8 @@ type ExtractID<T> = T extends { id: unknown } ? never : T
  */
 export type StripRelationships<T> = {
   [K in keyof T]: T[K] extends (infer U)[] | null | undefined
-    ? ExtractID<U>[] | Extract<T[K], null | undefined>
-    : ExtractID<T[K]> | Extract<T[K], null | undefined>
+    ? Extract<T[K], null | undefined> | ExtractID<U>[]
+    : Extract<T[K], null | undefined> | ExtractID<T[K]>
 }
 
 export type FilterOptionsProps<TData = any> = {
