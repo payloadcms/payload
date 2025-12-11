@@ -2,8 +2,8 @@
 
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
-import type { CSSProperties } from 'react'
 import type React from 'react'
+import type { CSSProperties } from 'react'
 import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
@@ -160,7 +160,7 @@ import type {
   UploadFieldSingleValidation,
 } from '../validations.js'
 
-export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
+export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = TData> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -215,7 +215,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    */
   showHiddenFields?: boolean
   /** The sibling data passed to a field that the hook is running against. */
-  siblingData: Partial<TSiblingData>
+  siblingData: Partial<StripRelationships<TSiblingData>>
   /**
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
@@ -228,11 +228,11 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   value?: TValue
 }
 
-export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = (
+export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = TData> = (
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = TData> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -254,15 +254,15 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
-  siblingData?: Partial<TSiblingData>
+  siblingData?: Partial<StripRelationships<TSiblingData>>
 }
 
-export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = TData> = (
   args: FieldAccessArgs<TData, TSiblingData>,
 ) => boolean | Promise<boolean>
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
-export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
+export type Condition<TData extends TypeWithID = any, TSiblingData = TData> = (
   /**
    * The top-level document data
    */
@@ -270,7 +270,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
-  siblingData: Partial<TSiblingData>,
+  siblingData: Partial<StripRelationships<TSiblingData>>,
   {
     blockData,
     operation,
@@ -293,6 +293,23 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   },
 ) => boolean
 
+/**
+ * Helper type to extract only primitive ID types from a union.
+ * Filters out object types that have an `id` property.
+ */
+type ExtractID<T> = T extends { id: unknown } ? never : T
+
+/**
+ * Utility type to strip populated relationship objects, keeping only the ID type.
+ * Converts `number | Entity` to `number`, and `string | Entity` to `string`.
+ * For arrays: `(number | Entity)[]` becomes `number[]`.
+ */
+export type StripRelationships<T> = {
+  [K in keyof T]: T[K] extends (infer U)[] | null | undefined
+    ? ExtractID<U>[] | Extract<T[K], null | undefined>
+    : ExtractID<T[K]> | Extract<T[K], null | undefined>
+}
+
 export type FilterOptionsProps<TData = any> = {
   /**
    * The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.
@@ -314,7 +331,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view.
    */
-  siblingData: unknown
+  siblingData: Partial<StripRelationships<TData>>
   /**
    * An object containing the currently authenticated user.
    */
@@ -451,7 +468,7 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   previousValue?: TValue
   req: PayloadRequest
   required?: boolean
-  siblingData: Partial<TSiblingData>
+  siblingData: Partial<StripRelationships<TSiblingData>>
 }
 
 export type ValidateOptions<
@@ -1144,7 +1161,7 @@ export type SelectField = {
     data: Data
     options: Option[]
     req: PayloadRequest
-    siblingData: Data
+    siblingData: StripRelationships<Data>
   }) => Option[]
   hasMany?: boolean
   /**
