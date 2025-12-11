@@ -1495,6 +1495,7 @@ export type {
   EmailFieldClient,
   Field,
   FieldAccess,
+  FieldAdmin,
   FieldAffectingData,
   FieldAffectingDataClient,
   FieldBase,
