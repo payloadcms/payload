@@ -1,9 +1,10 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientBlock, Labels, Widget  } from 'payload'
+import type { ClientBlock, Labels, Widget } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { toWords } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
@@ -39,9 +40,8 @@ const getItemLabel = (item: DrawerItem, i18n: I18nClient): string => {
     }
   }
 
-  // Handle Widget (just has slug)
   if ('slug' in item) {
-    return item.slug.toLowerCase()
+    return toWords(item.slug).toLowerCase()
   }
 
   return ''
@@ -67,8 +67,8 @@ const getItemDisplayLabel = (item: DrawerItem, i18n: I18nClient): string => {
     return getTranslation(item.labels.singular, i18n)
   }
 
-  // Handle Widget (just has slug)
-  return item.slug
+  // Handle Widget (just has slug) - convert to human-readable label
+  return toWords(item.slug)
 }
 
 export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
@@ -163,7 +163,9 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
                     const item =
                       typeof _item === 'string' ? (config.blocksMap?.[_item] as DrawerItem) : _item
 
-                    if (!item) {return null}
+                    if (!item) {
+                      return null
+                    }
 
                     const slug = getItemSlug(item)
                     const { imageAltText, imageURL } = getItemImageInfo(item)
