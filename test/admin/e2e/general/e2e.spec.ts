@@ -434,7 +434,7 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
+      const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
