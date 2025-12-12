@@ -1,11 +1,31 @@
+/* eslint-disable no-console */
+/* eslint-disable no-restricted-exports */
+import type { NextConfig } from 'next'
+
+import {
+  getNextjsVersion,
+  supportsTurbopackExternalizeTransitiveDependencies,
+} from './withPayload.utils.js'
+import { withPayloadLegacy } from './withPayloadLegacy.js'
+
+const poweredByHeader = {
+  key: 'X-Powered-By',
+  value: 'Next.js, Payload',
+}
+
 /**
  * @param {import('next').NextConfig} nextConfig
  * @param {Object} [options] - Optional configuration options
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
- *
- * @returns {import('next').NextConfig}
  * */
-export const withPayload = (nextConfig = {}, options = {}) => {
+export const withPayload = (
+  nextConfig: NextConfig = {},
+  options: { devBundleServerPackages?: boolean } = {},
+): NextConfig => {
+  const nextjsVersion = getNextjsVersion()
+
+  const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
+
   const env = nextConfig.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
@@ -15,67 +35,9 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
-  if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
-    // TODO: This warning is thrown because we cannot externalize the entry-point package for client-s3, so we patch the warning to not show it.
-    // We can remove this once Next.js implements https://github.com/vercel/next.js/discussions/76991
-    const turbopackWarningText =
-      'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running'
-
-    // TODO 4.0: Remove this once we drop support for Next.js 15.2.x
-    const turbopackConfigWarningText = "Unrecognized key(s) in object: 'turbopack'"
-
-    const consoleWarn = console.warn
-    console.warn = (...args) => {
-      // Force to disable serverExternalPackages warnings: https://github.com/vercel/next.js/issues/68805
-      if (
-        (typeof args[1] === 'string' && args[1].includes(turbopackWarningText)) ||
-        (typeof args[0] === 'string' && args[0].includes(turbopackWarningText))
-      ) {
-        return
-      }
-
-      // Add Payload-specific message after turbopack config warning in Next.js 15.2.x or lower.
-      // TODO 4.0: Remove this once we drop support for Next.js 15.2.x
-      const hasTurbopackConfigWarning =
-        (typeof args[1] === 'string' && args[1].includes(turbopackConfigWarningText)) ||
-        (typeof args[0] === 'string' && args[0].includes(turbopackConfigWarningText))
-
-      if (hasTurbopackConfigWarning) {
-        consoleWarn(...args)
-        consoleWarn(
-          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to Next.js 15.4.7 to resolve this warning.',
-        )
-        return
-      }
-
-      consoleWarn(...args)
-    }
-  }
-
-  const isBuild = process.env.NODE_ENV === 'production'
-  const isTurbopackNextjs15 = process.env.TURBOPACK === '1'
-  const isTurbopackNextjs16 = process.env.TURBOPACK === 'auto'
-
-  if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
-    throw new Error(
-      'Payload does not support using Turbopack for production builds. If you are using Next.js 16, please use `next build --webpack` instead.',
-    )
-  }
-
-  const poweredByHeader = {
-    key: 'X-Powered-By',
-    value: 'Next.js, Payload',
-  }
-
-  /**
-   * @type {import('next').NextConfig}
-   */
-  const toReturn = {
+  const baseConfig: NextConfig = {
     ...nextConfig,
     env,
-    turbopack: {
-      ...(nextConfig.turbopack || {}),
-    },
     outputFileTracingExcludes: {
       ...(nextConfig.outputFileTracingExcludes || {}),
       '**/*': [
@@ -88,6 +50,9 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ...(nextConfig.outputFileTracingIncludes || {}),
       '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
+    turbopack: {
+      ...(nextConfig.turbopack || {}),
+    },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
@@ -96,7 +61,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       return [
         ...(headersFromConfig || []),
         {
-          source: '/:path*',
           headers: [
             {
               key: 'Accept-CH',
@@ -112,20 +76,15 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             },
             ...(nextConfig.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
+          source: '/:path*',
         },
       ]
     },
     serverExternalPackages: [
-      // serverExternalPackages = webpack.externals, but with turbopack support and an additional check
-      // for whether the package is resolvable from the project root
       ...(nextConfig.serverExternalPackages || []),
-      // Can be externalized, because we require users to install graphql themselves - we only rely on it as a peer dependency => resolvable from the project root.
-      //
       // WHY: without externalizing graphql, a graphql version error will be thrown
       // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
       'graphql',
-      // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
-      '@sentry/nextjs',
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
         ? /**
            * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
@@ -208,6 +167,13 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           'libsql',
           'require-in-the-middle',
         ],
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
+        ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),
           alias: {
@@ -237,22 +203,31 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             aws4: false,
           },
         },
-        plugins: [
-          ...(incomingWebpackConfig?.plugins || []),
-          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
-          new webpackOptions.webpack.IgnorePlugin({
-            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
-          }),
-        ],
       }
     },
   }
 
   if (nextConfig.basePath) {
-    toReturn.env.NEXT_BASE_PATH = nextConfig.basePath
+    baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 
-  return toReturn
+  if (!supportsTurbopackBuild) {
+    return withPayloadLegacy(baseConfig)
+  } else {
+    return {
+      ...baseConfig,
+      serverExternalPackages: [
+        ...(baseConfig.serverExternalPackages || []),
+        'drizzle-kit',
+        'drizzle-kit/api',
+        'sharp',
+        'libsql',
+        'require-in-the-middle',
+        // Prevents turbopack build errors by the thread-stream package which is installed by pino
+        'pino',
+      ],
+    }
+  }
 }
 
 export default withPayload

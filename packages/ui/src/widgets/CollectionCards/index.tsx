@@ -22,6 +22,7 @@ export async function CollectionCards(props: WidgetServerProps) {
   const permissions = await getAccessResults({ req: props.req })
   const visibleEntities = getVisibleEntities({ req: props.req })
   const globalData = await getGlobalData(props.req)
+  const { serverURL } = payload.config
 
   const navGroups = getNavGroups(permissions, visibleEntities, payload.config, i18n)
 
@@ -51,11 +52,16 @@ export async function CollectionCards(props: WidgetServerProps) {
 
                       buttonAriaLabel = t('general:showAllLabel', { label: title })
 
-                      href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                      href = formatAdminURL({
+                        adminRoute,
+                        path: `/collections/${slug}`,
+                        serverURL,
+                      })
 
                       createHREF = formatAdminURL({
                         adminRoute,
                         path: `/collections/${slug}/create`,
+                        serverURL,
                       })
 
                       hasCreatePermission = permissions?.collections?.[slug]?.create

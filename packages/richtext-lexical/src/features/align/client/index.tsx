@@ -1,6 +1,20 @@
 'use client'
 
-import { $isElementNode, $isRangeSelection, FORMAT_ELEMENT_COMMAND } from 'lexical'
+import type { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import type { ElementFormatType, ElementNode } from 'lexical'
+
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $isDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import { $findMatchingParent } from '@lexical/utils'
+import {
+  $getSelection,
+  $isElementNode,
+  $isNodeSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_LOW,
+  FORMAT_ELEMENT_COMMAND,
+} from 'lexical'
+import { useEffect } from 'react'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
 
@@ -11,6 +25,15 @@ import { AlignRightIcon } from '../../../lexical/ui/icons/AlignRight/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarAlignGroupWithItems } from './toolbarAlignGroup.js'
 
+// DecoratorBlockNode has format, but Lexical forgot
+// to add the getters like ElementNode does.
+const getFormatType = (node: DecoratorBlockNode | ElementNode): ElementFormatType => {
+  if ($isElementNode(node)) {
+    return node.getFormatType()
+  }
+  return node.__format
+}
+
 const toolbarGroups: ToolbarGroup[] = [
   toolbarAlignGroupWithItems([
     {
@@ -20,15 +43,15 @@ const toolbarGroups: ToolbarGroup[] = [
           return false
         }
         for (const node of selection.getNodes()) {
-          if ($isElementNode(node)) {
-            if (node.getFormatType() === 'left') {
+          if ($isElementNode(node) || $isDecoratorBlockNode(node)) {
+            if (getFormatType(node) === 'left') {
               continue
             }
           }
 
           const parent = node.getParent()
-          if ($isElementNode(parent)) {
-            if (parent.getFormatType() === 'left') {
+          if ($isElementNode(parent) || $isDecoratorBlockNode(parent)) {
+            if (getFormatType(parent) === 'left') {
               continue
             }
           }
@@ -53,15 +76,15 @@ const toolbarGroups: ToolbarGroup[] = [
           return false
         }
         for (const node of selection.getNodes()) {
-          if ($isElementNode(node)) {
-            if (node.getFormatType() === 'center') {
+          if ($isElementNode(node) || $isDecoratorBlockNode(node)) {
+            if (getFormatType(node) === 'center') {
               continue
             }
           }
 
           const parent = node.getParent()
-          if ($isElementNode(parent)) {
-            if (parent.getFormatType() === 'center') {
+          if ($isElementNode(parent) || $isDecoratorBlockNode(parent)) {
+            if (getFormatType(parent) === 'center') {
               continue
             }
           }
@@ -86,15 +109,15 @@ const toolbarGroups: ToolbarGroup[] = [
           return false
         }
         for (const node of selection.getNodes()) {
-          if ($isElementNode(node)) {
-            if (node.getFormatType() === 'right') {
+          if ($isElementNode(node) || $isDecoratorBlockNode(node)) {
+            if (getFormatType(node) === 'right') {
               continue
             }
           }
 
           const parent = node.getParent()
-          if ($isElementNode(parent)) {
-            if (parent.getFormatType() === 'right') {
+          if ($isElementNode(parent) || $isDecoratorBlockNode(parent)) {
+            if (getFormatType(parent) === 'right') {
               continue
             }
           }
@@ -119,15 +142,15 @@ const toolbarGroups: ToolbarGroup[] = [
           return false
         }
         for (const node of selection.getNodes()) {
-          if ($isElementNode(node)) {
-            if (node.getFormatType() === 'justify') {
+          if ($isElementNode(node) || $isDecoratorBlockNode(node)) {
+            if (getFormatType(node) === 'justify') {
               continue
             }
           }
 
           const parent = node.getParent()
-          if ($isElementNode(parent)) {
-            if (parent.getFormatType() === 'justify') {
+          if ($isElementNode(parent) || $isDecoratorBlockNode(parent)) {
+            if (getFormatType(parent) === 'justify') {
               continue
             }
           }
@@ -148,7 +171,46 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
+const AlignPlugin = () => {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    // Just like the default Lexical configuration, but in
+    // addition to ElementNode we also set DecoratorBlocks
+    return editor.registerCommand(
+      FORMAT_ELEMENT_COMMAND,
+      (format) => {
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection) && !$isNodeSelection(selection)) {
+          return false
+        }
+        const nodes = selection.getNodes()
+        for (const node of nodes) {
+          const element = $findMatchingParent(
+            node,
+            (parentNode): parentNode is DecoratorBlockNode | ElementNode =>
+              ($isElementNode(parentNode) || $isDecoratorBlockNode(parentNode)) &&
+              !parentNode.isInline(),
+          )
+          if (element !== null) {
+            element.setFormat(format)
+          }
+        }
+        return true
+      },
+      COMMAND_PRIORITY_LOW,
+    )
+  }, [editor])
+  return null
+}
+
 export const AlignFeatureClient = createClientFeature({
+  plugins: [
+    {
+      Component: AlignPlugin,
+      position: 'normal',
+    },
+  ],
   toolbarFixed: {
     groups: toolbarGroups,
   },

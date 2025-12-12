@@ -262,6 +262,7 @@ jobs:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
           - _community
+          - a11y
           - access-control
           - admin__e2e__general
           - admin__e2e__list-view

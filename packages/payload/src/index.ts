@@ -1449,7 +1449,8 @@ export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
-export { slugField, type SlugFieldProps } from './fields/baseFields/slug/index.js'
+export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
+export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
   createClientField,
@@ -1457,6 +1458,8 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
+
+export { sanitizeFields } from './fields/config/sanitize.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1467,8 +1470,6 @@ export interface CollectionAdminCustom extends Record<string, any> {}
 export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
-
-export { sanitizeFields } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
@@ -1579,16 +1580,16 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
-export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
+export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
+
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
-export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
+export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1620,6 +1621,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export type { FolderSortKeys } from './folders/types.js'
 export { getFolderData } from './folders/utils/getFolderData.js'
 export {
@@ -1643,10 +1645,10 @@ export type {
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
@@ -1683,7 +1685,6 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
-
 export type {
   BaseJob,
   JobLog,
@@ -1694,20 +1695,21 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
 export type * from './uploads/types.js'
+
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'

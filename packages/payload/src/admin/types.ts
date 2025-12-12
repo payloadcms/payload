@@ -583,6 +583,7 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
+  SlugifyServerFunctionArgs,
 } from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'

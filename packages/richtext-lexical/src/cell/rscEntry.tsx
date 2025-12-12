@@ -49,6 +49,7 @@ export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) =
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
+  const serverURL = payload.config.serverURL
 
   const onClick = onClickFromProps
 
@@ -71,6 +72,7 @@ export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) =
       ? formatAdminURL({
           adminRoute,
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          serverURL,
         })
       : ''
   }

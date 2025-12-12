@@ -347,6 +347,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     loading: 'লোড হচ্ছে',
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
+    lock: 'লক',
     menu: 'মেনু',
     moreOptions: 'আরও বিকল্পগুলি',
     move: 'স্থানান্তর করুন',
@@ -438,6 +439,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে মুভ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
     unsavedChangesDuplicate:

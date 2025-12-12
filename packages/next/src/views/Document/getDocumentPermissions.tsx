@@ -11,6 +11,7 @@ import {
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
 import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -45,7 +46,7 @@ export const getDocumentPermissions = async (args: {
         req,
       })
 
-      if (collectionConfig.versions?.drafts) {
+      if (hasDraftsEnabled(collectionConfig)) {
         hasPublishPermission = (
           await docAccessOperation({
             id,
@@ -73,7 +74,7 @@ export const getDocumentPermissions = async (args: {
         req,
       })
 
-      if (globalConfig.versions?.drafts) {
+      if (hasDraftsEnabled(globalConfig)) {
         hasPublishPermission = (
           await docAccessOperationGlobal({
             data: {
