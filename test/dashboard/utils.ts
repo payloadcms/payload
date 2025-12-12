@@ -180,7 +180,7 @@ export class DashboardHelper {
     const widget = this.widgetByPos(position)
     const widgetDomElem = await widget.elementHandle()
     await widget.hover()
-    await widget.getByTitle('Delete widget').click()
+    await widget.getByText('Delete widget').click()
     expect(await widgetDomElem?.isHidden()).toBe(true)
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
   }

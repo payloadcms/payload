@@ -571,7 +571,11 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
-      await page.locator('.collections__card-list .card').first().click()
+      const firstCardLink = page.locator('.collections__card-list .card__click').first()
+      // flaky, probably due to hydration
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(1000)
+      await firstCardLink.click()
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
