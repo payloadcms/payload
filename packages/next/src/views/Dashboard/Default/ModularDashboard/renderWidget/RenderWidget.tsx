@@ -38,7 +38,7 @@ export const RenderWidget: React.FC<{
         })) as RenderWidgetServerFnReturnType
 
         setComponent(result.component)
-      } catch (_error) {
+      } catch (error) {
         // Log error but don't expose details to console in production
 
         // Fallback error component
@@ -55,7 +55,7 @@ export const RenderWidget: React.FC<{
                 textAlign: 'center',
               },
             },
-            'Failed to load widget',
+            `Failed to load widget: ${error.message}`,
           ),
         )
       }
