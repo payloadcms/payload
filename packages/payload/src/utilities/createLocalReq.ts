@@ -44,7 +44,9 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
       urlToUse = req.url
     } else if (req.payload?.config?.serverURL) {
       const base = req.payload.config.serverURL.replace(/\/+$/, '')
-      const suffix = urlSuffix?.startsWith('/') ? urlSuffix : `/${urlSuffix || ''}`
+      const suffix = urlSuffix
+        ? (urlSuffix.startsWith('/') ? urlSuffix : `/${urlSuffix}`)
+        : ''
       urlToUse = `${base}${suffix}`
     } else {
       urlToUse = fallbackURL
