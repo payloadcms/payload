@@ -220,6 +220,158 @@ Sometimes you want to fail a task based on business logic:
 
 ```
 
+### Handling Task Failures
+
+Tasks can fail in two ways, depending on the nature of the failure:
+
+1. **Throwing an error** - for unexpected errors and exceptions
+2. **Returning a failed state** - for controlled business logic failures
+
+#### Throwing Errors
+
+When a task encounters an unexpected error (network failure, invalid data, etc.), you can throw an error as shown in the "Conditional Failure" example above:
+
+```ts
+handler: async ({ input, req }) => {
+  const order = await req.payload.findByID({
+    collection: 'orders',
+    id: input.orderId,
+  })
+
+  if (order.status === 'paid') {
+    throw new Error('Order already processed')
+  }
+
+  // Continue processing...
+}
+```
+
+#### Returning Failed State
+
+For controlled failures based on business logic, you can return a failed state instead of throwing. This approach gives you more control over the error message and is cleaner for validation or conditional logic failures.
+
+**Basic syntax:**
+
+```ts
+{
+  slug: 'validateOrder',
+  handler: async ({ input, req }) => {
+    const order = await req.payload.findByID({
+      collection: 'orders',
+      id: input.orderId,
+    })
+
+    // Fail without custom message
+    if (!order.isPaid) {
+      return {
+        state: 'failed',
+      }
+    }
+
+    return {
+      output: {
+        validated: true,
+      },
+    }
+  },
+}
+```
+
+**With custom error message:**
+
+```ts
+{
+  slug: 'processPayment',
+  retries: 2,
+  inputSchema: [
+    {
+      name: 'orderId',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'amount',
+      type: 'number',
+      required: true,
+    },
+  ],
+  handler: async ({ input, req }) => {
+    const order = await req.payload.findByID({
+      collection: 'orders',
+      id: input.orderId,
+    })
+
+    // Validation failure with custom message
+    if (input.amount !== order.total) {
+      return {
+        state: 'failed',
+        errorMessage: `Amount mismatch: expected ${order.total}, received ${input.amount}`,
+      }
+    }
+
+    // Business rule failure
+    if (order.status === 'cancelled') {
+      return {
+        state: 'failed',
+        errorMessage: 'Cannot process payment for cancelled order',
+      }
+    }
+
+    // Process payment...
+    const paymentResult = await processPayment(input.amount)
+
+    return {
+      output: {
+        paymentId: paymentResult.id,
+        status: 'completed',
+      },
+    }
+  },
+}
+```
+
+#### When to Use Each Approach
+
+| Approach                     | Use Case                               | Example Scenarios                                                                    |
+| ---------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `throw new Error()`          | Unexpected errors and exceptions       | Network failures, database errors, invalid API responses, missing dependencies       |
+| `return { state: 'failed' }` | Business logic and validation failures | Validation errors, conditional checks, business rule violations, expected edge cases |
+
+#### Accessing Failure Information
+
+After a task fails, you can inspect the job to understand what went wrong:
+
+```ts
+const job = await payload.jobs.queue({
+  task: 'processPayment',
+  input: { orderId: '123', amount: 100 },
+})
+
+// Run the job
+await payload.jobs.run()
+
+// Check the job status
+const completedJob = await payload.findByID({
+  collection: 'payload-jobs',
+  id: job.id,
+})
+
+// Check if job failed
+if (completedJob.hasError) {
+  // Access the error from the log
+  const failedLog = completedJob.log?.find((entry) => entry.state === 'failed')
+
+  console.log(failedLog?.error?.message)
+  // If errorMessage was provided: "Amount mismatch: expected 150, received 100"
+  // If no errorMessage: "Task handler returned a failed state"
+  // If error was thrown: The thrown error message
+}
+```
+
+<Banner type="info">
+  When you return `{ state: 'failed' }` without an `errorMessage`, Payload will use the default message "Task handler returned a failed state". Always provide a custom `errorMessage` for better debugging and observability.
+</Banner>
+
 ### Understanding Task Execution
 
 #### When a task runs
