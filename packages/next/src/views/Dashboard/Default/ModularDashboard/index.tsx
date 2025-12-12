@@ -42,6 +42,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
         serverProps: {
           req,
           widgetSlug,
+          // TODO: widgets will support state in the future
           // widgetData: layoutItem.data,
         } satisfies WidgetServerProps,
       }),

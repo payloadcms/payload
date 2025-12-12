@@ -32,6 +32,7 @@ export const RenderWidget: React.FC<{
         const result = (await serverFunction({
           name: 'render-widget',
           args: {
+            // TODO: widgets will support state in the future
             // widgetData,
             widgetSlug,
           } as RenderWidgetServerFnArgs,

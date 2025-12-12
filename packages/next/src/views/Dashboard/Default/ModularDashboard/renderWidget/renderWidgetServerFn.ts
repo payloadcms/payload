@@ -7,7 +7,7 @@ export type RenderWidgetServerFnArgs = {
   /**
    * Instance-specific data for this widget
    */
-  // TODO
+  // TODO: widgets will support state in the future
   // widgetData?: Record<string, unknown>
   /**
    * The slug of the widget to render
