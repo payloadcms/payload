@@ -1,8 +1,17 @@
-import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
+import type {
+  DecoratorNode,
+  EditorConfig,
+  LexicalEditor,
+  EditorConfig as LexicalEditorConfig,
+  LexicalNode,
+  SerializedEditorState,
+  SerializedLexicalNode,
+} from 'lexical'
 import type {
   ClientField,
   DefaultServerCellComponentProps,
   LabelFunction,
+  PayloadComponent,
   RichTextAdapter,
   RichTextField,
   RichTextFieldClient,
@@ -11,13 +20,20 @@ import type {
   ServerFieldBase,
   StaticLabel,
 } from 'payload'
+import type { JSX } from 'react'
 
+import type { JSXConverterArgs } from './features/converters/lexicalToJSX/converter/types.js'
 import type {
   BaseClientFeatureProps,
   FeatureProviderProviderClient,
 } from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from './nodeTypes.js'
 import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
 export type LexicalFieldAdminProps = {
@@ -80,10 +96,168 @@ export type FeaturesInput =
     }) => FeatureProviderServer<any, any, any>[])
   | FeatureProviderServer<any, any, any>[]
 
+type WithinEditorArgs = {
+  config: EditorConfig
+  editor: LexicalEditor
+  node: LexicalNode
+}
+
+/**
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
+export type NodeMapValue<
+  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> = {
+  /**
+   * Provide a react component to render the node.
+   *
+   * **JSX Converter:** Always works. Takes priority over `html`.
+   *
+   * **Lexical Editor:** Only works for DecoratorNodes (renders in `decorate` method). Takes priority over `html` and `createDOM`.
+   */
+  Component?: (
+    args:
+      | ({
+          isEditor: false
+          isJSXConverter: true
+        } & JSXConverterArgs<TNode>)
+      | ({
+          isEditor: true
+          isJSXConverter: false
+          node: {
+            _originalDecorate?: (editor: LexicalEditor, config: EditorConfig) => React.ReactNode
+          } & DecoratorNode<React.ReactNode>
+        } & Omit<WithinEditorArgs, 'node'>),
+  ) => React.ReactNode
+  /**
+   * Provide a function to create the DOM element for the node.
+   *
+   * **JSX Converter:** Not used (only `Component` and `html` work).
+   *
+   * **Lexical Editor:** Always works (renders in `createDOM` method).
+   * - For ElementNodes: This is the standard way to customize rendering.
+   * - For DecoratorNodes: When combined with `html`, the DOM gets custom structure while `decorate` renders the `html` content.
+   */
+  createDOM?: (args: WithinEditorArgs) => HTMLElement
+  /**
+   * Provide HTML string or function to render the node.
+   *
+   * **JSX Converter:** Always works (ignored if `Component` is provided).
+   *
+   * **Lexical Editor behavior depends on node type:**
+   *
+   * - **ElementNodes:** `html` is used in `createDOM` to generate the DOM structure.
+   *
+   * - **DecoratorNodes (have both `createDOM` and `decorate`):**
+   *   - If only `html` is provided: `createDOM` uses `html` to create DOM, `decorate` returns `null`
+   *   - If `html` + `Component`: `createDOM` uses `html`, `decorate` uses `Component`
+   *   - If `html` + `createDOM`: Custom `createDOM` creates structure, `decorate` renders `html` content
+   *   - If `html` + `Component` + `createDOM`: Custom `createDOM` creates structure, `decorate` uses `Component` (html ignored in editor)
+   */
+  html?: (
+    args:
+      | ({
+          isEditor: false
+          isJSXConverter: true
+        } & JSXConverterArgs<TNode>)
+      | ({
+          isEditor: true
+          isJSXConverter: false
+        } & WithinEditorArgs),
+  ) => string
+}
+
+/**
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
+export type LexicalEditorNodeMap<
+  TNodes extends { [key: string]: any; type?: string } =
+    | DefaultNodeTypes
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+> = {
+  [key: string]:
+    | {
+        [blockSlug: string]: NodeMapValue<any>
+      }
+    | NodeMapValue<any>
+    | undefined
+} & {
+  [nodeType in Exclude<NonNullable<TNodes['type']>, 'block' | 'inlineBlock'>]?: NodeMapValue<
+    Extract<TNodes, { type: nodeType }>
+  >
+} & {
+  blocks?: {
+    [K in Extract<
+      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
+        ? B extends { blockType: string }
+          ? B['blockType']
+          : never
+        : never,
+      string
+    >]?: NodeMapValue<
+      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
+        ? SerializedBlockNode<Extract<B, { blockType: K }>>
+        : SerializedBlockNode
+    >
+  }
+  inlineBlocks?: {
+    [K in Extract<
+      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
+        ? B extends { blockType: string }
+          ? B['blockType']
+          : never
+        : never,
+      string
+    >]?: NodeMapValue<
+      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
+        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
+        : SerializedInlineBlockNode
+    >
+  }
+  unknown?: NodeMapValue<SerializedLexicalNode>
+}
+
+/**
+ * A map of views, which can be used to render the editor in different ways.
+ *
+ * In order to override the default view, you can add a `default` key to the map.
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
+export type LexicalEditorViewMap<
+  TNodes extends { [key: string]: any; type?: string } =
+    | DefaultNodeTypes
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+> = {
+  [viewKey: string]: {
+    admin?: LexicalFieldAdminClientProps
+    lexical?: LexicalEditorConfig
+    nodes: LexicalEditorNodeMap<TNodes>
+  }
+}
+
+/**
+ * @todo rename to LexicalEditorArgs in 4.0, since these are arguments for the lexicalEditor function
+ */
 export type LexicalEditorProps = {
   admin?: LexicalFieldAdminProps
   features?: FeaturesInput
   lexical?: LexicalEditorConfig
+  /**
+   * A path to a LexicalEditorViewMap, which can be used to render the editor in different ways.
+   *
+   * In order to override the default view, you can add a `default` key to the map.
+   *
+   * @experimental - This API is experimental and may change in a minor release.
+   * @internal
+   */
+  views?: PayloadComponent
 }
 
 export type LexicalRichTextAdapter = {
@@ -129,6 +303,7 @@ export type LexicalRichTextFieldProps = {
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
   lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
+  views?: LexicalEditorViewMap
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 

@@ -15,6 +15,18 @@
       }
     }
 
+    &__label-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: calc(var(--base) / 4);
+      gap: calc(var(--base) / 3);
+
+      label.field-label:not(.unstyled) {
+        margin-right: unset;
+        padding-bottom: unset;
+      }
+    }
+
     &__wrap {
       width: 100%;
       position: relative;
