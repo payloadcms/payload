@@ -68,7 +68,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 async function getItemsFromPreferences(
   payload: BasePayload,
   user: TypedUser,
-): Promise<WidgetItem[]> {
+): Promise<null | WidgetItem[]> {
   const savedPreferences = await getPreferences(
     'dashboard-layout',
     payload,
