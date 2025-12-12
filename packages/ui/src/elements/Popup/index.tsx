@@ -129,13 +129,32 @@ export const Popup: React.FC<PopupProps> = (props) => {
     popup.style.setProperty('--caret-left', `${caretLeft}px`)
   }, [horizontalAlign, verticalAlign])
 
-  // Position, resize, scroll, and click outside - all when active
+  // Position, resize, scroll, click outside, and keyboard
   useEffect(() => {
     if (!active) {
       return
     }
 
+    const popup = popupRef.current
+    if (!popup) {
+      return
+    }
+
     updatePosition()
+
+    // Get all focusable elements
+    const getFocusableElements = () =>
+      popup.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+
+    // Focus first element after a brief delay to ensure content is rendered
+    requestAnimationFrame(() => {
+      const focusable = getFocusableElements()
+      if (focusable.length > 0) {
+        focusable[0].focus()
+      }
+    })
 
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -146,14 +165,45 @@ export const Popup: React.FC<PopupProps> = (props) => {
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setActive(false)
+        // Return focus to trigger
+        triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]')?.focus()
+        return
+      }
+
+      // Focus trap
+      if (e.key === 'Tab') {
+        const focusable = getFocusableElements()
+        if (focusable.length === 0) {
+          return
+        }
+
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
     document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
     }
   }, [active, updatePosition, setActive])
 
