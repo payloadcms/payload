@@ -14,10 +14,10 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'
-import type { WidgetInstanceClient, WidgetItem } from './client.js'
+import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 
 import { getPreferences } from '../../../../utilities/getPreferences.js'
-import { ModularDashboardClient } from './client.js'
+import { ModularDashboardClient } from './index.client.js'
 import './index.scss'
 
 type ServerLayout = WidgetInstanceClient[]

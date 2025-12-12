@@ -5,7 +5,7 @@ import { Gutter } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { ModularDashboard } from './ModularDashboard/server.js'
+import { ModularDashboard } from './ModularDashboard/index.js'
 
 const baseClass = 'dashboard'
 

@@ -4,7 +4,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { toast, useConfig, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
-import type { WidgetInstanceClient, WidgetItem } from './client.js'
+import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 
