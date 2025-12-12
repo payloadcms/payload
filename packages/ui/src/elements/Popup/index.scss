@@ -18,6 +18,7 @@
 
   .popup__content {
     --popup-caret-size: 8px;
+    --popup-button-highlight: var(--theme-elevation-150);
 
     position: absolute;
     z-index: var(--z-popup);

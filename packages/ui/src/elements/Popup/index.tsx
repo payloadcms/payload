@@ -65,12 +65,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const popupRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
+  const openedViaKeyboardRef = useRef(false)
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
 
   const setActive = useCallback(
-    (isActive: boolean) => {
+    (isActive: boolean, viaKeyboard = false) => {
       if (isActive) {
+        openedViaKeyboardRef.current = viaKeyboard
         onToggleOpen?.(true)
       } else {
         onToggleClose?.()
@@ -142,19 +144,20 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     updatePosition()
 
-    // Get all focusable elements
     const getFocusableElements = () =>
       popup.querySelectorAll<HTMLElement>(
         'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
       )
 
-    // Focus first element after a brief delay to ensure content is rendered
-    requestAnimationFrame(() => {
-      const focusable = getFocusableElements()
-      if (focusable.length > 0) {
-        focusable[0].focus()
-      }
-    })
+    // Only autofocus when opened via keyboard
+    if (openedViaKeyboardRef.current) {
+      requestAnimationFrame(() => {
+        const focusable = getFocusableElements()
+        if (focusable.length > 0) {
+          focusable[0].focus()
+        }
+      })
+    }
 
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -183,7 +186,23 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
         const first = focusable[0]
         const last = focusable[focusable.length - 1]
+        const isInPopup = popup.contains(document.activeElement)
 
+        // If nothing in popup is focused, focus first/last based on direction.
+        // This happens when clicking on the popup via mouse, and then using shift
+        // keys to navigate the popup. We do not want to focus a specific button the be
+        // selected when opening the popup via mouse, but we do want the focus trap to work.
+        if (!isInPopup) {
+          e.preventDefault()
+          if (e.shiftKey) {
+            last.focus()
+          } else {
+            first.focus()
+          }
+          return
+        }
+
+        // Wrap around when at edges
         if (e.shiftKey && document.activeElement === first) {
           e.preventDefault()
           last.focus()
