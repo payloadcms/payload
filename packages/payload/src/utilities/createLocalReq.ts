@@ -38,10 +38,17 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
 
     const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
-    const urlToUse =
-      req?.url || req.payload?.config?.serverURL
-        ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
-        : fallbackURL
+    let urlToUse: string
+    
+    if (req?.url) {
+      urlToUse = req.url
+    } else if (req.payload?.config?.serverURL) {
+      const base = req.payload.config.serverURL.replace(/\/+$/, '')
+      const suffix = urlSuffix?.startsWith('/') ? urlSuffix : `/${urlSuffix || ''}`
+      urlToUse = `${base}${suffix}`
+    } else {
+      urlToUse = fallbackURL
+    }
 
     try {
       urlObject = new URL(urlToUse)
