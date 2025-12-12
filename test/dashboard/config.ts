@@ -59,16 +59,23 @@ export default buildConfigWithDefaults({
         {
           slug: 'count',
           ComponentPath: './components/Count.tsx#default',
+          label: {
+            en: 'Count Widget',
+            es: 'Widget de Conteo',
+          },
           maxWidth: 'medium',
           // fields: []
         },
         {
           slug: 'private',
           ComponentPath: './components/Private.tsx#default',
+          label: 'Private Widget',
         },
         {
           slug: 'revenue',
           ComponentPath: './components/Revenue.tsx#default',
+          // Demonstrates function form with i18n - returns localized label via t()
+          label: ({ i18n }) => (i18n.language === 'es' ? 'Gráfico de Ingresos' : 'Revenue Chart'),
           minWidth: 'medium',
         },
       ],

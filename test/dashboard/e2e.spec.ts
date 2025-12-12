@@ -183,4 +183,20 @@ describe('Dashboard', () => {
 
   // TODO: reorder widgets with keyboard (for a11y reasons)
   // It's already working. But I'd like to test it properly with a screen reader and everything.
+
+  test('widget labels are displayed correctly in the add widget drawer', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.openAddWidgetDrawer()
+
+    // Verify custom labels are displayed (English)
+    await expect(async () => {
+      const labels = await d.getWidgetLabelsInDrawer()
+      expect(labels).toContain('Count Widget')
+      expect(labels).toContain('Private Widget')
+      expect(labels).toContain('Revenue Chart')
+      // The default 'collections' widget should use toWords fallback
+      expect(labels).toContain('Collections')
+    }).toPass({ timeout: 1000 })
+  })
 })

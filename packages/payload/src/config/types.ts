@@ -740,6 +740,12 @@ export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x
 
 export type Widget = {
   ComponentPath: string
+  /**
+   * Human-friendly label for the widget.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the label will be auto-generated from the slug.
+   */
+  label?: LabelFunction | StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
@@ -747,6 +753,16 @@ export type Widget = {
   // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
+}
+
+/**
+ * Client-side widget type with resolved label (no functions).
+ */
+export type ClientWidget = {
+  label?: StaticLabel
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
+  slug: string
 }
 
 export type WidgetInstance = {

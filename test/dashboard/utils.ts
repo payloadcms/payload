@@ -157,6 +157,24 @@ export class DashboardHelper {
     await expect(this.widgets).toHaveCount(widgetsCount + 1)
   }
 
+  openAddWidgetDrawer = async () => {
+    await this.stepNavLast.locator('button').nth(0).click()
+    await expect(this.page.locator('.drawer__content')).toBeVisible()
+  }
+
+  getWidgetLabelsInDrawer = async (): Promise<string[]> => {
+    const labels: string[] = []
+    const cards = this.page.locator('.drawer__content .thumbnail-card__label')
+    const count = await cards.count()
+    for (let i = 0; i < count; i++) {
+      const text = await cards.nth(i).textContent()
+      if (text) {
+        labels.push(text)
+      }
+    }
+    return labels
+  }
+
   deleteWidget = async (position: number) => {
     const widgetsCount = await this.widgets.count()
     const widget = this.widgetByPos(position)

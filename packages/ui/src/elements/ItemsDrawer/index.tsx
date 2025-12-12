@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientBlock, Labels, Widget } from 'payload'
+import type { ClientBlock, ClientWidget, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -15,7 +15,7 @@ import { ThumbnailCard } from '../ThumbnailCard/index.js'
 import './index.scss'
 import { ItemSearch } from './ItemSearch/index.js'
 
-export type DrawerItem = ClientBlock | Widget
+export type DrawerItem = ClientBlock | ClientWidget
 
 export type ItemsDrawerProps = {
   readonly addRowIndex?: number
@@ -40,6 +40,17 @@ const getItemLabel = (item: DrawerItem, i18n: I18nClient): string => {
     }
   }
 
+  // Handle ClientWidget with label (already resolved from function on server)
+  if ('label' in item && item.label) {
+    if (typeof item.label === 'string') {
+      return item.label.toLowerCase()
+    }
+    if (typeof item.label === 'object') {
+      return getTranslation(item.label, i18n).toLowerCase()
+    }
+  }
+
+  // Fallback to slug
   if ('slug' in item) {
     return toWords(item.slug).toLowerCase()
   }
@@ -67,7 +78,17 @@ const getItemDisplayLabel = (item: DrawerItem, i18n: I18nClient): string => {
     return getTranslation(item.labels.singular, i18n)
   }
 
-  // Handle Widget (just has slug) - convert to human-readable label
+  // Handle ClientWidget with label (already resolved from function on server)
+  if ('label' in item && item.label) {
+    if (typeof item.label === 'string') {
+      return item.label
+    }
+    if (typeof item.label === 'object') {
+      return getTranslation(item.label, i18n)
+    }
+  }
+
+  // Fallback to slug - convert to human-readable label
   return toWords(item.slug)
 }
 
@@ -169,7 +190,6 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
                       return null
                     }
 
-                    const slug = getItemSlug(item)
                     const { imageAltText, imageURL } = getItemImageInfo(item)
                     const displayLabel = getItemDisplayLabel(item, i18n)
 

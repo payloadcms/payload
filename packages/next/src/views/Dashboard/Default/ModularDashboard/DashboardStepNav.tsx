@@ -1,5 +1,5 @@
 'use client'
-import type { Widget } from 'payload'
+import type { ClientWidget } from 'payload'
 
 import {
   Button,
@@ -27,7 +27,7 @@ export function DashboardStepNav({
   resetLayout: () => Promise<void>
   saveLayout: () => Promise<void>
   setIsEditing: (isEditing: boolean) => void
-  widgets: Widget[]
+  widgets: ClientWidget[]
 }) {
   const { t } = useTranslation()
   const { setStepNav } = useStepNav()

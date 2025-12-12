@@ -1,5 +1,7 @@
+import type { TFunction } from '@payloadcms/translations'
 import type {
   BasePayload,
+  ClientWidget,
   DashboardConfig,
   PayloadRequest,
   TypedUser,
@@ -21,10 +23,11 @@ import './index.scss'
 type ServerLayout = WidgetInstanceClient[]
 
 export async function ModularDashboard(props: DashboardViewServerProps) {
-  const { defaultLayout = [], widgets } = props.payload.config.admin.dashboard || {}
+  const { defaultLayout = [], widgets = [] } = props.payload.config.admin.dashboard || {}
   const { importMap } = props.payload
   const { user } = props
   const { req } = props.initPageResult
+  const { i18n } = req
 
   const layout =
     (await getItemsFromPreferences(props.payload, user)) ??
@@ -46,9 +49,18 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
     }
   })
 
+  // Resolve function labels to static labels for client components
+  const clientWidgets: ClientWidget[] = widgets.map((widget) => {
+    const { ComponentPath: _, label, ...rest } = widget
+    return {
+      ...rest,
+      label: typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
+    }
+  })
+
   return (
     <div>
-      <ModularDashboardClient clientLayout={serverLayout} widgets={widgets} />
+      <ModularDashboardClient clientLayout={serverLayout} widgets={clientWidgets} />
     </div>
   )
 }

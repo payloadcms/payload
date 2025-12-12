@@ -54,13 +54,13 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ...(sanitizedConfig.loggingLevels || {}),
   }
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
-    slug: 'colle-ctions',
+    slug: 'collections',
     ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
     minWidth: 'full',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
     {
-      widgetSlug: 'colle-ctions',
+      widgetSlug: 'collections',
       width: 'full',
     } satisfies WidgetInstance,
   ]

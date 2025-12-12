@@ -1,6 +1,6 @@
 'use client'
 
-import type { Widget, WidgetWidth } from 'payload'
+import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
@@ -44,7 +44,7 @@ export function ModularDashboardClient({
   widgets,
 }: {
   clientLayout: WidgetInstanceClient[]
-  widgets: Widget[]
+  widgets: ClientWidget[]
 }) {
   const { t } = useTranslation()
   const {

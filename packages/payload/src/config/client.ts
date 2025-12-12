@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
@@ -181,8 +181,13 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { ComponentPath: _, ...rest } = widget
-              return rest
+              const { ComponentPath: _, label, ...rest } = widget
+              return {
+                ...rest,
+                // Resolve label function to string for client
+                label:
+                  typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
+              }
             },
           )
         }
