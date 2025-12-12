@@ -3,12 +3,11 @@ import type { CSSProperties } from 'react'
 
 export * as PopupList from './PopupButtonList/index.js'
 
-import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
-import { useIntersect } from '../../hooks/useIntersect.js'
-import { PopupTrigger } from './PopupTrigger/index.js'
 import './index.scss'
+import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
 
@@ -23,6 +22,9 @@ export type PopupProps = {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
+  /**
+   * Force control the open state of the popup, regardless of the trigger.
+   */
   forceOpen?: boolean
   horizontalAlign?: 'center' | 'left' | 'right'
   id?: string
@@ -30,7 +32,7 @@ export type PopupProps = {
   noBackground?: boolean
   onToggleClose?: () => void
   onToggleOpen?: (active: boolean) => void
-  render?: (any) => React.ReactNode
+  render?: (args: { close: () => void }) => React.ReactNode
   showOnHover?: boolean
   showScrollbar?: boolean
   size?: 'fit-content' | 'large' | 'medium' | 'small'
@@ -40,7 +42,6 @@ export type PopupProps = {
 export const Popup: React.FC<PopupProps> = (props) => {
   const {
     id,
-    boundingRef,
     button,
     buttonClassName,
     buttonSize,
@@ -50,7 +51,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     className,
     disabled,
     forceOpen,
-    horizontalAlign: horizontalAlignFromProps = 'left',
+    horizontalAlign = 'left',
     initActive = false,
     noBackground,
     onToggleClose,
@@ -59,131 +60,124 @@ export const Popup: React.FC<PopupProps> = (props) => {
     showOnHover = false,
     showScrollbar = false,
     size = 'medium',
-    verticalAlign: verticalAlignFromProps = 'top',
+    verticalAlign = 'bottom',
   } = props
-  const { height: windowHeight, width: windowWidth } = useWindowInfo()
 
-  const [intersectionRef, intersectionEntry] = useIntersect({
-    root: boundingRef?.current || null,
-    rootMargin: '-100px 0px 0px 0px',
-    threshold: 1,
-  })
+  const popupRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const [active, setActiveInternal] = useState(initActive)
+  const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
 
-  const contentRef = useRef(null)
-  const triggerRef = useRef(null)
-  const [active, setActive_Internal] = useState(initActive)
-  const [verticalAlign, setVerticalAlign] = useState(verticalAlignFromProps)
-  const [horizontalAlign, setHorizontalAlign] = useState(horizontalAlignFromProps)
-
-  const setActive = React.useCallback(
-    (active: boolean) => {
-      if (active && typeof onToggleOpen === 'function') {
-        onToggleOpen(true)
+  const setActive = useCallback(
+    (isActive: boolean) => {
+      if (isActive) {
+        onToggleOpen?.(true)
+      } else {
+        onToggleClose?.()
       }
-      if (!active && typeof onToggleClose === 'function') {
-        onToggleClose()
-      }
-      setActive_Internal(active)
+      setActiveInternal(isActive)
     },
     [onToggleClose, onToggleOpen],
   )
 
-  const setPosition = useCallback(
-    ({ horizontal = false, vertical = false }) => {
-      if (contentRef.current) {
-        const bounds = contentRef.current.getBoundingClientRect()
-
-        const {
-          bottom: contentBottomPos,
-          left: contentLeftPos,
-          right: contentRightPos,
-          top: contentTopPos,
-        } = bounds
-
-        let boundingTopPos = 100
-        let boundingRightPos = document.documentElement.clientWidth
-        let boundingBottomPos = document.documentElement.clientHeight
-        let boundingLeftPos = 0
-
-        if (boundingRef?.current) {
-          ;({
-            bottom: boundingBottomPos,
-            left: boundingLeftPos,
-            right: boundingRightPos,
-            top: boundingTopPos,
-          } = boundingRef.current.getBoundingClientRect())
-        }
-
-        if (horizontal) {
-          if (contentRightPos > boundingRightPos && contentLeftPos > boundingLeftPos) {
-            setHorizontalAlign('right')
-          } else if (contentLeftPos < boundingLeftPos && contentRightPos < boundingRightPos) {
-            setHorizontalAlign('left')
-          }
-        }
-
-        if (vertical) {
-          if (contentTopPos < boundingTopPos && contentBottomPos < boundingBottomPos) {
-            setVerticalAlign('bottom')
-          } else if (contentBottomPos > boundingBottomPos && contentTopPos > boundingTopPos) {
-            setVerticalAlign('top')
-          }
-        }
-      }
-    },
-    [boundingRef],
-  )
-
-  const handleClickOutside = useCallback(
-    (e) => {
-      if (contentRef.current.contains(e.target) || triggerRef.current.contains(e.target)) {
-        return
-      }
-
-      setActive(false)
-    },
-    [contentRef, setActive],
-  )
-
-  useEffect(() => {
-    setPosition({ horizontal: true })
-  }, [intersectionEntry, setPosition, windowWidth])
-
-  useEffect(() => {
-    setPosition({ vertical: true })
-  }, [intersectionEntry, setPosition, windowHeight])
-
-  useEffect(() => {
-    if (active) {
-      document.addEventListener('mousedown', handleClickOutside)
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside)
+  const updatePosition = useCallback(() => {
+    const trigger = triggerRef.current
+    const popup = popupRef.current
+    if (!trigger || !popup) {
+      return
     }
+
+    const triggerRect = trigger.getBoundingClientRect()
+    const popupRect = popup.getBoundingClientRect()
+    const margin = 10
+
+    // Vertical positioning with flip
+    let top: number
+    let onTop = verticalAlign === 'top'
+
+    if (verticalAlign === 'bottom') {
+      top = triggerRect.bottom + window.scrollY + margin
+      if (triggerRect.bottom + popupRect.height + margin > window.innerHeight) {
+        top = triggerRect.top + window.scrollY - popupRect.height - margin
+        onTop = true
+      }
+    } else {
+      top = triggerRect.top + window.scrollY - popupRect.height - margin
+      if (triggerRect.top - popupRect.height - margin < 0) {
+        top = triggerRect.bottom + window.scrollY + margin
+        onTop = false
+      }
+    }
+    setIsOnTop(onTop)
+
+    // Horizontal positioning
+    let left =
+      horizontalAlign === 'right'
+        ? triggerRect.right - popupRect.width
+        : horizontalAlign === 'center'
+          ? triggerRect.left + triggerRect.width / 2 - popupRect.width / 2
+          : triggerRect.left
+
+    left = Math.max(margin, Math.min(left, window.innerWidth - popupRect.width - margin))
+
+    // Caret position
+    const triggerCenter = triggerRect.left + triggerRect.width / 2
+    const caretLeft = Math.max(12, Math.min(triggerCenter - left, popupRect.width - 12))
+
+    popup.style.top = `${top}px`
+    popup.style.left = `${left + window.scrollX}px`
+    popup.style.setProperty('--caret-left', `${caretLeft}px`)
+  }, [horizontalAlign, verticalAlign])
+
+  // Position, resize, scroll, and click outside - all when active
+  useEffect(() => {
+    if (!active) {
+      return
+    }
+
+    updatePosition()
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        !popupRef.current?.contains(e.target as Node) &&
+        !triggerRef.current?.contains(e.target as Node)
+      ) {
+        setActive(false)
+      }
+    }
+
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+    document.addEventListener('mousedown', handleClickOutside)
 
     return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [active, handleClickOutside, onToggleOpen])
+  }, [active, updatePosition, setActive])
 
   useEffect(() => {
-    setActive(forceOpen)
+    if (forceOpen !== undefined) {
+      setActive(forceOpen)
+    }
   }, [forceOpen, setActive])
 
-  const classes = [
-    baseClass,
-    className,
-    `${baseClass}--size-${size}`,
-    buttonSize && `${baseClass}--button-size-${buttonSize}`,
-    `${baseClass}--v-align-${verticalAlign}`,
-    `${baseClass}--h-align-${horizontalAlign}`,
-    active && `${baseClass}--active`,
-    showScrollbar && `${baseClass}--show-scrollbar`,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const Trigger = (
+    <PopupTrigger
+      active={active}
+      button={button}
+      buttonType={buttonType}
+      className={buttonClassName}
+      disabled={disabled}
+      noBackground={noBackground}
+      setActive={setActive}
+      size={buttonSize}
+    />
+  )
 
   return (
-    <div className={classes} id={id}>
+    <div className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
       <div className={`${baseClass}__trigger-wrap`} ref={triggerRef}>
         {showOnHover ? (
           <div
@@ -193,47 +187,34 @@ export const Popup: React.FC<PopupProps> = (props) => {
             role="button"
             tabIndex={0}
           >
-            <PopupTrigger
-              {...{
-                active,
-                button,
-                buttonType,
-                className: buttonClassName,
-                disabled,
-                noBackground,
-                setActive,
-                size: buttonSize,
-              }}
-            />
+            {Trigger}
           </div>
         ) : (
-          <PopupTrigger
-            {...{
-              active,
-              button,
-              buttonType,
-              className: buttonClassName,
-              disabled,
-              noBackground,
-              setActive,
-              size: buttonSize,
-            }}
-          />
+          Trigger
         )}
       </div>
 
-      <div className={`${baseClass}__content`} ref={contentRef}>
-        <div className={`${baseClass}__hide-scrollbar`} ref={intersectionRef}>
-          <div className={`${baseClass}__scroll-container`}>
-            <div className={`${baseClass}__scroll-content`}>
-              {render && render({ close: () => setActive(false) })}
+      {active &&
+        createPortal(
+          <div
+            className={[
+              `${baseClass}__content`,
+              `${baseClass}--size-${size}`,
+              showScrollbar && `${baseClass}--show-scrollbar`,
+              isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            ref={popupRef}
+          >
+            <div className={`${baseClass}__scroll-container`}>
+              {render?.({ close: () => setActive(false) })}
               {children}
             </div>
-          </div>
-        </div>
-
-        {caret && <div className={`${baseClass}__caret`} />}
-      </div>
+            {caret && <div className={`${baseClass}__caret`} />}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
