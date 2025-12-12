@@ -146,7 +146,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     const getFocusableElements = () =>
       popup.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        '.popup-button-list__button:not(.popup-button-list__disabled)',
       )
 
     // Only autofocus when opened via keyboard
@@ -177,39 +177,31 @@ export const Popup: React.FC<PopupProps> = (props) => {
         return
       }
 
-      // Focus trap
+      // Focus trap - handle ALL tab navigation ourselves, to also support buttons
+      // that are skipped by the browser.
       if (e.key === 'Tab') {
-        const focusable = getFocusableElements()
+        const focusable = Array.from(getFocusableElements())
         if (focusable.length === 0) {
           return
         }
 
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-        const isInPopup = popup.contains(document.activeElement)
+        e.preventDefault()
 
-        // If nothing in popup is focused, focus first/last based on direction.
-        // This happens when clicking on the popup via mouse, and then using shift
-        // keys to navigate the popup. We do not want to focus a specific button the be
-        // selected when opening the popup via mouse, but we do want the focus trap to work.
-        if (!isInPopup) {
-          e.preventDefault()
-          if (e.shiftKey) {
-            last.focus()
-          } else {
-            first.focus()
-          }
-          return
+        const currentIndex = focusable.findIndex((el) => el === document.activeElement)
+
+        let nextIndex: number
+        if (currentIndex === -1) {
+          // Nothing in popup focused, focus first/last based on direction
+          nextIndex = e.shiftKey ? focusable.length - 1 : 0
+        } else if (e.shiftKey) {
+          // Shift+Tab - go backwards, wrap to end
+          nextIndex = currentIndex === 0 ? focusable.length - 1 : currentIndex - 1
+        } else {
+          // Tab - go forwards, wrap to start
+          nextIndex = currentIndex === focusable.length - 1 ? 0 : currentIndex + 1
         }
 
-        // Wrap around when at edges
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
+        focusable[nextIndex].focus()
       }
     }
 
