@@ -79,6 +79,11 @@ export const koTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
+  dashboard: {
+    addWidget: '위젯 추가',
+    deleteWidget: '위젯 {{id}} 삭제',
+    searchWidgets: '위젯 검색...',
+  },
   error: {
     accountAlreadyActivated: '이 계정은 이미 활성화되었습니다.',
     autosaving: '이 문서를 자동 저장하는 중에 문제가 발생했습니다.',

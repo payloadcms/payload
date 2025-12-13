@@ -77,6 +77,11 @@ export const zhTranslations: DefaultTranslationsObject = {
       '您收到此邮件是因为您（或其他人）已请求重置您账号的密码。请点击以下链接，或将其粘贴到您的浏览器中以完成该过程：',
     youDidNotRequestPassword: '如果您没有要求这样做，请忽略这封邮件，您的密码将保持不变。',
   },
+  dashboard: {
+    addWidget: '添加小部件',
+    deleteWidget: '删除小部件 {{id}}',
+    searchWidgets: '搜索小工具...',
+  },
   error: {
     accountAlreadyActivated: '该账号已被激活。',
     autosaving: '自动保存该文档时出现了问题。',

@@ -79,6 +79,11 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  dashboard: {
+    addWidget: 'উইজেট যোগ করুন',
+    deleteWidget: 'উইজেট মুছে ফেলুন {{id}}',
+    searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
+  },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',
     autosaving: 'এই ডকুমেন্টটি স্বয়ংক্রিয়ভাবে সংরক্ষণ করার সময় একটি সমস্যা হয়েছে।',

@@ -78,6 +78,11 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  dashboard: {
+    addWidget: 'اضافه کردن ویجت',
+    deleteWidget: 'حذف ابزارک {{id}}',
+    searchWidgets: 'جستجوی ابزارک‌ها...',
+  },
   error: {
     accountAlreadyActivated: 'این حساب کاربری قبلاً فعال شده است.',
     autosaving: 'هنگام ذخیره خودکار این صفحه، خطایی رخ داد.',

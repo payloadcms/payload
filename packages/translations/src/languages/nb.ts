@@ -79,6 +79,11 @@ export const nbTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
+  dashboard: {
+    addWidget: 'Legg til widget',
+    deleteWidget: 'Slett widget {{id}}',
+    searchWidgets: 'Søk widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',
     autosaving: 'Det oppstod et problem under automatisk lagring av dokumentet.',

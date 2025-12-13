@@ -80,6 +80,11 @@ export const rsTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако нисте затражили промену лозинке игноришите ову поруку и лозинка ће остати непромењена.',
   },
+  dashboard: {
+    addWidget: 'Dodaj Widget',
+    deleteWidget: 'Obriši vidžet {{id}}',
+    searchWidgets: 'Pretraži widgete...',
+  },
   error: {
     accountAlreadyActivated: 'Овај налог је већ активиран.',
     autosaving: 'Настао је проблем при аутоматском чувању овог документа.',

@@ -184,6 +184,7 @@ export {
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { BlockSelector } from '../../fields/Blocks/BlockSelector/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
+export { ItemsDrawer } from '../../elements/ItemsDrawer/index.js'
 
 // fields
 export { HiddenField } from '../../fields/Hidden/index.js'

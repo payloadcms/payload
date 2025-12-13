@@ -272,6 +272,7 @@ jobs:
           - auth
           - auth-basic
           - bulk-edit
+          - dashboard
           - joins
           - field-error-states
           - fields-relationship
@@ -419,6 +420,7 @@ jobs:
           - auth
           - auth-basic
           - bulk-edit
+          - dashboard
           - joins
           - field-error-states
           - fields-relationship

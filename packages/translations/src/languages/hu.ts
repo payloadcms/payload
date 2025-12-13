@@ -81,6 +81,11 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  dashboard: {
+    addWidget: 'Adjon hozzá widgetet',
+    deleteWidget: 'Törölje a(z) {{id}} widgetet',
+    searchWidgets: 'Keresés widgetek...',
+  },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',
     autosaving: 'Hiba történt a dokumentum automatikus mentése közben.',

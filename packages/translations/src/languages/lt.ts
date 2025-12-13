@@ -80,6 +80,11 @@ export const ltTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
+  dashboard: {
+    addWidget: 'Pridėti valdiklį',
+    deleteWidget: 'Ištrinti valdiklį {{id}}',
+    searchWidgets: 'Ieškokite valdiklių...',
+  },
   error: {
     accountAlreadyActivated: 'Ši paskyra jau aktyvuota.',
     autosaving: 'Šio dokumento automatinio išsaugojimo metu kilo problema.',

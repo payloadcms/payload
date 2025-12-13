@@ -80,6 +80,11 @@ export const ruTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным.',
   },
+  dashboard: {
+    addWidget: 'Добавить виджет',
+    deleteWidget: 'Удалить виджет {{id}}',
+    searchWidgets: 'Поиск виджетов...',
+  },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',
     autosaving: 'При автосохранении этого документа возникла проблема.',
