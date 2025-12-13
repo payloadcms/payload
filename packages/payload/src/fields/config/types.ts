@@ -160,7 +160,7 @@ import type {
   UploadFieldSingleValidation,
 } from '../validations.js'
 
-export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = TData> = {
+export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -228,11 +228,11 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   value?: TValue
 }
 
-export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = TData> = (
+export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = (
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = TData> = {
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -257,12 +257,12 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = TData
   siblingData?: Partial<StripRelationships<TSiblingData>>
 }
 
-export type FieldAccess<TData extends TypeWithID = any, TSiblingData = TData> = (
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
   args: FieldAccessArgs<TData, TSiblingData>,
 ) => boolean | Promise<boolean>
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
-export type Condition<TData extends TypeWithID = any, TSiblingData = TData> = (
+export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   /**
    * The top-level document data
    */
@@ -310,7 +310,7 @@ export type StripRelationships<T> = {
     : Extract<T[K], null | undefined> | ExtractID<T[K]>
 }
 
-export type FilterOptionsProps<TData = any> = {
+export type FilterOptionsProps<TData = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.
    */
@@ -320,7 +320,7 @@ export type FilterOptionsProps<TData = any> = {
    */
   data: TData
   /**
-   * The `id` of the current document being edited. Will be undefined during the `create` operation or when called on a `Filter` component within the list view.
+   * The `id` of the current document being edited. Will be s during the `create` operation or when called on a `Filter` component within the list view.
    */
   id: number | string
   /**
@@ -331,7 +331,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view.
    */
-  siblingData: Partial<StripRelationships<TData>>
+  siblingData: Partial<StripRelationships<TSiblingData>>
   /**
    * An object containing the currently authenticated user.
    */
