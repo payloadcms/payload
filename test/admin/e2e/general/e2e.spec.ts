@@ -535,21 +535,17 @@ describe('General', () => {
       const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
       await gearButton.click()
 
+      const popupButtons = page.locator(
+        '[data-popup-id="settings-menu"] .popup-button-list__button',
+      )
+
       // Check for the first group of buttons
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').first(),
-      ).toContainText('System Settings')
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').nth(1),
-      ).toContainText('View Logs')
+      await expect(popupButtons.first()).toContainText('System Settings')
+      await expect(popupButtons.nth(1)).toContainText('View Logs')
 
       // Check for the second group of buttons
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').nth(2),
-      ).toContainText('Manage Users')
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').nth(3),
-      ).toContainText('View Activity')
+      await expect(popupButtons.nth(2)).toContainText('Manage Users')
+      await expect(popupButtons.nth(3)).toContainText('View Activity')
     })
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {

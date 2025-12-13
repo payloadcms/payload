@@ -368,6 +368,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
             ]
               .filter(Boolean)
               .join(' ')}
+            data-popup-id={id || undefined}
             ref={popupRef}
           >
             <div
