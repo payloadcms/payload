@@ -2,7 +2,7 @@
 
 import type { OptionObject } from 'payload'
 
-import { useAuth } from '@payloadcms/ui'
+import { useAuth, useDocumentEvents } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { createContext } from 'react'
 
@@ -42,11 +42,13 @@ export const TenantSelectionProviderClient = ({
   initialValue,
   tenantCookie,
   tenantOptions,
+  tenantsCollectionSlug,
 }: {
   children: React.ReactNode
   initialValue?: number | string
   tenantCookie?: string
   tenantOptions: OptionObject[]
+  tenantsCollectionSlug: string
 }) => {
   const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
     initialValue,
@@ -123,6 +125,16 @@ export const TenantSelectionProviderClient = ({
       router.refresh()
     }
   }, [userID, tenantCookie, deleteCookie, router])
+
+  // Listen for document events to refresh tenant options when tenants are created/updated
+  const { mostRecentUpdate } = useDocumentEvents() as {
+    mostRecentUpdate: { entitySlug: string; id?: number | string; updatedAt: string } | null
+  }
+  React.useEffect(() => {
+    if (mostRecentUpdate?.entitySlug === tenantsCollectionSlug) {
+      router.refresh()
+    }
+  }, [mostRecentUpdate, tenantsCollectionSlug, router])
 
   return (
     <span

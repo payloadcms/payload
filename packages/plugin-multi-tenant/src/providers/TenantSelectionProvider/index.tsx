@@ -65,6 +65,7 @@ export const TenantSelectionProvider = async ({
       initialValue={initialValue}
       tenantCookie={tenantCookie}
       tenantOptions={tenantOptions}
+      tenantsCollectionSlug={tenantsCollectionSlug}
     >
       {children}
     </TenantSelectionProviderClient>
