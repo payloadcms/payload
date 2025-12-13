@@ -720,6 +720,37 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
     })
+
+    test('blocks - ensure publish locale popup is visible on smaller screen sizes', async () => {
+      // This verifies that the Popup component is not hidden behind overflow: hidden of the parent element,
+      // which is set for smaller screen sizes.
+      // This was an issue until createPortal was introduced in the Popup component.
+      await page.setViewportSize({ width: 480, height: 720 })
+      await page.goto(urlBlocks.create)
+      await page.locator('.form-submit .popup-button').click()
+
+      const popup = page.locator('.popup__content')
+      await expect(popup).toBeVisible()
+
+      // Verify popup is actually visible (not clipped by overflow: hidden)
+      // by checking if elementFromPoint at popup's center returns the popup or its child
+      const box = await popup.boundingBox()
+      expect(box).not.toBeNull()
+
+      const centerX = box!.x + box!.width / 2
+      const centerY = box!.y + box!.height / 2
+
+      const isActuallyVisible = await page.evaluate(
+        ({ selector, x, y }) => {
+          const popup = document.querySelector(selector)
+          const elementAtPoint = document.elementFromPoint(x, y)
+          return popup?.contains(elementAtPoint) ?? false
+        },
+        { selector: '.popup__content', x: centerX, y: centerY },
+      )
+
+      expect(isActuallyVisible).toBe(true)
+    })
   })
 
   test('should not show publish specific locale button when no localized fields exist', async () => {
