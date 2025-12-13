@@ -783,7 +783,7 @@ describe('General', () => {
     })
 
     test('should allow custom translation of locale labels', async () => {
-      const selectOptionClass = '.localizer .popup-button-list__button'
+      const selectOptionClass = '.popup-button-list__button'
       const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
 
