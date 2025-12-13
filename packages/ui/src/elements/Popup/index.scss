@@ -42,17 +42,20 @@
     &.popup--size-fit-content {
       min-width: fit-content;
     }
-
-    &.popup--show-scrollbar {
-      .popup__scroll-container {
-        overflow-y: auto;
-      }
-    }
   }
 
   .popup__scroll-container {
     overflow-y: auto;
     max-height: calc(var(--base) * 10);
+
+    &:not(.popup__scroll-container--show-scrollbar) {
+      scrollbar-width: none; // Firefox
+      -ms-overflow-style: none; // IE/Edge
+
+      &::-webkit-scrollbar {
+        display: none; // Chrome/Safari/Opera
+      }
+    }
   }
 
   .popup__caret {

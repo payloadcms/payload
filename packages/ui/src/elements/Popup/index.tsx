@@ -34,6 +34,12 @@ export type PopupProps = {
   onToggleOpen?: (active: boolean) => void
   render?: (args: { close: () => void }) => React.ReactNode
   showOnHover?: boolean
+  /**
+   * By default, the scrollbar is hidden. If you want to show it, set this to true.
+   * In both cases, the container is still scrollable.
+   *
+   * @default false
+   */
   showScrollbar?: boolean
   size?: 'fit-content' | 'large' | 'medium' | 'small'
   verticalAlign?: 'bottom' | 'top'
@@ -261,14 +267,15 @@ export const Popup: React.FC<PopupProps> = (props) => {
             className={[
               `${baseClass}__content`,
               `${baseClass}--size-${size}`,
-              showScrollbar && `${baseClass}--show-scrollbar`,
               isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
             ]
               .filter(Boolean)
               .join(' ')}
             ref={popupRef}
           >
-            <div className={`${baseClass}__scroll-container`}>
+            <div
+              className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+            >
               {render?.({ close: () => setActive(false) })}
               {children}
             </div>
