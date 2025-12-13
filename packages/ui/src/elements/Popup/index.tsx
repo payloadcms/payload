@@ -26,6 +26,11 @@ export type PopupProps = {
    * Force control the open state of the popup, regardless of the trigger.
    */
   forceOpen?: boolean
+  /**
+   * Preferred horizontal alignment of the popup, if there is enough space available.
+   *
+   * @default 'left'
+   */
   horizontalAlign?: 'center' | 'left' | 'right'
   id?: string
   initActive?: boolean
@@ -42,6 +47,15 @@ export type PopupProps = {
    */
   showScrollbar?: boolean
   size?: 'fit-content' | 'large' | 'medium' | 'small'
+  /**
+   * Preferred vertical alignment of the popup (position below or above the trigger),
+   * if there is enough space available.
+   *
+   * If the popup is too close to the edge of the viewport, it will flip to the opposite side
+   * regardless of the preferred vertical alignment.
+   *
+   * @default 'bottom'
+   */
   verticalAlign?: 'bottom' | 'top'
 }
 
@@ -109,28 +123,49 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     const triggerRect = trigger.getBoundingClientRect()
     const popupRect = popup.getBoundingClientRect()
-    const margin = 10
 
-    // Vertical positioning with flip
+    // Gap between the popup and the trigger/viewport edges (in pixels)
+    const offset = 10
+
+    // /////////////////////////////////////
+    // Vertical Positioning
+    //
+    // Calculates the `top` position in absolute page coordinates.
+    // Uses `verticalAlign` prop as the *preferred* direction, but flips
+    // to the opposite side if there's not enough viewport space.
+    // /////////////////////////////////////
+
     let top: number
     let onTop = verticalAlign === 'top'
 
     if (verticalAlign === 'bottom') {
-      top = triggerRect.bottom + window.scrollY + margin
-      if (triggerRect.bottom + popupRect.height + margin > window.innerHeight) {
-        top = triggerRect.top + window.scrollY - popupRect.height - margin
+      top = triggerRect.bottom + window.scrollY + offset
+
+      if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
+        top = triggerRect.top + window.scrollY - popupRect.height - offset
         onTop = true
       }
     } else {
-      top = triggerRect.top + window.scrollY - popupRect.height - margin
-      if (triggerRect.top - popupRect.height - margin < 0) {
-        top = triggerRect.bottom + window.scrollY + margin
+      top = triggerRect.top + window.scrollY - popupRect.height - offset
+
+      if (triggerRect.top - popupRect.height - offset < 0) {
+        top = triggerRect.bottom + window.scrollY + offset
         onTop = false
       }
     }
+
     setIsOnTop(onTop)
 
-    // Horizontal positioning
+    // /////////////////////////////////////
+    // Horizontal Positioning
+    //
+    // Calculates the `left` position based on `horizontalAlign` prop:
+    // - 'left': aligns popup's left edge with trigger's left edge
+    // - 'right': aligns popup's right edge with trigger's right edge
+    // - 'center': centers popup horizontally relative to trigger
+    // Then clamps to keep the popup within viewport bounds.
+    // /////////////////////////////////////
+
     let left =
       horizontalAlign === 'right'
         ? triggerRect.right - popupRect.width
@@ -138,18 +173,27 @@ export const Popup: React.FC<PopupProps> = (props) => {
           ? triggerRect.left + triggerRect.width / 2 - popupRect.width / 2
           : triggerRect.left
 
-    left = Math.max(margin, Math.min(left, window.innerWidth - popupRect.width - margin))
+    left = Math.max(offset, Math.min(left, window.innerWidth - popupRect.width - offset))
 
-    // Caret position
+    // /////////////////////////////////////
+    // Caret Positioning
+    //
+    // Positions the caret arrow to point at the trigger's horizontal center.
+    // Clamps between 12px from edges to prevent caret from overflowing the popup.
+    // /////////////////////////////////////
+
     const triggerCenter = triggerRect.left + triggerRect.width / 2
     const caretLeft = Math.max(12, Math.min(triggerCenter - left, popupRect.width - 12))
+
+    // /////////////////////////////////////
+    // Apply Styles
+    // /////////////////////////////////////
 
     popup.style.top = `${top}px`
     popup.style.left = `${left + window.scrollX}px`
     popup.style.setProperty('--caret-left', `${caretLeft}px`)
   }, [horizontalAlign, verticalAlign])
 
-  // Position, resize, scroll, click outside, and keyboard
   useEffect(() => {
     if (!active) {
       return
@@ -160,14 +204,24 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
+    // /////////////////////////////////////
+    // Initial Position
+    // Calculate and apply initial popup position on mount.
+    // /////////////////////////////////////
+
     updatePosition()
+
+    // /////////////////////////////////////
+    // Focus Management
+    // When opened via keyboard, autofocus the first focusable button.
+    // When opened via mouse, skip autofocus to avoid unwanted highlights.
+    // /////////////////////////////////////
 
     const getFocusableElements = () =>
       popup.querySelectorAll<HTMLElement>(
         '.popup-button-list__button:not(.popup-button-list__disabled)',
       )
 
-    // Only autofocus when opened via keyboard
     if (openedViaKeyboardRef.current) {
       requestAnimationFrame(() => {
         const focusable = getFocusableElements()
@@ -177,25 +231,36 @@ export const Popup: React.FC<PopupProps> = (props) => {
       })
     }
 
+    // /////////////////////////////////////
+    // Click Outside Handler
+    // Closes popup when clicking outside both the popup and trigger.
+    // /////////////////////////////////////
+
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        !popupRef.current?.contains(e.target as Node) &&
-        !triggerRef.current?.contains(e.target as Node)
-      ) {
+      const isOutsidePopup = !popupRef.current?.contains(e.target as Node)
+      const isOutsideTrigger = !triggerRef.current?.contains(e.target as Node)
+
+      if (isOutsidePopup && isOutsideTrigger) {
         setActive(false)
       }
     }
+
+    // /////////////////////////////////////
+    // Keyboard Navigation
+    // - Escape: closes popup and returns focus to trigger
+    // - Tab/Shift+Tab: cycles through focusable elements with wrapping
+    // - ArrowUp/ArrowDown: navigates between items (same as Tab)
+    // Focus is managed manually to support elements the browser might skip.
+    // /////////////////////////////////////
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
         setActive(false)
-        // Return focus to trigger
         triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]')?.focus()
         return
       }
 
-      // Focus trap and arrow key navigation
       if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         const focusable = Array.from(getFocusableElements())
         if (focusable.length === 0) {
