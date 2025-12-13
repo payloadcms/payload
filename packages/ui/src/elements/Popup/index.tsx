@@ -177,9 +177,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
         return
       }
 
-      // Focus trap - handle ALL tab navigation ourselves, to also support buttons
-      // that are skipped by the browser.
-      if (e.key === 'Tab') {
+      // Focus trap and arrow key navigation
+      if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         const focusable = Array.from(getFocusableElements())
         if (focusable.length === 0) {
           return
@@ -188,16 +187,17 @@ export const Popup: React.FC<PopupProps> = (props) => {
         e.preventDefault()
 
         const currentIndex = focusable.findIndex((el) => el === document.activeElement)
+        const goBackward = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)
 
         let nextIndex: number
         if (currentIndex === -1) {
           // Nothing in popup focused, focus first/last based on direction
-          nextIndex = e.shiftKey ? focusable.length - 1 : 0
-        } else if (e.shiftKey) {
-          // Shift+Tab - go backwards, wrap to end
+          nextIndex = goBackward ? focusable.length - 1 : 0
+        } else if (goBackward) {
+          // Go backwards, wrap to end
           nextIndex = currentIndex === 0 ? focusable.length - 1 : currentIndex - 1
         } else {
-          // Tab - go forwards, wrap to start
+          // Go forwards, wrap to start
           nextIndex = currentIndex === focusable.length - 1 ? 0 : currentIndex + 1
         }
 
