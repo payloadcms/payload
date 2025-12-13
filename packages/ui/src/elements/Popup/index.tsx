@@ -77,6 +77,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const popupRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
+
+  /**
+   * Keeps track of whether the popup was opened via keyboard.
+   * This is used to determine whether to autofocus the first element in the popup.
+   * If the popup was opened via mouse, we do not want to autofocus the first element.
+   */
   const openedViaKeyboardRef = useRef(false)
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
