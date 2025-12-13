@@ -21,7 +21,7 @@
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
     "lucide-react": "^0.376.0",
-    "next": "^15.4.9",
+    "next": "^15.4.10",
     "payload": "beta",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

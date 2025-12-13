@@ -24,7 +24,7 @@
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
     "graphql": "^16.9.0",
-    "next": "^15.4.9",
+    "next": "^15.4.10",
     "payload": "latest",
     "react": "19.2.1",
     "react-dom": "19.2.1"
