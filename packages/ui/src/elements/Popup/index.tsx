@@ -45,6 +45,12 @@ export type PopupProps = {
   verticalAlign?: 'bottom' | 'top'
 }
 
+/**
+ * Component that renders a popup, as well as a button that triggers the popup.
+ *
+ * The popup is rendered in a portal, and is automatically positioned above / below the trigger,
+ * depending on the verticalAlign prop and the space available.
+ */
 export const Popup: React.FC<PopupProps> = (props) => {
   const {
     id,
