@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/kv-cloudflare",
-  "version": "3.64.0",
+  "version": "3.68.3",
   "description": "Cloudflare KV adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
