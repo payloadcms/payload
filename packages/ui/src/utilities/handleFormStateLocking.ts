@@ -25,6 +25,12 @@ export const handleFormStateLocking = async ({
 }: Args): Promise<Result> => {
   let result: Result
 
+  // Check if the locked-documents collection exists
+  if (!req.payload.collections?.['payload-locked-documents']) {
+    // If the collection doesn't exist, locking is not available
+    return result
+  }
+
   if (id || globalSlug) {
     let lockedDocumentQuery
 
