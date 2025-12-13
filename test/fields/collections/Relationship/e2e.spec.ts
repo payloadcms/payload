@@ -82,7 +82,7 @@ describe('relationship', () => {
     await loadCreatePage()
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
     const textField = page.locator('.drawer__content #field-text')
     await expect(textField).toBeEnabled()
@@ -105,7 +105,7 @@ describe('relationship', () => {
 
     // Select the SECOND collection (array-fields) instead of the first (text-fields)
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--array-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--array-fields')
       .click()
 
     await page.locator('[id^=doc-drawer_array-fields_1_] #action-save').click()
@@ -331,7 +331,7 @@ describe('relationship', () => {
     // First fill out the relationship field, as it's required
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
 
     await page.locator('.drawer__content #field-text').fill('something')
