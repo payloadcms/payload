@@ -2369,7 +2369,7 @@ describe('Versions', () => {
       await publishDropdown.click()
 
       const schedulePublishButton = page.locator(
-        '.popup-button-list__button:has-text("Schedule Publish")',
+        '.popup__content .popup-button-list__button:has-text("Schedule Publish")',
       )
       await schedulePublishButton.click()
 

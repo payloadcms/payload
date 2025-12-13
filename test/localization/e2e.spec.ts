@@ -121,14 +121,15 @@ describe('Localization', () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
-      await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
+      await expect(page.locator('.popup__content')).toBeVisible()
     })
 
     test('should filter locale with filterAvailableLocales', async () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
-      await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
+      await expect(page.locator('.popup__content')).toBeVisible()
+      await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
     test('should filter version locale selector with filterAvailableLocales', async () => {
@@ -156,9 +157,7 @@ describe('Localization', () => {
 
       await expect(page.locator('.localizer .popup')).toHaveClass(/popup--active/)
 
-      const activeOption = page.locator(
-        `.localizer .popup.popup--active .popup-button-list__button--selected`,
-      )
+      const activeOption = page.locator(`.popup__content .popup-button-list__button--selected`)
 
       await expect(activeOption).toBeVisible()
       const tagName = await activeOption.evaluate((node) => node.tagName)
@@ -545,7 +544,7 @@ describe('Localization', () => {
       await openLocaleSelector(page)
 
       const localeToSelect = page
-        .locator('.localizer .popup.popup--active .popup-button-list__button')
+        .locator('.popup__content .popup-button-list__button')
         .locator('.localizer__locale-code', {
           hasText: `${spanishLocale}`,
         })

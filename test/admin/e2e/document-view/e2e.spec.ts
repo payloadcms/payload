@@ -766,7 +766,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
+      const customEditMenuItem = page.locator('.popup__content .popup-button-list__button', {
         hasText: 'Custom Edit Menu Item',
       })
 
