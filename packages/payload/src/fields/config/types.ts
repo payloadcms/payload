@@ -320,7 +320,7 @@ export type FilterOptionsProps<TData = any, TSiblingData = any> = {
    */
   data: TData
   /**
-   * The `id` of the current document being edited. Will be s during the `create` operation or when called on a `Filter` component within the list view.
+   * The `id` of the current document being edited. Will be undefined during the `create` operation or when called on a `Filter` component within the list view.
    */
   id: number | string
   /**
