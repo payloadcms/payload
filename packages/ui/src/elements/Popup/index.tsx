@@ -99,6 +99,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
    * If the popup was opened via mouse, we do not want to autofocus the first element.
    */
   const openedViaKeyboardRef = useRef(false)
+
   const [mounted, setMounted] = useState(false)
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
@@ -125,6 +126,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // Position Calculation
   //
   // Calculates and applies popup position relative to trigger.
+  // Always checks viewport bounds (for flipping), but only updates
+  // styles if the calculated position differs from current position.
   // /////////////////////////////////////
 
   const updatePosition = useEffectEvent(() => {
@@ -196,14 +199,27 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const caretLeft = Math.max(12, Math.min(triggerCenter - left, popupRect.width - 12))
 
     // /////////////////////////////////////
-    // Apply Styles
-    // Sets absolute position using page coordinates (viewport + scroll offset).
-    // Caret position is passed via CSS variable for the ::before pseudo-element.
+    // Apply Styles (only if changed)
+    // Compares calculated position with current styles to avoid unnecessary
+    // DOM updates during scroll. This prevents visual lag by relying on the absolute
+    // positioning where possible (popup slightly lags behind when scrolling really fast),
+    // while still allowing position changes when needed (e.g., sticky parent, viewport flip).
+    // Values are rounded to match browser's CSS precision and avoid false updates.
     // /////////////////////////////////////
 
-    popup.style.top = `${top}px`
-    popup.style.left = `${left + window.scrollX}px`
-    popup.style.setProperty('--caret-left', `${caretLeft}px`)
+    const newTop = `${Math.round(top)}px`
+    const newLeft = `${Math.round(left + window.scrollX)}px`
+    const newCaretLeft = `${Math.round(caretLeft)}px`
+
+    if (popup.style.top !== newTop) {
+      popup.style.top = newTop
+    }
+    if (popup.style.left !== newLeft) {
+      popup.style.left = newLeft
+    }
+    if (popup.style.getPropertyValue('--caret-left') !== newCaretLeft) {
+      popup.style.setProperty('--caret-left', newCaretLeft)
+    }
   })
 
   // /////////////////////////////////////
@@ -309,7 +325,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Event Listeners
-    // - resize/scroll: reposition popup to stay aligned with trigger
+    // - resize/scroll: recalculate position (only applies styles if changed)
     // - mousedown: detect clicks outside to close
     // - keydown: handle keyboard navigation
     // /////////////////////////////////////
