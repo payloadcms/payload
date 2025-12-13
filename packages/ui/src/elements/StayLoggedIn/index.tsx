@@ -24,6 +24,7 @@ export const StayLoggedInModal: React.FC = () => {
       routes: { logout: logoutRoute },
     },
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   const { t } = useTranslation()
@@ -35,10 +36,11 @@ export const StayLoggedInModal: React.FC = () => {
         formatAdminURL({
           adminRoute,
           path: logoutRoute,
+          serverURL,
         }),
       ),
     )
-  }, [router, startRouteTransition, adminRoute, logoutRoute])
+  }, [router, startRouteTransition, adminRoute, logoutRoute, serverURL])
 
   const onCancel: OnCancel = useCallback(() => {
     refreshCookie()

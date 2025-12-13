@@ -44,6 +44,8 @@ export async function generateTypes(
     // If a field defines an interfaceName, it should be included in the generated types
     // even if it's not used by another type. Reason: the user might want to use it in their own code.
     unreachableDefinitions: true,
+    // Allow resolving external file references in $ref pointers
+    cwd: process.cwd(),
   })
 
   compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })

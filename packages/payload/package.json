@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.64.0",
+  "version": "3.68.3",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -78,6 +78,7 @@
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "bundle:types": "rollup -c rollup.dts.config.mjs",
@@ -86,7 +87,6 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
   "dependencies": {

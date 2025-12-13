@@ -23,7 +23,14 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
-import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type {
+  GlobalAdminCustom,
+  GlobalCustom,
+  GlobalSlug,
+  RequestContext,
+  TypedGlobal,
+  TypedGlobalSelect,
+} from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
@@ -134,7 +141,7 @@ export type GlobalAdminOptions = {
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
-  custom?: Record<string, any>
+  custom?: GlobalAdminCustom
   /**
    * Custom description for collection
    */
@@ -179,7 +186,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: GlobalCustom
   /**
    * Customize the SQL table name
    */
@@ -240,7 +247,7 @@ export interface SanitizedGlobalConfig
    */
   flattenedFields: FlattenedField[]
   slug: GlobalSlug
-  versions: SanitizedGlobalVersions
+  versions?: SanitizedGlobalVersions
 }
 
 export type Globals = {

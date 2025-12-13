@@ -227,7 +227,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             if (search !== searchArg) {
               lastLoadedPageToUse = 1
             } else {
-              lastLoadedPageToUse = lastLoadedPageArg[relation] + 1
+              lastLoadedPageToUse = (lastLoadedPageArg[relation] || 0) + 1
             }
             await priorRelation
 
@@ -630,6 +630,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           const docUrl = formatAdminURL({
             adminRoute: config.routes.admin,
             path: `/collections/${collectionSlug}/${id}`,
+            serverURL,
           })
 
           window.open(docUrl, '_blank')
@@ -644,7 +645,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         })
       }
     },
-    [config.routes.admin],
+    [config.routes.admin, serverURL],
   )
 
   const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {

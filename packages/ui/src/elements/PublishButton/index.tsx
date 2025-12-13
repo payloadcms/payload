@@ -3,6 +3,8 @@
 import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -23,7 +25,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const {
     id,
     collectionSlug,
-    docConfig,
     globalSlug,
     hasPublishedDoc,
     hasPublishPermission,
@@ -49,7 +50,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     serverURL,
   } = config
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
   const entityConfig = React.useMemo(() => {
@@ -64,21 +65,15 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const hasNewerVersions = unpublishedVersionCount > 0
 
-  const schedulePublish =
-    typeof entityConfig?.versions?.drafts === 'object' &&
-    entityConfig?.versions?.drafts.schedulePublish
-
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const scheduledPublishEnabled = Boolean(schedulePublish)
+  const scheduledPublishEnabled = hasScheduledPublishEnabled(entityConfig)
 
   // If autosave is enabled the modified will always be true so only conditionally check on modified state
-  const hasAutosave = Boolean(
-    typeof entityConfig?.versions?.drafts === 'object' && entityConfig?.versions?.drafts.autosave,
-  )
+  const hasAutosave = hasAutosaveEnabled(entityConfig)
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
@@ -134,7 +129,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     e.preventDefault()
     e.stopPropagation()
 
-    if (saveDraft && docConfig.versions?.drafts && docConfig.versions?.drafts?.autosave) {
+    if (saveDraft && hasAutosave) {
       void saveDraft()
     }
   })
@@ -203,11 +198,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
     )
 
-  const activeLocaleLabel =
-    activeLocale &&
-    (typeof activeLocale.label === 'string'
-      ? activeLocale.label
-      : (activeLocale.label?.[localeCode] ?? undefined))
+  const activeLocaleLabel = activeLocale && getTranslation(activeLocale.label, i18n)
 
   if (!hasPublishPermission) {
     return null
@@ -264,7 +255,12 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
-          schedulePublishConfig={typeof schedulePublish === 'object' && schedulePublish}
+          schedulePublishConfig={
+            scheduledPublishEnabled &&
+            typeof entityConfig.versions.drafts.schedulePublish === 'object'
+              ? entityConfig.versions.drafts.schedulePublish
+              : undefined
+          }
           slug={drawerSlug}
         />
       )}

@@ -95,6 +95,7 @@ export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
               formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}/trash`,
+                serverURL,
               }),
             ),
           )

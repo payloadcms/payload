@@ -306,6 +306,8 @@ async function main() {
       })
     }
 
+    // Install packages BEFORE running any commands that load the config
+    // This ensures all imports in payload.config.ts can be resolved
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
       execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
