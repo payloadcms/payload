@@ -21,7 +21,7 @@ export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: s
 
   await expect(breakpointSelector).toContainText(breakpointLabel)
 
-  const option = page.locator('.popup__content button.popup-button-list__button--selected')
+  const option = page.locator('.live-preview-toolbar-controls__breakpoint button.popup-button')
 
   await expect(option).toHaveText(breakpointLabel)
 }

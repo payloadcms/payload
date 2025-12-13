@@ -5,7 +5,7 @@ import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 import { expect } from 'playwright/test'
 
 export const selectLivePreviewZoom = async (page: Page, zoomLabel: string) => {
-  const zoomSelector = page.locator('.popup__content button.popup-button')
+  const zoomSelector = page.locator('.live-preview-toolbar-controls__zoom button.popup-button')
 
   await expect(() => expect(zoomSelector).toBeTruthy()).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
@@ -21,8 +21,4 @@ export const selectLivePreviewZoom = async (page: Page, zoomLabel: string) => {
   await zoomOption.click()
 
   await expect(zoomSelector).toContainText(zoomLabel)
-
-  const option = page.locator('.popup__content button.popup-button-list__button--selected')
-
-  await expect(option).toHaveText(zoomLabel)
 }
