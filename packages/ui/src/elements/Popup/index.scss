@@ -16,6 +16,10 @@
     }
   }
 
+  .popup__hidden-content {
+    display: none;
+  }
+
   .popup__content {
     --popup-caret-size: 8px;
     --popup-button-highlight: var(--theme-elevation-150);

@@ -358,29 +358,40 @@ export const Popup: React.FC<PopupProps> = (props) => {
         )}
       </div>
 
-      {active &&
-        createPortal(
-          <div
-            className={[
-              `${baseClass}__content`,
-              `${baseClass}--size-${size}`,
-              isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            data-popup-id={id || undefined}
-            ref={popupRef}
-          >
+      {typeof document !== 'undefined'
+        ? // We need to make sure the popup is part of the DOM (although invisible), even if it's not active.
+          // This ensures that components within the popup, like modals, do not unmount when the popup closes.
+          // Otherwise, modals opened from the popup will close unexpectedly when clicking within the modal, since
+          // that closes the popup due to the click outside handler.
+          createPortal(
             <div
-              className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+              className={
+                active
+                  ? [
+                      `${baseClass}__content`,
+                      `${baseClass}--size-${size}`,
+                      isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
+                  : // Do not share any class names between active and disabled popups, to make sure
+                    // tests do not accidentally target inactive popups.
+                    `${baseClass}__hidden-content`
+              }
+              data-popup-id={id || undefined}
+              ref={popupRef}
             >
-              {render?.({ close: () => setActive(false) })}
-              {children}
-            </div>
-            {caret && <div className={`${baseClass}__caret`} />}
-          </div>,
-          document.body,
-        )}
+              <div
+                className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+              >
+                {render?.({ close: () => setActive(false) })}
+                {children}
+              </div>
+              {caret && <div className={`${baseClass}__caret`} />}
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
