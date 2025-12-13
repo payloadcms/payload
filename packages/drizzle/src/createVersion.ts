@@ -27,8 +27,13 @@ export async function createVersion<T extends JsonObject = JsonObject>(
   }: CreateVersionArgs<T>,
 ): Promise<TypeWithVersion<T>> {
   const collection = this.payload.collections[collectionSlug].config
-  const defaultTableName = toSnakeCase(collection.slug)
+  if (collection.versions.drafts) {
+    if (typeof select === 'object') {
+      select.updatedAt = true
+    }
+  }
 
+  const defaultTableName = toSnakeCase(collection.slug)
   const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
 
   const version = { ...versionData }
@@ -54,6 +59,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     data,
     db,
     fields: buildVersionCollectionFields(this.payload.config, collection, true),
+    ignoreResult: returning === false ? 'idOnly' : undefined,
     operation: 'create',
     req,
     select,
@@ -70,7 +76,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
         SET latest = false
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
-          AND ${table.updatedAt} < ${result.updatedAt}
+          AND ${table.updatedAt} < ${result.updatedAt || updatedAt}
       `,
     })
   }

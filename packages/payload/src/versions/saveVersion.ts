@@ -21,6 +21,7 @@ type Args<T extends JsonObject = JsonObject> = {
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
+  returning?: boolean
   select?: SelectType
   snapshot?: any
 }
@@ -36,6 +37,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   payload,
   publishSpecificLocale,
   req,
+  returning,
   select,
   snapshot,
 }: Args<TData>): Promise<JsonObject> => {
@@ -136,6 +138,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
+        returning,
         select: getQueryDraftsSelect({ select }),
         updatedAt: now,
         versionData,
@@ -189,6 +192,9 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
       payload,
       req,
     })
+  }
+  if (returning === false) {
+    return {}
   }
 
   let createdVersion = (result as any).version
