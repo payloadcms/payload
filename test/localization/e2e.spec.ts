@@ -155,7 +155,7 @@ describe('Localization', () => {
 
       await page.locator('.localizer button.popup-button').first().click()
 
-      await expect(page.locator('.localizer .popup')).toHaveClass(/popup--active/)
+      await expect(page.locator('.popup__content')).toBeVisible()
 
       const activeOption = page.locator(`.popup__content .popup-button-list__button--selected`)
 
