@@ -782,7 +782,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {
@@ -801,7 +801,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {

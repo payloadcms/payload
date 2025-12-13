@@ -1200,7 +1200,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+      const publishSpecificLocale = page.locator('.popup__content')
 
       await expect(publishSpecificLocale).toContainText('English')
     })
@@ -1644,7 +1644,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+      const publishSpecificLocale = page.locator('.popup__content')
 
       await expect(publishSpecificLocale).toContainText('English')
     })

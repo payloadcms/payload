@@ -525,7 +525,7 @@ describe('General', () => {
       await openNav(page)
       const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
       await gearButton.click()
-      const popupContent = page.locator('.popup#settings-menu .popup__content')
+      const popupContent = page.locator('.popup__content')
       await expect(popupContent).toBeVisible()
     })
 
