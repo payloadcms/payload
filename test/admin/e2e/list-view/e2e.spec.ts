@@ -1525,8 +1525,7 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await page.locator('.per-page .popup-button').click()
-      await page.locator('.per-page .popup-button').click()
-      const options = page.locator('.per-page button.per-page__button')
+      const options = page.locator('.popup__content button.per-page__button')
       await expect(options).toHaveCount(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
@@ -1567,7 +1566,7 @@ describe('List View', () => {
       await page.locator('.per-page .popup-button').click()
 
       await page
-        .locator('.per-page button.per-page__button', {
+        .locator('.popup__content button.per-page__button', {
           hasText: '15',
         })
         .click()
