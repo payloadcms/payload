@@ -207,7 +207,7 @@ test.describe('Folders', () => {
       await expect(createDocButton).toBeVisible()
       await createDocButton.click()
       const postButton = page
-        .locator('.popup--active')
+        .locator('.popup__content')
         .locator('.popup-button-list__button', { hasText: 'Post' })
       await expect(postButton).toBeVisible()
       await postButton.click()
@@ -290,7 +290,7 @@ test.describe('Folders', () => {
         hasText: 'Create New',
       })
       await createNewDropdown.click()
-      const createFolderButton = page.locator('.popup-button-list__button').first()
+      const createFolderButton = page.locator('.popup__content .popup-button-list__button').first()
       await createFolderButton.click()
       await createFolderDoc({
         page,
@@ -300,7 +300,9 @@ test.describe('Folders', () => {
       await expect(page.locator('.folder-file-card__name')).toHaveText('Nested Folder')
 
       await createNewDropdown.click()
-      const createPostButton = page.locator('.popup-button-list__button', { hasText: 'Post' })
+      const createPostButton = page.locator('.popup__content .popup-button-list__button', {
+        hasText: 'Post',
+      })
       await createPostButton.click()
 
       const postTitleInput = page.locator('input[id="field-title"]')
@@ -612,10 +614,9 @@ test.describe('Folders', () => {
         hasText: 'Create New',
       })
       await createNewDropdown.click()
-      const createFolderButton = page.locator(
-        '.list-header__title-actions .popup-button-list__button',
-        { hasText: 'Folder' },
-      )
+      const createFolderButton = page.locator('.popup__content .popup-button-list__button', {
+        hasText: 'Folder',
+      })
       await createFolderButton.click()
 
       const drawer = page.locator('dialog .collection-edit--payload-folders')
@@ -671,12 +672,9 @@ test.describe('Folders', () => {
       )
       await expect(folderDropdown).toBeVisible()
       await folderDropdown.click()
-      const createFolderButton = page.locator(
-        '.list-header__title-actions .popup-button-list__button',
-        {
-          hasText: 'Folder',
-        },
-      )
+      const createFolderButton = page.locator('.popup__content .popup-button-list__button', {
+        hasText: 'Folder',
+      })
       await createFolderButton.click()
 
       const drawer = page.locator('dialog .collection-edit--payload-folders')
@@ -709,10 +707,9 @@ test.describe('Folders', () => {
         hasText: 'Create New',
       })
       await createNewDropdown.click()
-      const createFolderButton = page.locator(
-        '.list-header__title-actions .popup-button-list__button',
-        { hasText: 'Folder' },
-      )
+      const createFolderButton = page.locator('.popup__content .popup-button-list__button', {
+        hasText: 'Folder',
+      })
       await createFolderButton.click()
 
       const drawer = page.locator('dialog .collection-edit--payload-folders')
