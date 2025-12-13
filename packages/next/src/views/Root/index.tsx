@@ -120,6 +120,7 @@ export const RootPage = async ({
   }
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
     cookies,
     locale,
@@ -138,7 +139,11 @@ export const RootPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
-      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+      // intentionally omit `serverURL` to keep URL relative
+      urlSuffix: `${formatAdminURL({
+        adminRoute,
+        path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
+      })}${searchParams ? queryString : ''}`,
     },
   })
 
