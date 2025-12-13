@@ -6,6 +6,7 @@ export * as PopupList from './PopupButtonList/index.js'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import './index.scss'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
@@ -114,7 +115,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
     [onToggleClose, onToggleOpen],
   )
 
-  const updatePosition = useCallback(() => {
+  // /////////////////////////////////////
+  // Position Calculation
+  //
+  // Calculates and applies popup position relative to trigger.
+  // /////////////////////////////////////
+
+  const updatePosition = useEffectEvent(() => {
     const trigger = triggerRef.current
     const popup = popupRef.current
     if (!trigger || !popup) {
@@ -129,9 +136,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Vertical Positioning
-    //
     // Calculates the `top` position in absolute page coordinates.
-    // Uses `verticalAlign` prop as the *preferred* direction, but flips
+    // Uses `verticalAlign` prop as the preferred direction, but flips
     // to the opposite side if there's not enough viewport space.
     // /////////////////////////////////////
 
@@ -158,7 +164,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Horizontal Positioning
-    //
     // Calculates the `left` position based on `horizontalAlign` prop:
     // - 'left': aligns popup's left edge with trigger's left edge
     // - 'right': aligns popup's right edge with trigger's right edge
@@ -177,7 +182,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Caret Positioning
-    //
     // Positions the caret arrow to point at the trigger's horizontal center.
     // Clamps between 12px from edges to prevent caret from overflowing the popup.
     // /////////////////////////////////////
@@ -187,12 +191,82 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Apply Styles
+    // Sets absolute position using page coordinates (viewport + scroll offset).
+    // Caret position is passed via CSS variable for the ::before pseudo-element.
     // /////////////////////////////////////
 
     popup.style.top = `${top}px`
     popup.style.left = `${left + window.scrollX}px`
     popup.style.setProperty('--caret-left', `${caretLeft}px`)
-  }, [horizontalAlign, verticalAlign])
+  })
+
+  // /////////////////////////////////////
+  // Click Outside Handler
+  // Closes popup when clicking outside both the popup and trigger.
+  // /////////////////////////////////////
+
+  const handleClickOutside = useEffectEvent((e: MouseEvent) => {
+    const isOutsidePopup = !popupRef.current?.contains(e.target as Node)
+    const isOutsideTrigger = !triggerRef.current?.contains(e.target as Node)
+
+    if (isOutsidePopup && isOutsideTrigger) {
+      setActive(false)
+    }
+  })
+
+  // /////////////////////////////////////
+  // Keyboard Navigation
+  // Handles keyboard interactions when popup is open:
+  // - Escape: closes popup and returns focus to trigger
+  // - Tab/Shift+Tab: cycles through focusable items with wrapping
+  // - ArrowUp/ArrowDown: same as Shift+Tab/Tab for menu-style navigation
+  // Focus is managed manually to support elements the browser might skip.
+  // /////////////////////////////////////
+
+  const handleKeyDown = useEffectEvent((e: KeyboardEvent) => {
+    const popup = popupRef.current
+    if (!popup || !active) {
+      return
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      setActive(false)
+      triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]')?.focus()
+      return
+    }
+
+    if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const focusable = Array.from(
+        popup.querySelectorAll<HTMLElement>(
+          '.popup-button-list__button:not(.popup-button-list__disabled)',
+        ),
+      )
+      if (focusable.length === 0) {
+        return
+      }
+
+      e.preventDefault()
+
+      const currentIndex = focusable.findIndex((el) => el === document.activeElement)
+      const goBackward = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)
+
+      let nextIndex: number
+      if (currentIndex === -1) {
+        nextIndex = goBackward ? focusable.length - 1 : 0
+      } else if (goBackward) {
+        nextIndex = currentIndex === 0 ? focusable.length - 1 : currentIndex - 1
+      } else {
+        nextIndex = currentIndex === focusable.length - 1 ? 0 : currentIndex + 1
+      }
+
+      focusable[nextIndex].focus()
+    }
+  })
+
+  // /////////////////////////////////////
+  // Effect: Setup/Teardown position and focus management
+  // /////////////////////////////////////
 
   useEffect(() => {
     if (!active) {
@@ -206,7 +280,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Initial Position
-    // Calculate and apply initial popup position on mount.
+    // Calculate and apply popup position immediately on open.
     // /////////////////////////////////////
 
     updatePosition()
@@ -217,76 +291,22 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // When opened via mouse, skip autofocus to avoid unwanted highlights.
     // /////////////////////////////////////
 
-    const getFocusableElements = () =>
-      popup.querySelectorAll<HTMLElement>(
-        '.popup-button-list__button:not(.popup-button-list__disabled)',
-      )
-
     if (openedViaKeyboardRef.current) {
+      // Use requestAnimationFrame to ensure DOM is ready.
       requestAnimationFrame(() => {
-        const focusable = getFocusableElements()
-        if (focusable.length > 0) {
-          focusable[0].focus()
-        }
+        const firstFocusable = popup.querySelector<HTMLElement>(
+          '.popup-button-list__button:not(.popup-button-list__disabled)',
+        )
+        firstFocusable?.focus()
       })
     }
 
     // /////////////////////////////////////
-    // Click Outside Handler
-    // Closes popup when clicking outside both the popup and trigger.
+    // Event Listeners
+    // - resize/scroll: reposition popup to stay aligned with trigger
+    // - mousedown: detect clicks outside to close
+    // - keydown: handle keyboard navigation
     // /////////////////////////////////////
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const isOutsidePopup = !popupRef.current?.contains(e.target as Node)
-      const isOutsideTrigger = !triggerRef.current?.contains(e.target as Node)
-
-      if (isOutsidePopup && isOutsideTrigger) {
-        setActive(false)
-      }
-    }
-
-    // /////////////////////////////////////
-    // Keyboard Navigation
-    // - Escape: closes popup and returns focus to trigger
-    // - Tab/Shift+Tab: cycles through focusable elements with wrapping
-    // - ArrowUp/ArrowDown: navigates between items (same as Tab)
-    // Focus is managed manually to support elements the browser might skip.
-    // /////////////////////////////////////
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        setActive(false)
-        triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]')?.focus()
-        return
-      }
-
-      if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        const focusable = Array.from(getFocusableElements())
-        if (focusable.length === 0) {
-          return
-        }
-
-        e.preventDefault()
-
-        const currentIndex = focusable.findIndex((el) => el === document.activeElement)
-        const goBackward = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)
-
-        let nextIndex: number
-        if (currentIndex === -1) {
-          // Nothing in popup focused, focus first/last based on direction
-          nextIndex = goBackward ? focusable.length - 1 : 0
-        } else if (goBackward) {
-          // Go backwards, wrap to end
-          nextIndex = currentIndex === 0 ? focusable.length - 1 : currentIndex - 1
-        } else {
-          // Go forwards, wrap to start
-          nextIndex = currentIndex === focusable.length - 1 ? 0 : currentIndex + 1
-        }
-
-        focusable[nextIndex].focus()
-      }
-    }
 
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
@@ -299,7 +319,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [active, updatePosition, setActive])
+  }, [active])
 
   useEffect(() => {
     if (forceOpen !== undefined) {
