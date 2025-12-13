@@ -99,8 +99,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
    * If the popup was opened via mouse, we do not want to autofocus the first element.
    */
   const openedViaKeyboardRef = useRef(false)
+  const [mounted, setMounted] = useState(false)
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
+
+  // Track when component is mounted to avoid SSR/client hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const setActive = useCallback(
     (isActive: boolean, viaKeyboard = false) => {
@@ -358,7 +364,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         )}
       </div>
 
-      {typeof document !== 'undefined'
+      {mounted
         ? // We need to make sure the popup is part of the DOM (although invisible), even if it's not active.
           // This ensures that components within the popup, like modals, do not unmount when the popup closes.
           // Otherwise, modals opened from the popup will close unexpectedly when clicking within the modal, since
