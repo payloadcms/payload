@@ -195,6 +195,16 @@ describe('globals', () => {
       expect(hasAccess.title).toBeDefined()
     })
 
+    it('should return null when user is unauthorised and using findGlobal with disableErrors: true', async () => {
+      const doc = await payload.findGlobal({
+        slug: accessControlSlug,
+        overrideAccess: false,
+        disableErrors: true,
+      })
+
+      expect(doc).toBeNull()
+    })
+
     it('should get globals with defaultValues populated before first creation', async () => {
       const defaultValueGlobal = await payload.findGlobal({
         slug: defaultValueSlug,
