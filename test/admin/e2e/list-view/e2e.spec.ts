@@ -256,9 +256,12 @@ describe('List View', () => {
       await kebabMenu.click()
 
       await expect(
-        page.locator('.popup-button-list').locator('div', {
-          hasText: 'listMenuItems',
-        }),
+        page
+          .locator('.popup-button-list')
+          .locator('div', {
+            hasText: 'listMenuItems',
+          })
+          .first(),
       ).toBeVisible()
     })
 
