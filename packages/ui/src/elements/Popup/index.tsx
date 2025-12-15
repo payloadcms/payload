@@ -12,6 +12,24 @@ import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
 
+/**
+ * Selector for all elements the browser considers tabbable.
+ */
+const TABBABLE_SELECTOR = [
+  'a[href]',
+  'button:not(:disabled)',
+  'input:not(:disabled):not([type="hidden"])',
+  'select:not(:disabled)',
+  'textarea:not(:disabled)',
+  '[tabindex]',
+  '[contenteditable]:not([contenteditable="false"])',
+  'audio[controls]',
+  'video[controls]',
+  'summary',
+]
+  .map((s) => `${s}:not([tabindex="-1"])`)
+  .join(', ')
+
 export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.RefObject<HTMLElement>
@@ -259,11 +277,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      const focusable = Array.from(
-        popup.querySelectorAll<HTMLElement>(
-          '.popup-button-list__button:not(.popup-button-list__disabled)',
-        ),
-      )
+      const focusable = Array.from(popup.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR))
       if (focusable.length === 0) {
         return
       }
@@ -316,9 +330,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     if (openedViaKeyboardRef.current) {
       // Use requestAnimationFrame to ensure DOM is ready.
       requestAnimationFrame(() => {
-        const firstFocusable = popup.querySelector<HTMLElement>(
-          '.popup-button-list__button:not(.popup-button-list__disabled)',
-        )
+        const firstFocusable = popup.querySelector<HTMLElement>(TABBABLE_SELECTOR)
         firstFocusable?.focus()
       })
     }
