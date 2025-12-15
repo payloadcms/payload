@@ -301,6 +301,20 @@ export const Popup: React.FC<PopupProps> = (props) => {
   })
 
   // /////////////////////////////////////
+  // Click Handler for Actionable Elements
+  // Closes popup when buttons/links inside are clicked (includes Enter/Space activation).
+  // /////////////////////////////////////
+
+  const handleActionableClick = useEffectEvent((e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    // Check if the clicked element or any ancestor is an actionable element
+    const actionable = target.closest('button, a[href], [role="button"], [role="menuitem"]')
+    if (actionable && popupRef.current?.contains(actionable)) {
+      setActive(false)
+    }
+  })
+
+  // /////////////////////////////////////
   // Effect: Setup/Teardown position and focus management
   // /////////////////////////////////////
 
@@ -346,12 +360,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
     window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
     document.addEventListener('mousedown', handleClickOutside)
     document.addEventListener('keydown', handleKeyDown)
+    popup.addEventListener('click', handleActionableClick)
 
     return () => {
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
+      popup.removeEventListener('click', handleActionableClick)
     }
   }, [active])
 
