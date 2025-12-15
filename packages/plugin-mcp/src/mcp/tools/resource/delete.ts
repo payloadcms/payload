@@ -15,9 +15,11 @@ export const deleteResourceTool = (
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    id?: string,
+    id?: number | string,
     where?: string,
     depth: number = 0,
+    locale?: string,
+    fallbackLocale?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -28,7 +30,7 @@ export const deleteResourceTool = (
 
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Deleting resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}`,
+        `[payload-mcp] Deleting resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -77,7 +79,11 @@ export const deleteResourceTool = (
       const deleteOptions: Record<string, unknown> = {
         collection: collectionSlug,
         depth,
+        overrideAccess: false,
+        req,
         user,
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
       }
 
       // Delete by ID or where clause
@@ -200,10 +206,10 @@ ${JSON.stringify(errors, null, 2)}
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
       `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
       toolSchemas.deleteResource.parameters.shape,
-      async ({ id, depth, where }) => {
-        return await tool(id, where, depth)
+      async ({ id, depth, fallbackLocale, locale, where }) => {
+        return await tool(id, where, depth, locale, fallbackLocale)
       },
     )
   }

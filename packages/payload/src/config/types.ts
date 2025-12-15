@@ -43,8 +43,10 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  DefaultDocumentIDType,
   FlattenedBlock,
   JobsConfig,
+  KVAdapterResult,
   Payload,
   RequestContext,
   SelectField,
@@ -313,7 +315,7 @@ export type AccessArgs<TData = any> = {
    */
   data?: TData
   /** ID of the resource being accessed */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
@@ -344,7 +346,7 @@ export type Endpoint = {
    * Compatible with Web Request/Response Model
    */
   handler: PayloadHandler
-  /** HTTP method (or "all") */
+  /** HTTP method */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
@@ -439,7 +441,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezonesConfig = {
+export type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
@@ -987,6 +989,17 @@ export type Config = {
        * @default 5
        */
       limit?: number
+      /**
+       * The position of the toast on the screen.
+       * @default 'bottom-right'
+       */
+      position?:
+        | 'bottom-center'
+        | 'bottom-left'
+        | 'bottom-right'
+        | 'top-center'
+        | 'top-left'
+        | 'top-right'
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
@@ -1147,6 +1160,15 @@ export type Config = {
    * @experimental There may be frequent breaking changes to this API
    */
   jobs?: JobsConfig
+  /**
+   * Pass in a KV adapter for use on this project.
+   * @default `DatabaseKVAdapter` from:
+   * ```ts
+   * import { createDatabaseKVAdapter } from 'payload'
+   * createDatabaseKVAdapter()
+   * ```
+   */
+  kv?: KVAdapterResult
   /**
    * Translate your content to different languages/locales.
    *

@@ -14,7 +14,7 @@ import {
   type SelectType,
   type Where,
 } from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
@@ -91,6 +91,7 @@ type TraverseFieldArgs = {
   depth?: number
   draftsEnabled?: boolean
   fields: FlattenedField[]
+  forceWithFields?: boolean
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
@@ -119,6 +120,7 @@ export const traverseFields = ({
   depth,
   draftsEnabled,
   fields,
+  forceWithFields,
   joinQuery = {},
   joins,
   locale,
@@ -231,6 +233,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
+          forceWithFields,
           joinQuery,
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
@@ -358,6 +361,7 @@ export const traverseFields = ({
               depth,
               draftsEnabled,
               fields: block.flattenedFields,
+              forceWithFields: blockSelect === true,
               joinQuery,
               locale,
               parentIsLocalized: parentIsLocalized || field.localized,
@@ -400,6 +404,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
+          forceWithFields,
           joinQuery,
           joins,
           locale,
@@ -617,7 +622,7 @@ export const traverseFields = ({
         } else {
           const useDrafts =
             (versions || draftsEnabled) &&
-            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
+            hasDraftsEnabled(adapter.payload.collections[field.collection].config)
 
           const fields = useDrafts
             ? buildVersionCollectionFields(
@@ -862,6 +867,23 @@ export const traverseFields = ({
       }
 
       default: {
+        if (forceWithFields) {
+          if (
+            (field.type === 'relationship' || field.type === 'upload') &&
+            (field.hasMany || Array.isArray(field.relationTo))
+          ) {
+            withTabledFields.rels = true
+          }
+
+          if (field.type === 'number' && field.hasMany) {
+            withTabledFields.numbers = true
+          }
+
+          if (field.type === 'text' && field.hasMany) {
+            withTabledFields.texts = true
+          }
+        }
+
         if (!select && !selectAllOnCurrentLevel) {
           break
         }

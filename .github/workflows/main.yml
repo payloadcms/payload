@@ -91,7 +91,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
   tests-unit:
     runs-on: ubuntu-24.04
@@ -110,7 +110,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -134,7 +134,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
@@ -185,6 +185,13 @@ jobs:
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+
+        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
+
     steps:
       - uses: actions/checkout@v5
 
@@ -198,7 +205,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -232,6 +239,10 @@ jobs:
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
 
+      - name: Configure Redis
+        run: |
+          echo  "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+
       - name: Integration Tests
         run: pnpm test:int
         env:
@@ -251,6 +262,7 @@ jobs:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
           - _community
+          - a11y
           - access-control
           - admin__e2e__general
           - admin__e2e__list-view
@@ -285,6 +297,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - fields__collections__UploadPoly
+          - fields__collections__UploadMultiPoly
           - group-by
           - folders
           - hooks
@@ -309,8 +323,10 @@ jobs:
           - plugin-import-export
           - plugin-multi-tenant
           - plugin-nested-docs
+          - plugin-redirects
           - plugin-seo
           - sort
+          - server-url
           - trash
           - versions
           - uploads
@@ -329,7 +345,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -351,7 +367,7 @@ jobs:
 
       - name: Setup Playwright - Browsers and Dependencies
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium --no-shell
 
       - name: Setup Playwright - Dependencies-only
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
@@ -473,7 +489,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -538,9 +554,6 @@ jobs:
           - template: website
             database: mongodb
 
-          - template: with-payload-cloud
-            database: mongodb
-
           - template: with-vercel-mongodb
             database: mongodb
 
@@ -576,7 +589,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -673,7 +686,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -732,7 +745,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:

@@ -9,9 +9,11 @@ import type {
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -40,7 +42,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   const {
     slug,
     depth,
-    draft: draftEnabled = false,
+    draft: replaceWithVersion = false,
     flattenLocales,
     globalConfig,
     includeLockStatus,
@@ -80,6 +82,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       accessResult = await executeAccess({ req }, globalConfig.access.read)
     }
 
+    if (accessResult === false) {
+      throw new NotFound(req.t)
+    }
+
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
       forceSelect: globalConfig.forceSelect,
@@ -90,18 +96,22 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc =
-      (args.data as any) ??
-      (await req.payload.db.findGlobal({
-        slug,
-        locale: locale!,
-        req,
-        select,
-        where: overrideAccess ? undefined : (accessResult as Where),
-      }))
-    if (!doc) {
-      doc = {}
+    const docFromDB = await req.payload.db.findGlobal({
+      slug,
+      locale: locale!,
+      req,
+      select,
+      where: overrideAccess ? undefined : (accessResult as Where),
+    })
+
+    // Check if no document was returned (Postgres returns {} instead of null)
+    const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+
+    if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
+      return {} as any
     }
+
+    let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -155,7 +165,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Replace document with draft if available
     // /////////////////////////////////////
 
-    if (globalConfig.versions?.drafts && draftEnabled) {
+    if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
       doc = await replaceWithDraftIfAvailable({
         accessResult,
         doc,
@@ -205,7 +215,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       context: req.context,
       depth: depth!,
       doc,
-      draft: draftEnabled,
+      draft: replaceWithVersion,
       fallbackLocale: fallbackLocale!,
       flattenLocales,
       global: globalConfig,

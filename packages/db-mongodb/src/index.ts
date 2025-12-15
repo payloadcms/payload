@@ -12,7 +12,6 @@ import type {
   CollectionSlug,
   DatabaseAdapterObj,
   JsonObject,
-  Migration,
   Payload,
   TypeWithVersion,
   UpdateGlobalArgs,
@@ -24,7 +23,13 @@ import type {
 import mongoose from 'mongoose'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 
-import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
+import type {
+  CollectionModel,
+  GlobalModel,
+  MigrateDownArgs,
+  MigrateUpArgs,
+  MongooseMigration,
+} from './types.js'
 
 import { connect } from './connect.js'
 import { count } from './count.js'
@@ -62,6 +67,8 @@ import { upsert } from './upsert.js'
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
+  afterCreateConnection?: (adapter: MongooseAdapter) => Promise<void> | void
+  afterOpenConnection?: (adapter: MongooseAdapter) => Promise<void> | void
   /**
    * By default, Payload strips all additional keys from MongoDB data that don't exist
    * in the Payload schema. If you have some data that you want to include to the result
@@ -136,7 +143,7 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  prodMigrations?: Migration[]
+  prodMigrations?: MongooseMigration[]
 
   transactionOptions?: false | TransactionOptions
 
@@ -149,6 +156,7 @@ export interface Args {
    * @default false
    */
   useAlternativeDropDatabase?: boolean
+
   /**
    * Set to `true` to use `BigInt` for custom ID fields of type `'number'`.
    * Useful for databases that don't support `double` or `int32` IDs.
@@ -168,6 +176,8 @@ export interface Args {
 }
 
 export type MongooseAdapter = {
+  afterCreateConnection?: (adapter: MongooseAdapter) => Promise<void> | void
+  afterOpenConnection?: (adapter: MongooseAdapter) => Promise<void> | void
   collections: {
     [slug: string]: CollectionModel
   }
@@ -231,9 +241,12 @@ declare module 'payload' {
 }
 
 export function mongooseAdapter({
+  afterCreateConnection,
+  afterOpenConnection,
   allowAdditionalKeys = false,
   allowIDOnCreate = false,
   autoPluralization = true,
+  collation,
   collectionsSchemaOptions = {},
   connectOptions,
   disableFallbackSort = false,
@@ -257,7 +270,10 @@ export function mongooseAdapter({
       name: 'mongoose',
 
       // Mongoose-specific
+      afterCreateConnection,
+      afterOpenConnection,
       autoPluralization,
+      collation,
       collections: {},
       // @ts-expect-error initialize without a connection
       connection: undefined,

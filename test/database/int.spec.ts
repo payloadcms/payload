@@ -31,6 +31,7 @@ import { fileURLToPath } from 'url'
 
 import type { Global2, Post } from './payload-types.js'
 
+import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
@@ -125,14 +126,14 @@ describe('database', () => {
       })
 
       await payload.update({
-        collection: 'custom-ids',
         id: doc.id,
+        collection: 'custom-ids',
         data: {},
       })
 
       await payload.update({
-        collection: 'custom-ids',
         id: doc.id,
+        collection: 'custom-ids',
         data: {},
       })
 
@@ -140,11 +141,11 @@ describe('database', () => {
         collection: 'custom-ids',
         req: {} as PayloadRequest,
         where: {
-          'version.title': {
-            equals: 'hey',
-          },
           latest: {
             equals: true,
+          },
+          'version.title': {
+            equals: 'hey',
           },
         },
       })
@@ -163,7 +164,6 @@ describe('database', () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: {
-          title: 'test',
           arrayWithIDs: [
             {
               id: arrayRowID,
@@ -171,10 +171,11 @@ describe('database', () => {
           ],
           blocksWithIDs: [
             {
-              blockType: 'block-first',
               id: blockID,
+              blockType: 'block-first',
             },
           ],
+          title: 'test',
         },
       })
 
@@ -189,7 +190,6 @@ describe('database', () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: {
-          title: 'test',
           arrayWithIDs: [
             {
               id: arrayRowID,
@@ -197,16 +197,17 @@ describe('database', () => {
           ],
           blocksWithIDs: [
             {
-              blockType: 'block-first',
               id: blockID,
+              blockType: 'block-first',
             },
           ],
+          title: 'test',
         },
       })
 
       const duplicate = await payload.duplicate({
-        collection: postsSlug,
         id: doc.id,
+        collection: postsSlug,
       })
 
       expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
@@ -217,11 +218,11 @@ describe('database', () => {
       await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
       const res = await payload.create({
         collection: 'posts',
-        data: { title: 'post', categoriesCustomID: [9999] },
+        data: { categoriesCustomID: [9999], title: 'post' },
         depth: 0,
       })
       expect(res.categoriesCustomID[0]).toBe(9999)
-      const resFind = await payload.findByID({ collection: 'posts', id: res.id, depth: 0 })
+      const resFind = await payload.findByID({ id: res.id, collection: 'posts', depth: 0 })
       expect(resFind.categoriesCustomID[0]).toBe(9999)
     })
   })
@@ -299,8 +300,8 @@ describe('database', () => {
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
 
       const result: any = await payload.db.updateOne({
-        collection: postsSlug,
         id: post.id,
+        collection: postsSlug,
         data: {
           createdAt,
         },
@@ -330,8 +331,8 @@ describe('database', () => {
       const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
 
       const result: any = await payload.db.updateOne({
-        collection: postsSlug,
         id: post.id,
+        collection: postsSlug,
         data: {
           updatedAt,
         },
@@ -360,8 +361,8 @@ describe('database', () => {
       })
 
       const result: any = await payload.db.updateOne({
-        collection: postsSlug,
         id: post.id,
+        collection: postsSlug,
         data: {
           title: 'hello2',
         },
@@ -385,11 +386,11 @@ describe('database', () => {
       })
 
       const result: any = await payload.db.updateOne({
-        collection: postsSlug,
         id: post.id,
+        collection: postsSlug,
         data: {
-          updatedAt: null,
           title: 'hello2',
+          updatedAt: null,
         },
       })
 
@@ -410,8 +411,8 @@ describe('database', () => {
         },
       })
       await payload.update({
-        collection: 'categories',
         id: category.id,
+        collection: 'categories',
         data: {
           title: 'hello2',
         },
@@ -463,8 +464,8 @@ describe('database', () => {
         },
       })
       await payload.update({
-        collection: 'categories',
         id: category.id,
+        collection: 'categories',
         data: {
           title: 'hello2',
         },
@@ -519,8 +520,8 @@ describe('database', () => {
       expect(createdDoc.updatedAt).toBeUndefined()
 
       const updated: any = await payload.update({
-        collection: 'noTimeStamps',
         id: createdDoc.id,
+        collection: 'noTimeStamps',
         data: {
           title: 'updated',
         },
@@ -532,8 +533,8 @@ describe('database', () => {
       const createdDocWithTimestamps: any = await payload.create({
         collection: 'noTimeStamps',
         data: {
-          title: 'hello',
           createdAt: date,
+          title: 'hello',
           updatedAt: date,
         },
       })
@@ -541,11 +542,11 @@ describe('database', () => {
       expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
 
       const updatedDocWithTimestamps: any = await payload.update({
-        collection: 'noTimeStamps',
         id: createdDocWithTimestamps.id,
+        collection: 'noTimeStamps',
         data: {
-          title: 'updated',
           createdAt: date,
+          title: 'updated',
           updatedAt: date,
         },
       })
@@ -564,8 +565,8 @@ describe('database', () => {
       expect(createdDoc.updatedAt).toBeUndefined()
 
       const updated: any = await payload.db.updateOne({
-        collection: 'noTimeStamps',
         id: createdDoc.id,
+        collection: 'noTimeStamps',
         data: {
           title: 'updated',
         },
@@ -577,8 +578,8 @@ describe('database', () => {
       const createdDocWithTimestamps: any = await payload.db.create({
         collection: 'noTimeStamps',
         data: {
-          title: 'hello',
           createdAt: date,
+          title: 'hello',
           updatedAt: date,
         },
       })
@@ -586,11 +587,11 @@ describe('database', () => {
       expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
 
       const updatedDocWithTimestamps: any = await payload.db.updateOne({
-        collection: 'noTimeStamps',
         id: createdDocWithTimestamps.id,
+        collection: 'noTimeStamps',
         data: {
-          title: 'updated',
           createdAt: date,
+          title: 'updated',
           updatedAt: date,
         },
       })
@@ -659,9 +660,9 @@ describe('database', () => {
       const createdUser = await payload.db.create({
         collection: 'users',
         data: {
-          password: 'some-password',
           'confirm-password': 'some-password',
           email: 'user2@payloadcms.com',
+          password: 'some-password',
         },
       })
 
@@ -751,7 +752,7 @@ describe('database', () => {
 
       const doc = res.data.createPost
 
-      expect(doc).toMatchObject({ title: 'created', id })
+      expect(doc).toMatchObject({ id, title: 'created' })
       expect(doc.id).toBe(id)
     })
   })
@@ -810,8 +811,8 @@ describe('database', () => {
 
     const resDesc = await payload.findDistinct({
       collection: 'posts',
-      sort: '-title',
       field: 'title',
+      sort: '-title',
     })
 
     expect(resDesc.values).toStrictEqual(titles.toReversed())
@@ -842,19 +843,19 @@ describe('database', () => {
       // eslint-disable-next-line jest/no-conditional-in-test
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
-        await payload.create({ collection: 'posts', data: { title: randomUUID(), category } })
+        await payload.create({ collection: 'posts', data: { category, title: randomUUID() } })
       }
     }
 
     const resultDepth0 = await payload.findDistinct({
       collection: 'posts',
-      sort: 'category.title',
       field: 'category',
+      sort: 'category.title',
     })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
     const resultDepth1 = await payload.findDistinct({
-      depth: 1,
       collection: 'posts',
+      depth: 1,
       field: 'category',
       sort: 'category.title',
     })
@@ -886,44 +887,44 @@ describe('database', () => {
     await payload.create({
       collection: 'posts',
       data: {
-        title: '1',
         categories: [categoriesIDS[0]?.categories, categoriesIDS[1]?.categories],
+        title: '1',
       },
     })
 
     await payload.create({
       collection: 'posts',
       data: {
-        title: '2',
         categories: [
           categoriesIDS[0]?.categories,
           categoriesIDS[2]?.categories,
           categoriesIDS[3]?.categories,
         ],
+        title: '2',
       },
     })
 
     await payload.create({
       collection: 'posts',
       data: {
-        title: '3',
         categories: [
           categoriesIDS[0]?.categories,
           categoriesIDS[3]?.categories,
           categoriesIDS[1]?.categories,
         ],
+        title: '3',
       },
     })
 
     const resultDepth0 = await payload.findDistinct({
       collection: 'posts',
-      sort: 'categories.title',
       field: 'categories',
+      sort: 'categories.title',
     })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
     const resultDepth1 = await payload.findDistinct({
-      depth: 1,
       collection: 'posts',
+      depth: 1,
       field: 'categories',
       sort: 'categories.title',
     })
@@ -943,8 +944,8 @@ describe('database', () => {
     }
 
     const resultDepth1NoSort = await payload.findDistinct({
-      depth: 1,
       collection: 'posts',
+      depth: 1,
       field: 'categories',
     })
 
@@ -976,28 +977,28 @@ describe('database', () => {
 
     const post_1 = await payload.create({
       collection: 'posts',
-      data: { title: 'post_1', categoryPoly: { relationTo: 'categories', value: category_1.id } },
+      data: { categoryPoly: { relationTo: 'categories', value: category_1.id }, title: 'post_1' },
     })
     const post_2 = await payload.create({
       collection: 'posts',
-      data: { title: 'post_2', categoryPoly: { relationTo: 'categories', value: category_1.id } },
+      data: { categoryPoly: { relationTo: 'categories', value: category_1.id }, title: 'post_2' },
     })
     const post_3 = await payload.create({
       collection: 'posts',
-      data: { title: 'post_3', categoryPoly: { relationTo: 'categories', value: category_2.id } },
+      data: { categoryPoly: { relationTo: 'categories', value: category_2.id }, title: 'post_3' },
     })
     const post_4 = await payload.create({
       collection: 'posts',
-      data: { title: 'post_4', categoryPoly: { relationTo: 'categories', value: category_3.id } },
+      data: { categoryPoly: { relationTo: 'categories', value: category_3.id }, title: 'post_4' },
     })
     const post_5 = await payload.create({
       collection: 'posts',
-      data: { title: 'post_5', categoryPoly: { relationTo: 'categories', value: category_3.id } },
+      data: { categoryPoly: { relationTo: 'categories', value: category_3.id }, title: 'post_5' },
     })
 
     const result = await payload.findDistinct({
-      depth: 0,
       collection: 'posts',
+      depth: 0,
       field: 'categoryPoly',
     })
 
@@ -1042,50 +1043,50 @@ describe('database', () => {
     const post_1 = await payload.create({
       collection: 'posts',
       data: {
-        title: 'post_1',
         categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
+        title: 'post_1',
       },
     })
     const post_2 = await payload.create({
       collection: 'posts',
       data: {
-        title: 'post_2',
         categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
+        title: 'post_2',
       },
     })
     const post_3 = await payload.create({
       collection: 'posts',
       data: {
-        title: 'post_3',
         categoryPolyMany: [{ relationTo: 'categories', value: category_2.id }],
+        title: 'post_3',
       },
     })
     const post_4 = await payload.create({
       collection: 'posts',
       data: {
-        title: 'post_4',
         categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
+        title: 'post_4',
       },
     })
     const post_5 = await payload.create({
       collection: 'posts',
       data: {
-        title: 'post_5',
         categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
+        title: 'post_5',
       },
     })
 
     const post_6 = await payload.create({
       collection: 'posts',
       data: {
-        title: 'post_6',
         categoryPolyMany: null,
+        title: 'post_6',
       },
     })
 
     const result = await payload.findDistinct({
-      depth: 0,
       collection: 'posts',
+      depth: 0,
       field: 'categoryPolyMany',
     })
 
@@ -1131,14 +1132,14 @@ describe('database', () => {
       data: { title: 'category_3' },
     })
 
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
 
     const res = await payload.findDistinct({
       collection: 'posts',
@@ -1175,14 +1176,14 @@ describe('database', () => {
       data: { title: 'category_3' },
     })
 
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
 
     const res = await payload.findDistinct({
       collection: 'posts',
@@ -1213,30 +1214,30 @@ describe('database', () => {
 
     const category_1 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_1', simple: simple_1 },
+      data: { simple: simple_1, title: 'category_1' },
     })
     const category_2 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_2', simple: simple_2 },
+      data: { simple: simple_2, title: 'category_2' },
     })
     const category_3 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_3', simple: simple_3 },
+      data: { simple: simple_3, title: 'category_3' },
     })
     const category_4 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_4', simple: simple_3 },
+      data: { simple: simple_3, title: 'category_4' },
     })
 
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_4 } })
+    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_4, title: 'post' } })
 
     const res = await payload.findDistinct({
       collection: 'posts',
@@ -1267,30 +1268,30 @@ describe('database', () => {
 
     const category_1 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_1', simple: simple_1 },
+      data: { simple: simple_1, title: 'category_1' },
     })
     const category_2 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_2', simple: simple_2 },
+      data: { simple: simple_2, title: 'category_2' },
     })
     const category_3 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_3', simple: simple_3 },
+      data: { simple: simple_3, title: 'category_3' },
     })
     const category_4 = await payload.create({
       collection: 'categories',
-      data: { title: 'category_4', simple: simple_3 },
+      data: { simple: simple_3, title: 'category_4' },
     })
 
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
-    await payload.create({ collection: 'posts', data: { title: 'post', category: category_4 } })
+    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({ collection: 'posts', data: { category: category_4, title: 'post' } })
 
     const res = await payload.findDistinct({
       collection: 'posts',
@@ -1317,7 +1318,7 @@ describe('database', () => {
       collection: 'categories',
       data: { title: 'category' },
     })
-    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    await payload.create({ collection: 'posts', data: { category, title: 'post' } })
     const distinct = await payload.findDistinct({ collection: 'posts', field: 'categoryID' })
     expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
   })
@@ -1329,10 +1330,101 @@ describe('database', () => {
       collection: 'categories',
       data: { title: 'category' },
     })
-    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    await payload.create({ collection: 'posts', data: { category, title: 'post' } })
     const distinct = await payload.findDistinct({ collection: 'posts', field: 'category.id' })
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
+
+  describe('relationship field pagination', () => {
+    let createdCategoryIds: string[] = []
+    let createdPostIds: string[] = []
+
+    beforeEach(async () => {
+      // Create 15 unique categories
+      const categoryPromises = Array.from({ length: 15 }).map(async (_, i) => {
+        const cat = await payload.create({
+          collection: 'categories',
+          data: { title: `DistinctTest-Cat-${i + 1}-${Date.now()}` },
+        })
+        return cat.id
+      })
+      createdCategoryIds = await Promise.all(categoryPromises)
+
+      // Create 15 posts, each with a unique category
+      const postPromises = createdCategoryIds.map(async (categoryId, i) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            category: categoryId,
+            title: `DistinctTest-Post-${i + 1}-${Date.now()}`,
+          },
+        })
+        return post.id
+      })
+      createdPostIds = await Promise.all(postPromises)
+    })
+
+    afterAll(async () => {
+      // Clean up in order: posts first, then categories
+      await Promise.all(
+        createdPostIds.map((id) => payload.delete({ id, collection: 'posts' }).catch(() => {})),
+      )
+      await Promise.all(
+        createdCategoryIds.map((id) =>
+          payload.delete({ id, collection: 'categories' }).catch(() => {}),
+        ),
+      )
+    })
+
+    it('should paginate distinct results for relationship field paths', async () => {
+      // Test findDistinct with pagination on category.title path
+      const page1 = await payload.findDistinct({
+        collection: 'posts',
+        field: 'category.title',
+        limit: 10,
+        page: 1,
+        where: {
+          title: {
+            contains: 'DistinctTest-Post',
+          },
+        },
+      })
+
+      expect(page1.totalDocs).toBe(15)
+      expect(page1.totalPages).toBe(2)
+      expect(page1.limit).toBe(10)
+      expect(page1.page).toBe(1)
+      expect(page1.hasNextPage).toBe(true)
+      expect(page1.hasPrevPage).toBe(false)
+      expect(page1.values).toHaveLength(10)
+
+      const page2 = await payload.findDistinct({
+        collection: 'posts',
+        field: 'category.title',
+        limit: 10,
+        page: 2,
+        where: {
+          title: {
+            contains: 'DistinctTest-Post',
+          },
+        },
+      })
+
+      expect(page2.totalDocs).toBe(15)
+      expect(page2.totalPages).toBe(2)
+      expect(page2.page).toBe(2)
+      expect(page2.hasNextPage).toBe(false)
+      expect(page2.hasPrevPage).toBe(true)
+      expect(page2.values).toHaveLength(5)
+
+      // Verify no duplicate values between pages
+      const page1Values = page1.values.map((v: any) => v['category.title'])
+      const page2Values = page2.values.map((v: any) => v['category.title'])
+      const intersection = page1Values.filter((v) => page2Values.includes(v))
+      expect(intersection).toHaveLength(0)
+    })
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -1341,25 +1433,25 @@ describe('database', () => {
     it('top level: should throw a unique error', async () => {
       await payload.create({
         collection: 'compound-indexes',
-        data: { three: randomUUID(), one: '1', two: '2' },
+        data: { one: '1', three: randomUUID(), two: '2' },
       })
 
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
-        data: { three: randomUUID(), one: '1', two: '3' },
+        data: { one: '1', three: randomUUID(), two: '3' },
       })
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
-        data: { three: randomUUID(), one: '-1', two: '2' },
+        data: { one: '-1', three: randomUUID(), two: '2' },
       })
 
       // fails
       await expect(
         payload.create({
           collection: 'compound-indexes',
-          data: { three: randomUUID(), one: '1', two: '2' },
+          data: { one: '1', three: randomUUID(), two: '2' },
         }),
       ).rejects.toBeTruthy()
     })
@@ -1368,28 +1460,28 @@ describe('database', () => {
       await payload.create({
         collection: 'compound-indexes',
         data: {
+          group: { four: '4' },
           one: randomUUID(),
           three: '3',
-          group: { four: '4' },
         },
       })
 
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
-        data: { one: randomUUID(), three: '3', group: { four: '5' } },
+        data: { group: { four: '5' }, one: randomUUID(), three: '3' },
       })
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
-        data: { one: randomUUID(), three: '4', group: { four: '4' } },
+        data: { group: { four: '4' }, one: randomUUID(), three: '4' },
       })
 
       // fails
       await expect(
         payload.create({
           collection: 'compound-indexes',
-          data: { one: randomUUID(), three: '3', group: { four: '4' } },
+          data: { group: { four: '4' }, one: randomUUID(), three: '3' },
         }),
       ).rejects.toBeTruthy()
     })
@@ -1597,8 +1689,8 @@ describe('database', () => {
 
       const versions_before = await payload.db.versions['relationships-migration'].insertMany(
         docs_before.map((doc, i) => ({
-          version: doc,
           parent: inserted[i]._id.toHexString(),
+          version: doc,
         })),
         {
           lean: true,
@@ -1608,7 +1700,7 @@ describe('database', () => {
       expect(inserted.every((doc) => typeof doc.relationship === 'string')).toBeTruthy()
 
       await initTransaction(req)
-      await migrateRelationshipsV2_V3({ req, batchSize: 66 }).catch(async (err) => {
+      await migrateRelationshipsV2_V3({ batchSize: 66, req }).catch(async (err) => {
         await killTransaction(req)
         payload.logger.error(err)
         hasErr = true
@@ -1768,7 +1860,7 @@ describe('database', () => {
           ],
         },
       })
-      const res = await payload.findByID({ collection: 'aliases', id })
+      const res = await payload.findByID({ id, collection: 'aliases' })
       expect(
         res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName,
       ).toHaveLength(1)
@@ -1947,8 +2039,8 @@ describe('database', () => {
         })
         it('should not use transaction calling update() with disableTransaction', async () => {
           const result = await payload.update({
-            collection,
             id: disabledTransactionPost.id,
+            collection,
             data: {
               title,
             },
@@ -1959,8 +2051,8 @@ describe('database', () => {
         })
         it('should not use transaction calling delete() with disableTransaction', async () => {
           const result = await payload.delete({
-            collection,
             id: disabledTransactionPost.id,
+            collection,
             data: {
               title,
             },
@@ -1989,10 +2081,10 @@ describe('database', () => {
         data: {
           title: 'world',
         },
+        limit: 5,
         where: {
           title: { equals: 'hello' },
         },
-        limit: 5,
       })
 
       const findResult = await payload.find({
@@ -2185,8 +2277,8 @@ describe('database', () => {
         await payload.create({
           collection: postsSlug,
           data: {
-            title: 'not updated',
             number: i,
+            title: 'not updated',
           },
         })
       }
@@ -2252,8 +2344,8 @@ describe('database', () => {
         await payload.create({
           collection: postsSlug,
           data: {
-            title: 'not updated',
             number: i,
+            title: 'not updated',
           },
         })
       }
@@ -2319,8 +2411,8 @@ describe('database', () => {
         await payload.create({
           collection: postsSlug,
           data: {
-            title: 'not updated',
             number: i,
+            title: 'not updated',
           },
         })
       }
@@ -2386,8 +2478,8 @@ describe('database', () => {
         await payload.create({
           collection: postsSlug,
           data: {
-            title: 'not updated',
             number: i,
+            title: 'not updated',
           },
         })
       }
@@ -2626,7 +2718,6 @@ describe('database', () => {
         await payload.create({
           collection: postsSlug,
           data: {
-            title: 'Title',
             D1: {
               D2: {
                 D3: {
@@ -2635,6 +2726,7 @@ describe('database', () => {
                 },
               },
             },
+            title: 'Title',
           },
         })
       } catch (e: any) {
@@ -2682,7 +2774,7 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
-      expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
       expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
@@ -2847,9 +2939,8 @@ describe('database', () => {
       const isSQLite = payload.db.name === 'sqlite'
 
       payload.db.afterSchemaInit = [
-        ({ schema, extendTable }) => {
+        ({ extendTable, schema }) => {
           extendTable({
-            table: schema.tables.places,
             columns: {
               // SQLite doesn't have DB length enforcement
               // eslint-disable-next-line jest/no-conditional-in-test
@@ -2861,6 +2952,7 @@ describe('database', () => {
                 ? drizzleSqlite.integer('extra_column')
                 : drizzlePg.integer('extra_column'),
             },
+            table: schema.tables.places,
           })
 
           return schema
@@ -2917,15 +3009,15 @@ describe('database', () => {
       const isSQLite = payload.db.name === 'sqlite'
 
       payload.db.afterSchemaInit = [
-        ({ schema, extendTable }) => {
+        ({ extendTable, schema }) => {
           extendTable({
-            table: schema.tables.places,
             extraConfig: (t) => ({
               // eslint-disable-next-line jest/no-conditional-in-test
               uniqueOnCityAndCountry: (isSQLite ? drizzleSqlite : drizzlePg)
                 .unique()
                 .on(t.city, t.country),
             }),
+            table: schema.tables.places,
           })
 
           return schema
@@ -2980,18 +3072,18 @@ describe('database', () => {
     it('should not save a field with `virtual: true` to the db', async () => {
       const createRes = await payload.create({
         collection: 'fields-persistance',
-        data: { text: 'asd', array: [], textHooked: 'asd' },
+        data: { array: [], text: 'asd', textHooked: 'asd' },
       })
 
       const resLocal = await payload.findByID({
-        collection: 'fields-persistance',
         id: createRes.id,
+        collection: 'fields-persistance',
       })
 
       const resDb = (await payload.db.findOne({
         collection: 'fields-persistance',
-        where: { id: { equals: createRes.id } },
         req: {} as PayloadRequest,
+        where: { id: { equals: createRes.id } },
       })) as Record<string, unknown>
 
       expect(resDb.text).toBeUndefined()
@@ -3003,12 +3095,12 @@ describe('database', () => {
 
     it('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async () => {
       const res = await payload.create({
+        collection: 'fields-persistance',
         data: {
           textWithinCollapsible: '1',
           textWithinRow: '2',
           textWithinTabs: '3',
         },
-        collection: 'fields-persistance',
       })
 
       expect(res.textWithinCollapsible).toBeUndefined()
@@ -3020,11 +3112,11 @@ describe('database', () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post.id },
+        depth: 0,
       })
 
-      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      const doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
       expect(doc.postTitle).toBe('my-title')
       const draft = await payload.find({
         collection: 'virtual-relations',
@@ -3038,14 +3130,14 @@ describe('database', () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post.id },
+        depth: 0,
       })
 
       const doc = await payload.findByID({
+        id,
         collection: 'virtual-relations',
         depth: 0,
-        id,
         select: { postTitle: true },
       })
       expect(doc.postTitle).toBe('my-title-10')
@@ -3055,17 +3147,17 @@ describe('database', () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post.id },
+        depth: 0,
       })
 
-      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      const doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
       expect(doc.postTitleHidden).toBeUndefined()
 
       const doc_show = await payload.findByID({
+        id,
         collection: 'virtual-relations',
         depth: 0,
-        id,
         showHiddenFields: true,
       })
       expect(doc_show.postTitleHidden).toBe('my-title-3')
@@ -3075,13 +3167,13 @@ describe('database', () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post.id },
+        depth: 0,
       })
 
-      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
       expect(docDepth2.postID).toBe(post.id)
-      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      const docDepth0 = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
       expect(docDepth0.postID).toBe(post.id)
     })
 
@@ -3089,15 +3181,15 @@ describe('database', () => {
       const customID = await payload.create({ collection: 'custom-ids', data: {} })
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { customID: customID.id },
+        depth: 0,
       })
 
-      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
       expect(docDepth2.customIDValue).toBe(customID.id)
       const docDepth0 = await payload.findByID({
-        collection: 'virtual-relations',
         id,
+        collection: 'virtual-relations',
         depth: 0,
       })
       expect(docDepth0.customIDValue).toBe(customID.id)
@@ -3114,39 +3206,39 @@ describe('database', () => {
       })
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post.id },
+        depth: 0,
       })
 
-      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
       expect(docDepth2.postCategoryID).toBe(category.id)
-      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      const docDepth0 = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
       expect(docDepth0.postCategoryID).toBe(category.id)
     })
 
     it('should allow virtual field with reference localized', async () => {
       const post = await payload.create({
         collection: 'posts',
-        data: { title: 'my-title', localized: 'localized en' },
+        data: { localized: 'localized en', title: 'my-title' },
       })
 
       await payload.update({
-        collection: 'posts',
         id: post.id,
-        locale: 'es',
+        collection: 'posts',
         data: { localized: 'localized es' },
+        locale: 'es',
       })
 
       const { id } = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post.id },
+        depth: 0,
       })
 
-      let doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      let doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
       expect(doc.postLocalized).toBe('localized en')
 
-      doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id, locale: 'es' })
+      doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0, locale: 'es' })
       expect(doc.postLocalized).toBe('localized es')
     })
 
@@ -3158,19 +3250,19 @@ describe('database', () => {
 
       const doc_1 = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post_1.id },
+        depth: 0,
       })
       const doc_2 = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post_2.id },
+        depth: 0,
       })
 
       const { docs: ascDocs } = await payload.find({
         collection: 'virtual-relations',
-        sort: 'postTitle',
         depth: 0,
+        sort: 'postTitle',
       })
 
       expect(ascDocs[0]?.id).toBe(doc_1.id)
@@ -3179,8 +3271,8 @@ describe('database', () => {
 
       const { docs: descDocs } = await payload.find({
         collection: 'virtual-relations',
-        sort: '-postTitle',
         depth: 0,
+        sort: '-postTitle',
       })
 
       expect(descDocs[1]?.id).toBe(doc_1.id)
@@ -3195,7 +3287,7 @@ describe('database', () => {
       })
       const post = await payload.create({
         collection: 'posts',
-        data: { title: '1-post', category: category.id },
+        data: { category: category.id, title: '1-post' },
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       expect(doc.postCategoryTitle).toBe('1-category')
@@ -3208,14 +3300,14 @@ describe('database', () => {
       })
       const post = await payload.create({
         collection: 'posts',
-        data: { title: '3-post', category: category.id },
+        data: { category: category.id, title: '3-post' },
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
 
       const docWithSelect = await payload.findByID({
+        id: doc.id,
         collection: 'virtual-relations',
         depth: 0,
-        id: doc.id,
         select: { postCategoryTitle: true },
       })
       expect(docWithSelect.postCategoryTitle).toBe('3-category')
@@ -3228,7 +3320,7 @@ describe('database', () => {
       })
       const post = await payload.create({
         collection: 'posts',
-        data: { title: '2-post', category: category.id },
+        data: { category: category.id, title: '2-post' },
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       const found = await payload.find({
@@ -3247,13 +3339,13 @@ describe('database', () => {
       })
       const post = await payload.create({
         collection: 'posts',
-        data: { title: '3-post', category: category.id },
+        data: { category: category.id, title: '3-post' },
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       const found = await payload.find({
         collection: 'virtual-relations',
-        where: { postCategoryTitle: { equals: '3-category' } },
         draft: true,
+        where: { postCategoryTitle: { equals: '3-category' } },
       })
       expect(found.docs).toHaveLength(1)
       expect(found.docs[0].id).toBe(doc.id)
@@ -3419,8 +3511,8 @@ describe('database', () => {
 
       const res = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { posts: [post1.id, post2.id] },
+        depth: 0,
       })
       expect(res.postsTitles).toEqual(['post 1', 'post 2'])
     })
@@ -3440,13 +3532,13 @@ describe('database', () => {
       })
       const post1 = await payload.create({
         collection: 'posts',
-        data: { title: 'post 1', categories: [category_1.id, category_2.id] },
+        data: { categories: [category_1.id, category_2.id], title: 'post 1' },
       })
 
       const res = await payload.create({
         collection: 'virtual-relations',
-        depth: 0,
         data: { post: post1.id },
+        depth: 0,
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
@@ -3480,7 +3572,7 @@ describe('database', () => {
     try {
       invalidDoc = await payload.create({
         collection: 'relation-b',
-        data: { title: 'invalid', relationship: 'not-real-id' },
+        data: { relationship: 'not-real-id', title: 'invalid' },
       })
     } catch (error) {
       // instanceof checks don't work with libsql
@@ -3498,11 +3590,11 @@ describe('database', () => {
 
   it('should upsert', async () => {
     const postShouldCreated = await payload.db.upsert({
-      req: {},
       collection: postsSlug,
       data: {
         title: 'some-title-here',
       },
+      req: {},
       where: {
         title: {
           equals: 'some-title-here',
@@ -3513,11 +3605,11 @@ describe('database', () => {
     expect(postShouldCreated).toBeTruthy()
 
     const postShouldUpdated = await payload.db.upsert({
-      req: {},
       collection: postsSlug,
       data: {
         title: 'some-title-here',
       },
+      req: {},
       where: {
         title: {
           equals: 'some-title-here',
@@ -3607,8 +3699,8 @@ describe('database', () => {
       where: {
         id: {
           // where order, `in` last
-          not_in: [],
           in: [doc2.id],
+          not_in: [],
         },
       },
     })
@@ -3661,7 +3753,6 @@ describe('database', () => {
 
     const arrItemID = randomUUID()
     const res = await payload.db.collections[postsSlug]?.collection.insertOne({
-      SECRET_FIELD: 'secret data',
       arrayWithIDs: [
         {
           id: arrItemID,
@@ -3669,11 +3760,12 @@ describe('database', () => {
           text: 'existing key',
         },
       ],
+      SECRET_FIELD: 'secret data',
     })
 
     let payloadRes: any = await payload.findByID({
-      collection: postsSlug,
       id: res!.insertedId.toHexString(),
+      collection: postsSlug,
     })
 
     expect(payloadRes.id).toBe(res!.insertedId.toHexString())
@@ -3687,8 +3779,8 @@ describe('database', () => {
     payload.db.allowAdditionalKeys = true
 
     payloadRes = await payload.findByID({
-      collection: postsSlug,
       id: res!.insertedId.toHexString(),
+      collection: postsSlug,
     })
 
     expect(payloadRes.id).toBe(res!.insertedId.toHexString())
@@ -3702,8 +3794,8 @@ describe('database', () => {
     const customID = await payload.create({ collection: 'custom-ids', data: {} })
     const res = await payload.db.queryDrafts({
       collection: 'custom-ids',
-      where: { parent: { equals: customID.id } },
       select: { parent: true },
+      where: { parent: { equals: customID.id } },
     })
 
     expect(res.docs[0].id).toBe(customID.id)
@@ -3727,7 +3819,7 @@ describe('database', () => {
     })
     const post = await payload.create({
       collection: 'posts',
-      data: { title: 'new-post', category: category.id },
+      data: { category: category.id, title: 'new-post' },
     })
 
     const result_1 = await payload.count({
@@ -3770,19 +3862,19 @@ describe('database', () => {
     await payload.delete({ collection: 'posts', where: {} })
     const post_1 = await payload.create({
       collection: 'posts',
-      data: { title: 'a', text: 'text-1' },
+      data: { text: 'text-1', title: 'a' },
     })
     const post_2 = await payload.create({
       collection: 'posts',
-      data: { title: 'a', text: 'text-2' },
+      data: { text: 'text-2', title: 'a' },
     })
     const post_3 = await payload.create({
       collection: 'posts',
-      data: { title: 'a', text: 'text-3' },
+      data: { text: 'text-3', title: 'a' },
     })
     const post_null = await payload.create({
       collection: 'posts',
-      data: { title: 'a', text: null },
+      data: { text: null, title: 'a' },
     })
 
     const { docs } = await payload.find({
@@ -3819,21 +3911,21 @@ describe('database', () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
-        text: 'other text (should not be nuked)',
-        title: 'hello',
+        arrayWithIDs: [{ text: 'some text' }],
         group: { text: 'in group' },
         tab: { text: 'in tab' },
-        arrayWithIDs: [{ text: 'some text' }],
+        text: 'other text (should not be nuked)',
+        title: 'hello',
       },
     })
     const res = (await payload.db.updateOne({
-      where: { id: { equals: post.id } },
+      collection: 'posts',
       data: {
-        title: 'hello updated',
         group: { text: 'in group updated' },
         tab: { text: 'in tab updated' },
+        title: 'hello updated',
       },
-      collection: 'posts',
+      where: { id: { equals: post.id } },
     })) as unknown as DataFromCollectionSlug<'posts'>
 
     expect(res.title).toBe('hello updated')
@@ -3848,32 +3940,32 @@ describe('database', () => {
     const post1 = await payload.create({
       collection: 'posts',
       data: {
-        text: 'other text (should not be nuked)',
-        title: 'hello',
+        arrayWithIDs: [{ text: 'some text' }],
         group: { text: 'in group' },
         tab: { text: 'in tab' },
-        arrayWithIDs: [{ text: 'some text' }],
+        text: 'other text (should not be nuked)',
+        title: 'hello',
       },
     })
     const post2 = await payload.create({
       collection: 'posts',
       data: {
-        text: 'other text 2 (should not be nuked)',
-        title: 'hello',
+        arrayWithIDs: [{ text: 'some text' }],
         group: { text: 'in group' },
         tab: { text: 'in tab' },
-        arrayWithIDs: [{ text: 'some text' }],
+        text: 'other text 2 (should not be nuked)',
+        title: 'hello',
       },
     })
 
     const res = (await payload.db.updateMany({
-      where: { id: { in: [post1.id, post2.id] } },
+      collection: 'posts',
       data: {
-        title: 'hello updated',
         group: { text: 'in group updated' },
         tab: { text: 'in tab updated' },
+        title: 'hello updated',
       },
-      collection: 'posts',
+      where: { id: { in: [post1.id, post2.id] } },
     })) as unknown as Array<DataFromCollectionSlug<'posts'>>
 
     expect(res).toHaveLength(2)
@@ -3910,24 +4002,24 @@ describe('database', () => {
     const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
 
     const res = (await payload.db.updateOne({
+      collection: 'posts',
       data: {
         number: {
           $inc: 10,
         },
       },
-      collection: 'posts',
       where: { id: { equals: post.id } },
     })) as unknown as Post
 
     expect(res.number).toBe(11)
 
     const res2 = (await payload.db.updateOne({
+      collection: 'posts',
       data: {
         number: {
           $inc: -3,
         },
       },
-      collection: 'posts',
       where: { id: { equals: post.id } },
     })) as unknown as Post
 
@@ -3939,30 +4031,30 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          number: 10,
           arrayWithIDs: [
             {
               text: 'some text',
             },
           ],
+          number: 10,
           title: 'post',
         },
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           arrayWithIDs: {
             $push: {
-              text: 'some text 2',
               id: new mongoose.Types.ObjectId().toHexString(),
+              text: 'some text 2',
             },
           },
           number: {
             $inc: 5,
           },
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as Post
 
       expect(res.arrayWithIDs).toHaveLength(2)
@@ -3985,16 +4077,16 @@ describe('database', () => {
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           arrayWithIDs: {
             $push: {
-              text: 'some text 2',
               id: new mongoose.Types.ObjectId().toHexString(),
+              text: 'some text 2',
             },
           },
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as Post
 
       expect(res.arrayWithIDs).toHaveLength(2)
@@ -4016,22 +4108,22 @@ describe('database', () => {
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           // Locales used => no optimized row update => need to pass full data, incuding title
-          title: 'post',
           arrayWithIDs: {
             $push: {
-              text: 'some text 2',
               id: new mongoose.Types.ObjectId().toHexString(),
+              text: 'some text 2',
               textLocalized: {
                 en: 'Some text 2 localized',
                 es: 'Algun texto 2 localizado',
               },
             },
           },
+          title: 'post',
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as Post
 
       expect(res.arrayWithIDs).toHaveLength(2)
@@ -4060,26 +4152,26 @@ describe('database', () => {
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           // Locales used => no optimized row update => need to pass full data, incuding title
-          title: 'post',
           arrayWithIDsLocalized: {
             en: {
               $push: {
-                text: 'some text 2',
                 id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 2',
               },
             },
             es: {
               $push: {
-                text: 'some text 2 es',
                 id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 2 es',
               },
             },
           },
+          title: 'post',
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as Post
 
       expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
@@ -4104,6 +4196,8 @@ describe('database', () => {
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           arrayWithIDs: {
             $push: [
@@ -4118,8 +4212,6 @@ describe('database', () => {
             ],
           },
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as Post
 
       expect(res.arrayWithIDs).toHaveLength(3)
@@ -4143,9 +4235,10 @@ describe('database', () => {
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           // Locales used => no optimized row update => need to pass full data, incuding title
-          title: 'post',
           arrayWithIDs: {
             $push: [
               {
@@ -4166,9 +4259,8 @@ describe('database', () => {
               },
             ],
           },
+          title: 'post',
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as Post
 
       expect(res.arrayWithIDs).toHaveLength(3)
@@ -4203,32 +4295,32 @@ describe('database', () => {
       })
 
       const res = (await payload.db.updateOne({
+        id: post.id,
+        collection: 'posts',
         data: {
           // Locales used => no optimized row update => need to pass full data, incuding title
-          title: 'post',
           arrayWithIDsLocalized: {
             en: {
               $push: {
-                text: 'some text 2',
                 id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 2',
               },
             },
             es: {
               $push: [
                 {
-                  text: 'some text 2 es',
                   id: new mongoose.Types.ObjectId().toHexString(),
+                  text: 'some text 2 es',
                 },
                 {
-                  text: 'some text 3 es',
                   id: new mongoose.Types.ObjectId().toHexString(),
+                  text: 'some text 3 es',
                 },
               ],
             },
           },
+          title: 'post',
         },
-        collection: 'posts',
-        id: post.id,
       })) as unknown as any
 
       expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
@@ -4257,8 +4349,8 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           categories: [cat1.id],
+          title: 'Test Post',
         },
         depth: 0,
       })
@@ -4268,8 +4360,8 @@ describe('database', () => {
 
       // Append another relationship using $push
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           categories: {
             $push: cat2.id,
@@ -4303,15 +4395,15 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           categories: [cat1.id],
+          title: 'Test Post',
         },
       })
 
       // Append multiple relationships using $push
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           categories: {
             $push: [cat2.id, cat3.id],
@@ -4342,15 +4434,15 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           categories: [cat1.id, cat2.id],
+          title: 'Test Post',
         },
       })
 
       // Try to append existing relationship - should not create duplicates
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           categories: {
             $push: [cat1.id, cat2.id], // Appending existing items
@@ -4380,28 +4472,28 @@ describe('database', () => {
       const post1 = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Post 1',
           categories: [cat1.id],
+          title: 'Post 1',
         },
       })
       const post2 = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Post 2',
           categories: [cat1.id],
+          title: 'Post 2',
         },
       })
 
       // Append cat2 to all posts using updateMany
       const result = (await payload.db.updateMany({
         collection: 'posts',
-        where: {
-          id: { in: [post1.id, post2.id] },
-        },
         data: {
           categories: {
             $push: cat2.id,
           },
+        },
+        where: {
+          id: { in: [post1.id, post2.id] },
         },
       })) as unknown as Post[]
 
@@ -4429,13 +4521,13 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           polymorphicRelations: [
             {
               relationTo: 'categories',
               value: category.id,
             },
           ],
+          title: 'Test Post',
         },
         depth: 0, // Don't populate relationships
       })
@@ -4448,8 +4540,8 @@ describe('database', () => {
 
       // Append another polymorphic relationship using $push
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           polymorphicRelations: {
             $push: [
@@ -4484,21 +4576,21 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           polymorphicRelations: [
             {
               relationTo: 'categories',
               value: category.id,
             },
           ],
+          title: 'Test Post',
         },
         depth: 0,
       })
 
       // Try to append the same relationship - should not create duplicates
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           polymorphicRelations: {
             $push: [
@@ -4533,13 +4625,13 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           localizedPolymorphicRelations: [
             {
               relationTo: 'categories',
               value: category1.id,
             },
           ],
+          title: 'Test Post',
         },
         depth: 0,
         locale: 'en',
@@ -4547,8 +4639,8 @@ describe('database', () => {
 
       // Append relationship using $push with correct localized structure
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           localizedPolymorphicRelations: {
             en: {
@@ -4590,7 +4682,6 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Nested $push',
           testNestedGroup: {
             nestedLocalizedPolymorphicRelation: [
               {
@@ -4599,6 +4690,7 @@ describe('database', () => {
               },
             ],
           },
+          title: 'Test Nested $push',
         },
         locale: 'en',
       })
@@ -4606,7 +4698,6 @@ describe('database', () => {
       // Use low-level API to push new items
       await payload.db.updateOne({
         collection: 'posts',
-        where: { id: { equals: post.id } },
         data: {
           'testNestedGroup.nestedLocalizedPolymorphicRelation': {
             en: {
@@ -4619,14 +4710,15 @@ describe('database', () => {
             },
           },
         },
+        where: { id: { equals: post.id } },
       })
 
       // Verify the operation worked
       const result = await payload.findByID({
-        collection: 'posts',
         id: post.id,
-        locale: 'en',
+        collection: 'posts',
         depth: 0,
+        locale: 'en',
       })
 
       expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(2)
@@ -4657,8 +4749,8 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           categories: [cat1.id, cat2.id],
+          title: 'Test Post',
         },
       })
 
@@ -4666,8 +4758,8 @@ describe('database', () => {
 
       // Remove one relationship using $remove
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           categories: {
             $remove: cat1.id,
@@ -4698,8 +4790,8 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           categories: [cat1.id, cat2.id, cat3.id],
+          title: 'Test Post',
         },
       })
 
@@ -4707,8 +4799,8 @@ describe('database', () => {
 
       // Remove multiple relationships using $remove
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           categories: {
             $remove: [cat1.id, cat3.id],
@@ -4739,28 +4831,28 @@ describe('database', () => {
       const post1 = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Post 1',
           categories: [cat1.id, cat2.id, cat3.id],
+          title: 'Post 1',
         },
       })
       const post2 = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Post 2',
           categories: [cat1.id, cat2.id, cat3.id],
+          title: 'Post 2',
         },
       })
 
       // Remove cat1 and cat3 from all posts using updateMany
       const result = (await payload.db.updateMany({
         collection: 'posts',
-        where: {
-          id: { in: [post1.id, post2.id] },
-        },
         data: {
           categories: {
             $remove: [cat1.id, cat3.id],
           },
+        },
+        where: {
+          id: { in: [post1.id, post2.id] },
         },
       })) as unknown as Post[]
 
@@ -4789,7 +4881,6 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           polymorphicRelations: [
             {
               relationTo: 'categories',
@@ -4800,6 +4891,7 @@ describe('database', () => {
               value: category2.id,
             },
           ],
+          title: 'Test Post',
         },
         depth: 0,
       })
@@ -4808,8 +4900,8 @@ describe('database', () => {
 
       // Remove one polymorphic relationship using $remove
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           polymorphicRelations: {
             $remove: [
@@ -4848,12 +4940,12 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           polymorphicRelations: [
             { relationTo: 'categories', value: category1.id },
             { relationTo: 'categories', value: category2.id },
             { relationTo: 'simple', value: simple.id },
           ],
+          title: 'Test Post',
         },
         depth: 0,
       })
@@ -4862,8 +4954,8 @@ describe('database', () => {
 
       // Remove multiple polymorphic relationships using $remove
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           polymorphicRelations: {
             $remove: [
@@ -4900,12 +4992,12 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
           localizedPolymorphicRelations: [
             { relationTo: 'categories', value: category1.id },
             { relationTo: 'categories', value: category2.id },
             { relationTo: 'categories', value: category3.id },
           ],
+          title: 'Test Post',
         },
         depth: 0,
         locale: 'en',
@@ -4913,8 +5005,8 @@ describe('database', () => {
 
       // Remove relationships using $remove with correct localized structure
       const result = (await payload.db.updateOne({
-        collection: 'posts',
         id: post.id,
+        collection: 'posts',
         data: {
           localizedPolymorphicRelations: {
             en: {
@@ -4963,7 +5055,6 @@ describe('database', () => {
       const post = await payload.create({
         collection: 'posts',
         data: {
-          title: 'Test Nested $remove',
           testNestedGroup: {
             nestedLocalizedPolymorphicRelation: [
               {
@@ -4980,6 +5071,7 @@ describe('database', () => {
               },
             ],
           },
+          title: 'Test Nested $remove',
         },
         locale: 'en',
       })
@@ -4987,7 +5079,6 @@ describe('database', () => {
       // Use low-level API to remove items
       await payload.db.updateOne({
         collection: 'posts',
-        where: { id: { equals: post.id } },
         data: {
           'testNestedGroup.nestedLocalizedPolymorphicRelation': {
             en: {
@@ -4998,14 +5089,15 @@ describe('database', () => {
             },
           },
         },
+        where: { id: { equals: post.id } },
       })
 
       // Verify the operation worked
       const result = await payload.findByID({
-        collection: 'posts',
         id: post.id,
-        locale: 'en',
+        collection: 'posts',
         depth: 0,
+        locale: 'en',
       })
 
       expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(1)
@@ -5020,7 +5112,6 @@ describe('database', () => {
     const res = await payload.create({
       collection: 'posts',
       data: {
-        title: 'title',
         blocks: [
           {
             blockType: 'block-third',
@@ -5032,6 +5123,7 @@ describe('database', () => {
             ],
           },
         ],
+        title: 'title',
       },
     })
 
@@ -5077,8 +5169,8 @@ describe('database', () => {
     })
 
     const doc = await payload.findByID({
-      collection: 'blocks-docs',
       id: res?.insertedId?.toHexString() as string,
+      collection: 'blocks-docs',
       locale: 'en',
     })
     expect(doc.testBlocks).toHaveLength(1)
@@ -5110,19 +5202,19 @@ describe('database', () => {
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
     const res_es = await payload.update({
-      collection: 'blocks-docs',
       id: res.id,
-      locale: 'es',
+      collection: 'blocks-docs',
       data: {
-        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
         testBlocks: [{ blockType: 'cta', text: 'text_updated' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
       },
+      locale: 'es',
     })
     expect(res_es.testBlocks[0]?.text).toBe('text_updated')
     expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
     const res_all = await payload.findByID({
-      collection: 'blocks-docs',
       id: res.id,
+      collection: 'blocks-docs',
       locale: 'all',
     })
     expect(res_all.testBlocks[0]?.text).toBe('text_updated')
@@ -5133,5 +5225,77 @@ describe('database', () => {
     delete payload.db.pool
     await payload.db.init()
     await payload.db.connect()
+  })
+
+  it('ensure mongodb query sanitization does not duplicate IDs', () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+
+    const res: any = sanitizeQueryValue({
+      field: {
+        name: '_id',
+        type: 'text',
+      },
+      hasCustomID: false,
+      operator: 'in',
+      parentIsLocalized: false,
+      path: '_id',
+      payload,
+      val: ['68378b649ca45274fb10126f'],
+    })
+
+    expect(res?.val).toHaveLength(1)
+    expect(typeof res?.val?.[0]).toBe('object')
+    expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
+  })
+
+  itMongo('ensure mongodb respects collation when using collection in the config', async () => {
+    // Clear any existing documents
+    await payload.delete({ collection: 'simple', where: {} })
+
+    const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
+    const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
+
+    const simple_1 = await payload.create({
+      collection: 'simple',
+      locale: 'uk',
+      data: { text: 'Роман' },
+    })
+    const simple_2 = await payload.create({
+      collection: 'simple',
+      locale: 'uk',
+      data: { text: 'Віктор' },
+    })
+    const simple_3 = await payload.create({
+      collection: 'simple',
+      locale: 'uk',
+      data: { text: 'Євген' },
+    })
+
+    const results = await payload.find({
+      collection: 'simple',
+      locale: 'uk',
+      sort: 'text',
+    })
+
+    const initialMappedResults = results.docs.map((doc) => doc.text)
+
+    expect(initialMappedResults).toEqual(expectedUnsortedItems)
+
+    payload.db.collation = { strength: 1 }
+
+    const resultsWithCollation = await payload.find({
+      collection: 'simple',
+      locale: 'uk',
+      sort: 'text',
+    })
+
+    const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
+
+    console.log({ docs: JSON.stringify(collatedMappedResults) })
+
+    expect(collatedMappedResults).toEqual(expectedSortedItems)
   })
 })

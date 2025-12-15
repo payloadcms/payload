@@ -42,7 +42,7 @@ export async function buildSearchParam({
   globalSlug?: string
   incomingPath: string
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   payload: Payload
   val: unknown

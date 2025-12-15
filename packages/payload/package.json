@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.61.1",
+  "version": "3.68.4",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -45,6 +45,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
+    },
     "./shared": {
       "import": "./src/exports/shared.ts",
       "types": "./src/exports/shared.ts",
@@ -73,6 +78,7 @@
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "bundle:types": "rollup -c rollup.dts.config.mjs",
@@ -81,7 +87,6 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
   "dependencies": {
@@ -149,6 +154,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
       },
       "./node": {
         "import": "./dist/exports/node.js",

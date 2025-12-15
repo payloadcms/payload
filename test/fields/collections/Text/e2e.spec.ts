@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -341,5 +342,21 @@ describe('Text', () => {
 
     await wait(300)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  describe('A11y', () => {
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-text').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['[id*="react-select-"]'], // ignore react-select elements here
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

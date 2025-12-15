@@ -8,6 +8,7 @@ import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { AllFieldsLocalized } from './collections/AllFields/index.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
@@ -68,6 +69,7 @@ export default buildConfigWithDefaults({
     NestedFields,
     LocalizedDrafts,
     LocalizedDateFields,
+    AllFieldsLocalized,
     {
       admin: {
         listSearchableFields: 'name',
@@ -441,27 +443,47 @@ export default buildConfigWithDefaults({
       },
       {
         code: defaultLocale,
-        label: 'English',
+        label: {
+          de: 'Englisch',
+          en: 'English',
+          es: 'Inglés',
+        },
         rtl: false,
       },
       {
         code: spanishLocale,
-        label: 'Spanish',
+        label: {
+          de: 'Spanisch',
+          en: 'Spanish',
+          es: 'Español',
+        },
         rtl: false,
       },
       {
         code: portugueseLocale,
         fallbackLocale: spanishLocale,
-        label: 'Portuguese',
+        label: {
+          de: 'Portugiesisch',
+          en: 'Portuguese',
+          es: 'Portugués',
+        },
       },
       {
         code: 'ar',
-        label: 'Arabic',
+        label: {
+          de: 'Arabisch',
+          en: 'Arabic',
+          es: 'Árabe',
+        },
         rtl: true,
       },
       {
         code: hungarianLocale,
-        label: 'Hungarian',
+        label: {
+          de: 'Ungarische',
+          en: 'Hungarian',
+          es: 'Húngaro',
+        },
         rtl: false,
       },
     ],

@@ -1,9 +1,5 @@
-import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
-
-import pluralize from 'pluralize'
-const { singular } = pluralize
-
 import type { I18n } from '@payloadcms/translations'
+import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
 import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -14,7 +10,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
-import { toWords } from './formatLabels.js'
+import { formatNames } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
@@ -146,6 +142,30 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
     return {
       type: 'string',
       enum: locales,
+    }
+  }
+
+  return {
+    type: 'null',
+  }
+}
+
+function generateFallbackLocaleEntitySchemas(
+  localization: SanitizedConfig['localization'],
+): JSONSchema4 {
+  if (localization && 'localeCodes' in localization && localization?.localeCodes) {
+    const localeCodes = [...localization.localeCodes].map((localeCode) => {
+      return localeCode
+    }, [])
+
+    return {
+      oneOf: [
+        { type: 'string', enum: ['false', 'none', 'null'] },
+        { type: 'boolean', enum: [false] },
+        { type: 'null' },
+        { type: 'string', enum: localeCodes },
+        { type: 'array', items: { type: 'string', enum: localeCodes } },
+      ],
     }
   }
 
@@ -758,7 +778,7 @@ export function entityToJSONSchema(
 
   const title = entity.typescript?.interface
     ? entity.typescript.interface
-    : singular(toWords(entity.slug, true))
+    : formatNames(entity.slug).singular
 
   let mutableFields = [...entity.flattenedFields]
 
@@ -1067,7 +1087,7 @@ export function authCollectionToOperationsJSONSchema(
     additionalProperties: false,
     properties,
     required: Object.keys(properties),
-    title: `${singular(toWords(`${config.slug}`, true))}AuthOperations`,
+    title: `${formatNames(config.slug).singular}AuthOperations`,
   }
 }
 
@@ -1245,6 +1265,7 @@ export function configToJSONSchema(
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
+      fallbackLocale: generateFallbackLocaleEntitySchemas(config.localization),
       globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
@@ -1253,6 +1274,7 @@ export function configToJSONSchema(
     required: [
       'user',
       'locale',
+      'fallbackLocale',
       'collections',
       'collectionsSelect',
       'collectionsJoins',

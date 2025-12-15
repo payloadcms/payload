@@ -57,7 +57,18 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   }
 
   if (typeof config.carts === 'undefined') {
-    config.carts = true
+    config.carts = {
+      allowGuestCarts: true,
+    }
+  } else if (config.carts === true) {
+    config.carts = {
+      allowGuestCarts: true,
+    }
+  } else if (
+    typeof config.carts === 'object' &&
+    typeof config.carts.allowGuestCarts === 'undefined'
+  ) {
+    config.carts.allowGuestCarts = true
   }
 
   if (typeof config.orders === 'undefined') {
@@ -83,7 +94,7 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   }
 
   config.access = {
-    authenticatedOnly: ({ req: { user } }) => Boolean(user),
+    isAuthenticated: ({ req }) => Boolean(req?.user),
     publicAccess: () => true,
     ...pluginConfig.access,
   }

@@ -63,6 +63,7 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
+  // Intentionally omit `serverURL` to ensure relative path
   const currentRoute = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
@@ -119,6 +120,7 @@ export const RootPage = async ({
   }
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
     cookies,
     locale,
@@ -137,6 +139,7 @@ export const RootPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
+      // intentionally omit `serverURL` to keep URL relative
       urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
     },
   })
@@ -218,10 +221,10 @@ export const RootPage = async ({
     }
   }
 
-  const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
-
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+
+  const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
     redirect(adminRoute)
@@ -246,6 +249,27 @@ export const RootPage = async ({
     user: viewType === 'createFirstUser' ? true : req.user,
   })
   await applyLocaleFiltering({ clientConfig, config, req })
+
+  // Ensure locale on req is still valid after filtering locales
+  if (
+    clientConfig.localization &&
+    req.locale &&
+    !clientConfig.localization.localeCodes.includes(req.locale)
+  ) {
+    redirect(
+      `${currentRoute}${qs.stringify(
+        {
+          ...searchParams,
+          locale: clientConfig.localization.localeCodes.includes(
+            clientConfig.localization.defaultLocale,
+          )
+            ? clientConfig.localization.defaultLocale
+            : clientConfig.localization.localeCodes[0],
+        },
+        { addQueryPrefix: true },
+      )}`,
+    )
+  }
 
   const visibleEntities = getVisibleEntities({ req })
 

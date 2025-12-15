@@ -1,4 +1,5 @@
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
+import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
@@ -63,6 +64,32 @@ export default buildConfigWithDefaults({
       },
     }),
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es', 'fr'],
+    filterAvailableLocales: async ({ locales, req }) => {
+      const tenant = getTenantFromCookie(req.headers, 'text')
+      if (tenant) {
+        const fullTenant = await req.payload.findByID({
+          collection: 'tenants',
+          id: tenant,
+        })
+        if (
+          fullTenant &&
+          Array.isArray(fullTenant.selectedLocales) &&
+          fullTenant.selectedLocales.length > 0
+        ) {
+          if (fullTenant.selectedLocales.includes('allLocales')) {
+            return locales
+          }
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
+        }
+      }
+      return locales
+    },
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

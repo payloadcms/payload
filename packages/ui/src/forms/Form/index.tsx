@@ -7,6 +7,7 @@ import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
+  hasDraftValidationEnabled,
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
@@ -25,7 +26,7 @@ import type {
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueues } from '../../hooks/useQueues.js'
+import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -60,10 +61,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
 
-  const validateDrafts =
-    docConfig?.versions?.drafts && typeof docConfig?.versions?.drafts === 'object'
-      ? (docConfig.versions.drafts.validate ?? false)
-      : false
+  const validateDrafts = hasDraftValidationEnabled(docConfig)
 
   const {
     action,
@@ -98,7 +96,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
-  const { queueTask } = useQueues()
+  const { queueTask } = useQueue()
 
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
@@ -108,7 +106,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
-  const [modified, setModified] = useState(false)
+
+  const [submitted, setSubmitted] = useState(false)
 
   /**
    * Tracks wether the form state passes validation.
@@ -118,9 +117,50 @@ export const Form: React.FC<FormProps> = (props) => {
   const [initializing, setInitializing] = useState(initializingFromProps)
 
   const [processing, setProcessing] = useState(false)
-  const [backgroundProcessing, setBackgroundProcessing] = useState(false)
 
-  const [submitted, setSubmitted] = useState(false)
+  /**
+   * Determines whether the form is processing asynchronously in the background, e.g. autosave is running.
+   * Useful to determine whether to disable the form or queue other processes while in flight, e.g. disable manual submits while an autosave is running.
+   */
+  const [backgroundProcessing, _setBackgroundProcessing] = useState(false)
+
+  /**
+   * A ref that can be read within the `setModified` interceptor.
+   * Dependents of this state can read it immediately without needing to wait for a render cycle.
+   */
+  const backgroundProcessingRef = useRef(backgroundProcessing)
+
+  /**
+   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
+   * Useful in order to avoid resetting `modified` to false wrongfully after a submit.
+   * For example, if the user modifies a field while the a background process (autosave) is running,
+   * we need to ensure that after the submit completes, the `modified` state remains true.
+   */
+  const modifiedWhileProcessingRef = useRef(false)
+
+  /**
+   * Intercept the `setBackgroundProcessing` method to keep the ref in sync.
+   * See the `backgroundProcessingRef` for more details.
+   */
+  const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
+    backgroundProcessingRef.current = backgroundProcessing
+    _setBackgroundProcessing(backgroundProcessing)
+  }, [])
+
+  const [modified, _setModified] = useState(false)
+
+  /**
+   * Intercept the `setModified` method to track whether the event happened during background processing.
+   * See the `modifiedWhileProcessingRef` ref for more details.
+   */
+  const setModified = useCallback((modified: boolean) => {
+    if (backgroundProcessingRef.current) {
+      modifiedWhileProcessingRef.current = true
+    }
+
+    _setModified(modified)
+  }, [])
+
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
@@ -362,7 +402,12 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        setModified(false)
+        if (!modifiedWhileProcessingRef.current) {
+          setModified(false)
+        } else {
+          modifiedWhileProcessingRef.current = false
+        }
+
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
@@ -411,8 +456,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
           // When there was an error submitting a draft,
           // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-          if (!validateDrafts && overridesFromArgs['_status'] === 'draft') {
-            setSubmitted(false)
+          // Also keep the form as modified so the save button remains enabled for retry.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setModified(true)
+
+            if (!validateDrafts) {
+              setSubmitted(false)
+            }
           }
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
@@ -494,7 +544,10 @@ export const Form: React.FC<FormProps> = (props) => {
       router,
       t,
       i18n,
+      validateDrafts,
       waitForAutocomplete,
+      setModified,
+      setSubmitted,
     ],
   )
 
@@ -609,6 +662,7 @@ export const Form: React.FC<FormProps> = (props) => {
       docPermissions,
       getDocPreferences,
       locale,
+      setModified,
     ],
   )
 
@@ -618,7 +672,7 @@ export const Form: React.FC<FormProps> = (props) => {
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields],
+    [dispatchFields, setModified],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -638,7 +692,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields, getDataByPath],
+    [dispatchFields, getDataByPath, setModified],
   )
 
   const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
@@ -652,7 +706,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields],
+    [dispatchFields, setModified],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -661,7 +715,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields],
+    [dispatchFields, setModified],
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
@@ -679,7 +733,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields, getDataByPath],
+    [dispatchFields, getDataByPath, setModified],
   )
 
   useEffect(() => {
@@ -760,9 +814,13 @@ export const Form: React.FC<FormProps> = (props) => {
     [formState],
   )
 
-  useEffect(() => {
+  const handleLocaleChange = useEffectEvent(() => {
     contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
     setModified(false)
+  })
+
+  useEffect(() => {
+    handleLocaleChange()
   }, [locale])
 
   const classes = [className, baseClass].filter(Boolean).join(' ')

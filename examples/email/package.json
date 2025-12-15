@@ -25,17 +25,17 @@
     "ejs": "3.1.10",
     "graphql": "^16.9.0",
     "juice": "11.0.0",
-    "next": "^15.2.3",
+    "next": "^15.4.10",
     "payload": "latest",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@payloadcms/graphql": "latest",
     "@swc/core": "^1.6.13",
     "@types/ejs": "^3.1.5",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
     "tsx": "^4.16.2",

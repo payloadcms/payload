@@ -19,6 +19,10 @@ import { elements as elementTypes } from '../field/elements/index.js'
 import { defaultLeaves as leafTypes } from '../field/leaves/index.js'
 import { linkFieldsSchemaPath } from './elements/link/shared.js'
 import { uploadFieldsSchemaPath } from './elements/upload/shared.js'
+
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export const RscEntrySlateField: React.FC<
   {
     args: AdapterArguments

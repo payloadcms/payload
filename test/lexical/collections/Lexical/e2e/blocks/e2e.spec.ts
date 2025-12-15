@@ -1068,12 +1068,16 @@ describe('lexicalBlocks', () => {
 
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
       await expect(
-        conditionalArrayBlock.locator('.array-field__draggable-rows #columns2-row-0'),
+        conditionalArrayBlock.locator(
+          '.array-field__draggable-rows #columns2-row-0 input[type="text"]',
+        ),
       ).toBeVisible()
 
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
       await expect(
-        conditionalArrayBlock.locator('.array-field__draggable-rows #columns2-row-1'),
+        conditionalArrayBlock.locator(
+          '.array-field__draggable-rows #columns2-row-1 input[type="text"]',
+        ),
       ).toBeVisible()
 
       await conditionalArrayBlock

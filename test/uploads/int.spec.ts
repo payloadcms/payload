@@ -25,8 +25,10 @@ import {
   mediaSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -149,6 +151,24 @@ describe('Collections - Uploads', () => {
         expect(doc.height).toBeDefined()
       })
 
+      it('should upload svg in an image mimetype restricted collection', async () => {
+        const filePath = path.join(dirname, './image.svg')
+        const formData = new FormData()
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/any-images`, {
+          body: formData,
+          file,
+        })
+
+        const { doc } = await response.json()
+        await handle.close()
+
+        expect(response.status).toBe(201)
+        expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
       it('should have valid image url', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.svg')
@@ -251,6 +271,36 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.filename).toBeDefined()
+      })
+
+      it('should not allow creation of corrupted PDF', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './fake-pdf.pdf')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow invalid mimeType to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './image.jpg')
+        const { file, handle } = await createStreamableFile(filePath, 'image/png')
+        formData.append('file', file)
+        formData.append('mime', 'image/png')
+        formData.append('contentType', 'image/png')
+
+        const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
       })
     })
     describe('update', () => {
