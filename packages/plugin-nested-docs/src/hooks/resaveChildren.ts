@@ -57,9 +57,14 @@ export const resaveChildren =
     if (Object.keys(childrenById).length) {
       try {
         for (const [childId, versions] of Object.entries(childrenById)) {
-          const hasDraft = versions.some((v) => v._status !== 'published')
+          if (versions.length === 0) {
+            continue
+          }
 
-          const latestVersion = versions.sort((a, b) => (a.updatedAt > b.updatedAt ? -1 : 1))[0]!
+          const hasDraft = versions.some((v) => v._status !== 'published')
+          const latestVersion = versions.reduce((latest, current) =>
+            current.updatedAt > latest.updatedAt ? current : latest,
+          )
 
           await req.payload.update({
             id: childId,
