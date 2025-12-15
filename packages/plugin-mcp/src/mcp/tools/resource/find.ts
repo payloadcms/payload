@@ -20,6 +20,7 @@ export const findResourceTool = (
     page: number = 1,
     sort?: string,
     where?: string,
+    depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
   ): Promise<{
@@ -66,6 +67,7 @@ export const findResourceTool = (
           const doc = await payload.findByID({
             id,
             collection: collectionSlug,
+            depth,
             overrideAccess: false,
             req,
             user,
@@ -119,6 +121,7 @@ ${JSON.stringify(doc, null, 2)}`,
       // Otherwise, use find to get multiple documents
       const findOptions: Parameters<typeof payload.find>[0] = {
         collection: collectionSlug,
+        depth,
         limit,
         overrideAccess: false,
         page,
@@ -196,8 +199,8 @@ Page: ${result.page} of ${result.totalPages}
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
       toolSchemas.findResources.parameters.shape,
-      async ({ id, fallbackLocale, limit, locale, page, sort, where }) => {
-        return await tool(id, limit, page, sort, where, locale, fallbackLocale)
+      async ({ id, depth, fallbackLocale, limit, locale, page, sort, where }) => {
+        return await tool(id, limit, page, sort, where, depth, locale, fallbackLocale)
       },
     )
   }

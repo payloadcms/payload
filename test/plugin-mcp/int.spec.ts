@@ -760,6 +760,237 @@ describe('@payloadcms/plugin-mcp', () => {
     )
   })
 
+  describe('Depth', () => {
+    it('should include depth parameter in find tool schemas', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result.tools).toBeDefined()
+
+      // Check findPosts has depth parameter
+      const findTool = json.result.tools.find((t: any) => t.name === 'findPosts')
+      expect(findTool).toBeDefined()
+      expect(findTool.inputSchema.properties.depth).toBeDefined()
+      expect(findTool.inputSchema.properties.depth.type).toBe('integer')
+      expect(findTool.inputSchema.properties.depth.minimum).toBe(0)
+      expect(findTool.inputSchema.properties.depth.maximum).toBe(10)
+      expect(findTool.inputSchema.properties.depth.default).toBe(0)
+      expect(findTool.inputSchema.properties.depth.description).toContain('relationships')
+    })
+
+    it('should include depth parameter in create tool schemas', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result.tools).toBeDefined()
+
+      // Check createPosts has depth parameter
+      const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
+      expect(createTool).toBeDefined()
+      expect(createTool.inputSchema.properties.depth).toBeDefined()
+      expect(createTool.inputSchema.properties.depth.type).toBe('integer')
+      expect(createTool.inputSchema.properties.depth.default).toBe(0)
+      expect(createTool.inputSchema.properties.depth.description).toContain('relationships')
+    })
+
+    it('should find post without populating relationships when depth=0', async () => {
+      // Create a post with an author
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post with Author for Depth Test',
+          content: 'Content for depth test.',
+          author: userId,
+        },
+      })
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              depth: 0,
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      const responseText = json.result.content[0].text
+
+      // With depth=0, author should just be the ID (string), not a populated object
+      expect(responseText).toContain('"author":')
+      // The author should be the userId string, not an object with email
+      expect(responseText).not.toContain('"email":')
+    })
+
+    it('should find post with populated relationships when depth=1', async () => {
+      // Create a post with an author
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post with Author for Depth 1 Test',
+          content: 'Content for depth 1 test.',
+          author: userId,
+        },
+      })
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              depth: 1,
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      const responseText = json.result.content[0].text
+
+      // With depth=1, author should be populated with user data including email
+      expect(responseText).toContain('"author":')
+      expect(responseText).toContain('"email":')
+      expect(responseText).toContain('dev@payloadcms.com')
+    })
+
+    it('should create post and return with populated relationships when depth=1', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              title: 'New Post with Author',
+              content: 'Testing depth on create.',
+              author: userId,
+              depth: 1,
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      const responseText = json.result.content[0].text
+
+      expect(responseText).toContain('Resource created successfully')
+      // With depth=1, the returned document should have author populated
+      expect(responseText).toContain('"author":')
+      expect(responseText).toContain('"email":')
+      expect(responseText).toContain('dev@payloadcms.com')
+    })
+
+    it('should find multiple posts with depth parameter', async () => {
+      // Create posts with author
+      await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Bulk Post 1 for Depth Test',
+          author: userId,
+        },
+      })
+      await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Bulk Post 2 for Depth Test',
+          author: userId,
+        },
+      })
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              where: '{"title": {"contains": "Bulk Post"}}',
+              depth: 1,
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      const responseText = json.result.content[0].text
+
+      // Both posts should have populated authors
+      expect(responseText).toContain('dev@payloadcms.com')
+    })
+  })
+
   describe('Localization', () => {
     it('should include locale parameters in tool schemas', async () => {
       const apiKey = await getApiKey(true, true)
