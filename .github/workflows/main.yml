@@ -327,6 +327,7 @@ jobs:
           - plugin-redirects
           - plugin-seo
           - sort
+          - server-url
           - trash
           - versions
           - uploads
