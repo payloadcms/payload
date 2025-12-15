@@ -29,7 +29,16 @@ export type BeforeSync = (args: {
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
-export type SearchPluginConfig = {
+export type FilterLocalesToSyncFunction<ConfigTypes = unknown> = (args: {
+  collectionSlug: string
+  doc: any
+  localeCodes: ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'][] : string[]
+  req: PayloadRequest
+}) =>
+  | (ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'][] : string[])
+  | Promise<ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'][] : string[]>
+
+export type SearchPluginConfig<ConfigTypes = unknown> = {
   /**
    * @deprecated
    * This plugin gets the api route from the config directly and does not need to be passed in.
@@ -48,6 +57,23 @@ export type SearchPluginConfig = {
    * @default true
    */
   deleteDrafts?: boolean
+  /**
+   * Filter which locales should be synced to the search index.
+   * Useful for multi-tenant applications where each tenant uses different languages.
+   *
+   * @default undefined - All configured locales will be synced
+   *
+   * @example
+   * // Filter based on document's tenant
+   * filterLocalesToSync: async ({ localeCodes, req, doc, collectionSlug }) => {
+   *   const tenant = await req.payload.findByID({
+   *     collection: 'tenants',
+   *     id: doc.tenant.id
+   *   })
+   *   return localeCodes.filter(code => tenant.allowedLocales.includes(code))
+   * }
+   */
+  filterLocalesToSync?: FilterLocalesToSyncFunction<ConfigTypes>
   localize?: boolean
   /**
    * We use batching when re-indexing large collections. You can control the amount of items per batch, lower numbers should help with memory.
@@ -72,15 +98,14 @@ export type ResolvedCollectionLabels = {
   [collection: string]: StaticLabel
 }
 
-export type SearchPluginConfigWithLocales = {
+export type SearchPluginConfigWithLocales<ConfigTypes = unknown> = {
   labels?: CollectionLabels
-  locales?: string[]
-} & SearchPluginConfig
+} & SearchPluginConfig<ConfigTypes>
 
-export type SanitizedSearchPluginConfig = {
+export type SanitizedSearchPluginConfig<ConfigTypes = unknown> = {
   reindexBatchSize: number
   syncDrafts: boolean
-} & SearchPluginConfigWithLocales
+} & SearchPluginConfigWithLocales<ConfigTypes>
 
 export type SyncWithSearchArgs = {
   collection: string

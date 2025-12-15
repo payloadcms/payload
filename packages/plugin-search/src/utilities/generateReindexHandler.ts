@@ -11,6 +11,7 @@ import {
 
 import type { SanitizedSearchPluginConfig } from '../types.js'
 
+import { getLocalesToSync } from './getLocalesToSync.js'
 import { syncDocAsSearchIndex } from './syncDocAsSearchIndex.js'
 
 type ValidationResult = {
@@ -30,11 +31,6 @@ export const generateReindexHandler =
 
     const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
     const searchCollections = pluginConfig?.collections || []
-    const reindexLocales = pluginConfig?.locales?.length
-      ? pluginConfig.locales
-      : req.locale
-        ? [req.locale]
-        : []
 
     const validatePermissions = async (): Promise<ValidationResult> => {
       const accessResults = await getAccessResults({ req })
@@ -131,23 +127,38 @@ export const generateReindexHandler =
       aggregateDocsWithDrafts += totalDocsWithDrafts
       aggregateDocs += totalDocs
 
-      for (let j = 0; j < reindexLocales.length; j++) {
-        // create first index, then we update with other locales accordingly
-        const operation = j === 0 ? 'create' : 'update'
-        const localeToSync = reindexLocales[j]
+      // Loop through batches, then documents, then locales per document
+      for (let i = 0; i < totalBatches; i++) {
+        const defaultLocale = req.payload.config.localization
+          ? req.payload.config.localization.defaultLocale
+          : req.locale
 
-        for (let i = 0; i < totalBatches; i++) {
-          const { docs } = await payload.find({
+        const { docs } = await payload.find({
+          collection,
+          depth: 0,
+          limit: batchSize,
+          locale: defaultLocale,
+          page: i + 1,
+          where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
+          ...defaultLocalApiProps,
+        })
+
+        for (const doc of docs) {
+          // Get locales to sync for this specific document
+          const docLocales = await getLocalesToSync({
             collection,
-            depth: 0,
-            limit: batchSize,
-            locale: localeToSync,
-            page: i + 1,
-            where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
-            ...defaultLocalApiProps,
+            config: req.payload.config,
+            doc,
+            pluginConfig,
+            req,
           })
 
-          for (const doc of docs) {
+          // Sync each allowed locale for this document
+          for (let j = 0; j < docLocales.length; j++) {
+            // create first index, then we update with other locales accordingly
+            const operation = j === 0 ? 'create' : 'update'
+            const localeToSync = docLocales[j]
+
             await syncDocAsSearchIndex({
               collection,
               data: doc,
