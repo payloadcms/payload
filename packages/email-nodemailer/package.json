@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "3.68.4",
+  "version": "3.68.5",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
