@@ -1,7 +1,5 @@
 import type { Access, CollectionConfig, Where } from 'payload'
 
-import { getUserTenantIDs } from '@payloadcms/plugin-multi-tenant/utilities'
-
 import { tenantsSlug } from '../shared.js'
 
 const tenantAccess: Access = ({ req }) => {
@@ -11,18 +9,21 @@ const tenantAccess: Access = ({ req }) => {
   }
 
   if (req.user) {
-    const assignedTenants = getUserTenantIDs(req.user, {
-      tenantsArrayFieldName: 'tenants',
-      tenantsArrayTenantFieldName: 'tenant',
-    })
+    // Filter tenants where user has 'admin' tenantRole
+    const adminTenants = (
+      (req.user.tenants as Array<{ tenant: { id: string } | string; tenantRole?: string }>) || []
+    )
+      .filter((t) => t.tenantRole === 'admin')
+      .map((t) => (typeof t.tenant === 'string' ? t.tenant : t.tenant?.id))
+      .filter(Boolean)
 
-    // if the user has assigned tenants, add id constraint
-    if (assignedTenants.length > 0) {
+    // User can access tenants where they have 'admin' tenantRole OR public tenants
+    if (adminTenants.length > 0) {
       return {
         or: [
           {
             id: {
-              in: assignedTenants,
+              in: adminTenants,
             },
           },
           {
@@ -35,7 +36,7 @@ const tenantAccess: Access = ({ req }) => {
     }
   }
 
-  // if the user has no assigned tenants, return a filter that allows access to public tenants
+  // Default: only public tenants
   return {
     isPublic: {
       equals: true,

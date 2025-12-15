@@ -40,6 +40,26 @@ export default buildConfigWithDefaults({
       tenantField: {
         access: {},
       },
+      tenantsArrayField: {
+        rowFields: [
+          {
+            name: 'tenantRole',
+            type: 'select',
+            defaultValue: 'admin',
+            options: [
+              {
+                label: 'Admin',
+                value: 'admin',
+              },
+              {
+                label: 'Member',
+                value: 'member',
+              },
+            ],
+            saveToJWT: true,
+          },
+        ],
+      },
       collections: {
         [menuItemsSlug]: {
           useTenantAccess: false,
