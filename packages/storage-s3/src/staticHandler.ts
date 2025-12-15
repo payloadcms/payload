@@ -1,3 +1,4 @@
+import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
@@ -175,7 +176,7 @@ export const getHandler = ({
       }
 
       const stream = object.Body
-      stream.on('error', (err) => {
+      stream.on('error', (err: Error) => {
         req.payload.logger.error({
           err,
           key,
