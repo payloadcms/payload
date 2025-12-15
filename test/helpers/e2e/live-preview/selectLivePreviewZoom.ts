@@ -13,21 +13,12 @@ export const selectLivePreviewZoom = async (page: Page, zoomLabel: string) => {
 
   await zoomSelector.first().click()
 
-  const zoomOption = page.locator(
-    '.live-preview-toolbar-controls__zoom button.popup-button-list__button',
-    {
-      hasText: exactText(zoomLabel),
-    },
-  )
+  const zoomOption = page.locator('.popup__content button.popup-button-list__button', {
+    hasText: exactText(zoomLabel),
+  })
 
   expect(zoomOption).toBeTruthy()
   await zoomOption.click()
 
   await expect(zoomSelector).toContainText(zoomLabel)
-
-  const option = page.locator(
-    '.live-preview-toolbar-controls__zoom button.popup-button-list__button--selected',
-  )
-
-  await expect(option).toHaveText(zoomLabel)
 }

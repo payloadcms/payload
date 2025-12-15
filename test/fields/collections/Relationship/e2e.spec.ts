@@ -82,7 +82,7 @@ describe('relationship', () => {
     await loadCreatePage()
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
     const textField = page.locator('.drawer__content #field-text')
     await expect(textField).toBeEnabled()
@@ -105,7 +105,7 @@ describe('relationship', () => {
 
     // Select the SECOND collection (array-fields) instead of the first (text-fields)
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--array-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--array-fields')
       .click()
 
     await page.locator('[id^=doc-drawer_array-fields_1_] #action-save').click()
@@ -331,7 +331,7 @@ describe('relationship', () => {
     // First fill out the relationship field, as it's required
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
 
     await page.locator('.drawer__content #field-text').fill('something')
@@ -491,8 +491,8 @@ describe('relationship', () => {
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-create').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-create').click()
       await wait(1000) // wait for /form-state to return
       const title = 'Created from drawer'
       await drawer1Content.locator('#field-text').fill(title)
@@ -551,8 +551,8 @@ describe('relationship', () => {
       const originalText = 'Text'
       await drawer1Content.locator('#field-text').fill(originalText)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-duplicate').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-duplicate').click()
       const duplicateID = drawer1Content.locator('.id-label')
       await expect(duplicateID).not.toHaveText(originalID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
@@ -608,8 +608,8 @@ describe('relationship', () => {
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalID = await drawer1Content.locator('.id-label').textContent()
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-delete').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-delete').click()
 
       await page
         .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
