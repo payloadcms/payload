@@ -3,206 +3,204 @@ import { formatAdminURL } from './formatAdminURL.js'
 describe('formatAdminURL', () => {
   const serverURL = 'https://example.com'
 
+  const defaultAdminRoute = '/admin'
+  const rootAdminRoute = '/'
+
+  const dummyPath = '/collections/posts'
+
   describe('relative URLs', () => {
-    it('should return relative path when relative=true', () => {
+    it('should ignore `serverURL` when relative=true', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
-        path: '/collections/posts',
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
         serverURL,
         relative: true,
       })
-      expect(result).toBe('/admin/collections/posts')
+
+      expect(result).toBe(`${defaultAdminRoute}${dummyPath}`)
     })
 
-    it('should return relative path when no serverURL provided', () => {
+    it('should force relative URL when `serverURL` is omitted', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
-        path: '/collections/posts',
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
+        relative: false,
       })
-      expect(result).toBe('/admin/collections/posts')
-    })
 
-    it('should return "/" when no paths provided and relative=true', () => {
-      const result = formatAdminURL({
-        adminRoute: null,
-        relative: true,
-      })
-      expect(result).toBe('/')
+      expect(result).toBe(`${defaultAdminRoute}${dummyPath}`)
     })
   })
 
   describe('absolute URLs', () => {
     it('should return absolute URL with serverURL', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
-        path: '/collections/posts',
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
         serverURL,
       })
-      expect(result).toBe('https://example.com/admin/collections/posts')
+
+      expect(result).toBe(`${serverURL}${defaultAdminRoute}${dummyPath}`)
     })
 
     it('should handle serverURL with trailing slash', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
+        adminRoute: defaultAdminRoute,
         path: '/collections/posts',
         serverURL: 'https://example.com/',
       })
+
       expect(result).toBe('https://example.com/admin/collections/posts')
     })
 
     it('should handle serverURL with subdirectory', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
+        adminRoute: defaultAdminRoute,
         path: '/collections/posts',
         serverURL: 'https://example.com/api/v1',
       })
+
       expect(result).toBe('https://example.com/admin/collections/posts')
     })
   })
 
-  describe('adminRoute handling', () => {
-    it('should handle adminRoute="/"', () => {
+  describe('admin route handling', () => {
+    it('should return relative URL for adminRoute="/", no path, no `serverURL`', () => {
       const result = formatAdminURL({
-        adminRoute: '/',
+        adminRoute: rootAdminRoute,
+        relative: true,
+      })
+
+      expect(result).toBe('/')
+    })
+
+    it('should handle relative URL for adminRoute="/", with path, no `serverURL`', () => {
+      const result = formatAdminURL({
+        adminRoute: rootAdminRoute,
+        path: dummyPath,
+        relative: true,
+      })
+
+      expect(result).toBe(dummyPath)
+    })
+
+    it('should return absolute URL for adminRoute="/", no path, with `serverURL`', () => {
+      const result = formatAdminURL({
+        adminRoute: rootAdminRoute,
         serverURL,
       })
+
       expect(result).toBe('https://example.com/')
     })
 
-    it('should handle adminRoute="/" with path', () => {
+    it('should handle absolute URL for adminRoute="/", with path and `serverURL`', () => {
       const result = formatAdminURL({
-        adminRoute: '/',
-        path: '/collections/posts',
+        adminRoute: rootAdminRoute,
         serverURL,
+        path: dummyPath,
       })
-      expect(result).toBe('https://example.com/collections/posts')
-    })
 
-    it('should handle adminRoute="/admin"', () => {
-      const result = formatAdminURL({
-        adminRoute: '/admin',
-        serverURL,
-      })
-      expect(result).toBe('https://example.com/admin')
-    })
-
-    it('should handle adminRoute="/custom-admin"', () => {
-      const result = formatAdminURL({
-        adminRoute: '/custom-admin',
-        path: '/dashboard',
-        serverURL,
-      })
-      expect(result).toBe('https://example.com/custom-admin/dashboard')
-    })
-
-    it('should handle null adminRoute', () => {
-      const result = formatAdminURL({
-        adminRoute: undefined,
-        path: '/collections/posts',
-        serverURL,
-      })
-      expect(result).toBe('https://example.com/collections/posts')
+      expect(result).toBe(`${serverURL}${dummyPath}`)
     })
   })
 
-  describe('basePath handling', () => {
+  describe('base path handling', () => {
     it('should include basePath in URL', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
+        adminRoute: defaultAdminRoute,
         basePath: '/v1',
-        path: '/collections/posts',
+        path: dummyPath,
         serverURL,
       })
-      expect(result).toBe('https://example.com/v1/admin/collections/posts')
+
+      expect(result).toBe(`${serverURL}/v1${defaultAdminRoute}${dummyPath}`)
     })
 
     it('should handle basePath with adminRoute="/"', () => {
       const result = formatAdminURL({
-        adminRoute: '/',
-        basePath: '/api',
+        adminRoute: rootAdminRoute,
+        basePath: '/v1',
         serverURL,
       })
-      expect(result).toBe('https://example.com/api')
+
+      expect(result).toBe(`${serverURL}/v1`)
     })
 
     it('should handle basePath with no adminRoute', () => {
       const result = formatAdminURL({
         adminRoute: undefined,
-        basePath: '/api',
-        path: '/collections',
+        basePath: '/v1',
+        path: dummyPath,
         serverURL,
       })
-      expect(result).toBe('https://example.com/api/collections')
+
+      expect(result).toBe(`${serverURL}/v1${dummyPath}`)
+    })
+
+    it('should handle empty basePath', () => {
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        basePath: '',
+        path: dummyPath,
+        serverURL,
+      })
+
+      expect(result).toBe(`${serverURL}${defaultAdminRoute}${dummyPath}`)
     })
   })
 
   describe('path handling', () => {
     it('should handle empty string path', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
+        adminRoute: defaultAdminRoute,
         path: '',
         serverURL,
       })
-      expect(result).toBe('https://example.com/admin')
+
+      expect(result).toBe(`${serverURL}${defaultAdminRoute}`)
     })
 
     it('should handle null path', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
+        adminRoute: defaultAdminRoute,
         path: null,
         serverURL,
       })
-      expect(result).toBe('https://example.com/admin')
+      expect(result).toBe(`${serverURL}${defaultAdminRoute}`)
     })
 
     it('should handle undefined path', () => {
       const result = formatAdminURL({
-        adminRoute: '/admin',
+        adminRoute: defaultAdminRoute,
         path: undefined,
         serverURL,
       })
-      expect(result).toBe('https://example.com/admin')
+
+      expect(result).toBe(`${serverURL}${defaultAdminRoute}`)
     })
 
     it('should handle path with query parameters', () => {
+      const path = `${dummyPath}?page=2`
+
       const result = formatAdminURL({
-        adminRoute: '/admin',
-        path: '/collections/posts?page=2',
+        adminRoute: defaultAdminRoute,
+        path,
         serverURL,
       })
-      expect(result).toBe('https://example.com/admin/collections/posts?page=2')
+
+      expect(result).toBe(`${serverURL}${defaultAdminRoute}${path}`)
     })
   })
 
   describe('edge cases', () => {
-    it('should handle empty basePath', () => {
-      const result = formatAdminURL({
-        adminRoute: '/admin',
-        basePath: '',
-        path: '/collections/posts',
-        serverURL,
-      })
-      expect(result).toBe('https://example.com/admin/collections/posts')
-    })
-
-    it('should return "/" for minimal relative config', () => {
+    it('should return "/" when given minimal args', () => {
       const result = formatAdminURL({
         adminRoute: undefined,
         basePath: '',
         path: '',
         relative: true,
       })
-      expect(result).toBe('/')
-    })
 
-    it('should handle complex nested paths', () => {
-      const result = formatAdminURL({
-        adminRoute: '/admin',
-        basePath: '/api/v2',
-        path: '/collections/posts/edit/123',
-        serverURL,
-      })
-      expect(result).toBe('https://example.com/api/v2/admin/collections/posts/edit/123')
+      expect(result).toBe('/')
     })
   })
 })
