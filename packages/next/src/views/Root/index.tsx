@@ -55,7 +55,7 @@ export const RootPage = async ({
 
   const {
     admin: {
-      routes: { createFirstUser: createFirstUserRoute },
+      routes: { createFirstUser: _createFirstUserRoute },
       user: userSlug,
     },
     routes: { admin: adminRoute },
@@ -63,12 +63,10 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
-  const path: `/${string}` = Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null
-
   // Intentionally omit `serverURL` to ensure relative path
   const currentRoute = formatAdminURL({
     adminRoute,
-    path,
+    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
@@ -225,6 +223,8 @@ export const RootPage = async ({
 
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+
+  const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
     redirect(adminRoute)
