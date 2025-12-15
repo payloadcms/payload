@@ -11,6 +11,11 @@ You are an expert Payload CMS developer. When working with Payload projects, fol
 5. **Access Control**: Understand Local API bypasses access control by default
 6. **Access Control**: Ensure roles exist when modifiyng collection or globals with access controls
 
+### Code Validation
+
+- To validate typescript correctness after modifying code run `tsc --noEmit`
+- Generate import maps after creating or modifying components.
+
 ## Project Structure
 
 ```
@@ -514,6 +519,303 @@ export default async function Page() {
 }
 ```
 
+## Components
+
+The Admin Panel can be extensively customized using React Components. Custom Components can be Server Components (default) or Client Components.
+
+### Defining Components
+
+Components are defined using **file paths** (not direct imports) in your config:
+
+**Component Path Rules:**
+
+- Paths are relative to project root or `config.admin.importMap.baseDir`
+- Named exports: use `#ExportName` suffix or `exportName` property
+- Default exports: no suffix needed
+- File extensions can be omitted
+
+```typescript
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  admin: {
+    components: {
+      // Logo and branding
+      graphics: {
+        Logo: '/components/Logo',
+        Icon: '/components/Icon',
+      },
+
+      // Navigation
+      Nav: '/components/CustomNav',
+      beforeNavLinks: ['/components/CustomNavItem'],
+      afterNavLinks: ['/components/NavFooter'],
+
+      // Header
+      header: ['/components/AnnouncementBanner'],
+      actions: ['/components/ClearCache', '/components/Preview'],
+
+      // Dashboard
+      beforeDashboard: ['/components/WelcomeMessage'],
+      afterDashboard: ['/components/Analytics'],
+
+      // Auth
+      beforeLogin: ['/components/SSOButtons'],
+      logout: { Button: '/components/LogoutButton' },
+
+      // Settings
+      settingsMenu: ['/components/SettingsMenu'],
+
+      // Views
+      views: {
+        dashboard: { Component: '/components/CustomDashboard' },
+      },
+    },
+  },
+})
+```
+
+**Component Path Rules:**
+
+- Paths are relative to project root or `config.admin.importMap.baseDir`
+- Named exports: use `#ExportName` suffix or `exportName` property
+- Default exports: no suffix needed
+- File extensions can be omitted
+
+### Component Types
+
+1. **Root Components** - Global Admin Panel (logo, nav, header)
+2. **Collection Components** - Collection-specific (edit view, list view)
+3. **Global Components** - Global document views
+4. **Field Components** - Custom field UI and cells
+
+### Component Types
+
+1. **Root Components** - Global Admin Panel (logo, nav, header)
+2. **Collection Components** - Collection-specific (edit view, list view)
+3. **Global Components** - Global document views
+4. **Field Components** - Custom field UI and cells
+
+### Server vs Client Components
+
+**All components are Server Components by default** (can use Local API directly):
+
+```tsx
+// Server Component (default)
+import type { Payload } from 'payload'
+
+async function MyServerComponent({ payload }: { payload: Payload }) {
+  const posts = await payload.find({ collection: 'posts' })
+  return <div>{posts.totalDocs} posts</div>
+}
+
+export default MyServerComponent
+```
+
+**Client Components** need the `'use client'` directive:
+
+```tsx
+'use client'
+import { useState } from 'react'
+import { useAuth } from '@payloadcms/ui'
+
+export function MyClientComponent() {
+  const [count, setCount] = useState(0)
+  const { user } = useAuth()
+
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      {user?.email}: Clicked {count} times
+    </button>
+  )
+}
+```
+
+### Using Hooks (Client Components Only)
+
+```tsx
+'use client'
+import {
+  useAuth, // Current user
+  useConfig, // Payload config (client-safe)
+  useDocumentInfo, // Document info (id, collection, etc.)
+  useField, // Field value and setter
+  useForm, // Form state
+  useFormFields, // Multiple field values (optimized)
+  useLocale, // Current locale
+  useTranslation, // i18n translations
+  usePayload, // Local API methods
+} from '@payloadcms/ui'
+
+export function MyComponent() {
+  const { user } = useAuth()
+  const { config } = useConfig()
+  const { id, collection } = useDocumentInfo()
+  const locale = useLocale()
+  const { t } = useTranslation()
+
+  return <div>Hello {user?.email}</div>
+}
+```
+
+### Collection/Global Components
+
+```typescript
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    components: {
+      // Edit view
+      edit: {
+        PreviewButton: '/components/PostPreview',
+        SaveButton: '/components/CustomSave',
+        SaveDraftButton: '/components/SaveDraft',
+        PublishButton: '/components/Publish',
+      },
+
+      // List view
+      list: {
+        Header: '/components/ListHeader',
+        beforeList: ['/components/BulkActions'],
+        afterList: ['/components/ListFooter'],
+      },
+    },
+  },
+}
+```
+
+### Field Components
+
+```typescript
+{
+  name: 'status',
+  type: 'select',
+  options: ['draft', 'published'],
+  admin: {
+    components: {
+      // Edit view field
+      Field: '/components/StatusField',
+      // List view cell
+      Cell: '/components/StatusCell',
+      // Field label
+      Label: '/components/StatusLabel',
+      // Field description
+      Description: '/components/StatusDescription',
+      // Error message
+      Error: '/components/StatusError',
+    },
+  },
+}
+```
+
+**UI Field** (presentational only, no data):
+
+```typescript
+{
+  name: 'refundButton',
+  type: 'ui',
+  admin: {
+    components: {
+      Field: '/components/RefundButton',
+    },
+  },
+}
+```
+
+### Performance Best Practices
+
+1. **Import correctly:**
+
+   - Admin Panel: `import { Button } from '@payloadcms/ui'`
+   - Frontend: `import { Button } from '@payloadcms/ui/elements/Button'`
+
+2. **Optimize re-renders:**
+
+   ```tsx
+   // ❌ BAD: Re-renders on every form change
+   const { fields } = useForm()
+
+   // ✅ GOOD: Only re-renders when specific field changes
+   const value = useFormFields(([fields]) => fields[path])
+   ```
+
+3. **Prefer Server Components** - Only use Client Components when you need:
+
+   - State (useState, useReducer)
+   - Effects (useEffect)
+   - Event handlers (onClick, onChange)
+   - Browser APIs (localStorage, window)
+
+4. **Minimize serialized props** - Server Components serialize props sent to client
+
+### Styling Components
+
+```tsx
+import './styles.scss'
+
+export function MyComponent() {
+  return <div className="my-component">Content</div>
+}
+```
+
+```scss
+// Use Payload's CSS variables
+.my-component {
+  background-color: var(--theme-elevation-500);
+  color: var(--theme-text);
+  padding: var(--base);
+  border-radius: var(--border-radius-m);
+}
+
+// Import Payload's SCSS library
+@import '~@payloadcms/ui/scss';
+
+.my-component {
+  @include mid-break {
+    background-color: var(--theme-elevation-900);
+  }
+}
+```
+
+### Type Safety
+
+```tsx
+import type {
+  TextFieldServerComponent,
+  TextFieldClientComponent,
+  TextFieldCellComponent,
+  SelectFieldServerComponent,
+  // ... etc
+} from 'payload'
+
+export const MyField: TextFieldClientComponent = (props) => {
+  // Fully typed props
+}
+```
+
+### Import Map
+
+Payload auto-generates `app/(payload)/admin/importMap.js` to resolve component paths.
+
+**Regenerate manually:**
+
+```bash
+payload generate:importmap
+```
+
+**Set custom location:**
+
+```typescript
+export default buildConfig({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname, 'src'),
+      importMapFile: path.resolve(dirname, 'app', 'custom-import-map.js'),
+    },
+  },
+})
+```
+
 ## Custom Endpoints
 
 ```typescript
@@ -814,10 +1116,21 @@ For deeper exploration of specific topics, refer to the context files located in
     - Custom adapter development
 
 12. **`plugin-development.md`** - Creating plugins
+
     - Plugin architecture
     - Modifying configuration
     - Plugin hooks
     - Best practices
+
+13. **`components.md`** - Custom Components
+
+    - Component types (Root, Collection, Global, Field)
+    - Server vs Client Components
+    - Component paths and definition
+    - Default and custom props
+    - Using hooks
+    - Performance best practices
+    - Styling components
 
 ## Resources
 
