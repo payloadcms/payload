@@ -11,6 +11,7 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   serverURL: 'http://localhost:3000',
   admin: {
+    autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
