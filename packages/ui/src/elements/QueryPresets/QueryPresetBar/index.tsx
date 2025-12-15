@@ -2,7 +2,11 @@ import type { QueryPreset, SanitizedCollectionPermission } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
+import {
+  formatApiURL,
+  transformColumnsToPreferences,
+  transformColumnsToSearchParams,
+} from 'payload/shared'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -38,6 +42,7 @@ export const QueryPresetBar: React.FC<{
   const {
     config: {
       routes: { api: apiRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -107,9 +112,16 @@ export const QueryPresetBar: React.FC<{
 
   const handleDeletePreset = useCallback(async () => {
     try {
-      await fetch(`${apiRoute}/${queryPresetsSlug}/${activePreset.id}`, {
-        method: 'DELETE',
-      }).then(async (res) => {
+      await fetch(
+        formatApiURL({
+          apiRoute,
+          path: `/${queryPresetsSlug}/${activePreset.id}`,
+          serverURL,
+        }),
+        {
+          method: 'DELETE',
+        },
+      ).then(async (res) => {
         try {
           const json = await res.json()
 
@@ -136,22 +148,38 @@ export const QueryPresetBar: React.FC<{
     } catch (_err) {
       toast.error(t('error:deletingTitle', { title: activePreset.title }))
     }
-  }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetQueryPreset])
+  }, [
+    apiRoute,
+    activePreset?.id,
+    activePreset?.title,
+    t,
+    presetConfig,
+    i18n,
+    resetQueryPreset,
+    serverURL,
+  ])
 
   const saveCurrentChanges = useCallback(async () => {
     try {
-      await fetch(`${apiRoute}/payload-query-presets/${activePreset.id}`, {
-        body: JSON.stringify({
-          columns: transformColumnsToPreferences(query.columns),
-          groupBy: query.groupBy,
-          where: query.where,
+      await fetch(
+        formatApiURL({
+          apiRoute,
+          path: `/${queryPresetsSlug}/${activePreset.id}`,
+          serverURL,
         }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+        {
+          body: JSON.stringify({
+            columns: transformColumnsToPreferences(query.columns),
+            groupBy: query.groupBy,
+            where: query.where,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'PATCH',
         },
-        method: 'PATCH',
-      }).then(async (res) => {
+      ).then(async (res) => {
         try {
           const json = await res.json()
 
@@ -187,6 +215,7 @@ export const QueryPresetBar: React.FC<{
     presetConfig?.labels?.singular,
     i18n,
     setQueryModified,
+    serverURL,
   ])
 
   const hasModifiedPreset = activePreset && modified

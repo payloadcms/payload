@@ -47,6 +47,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
           components: { afterDashboard, beforeDashboard },
         },
         routes: { admin: adminRoute },
+        serverURL,
       },
     },
     payload,
@@ -96,11 +97,16 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
 
                         buttonAriaLabel = t('general:showAllLabel', { label: title })
 
-                        href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                        href = formatAdminURL({
+                          adminRoute,
+                          path: `/collections/${slug}`,
+                          serverURL,
+                        })
 
                         createHREF = formatAdminURL({
                           adminRoute,
                           path: `/collections/${slug}/create`,
+                          serverURL,
                         })
 
                         hasCreatePermission = permissions?.collections?.[slug]?.create
@@ -116,6 +122,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
                         href = formatAdminURL({
                           adminRoute,
                           path: `/globals/${slug}`,
+                          serverURL,
                         })
 
                         // Find the lock status for the global

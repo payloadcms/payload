@@ -3,7 +3,7 @@ import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, formatApiURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -125,12 +125,13 @@ export function AuthProvider({
         formatAdminURL({
           adminRoute,
           path: `${logoutInactivityRoute}${window.location.pathname.startsWith(adminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
+          serverURL,
         }),
       ),
     )
 
     closeAllModals()
-  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
+  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition, serverURL])
 
   const revokeTokenAndExpire = useCallback(() => {
     setUserInMemory(null)
@@ -197,7 +198,11 @@ export function AuthProvider({
         refreshTokenTimeoutRef.current = setTimeout(async () => {
           try {
             const request = await requests.post(
-              `${serverURL}${apiRoute}/${userSlug}/refresh-token?refresh`,
+              formatApiURL({
+                apiRoute,
+                path: `/${userSlug}/refresh-token?refresh`,
+                serverURL,
+              }),
               {
                 headers: {
                   'Accept-Language': i18n.language,
@@ -234,11 +239,18 @@ export function AuthProvider({
   const refreshCookieAsync = useCallback(
     async (skipSetUser?: boolean): Promise<ClientUser> => {
       try {
-        const request = await requests.post(`${serverURL}${apiRoute}/${userSlug}/refresh-token`, {
-          headers: {
-            'Accept-Language': i18n.language,
+        const request = await requests.post(
+          formatApiURL({
+            apiRoute,
+            path: `/${userSlug}/refresh-token`,
+            serverURL,
+          }),
+          {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (request.status === 200) {
           const json: UserWithToken = await request.json()
@@ -264,7 +276,13 @@ export function AuthProvider({
     try {
       if (user && user.collection) {
         setNewUser(null)
-        await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
+        await requests.post(
+          formatApiURL({
+            apiRoute,
+            path: `/${user.collection}/logout`,
+            serverURL,
+          }),
+        )
       }
     } catch (_) {
       // fail silently and log the user out in state
@@ -285,11 +303,18 @@ export function AuthProvider({
       )
 
       try {
-        const request = await requests.get(`${serverURL}${apiRoute}/access${params}`, {
-          headers: {
-            'Accept-Language': i18n.language,
+        const request = await requests.get(
+          formatApiURL({
+            apiRoute,
+            path: `/access${params}`,
+            serverURL,
+          }),
+          {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (request.status === 200) {
           const json: SanitizedPermissions = await request.json()
@@ -306,12 +331,19 @@ export function AuthProvider({
 
   const fetchFullUser = React.useCallback(async () => {
     try {
-      const request = await requests.get(`${serverURL}${apiRoute}/${userSlug}/me`, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
+      const request = await requests.get(
+        formatApiURL({
+          apiRoute,
+          path: `/${userSlug}/me`,
+          serverURL,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
         },
-      })
+      )
 
       if (request.status === 200) {
         const json: UserWithToken = await request.json()
