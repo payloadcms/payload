@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { logoutViaNav } from 'helpers/e2e/auth/logout.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -28,8 +30,14 @@ test.describe('serverURL', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('can load admin panel when serverURL is set', async () => {
+  test('can load admin panel', async () => {
     await page.goto(url.admin)
     await expect(page.getByText('Dashboard')).toBeVisible()
+  })
+
+  test('can log out', async () => {
+    await page.goto(url.admin)
+    await logoutViaNav(page)
+    await expect(page.locator('.login')).toBeVisible()
   })
 })
