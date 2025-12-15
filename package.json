@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.68.4",
+  "version": "3.68.5",
   "private": true,
   "type": "module",
   "workspaces": [
