@@ -287,6 +287,21 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
+      it('should not allow html file to be uploaded to PDF only collection', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './test.html')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+        formData.append('contentType', 'application/pdf')
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
       it('should not allow invalid mimeType to be created', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
@@ -296,6 +311,20 @@ describe('Collections - Uploads', () => {
         formData.append('contentType', 'image/png')
 
         const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow corrupted SVG to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './corrupt.svg')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${svgOnlySlug}`, {
           body: formData,
         })
         await handle.close()

@@ -6,6 +6,7 @@ import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
 import { detectSvgFromXml } from './detectSvgFromXml.js'
+import { validateSvg } from './validateSvg.js'
 
 /**
  * Restricted file types and their extensions.
@@ -103,8 +104,23 @@ export const checkFileRestrictions = async ({
       }
     }
 
-    if (!detected && expectsDetectableType(typeFromExtension) && !useTempFiles) {
-      errors.push(`File buffer returned no detectable MIME type.`)
+    if (!detected && !useTempFiles) {
+      if (expectsDetectableType(typeFromExtension)) {
+        errors.push(`File buffer returned no detectable MIME type.`)
+      }
+
+      const extIsValid = validateMimeType(typeFromExtension, configMimeTypes, true)
+      if (!extIsValid) {
+        errors.push(`File extension ${typeFromExtension} is not allowed.`)
+      }
+
+      // Additional security check for SVG files (since they're text-based and not detectable)
+      if (typeFromExtension.toLowerCase() === 'svg' && extIsValid) {
+        const isSafeSvg = validateSvg(file.data)
+        if (!isSafeSvg) {
+          errors.push('SVG file contains potentially harmful content.')
+        }
+      }
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
