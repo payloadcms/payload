@@ -197,6 +197,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                           formatAdminURL({
                             adminRoute: config.routes.admin,
                             path: `/collections/${collectionSlug}/${config.folders.slug}`,
+                            serverURL: config.serverURL,
                           }),
                         )
                       }
@@ -225,6 +226,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                           formatAdminURL({
                             adminRoute: config.routes.admin,
                             path: `/collections/${collectionSlug}/${config.folders.slug}/${crumb.id}`,
+                            serverURL: config.serverURL,
                           }),
                         )
                       }
@@ -243,6 +245,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     collectionSlug,
     config.folders,
     config.routes.admin,
+    config.serverURL,
     drawerDepth,
     i18n,
     labels?.plural,

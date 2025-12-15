@@ -6,12 +6,14 @@ type GoBackProps = {
   adminRoute: string
   collectionSlug: string
   router: AppRouterInstance
+  serverURL?: string
 }
 
-export const handleGoBack = ({ adminRoute, collectionSlug, router }: GoBackProps) => {
+export const handleGoBack = ({ adminRoute, collectionSlug, router, serverURL }: GoBackProps) => {
   const redirectRoute = formatAdminURL({
     adminRoute,
     path: collectionSlug ? `/collections/${collectionSlug}` : '/',
+    serverURL,
   })
   router.push(redirectRoute)
 }

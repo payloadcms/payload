@@ -66,6 +66,7 @@ export const RootPage = async ({
   const currentRoute = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
+    serverURL: config.serverURL,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
@@ -119,6 +120,7 @@ export const RootPage = async ({
   }
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
     cookies,
     locale,
@@ -137,7 +139,11 @@ export const RootPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
-      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+      // intentionally omit `serverURL` to keep URL relative
+      urlSuffix: `${formatAdminURL({
+        adminRoute,
+        path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
+      })}${searchParams ? queryString : ''}`,
     },
   })
 
@@ -218,7 +224,11 @@ export const RootPage = async ({
     }
   }
 
-  const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
+  const createFirstUserRoute = formatAdminURL({
+    adminRoute,
+    path: _createFirstUserRoute,
+    serverURL: config.serverURL,
+  })
 
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
