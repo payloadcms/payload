@@ -54,33 +54,26 @@ export const resaveChildren =
       return acc
     }, {})
 
-    const sortedChildren = Object.values(childrenById).flatMap((group: JsonObject[]) => {
-      return group.sort((a, b) => {
-        if (a.updatedAt !== b.updatedAt) {
-          return a.updatedAt > b.updatedAt ? 1 : -1
-        }
-        return a._status === 'published' ? 1 : -1
-      })
-    })
-
-    if (sortedChildren.length) {
+    if (Object.keys(childrenById).length) {
       try {
-        for (const child of sortedChildren) {
-          const isDraft = child._status !== 'published'
+        for (const [childId, versions] of Object.entries(childrenById)) {
+          const hasDraft = versions.some((v) => v._status !== 'published')
+
+          const latestVersion = versions.sort((a, b) => (a.updatedAt > b.updatedAt ? -1 : 1))[0]!
 
           await req.payload.update({
-            id: child.id,
+            id: childId,
             collection: collection.slug,
             data: populateBreadcrumbs({
               collection,
-              data: child,
+              data: latestVersion,
               generateLabel: pluginConfig.generateLabel,
               generateURL: pluginConfig.generateURL,
               parentFieldName: pluginConfig.parentFieldSlug,
               req,
             }),
             depth: 0,
-            draft: isDraft,
+            draft: hasDraft,
             locale: req.locale,
             req,
           })
