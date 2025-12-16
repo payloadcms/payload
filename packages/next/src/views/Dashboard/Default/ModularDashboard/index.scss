@@ -49,6 +49,18 @@
     cursor: grabbing;
   }
 
+  .widget-wrapper__controls {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .widget:focus,
+  .widget:focus-within {
+    .widget-wrapper__controls {
+      opacity: 1;
+    }
+  }
+
   .widget-wrapper {
     position: relative;
     height: 100%;
@@ -56,7 +68,7 @@
 
     &--editing {
       .widget-wrapper__controls {
-        opacity: 0;
+        // opacity: 0;
         transition: opacity 0.2s ease;
       }
 

@@ -113,6 +113,7 @@ export function ModularDashboardClient({
       >
         <div
           className={`modular-dashboard ${isEditing ? 'editing' : ''}`}
+          inert={activeDragId ? true : undefined}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -141,29 +142,27 @@ export function ModularDashboardClient({
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
                   <div className="widget-content">{widget.component}</div>
-                  {isEditing && (
-                    <div
-                      className="widget-wrapper__controls"
-                      onPointerDown={(e) => e.stopPropagation()}
+                  <div
+                    className="widget-wrapper__controls"
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <WidgetWidthDropdown
+                      currentWidth={widget.item.width}
+                      maxWidth={widget.item.maxWidth}
+                      minWidth={widget.item.minWidth}
+                      onResize={(width) => resizeWidget(widget.item.id, width)}
+                    />
+                    <button
+                      className="widget-wrapper__delete-btn"
+                      onClick={() => deleteWidget(widget.item.id)}
+                      type="button"
                     >
-                      <WidgetWidthDropdown
-                        currentWidth={widget.item.width}
-                        maxWidth={widget.item.maxWidth}
-                        minWidth={widget.item.minWidth}
-                        onResize={(width) => resizeWidget(widget.item.id, width)}
-                      />
-                      <button
-                        className="widget-wrapper__delete-btn"
-                        onClick={() => deleteWidget(widget.item.id)}
-                        type="button"
-                      >
-                        <span className="sr-only">
-                          {t('dashboard:deleteWidget', { id: widget.item.id })}
-                        </span>
-                        <XIcon />
-                      </button>
-                    </div>
-                  )}
+                      <span className="sr-only">
+                        {t('dashboard:deleteWidget', { id: widget.item.id })}
+                      </span>
+                      <XIcon />
+                    </button>
+                  </div>
                 </div>
               </DraggableItem>
             </React.Fragment>
