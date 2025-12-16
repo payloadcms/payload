@@ -18,11 +18,46 @@ import { getBeforeChangeHook } from './hooks/beforeChange.js'
 export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    const { collections: allCollectionOptions, enabled } = pluginOptions
+    const { alwaysInsertFields, collections: allCollectionOptions, enabled } = pluginOptions
     const config = { ...incomingConfig }
 
-    // Return early if disabled. Only webpack config mods are applied.
+    // If disabled but alwaysInsertFields is true, only insert fields without full plugin functionality
     if (enabled === false) {
+      if (alwaysInsertFields) {
+        return {
+          ...config,
+          collections: (config.collections || []).map((existingCollection) => {
+            const options = allCollectionOptions[existingCollection.slug]
+
+            if (options) {
+              // If adapter is provided, use it to get fields
+              const adapter = options.adapter
+                ? options.adapter({
+                    collection: existingCollection,
+                    prefix: options.prefix,
+                  })
+                : undefined
+
+              const fields = getFields({
+                adapter,
+                alwaysInsertFields: true,
+                collection: existingCollection,
+                disablePayloadAccessControl: options.disablePayloadAccessControl,
+                generateFileURL: options.generateFileURL,
+                prefix: options.prefix,
+              })
+
+              return {
+                ...existingCollection,
+                fields,
+              }
+            }
+
+            return existingCollection
+          }),
+        }
+      }
+
       return config
     }
 
@@ -49,7 +84,6 @@ export const cloudStoragePlugin =
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,
             prefix: options.prefix,
-            prefixAlwaysOn: options.prefixAlwaysOn,
           })
 
           const handlers = [

@@ -103,19 +103,19 @@ export interface CollectionOptions {
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
   prefix?: string
-  /**
-   * When enabled, the prefix field will always exist in the database
-   * regardless of whether a prefix is configured. This ensures a consistent
-   * schema across all environments.
-   *
-   * This will be enabled by default and removed as a flag in Payload v4.
-   *
-   * @default false
-   */
-  prefixAlwaysOn?: boolean
 }
 
 export interface PluginOptions {
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
   collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin

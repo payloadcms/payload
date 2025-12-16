@@ -3,12 +3,15 @@ import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 import path from 'path'
 
 interface Args {
+  /**
+   * When true, always insert the prefix field regardless of whether a prefix is configured.
+   */
+  alwaysInsertFields?: boolean
   collection: CollectionConfig
   prefix?: string
-  prefixAlwaysOn?: boolean
 }
 
-export const getFields = ({ collection, prefix, prefixAlwaysOn }: Args): Field[] => {
+export const getFields = ({ alwaysInsertFields, collection, prefix }: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
     type: 'text',
@@ -100,8 +103,8 @@ export const getFields = ({ collection, prefix, prefixAlwaysOn }: Args): Field[]
     fields.push(sizesField)
   }
 
-  // If prefix is enabled or prefixAlwaysOn is true, save it to db
-  if (typeof prefix !== 'undefined' || prefixAlwaysOn) {
+  // If prefix is enabled or alwaysInsertFields is true, save it to db
+  if (typeof prefix !== 'undefined' || alwaysInsertFields) {
     let existingPrefixFieldIndex = -1
 
     const existingPrefixField = fields.find((existingField, i) => {
