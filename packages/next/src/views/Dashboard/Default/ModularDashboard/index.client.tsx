@@ -305,7 +305,13 @@ function DraggableItem(props: {
   const draggableProps = props.disabled ? {} : { ...listeners, ...attributes }
 
   return (
-    <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
+    <div
+      className="widget"
+      data-slug={props.id}
+      data-width={props.width}
+      inert={props.disabled}
+      style={mergedStyles}
+    >
       <DroppableItem id={props.id} position="before" />
       <div
         className="draggable"
