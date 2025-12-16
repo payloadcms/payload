@@ -15,14 +15,13 @@
   }
 
   &__buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     flex-direction: column;
     gap: calc(var(--base) * 0.75);
   }
 
   &__button {
-    padding: calc(var(--base) * 0.75) var(--base);
+    padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
     border: 1px solid var(--theme-elevation-150);
     border-radius: 4px;
     background-color: var(--theme-elevation-0);

@@ -5,6 +5,7 @@ import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 import { useAuth, useRouteCache } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
+import { credentials } from '../../credentials.js'
 import './index.scss'
 
 const baseClass = 'before-login'
@@ -12,27 +13,19 @@ const baseClass = 'before-login'
 const testUsers = [
   {
     name: 'Admin (All Tenants)',
-    description: 'Access to all tenants',
-    email: 'dev@payloadcms.com',
-    password: 'test',
+    ...credentials.admin,
   },
   {
     name: 'Blue Dog User',
-    description: 'Blue Dog tenant only',
-    email: 'jane@blue-dog.com',
-    password: 'test',
+    ...credentials.blueDog,
   },
   {
     name: 'Multi-Tenant Owner',
-    description: 'Anchor Bar & Blue Dog tenants',
-    email: 'owner@anchorAndBlueDog.com',
-    password: 'test',
+    ...credentials.owner,
   },
   {
     name: 'Steel Cat User',
-    description: 'Steel Cat tenant only',
-    email: 'huel@steel-cat.com',
-    password: 'test',
+    ...credentials.steelCat,
   },
 ]
 
@@ -92,11 +85,9 @@ export const BeforeLogin: PayloadClientReactComponent<
             type="button"
           >
             <div className={`${baseClass}__button-name`}>
-              {loading === user.email ? 'Logging in...' : user.name}
+              {loading === user.email ? 'Logging in...' : user.email}
             </div>
-            <div className={`${baseClass}__button-details`}>
-              {user.email} • {user.description}
-            </div>
+            <div className={`${baseClass}__button-details`}>{user.name}</div>
           </button>
         ))}
       </div>
