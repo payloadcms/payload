@@ -92,10 +92,12 @@ export class DashboardHelper {
   resizeWidget = async (position: number, width: WidgetWidth) => {
     const widget = this.widgetByPos(position)
     await widget.hover()
-    const widthPopup = widget.locator('.popup')
-    await expect(widthPopup).toBeVisible()
-    await widthPopup.click()
-    const widthOptions = widthPopup.locator('.popup-button-list__button')
+    const widthButton = widget.locator('.widget-wrapper__size-btn')
+    await expect(widthButton).toBeVisible()
+    await widthButton.click()
+    const activePopup = this.page.locator('.popup__content:visible')
+    await expect(activePopup).toBeVisible()
+    const widthOptions = activePopup.locator('.popup-button-list__button')
     await widthOptions.getByText(width).click()
     const slug = await widget.getAttribute('data-slug')
     if (!slug) {
@@ -107,15 +109,17 @@ export class DashboardHelper {
   assertWidthRange = async (arg: { max: WidgetWidth; min: WidgetWidth; position: number }) => {
     const widget = this.widgetByPos(arg.position)
     await widget.hover()
-    const widthPopup = widget.locator('.popup')
-    await expect(widthPopup).toBeVisible()
-    if (await widthPopup.isDisabled()) {
+    const widthButton = widget.locator('.widget-wrapper__size-btn')
+    await expect(widthButton).toBeVisible()
+    if (await widthButton.isDisabled()) {
       await expect(widget).toHaveAttribute('data-width', arg.min)
       await expect(widget).toHaveAttribute('data-width', arg.max)
       return
     }
-    await widthPopup.click()
-    const widthOptions = widthPopup.locator('.popup-button-list__button')
+    await widthButton.click()
+    const activePopup = this.page.locator('.popup__content:visible')
+    await expect(activePopup).toBeVisible()
+    const widthOptions = activePopup.locator('.popup-button-list__button')
     await expect(widthOptions.first().locator('span').first()).toHaveText(arg.min)
     await expect(widthOptions.last().locator('span').first()).toHaveText(arg.max)
   }
@@ -155,6 +159,8 @@ export class DashboardHelper {
     await this.stepNavLast.locator('button').nth(0).click()
     await this.page.locator('.drawer__content').getByText(slug).click()
     await expect(this.widgets).toHaveCount(widgetsCount + 1)
+    // Wait for highlight animation to complete (1.5s animation + buffer)
+    await this.page.waitForTimeout(1600)
   }
 
   openAddWidgetDrawer = async () => {
@@ -187,7 +193,11 @@ export class DashboardHelper {
 
   cancelEditing = async () => {
     await this.stepNavLast.locator('button').nth(2).click()
+    const confirmButton = this.page.locator('#confirm-action')
+    await confirmButton.click()
     await this.assertIsEditing(false)
+    // Wait for any layout changes/transitions to settle
+    await this.page.waitForTimeout(200)
   }
 
   saveChangesAndValidate = async () => {
