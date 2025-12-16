@@ -50,6 +50,7 @@ export function ModularDashboardClient({
   const {
     addWidget,
     cancel,
+    cancelModal,
     currentLayout,
     deleteWidget,
     isEditing,
@@ -209,6 +210,7 @@ export function ModularDashboardClient({
         setIsEditing={setIsEditing}
         widgets={widgets}
       />
+      {cancelModal}
     </div>
   )
 }

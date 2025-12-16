@@ -1,7 +1,7 @@
 import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
-import { toast, useConfig, usePreferences } from '@payloadcms/ui'
+import { ConfirmationModal, toast, useConfig, useModal, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
@@ -13,6 +13,8 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const [isEditing, setIsEditing] = useState(false)
   const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
+  const { openModal } = useModal()
+  const cancelModalSlug = 'cancel-dashboard-changes'
 
   const saveLayout = useCallback(async () => {
     try {
@@ -37,11 +39,31 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     }
   }, [setLayoutPreference])
 
-  const cancel = useCallback(() => {
-    // Restore initial layout
+  const performCancel = useCallback(() => {
     setCurrentLayout(initialLayout)
     setIsEditing(false)
   }, [initialLayout])
+
+  const cancel = useCallback(() => {
+    // Check if layout has changed
+    const hasChanges =
+      currentLayout.length !== initialLayout.length ||
+      currentLayout.some((widget, index) => {
+        const initialWidget = initialLayout[index]
+        return (
+          !initialWidget ||
+          widget.item.id !== initialWidget.item.id ||
+          widget.item.width !== initialWidget.item.width
+        )
+      })
+
+    // If there are changes, show confirmation modal
+    if (hasChanges) {
+      openModal(cancelModalSlug)
+    } else {
+      performCancel()
+    }
+  }, [currentLayout, initialLayout, openModal, cancelModalSlug, performCancel])
 
   const moveWidget = useCallback(
     ({ moveFromIndex, moveToIndex }: { moveFromIndex: number; moveToIndex: number }) => {
@@ -137,9 +159,18 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     [isEditing],
   )
 
+  const cancelModal = React.createElement(ConfirmationModal, {
+    body: 'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
+    confirmLabel: 'Discard',
+    heading: 'Discard changes?',
+    modalSlug: cancelModalSlug,
+    onConfirm: performCancel,
+  })
+
   return {
     addWidget,
     cancel,
+    cancelModal,
     currentLayout,
     deleteWidget,
     isEditing,
