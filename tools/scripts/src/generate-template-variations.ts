@@ -439,11 +439,11 @@ async function copyAgentsFiles({ destDir }: { destDir: string }) {
   const agentsSourceDir = path.join(TEMPLATES_DIR, '_agents')
 
   if (!(await fs.stat(agentsSourceDir).catch(() => null))) {
-    log(`Skipping _agents copy: ${agentsSourceDir} does not exist`)
+    log(`Skipping agents copy: ${agentsSourceDir} does not exist`)
     return
   }
 
-  log('Copying _agents files')
+  log('Copying agents files')
 
   // Copy AGENTS.md
   const agentsMdSource = path.join(agentsSourceDir, 'AGENTS.md')
