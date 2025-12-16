@@ -2,7 +2,7 @@ import type { Access, CollectionConfig, Where } from 'payload'
 
 import { getUserTenantIDs } from '@payloadcms/plugin-multi-tenant/utilities'
 
-import { menuItemsSlug } from '../shared.js'
+import { menuItemsSlug, notTenantedSlug, relationshipsSlug } from '../shared.js'
 
 const collectionTenantReadAccess: Access = ({ req }) => {
   // admins can access all tenants
@@ -96,6 +96,14 @@ export const MenuItems: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+    },
+    {
+      name: 'polymorphicRelationship',
+      type: 'relationship',
+      relationTo: [relationshipsSlug, menuItemsSlug, notTenantedSlug],
+      admin: {
+        appearance: 'drawer',
+      },
     },
   ],
 }

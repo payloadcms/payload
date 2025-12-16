@@ -516,6 +516,82 @@ test.describe('Multi Tenant', () => {
     })
   })
 
+  test.describe('Polymorphic Relationships', () => {
+    test('should not duplicate tenant constraints in polymorphic relationship queries', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Navigate to a menu item and set tenant
+      await page.goto(menuItemsURL.create)
+      await selectDocumentTenant({
+        page,
+        payload,
+        tenant: 'Blue Dog',
+      })
+
+      // Fill in required field
+      await page.locator('#field-name').fill('Test Food Item')
+      await saveDocAndAssert(page)
+
+      // Get the document ID from the URL after save
+      const currentUrl = page.url()
+      const docId = currentUrl.split('/').pop()
+
+      // Capture render-list server action requests
+      const renderListRequests: Array<{
+        payload: any[]
+        url: string
+      }> = []
+
+      page.on('request', (request) => {
+        // Check for server action POST to the document URL
+        if (
+          request.method() === 'POST' &&
+          request.url().includes(`/admin/collections/${menuItemsSlug}/${docId}`)
+        ) {
+          const postData = request.postData()
+          if (postData) {
+            try {
+              const parsedPayload = JSON.parse(postData)
+              // Check if this is a render-list action
+              if (Array.isArray(parsedPayload) && parsedPayload[0]?.name === 'render-list') {
+                renderListRequests.push({
+                  url: request.url(),
+                  payload: parsedPayload,
+                })
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
+      })
+
+      // Click the polymorphic relationship field to open drawer
+      await page.locator('#field-polymorphicRelationship').click()
+
+      await expect(page.locator('.drawer__content')).toBeVisible()
+
+      await expect.poll(() => renderListRequests.length).toBeGreaterThan(0)
+
+      // Check the query.where clause for tenant constraint duplication
+      for (const request of renderListRequests) {
+        const renderListAction = request.payload[0]
+        await expect.poll(() => renderListAction.name).toBe('render-list')
+        await expect.poll(() => renderListAction.args).toBeDefined()
+        await expect.poll(() => renderListAction.args.query).toBeDefined()
+
+        const whereString = JSON.stringify(renderListAction.args.query.where)
+        const tenantMatches = whereString.match(/"tenant":/g)?.length
+
+        await expect.poll(() => tenantMatches).toEqual(1)
+      }
+    })
+  })
+
   test.describe('Tenant Selector', () => {
     test('should populate tenant selector on login', async () => {
       await loginClientSide({
