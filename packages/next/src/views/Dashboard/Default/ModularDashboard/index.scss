@@ -88,30 +88,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-
-      .popup__scroll-container {
-        padding: 0;
-      }
-
-      .popup__content {
-        padding: 5px;
-        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-      }
-
-      .popup-button-list {
-        &__button {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 24px;
-          padding: 4px 8px;
-
-          &--selected {
-            background: var(--theme-elevation-100);
-            font-weight: 500;
-          }
-        }
-      }
     }
 
     &__delete-btn {
@@ -209,6 +185,33 @@
       font-size: 12px;
       margin-left: auto;
       color: var(--theme-elevation-500);
+    }
+  }
+
+  // Since popup uses portal and renders to body, we need global styles
+  // for the size selection buttons in widget wrappers
+  .popup-button-list:has(.widget-wrapper__size-btn-label) {
+    .popup__scroll-container {
+      padding: 0;
+    }
+  }
+
+  .popup__content:has(.widget-wrapper__size-btn-label) {
+    padding: 5px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  }
+
+  .popup-button-list__button:has(.widget-wrapper__size-btn-label) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px;
+
+    .widget-wrapper__size-btn-label {
+      flex: 0 0 auto;
+    }
+
+    .widget-wrapper__size-btn-percentage {
+      margin-left: auto !important;
     }
   }
 
