@@ -239,8 +239,7 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: usersSlug,
     data: {
-      email: 'huel@steel-cat.com',
-      password: 'test',
+      ...credentials.steelCat,
       roles: ['user'],
       tenants: [
         {
