@@ -144,27 +144,29 @@ export function ModularDashboardClient({
                   <div aria-hidden={isEditing} className="widget-content" inert={isEditing}>
                     {widget.component}
                   </div>
-                  <div
-                    className="widget-wrapper__controls"
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <WidgetWidthDropdown
-                      currentWidth={widget.item.width}
-                      maxWidth={widget.item.maxWidth}
-                      minWidth={widget.item.minWidth}
-                      onResize={(width) => resizeWidget(widget.item.id, width)}
-                    />
-                    <button
-                      className="widget-wrapper__delete-btn"
-                      onClick={() => deleteWidget(widget.item.id)}
-                      type="button"
+                  {isEditing && (
+                    <div
+                      className="widget-wrapper__controls"
+                      onPointerDown={(e) => e.stopPropagation()}
                     >
-                      <span className="sr-only">
-                        {t('dashboard:deleteWidget', { id: widget.item.id })}
-                      </span>
-                      <XIcon />
-                    </button>
-                  </div>
+                      <WidgetWidthDropdown
+                        currentWidth={widget.item.width}
+                        maxWidth={widget.item.maxWidth}
+                        minWidth={widget.item.minWidth}
+                        onResize={(width) => resizeWidget(widget.item.id, width)}
+                      />
+                      <button
+                        className="widget-wrapper__delete-btn"
+                        onClick={() => deleteWidget(widget.item.id)}
+                        type="button"
+                      >
+                        <span className="sr-only">
+                          {t('dashboard:deleteWidget', { id: widget.item.id })}
+                        </span>
+                        <XIcon />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </DraggableItem>
             </React.Fragment>
@@ -307,13 +309,7 @@ function DraggableItem(props: {
   const draggableProps = props.disabled ? {} : { ...listeners, ...attributes }
 
   return (
-    <div
-      className="widget"
-      data-slug={props.id}
-      data-width={props.width}
-      inert={props.disabled}
-      style={mergedStyles}
-    >
+    <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
       <DroppableItem id={props.id} position="before" />
       <div
         className="draggable"
