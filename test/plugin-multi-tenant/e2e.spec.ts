@@ -17,6 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
+import { openRelationshipFieldDrawer } from '../helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import {
   clearSelectInput,
@@ -524,22 +525,6 @@ test.describe('Multi Tenant', () => {
         serverURL,
       })
 
-      // Navigate to a menu item and set tenant
-      await page.goto(menuItemsURL.create)
-      await selectDocumentTenant({
-        page,
-        payload,
-        tenant: 'Blue Dog',
-      })
-
-      // Fill in required field
-      await page.locator('#field-name').fill('Test Food Item')
-      await saveDocAndAssert(page)
-
-      // Get the document ID from the URL after save
-      const currentUrl = page.url()
-      const docId = currentUrl.split('/').pop()
-
       // Capture render-list server action requests
       const renderListRequests: Array<{
         payload: any[]
@@ -547,10 +532,10 @@ test.describe('Multi Tenant', () => {
       }> = []
 
       page.on('request', (request) => {
-        // Check for server action POST to the document URL
+        // Check for server action POST requests
         if (
           request.method() === 'POST' &&
-          request.url().includes(`/admin/collections/${menuItemsSlug}/${docId}`)
+          request.url().includes(`/admin/collections/${menuItemsSlug}`)
         ) {
           const postData = request.postData()
           if (postData) {
@@ -570,10 +555,22 @@ test.describe('Multi Tenant', () => {
         }
       })
 
-      // Click the polymorphic relationship field to open drawer
-      await page.locator('#field-polymorphicRelationship').click()
+      // Navigate to existing menu item
+      await page.goto(menuItemsURL.list)
+      await clearTenantFilter({ page })
 
-      await expect(page.locator('.drawer__content')).toBeVisible()
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await openRelationshipFieldDrawer({
+        page,
+        fieldName: 'polymorphicRelationship',
+        selectRelation: 'Relationship', // select a tenant-enabled collection
+      })
 
       await expect.poll(() => renderListRequests.length).toBeGreaterThan(0)
 
