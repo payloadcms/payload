@@ -46,8 +46,29 @@ export const getMCPHandler = (
   const { payload } = req
   const configSchema = configToJSONSchema(payload.config)
 
+  // Handler wrapper that injects req before the _extra argument
+  const wrapHandler = (handler: (...args: any[]) => any) => {
+    return async (...args: any[]) => {
+      const _extra = args[args.length - 1]
+      const handlerArgs = args.slice(0, -1)
+      return await handler(...handlerArgs, req, _extra)
+    }
+  }
+
+  const payloadToolHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['tools']>[number]['handler'],
+  ) => wrapHandler(handler)
+
+  const payloadPromptHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['prompts']>[number]['handler'],
+  ) => wrapHandler(handler)
+
+  const payloadResourceHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['resources']>[number]['handler'],
+  ) => wrapHandler(handler)
+
   // User
-  const user = mcpAccessSettings.user as TypedUser
+  const user = mcpAccessSettings.user
 
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
@@ -243,7 +264,13 @@ export const getMCPHandler = (
           registerTool(
             isToolEnabled,
             tool.name,
-            () => server.tool(tool.name, tool.description, tool.parameters, tool.handler),
+            () =>
+              server.tool(
+                tool.name,
+                tool.description,
+                tool.parameters,
+                payloadToolHandler(tool.handler),
+              ),
             payload,
             useVerboseLogs,
           )
@@ -263,7 +290,7 @@ export const getMCPHandler = (
                 description: prompt.description,
                 title: prompt.title,
               },
-              prompt.handler,
+              payloadPromptHandler(prompt.handler),
             )
             if (useVerboseLogs) {
               payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
@@ -289,7 +316,7 @@ export const getMCPHandler = (
                 mimeType: resource.mimeType,
                 title: resource.title,
               },
-              resource.handler,
+              payloadResourceHandler(resource.handler),
             )
 
             if (useVerboseLogs) {

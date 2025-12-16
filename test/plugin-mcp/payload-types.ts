@@ -72,6 +72,9 @@ export interface Config {
     media: Media;
     posts: Post;
     products: Product;
+    rolls: Roll;
+    'modified-prompts': ModifiedPrompt;
+    'returned-resources': ReturnedResource;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -84,6 +87,9 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    rolls: RollsSelect<false> | RollsSelect<true>;
+    'modified-prompts': ModifiedPromptsSelect<false> | ModifiedPromptsSelect<true>;
+    'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -224,6 +230,69 @@ export interface Product {
   title?: string | null;
   description?: string | null;
   price?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls".
+ */
+export interface Roll {
+  id: string;
+  /**
+   * The number of sides on the die that was rolled
+   */
+  sides: number;
+  /**
+   * The result of the die roll
+   */
+  result: number;
+  /**
+   * The user who rolled the die
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts".
+ */
+export interface ModifiedPrompt {
+  id: string;
+  /**
+   * The original prompt
+   */
+  original: string;
+  /**
+   * The modified prompt
+   */
+  modified: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources".
+ */
+export interface ReturnedResource {
+  id: string;
+  /**
+   * The URI of the resource
+   */
+  uri: string;
+  /**
+   * The content of the resource
+   */
+  content: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -436,6 +505,18 @@ export interface PayloadLockedDocument {
         value: string | Product;
       } | null)
     | ({
+        relationTo: 'rolls';
+        value: string | Roll;
+      } | null)
+    | ({
+        relationTo: 'modified-prompts';
+        value: string | ModifiedPrompt;
+      } | null)
+    | ({
+        relationTo: 'returned-resources';
+        value: string | ReturnedResource;
+      } | null)
+    | ({
         relationTo: 'payload-mcp-api-keys';
         value: string | PayloadMcpApiKey;
       } | null);
@@ -553,6 +634,39 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   price?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls_select".
+ */
+export interface RollsSelect<T extends boolean = true> {
+  sides?: T;
+  result?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts_select".
+ */
+export interface ModifiedPromptsSelect<T extends boolean = true> {
+  original?: T;
+  modified?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources_select".
+ */
+export interface ReturnedResourcesSelect<T extends boolean = true> {
+  uri?: T;
+  content?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,5 +1,4 @@
-// storage-adapter-import-placeholder
-import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite' // database-adapter-import
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -14,9 +13,11 @@ import { Media } from './collections/Media'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const cloudflareRemoteBindings = process.env.NODE_ENV === 'production'
+const isCLI = process.argv.some((value) => value.match(/^(generate|migrate):?/))
+const isProduction = process.env.NODE_ENV === 'production'
+
 const cloudflare =
-  process.argv.find((value) => value.match(/^(generate|migrate):?/)) || !cloudflareRemoteBindings
+  isCLI || !isProduction
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
@@ -33,11 +34,8 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // database-adapter-config-start
   db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
-  // database-adapter-config-end
   plugins: [
-    // storage-adapter-placeholder
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },
@@ -51,7 +49,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        experimental: { remoteBindings: cloudflareRemoteBindings },
+        remoteBindings: isProduction,
       } satisfies GetPlatformProxyOptions),
   )
 }

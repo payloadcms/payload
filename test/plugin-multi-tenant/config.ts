@@ -1,4 +1,5 @@
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
+import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
@@ -6,7 +7,6 @@ const dirname = path.dirname(filename)
 
 import type { Config as ConfigType } from './payload-types.js'
 
-import { getTenantFromCookie } from '../../packages/plugin-multi-tenant/src/utilities/getTenantFromCookie.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
 import { Menu } from './collections/Menu.js'

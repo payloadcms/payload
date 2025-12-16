@@ -135,6 +135,8 @@ function checkAndSanitizePermissions(
           continue
         }
       } else {
+        // eslint-disable-next-line no-console
+        console.error('Unexpected object in fields permissions', data, 'key:', key)
         throw new Error('Unexpected object in fields permissions')
       }
     } else if (data[key] !== true) {
@@ -200,6 +202,8 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
 
 /**
  * Recursively remove empty objects and false values from an object.
+ *
+ * @internal
  */
 export function sanitizePermissions(
   data: MarkOptional<Permissions, 'canAccessAdmin'>,

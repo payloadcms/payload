@@ -13,6 +13,7 @@ import {
   BeforeDelete2Collection,
   BeforeDeleteCollection,
 } from './collections/BeforeDelete/index.js'
+import { BeforeOperationCollection } from './collections/BeforeOperation/index.js'
 import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
@@ -34,6 +35,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   },
   collections: [
+    BeforeOperationCollection,
     BeforeChangeHooks,
     BeforeValidateCollection,
     AfterOperationCollection,

@@ -20,6 +20,7 @@ export const createResourceTool = (
 ) => {
   const tool = async (
     data: string,
+    draft: boolean,
     locale?: string,
     fallbackLocale?: string,
   ): Promise<{
@@ -57,6 +58,7 @@ export const createResourceTool = (
       const result = await payload.create({
         collection: collectionSlug,
         data: parsedData,
+        draft,
         overrideAccess: false,
         req,
         user,
@@ -120,6 +122,11 @@ ${JSON.stringify(result, null, 2)}
     // Create a new schema that combines the converted fields with create-specific parameters
     const createResourceSchema = z.object({
       ...convertedFields.shape,
+      draft: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Whether to create the document as a draft'),
       fallbackLocale: z
         .string()
         .optional()
@@ -134,12 +141,17 @@ ${JSON.stringify(result, null, 2)}
 
     server.tool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
+      `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
       createResourceSchema.shape,
       async (params: Record<string, unknown>) => {
-        const { fallbackLocale, locale, ...fieldData } = params
+        const { draft, fallbackLocale, locale, ...fieldData } = params
         const data = JSON.stringify(fieldData)
-        return await tool(data, locale as string | undefined, fallbackLocale as string | undefined)
+        return await tool(
+          data,
+          draft as boolean,
+          locale as string | undefined,
+          fallbackLocale as string | undefined,
+        )
       },
     )
   }

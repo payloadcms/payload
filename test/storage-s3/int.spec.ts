@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
@@ -7,7 +7,13 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, mediaWithSignedDownloadsSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithDynamicPrefixSlug,
+  mediaWithPrefixSlug,
+  mediaWithSignedDownloadsSlug,
+  prefix,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,15 +28,15 @@ describe('@payloadcms/storage-s3', () => {
 
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    TEST_BUCKET = process.env.S3_BUCKET
+    TEST_BUCKET = process.env.S3_BUCKET!
 
     client = new AWS.S3({
-      endpoint: process.env.S3_ENDPOINT,
+      endpoint: process.env.S3_ENDPOINT!,
       forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
+      region: process.env.S3_REGION!,
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
       },
     })
 
@@ -119,6 +125,117 @@ describe('@payloadcms/storage-s3', () => {
     it.todo('can upload')
   })
 
+  describe('prefix collision detection', () => {
+    beforeEach(async () => {
+      // Clear S3 bucket before each test
+      await clearTestBucket()
+      // Clear database records before each test
+      await payload.delete({
+        collection: mediaWithPrefixSlug,
+        where: {},
+      })
+      await payload.delete({
+        collection: mediaSlug,
+        where: {},
+      })
+    })
+
+    it('detects collision within same prefix', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Upload twice with same prefix
+      const upload1 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      const upload2 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image-1.png')
+      expect(upload1.prefix).toBe(prefix)
+      expect(upload2.prefix).toBe(prefix)
+    })
+
+    it('works normally for collections without prefix', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Upload twice to collection without prefix
+      const upload1 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      const upload2 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image-1.png')
+      // @ts-expect-error prefix should never be set
+      expect(upload1.prefix).toBeUndefined()
+      // @ts-expect-error prefix should never be set
+      expect(upload2.prefix).toBeUndefined()
+    })
+
+    it('allows same filename under different prefixes', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Upload with default prefix from config ('test-prefix')
+      const upload1 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: imageFile,
+      })
+
+      // Upload with different prefix
+      const upload2 = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {
+          prefix: 'different-prefix',
+        },
+        filePath: imageFile,
+      })
+
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image.png') // Should NOT increment
+      expect(upload1.prefix).toBe(prefix) // 'test-prefix'
+      expect(upload2.prefix).toBe('different-prefix')
+    })
+
+    it('supports multi-tenant scenario with dynamic prefix from hook', async () => {
+      const imageFile = path.resolve(dirname, '../uploads/image.png')
+
+      // Tenant A uploads logo.png
+      const tenantAUpload = await payload.create({
+        collection: mediaWithDynamicPrefixSlug,
+        data: { tenant: 'a' },
+        filePath: imageFile,
+      })
+
+      // Tenant B uploads logo.png
+      const tenantBUpload = await payload.create({
+        collection: mediaWithDynamicPrefixSlug,
+        data: { tenant: 'b' },
+        filePath: imageFile,
+      })
+
+      // Both should keep original filename
+      expect(tenantAUpload.filename).toBe('image.png')
+      expect(tenantBUpload.filename).toBe('image.png')
+      expect(tenantAUpload.prefix).toBe('tenant-a')
+      expect(tenantBUpload.prefix).toBe('tenant-b')
+    })
+  })
+
   async function createTestBucket() {
     try {
       const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
@@ -144,14 +261,10 @@ describe('@payloadcms/storage-s3', () => {
       return
     }
 
-    const deleteParams = {
+    const deleteParams: AWS.DeleteObjectsCommandInput = {
       Bucket: TEST_BUCKET,
-      Delete: { Objects: [] },
+      Delete: { Objects: listedObjects.Contents.map(({ Key }) => ({ Key })) },
     }
-
-    listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key })
-    })
 
     const deleteResult = await client.send(new AWS.DeleteObjectsCommand(deleteParams))
     if (deleteResult.Errors?.length) {
@@ -169,12 +282,12 @@ describe('@payloadcms/storage-s3', () => {
     uploadId: number | string
   }) {
     const uploadData = (await payload.findByID({
-      collection: collectionSlug,
+      collection: collectionSlug as CollectionSlug,
       id: uploadId,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
+      const rawFilename = uploadData?.sizes?.[key]?.filename
       return prefix ? `${prefix}/${rawFilename}` : rawFilename
     })
 
