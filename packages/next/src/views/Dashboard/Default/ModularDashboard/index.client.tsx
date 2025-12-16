@@ -113,7 +113,6 @@ export function ModularDashboardClient({
       >
         <div
           className={`modular-dashboard ${isEditing ? 'editing' : ''}`}
-          inert={activeDragId ? true : undefined}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -141,7 +140,9 @@ export function ModularDashboardClient({
                 width={widget.item.width}
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
-                  <div className="widget-content">{widget.component}</div>
+                  <div aria-hidden={isEditing} className="widget-content" inert={isEditing}>
+                    {widget.component}
+                  </div>
                   <div
                     className="widget-wrapper__controls"
                     onPointerDown={(e) => e.stopPropagation()}
