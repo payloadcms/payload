@@ -170,7 +170,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     const mainCollection = collectionSlug
     const mainDoc = await connection.collection(mainCollection).findOne({})
 
-    if (mainDoc && 'status' in mainDoc) {
+    if (mainDoc && '_status' in mainDoc) {
       payload.logger.info({ msg: `Migrating main collection documents for: ${mainCollection}` })
 
       const allDocs = await connection.collection(mainCollection).find({}).toArray()
@@ -205,7 +205,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
           { _id: doc._id },
           {
             $set: {
-              status: statusObj,
+              _status: statusObj,
             },
           },
         )
@@ -221,7 +221,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     const globalCollection = globalSlug
     const globalDoc = await connection.collection(globalCollection).findOne({})
 
-    if (globalDoc && 'status' in globalDoc && globalDoc._id) {
+    if (globalDoc && '_status' in globalDoc && globalDoc._id) {
       payload.logger.info({ msg: `Migrating main global document for: ${globalCollection}` })
 
       // Get the latest version for the global
@@ -247,7 +247,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
         { _id: globalDoc._id },
         {
           $set: {
-            status: statusObj,
+            _status: statusObj,
           },
         },
       )

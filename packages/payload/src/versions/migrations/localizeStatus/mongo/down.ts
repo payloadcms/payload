@@ -94,21 +94,21 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
     const mainCollection = collectionSlug
     const mainDoc = await connection.collection(mainCollection).findOne({})
 
-    if (mainDoc && 'status' in mainDoc && typeof mainDoc.status === 'object') {
+    if (mainDoc && '_status' in mainDoc && typeof mainDoc._status === 'object') {
       payload.logger.info({ msg: `Rolling back main collection documents for: ${mainCollection}` })
 
       const allDocs = await connection.collection(mainCollection).find({}).toArray()
 
       for (const doc of allDocs) {
-        if (typeof doc.status === 'object' && !Array.isArray(doc.status)) {
+        if (typeof doc._status === 'object' && !Array.isArray(doc._status)) {
           // Convert from { en: 'published', es: 'draft' } to 'published' (using default locale)
-          const statusValue = doc.status[defaultLocale] || 'draft'
+          const statusValue = doc._status[defaultLocale] || 'draft'
 
           await connection.collection(mainCollection).updateOne(
             { _id: doc._id },
             {
               $set: {
-                status: statusValue,
+                _status: statusValue,
               },
             },
           )
@@ -121,20 +121,20 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
     const globalCollection = globalSlug
     const globalDoc = await connection.collection(globalCollection).findOne({})
 
-    if (globalDoc && 'status' in globalDoc && typeof globalDoc.status === 'object') {
+    if (globalDoc && '_status' in globalDoc && typeof globalDoc.status === 'object') {
       payload.logger.info({ msg: `Rolling back main global document for: ${globalCollection}` })
 
       // Convert from { en: 'published', es: 'draft' } to 'published' (using default locale)
       const statusValue =
-        typeof globalDoc.status === 'object' && !Array.isArray(globalDoc.status)
-          ? globalDoc.status[defaultLocale] || 'draft'
+        typeof globalDoc._status === 'object' && !Array.isArray(globalDoc._status)
+          ? globalDoc._status[defaultLocale] || 'draft'
           : 'draft'
 
       await connection.collection(globalCollection).updateOne(
         { _id: globalDoc._id },
         {
           $set: {
-            status: statusValue,
+            _status: statusValue,
           },
         },
       )
