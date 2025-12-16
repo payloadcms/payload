@@ -25,6 +25,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     components: {
+      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
         Icon: '/components/Icon/index.js#Icon',
