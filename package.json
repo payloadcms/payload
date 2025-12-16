@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.68.1",
+  "version": "3.68.5",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -180,7 +180,7 @@
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
     "mongoose": "8.15.1",
-    "next": "15.4.8",
+    "next": "15.4.10",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",

@@ -26,7 +26,7 @@
     "@payloadcms/ui": "3.68.5",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "15.4.8",
+    "next": "15.4.10",
     "payload": "3.68.5",
     "react": "19.2.1",
     "react-dom": "19.2.1"
