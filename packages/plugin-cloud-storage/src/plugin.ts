@@ -49,6 +49,7 @@ export const cloudStoragePlugin =
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,
             prefix: options.prefix,
+            prefixAlwaysOn: options.prefixAlwaysOn,
           })
 
           const handlers = [

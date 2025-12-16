@@ -10,6 +10,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithDynamicPrefixSlug,
+  mediaWithPrefixAlwaysOnSlug,
   mediaWithPrefixSlug,
   mediaWithSignedDownloadsSlug,
   prefix,
@@ -85,6 +86,23 @@ describe('@payloadcms/storage-s3', () => {
     expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
   })
 
+  it('has prefix field with prefixAlwaysOn even without configured prefix', async () => {
+    const upload = await payload.create({
+      collection: mediaWithPrefixAlwaysOnSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
+
+    expect(upload.id).toBeTruthy()
+    // With prefixAlwaysOn: true, the prefix field should exist as empty string
+    expect(upload.prefix).toBe('')
+
+    await verifyUploads({
+      collectionSlug: mediaWithPrefixAlwaysOnSlug,
+      uploadId: upload.id,
+    })
+  })
+
   it('can download with signed downloads', async () => {
     await payload.create({
       collection: mediaWithSignedDownloadsSlug,
@@ -136,6 +154,10 @@ describe('@payloadcms/storage-s3', () => {
       })
       await payload.delete({
         collection: mediaSlug,
+        where: {},
+      })
+      await payload.delete({
+        collection: mediaWithPrefixAlwaysOnSlug,
         where: {},
       })
     })

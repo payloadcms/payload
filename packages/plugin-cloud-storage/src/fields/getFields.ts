@@ -12,6 +12,7 @@ interface Args {
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
   prefix?: string
+  prefixAlwaysOn?: boolean
 }
 
 export const getFields = ({
@@ -20,6 +21,7 @@ export const getFields = ({
   disablePayloadAccessControl,
   generateFileURL,
   prefix,
+  prefixAlwaysOn,
 }: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
@@ -134,8 +136,8 @@ export const getFields = ({
     fields.push(sizesField)
   }
 
-  // If prefix is enabled, save it to db
-  if (typeof prefix !== 'undefined') {
+  // If prefix is enabled or prefixAlwaysOn is true, save it to db
+  if (typeof prefix !== 'undefined' || prefixAlwaysOn) {
     let existingPrefixFieldIndex = -1
 
     const existingPrefixField = fields.find((existingField, i) => {
@@ -153,7 +155,7 @@ export const getFields = ({
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: path.posix.join(prefix),
+      defaultValue: prefix ? path.posix.join(prefix) : '',
     } as TextField)
   }
 

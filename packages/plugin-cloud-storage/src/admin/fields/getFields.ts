@@ -5,9 +5,10 @@ import path from 'path'
 interface Args {
   collection: CollectionConfig
   prefix?: string
+  prefixAlwaysOn?: boolean
 }
 
-export const getFields = ({ collection, prefix }: Args): Field[] => {
+export const getFields = ({ collection, prefix, prefixAlwaysOn }: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
     type: 'text',
@@ -99,8 +100,8 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
     fields.push(sizesField)
   }
 
-  // If prefix is enabled, save it to db
-  if (typeof prefix !== 'undefined') {
+  // If prefix is enabled or prefixAlwaysOn is true, save it to db
+  if (typeof prefix !== 'undefined' || prefixAlwaysOn) {
     let existingPrefixFieldIndex = -1
 
     const existingPrefixField = fields.find((existingField, i) => {
@@ -118,7 +119,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: path.posix.join(prefix),
+      defaultValue: prefix ? path.posix.join(prefix) : '',
     } as TextField)
   }
 

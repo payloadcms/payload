@@ -8,11 +8,13 @@ import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithDynamicPrefix } from './collections/MediaWithDynamicPrefix.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { MediaWithPrefixAlwaysOn } from './collections/MediaWithPrefixAlwaysOn.js'
 import { MediaWithSignedDownloads } from './collections/MediaWithSignedDownloads.js'
 import { Users } from './collections/Users.js'
 import {
   mediaSlug,
   mediaWithDynamicPrefixSlug,
+  mediaWithPrefixAlwaysOnSlug,
   mediaWithPrefixSlug,
   mediaWithSignedDownloadsSlug,
   prefix,
@@ -33,7 +35,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, MediaWithDynamicPrefix, MediaWithPrefix, MediaWithSignedDownloads, Users],
+  collections: [
+    Media,
+    MediaWithDynamicPrefix,
+    MediaWithPrefix,
+    MediaWithPrefixAlwaysOn,
+    MediaWithSignedDownloads,
+    Users,
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -47,6 +56,9 @@ export default buildConfigWithDefaults({
     s3Storage({
       collections: {
         [mediaSlug]: true,
+        [mediaWithPrefixAlwaysOnSlug]: {
+          prefixAlwaysOn: true,
+        },
         [mediaWithDynamicPrefixSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,
@@ -59,11 +71,11 @@ export default buildConfigWithDefaults({
           },
         },
       },
-      bucket: process.env.S3_BUCKET,
+      bucket: process.env.S3_BUCKET!,
       config: {
         credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
         },
         endpoint: process.env.S3_ENDPOINT,
         forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',

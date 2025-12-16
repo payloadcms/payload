@@ -27,6 +27,7 @@ export const cloudStorage =
           const fields = getFields({
             collection: existingCollection,
             prefix: options.prefix,
+            prefixAlwaysOn: options.prefixAlwaysOn,
           })
 
           return {

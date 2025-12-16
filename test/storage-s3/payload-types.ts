@@ -70,6 +70,7 @@ export interface Config {
     media: Media;
     'media-with-dynamic-prefix': MediaWithDynamicPrefix;
     'media-with-prefix': MediaWithPrefix;
+    'media-with-prefix-always-on': MediaWithPrefixAlwaysOn;
     'media-with-signed-downloads': MediaWithSignedDownload;
     users: User;
     'payload-kv': PayloadKv;
@@ -82,6 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-dynamic-prefix': MediaWithDynamicPrefixSelect<false> | MediaWithDynamicPrefixSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
+    'media-with-prefix-always-on': MediaWithPrefixAlwaysOnSelect<false> | MediaWithPrefixAlwaysOnSelect<true>;
     'media-with-signed-downloads': MediaWithSignedDownloadsSelect<false> | MediaWithSignedDownloadsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -92,6 +94,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
@@ -199,6 +202,26 @@ export interface MediaWithPrefix {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-prefix-always-on".
+ */
+export interface MediaWithPrefixAlwaysOn {
+  id: string;
+  alt?: string | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-signed-downloads".
  */
 export interface MediaWithSignedDownload {
@@ -274,6 +297,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-prefix';
         value: string | MediaWithPrefix;
+      } | null)
+    | ({
+        relationTo: 'media-with-prefix-always-on';
+        value: string | MediaWithPrefixAlwaysOn;
       } | null)
     | ({
         relationTo: 'media-with-signed-downloads';
@@ -391,6 +418,25 @@ export interface MediaWithDynamicPrefixSelect<T extends boolean = true> {
  * via the `definition` "media-with-prefix_select".
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-prefix-always-on_select".
+ */
+export interface MediaWithPrefixAlwaysOnSelect<T extends boolean = true> {
+  alt?: T;
   prefix?: T;
   updatedAt?: T;
   createdAt?: T;
