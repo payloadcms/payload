@@ -118,11 +118,10 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
       payload.logger.info({ msg: `Rolled back ${allDocs.length} collection documents` })
     }
   } else if (globalSlug) {
-    const globalCollection = globalSlug
-    const globalDoc = await connection.collection(globalCollection).findOne({})
+    const globalDoc = await connection.collection('globals').findOne({ globalType: globalSlug })
 
     if (globalDoc && '_status' in globalDoc && typeof globalDoc.status === 'object') {
-      payload.logger.info({ msg: `Rolling back main global document for: ${globalCollection}` })
+      payload.logger.info({ msg: `Rolling back main global document for: ${globalSlug}` })
 
       // Convert from { en: 'published', es: 'draft' } to 'published' (using default locale)
       const statusValue =
@@ -130,8 +129,8 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
           ? globalDoc._status[defaultLocale] || 'draft'
           : 'draft'
 
-      await connection.collection(globalCollection).updateOne(
-        { _id: globalDoc._id },
+      await connection.collection('globals').updateOne(
+        { _id: globalDoc._id, globalType: globalSlug },
         {
           $set: {
             _status: statusValue,

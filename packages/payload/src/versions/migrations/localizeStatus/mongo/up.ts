@@ -122,7 +122,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     id: doc._id.toString(),
     _status: doc.version._status as 'draft' | 'published',
     createdAt: doc.createdAt,
-    parent: doc.parent.toString(),
+    parent: doc.parent?.toString(),
     publishedLocale: doc.publishedLocale,
     snapshot: doc.snapshot || false,
   }))
@@ -218,11 +218,10 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       })
     }
   } else if (globalSlug) {
-    const globalCollection = globalSlug
-    const globalDoc = await connection.collection(globalCollection).findOne({})
-
+    // Globals are stored in a single 'globals' collection with globalType discriminator
+    const globalDoc = await connection.collection('globals').findOne({ globalType: globalSlug })
     if (globalDoc && '_status' in globalDoc && globalDoc._id) {
-      payload.logger.info({ msg: `Migrating main global document for: ${globalCollection}` })
+      payload.logger.info({ msg: `Migrating main global document for: ${globalSlug}` })
 
       // Get the latest version for the global
       const latestVersions = await connection
@@ -243,8 +242,8 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       }
 
       // Update global document
-      await connection.collection(globalCollection).updateOne(
-        { _id: globalDoc._id },
+      await connection.collection('globals').updateOne(
+        { _id: globalDoc._id, globalType: globalSlug },
         {
           $set: {
             _status: statusObj,
