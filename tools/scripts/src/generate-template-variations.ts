@@ -87,7 +87,7 @@ async function main() {
       sharp: false,
       skipDockerCompose: true,
       skipReadme: true,
-      skipAgents: true,
+      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -112,7 +112,7 @@ async function main() {
       sharp: true,
       skipDockerCompose: true,
       skipReadme: true,
-      skipAgents: true,
+      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -131,7 +131,7 @@ async function main() {
       dirname: 'with-postgres',
       sharp: true,
       skipDockerCompose: true,
-      skipAgents: true,
+      skipAgents: false,
       storage: 'localDisk',
     },
     {
@@ -144,7 +144,7 @@ async function main() {
       sharp: false,
       storage: 'vercelBlobStorage',
       skipReadme: true,
-      skipAgents: true,
+      skipAgents: false,
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
@@ -165,7 +165,7 @@ async function main() {
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipReadme: true, // Do not copy the README.md file from the base template
-      skipAgents: false, // Copy _agents files
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -180,7 +180,7 @@ async function main() {
       generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false, // Copy _agents files
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -197,7 +197,7 @@ async function main() {
       generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false, // Copy _agents files
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -214,7 +214,7 @@ async function main() {
       generateLockfile: false,
       sharp: false,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false, // Copy _agents files
+      skipAgents: false,
       storage: 'r2Storage',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
