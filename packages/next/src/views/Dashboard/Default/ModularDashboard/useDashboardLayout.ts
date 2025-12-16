@@ -80,6 +80,27 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       }
 
       setCurrentLayout((prev) => [...prev, newWidgetInstance])
+
+      // Scroll to the newly added widget after it's rendered and highlight it
+      setTimeout(() => {
+        const element = document.getElementById(widgetId)
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+
+          // Add highlight animation to the widget element
+          const widget = element.closest('.widget')
+          if (widget) {
+            widget.classList.add('widget--highlight')
+            // Remove the class after animation completes (1.5s fade out)
+            setTimeout(() => {
+              widget.classList.remove('widget--highlight')
+            }, 1500)
+          }
+        }
+      }, 100)
     },
     [isEditing, widgets],
   )

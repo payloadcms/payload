@@ -61,6 +61,23 @@
     }
   }
 
+  // This is used to highlight a newly added widget.
+  @keyframes widget-highlight {
+    0% {
+      box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.9);
+    }
+    100% {
+      box-shadow: 0 0 0 3px rgba(255, 208, 0, 0);
+    }
+  }
+
+  .widget {
+    &--highlight {
+      animation: widget-highlight 1.5s ease-out forwards;
+      border-radius: 8px;
+    }
+  }
+
   .widget-wrapper {
     position: relative;
     height: 100%;
