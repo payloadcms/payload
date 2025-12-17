@@ -1201,6 +1201,654 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(headerLine).toContain('virtualRelationship')
       })
     })
+
+    describe('json and richText fields CSV serialization', () => {
+      it('should serialize json and richText fields as JSON strings in single columns', async () => {
+        const jsonData = {
+          key: 'value',
+          nested: {
+            deep: 'data',
+            array: [1, 2, 3],
+          },
+        }
+
+        // Create a test page with json and richText fields
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'JSON Serialization Test',
+            jsonField: jsonData,
+            richTextField: richTextData,
+            blocks: [
+              {
+                blockType: 'content',
+                richText: richTextData,
+              },
+            ],
+          },
+        })
+
+        // Export to CSV
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const csvData = await readCSV(csvPath)
+
+        expect(csvData).toHaveLength(1)
+        const row = csvData[0]
+
+        // Verify jsonField is serialized as a single JSON string column
+        expect(row.jsonField).toBeDefined()
+        expect(typeof row.jsonField).toBe('string')
+        const parsedJson = JSON.parse(row.jsonField)
+        expect(parsedJson).toEqual(jsonData)
+
+        // Verify richTextField is serialized as a single JSON string column
+        expect(row.richTextField).toBeDefined()
+        expect(typeof row.richTextField).toBe('string')
+        const parsedRichText = JSON.parse(row.richTextField)
+        expect(parsedRichText.root).toBeDefined()
+        expect(parsedRichText.root.type).toBe('root')
+
+        // Verify richText inside blocks is also serialized as JSON string
+        // The column name pattern for blocks is: blocks_<index>_<blockType>_<fieldName>
+        const blockRichTextColumn = Object.keys(row).find(
+          (key) => key.includes('blocks') && key.includes('richText') && !key.includes('_root'),
+        )
+        expect(blockRichTextColumn).toBeDefined()
+        expect(typeof row[blockRichTextColumn!]).toBe('string')
+        const parsedBlockRichText = JSON.parse(row[blockRichTextColumn!])
+        expect(parsedBlockRichText.root).toBeDefined()
+
+        // Verify that json/richText fields are NOT flattened into multiple columns
+        // These keys should NOT exist if serialization is working correctly
+        expect(row.jsonField_key).toBeUndefined()
+        expect(row.jsonField_nested).toBeUndefined()
+        expect(row.jsonField_nested_deep).toBeUndefined()
+        expect(row.richTextField_root).toBeUndefined()
+        expect(row.richTextField_root_children).toBeUndefined()
+        // Verify no _root suffix columns exist for any richText (whether in blocks or standalone)
+        const flattenedRichTextKeys = Object.keys(row).filter(
+          (key) => key.includes('richText') && key.includes('_root'),
+        )
+        expect(flattenedRichTextKeys).toHaveLength(0)
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
+      })
+
+      it('should roundtrip json and richText fields through CSV export/import', async () => {
+        const jsonData = {
+          complex: {
+            nested: {
+              deeply: {
+                value: 'test',
+                numbers: [1, 2, 3, 4, 5],
+              },
+            },
+          },
+          array: [{ a: 1 }, { b: 2 }],
+        }
+
+        // Create test page
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'JSON Roundtrip CSV Test',
+            jsonField: jsonData,
+            richTextField: richTextData,
+            blocks: [
+              {
+                blockType: 'content',
+                richText: richTextData,
+              },
+            ],
+          },
+        })
+
+        // Export to CSV
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+
+        // Delete original
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
+
+        // Re-import
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            name: 'json-roundtrip.csv',
+            size: fs.statSync(csvPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        // Verify imported data
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { equals: 'JSON Roundtrip CSV Test' },
+          },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        const imported = importedPages.docs[0]
+
+        // Verify jsonField was restored correctly
+        expect(imported?.jsonField).toEqual(jsonData)
+
+        // Verify richTextField was restored correctly
+        expect(imported?.richTextField).toBeDefined()
+        expect((imported?.richTextField as typeof richTextData)?.root?.type).toBe('root')
+        expect(
+          (imported?.richTextField as typeof richTextData)?.root?.children?.length,
+        ).toBeGreaterThan(0)
+
+        // Verify richText in blocks was restored correctly
+        expect(imported?.blocks).toHaveLength(1)
+        const block = imported?.blocks?.[0]
+        expect(block?.blockType).toBe('content')
+        const blockRichText = 'richText' in (block || {}) ? (block as any).richText : null
+        expect(blockRichText?.root?.type).toBe('root')
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { equals: 'JSON Roundtrip CSV Test' },
+          },
+        })
+      })
+
+      it('should handle json fields in deeply nested array structures', async () => {
+        const jsonData = { level: 'nested', data: [1, 2, 3] }
+
+        // Create a page with arrays that don't contain json/richText (to verify arrays still work)
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Nested Array Test',
+            jsonField: jsonData,
+            array: [
+              { field1: 'array-item-1-field1', field2: 'array-item-1-field2' },
+              { field1: 'array-item-2-field1', field2: 'array-item-2-field2' },
+              { field1: 'array-item-3-field1', field2: 'array-item-3-field2' },
+            ],
+            group: {
+              value: 'group value',
+              array: [
+                { field1: 'nested-array-1', field2: 'nested-value-1' },
+                { field1: 'nested-array-2', field2: 'nested-value-2' },
+              ],
+            },
+          },
+        })
+
+        // Export to CSV
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const csvData = await readCSV(csvPath)
+
+        expect(csvData).toHaveLength(1)
+        const row = csvData[0]
+
+        // Verify json field is serialized as single column
+        expect(row.jsonField).toBeDefined()
+        expect(JSON.parse(row.jsonField)).toEqual(jsonData)
+
+        // Verify regular arrays are still flattened properly (not affected by json fix)
+        expect(row.array_0_field1).toBe('array-item-1-field1')
+        expect(row.array_0_field2).toBe('array-item-1-field2')
+        expect(row.array_1_field1).toBe('array-item-2-field1')
+        expect(row.array_2_field1).toBe('array-item-3-field1')
+
+        // Verify nested arrays in groups are still flattened properly
+        expect(row.group_array_0_field1).toBe('nested-array-1')
+        expect(row.group_array_1_field1).toBe('nested-array-2')
+
+        // Delete original and re-import
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            name: 'nested-array-test.csv',
+            size: fs.statSync(csvPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+
+        // Verify imported data
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { equals: 'Nested Array Test' },
+          },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        const imported = importedPages.docs[0]
+
+        // Verify json field
+        expect(imported?.jsonField).toEqual(jsonData)
+
+        // Verify regular arrays were imported correctly
+        expect(imported?.array).toHaveLength(3)
+        expect(imported?.array?.[0]?.field1).toBe('array-item-1-field1')
+        expect(imported?.array?.[1]?.field1).toBe('array-item-2-field1')
+        expect(imported?.array?.[2]?.field1).toBe('array-item-3-field1')
+
+        // Verify nested arrays in groups
+        expect(imported?.group?.array).toHaveLength(2)
+        expect(imported?.group?.array?.[0]?.field1).toBe('nested-array-1')
+        expect(imported?.group?.array?.[1]?.field1).toBe('nested-array-2')
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { equals: 'Nested Array Test' },
+          },
+        })
+      })
+
+      it('should update json and richText fields in update mode', async () => {
+        const initialJson = { version: 1, data: 'initial' }
+        const updatedJson = { version: 2, data: 'updated', extra: [1, 2, 3] }
+
+        // Create initial document with json and richText
+        const existingPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'JSON Update Mode Test',
+            jsonField: initialJson,
+            richTextField: richTextData,
+          },
+        })
+
+        // Verify initial state
+        expect(existingPage.jsonField).toEqual(initialJson)
+
+        // Create CSV with updated json data
+        const csvContent =
+          `id,title,jsonField,richTextField\n` +
+          `${existingPage.id},"JSON Update Mode Test","${JSON.stringify(updatedJson).replace(/"/g, '""')}","${JSON.stringify(richTextData).replace(/"/g, '""')}"`
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        // Import with update mode
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'update',
+            matchField: 'id',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'json-update-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.updated).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        // Verify updated document
+        const updatedPage = await payload.findByID({
+          collection: 'pages',
+          id: existingPage.id,
+        })
+
+        // Verify jsonField was updated correctly
+        expect(updatedPage.jsonField).toEqual(updatedJson)
+
+        // Verify richTextField is still correct
+        expect((updatedPage.richTextField as typeof richTextData)?.root?.type).toBe('root')
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          id: existingPage.id,
+        })
+      })
+
+      it('should handle json and richText fields in upsert mode', async () => {
+        const timestamp = Date.now()
+        const existingJson = { id: 'existing', value: 100 }
+        const newJson = { id: 'new', value: 200, nested: { key: 'value' } }
+        const updatedExistingJson = { id: 'existing', value: 150, modified: true }
+
+        // Create one existing document with a unique title
+        const existingPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: `JSON Upsert Existing ${timestamp}`,
+            jsonField: existingJson,
+            richTextField: richTextData,
+          },
+        })
+
+        // Create CSV with both existing (to update) and new (to create) documents
+        // Use title as the match field for upsert
+        const csvContent =
+          `title,jsonField,richTextField\n` +
+          `"JSON Upsert Existing ${timestamp}","${JSON.stringify(updatedExistingJson).replace(/"/g, '""')}","${JSON.stringify(richTextData).replace(/"/g, '""')}"\n` +
+          `"JSON Upsert New ${timestamp}","${JSON.stringify(newJson).replace(/"/g, '""')}","${JSON.stringify(richTextData).replace(/"/g, '""')}"`
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        // Import with upsert mode using title as matchField
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'upsert',
+            matchField: 'title',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'json-upsert-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.updated).toBe(1)
+        expect(importDoc.summary?.imported).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        // Verify updated document
+        const updatedPage = await payload.findByID({
+          collection: 'pages',
+          id: existingPage.id,
+        })
+
+        expect(updatedPage.jsonField).toEqual(updatedExistingJson)
+
+        // Verify newly created document
+        const newPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { equals: `JSON Upsert New ${timestamp}` },
+          },
+        })
+
+        expect(newPages.docs).toHaveLength(1)
+        expect(newPages.docs[0]?.jsonField).toEqual(newJson)
+        expect((newPages.docs[0]?.richTextField as typeof richTextData)?.root?.type).toBe('root')
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            or: [
+              { title: { equals: `JSON Upsert Existing ${timestamp}` } },
+              { title: { equals: `JSON Upsert New ${timestamp}` } },
+            ],
+          },
+        })
+      })
+
+      it('should import json fields from manually created CSV', async () => {
+        // Simulate a user manually creating a CSV with JSON data
+        const manualJson = {
+          settings: {
+            theme: 'dark',
+            notifications: true,
+            preferences: ['email', 'sms'],
+          },
+        }
+
+        // Create CSV as a user might - with properly escaped JSON in a single column
+        const csvContent =
+          `title,jsonField\n` +
+          `"Manual CSV Import","${JSON.stringify(manualJson).replace(/"/g, '""')}"`
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'manual-json-csv.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        // Verify imported data
+        const importedPage = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { equals: 'Manual CSV Import' },
+          },
+        })
+
+        expect(importedPage.docs).toHaveLength(1)
+        expect(importedPage.docs[0]?.jsonField).toEqual(manualJson)
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { equals: 'Manual CSV Import' },
+          },
+        })
+      })
+
+      it('should handle multiple imports updating the same json fields', async () => {
+        const jsonV1 = { version: 1, items: ['a'] }
+        const jsonV2 = { version: 2, items: ['a', 'b'] }
+        const jsonV3 = { version: 3, items: ['a', 'b', 'c'] }
+
+        // Create initial document
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Sequential Import Test',
+            jsonField: jsonV1,
+          },
+        })
+
+        // First update
+        let csvContent =
+          `id,title,jsonField\n` +
+          `${page.id},"Sequential Import Test","${JSON.stringify(jsonV2).replace(/"/g, '""')}"`
+
+        let csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'update',
+            matchField: 'id',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'sequential-1.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        // Verify first update
+        let updatedPage = await payload.findByID({
+          collection: 'pages',
+          id: page.id,
+        })
+        expect(updatedPage.jsonField).toEqual(jsonV2)
+
+        // Second update
+        csvContent =
+          `id,title,jsonField\n` +
+          `${page.id},"Sequential Import Test","${JSON.stringify(jsonV3).replace(/"/g, '""')}"`
+
+        csvBuffer = Buffer.from(csvContent)
+
+        importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'update',
+            matchField: 'id',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'sequential-2.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        // Verify second update
+        updatedPage = await payload.findByID({
+          collection: 'pages',
+          id: page.id,
+        })
+        expect(updatedPage.jsonField).toEqual(jsonV3)
+
+        // Clean up
+        await payload.delete({
+          collection: 'pages',
+          id: page.id,
+        })
+      })
+    })
   })
 
   describe('imports', () => {

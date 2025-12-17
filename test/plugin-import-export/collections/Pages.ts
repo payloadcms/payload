@@ -213,6 +213,14 @@ export const Pages: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'jsonField',
+      type: 'json',
+    },
+    {
+      name: 'richTextField',
+      type: 'richText',
+    },
+    {
       name: 'relationship',
       type: 'relationship',
       relationTo: 'users',

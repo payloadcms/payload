@@ -31,6 +31,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         collection: 'posts',
         data: {
           title: `Post ${i}`,
+          content: richTextData,
           _status: i % 2 === 0 ? 'published' : 'draft', // Evens published, odds draft
         },
       })

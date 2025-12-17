@@ -236,6 +236,30 @@ export interface Page {
   virtualRelationship?: string | null;
   virtual?: string | null;
   hasManyNumber?: number[] | null;
+  jsonField?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  richTextField?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
   hasOnePolymorphic?:
@@ -782,6 +806,8 @@ export interface PagesSelect<T extends boolean = true> {
   virtualRelationship?: T;
   virtual?: T;
   hasManyNumber?: T;
+  jsonField?: T;
+  richTextField?: T;
   relationship?: T;
   excerpt?: T;
   hasOnePolymorphic?: T;
