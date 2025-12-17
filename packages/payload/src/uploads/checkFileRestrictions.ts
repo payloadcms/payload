@@ -6,6 +6,7 @@ import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
 import { detectSvgFromXml } from './detectSvgFromXml.js'
+import { getFileTypeFallback } from './getFileTypeFallback.js'
 import { validateSvg } from './validateSvg.js'
 
 /**
@@ -105,21 +106,35 @@ export const checkFileRestrictions = async ({
     }
 
     if (!detected && !useTempFiles) {
-      if (expectsDetectableType(typeFromExtension)) {
-        errors.push(`File buffer returned no detectable MIME type.`)
-      }
+      const mimeTypeFromExtension = getFileTypeFallback(file.name).mime
+      const extIsValid = validateMimeType(mimeTypeFromExtension, configMimeTypes)
 
-      const extIsValid = validateMimeType(typeFromExtension, configMimeTypes, true)
       if (!extIsValid) {
-        errors.push(`File extension ${typeFromExtension} is not allowed.`)
+        errors.push(
+          `File type ${mimeTypeFromExtension} (from extension ${typeFromExtension}) is not allowed.`,
+        )
+      } else {
+        // SVG security check (text-based files not detectable by buffer)
+        if (typeFromExtension.toLowerCase() === 'svg') {
+          const isSafeSvg = validateSvg(file.data)
+          if (!isSafeSvg) {
+            errors.push('SVG file contains potentially harmful content.')
+          }
+        }
+
+        // PDF validation
+        if (mimeTypeFromExtension === 'application/pdf') {
+          const isValidPDF = validatePDF(file.data)
+          if (!isValidPDF) {
+            errors.push('Invalid or corrupted PDF file.')
+          }
+        }
       }
 
-      // Additional security check for SVG files (since they're text-based and not detectable)
-      if (typeFromExtension.toLowerCase() === 'svg' && extIsValid) {
-        const isSafeSvg = validateSvg(file.data)
-        if (!isSafeSvg) {
-          errors.push('SVG file contains potentially harmful content.')
-        }
+      if (expectsDetectableType(mimeTypeFromExtension)) {
+        req.payload.logger.warn(
+          `File buffer returned no detectable MIME type for ${file.name}. Falling back to extension-based validation.`,
+        )
       }
     }
 
