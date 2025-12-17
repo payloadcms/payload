@@ -61,7 +61,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                       createHREF = formatAdminURL({
                         adminRoute,
                         path: `/collections/${slug}/create`,
-                        serverURL,
+                        // serverURL,
                       })
 
                       hasCreatePermission = permissions?.collections?.[slug]?.create
