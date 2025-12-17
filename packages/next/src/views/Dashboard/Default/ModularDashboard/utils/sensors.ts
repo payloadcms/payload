@@ -227,10 +227,34 @@ const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
   // Find the target droppable based on direction
   const targetDroppable = findTargetDroppable(droppables, currentCenterX, currentCenterY, code)
 
-  // If we found a target, calculate the delta and move
+  // If we found a target, scroll if needed and calculate the delta
   if (targetDroppable) {
-    const deltaX = targetDroppable.centerX - currentCenterX
-    const deltaY = targetDroppable.centerY - currentCenterY
+    const viewportHeight = window.innerHeight
+    const targetRect = targetDroppable.rect
+    const scrollPadding = 20 // Extra padding to ensure element is fully visible
+
+    // Check if target droppable is fully visible in viewport
+    const isAboveViewport = targetRect.top < scrollPadding
+    const isBelowViewport = targetRect.bottom > viewportHeight - scrollPadding
+
+    // Scroll to make target visible (using instant scroll for synchronous behavior)
+    if (isAboveViewport) {
+      const scrollAmount = targetRect.top - scrollPadding
+      // don't use smooth scroll here, because it will mess up the delta calculation
+      window.scrollBy({ behavior: 'instant', top: scrollAmount })
+    } else if (isBelowViewport) {
+      const scrollAmount = targetRect.bottom - viewportHeight + scrollPadding
+      window.scrollBy({ behavior: 'instant', top: scrollAmount })
+    }
+
+    // After scroll, recalculate target position (it may have changed due to scroll)
+    const newTargetRect = targetDroppable.element.getBoundingClientRect()
+    const newTargetCenterX = newTargetRect.left + newTargetRect.width / 2
+    const newTargetCenterY = newTargetRect.top + newTargetRect.height / 2
+
+    // Calculate delta using current overlay position (which didn't change) and new target position
+    const deltaX = newTargetCenterX - currentCenterX
+    const deltaY = newTargetCenterY - currentCenterY
 
     // Add delta to currentCoordinates to position overlay's center at target's center
     return {
