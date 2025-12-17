@@ -75,15 +75,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
       setHasRequested(true)
       setValues(formattedValues)
     }
-  }, [
-    cellData,
-    relationTo,
-    collections,
-    isAboveViewport,
-    routes.api,
-    hasRequested,
-    getRelationships,
-  ])
+  }, [cellData, relationTo, collections, isAboveViewport, hasRequested, getRelationships])
 
   useEffect(() => {
     if (hasRequested) {

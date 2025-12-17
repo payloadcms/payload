@@ -99,7 +99,6 @@ export function AuthProvider({
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
   } = config
 
   const { i18n } = useTranslation()
@@ -125,13 +124,12 @@ export function AuthProvider({
         formatAdminURL({
           adminRoute,
           path: `${logoutInactivityRoute}${window.location.pathname.startsWith(adminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
-          serverURL,
         }),
       ),
     )
 
     closeAllModals()
-  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition, serverURL])
+  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
 
   const revokeTokenAndExpire = useCallback(() => {
     setUserInMemory(null)
@@ -201,7 +199,6 @@ export function AuthProvider({
               formatApiURL({
                 apiRoute,
                 path: `/${userSlug}/refresh-token?refresh`,
-                serverURL,
               }),
               {
                 headers: {
@@ -227,7 +224,6 @@ export function AuthProvider({
       apiRoute,
       i18n.language,
       redirectToInactivityRoute,
-      serverURL,
       setNewUser,
       tokenExpirationMs,
       userSlug,
@@ -243,7 +239,6 @@ export function AuthProvider({
           formatApiURL({
             apiRoute,
             path: `/${userSlug}/refresh-token`,
-            serverURL,
           }),
           {
             headers: {
@@ -269,7 +264,7 @@ export function AuthProvider({
       }
       return null
     },
-    [apiRoute, i18n.language, redirectToInactivityRoute, serverURL, setNewUser, userSlug, user],
+    [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
   )
 
   const logOut = useCallback(async () => {
@@ -280,7 +275,6 @@ export function AuthProvider({
           formatApiURL({
             apiRoute,
             path: `/${user.collection}/logout`,
-            serverURL,
           }),
         )
       }
@@ -289,7 +283,7 @@ export function AuthProvider({
     }
 
     return true
-  }, [apiRoute, serverURL, setNewUser, user])
+  }, [apiRoute, setNewUser, user])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -307,7 +301,6 @@ export function AuthProvider({
           formatApiURL({
             apiRoute,
             path: `/access${params}`,
-            serverURL,
           }),
           {
             headers: {
@@ -326,7 +319,7 @@ export function AuthProvider({
         toast.error(`Refreshing permissions failed: ${e.message}`)
       }
     },
-    [serverURL, apiRoute, i18n],
+    [apiRoute, i18n],
   )
 
   const fetchFullUser = React.useCallback(async () => {
@@ -335,7 +328,6 @@ export function AuthProvider({
         formatApiURL({
           apiRoute,
           path: `/${userSlug}/me`,
-          serverURL,
         }),
         {
           credentials: 'include',
@@ -355,7 +347,7 @@ export function AuthProvider({
     }
 
     return null
-  }, [serverURL, apiRoute, userSlug, i18n.language, setNewUser])
+  }, [apiRoute, userSlug, i18n.language, setNewUser])
 
   const refreshCookieEvent = useEffectEvent(refreshCookie)
   useEffect(() => {

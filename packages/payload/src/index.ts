@@ -139,6 +139,8 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { formatAdminURL } from './utilities/formatAdminURL.js'
+import { formatApiURL } from './utilities/formatApiURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -546,9 +548,19 @@ export class BasePayload {
     return forgotPasswordLocal<TSlug>(this, options)
   }
 
-  getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
+  getAdminURL = (): string =>
+    formatAdminURL({
+      adminRoute: this.config.routes.admin,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
+  getAPIURL = (): string =>
+    formatApiURL({
+      apiRoute: this.config.routes.api,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
   globals!: Globals
 

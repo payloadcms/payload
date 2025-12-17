@@ -63,12 +63,9 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
-  // Intentionally omit `serverURL` to ensure relative path
   const currentRoute = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
-    relative: true,
-    serverURL: config.serverURL,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
@@ -229,8 +226,6 @@ export const RootPage = async ({
   const createFirstUserRoute = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
-    relative: true,
-    serverURL: config.serverURL,
   })
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
@@ -255,6 +250,7 @@ export const RootPage = async ({
     importMap,
     user: viewType === 'createFirstUser' ? true : req.user,
   })
+
   await applyLocaleFiltering({ clientConfig, config, req })
 
   // Ensure locale on req is still valid after filtering locales

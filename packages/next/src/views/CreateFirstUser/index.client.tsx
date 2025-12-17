@@ -88,7 +88,6 @@ export const CreateFirstUserClient: React.FC<{
       action={formatApiURL({
         apiRoute,
         path: `/${userSlug}/first-register`,
-        serverURL,
       })}
       initialState={{
         ...initialState,

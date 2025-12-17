@@ -89,7 +89,6 @@ export const LoginForm: React.FC<{
       action={formatApiURL({
         apiRoute,
         path: `/${userSlug}/login`,
-        serverURL,
       })}
       className={baseClass}
       disableSuccessStatus
@@ -114,7 +113,6 @@ export const LoginForm: React.FC<{
         href={formatAdminURL({
           adminRoute,
           path: forgotRoute,
-          serverURL,
         })}
         prefetch={false}
       >

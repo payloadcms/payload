@@ -43,11 +43,10 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
         formatAdminURL({
           adminRoute,
           path: loginRoute,
-          serverURL,
         }),
       )
     }
-  }, [adminRoute, fetchFullUser, history, loginRoute, serverURL])
+  }, [adminRoute, fetchFullUser, history, loginRoute])
 
   const initialState: FormState = {
     'confirm-password': {
@@ -72,7 +71,6 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
       action={formatApiURL({
         apiRoute,
         path: `/${userSlug}/reset-password`,
-        serverURL,
       })}
       initialState={initialState}
       method="POST"

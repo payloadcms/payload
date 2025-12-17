@@ -27,6 +27,7 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
+import { formatApiURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
@@ -173,15 +174,21 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         setLinkLabel(loadingLabel)
 
         requests
-          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
+          .get(
+            formatApiURL({
+              apiRoute: config.routes.api,
+              path: `/${collection}/${id}`,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              params: {
+                depth: 0,
+                locale: locale?.code,
+              },
             },
-            params: {
-              depth: 0,
-              locale: locale?.code,
-            },
-          })
+          )
           .then(async (res) => {
             if (!res.ok) {
               throw new Error(`HTTP error! Status: ${res.status}`)

@@ -8,6 +8,7 @@ import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
+import { formatApiURL } from './formatApiURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
@@ -155,14 +156,18 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = `${basePath}${path ?? new URL(req.url!).pathname}`
+    const pathname = path ?? new URL(req.url!).pathname
+    const baseAPIPath = formatApiURL({
+      apiRoute: config.routes.api as `/${string}`,
+      path: '',
+    })
 
-    if (!pathname.startsWith(config.routes.api)) {
+    if (!pathname.startsWith(baseAPIPath)) {
       return notFoundResponse(req, pathname)
     }
 
     // /api/posts/route -> /posts/route
-    let adjustedPathname = pathname.replace(config.routes.api, '')
+    let adjustedPathname = pathname.replace(baseAPIPath, '')
 
     let isGlobals = false
 

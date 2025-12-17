@@ -24,23 +24,23 @@ export const formatAdminURL = (
     relative?: boolean
   } & Pick<Config, 'serverURL'>,
 ): string => {
-  const { adminRoute, basePath = '', path = '', relative = false, serverURL } = args
+  const { adminRoute, basePath, path = '', relative = false, serverURL } = args
 
-  const pathSegments = [basePath]
+  // Build the pathname from segments
+  const segments = [adminRoute && adminRoute !== '/' && adminRoute, path && path].filter(Boolean)
 
-  if (adminRoute && adminRoute !== '/') {
-    pathSegments.push(adminRoute)
-  }
+  const pathname = segments.join('') || '/'
 
-  if (path && !(adminRoute === '/' && !path)) {
-    pathSegments.push(path)
-  }
-
-  const pathname = pathSegments.join('') || '/'
-
+  // Return relative URL if requested or no serverURL provided
   if (relative || !serverURL) {
     return pathname
   }
 
-  return new URL(pathname, serverURL).toString()
+  // When serverURL is provided, prepend basePath and construct absolute URL
+  const serverURLObj = new URL(serverURL)
+  const envBasePath = process.env.NEXT_BASE_PATH || ''
+  console.log('HEREHER', { envBasePath })
+  const fullPath = ((envBasePath || basePath || '') + pathname).replace(/\/$/, '') || '/'
+
+  return new URL(fullPath, serverURLObj.origin).toString()
 }

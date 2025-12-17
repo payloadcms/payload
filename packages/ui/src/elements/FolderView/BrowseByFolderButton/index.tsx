@@ -17,7 +17,6 @@ export function BrowseByFolderButton({ active }) {
       routes: { browseByFolder: foldersRoute },
     },
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
   return (
@@ -26,7 +25,6 @@ export function BrowseByFolderButton({ active }) {
       href={formatAdminURL({
         adminRoute,
         path: foldersRoute,
-        serverURL,
       })}
       id="browse-by-folder"
       prefetch={false}

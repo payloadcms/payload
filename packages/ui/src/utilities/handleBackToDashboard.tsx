@@ -12,7 +12,6 @@ export const handleBackToDashboard = ({ adminRoute, router, serverURL }: BackToD
   const redirectRoute = formatAdminURL({
     adminRoute,
     path: '/',
-    serverURL,
   })
   router.push(redirectRoute)
 }

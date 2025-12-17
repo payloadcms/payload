@@ -118,7 +118,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const fetchURL = formatApiURL({
     apiRoute,
     path: collectionSlug ? `/${collectionSlug}/versions` : `/${globalSlug}/versions`,
-    serverURL,
   })
 
   const columns = buildVersionColumns({

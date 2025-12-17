@@ -129,7 +129,6 @@ export const renderDocument = async ({
       const redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
-        serverURL,
       })
       redirect(redirectURL)
     } else {
@@ -281,7 +280,6 @@ export const renderDocument = async ({
       : globalSlug
         ? `/${globalSlug}${apiQueryParams}`
         : '',
-    serverURL,
   })
 
   let View: ViewToRender = null
@@ -345,7 +343,6 @@ export const renderDocument = async ({
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
-          serverURL,
         })
 
         redirect(redirectURL)
