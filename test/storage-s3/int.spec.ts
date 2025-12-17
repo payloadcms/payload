@@ -9,6 +9,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   mediaSlug,
+  mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
   mediaWithSignedDownloadsSlug,
@@ -119,6 +120,49 @@ describe('@payloadcms/storage-s3', () => {
   it('should return 404 when the file is not found', async () => {
     const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
     expect(response.status).toBe(404)
+  })
+
+  describe('disablePayloadAccessControl', () => {
+    it('should return direct S3 URL with encoded filename when uploading file with spaces', async () => {
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+      })
+
+      expect(upload.id).toBeTruthy()
+      expect(upload.filename).toBe('image with spaces.png')
+
+      // When disablePayloadAccessControl is true, URL should point directly to S3
+      // and the filename should be URL-encoded
+      expect(upload.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.url).toContain(TEST_BUCKET)
+      expect(upload.url).toContain('image%20with%20spaces.png')
+
+      // Verify the file can be fetched using the URL
+      const response = await fetch(upload.url)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/png')
+    })
+
+    it('should return direct S3 URL without encoding issues for normal filenames', async () => {
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      expect(upload.id).toBeTruthy()
+
+      // URL should point directly to S3
+      expect(upload.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.url).toContain(TEST_BUCKET)
+      expect(upload.url).toContain('image.png')
+
+      // Verify the file can be fetched
+      const response = await fetch(upload.url)
+      expect(response.status).toBe(200)
+    })
   })
 
   describe('R2', () => {
