@@ -12,6 +12,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatApiURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -35,7 +36,6 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -56,7 +56,10 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const [href, setHref] = useState<string>()
 
   useEffect(() => {
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-url`
+    const endpoint = formatApiURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-url',
+    })
 
     const getHref = async () => {
       const genURLResponse = await fetch(endpoint, {

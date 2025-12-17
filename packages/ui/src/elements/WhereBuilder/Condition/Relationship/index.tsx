@@ -1,6 +1,7 @@
 'use client'
 import type { PaginatedDocs, Where } from 'payload'
 
+import { formatApiURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
@@ -13,8 +14,8 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import optionsReducer from './optionsReducer.js'
 import './index.scss'
+import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
@@ -125,7 +126,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
         try {
           const response = await fetch(
-            `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            formatApiURL({
+              apiRoute: api,
+              path: `/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            }),
             {
               credentials: 'include',
               headers: {
@@ -262,12 +266,15 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const addOptionByID = useCallback(
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
-        const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
+        const response = await fetch(
+          formatApiURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (response.ok) {
           const data = await response.json()

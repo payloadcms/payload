@@ -516,13 +516,19 @@ export const myPlugin =
 'use client'
 import { useConfig } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
+import { formatApiURL } from 'payload/shared'
 
 export const BeforeDashboardClient = () => {
   const { config } = useConfig()
   const [data, setData] = useState('')
 
   useEffect(() => {
-    fetch(`${config.serverURL}${config.routes.api}/my-endpoint`)
+    fetch(
+      formatApiURL({
+        apiRoute: config.routes.api,
+        path: '/my-endpoint',
+      }),
+    )
       .then((res) => res.json())
       .then(setData)
   }, [config.serverURL, config.routes.api])

@@ -5,7 +5,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, formatApiURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -65,12 +65,15 @@ export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(async () => {
     try {
-      const url = `${serverURL}${api}/${collectionSlug}?${qs.stringify({
-        trash: true,
-        where: {
-          and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
-        },
-      })}`
+      const url = formatApiURL({
+        apiRoute: api,
+        path: `/${collectionSlug}?${qs.stringify({
+          trash: true,
+          where: {
+            and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
+          },
+        })}`,
+      })
 
       const res = await requests.delete(url, {
         headers: {

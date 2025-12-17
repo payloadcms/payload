@@ -116,7 +116,6 @@ export const QueryPresetBar: React.FC<{
         formatApiURL({
           apiRoute,
           path: `/${queryPresetsSlug}/${activePreset.id}`,
-          serverURL,
         }),
         {
           method: 'DELETE',
@@ -148,16 +147,7 @@ export const QueryPresetBar: React.FC<{
     } catch (_err) {
       toast.error(t('error:deletingTitle', { title: activePreset.title }))
     }
-  }, [
-    apiRoute,
-    activePreset?.id,
-    activePreset?.title,
-    t,
-    presetConfig,
-    i18n,
-    resetQueryPreset,
-    serverURL,
-  ])
+  }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetQueryPreset])
 
   const saveCurrentChanges = useCallback(async () => {
     try {
@@ -165,7 +155,6 @@ export const QueryPresetBar: React.FC<{
         formatApiURL({
           apiRoute,
           path: `/${queryPresetsSlug}/${activePreset.id}`,
-          serverURL,
         }),
         {
           body: JSON.stringify({
@@ -215,7 +204,6 @@ export const QueryPresetBar: React.FC<{
     presetConfig?.labels?.singular,
     i18n,
     setQueryModified,
-    serverURL,
   ])
 
   const hasModifiedPreset = activePreset && modified

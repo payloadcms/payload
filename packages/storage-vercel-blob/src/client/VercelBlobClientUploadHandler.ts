@@ -1,6 +1,7 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { upload } from '@vercel/blob/client'
+import { formatApiURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean
@@ -16,14 +17,17 @@ export const VercelBlobClientUploadHandler =
       extra: { addRandomSuffix, baseURL, prefix = '' },
       file,
       serverHandlerPath,
-      serverURL,
       updateFilename,
     }) => {
+      const endpointRoute = formatApiURL({
+        apiRoute,
+        path: serverHandlerPath,
+      })
       const result = await upload(`${prefix}${file.name}`, file, {
         access: 'public',
         clientPayload: collectionSlug,
         contentType: file.type,
-        handleUploadUrl: `${serverURL}${apiRoute}${serverHandlerPath}`,
+        handleUploadUrl: endpointRoute,
       })
 
       // Update filename with suffix from returned url

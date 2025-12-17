@@ -1,7 +1,7 @@
 'use client'
 import type { SelectType, TypeWithID } from 'payload'
 
-import { appendUploadSelectFields } from 'payload/shared'
+import { appendUploadSelectFields, formatApiURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 
@@ -62,7 +62,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         })
 
         if (idsToLoad.length > 0) {
-          const url = `${serverURL}${api}/${slug}`
+          const url = formatApiURL({ apiRoute: api, path: `/${slug}` })
 
           const params = new URLSearchParams()
           const select: SelectType = {}

@@ -1,12 +1,12 @@
+import { formatApiURL } from 'payload/shared'
+
 import type { CollectionPopulationRequestHandler } from './types.js'
 
-const defaultRequestHandler: CollectionPopulationRequestHandler = ({
-  apiPath,
-  data,
-  endpoint,
-  serverURL,
-}) => {
-  const url = `${serverURL}${apiPath}/${endpoint}`
+const defaultRequestHandler: CollectionPopulationRequestHandler = ({ apiPath, data, endpoint }) => {
+  const url = formatApiURL({
+    apiRoute: apiPath,
+    path: `/${endpoint}`,
+  })
 
   return fetch(url, {
     body: JSON.stringify(data),
@@ -30,16 +30,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): Promise<T> => {
-  const {
-    apiRoute,
-    collectionSlug,
-    depth,
-    globalSlug,
-    incomingData,
-    initialData,
-    locale,
-    serverURL,
-  } = args
+  const { apiRoute, collectionSlug, depth, globalSlug, incomingData, initialData, locale } = args
 
   const requestHandler = args.requestHandler || defaultRequestHandler
 
@@ -55,7 +46,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     endpoint: encodeURI(
       `${globalSlug ? 'globals/' : ''}${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
     ),
-    serverURL,
   }).then((res) => res.json())
 
   return result

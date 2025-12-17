@@ -23,7 +23,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     extra: T
     file: File
     prefix?: string
-    serverHandlerPath: string
+    serverHandlerPath: `/${string}`
     serverURL: string
     updateFilename: (value: string) => void
   }) => Promise<unknown>

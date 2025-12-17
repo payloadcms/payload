@@ -15,6 +15,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatApiURL } from 'payload/shared'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
@@ -24,8 +25,8 @@ import type { UploadElementType } from '../types.js'
 import { useElement } from '../../../providers/ElementProvider.js'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import { uploadFieldsSchemaPath, uploadName } from '../shared.js'
-import { UploadDrawer } from './UploadDrawer/index.js'
 import './index.scss'
+import { UploadDrawer } from './UploadDrawer/index.js'
 
 const baseClass = 'rich-text-upload'
 
@@ -76,7 +77,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}` }),
     { initialParams },
   )
 

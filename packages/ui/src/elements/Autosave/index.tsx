@@ -4,6 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
+  formatApiURL,
   getAutosaveInterval,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
@@ -45,7 +46,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -112,13 +112,19 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
+            url = formatApiURL({
+              apiRoute: api,
+              path: `/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`,
+            })
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
+            url = formatApiURL({
+              apiRoute: api,
+              path: `/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`,
+            })
             method = 'POST'
           }
 

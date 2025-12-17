@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { mergeListSearchAndWhere } from 'payload/shared'
+import { formatApiURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -84,20 +84,23 @@ export const RestoreMany: React.FC<Props> = (props) => {
       }
     }
 
-    const url = `${serverURL}${routes.api}/${slug}${qs.stringify(
-      {
-        limit: 0,
-        locale,
-        select: {},
-        trash: true, // Ensure trashed docs are returned
-        where: mergeListSearchAndWhere({
-          collectionConfig,
-          search: parseSearchParams(searchParams)?.search as string,
-          where: whereConstraint,
-        }),
-      },
-      { addQueryPrefix: true },
-    )}`
+    const url = formatApiURL({
+      apiRoute: routes.api as `/${string}`,
+      path: `/${slug}${qs.stringify(
+        {
+          limit: 0,
+          locale,
+          select: {},
+          trash: true, // Ensure trashed docs are returned
+          where: mergeListSearchAndWhere({
+            collectionConfig,
+            search: parseSearchParams(searchParams)?.search as string,
+            where: whereConstraint,
+          }),
+        },
+        { addQueryPrefix: true },
+      )}`,
+    })
 
     const body: Record<string, unknown> = {
       deletedAt: null,

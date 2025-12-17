@@ -96,7 +96,6 @@ export const DuplicateDocument: React.FC<Props> = ({
             path: `/${slug}/${id}/duplicate${qs.stringify(queryParams, {
               addQueryPrefix: true,
             })}`,
-            serverURL,
           }),
           {
             body: JSON.stringify(hasDraftsEnabled(collectionConfig) ? { _status: 'draft' } : {}),
@@ -120,7 +119,6 @@ export const DuplicateDocument: React.FC<Props> = ({
                 formatAdminURL({
                   adminRoute,
                   path: `/collections/${slug}/${doc.id}${localeCode ? `?locale=${localeCode}` : ''}`,
-                  serverURL,
                 }),
               ),
             )

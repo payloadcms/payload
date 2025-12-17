@@ -169,7 +169,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const {
     config: {
       routes: { api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -393,7 +392,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                           action={formatApiURL({
                             apiRoute,
                             path: `/${collection.slug}${queryString}&draft=true`,
-                            serverURL,
                           })}
                           disabled={selectedFields.length === 0}
                         />
@@ -401,7 +399,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                           action={formatApiURL({
                             apiRoute,
                             path: `/${collection.slug}${queryString}&draft=true`,
-                            serverURL,
                           })}
                           disabled={selectedFields.length === 0}
                         />
@@ -411,7 +408,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                         action={formatApiURL({
                           apiRoute,
                           path: `/${collection.slug}${queryString}`,
-                          serverURL,
                         })}
                         disabled={selectedFields.length === 0}
                       />
