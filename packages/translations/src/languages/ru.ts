@@ -413,8 +413,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Остаться на этой странице',
     submissionSuccessful: 'Успешно отправлено.',
     submit: 'Отправить',
-    submitting: 'Подача заявления...',
-    success: 'Успех',
+    submitting: 'Отправка...',
+    success: 'Успешно',
     successfullyCreated: '{{label}} успешно создан.',
     successfullyDuplicated: '{{label}} успешно продублирован.',
     successfullyReindexed:
