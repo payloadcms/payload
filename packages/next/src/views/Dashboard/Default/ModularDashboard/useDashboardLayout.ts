@@ -1,10 +1,18 @@
 import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
-import { ConfirmationModal, toast, useConfig, useModal, usePreferences } from '@payloadcms/ui'
+import {
+  ConfirmationModal,
+  toast,
+  useConfig,
+  useModal,
+  usePreferences,
+  useServerFunctions,
+} from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
+import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefaultLayoutServerFn.js'
 
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 
@@ -15,6 +23,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
+  const { serverFunction } = useServerFunctions()
 
   const saveLayout = useCallback(async () => {
     try {
@@ -30,14 +39,18 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const resetLayout = useCallback(async () => {
     try {
       await setLayoutPreference(null)
+
+      const result = (await serverFunction({
+        name: 'get-default-layout',
+        args: {},
+      })) as GetDefaultLayoutServerFnReturnType
+
+      setCurrentLayout(result.layout)
       setIsEditing(false)
-      // Reload to get default layout from server
-      // TO-DECIDE: should we send the default layout from server to prevent a reload?
-      window.location.reload()
     } catch {
-      // Handle error silently or show user feedback
+      toast.error('Failed to reset layout')
     }
-  }, [setLayoutPreference])
+  }, [setLayoutPreference, serverFunction])
 
   const performCancel = useCallback(() => {
     setCurrentLayout(initialLayout)
