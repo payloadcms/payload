@@ -341,6 +341,7 @@ export const trTranslations: DefaultTranslationsObject = {
     loading: 'Yükleniyor',
     locale: 'Yerel ayar',
     locales: 'Diller',
+    lock: 'Kilitle',
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
     move: 'Hareket et',
@@ -432,6 +433,7 @@ export const trTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} çöp kutusuna taşındı.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
+    unlock: 'Kilidi Aç',
     unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:
       'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',
@@ -461,7 +463,9 @@ export const trTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopyala',
     copyToLocale: 'Yerel hafızaya kopyala',
     localeToPublish: 'Yayınlanacak yerel',
+    selectedLocales: 'Seçilen Yerel Ayarlar',
     selectLocaleToCopy: 'Kopyalamak için yerel seçimi yapın',
+    selectLocaleToDuplicate: 'Çoğaltmak için yerelleri seçin',
   },
   operators: {
     contains: 'içerir',
@@ -568,6 +572,7 @@ export const trTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Şu anda görüntüleniyor',
     currentPublishedVersion: 'Mevcut Yayınlanan Sürüm',
     draft: 'Taslak',
+    draftHasPublishedVersion: 'Taslak (yayınlanmış versiyonu var)',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     modifiedOnly: 'Yalnızca değiştirilmiş',

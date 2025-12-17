@@ -339,6 +339,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     loading: 'Բեռնում',
     locale: 'Լոկալ',
     locales: 'Լոկալներ',
+    lock: 'Կողպել',
     menu: 'Մենյու',
     moreOptions: 'Լրացուցիչ ընտրանքներ',
     move: 'Տեղափոխվել',
@@ -430,6 +431,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
+    unlock: 'Բացարձակել',
     unsavedChanges:
       'Դուք ունեք չպահպանված փոփոխություններ։ Պահպանեք կամ հեռացեք նախքան շարունակելը։',
     unsavedChangesDuplicate:
@@ -460,7 +462,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     copyTo: 'Պատճենել դեպի',
     copyToLocale: 'Պատճենել լոկալին',
     localeToPublish: 'Հրապարակման լոկալ',
+    selectedLocales: 'Ընտրված տեղադրություններ',
     selectLocaleToCopy: 'Ընտրեք լոկալ՝ պատճենելու համար',
+    selectLocaleToDuplicate: 'Ընտրեք տեղայնացվածությունները կրկնօրինակելու համար',
   },
   operators: {
     contains: 'պարունակում է',
@@ -574,6 +578,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Ներկայումս դիտում է',
     currentPublishedVersion: 'Ընթացիկ հրապարակված տարբերակ',
     draft: 'Սևագիր',
+    draftHasPublishedVersion: 'Սրաց (ունի հրատարակված տարբերակ)',
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',
     lastSavedAgo: 'Վերջին անգամ պահպանվել է {{distance}} առաջ',
     modifiedOnly: 'Միայն փոփոխված',

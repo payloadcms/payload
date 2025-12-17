@@ -22,15 +22,18 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
-import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -78,18 +81,11 @@ export const updateOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'update',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'update',
+    })
 
     const {
       autosave = false,
@@ -122,7 +118,7 @@ export const updateOperation = async <
     }
 
     const { data: bulkUpdateData } = args
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
+    const shouldSaveDraft = Boolean(draftArg && hasDraftsEnabled(collectionConfig))
 
     // /////////////////////////////////////
     // Access
@@ -175,7 +171,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (collectionConfig.versions?.drafts && shouldSaveDraft) {
+    if (hasDraftsEnabled(collectionConfig) && shouldSaveDraft) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -225,7 +221,7 @@ export const updateOperation = async <
       throwOnMissingFile: false,
     })
 
-    const errors: { id: number | string; message: string }[] = []
+    const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
@@ -265,8 +261,11 @@ export const updateOperation = async <
 
         return updatedDoc
       } catch (error) {
+        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+
         errors.push({
           id,
+          isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       }

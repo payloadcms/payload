@@ -19,6 +19,7 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  saveDocAndAssert,
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -165,8 +166,8 @@ test.describe('Group By', () => {
 
   test('should load group-by from user preferences', async () => {
     await deletePreferences({
-      payload,
       key: `${postsSlug}.list`,
+      payload,
       user,
     })
 
@@ -227,8 +228,8 @@ test.describe('Group By', () => {
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'My Post',
         category: null,
+        title: 'My Post',
       },
     })
 
@@ -247,8 +248,8 @@ test.describe('Group By', () => {
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'My Post',
         date: null,
+        title: 'My Post',
       },
     })
 
@@ -268,22 +269,22 @@ test.describe('Group By', () => {
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'Null Post',
           checkbox: null,
+          title: 'Null Post',
         },
       }),
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'True Post',
           checkbox: true,
+          title: 'True Post',
         },
       }),
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'False Post',
           checkbox: false,
+          title: 'False Post',
         },
       }),
     ])
@@ -343,9 +344,8 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
 
     await sortColumn(page, {
-      scope: table1,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: table1,
       targetState: 'asc',
     })
 
@@ -365,9 +365,8 @@ test.describe('Group By', () => {
     await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
 
     await sortColumn(page, {
-      scope: table1,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: table1,
       targetState: 'desc',
     })
 
@@ -415,9 +414,9 @@ test.describe('Group By', () => {
     })
 
     await addListFilter({
-      page,
       fieldLabel: 'Title',
       operatorLabel: 'equals',
+      page,
       value: 'Find me',
     })
 
@@ -447,9 +446,9 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Category',
       operatorLabel: 'equals',
+      page,
       value: 'Category 1',
     })
 
@@ -460,9 +459,9 @@ test.describe('Group By', () => {
     await page.goto(url.list)
 
     await addListFilter({
-      page,
       fieldLabel: 'Title',
       operatorLabel: 'equals',
+      page,
       value: 'This title does not exist',
     })
 
@@ -477,6 +476,39 @@ test.describe('Group By', () => {
     await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
     await expect(page.locator('.sticky-toolbar')).toBeVisible()
+  })
+
+  test('should paginate globally when grouping by virtual relationship field', async () => {
+    await page.goto(url.list)
+
+    // Open the group-by dropdown
+    const { groupByContainer } = await openGroupBy(page)
+
+    // Select the virtual field
+    const field = groupByContainer.locator('#group-by--field-select')
+    await field.click()
+    await field
+      .locator('.rs__option', {
+        hasText: exactText('Virtual Title From Page'),
+      })
+      .click()
+
+    // Wait for the field to be selected
+    await expect(field.locator('.react-select--single-value')).toHaveText('Virtual Title From Page')
+
+    // Virtual fields get transformed to their resolved path in the URL (page.title)
+    await expect(page).toHaveURL(/&groupBy=page\.title/)
+
+    // Should show sticky toolbar when there are 30 distinct page titles
+    await expect(page.locator('.sticky-toolbar')).toBeVisible()
+
+    // Verify the pagination controls are present
+    await expect(page.locator('.sticky-toolbar .page-controls')).toBeVisible()
+
+    // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
+    const pageInfo = page.locator('.sticky-toolbar .page-controls .page-controls__page-info')
+    await expect(pageInfo).toBeVisible()
+    await expect(pageInfo).toContainText('of 30')
   })
 
   test('should paginate per table', async () => {
@@ -510,8 +542,8 @@ test.describe('Group By', () => {
     await expect(table2.locator('.page-controls')).toBeVisible()
 
     await goToNextPage(page, {
-      scope: table1,
       affectsURL: false,
+      scope: table1,
     })
 
     await expect(page).toHaveURL(/queryByGroup=/)
@@ -523,7 +555,7 @@ test.describe('Group By', () => {
 
   test('should not render per table pagination controls when group-by is not active', async () => {
     // delete user prefs to ensure that group-by isn't populated after loading the page
-    await deletePreferences({ payload, key: `${postsSlug}.list`, user })
+    await deletePreferences({ key: `${postsSlug}.list`, payload, user })
     await page.goto(url.list)
     await expect(page.locator('.page-controls')).toHaveCount(1)
   })
@@ -583,9 +615,8 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      scope: firstTable,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: firstTable,
       targetState: 'asc',
     })
 
@@ -628,9 +659,8 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      scope: firstTable,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: firstTable,
       targetState: 'asc',
     })
 
@@ -813,7 +843,7 @@ test.describe('Group By', () => {
 
     await expect(
       field.locator('.rs__option', {
-        hasText: exactText('Virtual Title From Category'),
+        hasText: exactText('Disabled Virtual Relationship From Category'),
       }),
     ).toBeHidden()
   })
@@ -894,4 +924,129 @@ test.describe('Group By', () => {
       },
     }) as unknown as Promise<Post>
   }
+
+  test.describe('Query Presets with Virtual Fields', () => {
+    test('should display virtual field label in preset drawer when groupBy is saved', async () => {
+      await page.goto(url.list)
+
+      // Add group by virtual field
+      const { groupByContainer } = await openGroupBy(page)
+      const field = groupByContainer.locator('#group-by--field-select')
+      await field.click()
+      await field
+        .locator('.rs__option', {
+          hasText: exactText('Virtual Title From Page'),
+        })
+        .click()
+
+      await expect(field.locator('.react-select--single-value')).toHaveText(
+        'Virtual Title From Page',
+      )
+      await expect(page).toHaveURL(/&groupBy=page\.title/)
+
+      // Create a new preset with this groupBy
+      await page.locator('#create-new-preset').click()
+      const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+      await expect(modal).toBeVisible()
+
+      const presetTitle = 'Virtual Field Preset'
+      await modal.locator('input[name="title"]').fill(presetTitle)
+
+      // Check that the groupBy field shows the proper label (not "page.title")
+      const groupByField = modal.locator('.query-preset-group-by-field .value-wrapper')
+      await expect(groupByField).toBeVisible()
+      await expect(groupByField).toContainText('Virtual Title From Page')
+      await expect(groupByField).toContainText('ascending')
+
+      await saveDocAndAssert(page)
+      await expect(modal).toBeHidden()
+
+      await expect(page).toHaveURL(/groupBy=page\.title/)
+    })
+
+    test('should display virtual field label in preset list cell', async () => {
+      await page.goto(url.list)
+
+      await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          access: {
+            delete: { constraint: 'onlyMe' },
+            read: { constraint: 'onlyMe' },
+            update: { constraint: 'onlyMe' },
+          },
+          groupBy: 'page.title',
+          isShared: false,
+          relatedCollection: postsSlug,
+          title: 'Virtual Field Cell Test',
+          where: {},
+        },
+        user,
+      })
+
+      // Open the preset drawer
+      await page.click('button#select-preset')
+      const drawer = page.locator('dialog[id^="list-drawer_0_"]')
+      await expect(drawer).toBeVisible()
+
+      // Find the row with our preset in the drawer
+      const presetRow = drawer.locator('tbody tr', {
+        has: page.locator('button:has-text("Virtual Field Cell Test")'),
+      })
+      await expect(presetRow).toBeVisible()
+
+      // Check the groupBy cell displays the proper label (not "page.title")
+      const groupByCell = presetRow.locator('td.cell-groupBy')
+      await expect(groupByCell).toBeVisible()
+      await expect(groupByCell).toContainText('Virtual Title From Page')
+      await expect(groupByCell).toContainText('ascending')
+    })
+
+    test('should display virtual field label when editing a preset', async () => {
+      await page.goto(url.list)
+
+      const presetTitle = 'Virtual Field Edit Test'
+      await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          access: {
+            delete: { constraint: 'onlyMe' },
+            read: { constraint: 'onlyMe' },
+            update: { constraint: 'onlyMe' },
+          },
+          groupBy: '-page.title',
+          isShared: false,
+          relatedCollection: postsSlug,
+          title: presetTitle,
+          where: {},
+        },
+        user,
+      })
+
+      // Select the preset to make it active
+      await page.locator('button#select-preset').click()
+      const drawer = page.locator('[id^=list-drawer_0_]')
+      await expect(drawer).toBeVisible()
+
+      await drawer
+        .locator('tbody tr td button', {
+          hasText: exactText(presetTitle),
+        })
+        .first()
+        .click()
+
+      await expect(drawer).toBeHidden()
+
+      // Now open the edit preset drawer
+      await page.locator('#edit-preset').click()
+      const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+      await expect(editModal).toBeVisible()
+
+      // Check that the groupBy field shows the proper label with descending direction
+      const groupByField = editModal.locator('.query-preset-group-by-field .value-wrapper')
+      await expect(groupByField).toBeVisible()
+      await expect(groupByField).toContainText('Virtual Title From Page')
+      await expect(groupByField).toContainText('descending')
+    })
+  })
 })

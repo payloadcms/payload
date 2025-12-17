@@ -212,15 +212,16 @@ export const ExampleCollection: CollectionConfig = {
 
 The slug field exposes a few top-level config options for easy customization:
 
-| Option         | Description                                                                                                                               |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | To be used as the slug field's name. Defaults to `slug`.                                                                                  |
-| `overrides`    | A function that receives the default fields so you can override on a granular level. See example below. [More details](#slug-overrides).  |
-| `checkboxName` | To be used as the name for the `generateSlug` checkbox field. Defaults to `generateSlug`.                                                 |
-| `fieldToUse`   | The name of the field to use when generating the slug. This field must exist in the same collection. Defaults to `title`.                 |
-| `localized`    | Enable localization on the `slug` and `generateSlug` fields. Defaults to `false`.                                                         |
-| `position`     | The position of the slug field. [More details](./overview#admin-options).                                                                 |
-| `required`     | Require the slug field. Defaults to `true`.                                                                                               |
+| Option         | Description                                                                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | To be used as the slug field's name. Defaults to `slug`.                                                                                 |
+| `overrides`    | A function that receives the default fields so you can override on a granular level. See example below. [More details](#slug-overrides). |
+| `checkboxName` | To be used as the name for the `generateSlug` checkbox field. Defaults to `generateSlug`.                                                |
+| `useAsSlug`    | The name of the top-level field to use when generating the slug. This field must exist in the same collection. Defaults to `title`.      |
+| `localized`    | Enable localization on the `slug` and `generateSlug` fields. Defaults to `false`.                                                        |
+| `position`     | The position of the slug field. [More details](./overview#admin-options).                                                                |
+| `required`     | Require the slug field. Defaults to `true`.                                                                                              |
+| `slugify`      | Override the default slugify function. [More details](#custom-slugify-function).                                                         |
 
 ### Slug Overrides
 
@@ -245,3 +246,38 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+### Custom Slugify Function
+
+You can also override the default slugify function of the slug field. This is necessary if the slug requires special treatment, such as character encoding, additional language support, etc.
+
+This functions receives the value of the `useAsSlug` field as `valueToSlugify` and must return a string.
+
+For example, if you wanted to use the [`slugify`](https://www.npmjs.com/package/slugify) package, you could do something like this:
+
+```ts
+import type { CollectionConfig } from 'payload'
+import { slugField } from 'payload'
+import slugify from 'slugify'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    slugField({
+      slugify: ({ valueToSlugify }) =>
+        slugify(valueToSlugify, {
+          // ...additional `slugify` options here
+        }),
+    }),
+  ],
+}
+```
+
+The following args are provided to the custom `slugify` function:
+
+| Argument         | Type             | Description                                      |
+| ---------------- | ---------------- | ------------------------------------------------ |
+| `valueToSlugify` | `string`         | The value of the field specified in `useAsSlug`. |
+| `data`           | `object`         | The full document data being saved.              |
+| `req`            | `PayloadRequest` | The Payload request object.                      |

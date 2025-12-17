@@ -33854,6 +33854,13 @@ var config = {
         label: (0,core.getInput)('reproduction_invalid_label') || 'invalid-reproduction',
         linkSection: (0,core.getInput)('reproduction_link_section') || '### Link to reproduction(.*)### To reproduce',
     },
+    areaLabels: {
+        section: (0,core.getInput)('area_label_section') || '',
+        skip: ((0,core.getInput)('area_label_skip') || '')
+            .split(',')
+            .map(function (s) { return s.trim(); })
+            .filter(Boolean),
+    },
     actionsToPerform: ((0,core.getInput)('actions_to_perform') || validActionsToPerform.join(','))
         .split(',')
         .map(function (a) {
@@ -33925,7 +33932,7 @@ function checkValidReproduction() {
                 case 4:
                     // Adjust labels
                     _f.sent();
-                    if (!!config.actionsToPerform.includes('tag')) return [3 /*break*/, 6];
+                    if (!config.actionsToPerform.includes('tag')) return [3 /*break*/, 6];
                     (0,core.info)("Added label: ".concat(config.invalidLink.label));
                     return [4 /*yield*/, client.issues.addLabels(__assign(__assign({}, common), { labels: [config.invalidLink.label] }))];
                 case 5:
@@ -34042,6 +34049,56 @@ function getCommentBody(pathOrComment) {
         });
     });
 }
+/**
+ * Apply area labels from the issue body dropdown selection
+ */
+function checkAreaLabels() {
+    var _a, _b;
+    return __awaiter(this, void 0, Promise, function () {
+        var _c, issue, action, sectionRegex, match, labels, client, common, err_1;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    if (!config.areaLabels.section) {
+                        (0,core.info)('Area labels - skipped, no section regex configured');
+                        return [2 /*return*/];
+                    }
+                    _c = github.context.payload, issue = _c.issue, action = _c.action;
+                    if (action !== 'opened' || !(issue === null || issue === void 0 ? void 0 : issue.body))
+                        return [2 /*return*/];
+                    sectionRegex = new RegExp(config.areaLabels.section, 'is');
+                    match = (_b = (_a = issue.body.match(sectionRegex)) === null || _a === void 0 ? void 0 : _a[1]) === null || _b === void 0 ? void 0 : _b.trim();
+                    if (!match) {
+                        (0,core.info)('Area labels - no matching section found in issue body');
+                        return [2 /*return*/];
+                    }
+                    labels = match
+                        .split(',')
+                        .map(function (l) { return l.trim(); })
+                        .filter(function (l) { return l && !config.areaLabels.skip.includes(l); });
+                    if (labels.length === 0) {
+                        (0,core.info)('Area labels - no labels to apply after filtering');
+                        return [2 /*return*/];
+                    }
+                    client = (0,github.getOctokit)(config.token).rest;
+                    common = __assign(__assign({}, github.context.repo), { issue_number: issue.number });
+                    _d.label = 1;
+                case 1:
+                    _d.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, client.issues.addLabels(__assign(__assign({}, common), { labels: labels }))];
+                case 2:
+                    _d.sent();
+                    (0,core.info)("Applied area labels: ".concat(labels.join(', ')));
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_1 = _d.sent();
+                    (0,core.error)("Failed to apply area labels: ".concat(err_1 instanceof Error ? err_1.message : err_1));
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function () {
         var token, workspace, safeConfig;
@@ -34051,8 +34108,11 @@ function run() {
                     token = config.token, workspace = config.workspace, safeConfig = __rest(config, ["token", "workspace"]);
                     (0,core.info)('Configuration:');
                     (0,core.info)(JSON.stringify(safeConfig, null, 2));
-                    return [4 /*yield*/, checkValidReproduction()];
+                    return [4 /*yield*/, checkAreaLabels()];
                 case 1:
+                    _a.sent();
+                    return [4 /*yield*/, checkValidReproduction()];
+                case 2:
                     _a.sent();
                     return [2 /*return*/];
             }

@@ -25,8 +25,10 @@ import {
   mediaSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -149,6 +151,24 @@ describe('Collections - Uploads', () => {
         expect(doc.height).toBeDefined()
       })
 
+      it('should upload svg in an image mimetype restricted collection', async () => {
+        const filePath = path.join(dirname, './image.svg')
+        const formData = new FormData()
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/any-images`, {
+          body: formData,
+          file,
+        })
+
+        const { doc } = await response.json()
+        await handle.close()
+
+        expect(response.status).toBe(201)
+        expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
       it('should have valid image url', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.svg')
@@ -251,6 +271,36 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.filename).toBeDefined()
+      })
+
+      it('should not allow creation of corrupted PDF', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './fake-pdf.pdf')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow invalid mimeType to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './image.jpg')
+        const { file, handle } = await createStreamableFile(filePath, 'image/png')
+        formData.append('file', file)
+        formData.append('mime', 'image/png')
+        formData.append('contentType', 'image/png')
+
+        const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
       })
     })
     describe('update', () => {
@@ -1233,6 +1283,116 @@ describe('Collections - Uploads', () => {
       const expectedPath = path.join(dirname, './media')
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
+    })
+  })
+
+  describe('HTTP Range Requests', () => {
+    let uploadedDoc: Media
+    let uploadedFilename: string
+    let fileSize: number
+
+    beforeAll(async () => {
+      // Upload a test file for range request testing
+      const filePath = path.join(dirname, './audio.mp3')
+      const file = await getFileByPath(filePath)
+
+      uploadedDoc = (await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      uploadedFilename = uploadedDoc.filename
+      const stats = await stat(filePath)
+      fileSize = stats.size
+    })
+
+    it('should return Accept-Ranges header on full file request', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`)
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Accept-Ranges')).toBe('bytes')
+      expect(response.headers.get('Content-Length')).toBe(String(fileSize))
+    })
+
+    it('should handle range request with single byte range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=0-1023' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 0-1023/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe('1024')
+      expect(response.headers.get('Accept-Ranges')).toBe('bytes')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1024)
+    })
+
+    it('should handle range request with open-ended range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=1024-' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 1024-${fileSize - 1}/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe(String(fileSize - 1024))
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(fileSize - 1024)
+    })
+
+    it('should handle range request for suffix bytes', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=-512' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(
+        `bytes ${fileSize - 512}-${fileSize - 1}/${fileSize}`,
+      )
+      expect(response.headers.get('Content-Length')).toBe('512')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(512)
+    })
+
+    it('should return 416 for invalid range (start > file size)', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: `bytes=${fileSize + 1000}-` },
+      })
+
+      expect(response.status).toBe(416)
+      expect(response.headers.get('Content-Range')).toBe(`bytes */${fileSize}`)
+    })
+
+    it('should handle multi-range requests by returning first range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=0-1023,2048-3071' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 0-1023/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe('1024')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1024)
+    })
+
+    it('should handle range at end of file', async () => {
+      const lastByte = fileSize - 1
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: `bytes=${lastByte}-${lastByte}` },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(
+        `bytes ${lastByte}-${lastByte}/${fileSize}`,
+      )
+      expect(response.headers.get('Content-Length')).toBe('1')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1)
     })
   })
 })

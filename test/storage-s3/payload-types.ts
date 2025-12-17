@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     media: Media;
     'media-with-direct-access': MediaWithDirectAccess;
+    'media-with-dynamic-prefix': MediaWithDynamicPrefix;
     'media-with-prefix': MediaWithPrefix;
     'media-with-signed-downloads': MediaWithSignedDownload;
     users: User;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-direct-access': MediaWithDirectAccessSelect<false> | MediaWithDirectAccessSelect<true>;
+    'media-with-dynamic-prefix': MediaWithDynamicPrefixSelect<false> | MediaWithDynamicPrefixSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-with-signed-downloads': MediaWithSignedDownloadsSelect<false> | MediaWithSignedDownloadsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -166,6 +168,26 @@ export interface Media {
 export interface MediaWithDirectAccess {
   id: string;
   alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-dynamic-prefix".
+ */
+export interface MediaWithDynamicPrefix {
+  id: string;
+  tenant: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -272,6 +294,10 @@ export interface PayloadLockedDocument {
         value: string | MediaWithDirectAccess;
       } | null)
     | ({
+        relationTo: 'media-with-dynamic-prefix';
+        value: string | MediaWithDynamicPrefix;
+      } | null)
+    | ({
         relationTo: 'media-with-prefix';
         value: string | MediaWithPrefix;
       } | null)
@@ -282,10 +308,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -377,6 +399,25 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface MediaWithDirectAccessSelect<T extends boolean = true> {
   alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-dynamic-prefix_select".
+ */
+export interface MediaWithDynamicPrefixSelect<T extends boolean = true> {
+  tenant?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

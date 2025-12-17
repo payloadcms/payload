@@ -1,4 +1,4 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages, Language } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
@@ -32,6 +32,7 @@ import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-pres
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { setupOrderable } from './orderable/index.js'
@@ -94,7 +95,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
   // We're casting here because it's already been sanitised above but TS still thinks it could be a function
   ;(sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (!_internalSupportedTimezones.includes(timezone.value)) {
+    if (timezone.value !== 'UTC' && !_internalSupportedTimezones.includes(timezone.value)) {
       throw new InvalidConfiguration(
         `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
       )
@@ -281,9 +282,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
-      const draftsConfig = config.globals![i]?.versions?.drafts
-
-      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+      if (hasScheduledPublishEnabled(config.globals![i]!)) {
         schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 
@@ -395,14 +394,23 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ),
   )
 
-  configWithDefaults.collections!.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      migrationsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
+  const migrations = await sanitizeCollection(
+    config as unknown as Config,
+    migrationsCollection,
+    richTextSanitizationPromises,
+    validRelationships,
   )
+
+  // @ts-expect-error indexSortableFields is only valid for @payloadcms/db-mongodb
+  if (config?.db?.indexSortableFields) {
+    migrations.indexes = [
+      {
+        fields: ['batch', 'name'],
+        unique: false,
+      },
+    ]
+  }
+  configWithDefaults.collections!.push(migrations)
 
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(

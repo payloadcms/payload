@@ -20,6 +20,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore, handleAbortRef } from '@payloadcms/ui/shared'
+import { formatApiURL } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
@@ -84,7 +85,11 @@ export const CreateFirstUserClient: React.FC<{
 
   return (
     <Form
-      action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
+      action={formatApiURL({
+        apiRoute,
+        path: `/${userSlug}/first-register`,
+        serverURL,
+      })}
       initialState={{
         ...initialState,
         'confirm-password': {

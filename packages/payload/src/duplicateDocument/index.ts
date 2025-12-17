@@ -10,23 +10,24 @@ import { NotFound } from '../errors/NotFound.js'
 import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
+import { filterDataToSelectedLocales } from '../utilities/filterDataToSelectedLocales.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
   collectionConfig: SanitizedCollectionConfig
   draftArg?: boolean
   id: number | string
-  isSavingDraft?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
+  selectedLocales?: string[]
 }
 export const getDuplicateDocumentData = async ({
   id,
   collectionConfig,
   draftArg,
-  isSavingDraft,
   overrideAccess,
   req,
+  selectedLocales,
 }: GetDuplicateDocumentArgs): Promise<{
   duplicatedFromDoc: JsonObject
   duplicatedFromDocWithLocales: JsonObject
@@ -59,6 +60,15 @@ export const getDuplicateDocumentData = async ({
     req,
   })
 
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      configBlockReferences: payload.config.blocks,
+      docWithLocales: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
+  }
+
   if (!duplicatedFromDocWithLocales && !hasWherePolicy) {
     throw new NotFound(req.t)
   }
@@ -83,11 +93,6 @@ export const getDuplicateDocumentData = async ({
     overrideAccess: overrideAccess!,
     req,
   })
-
-  // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
-  if (isSavingDraft) {
-    duplicatedFromDocWithLocales._status = 'draft'
-  }
 
   const duplicatedFromDoc = await afterRead({
     collection: collectionConfig,

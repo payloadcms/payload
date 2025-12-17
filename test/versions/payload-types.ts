@@ -74,6 +74,7 @@ export interface Config {
     'autosave-multi-select-posts': AutosaveMultiSelectPost;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
+    'drafts-no-read-versions': DraftsNoReadVersion;
     'draft-with-max-posts': DraftWithMaxPost;
     'draft-posts-with-change-hook': DraftPostsWithChangeHook;
     'draft-with-validate-posts': DraftWithValidatePost;
@@ -85,6 +86,7 @@ export interface Config {
     text: Text;
     media: Media;
     media2: Media2;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -100,6 +102,7 @@ export interface Config {
     'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
+    'drafts-no-read-versions': DraftsNoReadVersionsSelect<false> | DraftsNoReadVersionsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
     'draft-posts-with-change-hook': DraftPostsWithChangeHookSelect<false> | DraftPostsWithChangeHookSelect<true>;
     'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
@@ -111,6 +114,7 @@ export interface Config {
     text: TextSelect<false> | TextSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -120,6 +124,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {
     'autosave-global': AutosaveGlobal;
     'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobal;
@@ -306,6 +311,18 @@ export interface AutosaveMultiSelectPost {
 export interface AutosaveWithValidatePost {
   id: string;
   title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drafts-no-read-versions".
+ */
+export interface DraftsNoReadVersion {
+  id: string;
+  title: string;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -607,6 +624,23 @@ export interface Media2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -757,6 +791,10 @@ export interface PayloadLockedDocument {
         value: string | DraftPost;
       } | null)
     | ({
+        relationTo: 'drafts-no-read-versions';
+        value: string | DraftsNoReadVersion;
+      } | null)
+    | ({
         relationTo: 'draft-with-max-posts';
         value: string | DraftWithMaxPost;
       } | null)
@@ -803,10 +841,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-jobs';
-        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -946,6 +980,17 @@ export interface DraftPostsSelect<T extends boolean = true> {
       };
   relation?: T;
   restrictedToUpdate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drafts-no-read-versions_select".
+ */
+export interface DraftsNoReadVersionsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1190,6 +1235,14 @@ export interface Media2Select<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
