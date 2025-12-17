@@ -1,5 +1,4 @@
-// storage-adapter-import-placeholder
-import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite' // database-adapter-import
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -35,11 +34,8 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // database-adapter-config-start
   db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
-  // database-adapter-config-end
   plugins: [
-    // storage-adapter-placeholder
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },

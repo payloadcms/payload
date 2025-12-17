@@ -40,7 +40,6 @@
     "generate:types": "pnpm dev:generate-types",
     "lint": "eslint",
     "lint:fix": "eslint ./src --fix",
-    "prepublishOnly": "pnpm clean && pnpm build",
     "test": "pnpm test:int && pnpm test:e2e",
     "test:e2e": "playwright test",
     "test:int": "vitest"
@@ -66,7 +65,7 @@
     "eslint-config-next": "15.4.7",
     "graphql": "^16.8.1",
     "mongodb-memory-server": "10.1.4",
-    "next": "15.4.8",
+    "next": "15.4.10",
     "open": "^10.1.0",
     "payload": "3.37.0",
     "prettier": "^3.4.2",

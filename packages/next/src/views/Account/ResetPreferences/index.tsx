@@ -2,6 +2,7 @@
 import type { TypedUser } from 'payload'
 
 import { Button, ConfirmationModal, toast, useModal, useTranslation } from '@payloadcms/ui'
+import { formatApiURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { Fragment, useCallback } from 'react'
 
@@ -34,13 +35,20 @@ export const ResetPreferences: React.FC<{
     )
 
     try {
-      const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const res = await fetch(
+        formatApiURL({
+          apiRoute,
+          path: `/payload-preferences${stringifiedQuery}`,
+          serverURL: undefined,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'DELETE',
         },
-        method: 'DELETE',
-      })
+      )
 
       const json = await res.json()
       const message = json.message
