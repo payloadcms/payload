@@ -22,7 +22,7 @@ export type GetDefaultLayoutServerFnReturnType = {
  */
 export const getDefaultLayoutHandler: ServerFunction<
   GetDefaultLayoutServerFnArgs,
-  GetDefaultLayoutServerFnReturnType
+  Promise<GetDefaultLayoutServerFnReturnType>
 > = async ({ req }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
