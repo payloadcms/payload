@@ -3,6 +3,7 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import { formatApiURL } from 'payload/shared'
 import { postSlug } from 'folders/shared.js'
 import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
@@ -341,7 +342,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/posts/access/${doc.id}`,
+      formatApiURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title')
         await wait(500)
@@ -356,7 +357,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/posts/access/${doc.id}`,
+      formatApiURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title 2')
         await wait(500)
@@ -384,7 +385,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      formatApiURL({ apiRoute: '/api', path: `/${autosavePostsSlug}/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title')
       },
@@ -396,7 +397,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      formatApiURL({ apiRoute: '/api', path: `/${autosavePostsSlug}/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title Again')
       },
@@ -409,7 +410,7 @@ test.describe('Form State', () => {
     // save manually and ensure the permissions are fetched again
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      formatApiURL({ apiRoute: '/api', path: `/${autosavePostsSlug}/access/${doc.id}`, serverURL }),
       async () => {
         await page.click('#action-save', { delay: 100 })
       },

@@ -13,6 +13,7 @@ import {
 } from '@payloadcms/richtext-lexical/html-async'
 import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
 import { useConfig, useDocumentInfo, usePayloadAPI } from '@payloadcms/ui'
+import { formatApiURL } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 
 const jsxConverters: JSXConvertersFunction<DefaultNodeTypes | SerializedBlockNode<any>> = ({
@@ -61,13 +62,13 @@ export const LexicalRendered: React.FC = () => {
     },
   } = useConfig()
 
-  const [{ data }] = usePayloadAPI(`${serverURL}${api}/${collectionSlug}/${id}`, {
+  const [{ data }] = usePayloadAPI(formatApiURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }), {
     initialParams: {
       depth: 1,
     },
   })
 
-  const [{ data: unpopulatedData }] = usePayloadAPI(`${serverURL}${api}/${collectionSlug}/${id}`, {
+  const [{ data: unpopulatedData }] = usePayloadAPI(formatApiURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }), {
     initialParams: {
       depth: 0,
     },
@@ -92,7 +93,7 @@ export const LexicalRendered: React.FC = () => {
         converters: htmlConvertersAsync,
         data: unpopulatedData.lexicalWithBlocks as SerializedEditorState,
         populate: getRestPopulateFn({
-          apiURL: `${serverURL}${api}`,
+          apiURL: formatApiURL({ apiRoute: api, path: '/', serverURL }),
         }),
       })
 

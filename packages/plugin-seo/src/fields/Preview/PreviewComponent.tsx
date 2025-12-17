@@ -94,7 +94,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
     if (hasGenerateURLFn && !href) {
       void getHref()
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, serverURL, api, title])
+  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, api, title])
 
   return (
     <div

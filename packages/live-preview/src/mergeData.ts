@@ -30,7 +30,16 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): Promise<T> => {
-  const { apiRoute, collectionSlug, depth, globalSlug, incomingData, initialData, locale } = args
+  const {
+    apiRoute,
+    collectionSlug,
+    depth,
+    globalSlug,
+    incomingData,
+    initialData,
+    locale,
+    serverURL,
+  } = args
 
   const requestHandler = args.requestHandler || defaultRequestHandler
 
@@ -46,6 +55,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     endpoint: encodeURI(
       `${globalSlug ? 'globals/' : ''}${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
     ),
+    serverURL,
   }).then((res) => res.json())
 
   return result

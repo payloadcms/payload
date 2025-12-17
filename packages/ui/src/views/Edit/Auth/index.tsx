@@ -185,7 +185,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, username, t, loginWithUsername])
+  }, [i18n, api, collectionSlug, email, username, t, loginWithUsername])
 
   useEffect(() => {
     if (!modified) {

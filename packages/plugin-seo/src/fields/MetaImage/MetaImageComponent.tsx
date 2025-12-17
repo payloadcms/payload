@@ -38,6 +38,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
     config: {
       routes: { api },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()

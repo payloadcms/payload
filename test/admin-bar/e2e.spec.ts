@@ -31,7 +31,7 @@ test.describe('Admin Bar', () => {
   })
 
   test('should render admin bar', async () => {
-    await page.goto(`${serverURL}/admin-bar`)
+    await page.goto(formatAdminURL({ adminRoute: '/admin-bar', path: '/', serverURL }))
     await expect(page.locator('#payload-admin-bar')).toBeVisible()
   })
 })

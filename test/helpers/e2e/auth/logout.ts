@@ -1,12 +1,13 @@
 import type { Page } from 'playwright'
 
+import { formatAdminURL } from 'payload/shared'
 import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 import { expect } from 'playwright/test'
 
 import { openNav } from '../toggleNav.js'
 
 export const logout = async (page: Page, serverURL: string) => {
-  await page.goto(`${serverURL}/admin/logout`)
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/logout', serverURL }))
 
   await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('/admin/login')
 

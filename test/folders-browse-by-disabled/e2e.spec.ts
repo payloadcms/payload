@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { formatAdminURL } from 'payload/shared'
 
 import { expect, test } from '@playwright/test'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
@@ -36,7 +37,7 @@ test.describe('Browse By Folders Disabled', () => {
   })
 
   test('should not show the browse-by-folder button in the nav', async () => {
-    await page.goto(`${serverURL}/admin`)
+    await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
     await page.locator('#nav-toggler button.nav-toggler').click()
     await expect(page.locator('#nav-toggler button.nav-toggler--is-open')).toBeVisible()
     await expect(page.locator('.browse-by-folder-button')).toBeHidden()

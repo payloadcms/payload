@@ -9,7 +9,7 @@ import type { Config } from 'payload'
 
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
@@ -69,7 +69,7 @@ export async function ensureCompilationIsDone({
 }): Promise<void> {
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
-  const adminURL = `${serverURL}${adminRoute}`
+  const adminURL = formatAdminURL({ adminRoute, path: '/', serverURL })
 
   const maxAttempts = 50
   let attempt = 1

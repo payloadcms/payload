@@ -6,6 +6,7 @@ import { login } from 'helpers/e2e/auth/login.js'
 import { logout } from 'helpers/e2e/auth/logout.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
+import { formatAdminURL, formatApiURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -46,7 +47,7 @@ describe('Auth', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = `${serverURL}/api`
+    apiURL = formatApiURL({ apiRoute: '/api', path: '/', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
 
     context = await browser.newContext()
@@ -89,7 +90,7 @@ describe('Auth', () => {
       } = getRoutes({})
 
       // wait for create first user route
-      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+      await page.goto(formatAdminURL({ adminRoute, path: createFirstUserRoute, serverURL }))
 
       await expect(page.locator('.create-first-user')).toBeVisible()
 
@@ -141,7 +142,7 @@ describe('Auth', () => {
       } = getRoutes({})
 
       // wait for create first user route
-      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+      await page.goto(formatAdminURL({ adminRoute, path: createFirstUserRoute, serverURL }))
 
       await expect(page.locator('.create-first-user')).toBeVisible()
 
@@ -196,7 +197,7 @@ describe('Auth', () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
-        const loginPageRes = await page.goto(`${serverURL}/admin/login`)
+        const loginPageRes = await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
         const loginPageSource = await loginPageRes?.text()
         expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
 
@@ -223,7 +224,7 @@ describe('Auth', () => {
         ).toHaveCount(1)
 
         // Inspect the page source (after authentication)
-        const dashboardPageRes = await page.goto(`${serverURL}/admin`)
+        const dashboardPageRes = await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
         const dashboardPageSource = await dashboardPageRes?.text()
         expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })
@@ -447,7 +448,7 @@ describe('Auth', () => {
           limit: 1,
         })
 
-        const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
+        const userDocumentRoute = formatAdminURL({ adminRoute: '/admin', path: `/collections/users/${users?.docs?.[0]?.id}`, serverURL })
 
         await logout(page, serverURL)
 
@@ -480,9 +481,8 @@ describe('Auth', () => {
 
         await logout(page, serverURL)
 
-        await page.goto(
-          `${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`,
-        )
+        const notInUserCollectionURL = formatAdminURL({ adminRoute: '/admin', path: `/collections/relationsCollection/${notInUserCollection.id}`, serverURL })
+        await page.goto(notInUserCollectionURL)
 
         await expect
           .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
@@ -497,7 +497,7 @@ describe('Auth', () => {
         // Expect to be redirected to the correct page
         await expect
           .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
-          .toBe(`${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`)
+          .toBe(notInUserCollectionURL)
 
         // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
         await expect(page.locator('#field-rel')).toBeVisible()

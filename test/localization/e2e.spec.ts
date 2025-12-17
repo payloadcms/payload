@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { formatApiURL } from 'payload/shared'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
@@ -634,7 +635,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()
-      const apiURL = `${serverURL}/api/${arrayWithFallbackCollectionSlug}/${id}`
+      const apiURL = formatApiURL({ apiRoute: '/api', path: `/${arrayWithFallbackCollectionSlug}/${id}`, serverURL })
       await page.goto(apiURL)
       const data = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')

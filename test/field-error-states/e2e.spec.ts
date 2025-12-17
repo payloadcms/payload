@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { formatAdminURL } from 'payload/shared'
 
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
@@ -46,7 +47,7 @@ describe('Field Error States', () => {
   })
 
   test('Remove row should remove error states from parent fields', async () => {
-    await page.goto(`${serverURL}/admin/collections/error-fields/create`)
+    await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/collections/error-fields/create', serverURL }))
 
     // add parent array
     await addArrayRow(page, { fieldName: 'parentArray' })

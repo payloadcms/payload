@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -43,7 +44,7 @@ describe('Server Functions', () => {
 
   describe('Auth functions', () => {
     test('should log user in from login server function', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
 
       // Expect email and password fields to be visible
       await expect(page.locator('#email')).toBeVisible()
@@ -58,12 +59,12 @@ describe('Server Functions', () => {
       await page.waitForTimeout(1000)
 
       await page.reload()
-      await page.goto(`${serverURL}/admin/account`)
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
       await expect(page.locator('h1[title="dev@payloadcms.com"]')).toBeVisible()
     })
 
     test('should refresh user from refresh server function', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
 
       const initialCookie = await page.context().cookies()
       const payloadToken = initialCookie.find((cookie) => cookie.name === 'payload-token')
@@ -82,14 +83,14 @@ describe('Server Functions', () => {
     })
 
     test('should log user out from logout server function', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
       const logoutButton = page.locator('text=Custom Logout')
       await expect(logoutButton).toBeVisible()
       await logoutButton.click()
       await page.waitForTimeout(1000)
 
       await page.reload()
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
       await expect(page.locator('#email')).toBeVisible()
       await expect(page.locator('#password')).toBeVisible()
     })

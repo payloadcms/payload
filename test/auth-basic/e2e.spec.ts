@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { formatAdminURL } from 'payload/shared'
 import type { SanitizedConfig } from 'payload'
 
 import { expect, test } from '@playwright/test'
@@ -85,7 +86,7 @@ describe('Auth (Basic)', () => {
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: `${serverURL}/admin/**`,
+      readyURL: formatAdminURL({ adminRoute: '/admin', path: '/**', serverURL }),
       noAutoLogin: true,
     })
 
@@ -108,7 +109,7 @@ describe('Auth (Basic)', () => {
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: `${serverURL}/admin/create-first-user`,
+      readyURL: formatAdminURL({ adminRoute: '/admin', path: '/create-first-user', serverURL }),
     })
   })
 

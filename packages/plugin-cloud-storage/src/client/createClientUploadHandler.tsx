@@ -11,7 +11,7 @@ type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
   enabled?: boolean
   extra: T
   prefix?: string
-  serverHandlerPath: string
+  serverHandlerPath: `/${string}`
 }
 
 export const createClientUploadHandler = <T extends Record<string, unknown>>({

@@ -1,6 +1,8 @@
-import type { Page } from '@playwright/test'
+import type { Page} from '@playwright/test'
 
 import type { AdminUrlUtil } from '../../helpers/adminUrlUtil.js'
+
+import { formatAdminURL } from 'payload/shared'
 
 import { getRowByCellValueAndAssert } from './getRowByCellValueAndAssert.js'
 
@@ -19,6 +21,8 @@ export async function goToListDoc({
   const row = await getRowByCellValueAndAssert({ page, textToMatch, cellClass })
   const cellLink = row.locator(`td a`).first()
   const linkURL = await cellLink.getAttribute('href')
-  await page.goto(`${urlUtil.serverURL}${linkURL?.replace(urlUtil.serverURL, '')}`)
+  let path = linkURL?.replace(urlUtil.serverURL, '').replace('/admin', '') || '/'
+  if (!path.startsWith('/')) path = `/${path}`
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL: urlUtil.serverURL }))
   await page.waitForLoadState('networkidle')
 }

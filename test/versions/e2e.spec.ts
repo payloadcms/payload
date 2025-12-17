@@ -25,6 +25,7 @@
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { formatAdminURL, formatApiURL } from 'payload/shared'
 import { postsCollectionSlug } from 'admin/slugs.js'
 import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
 import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
@@ -447,7 +448,7 @@ describe('Versions', () => {
 
       await assertNetworkRequests(
         page,
-        `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
+        formatAdminURL({ adminRoute: '/admin', path: `/collections/${postCollectionSlug}/${postID}`, serverURL }),
         async () => {
           await page
             .locator(
@@ -492,7 +493,7 @@ describe('Versions', () => {
       await assertNetworkRequests(
         page,
         // Important: assert that depth is 0 in this request
-        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`,
+        formatApiURL({ apiRoute: '/api', path: `/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`, serverURL }),
         async () => {
           await page.locator('#field-title').fill('changed title')
         },
@@ -1729,13 +1730,13 @@ describe('Versions', () => {
     })
 
     async function navigateToDraftVersionView(versionID: string) {
-      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      const versionURL = formatAdminURL({ adminRoute: '/admin', path: `/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`, serverURL })
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     async function navigateToDiffVersionView(versionID?: string) {
-      const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionID ?? versionDiffID}`
+      const versionURL = formatAdminURL({ adminRoute: '/admin', path: `/collections/${diffCollectionSlug}/${diffID}/versions/${versionID ?? versionDiffID}`, serverURL })
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
@@ -2363,7 +2364,7 @@ describe('Versions', () => {
         },
       })
 
-      await page.goto(`${serverURL}/admin/collections/${draftCollectionSlug}/${post.id}`)
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: `/collections/${draftCollectionSlug}/${post.id}`, serverURL }))
 
       const publishDropdown = page.locator('.doc-controls__controls .popup-button')
       await publishDropdown.click()

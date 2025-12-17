@@ -1,4 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test'
+import { formatAdminURL } from 'payload/shared'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
@@ -621,7 +622,7 @@ describe('Access Control', () => {
       })
 
       test('should restrict access based on user settings', async () => {
-        const url = `${serverURL}/admin/globals/settings`
+        const url = formatAdminURL({ adminRoute: '/admin', path: '/globals/settings', serverURL })
         await page.goto(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()
