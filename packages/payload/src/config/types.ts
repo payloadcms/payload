@@ -908,6 +908,7 @@ export type Config = {
     custom?: Record<string, any>
     /**
      * Customize the dashboard widgets
+     * @experimental This prop is subject to change in future releases.
      */
     dashboard?: DashboardConfig
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
