@@ -3,19 +3,8 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
+import { generateFileURL } from './generateFileURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
-
-type GenerateURLArgs = {
-  collectionSlug: string
-  config: Config
-  filename?: string
-}
-const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
-  if (filename) {
-    return `${config.serverURL || ''}${config.routes?.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
-  }
-  return undefined
-}
 
 type Options = {
   collection: CollectionConfig
@@ -57,10 +46,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             'sizes' in originalDoc &&
             originalDoc.sizes?.[adminThumbnail]?.filename
           ) {
-            return generateURL({
+            return generateFileURL({
+              apiRoute: config.routes?.api,
               collectionSlug: collection.slug,
-              config,
               filename: originalDoc.sizes?.[adminThumbnail].filename as string,
+              serverURL: config.serverURL,
             })
           }
 
@@ -141,10 +131,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               return value
             }
 
-            return generateURL({
+            return generateFileURL({
+              apiRoute: config.routes?.api,
               collectionSlug: collection.slug,
-              config,
               filename: data?.filename,
+              serverURL: config.serverURL,
             })
           },
         ],

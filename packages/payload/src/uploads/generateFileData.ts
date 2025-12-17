@@ -13,6 +13,7 @@ import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
+import { generateFileURL } from './generateFileURL.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
@@ -81,7 +82,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  const { sharp } = req.payload.config
+  const { routes, serverURL, sharp } = req.payload.config
 
   let file = req.file
 
@@ -119,8 +120,15 @@ export const generateFileData = async <T>({
       throw new Forbidden(req.t)
     }
 
+    const apiURL = generateFileURL({
+      apiRoute: routes?.api,
+      collectionSlug: collectionConfig.slug,
+      filename,
+      serverURL,
+    })
+
     try {
-      if (url && url.startsWith('/') && !disableLocalStorage) {
+      if (url && url === apiURL && !disableLocalStorage) {
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
