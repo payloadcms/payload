@@ -1,5 +1,7 @@
 import type { PaginatedDocs, SendEmailOptions } from 'payload'
 
+import { formatApiURL } from 'payload/shared'
+
 import type {
   CreateArgs,
   DeleteArgs,
@@ -25,14 +27,20 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       headers.Authorization = `JWT ${jwt}`
     }
 
-    const json: T = await fetch(`${this.serverURL}/api/local-api`, {
-      method: 'post',
-      headers,
-      body: JSON.stringify({
-        args,
-        operation,
+    const json: T = await fetch(
+      formatApiURL({
+        apiRoute: '/api',
+        path: `/local-api`,
       }),
-    }).then((res) => res.json())
+      {
+        method: 'post',
+        headers,
+        body: JSON.stringify({
+          args,
+          operation,
+        }),
+      },
+    ).then((res) => res.json())
 
     if (reduceJSON) {
       return reduceJSON<T>(json)

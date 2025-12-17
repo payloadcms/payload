@@ -19,6 +19,6 @@ export async function goToListDoc({
   const row = await getRowByCellValueAndAssert({ page, textToMatch, cellClass })
   const cellLink = row.locator(`td a`).first()
   const linkURL = await cellLink.getAttribute('href')
-  await page.goto(`${urlUtil.serverURL}${linkURL}`)
+  await page.goto(`${urlUtil.serverURL}${linkURL?.replace(urlUtil.serverURL, '')}`)
   await page.waitForLoadState('networkidle')
 }
