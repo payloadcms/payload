@@ -79,6 +79,55 @@ function getDroppablePositions(): DroppablePosition[] {
 }
 
 /**
+ * Find the closest droppable to a given position.
+ * Uses Y position to find the row first, then X position to find the droppable within that row.
+ * This is important because when entering DND mode, the drag preview appears at the center
+ * of the widget, not at any droppable position.
+ */
+function findClosestDroppable(
+  droppables: DroppablePosition[],
+  centerX: number,
+  centerY: number,
+): { droppable: DroppablePosition; index: number } | null {
+  if (droppables.length === 0) {
+    return null
+  }
+
+  // Step 1: Find the row with the closest Y position
+  let closestRow = droppables[0].row
+  let minYDistance = Infinity
+
+  for (const droppable of droppables) {
+    const yDistance = Math.abs(droppable.centerY - centerY)
+    if (yDistance < minYDistance) {
+      minYDistance = yDistance
+      closestRow = droppable.row
+    }
+  }
+
+  // Step 2: Within that row, find the droppable with the closest X position
+  let closestIndex = -1
+  let minXDistance = Infinity
+
+  for (let i = 0; i < droppables.length; i++) {
+    const droppable = droppables[i]
+    if (droppable.row === closestRow) {
+      const xDistance = Math.abs(droppable.centerX - centerX)
+      if (xDistance < minXDistance) {
+        minXDistance = xDistance
+        closestIndex = i
+      }
+    }
+  }
+
+  if (closestIndex === -1) {
+    return null
+  }
+
+  return { droppable: droppables[closestIndex], index: closestIndex }
+}
+
+/**
  * Find the target droppable based on direction
  * - ArrowRight/Left: Next/previous in DOM order (now that overlapping droppables are filtered)
  * - ArrowUp/Down: Closest in adjacent row (row +1 or -1) by X position
@@ -89,26 +138,14 @@ function findTargetDroppable(
   currentCenterY: number,
   direction: string,
 ): DroppablePosition | null {
-  // Find current droppable index (closest to current position)
-  let currentIndex = -1
-  let minDistanceToCurrent = Infinity
+  // Find the closest droppable to current position using Y-first, then X approach
+  const closest = findClosestDroppable(droppables, currentCenterX, currentCenterY)
 
-  droppables.forEach((droppable, index) => {
-    const dx = droppable.centerX - currentCenterX
-    const dy = droppable.centerY - currentCenterY
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    if (distance < minDistanceToCurrent) {
-      minDistanceToCurrent = distance
-      currentIndex = index
-    }
-  })
-
-  if (currentIndex === -1) {
+  if (!closest) {
     return null
   }
 
-  const currentDroppable = droppables[currentIndex]
+  const { droppable: currentDroppable, index: currentIndex } = closest
   const currentRow = currentDroppable.row
 
   switch (direction) {
