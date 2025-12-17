@@ -21,54 +21,48 @@ export async function migrateMainCollectionStatus({
   versionsTable: string
 }): Promise<void> {
   const mainTable = toSnakeCase(collectionSlug)
+  const mainLocalesTable = `${mainTable}_locales`
 
-  payload.logger.info({ msg: `Migrating main collection documents for: ${mainTable}` })
+  payload.logger.info({ msg: `Migrating main collection locales for: ${mainLocalesTable}` })
 
-  // Get all documents with their latest version status per locale
+  // Get all documents
   const documents = await db.execute({
     drizzle: db.drizzle,
     sql: sql`
-      SELECT DISTINCT doc.id
-      FROM ${sql.identifier(mainTable)} doc
+      SELECT DISTINCT id
+      FROM ${sql.identifier(mainTable)}
     `,
   })
 
   for (const doc of documents.rows) {
-    // Get the latest version for this document and check published status per locale
-    const latestVersionStatuses = await db.execute({
-      drizzle: db.drizzle,
-      sql: sql`
-        SELECT l._locale, l._status
-        FROM ${sql.identifier(versionsTable)} v
-        JOIN ${sql.raw(`${versionsTable}_locales`)} l ON l._parent_id = v.id
-        WHERE v.parent_id = ${doc.id}
-        ORDER BY v.created_at DESC
-        LIMIT ${locales.length}
-      `,
-    })
+    // For each locale, get the latest version status
+    for (const locale of locales) {
+      const latestVersionStatus = await db.execute({
+        drizzle: db.drizzle,
+        sql: sql`
+          SELECT l.version__status as _status
+          FROM ${sql.identifier(versionsTable)} v
+          JOIN ${sql.raw(`${versionsTable}_locales`)} l ON l._parent_id = v.id
+          WHERE v.parent_id = ${doc.id}
+          AND l._locale = ${locale}
+          ORDER BY v.created_at DESC
+          LIMIT 1
+        `,
+      })
 
-    // Build status object { en: 'published', es: 'draft', ... }
-    const statusObj: Record<string, string> = {}
-    for (const row of latestVersionStatuses.rows) {
-      statusObj[row._locale] = row._status
+      const status = latestVersionStatus.rows[0]?._status || 'draft'
+
+      // Update the main collection's locales table with this status
+      await db.execute({
+        drizzle: db.drizzle,
+        sql: sql`
+          UPDATE ${sql.identifier(mainLocalesTable)}
+          SET _status = ${status}
+          WHERE _parent_id = ${doc.id}
+          AND _locale = ${locale}
+        `,
+      })
     }
-
-    // If no statuses found, set all to draft
-    if (latestVersionStatuses.rows.length === 0) {
-      for (const locale of locales) {
-        statusObj[locale] = 'draft'
-      }
-    }
-
-    // Update the document with the new status object
-    await db.execute({
-      drizzle: db.drizzle,
-      sql: sql`
-        UPDATE ${sql.identifier(mainTable)}
-        SET status = ${JSON.stringify(statusObj)}
-        WHERE id = ${doc.id}
-      `,
-    })
   }
 
   payload.logger.info({ msg: `Migrated ${documents.rows.length} collection documents` })

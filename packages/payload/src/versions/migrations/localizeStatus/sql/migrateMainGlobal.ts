@@ -21,42 +21,52 @@ export async function migrateMainGlobalStatus({
   versionsTable: string
 }): Promise<void> {
   const globalTable = toSnakeCase(globalSlug)
+  const globalLocalesTable = `${globalTable}_locales`
 
-  payload.logger.info({ msg: `Migrating main global document for: ${globalTable}` })
+  payload.logger.info({ msg: `Migrating main global locales for: ${globalLocalesTable}` })
 
-  // Get the latest version status per locale for the global
-  const latestVersionStatuses = await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
-      SELECT l._locale, l._status
-      FROM ${sql.identifier(versionsTable)} v
-      JOIN ${sql.raw(`${versionsTable}_locales`)} l ON l._parent_id = v.id
-      ORDER BY v.created_at DESC
-      LIMIT ${locales.length}
-    `,
-  })
+  // For each locale, get the latest version status
+  for (const locale of locales) {
+    const latestVersionStatus = await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        SELECT l.version__status as _status
+        FROM ${sql.identifier(versionsTable)} v
+        JOIN ${sql.raw(`${versionsTable}_locales`)} l ON l._parent_id = v.id
+        WHERE l._locale = ${locale}
+        ORDER BY v.created_at DESC
+        LIMIT 1
+      `,
+    })
 
-  // Build status object { en: 'published', es: 'draft', ... }
-  const statusObj: Record<string, string> = {}
-  for (const row of latestVersionStatuses.rows) {
-    statusObj[row._locale] = row._status
-  }
+    const status = latestVersionStatus.rows[0]?._status || 'draft'
 
-  // If no statuses found, set all to draft
-  if (latestVersionStatuses.rows.length === 0) {
-    for (const locale of locales) {
-      statusObj[locale] = 'draft'
+    // Get the global document ID from the globals table
+    const globalDoc = await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        SELECT id FROM ${sql.identifier(globalTable)} LIMIT 1
+      `,
+    })
+
+    if (globalDoc.rows.length === 0) {
+      payload.logger.warn({ msg: `No global document found for ${globalSlug}, skipping` })
+      continue
     }
-  }
 
-  // Update the global document with the new status object
-  await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
-      UPDATE ${sql.identifier(globalTable)}
-      SET status = ${JSON.stringify(statusObj)}
-    `,
-  })
+    const globalId = globalDoc.rows[0].id
+
+    // Update the global's locales table with this status
+    await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        UPDATE ${sql.identifier(globalLocalesTable)}
+        SET _status = ${status}
+        WHERE _parent_id = ${globalId}
+        AND _locale = ${locale}
+      `,
+    })
+  }
 
   payload.logger.info({ msg: 'Migrated global document' })
 }

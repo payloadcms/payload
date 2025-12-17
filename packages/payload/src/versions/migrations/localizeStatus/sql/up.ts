@@ -124,7 +124,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
           id SERIAL PRIMARY KEY,
           _locale VARCHAR NOT NULL,
           _parent_id INTEGER NOT NULL,
-          _status VARCHAR,
+          version__status VARCHAR,
           UNIQUE(_locale, _parent_id),
           FOREIGN KEY (_parent_id) REFERENCES ${sql.identifier(versionsTable)}(id) ON DELETE CASCADE
         )
@@ -137,7 +137,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       const inserted = await db.execute({
         drizzle: db.drizzle,
         sql: sql`
-          INSERT INTO ${sql.identifier(localesTable)} (_locale, _parent_id, _status)
+          INSERT INTO ${sql.identifier(localesTable)} (_locale, _parent_id, version__status)
           SELECT ${locale}, id, version__status
           FROM ${sql.identifier(versionsTable)}
           RETURNING id
@@ -148,13 +148,13 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       })
     }
   } else {
-    // SCENARIO 2: Add _status column to existing locales table
-    payload.logger.info({ msg: `Adding _status column to existing table: ${localesTable}` })
+    // SCENARIO 2: Add version__status column to existing locales table
+    payload.logger.info({ msg: `Adding version__status column to existing table: ${localesTable}` })
 
     await db.execute({
       drizzle: db.drizzle,
       sql: sql`
-        ALTER TABLE ${sql.identifier(localesTable)} ADD COLUMN _status VARCHAR
+        ALTER TABLE ${sql.identifier(localesTable)} ADD COLUMN version__status VARCHAR
       `,
     })
 
@@ -204,7 +204,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
           drizzle: db.drizzle,
           sql: sql`
             UPDATE ${sql.identifier(localesTable)}
-            SET _status = ${status}
+            SET version__status = ${status}
             WHERE _parent_id = ${versionId}
             AND _locale = ${locale}
           `,
@@ -216,9 +216,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     payload.logger.info({ msg: `Updated ${updateCount} locale rows with status` })
   }
 
-  // 3. Drop the old _status column from main versions table
-  payload.logger.info({ msg: `Dropping version__status column from ${versionsTable}` })
-
+  // 3. Drop the old version__status column from main versions table
   await db.execute({
     drizzle: db.drizzle,
     sql: sql`
@@ -226,23 +224,49 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     `,
   })
 
-  // 4. Migrate main collection/global document _status to per-locale status object
-  // Only if the main table has a status column (versions.localizeStatusEnabled: true)
+  // 4. Create and populate _status column in main collection/global locales table
+  // With localizeStatus enabled, _status is a localized field stored in the collection's locales table
+  // We need to create this column and populate it based on the latest version status per locale
   const mainTable = collectionSlug ? toSnakeCase(collectionSlug) : toSnakeCase(globalSlug!)
+  const mainLocalesTable = `${mainTable}_locales`
 
-  const statusColumnCheck = await db.execute({
+  const localesTableCheck = await db.execute({
     drizzle: db.drizzle,
     sql: sql`
       SELECT EXISTS (
-        SELECT FROM information_schema.columns
+        SELECT FROM information_schema.tables
         WHERE table_schema = 'public'
-        AND table_name = ${mainTable}
-        AND column_name = 'status'
+        AND table_name = ${mainLocalesTable}
       ) as exists
     `,
   })
 
-  if (statusColumnCheck.rows[0]?.exists) {
+  if (localesTableCheck.rows[0]?.exists) {
+    // Check if _status column already exists in the locales table
+    const statusColumnCheck = await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        SELECT EXISTS (
+          SELECT FROM information_schema.columns
+          WHERE table_schema = 'public'
+          AND table_name = ${mainLocalesTable}
+          AND column_name = '_status'
+        ) as exists
+      `,
+    })
+
+    if (!statusColumnCheck.rows[0]?.exists) {
+      // Add _status column to locales table
+      await db.execute({
+        drizzle: db.drizzle,
+        sql: sql`
+          ALTER TABLE ${sql.identifier(mainLocalesTable)}
+          ADD COLUMN _status VARCHAR DEFAULT 'draft'
+        `,
+      })
+    }
+
+    // Now populate the _status values from the latest version
     if (collectionSlug) {
       await migrateMainCollectionStatus({
         collectionSlug,
@@ -257,7 +281,29 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     }
   } else {
     payload.logger.info({
-      msg: 'Skipping main document status migration (no status column found)',
+      msg: `No locales table found: ${mainLocalesTable} (collection/global not localized)`,
+    })
+  }
+
+  // 5. Drop _status from main table if it exists (it will be in locales table now)
+  const mainTableStatusCheck = await db.execute({
+    drizzle: db.drizzle,
+    sql: sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = ${mainTable}
+        AND column_name = '_status'
+      ) as exists
+    `,
+  })
+
+  if (mainTableStatusCheck.rows[0]?.exists) {
+    await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        ALTER TABLE ${sql.identifier(mainTable)} DROP COLUMN _status
+      `,
     })
   }
 
