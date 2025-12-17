@@ -11,15 +11,14 @@ interface Args {
 
 export const getBeforeChangeHook =
   ({ adapter, collection }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
-  async ({ data, originalDoc, req }) => {
+  async ({ data, operation, originalDoc, req }) => {
     try {
       const files = getIncomingFiles({ data, req })
 
       if (files.length > 0) {
-        // If there is an original doc,
-        // And we have new files,
-        // We need to delete the old files before uploading new
-        if (originalDoc) {
+        // If there is an original doc, files and the operation is update,
+        // delete the old files before uploading the new ones.
+        if (originalDoc && operation === 'update') {
           let filesToDelete: string[] = []
 
           if (typeof originalDoc?.filename === 'string') {
