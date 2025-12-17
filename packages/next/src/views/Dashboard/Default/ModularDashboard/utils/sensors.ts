@@ -79,40 +79,44 @@ function getDroppablePositions(): DroppablePosition[] {
 }
 
 /**
- * Find the closest droppable to a given position.
- * Uses Y position to find the row first, then X position to find the droppable within that row.
- * This is important because when entering DND mode, the drag preview appears at the center
- * of the widget, not at any droppable position.
+ * Find the row with the closest Y position to the given posY.
+ * Returns the row index, or null if no droppables exist.
  */
-function findClosestDroppable(
-  droppables: DroppablePosition[],
-  centerX: number,
-  centerY: number,
-): { droppable: DroppablePosition; index: number } | null {
+function findClosestRow(droppables: DroppablePosition[], posY: number): null | number {
   if (droppables.length === 0) {
     return null
   }
 
-  // Step 1: Find the row with the closest Y position
   let closestRow = droppables[0].row
   let minYDistance = Infinity
 
   for (const droppable of droppables) {
-    const yDistance = Math.abs(droppable.centerY - centerY)
+    const yDistance = Math.abs(droppable.centerY - posY)
     if (yDistance < minYDistance) {
       minYDistance = yDistance
       closestRow = droppable.row
     }
   }
 
-  // Step 2: Within that row, find the droppable with the closest X position
+  return closestRow
+}
+
+/**
+ * Find the closest droppable within a specific row by X position.
+ * Returns the droppable and its index, or null if no droppables in that row.
+ */
+function findClosestDroppableInRow(
+  droppables: DroppablePosition[],
+  rowIndex: number,
+  posX: number,
+): { droppable: DroppablePosition; index: number } | null {
   let closestIndex = -1
   let minXDistance = Infinity
 
   for (let i = 0; i < droppables.length; i++) {
     const droppable = droppables[i]
-    if (droppable.row === closestRow) {
-      const xDistance = Math.abs(droppable.centerX - centerX)
+    if (droppable.row === rowIndex) {
+      const xDistance = Math.abs(droppable.centerX - posX)
       if (xDistance < minXDistance) {
         minXDistance = xDistance
         closestIndex = i
@@ -138,37 +142,25 @@ function findTargetDroppable(
   currentCenterY: number,
   direction: string,
 ): DroppablePosition | null {
-  // Find the closest droppable to current position using Y-first, then X approach
-  const closest = findClosestDroppable(droppables, currentCenterX, currentCenterY)
+  // Find the closest row, then the closest droppable in that row
+  const currentRow = findClosestRow(droppables, currentCenterY)
 
-  if (!closest) {
+  if (currentRow === null) {
     return null
   }
 
-  const { droppable: currentDroppable, index: currentIndex } = closest
-  const currentRow = currentDroppable.row
+  const currentDroppable = findClosestDroppableInRow(droppables, currentRow, currentCenterX)
+
+  if (!currentDroppable) {
+    return null
+  }
+
+  const { index: currentIndex } = currentDroppable
 
   switch (direction) {
     case 'ArrowDown': {
-      // Find droppables in row + 1 and get the one with closest X
       const targetRow = currentRow + 1
-      const candidatesInRow = droppables.filter((d) => d.row === targetRow)
-
-      if (candidatesInRow.length === 0) {
-        return null
-      }
-
-      let closest: DroppablePosition | null = null
-      let minXDistance = Infinity
-
-      for (const droppable of candidatesInRow) {
-        const xDistance = Math.abs(droppable.centerX - currentCenterX)
-        if (xDistance < minXDistance) {
-          minXDistance = xDistance
-          closest = droppable
-        }
-      }
-      return closest
+      return findClosestDroppableInRow(droppables, targetRow, currentCenterX)?.droppable || null
     }
 
     case 'ArrowLeft':
@@ -180,25 +172,8 @@ function findTargetDroppable(
       return droppables[currentIndex + 1] || null
 
     case 'ArrowUp': {
-      // Find droppables in row - 1 and get the one with closest X
       const targetRow = currentRow - 1
-      const candidatesInRow = droppables.filter((d) => d.row === targetRow)
-
-      if (candidatesInRow.length === 0) {
-        return null
-      }
-
-      let closest: DroppablePosition | null = null
-      let minXDistance = Infinity
-
-      for (const droppable of candidatesInRow) {
-        const xDistance = Math.abs(droppable.centerX - currentCenterX)
-        if (xDistance < minXDistance) {
-          minXDistance = xDistance
-          closest = droppable
-        }
-      }
-      return closest
+      return findClosestDroppableInRow(droppables, targetRow, currentCenterX)?.droppable || null
     }
 
     default:
@@ -227,30 +202,40 @@ const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
     return currentCoordinates
   }
 
+  // Prevent default browser scroll behavior for arrow keys
+  event.preventDefault()
+
+  // Clear scrollableAncestors to prevent dnd-kit from scrolling instead of moving
+  // This must be done on every keydown because context is updated by dnd-kit
+  if (context.scrollableAncestors) {
+    context.scrollableAncestors.length = 0
+  }
+
   // Get all droppable widgets and their positions
   const droppables = getDroppablePositions()
+
+  // showDroppableDebugDots(droppables)
 
   if (droppables.length === 0) {
     return currentCoordinates
   }
 
-  // Current position center
+  // Current position center (viewport coordinates from collisionRect)
   const currentCenterX = collisionRect.left + collisionRect.width / 2
   const currentCenterY = collisionRect.top + collisionRect.height / 2
 
   // Find the target droppable based on direction
   const targetDroppable = findTargetDroppable(droppables, currentCenterX, currentCenterY, code)
 
-  // If we found a target, move to it
+  // If we found a target, calculate the delta and move
   if (targetDroppable) {
-    // Scroll the target into view if needed
-    requestAnimationFrame(() => {
-      targetDroppable.element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    })
+    const deltaX = targetDroppable.centerX - currentCenterX
+    const deltaY = targetDroppable.centerY - currentCenterY
 
+    // Add delta to currentCoordinates to position overlay's center at target's center
     return {
-      x: targetDroppable.centerX,
-      y: targetDroppable.centerY,
+      x: currentCoordinates.x + deltaX,
+      y: currentCoordinates.y + deltaY,
     }
   }
 
@@ -309,4 +294,30 @@ export function useDashboardSensors() {
       coordinateGetter: droppableJumpKeyboardCoordinateGetter,
     }),
   )
+}
+
+/**
+ * DEBUG: Show red dots at droppable positions (viewport-relative)
+ */
+function _showDroppableDebugDots(droppables: DroppablePosition[]) {
+  // Remove any existing debug dots
+  document.querySelectorAll('.debug-droppable-dot').forEach((el) => el.remove())
+
+  // Create new debug dots
+  droppables.forEach((droppable, index) => {
+    // centerX/Y are already viewport coordinates (from getBoundingClientRect)
+    const dot = document.createElement('div')
+    dot.className = 'debug-droppable-dot'
+    dot.style.position = 'fixed'
+    dot.style.left = `${droppable.centerX - 4}px`
+    dot.style.top = `${droppable.centerY - 4}px`
+    dot.style.width = '8px'
+    dot.style.height = '8px'
+    dot.style.backgroundColor = 'red'
+    dot.style.borderRadius = '50%'
+    dot.style.zIndex = '9999'
+    dot.style.pointerEvents = 'none'
+    dot.title = `Row ${droppable.row}, Index ${index}`
+    document.body.appendChild(dot)
+  })
 }

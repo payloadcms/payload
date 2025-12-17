@@ -1,11 +1,28 @@
 'use client'
 
+import type { Modifier } from '@dnd-kit/core'
 import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { ChevronIcon, Popup, PopupList, useTranslation, XIcon } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
+
+/**
+ * Custom modifier that only applies snapCenterToCursor for pointer events.
+ * During keyboard navigation, we handle positioning ourselves via the coordinate getter.
+ */
+const snapCenterToCursorOnlyForPointer: Modifier = (args) => {
+  const { activatorEvent } = args
+
+  // Only apply snap for pointer events (mouse/touch), not keyboard
+  // Check activatorEvent.type since KeyboardEvent may not exist on server
+  if (activatorEvent && 'key' in activatorEvent) {
+    return args.transform
+  }
+
+  return snapCenterToCursor(args)
+}
 
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
@@ -176,9 +193,8 @@ export function ModularDashboardClient({
             dropAnimation={{
               duration: 100,
             }}
-            // Needed for the scale(0.25) of the dragOverlay, so there is no offset
-            // between the dragOverlay and the mouse pointer.
-            modifiers={[snapCenterToCursor]}
+            // Uses custom modifier that only applies for pointer, not keyboard navigation.
+            modifiers={[snapCenterToCursorOnlyForPointer]}
           >
             {activeDragId
               ? (() => {
