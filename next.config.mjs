@@ -14,7 +14,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
-      basePath: process.env?.NEXT_BASE_PATH || undefined,
+      // basePath: process.env?.NEXT_BASE_PATH || undefined,
       eslint: {
         ignoreDuringBuilds: true,
       },
