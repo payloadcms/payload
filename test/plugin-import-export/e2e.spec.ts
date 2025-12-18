@@ -121,7 +121,7 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-content button', {
+      const createExportButton = page.locator('.popup__scroll-container button', {
         hasText: 'Export Posts',
       })
       await expect(createExportButton).toBeVisible()
@@ -358,7 +358,7 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createImportButton = page.locator('.popup__scroll-content button', {
+      const createImportButton = page.locator('.popup__scroll-container button', {
         hasText: 'Import Posts',
       })
       await expect(createImportButton).toBeVisible()
