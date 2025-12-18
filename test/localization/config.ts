@@ -406,6 +406,9 @@ export default buildConfigWithDefaults({
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
   ],
+  experimental: {
+    localizeStatus: true,
+  },
   globals: [
     {
       fields: [
@@ -460,27 +463,47 @@ export default buildConfigWithDefaults({
       },
       {
         code: defaultLocale,
-        label: 'English',
+        label: {
+          de: 'Englisch',
+          en: 'English',
+          es: 'Inglés',
+        },
         rtl: false,
       },
       {
         code: spanishLocale,
-        label: 'Spanish',
+        label: {
+          de: 'Spanisch',
+          en: 'Spanish',
+          es: 'Español',
+        },
         rtl: false,
       },
       {
         code: portugueseLocale,
         fallbackLocale: spanishLocale,
-        label: 'Portuguese',
+        label: {
+          de: 'Portugiesisch',
+          en: 'Portuguese',
+          es: 'Portugués',
+        },
       },
       {
         code: 'ar',
-        label: 'Arabic',
+        label: {
+          de: 'Arabisch',
+          en: 'Arabic',
+          es: 'Árabe',
+        },
         rtl: true,
       },
       {
         code: hungarianLocale,
-        label: 'Hungarian',
+        label: {
+          de: 'Ungarische',
+          en: 'Hungarian',
+          es: 'Húngaro',
+        },
         rtl: false,
       },
     ],

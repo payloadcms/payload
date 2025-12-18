@@ -29,6 +29,7 @@ export const en: GenericTranslationsObject = {
     carts: 'Carts',
     cartsCollectionDescription:
       "Carts represent a customer's selection of products they intend to purchase. They are related to a customer where possible and guest users do not have a customer attached.",
+    cartSecret: 'Cart Secret',
     completed: 'Completed',
     currency: 'Currency',
     currencyNotSet: 'Currency not set.',

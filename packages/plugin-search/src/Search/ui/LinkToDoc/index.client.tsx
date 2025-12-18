@@ -23,6 +23,7 @@ export const LinkToDocClient: React.FC = () => {
   const href = `${serverURL}${formatAdminURL({
     adminRoute,
     path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
+    serverURL,
   })}`
 
   const hrefToDisplay = `${process.env.NEXT_BASE_PATH || ''}${href}`

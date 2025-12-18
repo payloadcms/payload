@@ -337,6 +337,7 @@ export function FolderProvider({
               formatAdminURL({
                 adminRoute: config.routes.admin,
                 path: `/collections/${collectionSlug}/${docID}`,
+                serverURL,
               }),
             )
             clearSelections()
@@ -351,6 +352,7 @@ export function FolderProvider({
       }
     },
     [
+      serverURL,
       clearSelections,
       config.routes.admin,
       drawerDepth,

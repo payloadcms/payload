@@ -5,7 +5,12 @@ import type { SelectType, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, mergeListSearchAndWhere, unflatten } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  formatApiURL,
+  mergeListSearchAndWhere,
+  unflatten,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -385,17 +390,29 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatApiURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                            serverURL,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatApiURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                            serverURL,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={`${serverURL}${apiRoute}/${collection.slug}${queryString}`}
+                        action={formatApiURL({
+                          apiRoute,
+                          path: `/${collection.slug}${queryString}`,
+                          serverURL,
+                        })}
                         disabled={selectedFields.length === 0}
                       />
                     )}
