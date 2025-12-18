@@ -446,7 +446,9 @@ export default buildConfigWithDefaults({
       ],
       slug: globalWithDraftsSlug,
       versions: {
-        drafts: true,
+        drafts: {
+          localizeStatus: true,
+        },
       },
     },
   ],
