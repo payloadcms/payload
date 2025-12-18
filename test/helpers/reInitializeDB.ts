@@ -33,12 +33,15 @@ export const reInitializeDB = async ({
         },
       )
 
-      const response = await fetch(formatApiURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }), {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatApiURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      })
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
