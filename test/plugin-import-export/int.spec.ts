@@ -4496,6 +4496,181 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.error).toContain('No file data')
     })
 
+    it('should paginate import preview data for CSV', async () => {
+      // Create CSV with 15 rows
+      const rows = ['title,excerpt']
+      for (let i = 0; i < 15; i++) {
+        rows.push(`"Import Pagination Test ${i}","Excerpt ${i}"`)
+      }
+      const csvContent = rows.join('\n')
+      const base64Data = Buffer.from(csvContent).toString('base64')
+
+      // Request page 1 with limit 10
+      const responsePage1: {
+        docs: unknown[]
+        hasNextPage: boolean
+        hasPrevPage: boolean
+        page: number
+        totalDocs: number
+        totalPages: number
+      } = await restClient
+        .POST('/imports/preview-data', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            fileData: base64Data,
+            format: 'csv',
+            previewLimit: 10,
+            previewPage: 1,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(responsePage1.docs).toHaveLength(10)
+      expect(responsePage1.totalDocs).toBe(15)
+      expect(responsePage1.page).toBe(1)
+      expect(responsePage1.totalPages).toBe(2)
+      expect(responsePage1.hasNextPage).toBe(true)
+      expect(responsePage1.hasPrevPage).toBe(false)
+
+      // Request page 2
+      const responsePage2: {
+        docs: unknown[]
+        hasNextPage: boolean
+        hasPrevPage: boolean
+        page: number
+        totalDocs: number
+        totalPages: number
+      } = await restClient
+        .POST('/imports/preview-data', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            fileData: base64Data,
+            format: 'csv',
+            previewLimit: 10,
+            previewPage: 2,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(responsePage2.docs).toHaveLength(5)
+      expect(responsePage2.totalDocs).toBe(15)
+      expect(responsePage2.page).toBe(2)
+      expect(responsePage2.totalPages).toBe(2)
+      expect(responsePage2.hasNextPage).toBe(false)
+      expect(responsePage2.hasPrevPage).toBe(true)
+    })
+
+    it('should paginate import preview data for JSON', async () => {
+      // Create JSON with 11 items
+      const items = []
+      for (let i = 0; i < 11; i++) {
+        items.push({ title: `JSON Import Test ${i}`, excerpt: `Excerpt ${i}` })
+      }
+      const jsonContent = JSON.stringify(items)
+      const base64Data = Buffer.from(jsonContent).toString('base64')
+
+      // Request page 1 with limit 10
+      const responsePage1: {
+        docs: unknown[]
+        hasNextPage: boolean
+        hasPrevPage: boolean
+        page: number
+        totalDocs: number
+        totalPages: number
+      } = await restClient
+        .POST('/imports/preview-data', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            fileData: base64Data,
+            format: 'json',
+            previewLimit: 10,
+            previewPage: 1,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(responsePage1.docs).toHaveLength(10)
+      expect(responsePage1.totalDocs).toBe(11)
+      expect(responsePage1.page).toBe(1)
+      expect(responsePage1.totalPages).toBe(2)
+      expect(responsePage1.hasNextPage).toBe(true)
+      expect(responsePage1.hasPrevPage).toBe(false)
+
+      // Request page 2 - should only have 1 item
+      const responsePage2: {
+        docs: unknown[]
+        hasNextPage: boolean
+        hasPrevPage: boolean
+        page: number
+        totalDocs: number
+        totalPages: number
+      } = await restClient
+        .POST('/imports/preview-data', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            fileData: base64Data,
+            format: 'json',
+            previewLimit: 10,
+            previewPage: 2,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(responsePage2.docs).toHaveLength(1)
+      expect(responsePage2.totalDocs).toBe(11)
+      expect(responsePage2.page).toBe(2)
+      expect(responsePage2.hasNextPage).toBe(false)
+      expect(responsePage2.hasPrevPage).toBe(true)
+    })
+
+    it('should default to previewLimit 10 and previewPage 1 for import preview', async () => {
+      // Create CSV with 25 rows
+      const rows = ['title,excerpt']
+      for (let i = 0; i < 25; i++) {
+        rows.push(`"Default Pagination Test ${i}","Excerpt ${i}"`)
+      }
+      const csvContent = rows.join('\n')
+      const base64Data = Buffer.from(csvContent).toString('base64')
+
+      // Request without pagination params
+      const response: {
+        docs: unknown[]
+        limit: number
+        page: number
+        totalDocs: number
+        totalPages: number
+      } = await restClient
+        .POST('/imports/preview-data', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            fileData: base64Data,
+            format: 'csv',
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.docs).toHaveLength(10) // Default limit
+      expect(response.page).toBe(1) // Default page
+      expect(response.limit).toBe(10)
+      expect(response.totalDocs).toBe(25)
+      expect(response.totalPages).toBe(3)
+    })
+
     it('should respect preview limit (max 10)', async () => {
       // Create more than 10 documents
       for (let i = 0; i < 15; i++) {
