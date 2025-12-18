@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.68.2",
+  "version": "3.68.5",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -178,7 +178,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.2.6 || ^15.3.6 || ^15.4.8 || ^15.5.7 || ^16.1.0 || ^16.1.0-canary.3",
+    "next": "^15.2.6 || ^15.3.6 || ^15.4.8 || ^15.5.7 || ^16.1.0",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"

@@ -63,9 +63,11 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
+  // Intentionally omit `serverURL` to ensure relative path
   const currentRoute = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
+    relative: true,
     serverURL: config.serverURL,
   })
 
@@ -120,6 +122,7 @@ export const RootPage = async ({
   }
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
     cookies,
     locale,
@@ -138,6 +141,7 @@ export const RootPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
+      // intentionally omit `serverURL` to keep URL relative
       urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
     },
   })
@@ -219,14 +223,15 @@ export const RootPage = async ({
     }
   }
 
+  const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
+  const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+
   const createFirstUserRoute = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
+    relative: true,
     serverURL: config.serverURL,
   })
-
-  const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
-  const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
     redirect(adminRoute)
