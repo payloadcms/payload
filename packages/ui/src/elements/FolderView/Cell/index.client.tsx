@@ -1,8 +1,9 @@
 'use client'
 
 import type { Data, ViewTypes } from 'payload'
+import type { FolderOrDocument } from 'payload/shared'
 
-import { type FolderOrDocument, formatApiURL } from 'payload/shared'
+import { formatApiURL } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
