@@ -127,80 +127,6 @@ BlocksFeature({
 })
 ```
 
-## Code Block
-
-<PayloadMedia mediaID="69448939caf2c46e92a857a9" />
-
-Payload provides a pre-built `CodeBlock` that you can use directly in your projects. It includes syntax highlighting, language selection, and optional TypeScript type definitions support:
-
-```ts
-import { BlocksFeature, CodeBlock } from '@payloadcms/richtext-lexical'
-
-BlocksFeature({
-  blocks: [
-    CodeBlock({
-      defaultLanguage: 'ts',
-      languages: {
-        plaintext: 'Plain Text',
-        js: 'JavaScript',
-        ts: 'TypeScript',
-        tsx: 'TSX',
-        jsx: 'JSX',
-      },
-    }),
-  ],
-})
-```
-
-### CodeBlock Options
-
-| Option                | Description                                                       |
-| --------------------- | ----------------------------------------------------------------- |
-| **`slug`**            | Override the block slug. Default: `'Code'`                        |
-| **`defaultLanguage`** | The default language selection. Default: first key in `languages` |
-| **`languages`**       | Object mapping language keys to display labels                    |
-| **`typescript`**      | TypeScript-specific configuration (see below)                     |
-| **`fieldOverrides`**  | Partial block config to override or extend the default CodeBlock  |
-
-### TypeScript Support
-
-When using TypeScript as a language option, you can load external type definitions to provide IntelliSense in the editor:
-
-```ts
-CodeBlock({
-  slug: 'PayloadCode',
-  languages: {
-    ts: 'TypeScript',
-  },
-  typescript: {
-    fetchTypes: [
-      {
-        url: 'https://unpkg.com/payload@3.68.5/dist/index.bundled.d.ts',
-        filePath: 'file:///node_modules/payload/index.d.ts',
-      },
-      {
-        url: 'https://unpkg.com/@types/react@19.2.3/index.d.ts',
-        filePath: 'file:///node_modules/@types/react/index.d.ts',
-      },
-    ],
-    paths: {
-      payload: ['file:///node_modules/payload/index.d.ts'],
-      react: ['file:///node_modules/@types/react/index.d.ts'],
-    },
-    typeRoots: ['node_modules/@types', 'node_modules/payload'],
-    enableSemanticValidation: true,
-  },
-})
-```
-
-| TypeScript Option              | Description                                                                    |
-| ------------------------------ | ------------------------------------------------------------------------------ |
-| **`fetchTypes`**               | Array of `{ url, filePath }` objects to fetch external type definitions        |
-| **`paths`**                    | Module path mappings for import resolution                                     |
-| **`typeRoots`**                | Directories to search for type definitions. Default: `['node_modules/@types']` |
-| **`target`**                   | TypeScript compilation target. Default: `'ESNext'`                             |
-| **`enableSemanticValidation`** | Enable full type checking (not just syntax). Default: `false`                  |
-
 ## Data Structure
 
 Block data is stored within the Lexical JSON structure. Each block node contains a `fields` object with all the block's field values:
@@ -497,3 +423,77 @@ When rendering rich text content on the frontend, blocks need to be handled by y
 - [Markdown Converters](/docs/rich-text/converting-markdown#defining-a-custom-block) - For markdown output
 
 Each converter allows you to define custom renderers for your block types, giving you full control over how block content appears on your frontend.
+
+## Code Block
+
+<PayloadMedia mediaID="69448939caf2c46e92a857a9" />
+
+Payload provides a pre-built `CodeBlock` that you can use directly in your projects. It includes syntax highlighting, language selection, and optional TypeScript type definitions support:
+
+```ts
+import { BlocksFeature, CodeBlock } from '@payloadcms/richtext-lexical'
+
+BlocksFeature({
+  blocks: [
+    CodeBlock({
+      defaultLanguage: 'ts',
+      languages: {
+        plaintext: 'Plain Text',
+        js: 'JavaScript',
+        ts: 'TypeScript',
+        tsx: 'TSX',
+        jsx: 'JSX',
+      },
+    }),
+  ],
+})
+```
+
+### CodeBlock Options
+
+| Option                | Description                                                       |
+| --------------------- | ----------------------------------------------------------------- |
+| **`slug`**            | Override the block slug. Default: `'Code'`                        |
+| **`defaultLanguage`** | The default language selection. Default: first key in `languages` |
+| **`languages`**       | Object mapping language keys to display labels                    |
+| **`typescript`**      | TypeScript-specific configuration (see below)                     |
+| **`fieldOverrides`**  | Partial block config to override or extend the default CodeBlock  |
+
+### TypeScript Support
+
+When using TypeScript as a language option, you can load external type definitions to provide IntelliSense in the editor:
+
+```ts
+CodeBlock({
+  slug: 'PayloadCode',
+  languages: {
+    ts: 'TypeScript',
+  },
+  typescript: {
+    fetchTypes: [
+      {
+        url: 'https://unpkg.com/payload@3.68.5/dist/index.bundled.d.ts',
+        filePath: 'file:///node_modules/payload/index.d.ts',
+      },
+      {
+        url: 'https://unpkg.com/@types/react@19.2.3/index.d.ts',
+        filePath: 'file:///node_modules/@types/react/index.d.ts',
+      },
+    ],
+    paths: {
+      payload: ['file:///node_modules/payload/index.d.ts'],
+      react: ['file:///node_modules/@types/react/index.d.ts'],
+    },
+    typeRoots: ['node_modules/@types', 'node_modules/payload'],
+    enableSemanticValidation: true,
+  },
+})
+```
+
+| TypeScript Option              | Description                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| **`fetchTypes`**               | Array of `{ url, filePath }` objects to fetch external type definitions        |
+| **`paths`**                    | Module path mappings for import resolution                                     |
+| **`typeRoots`**                | Directories to search for type definitions. Default: `['node_modules/@types']` |
+| **`target`**                   | TypeScript compilation target. Default: `'ESNext'`                             |
+| **`enableSemanticValidation`** | Enable full type checking (not just syntax). Default: `false`                  |
