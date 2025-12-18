@@ -1089,14 +1089,18 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * @experimental features
-   * These features are not yet fully stable and may change in future versions
+   * Experimental features may be unstable or change in future versions.
    */
   experimental?: {
     /**
-     * @experimental when enabled, stores status per-locale
-     * Required localization and versions.drafts to be enabled
-     * versions.drafts.localizeStatus must also be set on the collection or global level
+     * Enable per-locale status for documents.
+     *
+     * Requires:
+     * - `localization` enabled
+     * - `versions.drafts` enabled
+     * - `versions.drafts.localizeStatus` set at collection or global level
+     *
+     * @experimental
      */
     localizeStatus?: boolean
   }
