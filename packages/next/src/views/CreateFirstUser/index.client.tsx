@@ -33,7 +33,6 @@ export const CreateFirstUserClient: React.FC<{
   const {
     config: {
       routes: { admin, api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()

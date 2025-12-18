@@ -622,7 +622,7 @@ describe('Access Control', () => {
       })
 
       test('should restrict access based on user settings', async () => {
-        const url = formatAdminURL({ adminRoute: '/admin', path: '/globals/settings', serverURL })
+        const url = formatAdminURL({ path: '/globals/settings', serverURL })
         await page.goto(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()

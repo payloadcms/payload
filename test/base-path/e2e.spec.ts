@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -13,6 +14,8 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+dotenv.config({ path: path.join(dirname, '.env'), override: true })
+
 test.describe('Base Path', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -20,7 +23,6 @@ test.describe('Base Path', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.NEXT_BASE_PATH = '/cms'
 
     const { payload } = await initPayloadE2ENoConfig({
       dirname,

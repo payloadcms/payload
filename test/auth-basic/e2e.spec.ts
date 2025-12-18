@@ -86,7 +86,7 @@ describe('Auth (Basic)', () => {
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: formatAdminURL({ adminRoute: '/admin', path: '/**', serverURL }),
+      readyURL: formatAdminURL({ path: '/**', serverURL }),
       noAutoLogin: true,
     })
 
@@ -109,7 +109,7 @@ describe('Auth (Basic)', () => {
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: formatAdminURL({ adminRoute: '/admin', path: '/create-first-user', serverURL }),
+      readyURL: formatAdminURL({ path: '/create-first-user', serverURL }),
     })
   })
 

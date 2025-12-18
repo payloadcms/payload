@@ -24,10 +24,11 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, slug } from './shared.js'
+import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 let payload: PayloadTestSDK<Config>
 
@@ -197,7 +198,7 @@ describe('Auth', () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
-        const loginPageRes = await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+        const loginPageRes = await page.goto(formatAdminURL({ path: '/login', serverURL }))
         const loginPageSource = await loginPageRes?.text()
         expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
 
@@ -212,7 +213,7 @@ describe('Auth', () => {
 
         await login({ page, serverURL })
 
-        await page.goto(serverURL + '/admin')
+        await page.goto(formatAdminURL({ path: '', serverURL }))
 
         // Inspect the client config (after authentication)
         await expect(page.locator('#authenticated-client-config')).toBeAttached()
@@ -224,7 +225,7 @@ describe('Auth', () => {
         ).toHaveCount(1)
 
         // Inspect the page source (after authentication)
-        const dashboardPageRes = await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+        const dashboardPageRes = await page.goto(formatAdminURL({ path: '/', serverURL }))
         const dashboardPageSource = await dashboardPageRes?.text()
         expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })
@@ -266,11 +267,12 @@ describe('Auth', () => {
       })
 
       test('should prevent new user creation without confirm password', async () => {
+        await page.goto(url.list)
         await page.goto(url.create)
         await page.locator('#field-email').fill('dev2@payloadcms.com')
         await page.locator('#field-password').fill('password')
         // should fail to save without confirm password
-        await page.locator('#action-save').click()
+        await page.locator('#action-save').click({ delay: 100 })
         await expect(
           page.locator('.field-type.confirm-password .tooltip--show', {
             hasText: exactText('This field is required.'),
@@ -325,8 +327,11 @@ describe('Auth', () => {
         await expect.poll(() => lockedDocs.docs.length).toBe(1)
 
         await openNav(page)
-
-        await page.locator('.nav .nav__controls a[href="/admin/logout"]').click()
+        await page
+          .locator(
+            `.nav .nav__controls a[href="${formatAdminURL({ includeRelativeBasePath: true, path: '/logout' })}"]`,
+          )
+          .click()
 
         // Locate the modal container
         const modalContainer = page.locator('.payload__modal-container')
@@ -448,7 +453,10 @@ describe('Auth', () => {
           limit: 1,
         })
 
-        const userDocumentRoute = formatAdminURL({ adminRoute: '/admin', path: `/collections/users/${users?.docs?.[0]?.id}`, serverURL })
+        const userDocumentRoute = formatAdminURL({
+          path: `/collections/users/${users?.docs?.[0]?.id}`,
+          serverURL,
+        })
 
         await logout(page, serverURL)
 
@@ -481,7 +489,10 @@ describe('Auth', () => {
 
         await logout(page, serverURL)
 
-        const notInUserCollectionURL = formatAdminURL({ adminRoute: '/admin', path: `/collections/relationsCollection/${notInUserCollection.id}`, serverURL })
+        const notInUserCollectionURL = formatAdminURL({
+          path: `/collections/relationsCollection/${notInUserCollection.id}`,
+          serverURL,
+        })
         await page.goto(notInUserCollectionURL)
 
         await expect

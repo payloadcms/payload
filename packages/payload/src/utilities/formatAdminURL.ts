@@ -9,13 +9,14 @@ import type { Config } from '../config/types.js'
  */
 export const formatAdminURL = (
   args: {
-    adminRoute: NonNullable<Config['routes']>['admin']
+    adminRoute?: NonNullable<Config['routes']>['admin']
     /**
      * The subpath of your application, if specified.
      * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
      * @example '/docs'
      */
     basePath?: string
+    includeRelativeBasePath?: boolean
     path?: '' | `/${string}` | null
     /**
      * Return a relative URL, e.g. ignore `serverURL`.
@@ -24,7 +25,15 @@ export const formatAdminURL = (
     relative?: boolean
   } & Pick<Config, 'serverURL'>,
 ): string => {
-  const { adminRoute, basePath, path = '', relative = false, serverURL } = args
+  const {
+    adminRoute = '/admin',
+    includeRelativeBasePath = false,
+    path = '',
+    relative = false,
+    serverURL,
+  } = args
+
+  const basePath = process.env.NEXT_BASE_PATH || args.basePath || ''
 
   // Build the pathname from segments
   const segments = [adminRoute && adminRoute !== '/' && adminRoute, path && path].filter(Boolean)
@@ -33,14 +42,15 @@ export const formatAdminURL = (
 
   // Return relative URL if requested or no serverURL provided
   if (relative || !serverURL) {
+    if (includeRelativeBasePath && basePath) {
+      return (basePath + pathname).replace(/\/$/, '') || '/'
+    }
     return pathname
   }
 
   // When serverURL is provided, prepend basePath and construct absolute URL
   const serverURLObj = new URL(serverURL)
-  const envBasePath = process.env.NEXT_BASE_PATH || ''
-  console.log('HEREHER', { envBasePath })
-  const fullPath = ((envBasePath || basePath || '') + pathname).replace(/\/$/, '') || '/'
+  const fullPath = (basePath + pathname).replace(/\/$/, '') || '/'
 
   return new URL(fullPath, serverURLObj.origin).toString()
 }

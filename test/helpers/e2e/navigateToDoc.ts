@@ -1,14 +1,12 @@
 import type { Page } from '@playwright/test'
 import type { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 
-import { formatAdminURL, wait } from 'payload/shared'
+import { wait } from 'payload/shared'
 
 export const goToFirstCell = async (page: Page, urlUtil: AdminUrlUtil) => {
   const cellLink = page.locator(`tbody tr:first-child td a`).first()
   const linkURL = await cellLink.getAttribute('href')
-  let path = linkURL.replace('/admin', '')
-  if (!path.startsWith('/')) path = `/${path}`
-  await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL: urlUtil.serverURL }))
+  await page.goto(`${urlUtil.serverURL}${linkURL}`)
   await wait(50)
 }
 

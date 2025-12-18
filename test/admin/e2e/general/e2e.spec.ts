@@ -1,7 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
 
@@ -16,6 +16,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customCollectionMetaTitle,
   customDefaultTabMetaTitle,
@@ -42,6 +43,7 @@ import {
   settingsGlobalSlug,
   uploadTwoCollectionSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -54,7 +56,6 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -125,12 +126,12 @@ describe('General', () => {
   describe('metadata', () => {
     describe('root title and description', () => {
       test('should render custom page title suffix', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '/', serverURL }))
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
       test('should render custom meta description from root config', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '/', serverURL }))
         await expect(page.locator('meta[name="description"]')).toHaveAttribute(
           'content',
           /This is a custom meta description/,
@@ -148,12 +149,12 @@ describe('General', () => {
       })
 
       test('should fallback to root meta for custom root views', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/custom-default-view', serverURL }))
+        await page.goto(formatAdminURL({ path: '/custom-default-view', serverURL }))
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
       test('should render custom meta title from custom root views', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/custom-minimal-view', serverURL }))
+        await page.goto(formatAdminURL({ path: '/custom-minimal-view', serverURL }))
         const pattern = new RegExp(`^${customRootViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -161,7 +162,7 @@ describe('General', () => {
 
     describe('robots', () => {
       test('should apply default robots meta tag', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '/', serverURL }))
         await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
           'content',
           /noindex, nofollow/,
@@ -189,7 +190,7 @@ describe('General', () => {
 
     describe('og meta', () => {
       test('should render custom og:title from root config', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '/', serverURL }))
         await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
           'content',
           /This is a custom OG title/,
@@ -197,7 +198,7 @@ describe('General', () => {
       })
 
       test('should render custom og:description from root config', async () => {
-        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '/', serverURL }))
         await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
           'content',
           /This is a custom OG description/,
@@ -342,25 +343,37 @@ describe('General', () => {
 
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
-      const unknownPageURL = formatAdminURL({ adminRoute: '/admin', path: '/1234', serverURL })
+      const unknownPageURL = formatAdminURL({ path: '/1234', serverURL })
       const response = await page.goto(unknownPageURL)
       expect(response.status() === 404).toBeTruthy()
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
     test('should use custom logout route', async () => {
-      const customLogoutRouteURL = formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: adminRoutes.admin.routes.logout, serverURL })
+      const customLogoutRouteURL = formatAdminURL({
+        adminRoute: adminRoutes.routes.admin,
+        path: adminRoutes.admin.routes.logout,
+        serverURL,
+      })
       const response = await page.goto(customLogoutRouteURL)
       expect(response.status() !== 404).toBeTruthy()
     })
 
     test('should redirect from non-existent document ID to collection list', async () => {
-      const nonExistentDocURL = formatAdminURL({ adminRoute: '/admin', path: `/collections/${postsCollectionSlug}/999999`, serverURL })
+      const nonExistentDocURL = formatAdminURL({
+        path: `/collections/${postsCollectionSlug}/999999`,
+        serverURL,
+      })
       await page.goto(nonExistentDocURL)
       // Should redirect to collection list with notFound query parameter
       await expect
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
-        .toMatch(formatAdminURL({ adminRoute: '/admin', path: `/collections/${postsCollectionSlug}?notFound=999999`, serverURL }))
+        .toMatch(
+          formatAdminURL({
+            path: `/collections/${postsCollectionSlug}?notFound=999999`,
+            serverURL,
+          }),
+        )
 
       // Should show warning banner about document not found
       await expect(page.locator('.banner--type-error')).toBeVisible()
@@ -368,16 +381,16 @@ describe('General', () => {
     })
 
     test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
-      const collectionsURL = formatAdminURL({ adminRoute: '/admin', path: '/collections', serverURL })
+      const collectionsURL = formatAdminURL({ path: '/collections', serverURL })
       await page.goto(collectionsURL)
       await expect(page.getByText('Custom View').first()).toBeVisible()
     })
 
     test('should redirect `${adminRoute}/globals` to `${adminRoute}', async () => {
-      const globalsURL = formatAdminURL({ adminRoute: '/admin', path: '/globals', serverURL })
+      const globalsURL = formatAdminURL({ path: '/globals', serverURL })
       await page.goto(globalsURL)
       // Should redirect to dashboard
-      await expect.poll(() => page.url()).toBe(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+      await expect.poll(() => page.url()).toBe(formatAdminURL({ path: '/', serverURL }))
     })
 
     /**
@@ -551,7 +564,11 @@ describe('General', () => {
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
-      await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
+      await page
+        .locator(
+          `.step-nav a[href="${formatAdminURL({ path: '', includeRelativeBasePath: true })}"]`,
+        )
+        .click()
       expect(page.url()).toContain(postsUrl.admin)
     })
 
@@ -559,7 +576,7 @@ describe('General', () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="${adminRoutes.routes.admin}/collections/${postsCollectionSlug}"]`,
+        `.step-nav a[href="${formatAdminURL({ path: `/collections/${postsCollectionSlug}`, includeRelativeBasePath: true })}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
@@ -637,13 +654,13 @@ describe('General', () => {
 
   describe('custom providers', () => {
     test('should render custom providers', async () => {
-      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '/', serverURL }))
       await expect(page.locator('.custom-provider')).toHaveCount(1)
       await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
     test('should render custom provider server components with props', async () => {
-      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '/', serverURL }))
       await expect(page.locator('.custom-provider-server')).toHaveCount(1)
       await expect(page.locator('.custom-provider-server')).toContainText(
         'This is a custom provider with payload: true',
@@ -653,12 +670,20 @@ describe('General', () => {
 
   describe('custom root views', () => {
     test('should render custom view', async () => {
-      await page.goto(formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: customViewPath, serverURL }))
+      await page.goto(
+        formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: customViewPath, serverURL }),
+      )
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('should render custom nested view', async () => {
-      await page.goto(formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: customNestedViewPath, serverURL }))
+      await page.goto(
+        formatAdminURL({
+          adminRoute: adminRoutes.routes.admin,
+          path: customNestedViewPath,
+          serverURL,
+        }),
+      )
       const pageURL = page.url()
       const pathname = new URL(pageURL).pathname
       expect(pathname).toEqual(`${adminRoutes.routes.admin}${customNestedViewPath}`)
@@ -666,12 +691,24 @@ describe('General', () => {
     })
 
     test('should render public custom view', async () => {
-      await page.goto(formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: publicCustomViewPath, serverURL }))
+      await page.goto(
+        formatAdminURL({
+          adminRoute: adminRoutes.routes.admin,
+          path: publicCustomViewPath,
+          serverURL,
+        }),
+      )
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('should render protected nested custom view', async () => {
-      await page.goto(formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: protectedCustomNestedViewPath, serverURL }))
+      await page.goto(
+        formatAdminURL({
+          adminRoute: adminRoutes.routes.admin,
+          path: protectedCustomNestedViewPath,
+          serverURL,
+        }),
+      )
 
       // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
@@ -685,7 +722,13 @@ describe('General', () => {
 
       await saveDocAndAssert(page)
 
-      await page.goto(formatAdminURL({ adminRoute: adminRoutes.routes.admin, path: protectedCustomNestedViewPath, serverURL }))
+      await page.goto(
+        formatAdminURL({
+          adminRoute: adminRoutes.routes.admin,
+          path: protectedCustomNestedViewPath,
+          serverURL,
+        }),
+      )
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
   })
@@ -748,7 +791,7 @@ describe('General', () => {
 
   describe('custom components', () => {
     test('should render custom header', async () => {
-      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '/', serverURL }))
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })
@@ -944,7 +987,7 @@ describe('General', () => {
 
   describe('preferences', () => {
     test('should successfully reset prefs after clicking reset button', async () => {
-      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+      await page.goto(formatAdminURL({ path: '/account', serverURL }))
       const resetPrefsButton = page.locator('.payload-settings > div > button.btn')
       await expect(resetPrefsButton).toBeVisible()
       await resetPrefsButton.click()

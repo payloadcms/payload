@@ -31,6 +31,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       formatApiURL({
         apiRoute: '/api',
         path: `/local-api`,
+        serverURL: this.serverURL,
       }),
       {
         method: 'post',
