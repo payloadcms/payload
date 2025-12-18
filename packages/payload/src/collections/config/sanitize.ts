@@ -16,6 +16,7 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -191,10 +192,20 @@ export const sanitizeCollection = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
 
-      if (config.localization && hasLocalizedFields) {
-        if (sanitized.versions.drafts.localizeStatus === undefined) {
+      if (config.localization) {
+        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
           sanitized.versions.drafts.localizeStatus = false
         }
+      }
+
+      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
+      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
+        sanitized.versions.drafts.localizeStatus = false
+        console.log(
+          miniChalk.yellowBold(
+            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
+          ),
+        )
       }
 
       if (sanitized.versions.drafts.autosave === true) {
