@@ -1,5 +1,11 @@
 import crypto from 'crypto'
-import { type PayloadHandler, UnauthorizedError, type Where } from 'payload'
+import {
+  type CollectionSlug,
+  type PayloadHandler,
+  type TypedUser,
+  UnauthorizedError,
+  type Where,
+} from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
@@ -57,6 +63,14 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
         payload.logger.info('[payload-mcp] API Key is valid')
       }
 
+      const user = docs[0]?.user as TypedUser
+      user.collection =
+        typeof pluginOptions.userCollection === 'string'
+          ? pluginOptions.userCollection
+          : (pluginOptions.userCollection?.slug as CollectionSlug) || ('users' as CollectionSlug)
+      user._strategy = 'mcp-api-key' as const
+
+      console.log(user)
       return docs[0] as unknown as MCPAccessSettings
     }
 
