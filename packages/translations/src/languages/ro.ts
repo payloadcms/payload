@@ -558,6 +558,8 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Sunteți pe cale să readuceți modificările aduse acestui document la starea sa publicată. Sunteți sigur?',
     aboutToUnpublish: 'Sunteți pe cale să nepublicați acest document. Sunteți sigur?',
+    aboutToUnpublishIn:
+      'Sunteți pe cale să anulați publicarea acestui document în {{locale}}. Sunteți sigur?',
     aboutToUnpublishSelection:
       'Sunteți pe punctul de a nepublica toate {{label}} din selecție. Sunteți sigur?',
     autosave: 'Autosalvare',
@@ -605,6 +607,7 @@ export const roTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurare...',
     reverting: 'Revenire...',
     revertToPublished: 'Reveniți la publicat',
+    revertUnsuccessful: 'Revenire eșuată. Nu s-a găsit nicio versiune publicată anterior.',
     saveDraft: 'Salvați proiectul',
     scheduledSuccessfully: 'Programat cu succes.',
     schedulePublish: 'Programare Publicare',
@@ -615,6 +618,9 @@ export const roTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versiunea specifică',
     status: 'Status',
     unpublish: 'Dezpublicare',
+    unpublished: 'Needitat',
+    unpublishedSuccessfully: 'Nepublicat cu succes.',
+    unpublishIn: 'Anulați publicarea în {{locale}}',
     unpublishing: 'Dezpublicare...',
     version: 'Versiune',
     versionAgo: '{{distance}} în urmă',

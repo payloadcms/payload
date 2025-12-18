@@ -553,6 +553,7 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       "Estàs a punt de revertir els canvis d'aquest document a l'estat publicat. Estàs segur?",
     aboutToUnpublish: 'Estàs a punt de despublicar aquest document. Estàs segur?',
+    aboutToUnpublishIn: "Estàs a punt de despublicar aquest document en {{locale}}. N'estàs segur?",
     aboutToUnpublishSelection:
       'Estàs a punt de despublicar tots els {{label}} de la selecció. Estàs segur?',
     autosave: 'Desa automàticament',
@@ -600,6 +601,7 @@ export const caTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurant...',
     reverting: 'Revertint...',
     revertToPublished: 'Revertir a publicat',
+    revertUnsuccessful: "No s'ha pogut revertir. No s'ha trobat cap versió publicada anteriorment.",
     saveDraft: 'Desar borrador',
     scheduledSuccessfully: 'Programat amb èxit.',
     schedulePublish: 'Programar publicació',
@@ -610,6 +612,9 @@ export const caTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versió Específica',
     status: 'Estat',
     unpublish: 'Despublicar',
+    unpublished: 'Inèdit',
+    unpublishedSuccessfully: 'Despublicat amb èxit.',
+    unpublishIn: 'Despublica a {{locale}}',
     unpublishing: 'Despublicant...',
     version: 'Versió',
     versionAgo: 'fa {{distance}}',

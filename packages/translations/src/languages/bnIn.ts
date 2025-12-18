@@ -553,6 +553,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'আপনি এই ডকুমেন্টের পরিবর্তনগুলি তার প্রকাশিত অবস্থায় ফিরিয়ে আনতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublish: 'আপনি এই ডকুমেন্টটি আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
+    aboutToUnpublishIn:
+      'আপনি এই দস্তাবেজটি {{locale}} থেকে প্রকাশনা বাতিল করার ব্যাপারে নিশ্চিত আছেন তো?',
     aboutToUnpublishSelection:
       'আপনি নির্বাচনে সমস্ত {{label}} আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     autosave: 'স্বয়ংক্রিয় সংরক্ষণ',
@@ -600,6 +602,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     restoring: 'পুনরুদ্ধার করা হচ্ছে...',
     reverting: 'পূর্বাবস্থায় ফেরানো হচ্ছে...',
     revertToPublished: 'প্রকাশিত সংস্করণে ফিরে যান',
+    revertUnsuccessful: 'পূর্বাবস্থায় ফেরাঁ অসফল। কোনো পূর্বে প্রকাশিত সংস্করণ পাওয়া যায়নি।',
     saveDraft: 'খসড়া সংরক্ষণ করুন',
     scheduledSuccessfully: 'সফলভাবে নির্ধারিত হয়েছে।',
     schedulePublish: 'প্রকাশের সময়সূচী নির্ধারণ করুন',
@@ -610,6 +613,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     specificVersion: 'নির্দিষ্ট সংস্করণ',
     status: 'স্থিতি',
     unpublish: 'প্রকাশ বাতিল করুন',
+    unpublished: 'অপ্রকাশিত',
+    unpublishedSuccessfully: 'সফলভাবে অপ্রকাশিত হয়েছে।',
+    unpublishIn: '{{locale}} এ অপ্রকাশ্য করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',
     version: 'সংস্করণ',
     versionAgo: '{{distance}} পূর্বে',

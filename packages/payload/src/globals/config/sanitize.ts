@@ -118,9 +118,9 @@ export const sanitizeGlobal = async (
       const hasLocalizedFields = traverseForLocalizedFields(global.fields)
 
       if (config.localization && hasLocalizedFields) {
-        global.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
-      } else {
-        global.versions.drafts.localizeStatus = false
+        if (global.versions.drafts.localizeStatus === undefined) {
+          global.versions.drafts.localizeStatus = false
+        }
       }
 
       if (global.versions.drafts.autosave === true) {
@@ -136,7 +136,7 @@ export const sanitizeGlobal = async (
       global.fields = mergeBaseFields(
         global.fields,
         baseVersionFields({
-          localized: global.versions.drafts.localizeStatus,
+          localized: global.versions.drafts.localizeStatus ?? false,
         }),
       )
     }

@@ -67,6 +67,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     depth: 0,
     globalSlug,
     limit: limitToUse,
+    locale: req.locale,
     overrideAccess: false,
     page: page ? parseInt(page.toString(), 10) : undefined,
     parentID: id,
@@ -86,15 +87,25 @@ export async function VersionsView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,
           select: {
             id: true,
             updatedAt: true,
+            version: {
+              _status: true,
+              updatedAt: true,
+            },
           },
           status: 'published',
           user,
+          where: {
+            snapshot: {
+              not_equals: true,
+            },
+          },
         })
       : Promise.resolve(null),
     draftsEnabled
@@ -102,15 +113,25 @@ export async function VersionsView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,
           select: {
             id: true,
             updatedAt: true,
+            version: {
+              _status: true,
+              updatedAt: true,
+            },
           },
           status: 'draft',
           user,
+          where: {
+            snapshot: {
+              not_equals: true,
+            },
+          },
         })
       : Promise.resolve(null),
   ])

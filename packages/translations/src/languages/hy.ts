@@ -557,6 +557,8 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստվում եք հետ բերել այս փաստաթղթի փոփոխությունները դեպի իր հրապարակված վիճակին։ Համոզվա՞ծ եք։',
     aboutToUnpublish:
       'Դուք պատրաստվում եք այս փաստաթուղթը բերել չհրապարակված վիճակի։ Համոզվա՞ծ եք։',
+    aboutToUnpublishIn:
+      'Դուք պատրաստվում եք այս փաստաթուղթը {{locale}} լեզվով չհրատապել։ Համոզված եք։',
     aboutToUnpublishSelection:
       'Դուք պատրաստվում եք ընտրության մեջ գտնվող բոլոր {{label}}-ները բերել չհրապարակված վիճակի։ Համոզվա՞ծ եք։',
     autosave: 'Ինքնապահպանում',
@@ -604,6 +606,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     restoring: 'Վերականգնվում է...',
     reverting: 'Հետ է բերվում...',
     revertToPublished: 'Հետ բերել հրապարակված վիճակին',
+    revertUnsuccessful: 'Վերացումը չհաջողվել: Նախկինում հրապարակված տարբերակներ չեն հայտնաբերվել:',
     saveDraft: 'Պահպանել սևագիրը',
     scheduledSuccessfully: 'Հաջողությամբ պլանավորված։',
     schedulePublish: 'Պլանավորել հրապարակումը',
@@ -614,6 +617,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     specificVersion: 'Մասնավոր Տարբերակ',
     status: 'Կարգավիճակ',
     unpublish: 'Բերել չհրապարակված վիճակի։',
+    unpublished: 'Չհրատարակված',
+    unpublishedSuccessfully: 'Չհրատարակվել է հաջողությամբ:',
+    unpublishIn: 'Արգելարարել {{locale}} լեզվով',
     unpublishing: 'Բերվում է չհրապարակված վիճակի...',
     version: 'Տարբերակ',
     versionAgo: '{{distance}} առաջ',

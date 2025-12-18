@@ -551,6 +551,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Вы собираетесь вернуть изменения этого документа к его опубликованному состоянию. Вы уверены?',
     aboutToUnpublish: 'Вы собираетесь отменить публикацию этого документа. Вы уверены?',
+    aboutToUnpublishIn:
+      'Вы собираетесь снять с публикации этот документ на {{locale}}. Вы уверены?',
     aboutToUnpublishSelection:
       'Вы собираетесь отменить публикацию всех выбранных {{label}}. Вы уверены?',
     autosave: 'Автосохранение',
@@ -598,6 +600,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     restoring: 'Восстановление...',
     reverting: 'Возврат...',
     revertToPublished: 'Вернуться к опубликованному',
+    revertUnsuccessful: 'Откат не удался. Ранее опубликованная версия не найдена.',
     saveDraft: 'Сохранить черновик',
     scheduledSuccessfully: 'Успешно запланировано.',
     schedulePublish: 'Планирование публикации',
@@ -608,6 +611,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     specificVersion: 'Конкретная версия',
     status: 'Статус',
     unpublish: 'Отменить публикацию',
+    unpublished: 'Неопубликованный',
+    unpublishedSuccessfully: 'Успешно снято с публикации.',
+    unpublishIn: 'Отменить публикацию на {{locale}}',
     unpublishing: 'Отмена публикации...',
     version: 'Версия',
     versionAgo: '{{distance}} назад',

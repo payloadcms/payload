@@ -38,7 +38,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: localeCode } = useLocale()
   const { isModalOpen, toggleModal } = useModal()
 
   const drawerSlug = `schedule-publish-${id}`
@@ -50,6 +49,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   } = config
 
   const { t } = useTranslation()
+  const { code: localeCode } = useLocale()
   const label = labelProp || t('version:publishChanges')
 
   const entityConfig = React.useMemo(() => {
@@ -99,19 +99,28 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       return
     }
 
-    const search = `?locale=${localeCode}&depth=0&fallback-locale=null&draft=true`
+    const params = qs.stringify(
+      {
+        depth: 0,
+        draft: true,
+        'fallback-locale': 'null',
+        locale: localeCode,
+      },
+      { addQueryPrefix: true },
+    )
+
     let action
     let method = 'POST'
 
     if (collectionSlug) {
-      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
+      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${params}`
       if (id) {
         method = 'PATCH'
       }
     }
 
     if (globalSlug) {
-      action = `${serverURL}${api}/globals/${globalSlug}${search}`
+      action = `${serverURL}${api}/globals/${globalSlug}${params}`
     }
 
     await submit({
@@ -122,7 +131,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, disabled])
+  }, [disabled, localeCode, collectionSlug, globalSlug, submit, serverURL, api, id])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -138,7 +147,21 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       return
     }
 
+    const params = qs.stringify(
+      {
+        depth: 0,
+        locale: localeCode,
+        publishAllLocales: true,
+      },
+      { addQueryPrefix: true },
+    )
+
+    const action = `${serverURL}${api}${
+      globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
+    }${params}`
+
     const result = await submit({
+      action,
       overrides: {
         _status: 'published',
       },
@@ -150,6 +173,12 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       setHasPublishedDoc(true)
     }
   }, [
+    localeCode,
+    api,
+    collectionSlug,
+    globalSlug,
+    id,
+    serverURL,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
@@ -163,14 +192,18 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         return
       }
 
-      const params = qs.stringify({
-        depth: 0,
-        publishSpecificLocale: locale,
-      })
+      const params = qs.stringify(
+        {
+          depth: 0,
+          locale,
+          publishSpecificLocale: locale,
+        },
+        { addQueryPrefix: true },
+      )
 
       const action = `${serverURL}${api}${
         globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
-      }${params ? '?' + params : ''}`
+      }${params}`
 
       const result = await submit({
         action,

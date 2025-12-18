@@ -45,7 +45,6 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   if (hasLocalizeStatusEnabled(entity)) {
     if (locale === 'all') {
-      // TODO: update our drizzle logic to support this type of query
       queryToBuild = {
         and: [
           {
