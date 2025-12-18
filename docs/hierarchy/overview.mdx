@@ -1,0 +1,560 @@
+---
+title: Hierarchy
+label: Overview
+order: 10
+desc: Add hierarchical tree structure to any collection with automatic path generation and efficient querying.
+keywords: hierarchy, tree structure, nested documents, breadcrumbs, parent-child
+---
+
+The Hierarchy feature provides automatic tree structure management for any Payload collection. When enabled, it maintains parent-child relationships, generates breadcrumb paths, and enables efficient descendant queries.
+
+**Use it for:** Nested pages, categories, organizational structures, folder systems, or any hierarchical data.
+
+<Banner type="success">
+  Hierarchy is a collection-level feature that automatically adds internal
+  fields and hooks to manage tree structure without requiring custom code.
+</Banner>
+
+## Quick Start
+
+Enable hierarchy on any collection by adding the `hierarchy` property:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  // highlight-start
+  hierarchy: {
+    parentFieldName: 'parent',
+  },
+  // highlight-end
+}
+```
+
+This automatically:
+
+- Creates a `parent` relationship field (if it doesn't exist)
+- Adds internal `_h_parentTree`, `_h_depth`, `_h_slugPath`, and `_h_titlePath` fields
+- Sets up hooks to maintain tree integrity
+- Generates breadcrumb paths based on `admin.useAsTitle`
+
+## Auto-Generated Fields
+
+When hierarchy is enabled, four internal fields are automatically added to your collection:
+
+### `_h_parentTree`
+
+**Type:** Array of IDs
+**Purpose:** Stores the complete ancestor chain
+**Indexed:** Yes
+
+```ts
+{
+  id: 'doc-c',
+  title: 'Current Document',
+  parent: 'doc-b',
+  _h_parentTree: ['doc-a', 'doc-b'],  // Grandparent, Parent
+}
+```
+
+**Use for queries:**
+
+```ts
+// Find all descendants of doc-b
+await payload.find({
+  collection: 'pages',
+  where: {
+    _h_parentTree: { in: ['doc-b'] },
+  },
+})
+```
+
+### `_h_depth`
+
+**Type:** Number
+**Purpose:** Stores the depth/level in the tree (0-indexed from root)
+**Indexed:** Yes
+
+```ts
+{
+  _h_depth: 0,  // Root level
+  _h_depth: 1,  // First level
+  _h_depth: 2,  // Second level
+}
+```
+
+**Use for queries:**
+
+```ts
+// Get all root documents
+await payload.find({
+  collection: 'pages',
+  where: {
+    _h_depth: { equals: 0 },
+  },
+})
+
+// Get documents up to 2 levels deep
+await payload.find({
+  collection: 'pages',
+  where: {
+    _h_depth: { less_than_equal: 2 },
+  },
+})
+```
+
+### `_h_slugPath`
+
+**Type:** String or Localized Object
+**Purpose:** Slugified breadcrumb path for URLs and search
+**Indexed:** Yes
+**Read-only:** Yes
+**Added when:** `generatePaths: true` (default)
+
+```ts
+{
+  _h_slugPath: 'grandparent/parent/current',
+  // or localized:
+  _h_slugPath: {
+    en: 'store/products/widgets',
+    fr: 'magasin/produits/widgets'
+  }
+}
+```
+
+**Use for URLs:**
+
+```ts
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+})
+
+// Use in your frontend routing
+const url = `/${page._h_slugPath}` // "/store/products/widgets"
+```
+
+### `_h_titlePath`
+
+**Type:** String or Localized Object
+**Purpose:** Human-readable breadcrumb path for display
+**Indexed:** Yes
+**Read-only:** Yes
+**Added when:** `generatePaths: true` (default)
+
+```ts
+{
+  _h_titlePath: 'Grandparent/Parent/Current',
+  // or localized:
+  _h_titlePath: {
+    en: 'Store/Products/Widgets',
+    fr: 'Magasin/Produits/Widgets'
+  }
+}
+```
+
+**Use for breadcrumbs:**
+
+```tsx
+const breadcrumbs = page._h_titlePath.split('/')
+// ['Store', 'Products', 'Widgets']
+```
+
+## Configuration
+
+### Basic Configuration
+
+Enable with defaults (parent field auto-created):
+
+```ts
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',  // Field will be auto-created
+  }
+}
+```
+
+### With Custom Parent Field
+
+Define the parent field yourself for custom validation or UI:
+
+```ts
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'parentPage',
+      type: 'relationship',
+      relationTo: 'pages',  // Must be self-referential
+      hasMany: false,       // Must be single relationship
+      admin: {
+        description: 'Select a parent page',
+        position: 'sidebar',
+      },
+      validate: (value, { id }) => {
+        if (value === id) {
+          return 'Document cannot be its own parent'
+        }
+        return true
+      },
+    },
+    {
+      name: 'title',
+      type: 'text',
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parentPage',  // References your custom field
+  }
+}
+```
+
+<Banner type="warning">
+  **Important:** If you define the parent field manually, it must be: - `type:
+  'relationship'` - `relationTo: current-collection-slug` (self-referential) -
+  `hasMany: false`
+</Banner>
+
+### With Custom Options
+
+```ts
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+
+    // Optional: Custom slugify function
+    slugify: (text) => {
+      return text.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+    },
+
+    // Optional: Custom field names
+    slugPathFieldName: '_breadcrumbPath',
+    titlePathFieldName: '_breadcrumbTitle',
+  }
+}
+```
+
+### Without Path Generation
+
+If you only need tree structure for queries (without breadcrumb paths):
+
+```ts
+{
+  slug: 'categories',
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    generatePaths: false,  // Skip path generation
+  }
+}
+```
+
+**What you get:**
+
+- ✅ `parent` field (auto-created)
+- ✅ `_h_parentTree` field (for descendant queries)
+- ✅ `_h_depth` field (for level tracking)
+- ❌ `_h_slugPath` and `_h_titlePath` fields (skipped)
+
+**Benefits:**
+
+- Faster operations (no path computation)
+- No dependency on `useAsTitle` field
+- Simpler data model when URLs/breadcrumbs aren't needed
+
+## Config Options
+
+| Option               | Type       | Required | Description                                                                                   |
+| -------------------- | ---------- | -------- | --------------------------------------------------------------------------------------------- |
+| `parentFieldName`    | `string`   | Yes      | Name of the parent relationship field. Will be auto-created if it doesn't exist.              |
+| `generatePaths`      | `boolean`  | No       | Whether to generate path fields (`_h_slugPath` and `_h_titlePath`). Default: `true`           |
+| `slugify`            | `function` | No       | Custom function to slugify text for path generation. Only used when `generatePaths: true`     |
+| `slugPathFieldName`  | `string`   | No       | Name for slugified path field. Default: `'_h_slugPath'`. Only used when `generatePaths: true` |
+| `titlePathFieldName` | `string`   | No       | Name for title path field. Default: `'_h_titlePath'`. Only used when `generatePaths: true`    |
+
+## Use Cases
+
+### Nested Pages
+
+```ts
+{
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'content',
+      type: 'richText',
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+  }
+}
+```
+
+### Nested Categories
+
+```ts
+{
+  slug: 'categories',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parentCategory',
+  }
+}
+```
+
+### Organizational Structure
+
+```ts
+{
+  slug: 'departments',
+  admin: {
+    useAsTitle: 'deptName',
+  },
+  fields: [
+    {
+      name: 'deptName',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parentDept',
+    slugPathFieldName: '_orgPath',
+    titlePathFieldName: '_orgBreadcrumb',
+  }
+}
+```
+
+## Localization Support
+
+If the title field (from `admin.useAsTitle`) is localized, path fields are automatically localized:
+
+```ts
+{
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      localized: true,  // Enables localized paths
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+  }
+}
+```
+
+**Result:**
+
+```ts
+{
+  title: {
+    en: 'Products',
+    fr: 'Produits',
+  },
+  _h_slugPath: {
+    en: 'store/products',
+    fr: 'magasin/produits',
+  },
+  _h_titlePath: {
+    en: 'Store/Products',
+    fr: 'Magasin/Produits',
+  }
+}
+```
+
+## How It Works
+
+### Automatic Tree Maintenance
+
+When a document's parent or title changes, hierarchy automatically:
+
+1. Recalculates tree data for the document
+2. Updates all descendants recursively
+3. Regenerates all path fields for consistency
+4. Processes descendants in batches of 100 (handles unlimited depth)
+
+**Example:**
+
+```ts
+// Move "Page C" from under "Page A" to under "Page B"
+await payload.update({
+  collection: 'pages',
+  id: 'page-c',
+  data: { parent: 'page-b' }, // Changed from page-a
+})
+
+// Automatically updates:
+// - page-c's _h_parentTree: ['page-a'] → ['page-b']
+// - All descendants of page-c get new tree paths
+```
+
+### Performance Optimizations
+
+**Title-Only Change Optimization:**
+When only the title changes (parent unchanged), hierarchy derives the parent's path without fetching from the database—50% faster.
+
+**Batch Processing:**
+Descendants are processed in batches of 100, handling unlimited tree depths without memory issues.
+
+**Direct Database Updates:**
+Descendant updates use `db.updateOne()` directly for performance. Trade-off: Descendants don't trigger `afterChange` hooks during cascade updates.
+
+## Limitations
+
+### 1. Locale 'all' Not Supported
+
+Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
+
+### 2. Descendant Hooks Not Triggered
+
+When a parent moves or changes title, descendants are updated directly without triggering their `afterChange` hooks (for performance).
+
+### 3. No Built-in Circular Reference Prevention
+
+Add validation to your parent field to prevent circular references:
+
+```ts
+{
+  name: 'parent',
+  type: 'relationship',
+  relationTo: 'pages',
+  validate: async (value, { id }) => {
+    if (value === id) {
+      return 'Document cannot be its own parent'
+    }
+    return true
+  }
+}
+```
+
+## Best Practices
+
+### Use Consistent Title Fields
+
+Ensure your `admin.useAsTitle` field is stable and always has a value:
+
+```ts
+{
+  admin: {
+    useAsTitle: 'title',  // ✅ Clear, user-facing field
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,  // ✅ Always has a value
+    }
+  ]
+}
+```
+
+**Avoid:** Fields that can be empty, computed fields, or fields nested in named groups/tabs.
+
+### Plan for Migrations
+
+If adding hierarchy to an existing collection, regenerate all paths:
+
+```ts
+const docs = await payload.find({
+  collection: 'pages',
+  limit: 1000,
+})
+
+for (const doc of docs.docs) {
+  await payload.update({
+    collection: 'pages',
+    id: doc.id,
+    data: { parent: doc.parent }, // Trigger hierarchy recalculation
+  })
+}
+```
+
+### Consider Performance at Scale
+
+For collections with many documents:
+
+- Limit tree depth in your UI (e.g., max 5 levels)
+- Use `generatePaths: false` if you only need parent tree structure
+- Consider background jobs for large tree reorganizations
+
+## TypeScript
+
+The hierarchy fields are automatically included in your generated types:
+
+```ts
+import type { Page } from './payload-types'
+
+const page: Page = {
+  id: 'page-id',
+  title: 'My Page',
+  parent: 'parent-id',
+  _h_parentTree: ['grandparent-id', 'parent-id'],
+  _h_depth: 2,
+  _h_slugPath: 'grandparent/parent/my-page',
+  _h_titlePath: 'Grandparent/Parent/My Page',
+}
+```
+
+If types aren't generated, regenerate them:
+
+```bash
+payload generate:types
+```
