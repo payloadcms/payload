@@ -23,12 +23,12 @@ import type {
   PluginImportExportTranslationKeys,
   PluginImportExportTranslations,
 } from '../../translations/index.js'
+import type { ImportPreviewResponse } from '../../types.js'
 
+import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
 import './index.scss'
 
 const baseClass = 'import-preview'
-const DEFAULT_PREVIEW_LIMIT = 10
-const PREVIEW_LIMIT_OPTIONS = [10, 25, 50]
 
 export const ImportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -163,15 +163,7 @@ export const ImportPreview: React.FC = () => {
             page: responsePage,
             totalDocs: serverTotalDocs,
             totalPages,
-          }: {
-            docs: Record<string, unknown>[]
-            hasNextPage: boolean
-            hasPrevPage: boolean
-            limit: number
-            page: number
-            totalDocs: number
-            totalPages: number
-          } = await res.json()
+          }: ImportPreviewResponse = await res.json()
 
           setTotalDocs(serverTotalDocs)
           setPaginationData({
@@ -612,6 +604,18 @@ export const ImportPreview: React.FC = () => {
               totalPages={paginationData.totalPages}
             />
           )}
+          <span className={`${baseClass}__page-info`}>
+            <Translation
+              // @ts-expect-error - plugin translations not typed
+              i18nKey="plugin-import-export:previewPageInfo"
+              t={t}
+              variables={{
+                end: Math.min((paginationData.page ?? 1) * previewLimit, totalDocs),
+                start: ((paginationData.page ?? 1) - 1) * previewLimit + 1,
+                total: totalDocs,
+              }}
+            />
+          </span>
           <PerPage
             handleChange={handlePerPageChange}
             limit={previewLimit}

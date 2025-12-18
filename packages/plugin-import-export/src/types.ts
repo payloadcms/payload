@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug, UploadConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 /**
  * Type for overriding import/export collection configurations
@@ -175,3 +175,61 @@ export type FromCSVFunction = (args: {
    */
   value: unknown
 }) => unknown
+
+/**
+ * Base pagination data returned from preview endpoints
+ */
+export type PreviewPaginationData = {
+  /**
+   * Whether there is a next page available
+   */
+  hasNextPage: boolean
+  /**
+   * Whether there is a previous page available
+   */
+  hasPrevPage: boolean
+  /**
+   * Number of documents per page
+   */
+  limit: number
+  /**
+   * Current page number (1-indexed)
+   */
+  page: number
+  /**
+   * Total number of documents
+   */
+  totalDocs: number
+  /**
+   * Total number of pages
+   */
+  totalPages: number
+}
+
+/**
+ * Response from export preview endpoint
+ */
+export type ExportPreviewResponse = {
+  /**
+   * Column names for CSV format (undefined for JSON)
+   */
+  columns?: string[]
+  /**
+   * Preview documents (transformed for display)
+   */
+  docs: Record<string, unknown>[]
+  /**
+   * Actual count of docs that will be exported (respects export limit)
+   */
+  exportTotalDocs: number
+} & PreviewPaginationData
+
+/**
+ * Response from import preview endpoint
+ */
+export type ImportPreviewResponse = {
+  /**
+   * Preview documents parsed from the import file
+   */
+  docs: Record<string, unknown>[]
+} & PreviewPaginationData

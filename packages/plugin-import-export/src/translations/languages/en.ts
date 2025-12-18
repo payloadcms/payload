@@ -32,6 +32,7 @@ export const enTranslations = {
     matchBy: 'Match by',
     mode: 'Mode',
     noDataToPreview: 'No data to preview',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Use all documents',
     'selectionToUse-currentFilters': 'Use current filters',
     'selectionToUse-currentSelection': 'Use current selection',

@@ -2,6 +2,14 @@ import type { FlattenedField, PayloadRequest, Where } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
+import type { ExportPreviewResponse } from '../types.js'
+
+import {
+  DEFAULT_PREVIEW_LIMIT,
+  MAX_PREVIEW_LIMIT,
+  MIN_PREVIEW_LIMIT,
+  MIN_PREVIEW_PAGE,
+} from '../constants.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
@@ -11,9 +19,7 @@ import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 
-const DEFAULT_PREVIEW_LIMIT = 10
-
-export const handlePreview = async (req: PayloadRequest) => {
+export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   await addDataAndFileToRequest(req)
 
   const {
@@ -22,8 +28,8 @@ export const handlePreview = async (req: PayloadRequest) => {
     fields,
     limit: exportLimit,
     locale,
-    previewLimit = DEFAULT_PREVIEW_LIMIT,
-    previewPage = 1,
+    previewLimit: rawPreviewLimit = DEFAULT_PREVIEW_LIMIT,
+    previewPage: rawPreviewPage = 1,
     sort,
     where: whereFromReq = {},
   } = req.data as {
@@ -38,6 +44,10 @@ export const handlePreview = async (req: PayloadRequest) => {
     sort?: any
     where?: any
   }
+
+  // Validate and clamp pagination values to safe bounds
+  const previewLimit = Math.max(MIN_PREVIEW_LIMIT, Math.min(rawPreviewLimit, MAX_PREVIEW_LIMIT))
+  const previewPage = Math.max(MIN_PREVIEW_PAGE, rawPreviewPage)
 
   const targetCollection = req.payload.collections[collectionSlug]
   if (!targetCollection) {
@@ -77,12 +87,35 @@ export const handlePreview = async (req: PayloadRequest) => {
   const previewStartIndex = (previewPage - 1) * previewLimit
 
   // Calculate pagination info based on export limit (not raw DB results)
-  const previewTotalPages = Math.ceil(exportTotalDocs / previewLimit)
+  const previewTotalPages = exportTotalDocs === 0 ? 0 : Math.ceil(exportTotalDocs / previewLimit)
 
-  // If we're beyond the export limit, return empty
+  const isCSV = req?.data?.format === 'csv'
+
+  // Get locale codes for locale expansion when locale='all'
+  const localeCodes =
+    locale === 'all' && req.payload.config.localization
+      ? req.payload.config.localization.localeCodes
+      : undefined
+
+  // Get disabled fields configuration
+  const disabledFields =
+    targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+  // Always compute columns for CSV (even if no docs) for consistent schema
+  const columns = isCSV
+    ? getSchemaColumns({
+        collectionConfig: targetCollection.config,
+        disabledFields,
+        fields,
+        locale: locale ?? undefined,
+        localeCodes,
+      })
+    : undefined
+
+  // If we're beyond the export limit, return empty docs with columns
   if (exportLimit && exportLimit > 0 && previewStartIndex >= exportLimit) {
-    return Response.json({
-      columns: [],
+    const response: ExportPreviewResponse = {
+      columns,
       docs: [],
       exportTotalDocs,
       hasNextPage: false,
@@ -91,7 +124,8 @@ export const handlePreview = async (req: PayloadRequest) => {
       page: previewPage,
       totalDocs: exportTotalDocs,
       totalPages: previewTotalPages,
-    })
+    }
+    return Response.json(response)
   }
 
   // Fetch preview page with full previewLimit to maintain consistent pagination offsets
@@ -119,33 +153,12 @@ export const handlePreview = async (req: PayloadRequest) => {
     }
   }
 
-  const isCSV = req?.data?.format === 'csv'
-
-  let transformed: Record<string, unknown>[] = []
-  let columns: string[] = []
+  // Transform docs based on format
+  let transformed: Record<string, unknown>[]
 
   if (isCSV) {
     const toCSVFunctions = getExportFieldFunctions({
       fields: targetCollection.config.fields as FlattenedField[],
-    })
-
-    // Get locale codes for locale expansion when locale='all'
-    const localeCodes =
-      locale === 'all' && req.payload.config.localization
-        ? req.payload.config.localization.localeCodes
-        : undefined
-
-    // Get disabled fields configuration
-    const disabledFields =
-      targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
-
-    // Use getSchemaColumns for consistent ordering with actual export
-    columns = getSchemaColumns({
-      collectionConfig: targetCollection.config,
-      disabledFields,
-      fields,
-      locale: locale ?? undefined,
-      localeCodes,
     })
 
     const possibleKeys = getFlattenedFieldKeys(
@@ -170,9 +183,6 @@ export const handlePreview = async (req: PayloadRequest) => {
       return row
     })
   } else {
-    const disabledFields =
-      targetCollection.config.admin.custom?.['plugin-import-export']?.disabledFields
-
     transformed = docs.map((doc) => {
       let output: Record<string, unknown> = { ...doc }
 
@@ -198,17 +208,17 @@ export const handlePreview = async (req: PayloadRequest) => {
   const hasNextPage = previewPage < previewTotalPages
   const hasPrevPage = previewPage > 1
 
-  return Response.json({
-    columns: isCSV ? columns : undefined,
+  const response: ExportPreviewResponse = {
+    columns,
     docs: transformed,
-    // Export count - actual number of docs that will be exported
     exportTotalDocs,
-    // Preview pagination info (based on exportTotalDocs, not raw DB count)
     hasNextPage,
     hasPrevPage,
     limit: previewLimit,
     page: previewPage,
     totalDocs: exportTotalDocs,
     totalPages: previewTotalPages,
-  })
+  }
+
+  return Response.json(response)
 }

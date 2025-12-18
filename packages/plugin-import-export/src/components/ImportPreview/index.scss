@@ -31,5 +31,11 @@
         margin-left: auto;
       }
     }
+
+    &__page-info {
+      font-size: var(--font-size-small);
+      color: var(--theme-elevation-500);
+      white-space: nowrap;
+    }
   }
 }

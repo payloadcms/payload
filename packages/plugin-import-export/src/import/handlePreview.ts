@@ -2,23 +2,29 @@ import type { PayloadRequest } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
+import type { ImportPreviewResponse } from '../types.js'
+
+import {
+  DEFAULT_PREVIEW_LIMIT,
+  MAX_PREVIEW_LIMIT,
+  MIN_PREVIEW_LIMIT,
+  MIN_PREVIEW_PAGE,
+} from '../constants.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { unflattenObject } from '../utilities/unflattenObject.js'
 
-const DEFAULT_PREVIEW_LIMIT = 10
-
-export const handlePreview = async (req: PayloadRequest) => {
+export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   await addDataAndFileToRequest(req)
 
   const {
     collectionSlug,
     fileData,
     format,
-    previewLimit = DEFAULT_PREVIEW_LIMIT,
-    previewPage = 1,
+    previewLimit: rawPreviewLimit = DEFAULT_PREVIEW_LIMIT,
+    previewPage: rawPreviewPage = 1,
   } = req.data as {
     collectionSlug: string
     fileData?: string
@@ -26,6 +32,10 @@ export const handlePreview = async (req: PayloadRequest) => {
     previewLimit?: number
     previewPage?: number
   }
+
+  // Validate and clamp pagination values to safe bounds
+  const previewLimit = Math.max(MIN_PREVIEW_LIMIT, Math.min(rawPreviewLimit, MAX_PREVIEW_LIMIT))
+  const previewPage = Math.max(MIN_PREVIEW_PAGE, rawPreviewPage)
 
   const targetCollection = req.payload.collections[collectionSlug]
   if (!targetCollection) {
@@ -78,7 +88,7 @@ export const handlePreview = async (req: PayloadRequest) => {
 
     // Calculate pagination
     const totalDocs = parsedData.length
-    const totalPages = Math.ceil(totalDocs / previewLimit)
+    const totalPages = totalDocs === 0 ? 0 : Math.ceil(totalDocs / previewLimit)
     const startIndex = (previewPage - 1) * previewLimit
     const endIndex = startIndex + previewLimit
     const paginatedDocs = parsedData.slice(startIndex, endIndex)
@@ -86,7 +96,7 @@ export const handlePreview = async (req: PayloadRequest) => {
     const hasNextPage = previewPage < totalPages
     const hasPrevPage = previewPage > 1
 
-    return Response.json({
+    const response: ImportPreviewResponse = {
       docs: paginatedDocs,
       hasNextPage,
       hasPrevPage,
@@ -94,7 +104,9 @@ export const handlePreview = async (req: PayloadRequest) => {
       page: previewPage,
       totalDocs,
       totalPages,
-    })
+    }
+
+    return Response.json(response)
   } catch (error) {
     req.payload.logger.error({ err: error, msg: 'Error parsing import preview data' })
     return Response.json({ error: 'Failed to parse file data' }, { status: 500 })

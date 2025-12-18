@@ -29,6 +29,7 @@ export type PluginLanguage = Language<{
     'field-status-label': string
     'field-summary-label': string
     importDocumentLabel: string
+    previewPageInfo: string
     'selectionToUse-allDocuments': string
     'selectionToUse-currentFilters': string
     'selectionToUse-currentSelection': string

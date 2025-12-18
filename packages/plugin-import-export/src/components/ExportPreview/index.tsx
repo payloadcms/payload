@@ -15,20 +15,19 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import React, { useEffect, useRef, useState, useTransition } from 'react'
 
 import type {
   PluginImportExportTranslationKeys,
   PluginImportExportTranslations,
 } from '../../translations/index.js'
+import type { ExportPreviewResponse } from '../../types.js'
 
-import { buildDisabledFieldRegex } from '../../utilities/buildDisabledFieldRegex.js'
+import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
 import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'export-preview'
-const DEFAULT_PREVIEW_LIMIT = 10
-const PREVIEW_LIMIT_OPTIONS = [10, 25, 50]
 
 export const ExportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -87,18 +86,6 @@ export const ExportPreview: React.FC = () => {
 
   const targetCollectionSlug = typeof collection === 'string' && collection
 
-  const targetCollectionConfig = useMemo(
-    () => config.collections.find((collection) => collection.slug === targetCollectionSlug),
-    [config.collections, targetCollectionSlug],
-  )
-
-  const disabledFieldRegexes: RegExp[] = useMemo(() => {
-    const disabledFieldPaths =
-      targetCollectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
-
-    return disabledFieldPaths.map(buildDisabledFieldRegex)
-  }, [targetCollectionConfig])
-
   const isCSV = format === 'csv'
 
   useDebouncedEffect(
@@ -143,16 +130,7 @@ export const ExportPreview: React.FC = () => {
             limit: responseLimit,
             page: responsePage,
             totalPages,
-          }: {
-            columns?: string[]
-            docs: Record<string, unknown>[]
-            exportTotalDocs: number
-            hasNextPage: boolean
-            hasPrevPage: boolean
-            limit: number
-            page: number
-            totalPages: number
-          } = await res.json()
+          }: ExportPreviewResponse = await res.json()
 
           // For CSV: use server-provided columns (from getSchemaColumns) for consistent ordering
           // For JSON: derive keys from docs
@@ -214,7 +192,6 @@ export const ExportPreview: React.FC = () => {
     },
     [
       collectionSlug,
-      disabledFieldRegexes,
       draft,
       fields,
       format,
@@ -285,6 +262,18 @@ export const ExportPreview: React.FC = () => {
               totalPages={paginationData.totalPages}
             />
           )}
+          <span className={`${baseClass}__page-info`}>
+            <Translation
+              // @ts-expect-error - plugin translations not typed
+              i18nKey="plugin-import-export:previewPageInfo"
+              t={t}
+              variables={{
+                end: Math.min((paginationData.page ?? 1) * previewLimit, exportTotalDocs),
+                start: ((paginationData.page ?? 1) - 1) * previewLimit + 1,
+                total: exportTotalDocs,
+              }}
+            />
+          </span>
           <PerPage
             handleChange={handlePerPageChange}
             limit={previewLimit}
