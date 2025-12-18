@@ -49,13 +49,18 @@ export function generateTreePaths({
           treeData && typeof treeData?.parentTitlePath === 'object'
             ? treeData?.parentTitlePath?.[locale]
             : ''
-        let title = docWithLocales[titleFieldName]
+
+        let title = docWithLocales[titleFieldName]?.[locale]
+
         if (reqLocale !== locale && previousDocWithLocales?.[titleFieldName]?.[locale]) {
           title = previousDocWithLocales[titleFieldName][locale]
         }
 
-        acc.slugPath[locale] = `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(title)}`
-        acc.titlePath[locale] = `${titlePrefix ? `${titlePrefix}/` : ''}${title}`
+        if (title) {
+          acc.slugPath[locale] = `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(title)}`
+          acc.titlePath[locale] = `${titlePrefix ? `${titlePrefix}/` : ''}${title}`
+        }
+
         return acc
       },
       {

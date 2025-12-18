@@ -151,11 +151,16 @@ export const hierarchyCollectionAfterChange =
 
       // Update doc with new values
       if (generatePaths) {
+        // Ensure we have a valid locale for accessing localized fields
+        const safeLocale =
+          reqLocale ||
+          (req.payload.config.localization ? req.payload.config.localization.defaultLocale : 'en')
+
         const updatedSlugPath = isTitleLocalized
-          ? updatedDocWithLocales[slugPathFieldName][reqLocale!]
+          ? updatedDocWithLocales[slugPathFieldName][safeLocale]
           : updatedDocWithLocales[slugPathFieldName]
         const updatedTitlePath = isTitleLocalized
-          ? updatedDocWithLocales[titlePathFieldName][reqLocale!]
+          ? updatedDocWithLocales[titlePathFieldName][safeLocale]
           : updatedDocWithLocales[titlePathFieldName]
 
         if (updatedSlugPath) {
