@@ -489,7 +489,7 @@ describe('Versions', () => {
         // Important: assert that depth is 0 in this request
         formatApiURL({
           apiRoute: '/api',
-          path: `/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`,
+          path: `/autosave-posts/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
           serverURL,
         }),
         async () => {
