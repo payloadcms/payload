@@ -48,7 +48,7 @@ describe('Auth', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = formatApiURL({ apiRoute: '/api', path: '/', serverURL })
+    apiURL = formatApiURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
 
     context = await browser.newContext()
@@ -225,7 +225,7 @@ describe('Auth', () => {
         ).toHaveCount(1)
 
         // Inspect the page source (after authentication)
-        const dashboardPageRes = await page.goto(formatAdminURL({ path: '/', serverURL }))
+        const dashboardPageRes = await page.goto(formatAdminURL({ path: '', serverURL }))
         const dashboardPageSource = await dashboardPageRes?.text()
         expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })

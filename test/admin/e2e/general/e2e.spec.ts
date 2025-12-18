@@ -126,12 +126,12 @@ describe('General', () => {
   describe('metadata', () => {
     describe('root title and description', () => {
       test('should render custom page title suffix', async () => {
-        await page.goto(formatAdminURL({ path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '', serverURL }))
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
       test('should render custom meta description from root config', async () => {
-        await page.goto(formatAdminURL({ path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '', serverURL }))
         await expect(page.locator('meta[name="description"]')).toHaveAttribute(
           'content',
           /This is a custom meta description/,
@@ -162,7 +162,7 @@ describe('General', () => {
 
     describe('robots', () => {
       test('should apply default robots meta tag', async () => {
-        await page.goto(formatAdminURL({ path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '', serverURL }))
         await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
           'content',
           /noindex, nofollow/,
@@ -190,7 +190,7 @@ describe('General', () => {
 
     describe('og meta', () => {
       test('should render custom og:title from root config', async () => {
-        await page.goto(formatAdminURL({ path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '', serverURL }))
         await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
           'content',
           /This is a custom OG title/,
@@ -198,7 +198,7 @@ describe('General', () => {
       })
 
       test('should render custom og:description from root config', async () => {
-        await page.goto(formatAdminURL({ path: '/', serverURL }))
+        await page.goto(formatAdminURL({ path: '', serverURL }))
         await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
           'content',
           /This is a custom OG description/,
@@ -390,7 +390,7 @@ describe('General', () => {
       const globalsURL = formatAdminURL({ path: '/globals', serverURL })
       await page.goto(globalsURL)
       // Should redirect to dashboard
-      await expect.poll(() => page.url()).toBe(formatAdminURL({ path: '/', serverURL }))
+      await expect.poll(() => page.url()).toBe(formatAdminURL({ path: '', serverURL }))
     })
 
     /**
@@ -654,13 +654,13 @@ describe('General', () => {
 
   describe('custom providers', () => {
     test('should render custom providers', async () => {
-      await page.goto(formatAdminURL({ path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '', serverURL }))
       await expect(page.locator('.custom-provider')).toHaveCount(1)
       await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
     test('should render custom provider server components with props', async () => {
-      await page.goto(formatAdminURL({ path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '', serverURL }))
       await expect(page.locator('.custom-provider-server')).toHaveCount(1)
       await expect(page.locator('.custom-provider-server')).toContainText(
         'This is a custom provider with payload: true',
@@ -791,7 +791,7 @@ describe('General', () => {
 
   describe('custom components', () => {
     test('should render custom header', async () => {
-      await page.goto(formatAdminURL({ path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '', serverURL }))
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })

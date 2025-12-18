@@ -92,7 +92,7 @@ test.describe('Folders', () => {
 
   test.describe('Folder view actions', () => {
     test('should show Browse by Folder button', async () => {
-      await page.goto(formatAdminURL({ path: '/', serverURL }))
+      await page.goto(formatAdminURL({ path: '', serverURL }))
       const folderButton = page.locator('text=Browse by folder')
       await expect(folderButton).toBeVisible()
     })

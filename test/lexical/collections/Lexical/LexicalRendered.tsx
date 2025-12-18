@@ -62,17 +62,23 @@ export const LexicalRendered: React.FC = () => {
     },
   } = useConfig()
 
-  const [{ data }] = usePayloadAPI(formatApiURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }), {
-    initialParams: {
-      depth: 1,
+  const [{ data }] = usePayloadAPI(
+    formatApiURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }),
+    {
+      initialParams: {
+        depth: 1,
+      },
     },
-  })
+  )
 
-  const [{ data: unpopulatedData }] = usePayloadAPI(formatApiURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }), {
-    initialParams: {
-      depth: 0,
+  const [{ data: unpopulatedData }] = usePayloadAPI(
+    formatApiURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }),
+    {
+      initialParams: {
+        depth: 0,
+      },
     },
-  })
+  )
 
   const html: null | string = useMemo(() => {
     if (!data.lexicalWithBlocks) {
@@ -93,7 +99,7 @@ export const LexicalRendered: React.FC = () => {
         converters: htmlConvertersAsync,
         data: unpopulatedData.lexicalWithBlocks as SerializedEditorState,
         populate: getRestPopulateFn({
-          apiURL: formatApiURL({ apiRoute: api, path: '/', serverURL }),
+          apiURL: formatApiURL({ apiRoute: api, path: '', serverURL }),
         }),
       })
 

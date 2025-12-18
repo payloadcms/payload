@@ -69,7 +69,7 @@ export async function ensureCompilationIsDone({
 }): Promise<void> {
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
-  const adminURL = formatAdminURL({ adminRoute, path: '/', serverURL })
+  const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
   const maxAttempts = 50
   let attempt = 1
