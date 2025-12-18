@@ -192,9 +192,9 @@ export const sanitizeCollection = async (
       const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
 
       if (config.localization && hasLocalizedFields) {
-        sanitized.versions.drafts.localizeStatus ??= Boolean(config.experimental?.localizeStatus)
-      } else {
-        sanitized.versions.drafts.localizeStatus = false
+        if (sanitized.versions.drafts.localizeStatus === undefined) {
+          sanitized.versions.drafts.localizeStatus = false
+        }
       }
 
       if (sanitized.versions.drafts.autosave === true) {
@@ -210,7 +210,7 @@ export const sanitizeCollection = async (
       sanitized.fields = mergeBaseFields(
         sanitized.fields,
         baseVersionFields({
-          localized: sanitized.versions.drafts.localizeStatus,
+          localized: sanitized.versions.drafts.localizeStatus ?? false,
         }),
       )
     }
