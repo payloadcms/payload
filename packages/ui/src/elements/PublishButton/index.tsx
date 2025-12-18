@@ -39,6 +39,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
+  const { code: localeCode } = useLocale()
   const { isModalOpen, toggleModal } = useModal()
 
   const drawerSlug = `schedule-publish-${id}`
