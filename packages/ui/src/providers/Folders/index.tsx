@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, CollectionSlug, FolderSortKeys } from 'pay
 import type { FolderBreadcrumb, FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { extractID, formatAdminURL, formatApiURL, formatFolderOrDocumentItem } from 'payload/shared'
+import { extractID, formatAdminURL, formatFolderOrDocumentItem } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -693,7 +693,7 @@ export function FolderProvider({
           },
         )
         const req = await fetch(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: routes.api,
             path: `/${folderCollectionSlug}/${folderID}${queryParams}`,
           }),
@@ -728,7 +728,7 @@ export function FolderProvider({
           )
           try {
             await fetch(
-              formatApiURL({
+              formatAdminURL({
                 apiRoute: routes.api,
                 path: `/${collectionSlug}${queryParams}`,
               }),

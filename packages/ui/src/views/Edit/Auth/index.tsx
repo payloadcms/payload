@@ -2,7 +2,7 @@
 
 import type { SanitizedFieldPermissions } from 'payload'
 
-import { formatApiURL, getFieldPermissions } from 'payload/shared'
+import { formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -165,7 +165,7 @@ export const Auth: React.FC<Props> = (props) => {
   )
 
   const unlock = useCallback(async () => {
-    const url = formatApiURL({
+    const url = formatAdminURL({
       apiRoute: api,
       path: `/${collectionSlug}/unlock`,
     })

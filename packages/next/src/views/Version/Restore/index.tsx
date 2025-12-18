@@ -15,7 +15,7 @@ import {
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL, formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import './index.scss'
 
@@ -66,7 +66,7 @@ export const Restore: React.FC<Props> = ({
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   const handleRestore = useCallback(async () => {
-    let fetchURL = formatApiURL({
+    let fetchURL = formatAdminURL({
       apiRoute,
       path: '',
     })

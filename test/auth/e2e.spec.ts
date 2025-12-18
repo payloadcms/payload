@@ -6,7 +6,7 @@ import { login } from 'helpers/e2e/auth/login.js'
 import { logout } from 'helpers/e2e/auth/logout.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { formatAdminURL, formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -48,7 +48,7 @@ describe('Auth', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = formatApiURL({ apiRoute: '/api', path: '', serverURL })
+    apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
 
     context = await browser.newContext()
@@ -329,7 +329,7 @@ describe('Auth', () => {
         await openNav(page)
         await page
           .locator(
-            `.nav .nav__controls a[href="${formatAdminURL({ includeRelativeBasePath: true, path: '/logout' })}"]`,
+            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout' })}"]`,
           )
           .click()
 

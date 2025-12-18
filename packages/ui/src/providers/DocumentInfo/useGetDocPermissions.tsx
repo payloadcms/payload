@@ -1,6 +1,6 @@
 import type { Data, SanitizedDocumentPermissions, SanitizedPermissions } from 'payload'
 
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -50,7 +50,7 @@ export const useGetDocPermissions = ({
 
         if (docAccessPath) {
           const res = await fetch(
-            formatApiURL({
+            formatAdminURL({
               apiRoute: api,
               path: `${docAccessPath}${qs.stringify(params, { addQueryPrefix: true })}`,
             }),
@@ -71,7 +71,7 @@ export const useGetDocPermissions = ({
           const json: SanitizedDocumentPermissions = await res.json()
 
           const publishedAccessJSON = await fetch(
-            formatApiURL({
+            formatAdminURL({
               apiRoute: api,
               path: `${docAccessPath}${qs.stringify(params, { addQueryPrefix: true })}`,
             }),

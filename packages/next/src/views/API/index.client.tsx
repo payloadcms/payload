@@ -18,7 +18,7 @@ import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 
-import { formatApiURL, hasDraftsEnabled } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 
 import { LocaleSelector } from './LocaleSelector/index.js'
@@ -80,7 +80,7 @@ export const APIViewClient: React.FC = () => {
     trash: trashParam ? 'true' : 'false',
   }).toString()
 
-  const fetchURL = formatApiURL({
+  const fetchURL = formatAdminURL({
     apiRoute,
     path: `${docEndpoint}?${params}`,
   })

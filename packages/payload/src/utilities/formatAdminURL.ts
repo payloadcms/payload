@@ -7,50 +7,56 @@ import type { Config } from '../config/types.js'
  * 2. Prepend the `basePath` from your Next.js config, if specified
  * 3. Return relative or absolute URLs, as needed
  */
-export const formatAdminURL = (
-  args: {
-    adminRoute?: NonNullable<Config['routes']>['admin']
-    /**
-     * The subpath of your application, if specified.
-     * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
-     * @example '/docs'
-     */
-    basePath?: string
-    includeRelativeBasePath?: boolean
-    path?: '' | `/${string}` | null
-    /**
-     * Return a relative URL, e.g. ignore `serverURL`.
-     * Useful for route-matching, etc.
-     */
-    relative?: boolean
-  } & Pick<Config, 'serverURL'>,
-): string => {
+type BaseFormatURLArgs = {
+  /**
+   * The subpath of your application, if specified.
+   * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
+   * @example '/docs'
+   */
+  basePath?: string
+  includeBasePath?: boolean
+  path?: '' | `/${string}` | null
+  /**
+   * Return a relative URL, e.g. ignore `serverURL`.
+   * Useful for route-matching, etc.
+   */
+  relative?: boolean
+} & Pick<Config, 'serverURL'>
+
+type FormatURLArgs =
+  | ({
+      adminRoute: NonNullable<Config['routes']>['admin']
+      apiRoute?: never
+    } & BaseFormatURLArgs)
+  | ({
+      adminRoute?: never
+      apiRoute: NonNullable<Config['routes']>['api']
+    } & BaseFormatURLArgs)
+
+export const formatAdminURL = (args: FormatURLArgs): string => {
   const {
-    adminRoute = '/admin',
-    includeRelativeBasePath = false,
+    adminRoute,
+    apiRoute,
+    includeBasePath: includeBasePathArg = false,
     path = '',
     relative = false,
     serverURL,
   } = args
-
   const basePath = process.env.NEXT_BASE_PATH || args.basePath || ''
-
-  // Build the pathname from segments
-  const segments = [adminRoute && adminRoute !== '/' && adminRoute, path && path].filter(Boolean)
-
+  const routePath = adminRoute || apiRoute
+  const segments = [routePath && routePath !== '/' && routePath, path && path].filter(Boolean)
   const pathname = segments.join('') || '/'
+  const pathnameWithBase = (basePath + pathname).replace(/\/$/, '') || '/'
 
-  // Return relative URL if requested or no serverURL provided
+  const includeBasePath = includeBasePathArg ?? (adminRoute ? false : true)
+
   if (relative || !serverURL) {
-    if (includeRelativeBasePath && basePath) {
-      return (basePath + pathname).replace(/\/$/, '') || '/'
+    if (includeBasePath && basePath) {
+      return pathnameWithBase
     }
     return pathname
   }
 
-  // When serverURL is provided, prepend basePath and construct absolute URL
   const serverURLObj = new URL(serverURL)
-  const fullPath = (basePath + pathname).replace(/\/$/, '') || '/'
-
-  return new URL(fullPath, serverURLObj.origin).toString()
+  return new URL(pathnameWithBase, serverURLObj.origin).toString()
 }

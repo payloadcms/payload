@@ -4,7 +4,7 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatApiURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -105,7 +105,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     let method = 'POST'
 
     if (collectionSlug) {
-      action = formatApiURL({
+      action = formatAdminURL({
         apiRoute: api,
         path: `/${collectionSlug}${id ? `/${id}` : ''}${search}`,
       })
@@ -115,7 +115,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     }
 
     if (globalSlug) {
-      action = formatApiURL({
+      action = formatAdminURL({
         apiRoute: api,
         path: `/globals/${globalSlug}${search}`,
       })
@@ -178,7 +178,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       const pathSegment = globalSlug
         ? `/globals/${globalSlug}`
         : `/${collectionSlug}${id ? `/${id}` : ''}`
-      const action = formatApiURL({
+      const action = formatAdminURL({
         apiRoute: api,
         path: `${pathSegment}${params ? '?' + params : ''}` as `/${string}`,
       })

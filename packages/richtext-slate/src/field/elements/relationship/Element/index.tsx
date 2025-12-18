@@ -11,7 +11,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
@@ -60,7 +60,7 @@ const RelationshipElementComponent: React.FC = () => {
   const editor = useSlateStatic()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}`, serverURL }),
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}`, serverURL }),
     { initialParams },
   )
 

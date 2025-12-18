@@ -3,7 +3,7 @@
 import type { Data, ViewTypes } from 'payload'
 import type { FolderOrDocument } from 'payload/shared'
 
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
@@ -42,7 +42,7 @@ export const FolderTableCellClient = ({
     async ({ id, name }) => {
       try {
         await fetch(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: config.routes.api,
             path: `/${collectionSlug}/${docID}`,
           }),
@@ -72,7 +72,7 @@ export const FolderTableCellClient = ({
     const loadFolderName = async () => {
       try {
         const req = await fetch(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: config.routes.api,
             path: `/${folderCollectionSlug}${intialFolderID ? `/${intialFolderID}` : ''}`,
           }),

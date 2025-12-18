@@ -27,7 +27,7 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
@@ -175,7 +175,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
         requests
           .get(
-            formatApiURL({
+            formatAdminURL({
               apiRoute: config.routes.api,
               path: `/${collection}/${id}`,
               serverURL: config.serverURL,

@@ -1,6 +1,6 @@
 'use client'
 import { useConfig } from '@payloadcms/ui'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import { useEffect, useState } from 'react'
 
 export const BeforeDashboardClient = () => {
@@ -11,7 +11,7 @@ export const BeforeDashboardClient = () => {
   useEffect(() => {
     const fetchMessage = async () => {
       const response = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute: config.routes.api,
           path: '/my-plugin-endpoint',
         }),

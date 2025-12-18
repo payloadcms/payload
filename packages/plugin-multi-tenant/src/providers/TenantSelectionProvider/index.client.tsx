@@ -4,7 +4,7 @@ import type { OptionObject } from 'payload'
 
 import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
 import { generateCookie } from '../../utilities/generateCookie.js'
@@ -172,7 +172,7 @@ export const TenantSelectionProviderClient = ({
   const syncTenants = React.useCallback(async () => {
     try {
       const req = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute: config.routes.api,
           path: `/${tenantsCollectionSlug}/populate-tenant-options`,
         }),

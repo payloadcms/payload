@@ -3,7 +3,7 @@ import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
-import { formatAdminURL, formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -197,7 +197,7 @@ export function AuthProvider({
         refreshTokenTimeoutRef.current = setTimeout(async () => {
           try {
             const request = await requests.post(
-              formatApiURL({
+              formatAdminURL({
                 apiRoute,
                 path: `/${userSlug}/refresh-token?refresh`,
               }),
@@ -237,7 +237,7 @@ export function AuthProvider({
     async (skipSetUser?: boolean): Promise<ClientUser> => {
       try {
         const request = await requests.post(
-          formatApiURL({
+          formatAdminURL({
             apiRoute,
             path: `/${userSlug}/refresh-token`,
           }),
@@ -273,7 +273,7 @@ export function AuthProvider({
       if (user && user.collection) {
         setNewUser(null)
         await requests.post(
-          formatApiURL({
+          formatAdminURL({
             apiRoute,
             path: `/${user.collection}/logout`,
           }),
@@ -299,7 +299,7 @@ export function AuthProvider({
 
       try {
         const request = await requests.get(
-          formatApiURL({
+          formatAdminURL({
             apiRoute,
             path: `/access${params}`,
           }),
@@ -326,7 +326,7 @@ export function AuthProvider({
   const fetchFullUser = React.useCallback(async () => {
     try {
       const request = await requests.get(
-        formatApiURL({
+        formatAdminURL({
           apiRoute,
           path: `/${userSlug}/me`,
         }),

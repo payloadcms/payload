@@ -2,7 +2,7 @@ import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, formatApiURL, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -105,7 +105,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handlePublish = useCallback(async () => {
-    const url = formatApiURL({
+    const url = formatAdminURL({
       apiRoute: api,
       path: `/${slug}${queryString}&draft=true`,
     })

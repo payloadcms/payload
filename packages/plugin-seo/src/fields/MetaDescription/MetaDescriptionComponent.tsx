@@ -15,7 +15,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -73,7 +73,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       return
     }
 
-    const endpoint = formatApiURL({
+    const endpoint = formatAdminURL({
       apiRoute: api,
       path: '/plugin-seo/generate-description',
     })

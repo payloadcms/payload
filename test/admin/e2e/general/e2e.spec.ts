@@ -565,9 +565,7 @@ describe('General', () => {
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page
-        .locator(
-          `.step-nav a[href="${formatAdminURL({ path: '', includeRelativeBasePath: true })}"]`,
-        )
+        .locator(`.step-nav a[href="${formatAdminURL({ path: '', includeBasePath: true })}"]`)
         .click()
       expect(page.url()).toContain(postsUrl.admin)
     })
@@ -576,7 +574,7 @@ describe('General', () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="${formatAdminURL({ path: `/collections/${postsCollectionSlug}`, includeRelativeBasePath: true })}"]`,
+        `.step-nav a[href="${formatAdminURL({ path: `/collections/${postsCollectionSlug}`, includeBasePath: true })}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)

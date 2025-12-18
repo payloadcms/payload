@@ -1,9 +1,9 @@
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import type { CollectionPopulationRequestHandler } from './types.js'
 
 const defaultRequestHandler: CollectionPopulationRequestHandler = ({ apiPath, data, endpoint }) => {
-  const url = formatApiURL({
+  const url = formatAdminURL({
     apiRoute: apiPath,
     path: `/${endpoint}`,
   })

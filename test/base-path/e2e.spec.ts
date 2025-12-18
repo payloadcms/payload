@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -10,11 +9,12 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { BASE_PATH } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-dotenv.config({ path: path.join(dirname, '.env'), override: true })
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 test.describe('Base Path', () => {
   let page: Page

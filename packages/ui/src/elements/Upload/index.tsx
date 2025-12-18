@@ -2,7 +2,7 @@
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatApiURL, isImage } from 'payload/shared'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -291,7 +291,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     try {
       const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
       const serverResponse = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute: api,
           path: pasteURL,
         }),

@@ -1,7 +1,7 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -51,7 +51,7 @@ export function CurrentFolderActions({ className }: Props) {
 
   const deleteCurrentFolder = React.useCallback(async () => {
     await fetch(
-      formatApiURL({
+      formatAdminURL({
         apiRoute: routes.api,
         path: `/${folderCollectionSlug}/${folderID}?depth=0`,
       }),

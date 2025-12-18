@@ -1,4 +1,4 @@
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 export const path = '/re-initialize'
@@ -34,7 +34,7 @@ export const reInitializeDB = async ({
       )
 
       const response = await fetch(
-        formatApiURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
+        formatAdminURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
         {
           method: 'get',
           headers: {

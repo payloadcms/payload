@@ -3,7 +3,7 @@ import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { formatApiURL, wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -340,7 +340,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      formatApiURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
+      formatAdminURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title')
         await wait(500)
@@ -355,7 +355,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      formatApiURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
+      formatAdminURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title 2')
         await wait(500)
@@ -383,7 +383,11 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      formatApiURL({ apiRoute: '/api', path: `/${autosavePostsSlug}/access/${doc.id}`, serverURL }),
+      formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosavePostsSlug}/access/${doc.id}`,
+        serverURL,
+      }),
       async () => {
         await titleField.fill('Updated Title')
       },
@@ -395,7 +399,11 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      formatApiURL({ apiRoute: '/api', path: `/${autosavePostsSlug}/access/${doc.id}`, serverURL }),
+      formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosavePostsSlug}/access/${doc.id}`,
+        serverURL,
+      }),
       async () => {
         await titleField.fill('Updated Title Again')
       },
@@ -408,7 +416,11 @@ test.describe('Form State', () => {
     // save manually and ensure the permissions are fetched again
     await assertNetworkRequests(
       page,
-      formatApiURL({ apiRoute: '/api', path: `/${autosavePostsSlug}/access/${doc.id}`, serverURL }),
+      formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosavePostsSlug}/access/${doc.id}`,
+        serverURL,
+      }),
       async () => {
         await page.click('#action-save', { delay: 100 })
       },

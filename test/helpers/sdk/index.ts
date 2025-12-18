@@ -1,6 +1,6 @@
 import type { PaginatedDocs, SendEmailOptions } from 'payload'
 
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import type {
   CreateArgs,
@@ -28,7 +28,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     }
 
     const json: T = await fetch(
-      formatApiURL({
+      formatAdminURL({
         apiRoute: '/api',
         path: `/local-api`,
         serverURL: this.serverURL,

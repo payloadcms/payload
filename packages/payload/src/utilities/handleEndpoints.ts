@@ -8,7 +8,7 @@ import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
-import { formatApiURL } from './formatApiURL.js'
+import { formatAdminURL } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
@@ -157,7 +157,7 @@ export const handleEndpoints = async ({
     const { config } = payload
 
     const pathname = path ?? new URL(req.url!).pathname
-    const baseAPIPath = formatApiURL({
+    const baseAPIPath = formatAdminURL({
       apiRoute: config.routes.api,
       path: '',
     })

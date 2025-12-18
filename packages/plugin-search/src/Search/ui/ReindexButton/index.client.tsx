@@ -11,7 +11,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import type { ReindexButtonProps } from './types.js'
@@ -47,7 +47,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
 
     try {
       const res = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute: config.routes.api,
           path: `/${searchSlug}/reindex?locale=${locale.code}`,
         }),

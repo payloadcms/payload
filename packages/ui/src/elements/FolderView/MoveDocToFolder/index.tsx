@@ -2,7 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { type FolderOrDocument, formatApiURL } from 'payload/shared'
+import { type FolderOrDocument, formatAdminURL } from 'payload/shared'
 import React, { useId } from 'react'
 import { toast } from 'sonner'
 
@@ -51,7 +51,7 @@ export function MoveDocToFolder({
     async function fetchFolderLabel() {
       if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
         const response = await fetch(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: config.routes.api,
             path: `/${folderCollectionSlug}/${fromFolderID}`,
           }),

@@ -5,7 +5,7 @@ import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payl
 import './index.scss'
 
 import { DragOverlay } from '@dnd-kit/core'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -121,7 +121,7 @@ export const OrderableTable: React.FC<Props> = ({
       }
 
       const response = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute: config.routes.api,
           path: '/reorder',
         }),

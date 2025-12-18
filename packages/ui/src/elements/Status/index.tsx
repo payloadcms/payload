@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -75,7 +75,7 @@ export const Status: React.FC = () => {
       }
 
       if (collectionSlug) {
-        url = formatApiURL({
+        url = formatAdminURL({
           apiRoute: api,
           path: `/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`,
         })
@@ -83,7 +83,7 @@ export const Status: React.FC = () => {
       }
 
       if (globalSlug) {
-        url = formatApiURL({
+        url = formatAdminURL({
           apiRoute: api,
           path: `/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`,
         })

@@ -9,7 +9,7 @@ import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
-import { formatApiURL } from './formatApiURL.js'
+import { formatAdminURL } from './formatAdminURL.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
 
@@ -46,7 +46,7 @@ export const createPayloadRequest = async ({
   const isGraphQL =
     !config.graphQL.disable &&
     pathname ===
-      formatApiURL({
+      formatAdminURL({
         apiRoute: config.routes.api,
         path: config.routes.graphQL as `/${string}`,
       })

@@ -9,7 +9,7 @@ import {
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { Fragment, useCallback } from 'react'
 
@@ -47,7 +47,7 @@ export const ResetPreferences: React.FC<{
 
     try {
       const res = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute,
           path: `/payload-preferences${stringifiedQuery}`,
         }),

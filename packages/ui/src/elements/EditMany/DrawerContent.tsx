@@ -7,7 +7,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   combineWhereConstraints,
-  formatApiURL,
+  formatAdminURL,
   mergeListSearchAndWhere,
   unflatten,
 } from 'payload/shared'
@@ -389,14 +389,14 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={formatApiURL({
+                          action={formatAdminURL({
                             apiRoute,
                             path: `/${collection.slug}${queryString}&draft=true`,
                           })}
                           disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={formatApiURL({
+                          action={formatAdminURL({
                             apiRoute,
                             path: `/${collection.slug}${queryString}&draft=true`,
                           })}
@@ -405,7 +405,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={formatApiURL({
+                        action={formatAdminURL({
                           apiRoute,
                           path: `/${collection.slug}${queryString}`,
                         })}

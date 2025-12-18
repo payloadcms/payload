@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { formatAdminURL, formatApiURL, wordBoundariesRegex } from 'payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -285,7 +285,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               sanitizeFilterOptionsQuery(query.where)
 
               const response = await fetch(
-                formatApiURL({
+                formatAdminURL({
                   apiRoute: api,
                   path: `/${relation}`,
                 }),
@@ -449,7 +449,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
         if (!errorLoading) {
           const response = await fetch(
-            formatApiURL({
+            formatAdminURL({
               apiRoute: api,
               path: `/${relation}`,
             }),

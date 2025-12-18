@@ -1,7 +1,7 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { upload } from '@vercel/blob/client'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean
@@ -20,7 +20,7 @@ export const VercelBlobClientUploadHandler =
       serverURL,
       updateFilename,
     }) => {
-      const endpointRoute = formatApiURL({
+      const endpointRoute = formatAdminURL({
         apiRoute,
         path: serverHandlerPath,
         serverURL,

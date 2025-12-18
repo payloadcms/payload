@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
-  formatApiURL,
+  formatAdminURL,
   getAutosaveInterval,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
@@ -125,7 +125,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = formatApiURL({
+            url = formatAdminURL({
               apiRoute: api,
               path: `/${entitySlug}/${id}${queryParams}`,
             })
@@ -134,7 +134,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = formatApiURL({
+            url = formatAdminURL({
               apiRoute: api,
               path: `/globals/${entitySlug}${queryParams}`,
             })

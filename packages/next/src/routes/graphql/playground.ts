@@ -1,6 +1,6 @@
 import { renderPlaygroundPage } from 'graphql-playground-html'
 import { createPayloadRequest, type SanitizedConfig } from 'payload'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
   const req = await createPayloadRequest({
@@ -14,7 +14,7 @@ export const GET = (config: Promise<SanitizedConfig>) => async (request: Request
       process.env.NODE_ENV === 'production') ||
     process.env.NODE_ENV !== 'production'
   ) {
-    const endpoint = formatApiURL({
+    const endpoint = formatAdminURL({
       apiRoute: req.payload.config.routes.api,
       path: req.payload.config.routes.graphQL as `/${string}`,
     })

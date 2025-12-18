@@ -1,6 +1,6 @@
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
 import type { Preferences } from '../../forms/Form/types.js'
@@ -61,7 +61,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       const promise = new Promise((resolve: (value: T) => void) => {
         void (async () => {
           const request = await requests.get(
-            formatApiURL({
+            formatAdminURL({
               apiRoute: api,
               path: `/payload-preferences/${key}`,
             }),
@@ -99,7 +99,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         preferencesRef.current[key] = value
 
         await requests.post(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: api,
             path: `/payload-preferences/${key}`,
           }),
@@ -150,7 +150,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         preferencesRef.current[key] = pendingUpdate.current[key]
 
         await requests.post(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: api,
             path: `/payload-preferences/${key}`,
           }),

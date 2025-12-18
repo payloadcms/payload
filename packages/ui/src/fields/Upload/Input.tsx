@@ -14,7 +14,7 @@ import type {
 import type { MarkOptional } from 'ts-essentials'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
@@ -279,7 +279,7 @@ export function UploadInput(props: UploadInputProps) {
           },
         }
         const response = await fetch(
-          formatApiURL({
+          formatAdminURL({
             apiRoute: api,
             path: `/${collection}`,
           }),

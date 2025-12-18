@@ -1,7 +1,7 @@
 'use client'
 import type { ClientUser, DocumentPreferences } from 'payload'
 
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -144,7 +144,7 @@ const DocumentInfo: React.FC<
     [initialData, initialState, localeIsLoading],
   )
 
-  const baseAPIPath = formatApiURL({
+  const baseAPIPath = formatAdminURL({
     apiRoute: api,
     path: '',
   })

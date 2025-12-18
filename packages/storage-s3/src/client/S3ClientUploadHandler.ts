@@ -1,10 +1,10 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
   handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {
-    const endpointRoute = formatApiURL({
+    const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
       serverURL,

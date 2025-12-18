@@ -8,7 +8,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { endOfToday, isToday, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -135,7 +135,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
     }
 
     const { docs } = await requests
-      .post(formatApiURL({ apiRoute: api, path: `/payload-jobs` }), {
+      .post(formatAdminURL({ apiRoute: api, path: `/payload-jobs` }), {
         body: qs.stringify(query),
         headers: {
           'Accept-Language': i18n.language,

@@ -140,7 +140,6 @@ import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
-import { formatApiURL } from './utilities/formatApiURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -556,7 +555,7 @@ export class BasePayload {
     })
 
   getAPIURL = (): string =>
-    formatApiURL({
+    formatAdminURL({
       apiRoute: this.config.routes.api,
       path: '',
       serverURL: this.config.serverURL,

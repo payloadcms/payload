@@ -2,7 +2,6 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { formatApiURL } from 'payload/shared'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
@@ -13,6 +12,7 @@ import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -635,7 +635,11 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()
-      const apiURL = formatApiURL({ apiRoute: '/api', path: `/${arrayWithFallbackCollectionSlug}/${id}`, serverURL })
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${arrayWithFallbackCollectionSlug}/${id}`,
+        serverURL,
+      })
       await page.goto(apiURL)
       const data = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')

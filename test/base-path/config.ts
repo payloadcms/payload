@@ -1,6 +1,9 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Posts } from './collections/Posts.js'
 import { seed } from './seed/index.js'
+import { BASE_PATH } from './shared.js'
+
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
   collections: [

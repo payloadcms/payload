@@ -10,7 +10,7 @@ import {
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type {
@@ -52,7 +52,7 @@ export const ExportSaveButton: React.FC = () => {
       }, 200)
 
       const response = await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute: api,
           path: '/exports/download',
         }),

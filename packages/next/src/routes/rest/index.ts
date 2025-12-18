@@ -1,5 +1,5 @@
 import { handleEndpoints, type SanitizedConfig } from 'payload'
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import { generateOGImage } from './og/index.js'
 
@@ -35,7 +35,7 @@ const handlerBuilder =
 
     const response = await handleEndpoints({
       config,
-      path: formatApiURL({
+      path: formatAdminURL({
         apiRoute: awaitedConfig.routes.api,
         path: awaitedParams ? `/${awaitedParams.slug.join('/')}` : undefined,
       }),

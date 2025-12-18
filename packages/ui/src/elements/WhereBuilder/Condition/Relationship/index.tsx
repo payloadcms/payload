@@ -1,7 +1,7 @@
 'use client'
 import type { PaginatedDocs, Where } from 'payload'
 
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
@@ -125,7 +125,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
         try {
           const response = await fetch(
-            formatApiURL({
+            formatAdminURL({
               apiRoute: api,
               path: `/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
             }),
@@ -266,7 +266,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
         const response = await fetch(
-          formatApiURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
           {
             credentials: 'include',
             headers: {

@@ -2,7 +2,7 @@
 
 import type { SaveDraftButtonClientProps } from 'payload'
 
-import { formatApiURL } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -47,7 +47,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     let method = 'POST'
 
     if (collectionSlug) {
-      action = formatApiURL({
+      action = formatAdminURL({
         apiRoute: api,
         path: `/${collectionSlug}${id ? `/${id}` : ''}${search}`,
       })
@@ -57,7 +57,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     }
 
     if (globalSlug) {
-      action = formatApiURL({
+      action = formatAdminURL({
         apiRoute: api,
         path: `/globals/${globalSlug}${search}`,
       })
