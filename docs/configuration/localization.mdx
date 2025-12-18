@@ -171,7 +171,12 @@ All field types with a `name` property support the `localized` property—even t
 
 Payload allows you to localize the `status` field for **draft enabled** collections and globals. This lets you manage publication status independently for each locale, ensures the admin UI always shows the status for the selected locale, and unpublish content in a single locale.
 
-To enable this feature, set `versions.drafts.localizeStatus` to `true` in your collection or global config:
+<Banner type="warning">
+  **Important:** This feature is currently in beta and may have some limitations
+  or bugs. Please test thoroughly before using in production.
+</Banner>
+
+To enable this experimental feature, set `versions.drafts.localizeStatus` to `true` in your collection or global config:
 
 ```ts
 import type { CollectionConfig } from 'payload'
