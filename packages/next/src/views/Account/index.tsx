@@ -119,7 +119,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
         }
         apiURL={formatApiURL({
           apiRoute: api,
-          path: `/${userSlug}${user?.id ? ` })/${user.id}` : ''}`,
+          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
         })}
         collectionSlug={userSlug}
         currentEditor={currentEditor}
