@@ -1,11 +1,5 @@
 import crypto from 'crypto'
-import {
-  type CollectionSlug,
-  type PayloadHandler,
-  type TypedUser,
-  UnauthorizedError,
-  type Where,
-} from 'payload'
+import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
