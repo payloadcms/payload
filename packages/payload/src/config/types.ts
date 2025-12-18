@@ -1346,6 +1346,14 @@ export type Config = {
         jsonSchema: JSONSchema4
       }) => JSONSchema4
     >
+
+    /**
+     * Enable strict type safety for draft mode queries.
+     * When enabled, find operations with draft: true will type required fields as optional.
+     * @default false
+     * @todo Remove in v4. Strict draft types will become the default behavior.
+     */
+    strictDraftTypes?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
