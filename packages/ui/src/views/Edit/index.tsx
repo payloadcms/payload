@@ -412,7 +412,6 @@ export function DefaultEditView({
       incrementVersionCount,
       adminRoute,
       locale,
-      serverURL,
       startRouteTransition,
       router,
       resetUploadEdits,
