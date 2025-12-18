@@ -4,6 +4,8 @@ export const heTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'כל המיקומים',
     collectionRequired: 'חובה להציג אוסף לתצוגה מקדימה',
+    documentsToExport: '{{count}} מסמכים לייצוא',
+    documentsToImport: '{{count}} מסמכים לייבוא',
     exportDocumentLabel: 'ייצוא {{label}}',
     exportOptions: 'אפשרויות ייצוא',
     'field-collectionSlug-label': 'אוסף',
@@ -31,6 +33,7 @@ export const heTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'התאמה על פי',
     mode: 'מצב',
     noDataToPreview: 'אין נתונים לתצוגה מקדימה',
+    previewPageInfo: '{{start}}-{{end}} מתוך {{total}}',
     'selectionToUse-allDocuments': 'השתמש בכל המסמכים',
     'selectionToUse-currentFilters': 'השתמש במסננים הנוכחיים',
     'selectionToUse-currentSelection': 'השתמש בבחירה הנוכחית',

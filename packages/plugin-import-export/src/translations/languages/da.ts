@@ -4,6 +4,8 @@ export const daTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Alle lokaliteter',
     collectionRequired: 'Samling krævet for at vise forhåndsvisning',
+    documentsToExport: '{{count}} dokumenter at eksportere',
+    documentsToImport: '{{count}} dokumenter at importere',
     exportDocumentLabel: 'Eksport {{label}}',
     exportOptions: 'Eksportmuligheder',
     'field-collectionSlug-label': 'Samling',
@@ -31,6 +33,7 @@ export const daTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Match af',
     mode: 'Tilstand',
     noDataToPreview: 'Ingen data at forhåndsvise',
+    previewPageInfo: '{{start}}-{{end}} af {{total}}',
     'selectionToUse-allDocuments': 'Brug alle dokumenter',
     'selectionToUse-currentFilters': 'Brug nuværende filtre',
     'selectionToUse-currentSelection': 'Brug nuværende valg',

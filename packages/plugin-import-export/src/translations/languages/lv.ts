@@ -4,6 +4,8 @@ export const lvTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Visi lokālie iestatījumi',
     collectionRequired: 'Nepieciešama kolekcija, lai parādītu priekšskatījumu',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Eksportēt {{label}}',
     exportOptions: 'Eksportēšanas opcijas',
     'field-collectionSlug-label': 'Kolekcija',
@@ -31,6 +33,7 @@ export const lvTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Saskanā ar',
     mode: 'Režīms',
     noDataToPreview: 'Nav datu priekšskatīšanai',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Izmantojiet visus dokumentus',
     'selectionToUse-currentFilters': 'Izmantot pašreizējos filtrus',
     'selectionToUse-currentSelection': 'Izmantot pašreizējo izvēli',

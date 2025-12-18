@@ -4,6 +4,8 @@ export const roTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Toate locațiile',
     collectionRequired: 'Colecție necesară pentru a arăta previzualizarea',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Opțiuni de export',
     'field-collectionSlug-label': 'Colecție',
@@ -31,6 +33,7 @@ export const roTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Potrivire după',
     mode: 'Mod',
     noDataToPreview: 'Nu există date de previzualizat.',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Utilizați toate documentele.',
     'selectionToUse-currentFilters': 'Utilizați filtrele curente',
     'selectionToUse-currentSelection': 'Utilizați selecția curentă',

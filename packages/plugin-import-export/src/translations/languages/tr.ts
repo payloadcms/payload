@@ -4,6 +4,8 @@ export const trTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Tüm yerler',
     collectionRequired: 'Önizlemeyi göstermek için Koleksiyon gereklidir.',
+    documentsToExport: '{{count}} dışa aktarılacak belge',
+    documentsToImport: '{{count}} içe aktarılacak belge',
     exportDocumentLabel: '{{label}} dışa aktar',
     exportOptions: 'İhracat Seçenekleri',
     'field-collectionSlug-label': 'Koleksiyon',
@@ -31,6 +33,7 @@ export const trTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Eşleştirme kriteri',
     mode: 'Mod',
     noDataToPreview: 'Önizlenecek veri yok',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'Tüm belgeleri kullanın',
     'selectionToUse-currentFilters': 'Mevcut filtreleri kullanın',
     'selectionToUse-currentSelection': 'Mevcut seçimi kullanın',

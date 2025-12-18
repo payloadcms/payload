@@ -4,6 +4,8 @@ export const bnBdTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'সমস্ত লোকেল',
     collectionRequired: 'প্রিভিউ দেখানোর জন্য সংগ্রহণ প্রয়োজন',
+    documentsToExport: '{{count}} টি ডকুমেন্ট রপ্তানি করতে হবে',
+    documentsToImport: '{{count}} টি ডকুমেন্ট আমদানি করতে হবে',
     exportDocumentLabel: '{{label}} রপ্তানি করুন',
     exportOptions: 'রপ্তানি বিকল্পসমূহ',
     'field-collectionSlug-label': 'সংগ্রহ',
@@ -30,12 +32,11 @@ export const bnBdTranslations: PluginDefaultTranslationsObject = {
     importResults: 'আমদানি ফলাফল',
     matchBy: 'দ্বারা মিলান',
     mode: 'মোড',
-    noDataToPreview:
-      'প্রাথমিক টেক্সটের অর্থ পরিপ্রেক্ষিতে Payload এর সর্বদাহ করুন। এখানে কিছু সাধারণ Payload শব্দের তালিকা যা খুব নির্দিষ্ট অর্থ বহন করে:\n    - সংগ্রহ: এক',
+    noDataToPreview: 'প্রিভিউ করার জন্য কোন ডেটা নেই',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'সমস্ত নথি ব্যবহার করুন',
     'selectionToUse-currentFilters': 'বর্তমান ফিল্টারগুলি ব্যবহার করুন',
-    'selectionToUse-currentSelection':
-      'আপনার প্রাসঙ্গিক টেক্সটটি নিচে নিবেশ করুন। এটি পয়সলোডের সন্দর্ভে অর্থটি সম্মান করবে। এখানে কিছু প্রামাণিক পয়সলোড শব্দের',
+    'selectionToUse-currentSelection': 'বর্তমান নির্বাচন ব্যবহার করুন',
     startImport: 'আমদানি শুরু করুন',
     totalDocumentsCount: '{{count}} মোট নথি',
     uploadFileToSeePreview: 'প্রিভিউ দেখতে একটি ফাইল আপলোড করুন',

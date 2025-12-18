@@ -4,6 +4,8 @@ export const faTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'تمام مکان ها',
     collectionRequired: 'برای نمایش پیش نمایش، مجموعه ای لازم است',
+    documentsToExport: '{{count}} سند برای صادرات',
+    documentsToImport: '{{count}} سند برای واردات',
     exportDocumentLabel: 'صادر کردن {{label}}',
     exportOptions: 'گزینه های صادرات',
     'field-collectionSlug-label': 'مجموعه',
@@ -31,6 +33,7 @@ export const faTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'همخوانی توسط',
     mode: 'حالت',
     noDataToPreview: 'داده ای برای پیش نمایش وجود ندارد',
+    previewPageInfo: '{{start}}-{{end}} از {{total}}',
     'selectionToUse-allDocuments': 'از تمام مستندات استفاده کنید',
     'selectionToUse-currentFilters': 'از فیلترهای فعلی استفاده کنید',
     'selectionToUse-currentSelection': 'از انتخاب فعلی استفاده کنید',

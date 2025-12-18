@@ -4,6 +4,8 @@ export const caTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Totes les localitzacions',
     collectionRequired: 'Es requereix una col·lecció per mostrar la previsualització.',
+    documentsToExport: '{{count}} documents per exportar',
+    documentsToImport: '{{count}} documents per importar',
     exportDocumentLabel: 'Exporta {{label}}',
     exportOptions: "Opcions d'exportació",
     'field-collectionSlug-label': 'Col·lecció',
@@ -31,6 +33,7 @@ export const caTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Coincidir per',
     mode: 'Mode',
     noDataToPreview: 'No hi ha dades per previsualitzar',
+    previewPageInfo: '{{start}}-{{end}} de {{total}}',
     'selectionToUse-allDocuments': 'Utilitzeu tots els documents',
     'selectionToUse-currentFilters': 'Utilitza els filtres actuals',
     'selectionToUse-currentSelection': 'Utilitza la selecció actual',

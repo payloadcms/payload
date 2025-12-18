@@ -4,6 +4,8 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: '所有语言环境',
     collectionRequired: '需要集合以显示预览',
+    documentsToExport: '{{count}} 个待导出文档',
+    documentsToImport: '{{count}} 个待导入文档',
     exportDocumentLabel: '导出{{label}}',
     exportOptions: '导出选项',
     'field-collectionSlug-label': '集合',
@@ -31,6 +33,7 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
     matchBy: '匹配方式',
     mode: '模式',
     noDataToPreview: '无数据预览',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': '使用所有文档',
     'selectionToUse-currentFilters': '使用当前过滤条件',
     'selectionToUse-currentSelection': '使用当前选择',

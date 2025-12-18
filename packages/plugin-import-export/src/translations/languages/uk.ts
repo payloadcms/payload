@@ -4,6 +4,8 @@ export const ukTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Всі локалі',
     collectionRequired: 'Необхідна колекція для показу попереднього перегляду',
+    documentsToExport: '{{count}} документів для експорту',
+    documentsToImport: '{{count}} документів для імпорту',
     exportDocumentLabel: 'Експорт {{label}}',
     exportOptions: 'Опції експорту',
     'field-collectionSlug-label': 'Колекція',
@@ -30,7 +32,8 @@ export const ukTranslations: PluginDefaultTranslationsObject = {
     importResults: 'Результати імпорту',
     matchBy: 'Зіставити за',
     mode: 'Режим',
-    noDataToPreview: 'No data to preview',
+    noDataToPreview: 'Немає даних для попереднього перегляду',
+    previewPageInfo: '{{start}}-{{end}} з {{total}}',
     'selectionToUse-allDocuments': 'Використовуйте всі документи',
     'selectionToUse-currentFilters': 'Використовувати поточні фільтри',
     'selectionToUse-currentSelection': 'Використовуйте поточний вибір',

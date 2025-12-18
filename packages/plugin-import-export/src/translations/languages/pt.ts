@@ -4,6 +4,8 @@ export const ptTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Todos os locais',
     collectionRequired: 'Coleção necessária para mostrar a pré-visualização',
+    documentsToExport: '{{count}} documentos para exportar',
+    documentsToImport: '{{count}} documentos para importar',
     exportDocumentLabel: 'Exportar {{label}}',
     exportOptions: 'Opções de Exportação',
     'field-collectionSlug-label': 'Coleção',
@@ -32,6 +34,7 @@ export const ptTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Correspondência por',
     mode: 'Modo',
     noDataToPreview: 'Sem dados para visualizar',
+    previewPageInfo: '{{start}}-{{end}} de {{total}}',
     'selectionToUse-allDocuments': 'Use todos os documentos',
     'selectionToUse-currentFilters': 'Use os filtros atuais',
     'selectionToUse-currentSelection': 'Use a seleção atual',

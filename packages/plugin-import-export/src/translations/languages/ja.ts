@@ -4,6 +4,8 @@ export const jaTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'すべてのロケール',
     collectionRequired: 'プレビューを表示するためのコレクションが必要です',
+    documentsToExport: '{{count}} 件のエクスポート対象ドキュメント',
+    documentsToImport: '{{count}} 件のインポート対象ドキュメント',
     exportDocumentLabel: '{{label}}をエクスポートする',
     exportOptions: 'エクスポートオプション',
     'field-collectionSlug-label': 'コレクション',
@@ -31,6 +33,7 @@ export const jaTranslations: PluginDefaultTranslationsObject = {
     matchBy: '一致する',
     mode: 'モード',
     noDataToPreview: '表示するデータがありません',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'すべての文書を使用してください。',
     'selectionToUse-currentFilters': '現在のフィルターを使用してください',
     'selectionToUse-currentSelection': '現在の選択を使用する',

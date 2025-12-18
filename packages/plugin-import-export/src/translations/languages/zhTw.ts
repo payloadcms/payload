@@ -4,6 +4,8 @@ export const zhTwTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: '所有語言地區',
     collectionRequired: '需要的集合以顯示預覽',
+    documentsToExport: '{{count}} 個待匯出文件',
+    documentsToImport: '{{count}} 個待匯入文件',
     exportDocumentLabel: '匯出 {{label}}',
     exportOptions: '匯出選項',
     'field-collectionSlug-label': '收藏集',
@@ -30,7 +32,8 @@ export const zhTwTranslations: PluginDefaultTranslationsObject = {
     importResults: '導入結果',
     matchBy: '匹配由',
     mode: '模式',
-    noDataToPreview: '没有数据可以预览',
+    noDataToPreview: '沒有資料可以預覽',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': '使用所有文件',
     'selectionToUse-currentFilters': '使用目前篩選條件',
     'selectionToUse-currentSelection': '使用目前選取內容',

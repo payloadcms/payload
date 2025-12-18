@@ -4,6 +4,8 @@ export const skTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Všetky miestne nastavenia',
     collectionRequired: 'Je potrebná kolekcia pre zobrazenie náhľadu',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Možnosti exportu',
     'field-collectionSlug-label': 'Kolekcia',
@@ -31,6 +33,7 @@ export const skTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Porovnať podľa',
     mode: 'Režim',
     noDataToPreview: 'Žiadne dáta na ukážku',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Použite všetky dokumenty',
     'selectionToUse-currentFilters': 'Použiť aktuálne filtre',
     'selectionToUse-currentSelection': 'Použiť aktuálny výber',

@@ -4,6 +4,8 @@ export const etTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Kõik kohalikud seaded',
     collectionRequired: 'Kogumine on vajalik eelvaate kuvamiseks.',
+    documentsToExport: '{{count}} dokumenti eksportimiseks',
+    documentsToImport: '{{count}} dokumenti importimiseks',
     exportDocumentLabel: 'Ekspordi {{label}}',
     exportOptions: 'Ekspordi valikud',
     'field-collectionSlug-label': 'Kogumik',
@@ -31,6 +33,7 @@ export const etTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Vastavus',
     mode: 'Režiim',
     noDataToPreview: 'Andmed puuduvad eelvaates',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'Kasutage kõiki dokumente',
     'selectionToUse-currentFilters': 'Kasuta praeguseid filtreid',
     'selectionToUse-currentSelection': 'Kasuta praegust valikut',

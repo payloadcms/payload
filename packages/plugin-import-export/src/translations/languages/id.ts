@@ -4,6 +4,8 @@ export const idTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Semua lokasi',
     collectionRequired: 'Diperlukan Koleksi untuk menunjukkan pratinjau',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Ekspor {{label}}',
     exportOptions: 'Opsi Ekspor',
     'field-collectionSlug-label': 'Koleksi',
@@ -31,6 +33,7 @@ export const idTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Cocokkan dengan',
     mode: 'Mode',
     noDataToPreview: 'Tidak ada data untuk pratinjau',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Gunakan semua dokumen',
     'selectionToUse-currentFilters': 'Gunakan filter saat ini',
     'selectionToUse-currentSelection': 'Gunakan pilihan saat ini',

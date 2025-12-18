@@ -4,6 +4,8 @@ export const thTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'ทุกสถานที่',
     collectionRequired: 'ต้องการคอลเลกชันเพื่อแสดงตัวอย่าง',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'ส่งออก {{label}}',
     exportOptions: 'ตัวเลือกการส่งออก',
     'field-collectionSlug-label': 'คอลเลกชัน',
@@ -31,6 +33,7 @@ export const thTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'ตรงตาม',
     mode: 'โหมด',
     noDataToPreview: 'ไม่มีข้อมูลที่จะแสดงตัวอย่าง',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'ใช้เอกสารทั้งหมด',
     'selectionToUse-currentFilters': 'ใช้ตัวกรองปัจจุบัน',
     'selectionToUse-currentSelection': 'ใช้การเลือกปัจจุบัน',

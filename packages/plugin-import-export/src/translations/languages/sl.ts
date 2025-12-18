@@ -4,6 +4,8 @@ export const slTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Vse lokacije',
     collectionRequired: 'Zbirka je potrebna za prikaz predogleda.',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Izvozi {{label}}',
     exportOptions: 'Možnosti izvoza',
     'field-collectionSlug-label': 'Zbirka',
@@ -31,6 +33,7 @@ export const slTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Ujemanje po',
     mode: 'Način',
     noDataToPreview: 'Ni podatkov za predogled.',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Uporabite vse dokumente',
     'selectionToUse-currentFilters': 'Uporabite trenutne filtre.',
     'selectionToUse-currentSelection': 'Uporabi trenutno izbiro',

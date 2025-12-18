@@ -4,6 +4,8 @@ export const isTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Allar staðfærslur',
     collectionRequired: 'Þarf að sýna safn til að sýna forskoðun',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Flytja út {{label}}',
     exportOptions: 'Útflutningsvalkostir',
     'field-collectionSlug-label': 'Safn',
@@ -31,6 +33,7 @@ export const isTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Samsvörun eftir',
     mode: 'Hættir',
     noDataToPreview: 'Enginn gögn til að forskoða',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Nota allar færslur',
     'selectionToUse-currentFilters': 'Nota núverandi síu',
     'selectionToUse-currentSelection': 'Nota núverandi val',

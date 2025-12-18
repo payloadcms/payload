@@ -4,6 +4,8 @@ export const nbTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Alle steder',
     collectionRequired: 'Samling kreves for å vise forhåndsvisning',
+    documentsToExport: '{{count}} dokumenter å eksportere',
+    documentsToImport: '{{count}} dokumenter å importere',
     exportDocumentLabel: 'Eksporter {{label}}',
     exportOptions: 'Eksportalternativer',
     'field-collectionSlug-label': 'Samling',
@@ -31,6 +33,7 @@ export const nbTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Samsvare med',
     mode: 'Modus',
     noDataToPreview: 'Ingen data å forhåndsvise',
+    previewPageInfo: '{{start}}-{{end}} av {{total}}',
     'selectionToUse-allDocuments': 'Bruk alle dokumentene',
     'selectionToUse-currentFilters': 'Bruk gjeldende filtre',
     'selectionToUse-currentSelection': 'Bruk gjeldende utvalg',

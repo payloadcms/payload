@@ -4,6 +4,8 @@ export const svTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Alla platser',
     collectionRequired: 'Samling krävs för att visa förhandsgranskning',
+    documentsToExport: '{{count}} dokument att exportera',
+    documentsToImport: '{{count}} dokument att importera',
     exportDocumentLabel: 'Exportera {{label}}',
     exportOptions: 'Exportalternativ',
     'field-collectionSlug-label': 'Samling',
@@ -31,6 +33,7 @@ export const svTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Matcha genom',
     mode: 'Läge',
     noDataToPreview: 'Ingen data att förhandsgranska',
+    previewPageInfo: '{{start}}-{{end}} av {{total}}',
     'selectionToUse-allDocuments': 'Använd alla dokument',
     'selectionToUse-currentFilters': 'Använd aktuella filter',
     'selectionToUse-currentSelection': 'Använd nuvarande urval',

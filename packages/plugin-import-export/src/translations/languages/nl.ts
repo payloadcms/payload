@@ -4,6 +4,8 @@ export const nlTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Alle locaties',
     collectionRequired: 'Collectie vereist om voorbeeld te tonen',
+    documentsToExport: '{{count}} documenten te exporteren',
+    documentsToImport: '{{count}} documenten te importeren',
     exportDocumentLabel: 'Exporteer {{label}}',
     exportOptions: 'Exportmogelijkheden',
     'field-collectionSlug-label': 'Collectie',
@@ -32,6 +34,7 @@ export const nlTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Overeenkomen door',
     mode: 'Modus',
     noDataToPreview: 'Geen gegevens om te bekijken',
+    previewPageInfo: '{{start}}-{{end}} van {{total}}',
     'selectionToUse-allDocuments': 'Gebruik alle documenten',
     'selectionToUse-currentFilters': 'Gebruik huidige filters',
     'selectionToUse-currentSelection': 'Gebruik huidige selectie',

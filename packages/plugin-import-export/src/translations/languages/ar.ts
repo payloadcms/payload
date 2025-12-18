@@ -4,6 +4,8 @@ export const arTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'جميع المواقع',
     collectionRequired: 'مطلوب مجموعة لعرض المعاينة',
+    documentsToExport: '{{count}} مستند للتصدير',
+    documentsToImport: '{{count}} مستند للاستيراد',
     exportDocumentLabel: 'تصدير {{label}}',
     exportOptions: 'خيارات التصدير',
     'field-collectionSlug-label': 'مجموعة',
@@ -31,6 +33,7 @@ export const arTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'مطابقة بواسطة',
     mode: 'وضع',
     noDataToPreview: 'لا يوجد بيانات لعرضها',
+    previewPageInfo: '{{start}}-{{end}} من {{total}}',
     'selectionToUse-allDocuments': 'استخدم جميع الوثائق',
     'selectionToUse-currentFilters': 'استخدم الفلاتر الحالية',
     'selectionToUse-currentSelection': 'استخدم الاختيار الحالي',

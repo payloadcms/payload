@@ -4,6 +4,8 @@ export const bgTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Всички локации',
     collectionRequired: 'Изисква се колекция за показване на визуализация.',
+    documentsToExport: '{{count}} документа за експортиране',
+    documentsToImport: '{{count}} документа за импортиране',
     exportDocumentLabel: 'Експортиране {{label}}',
     exportOptions: 'Опции за експортиране',
     'field-collectionSlug-label': 'Колекция',
@@ -31,6 +33,7 @@ export const bgTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Съвпадение по',
     mode: 'Могощности',
     noDataToPreview: 'Няма данни за преглед.',
+    previewPageInfo: '{{start}}-{{end}} от {{total}}',
     'selectionToUse-allDocuments': 'Използвайте всички документи',
     'selectionToUse-currentFilters': 'Използвайте текущите филтри',
     'selectionToUse-currentSelection': 'Използвайте текущия избор',

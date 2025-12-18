@@ -4,6 +4,8 @@ export const deTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Alle Gebietsschemata',
     collectionRequired: 'Sammlung erforderlich zur Vorschauanzeige',
+    documentsToExport: '{{count}} Dokumente zum Exportieren',
+    documentsToImport: '{{count}} Dokumente zum Importieren',
     exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Exportoptionen',
     'field-collectionSlug-label': 'Sammlung',
@@ -30,8 +32,8 @@ export const deTranslations: PluginDefaultTranslationsObject = {
     importResults: 'Ergebnisse importieren',
     matchBy: 'Übereinstimmung nach',
     mode: 'Modus',
-    noDataToPreview:
-      'Respektieren Sie die Bedeutung des Originaltextes im Kontext von Payload. Hier ist eine Liste mit gebräuchlichen Payload-Begriffen, die sehr spezifische Bedeutungen haben:\n- Sammlung: Eine Sammlung ist eine Gruppe von Dokumenten, die eine gemeinsame Struktur und einen gemeinsamen Zweck teilen. Sammlungen werden verwendet, um Inhalte in Payload zu organisieren und zu verwalten.\n- Feld: Ein Feld ist ein spezifisches Datenstück in einem Dokument einer Sammlung. Felder definieren die Struktur und den Typ der Daten, die in einem Dokument gespeichert werden können.\n- Dokument: Ein',
+    noDataToPreview: 'Keine Daten zur Vorschau',
+    previewPageInfo: '{{start}}-{{end}} von {{total}}',
     'selectionToUse-allDocuments': 'Verwenden Sie alle Dokumente.',
     'selectionToUse-currentFilters': 'Verwenden Sie aktuelle Filter',
     'selectionToUse-currentSelection': 'Verwenden Sie die aktuelle Auswahl',

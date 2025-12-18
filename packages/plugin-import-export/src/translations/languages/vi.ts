@@ -4,6 +4,8 @@ export const viTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Tất cả ngôn ngữ',
     collectionRequired: 'Yêu cầu Bộ sưu tập để xem trước',
+    documentsToExport: '{{count}} tài liệu để xuất',
+    documentsToImport: '{{count}} tài liệu để nhập',
     exportDocumentLabel: 'Xuất {{label}}',
     exportOptions: 'Tùy chọn xuất',
     'field-collectionSlug-label': 'Bộ sưu tập',
@@ -31,6 +33,7 @@ export const viTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'So sánh theo',
     mode: 'Chế độ',
     noDataToPreview: 'Không có dữ liệu để xem trước',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'Dùng tất cả',
     'selectionToUse-currentFilters': 'Dùng bộ lọc hiện tại',
     'selectionToUse-currentSelection': 'Dùng đang chọn',

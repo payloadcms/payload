@@ -4,6 +4,8 @@ export const bnInTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'সমস্ত লোকেল',
     collectionRequired: 'প্রিভিউ দেখানোর জন্য সংগ্রহ প্রয়োজন',
+    documentsToExport: '{{count}} টি ডকুমেন্ট রপ্তানি করতে হবে',
+    documentsToImport: '{{count}} টি ডকুমেন্ট আমদানি করতে হবে',
     exportDocumentLabel: '{{label}} রপ্তানি করুন',
     exportOptions: 'রপ্তানি বিকল্পগুলি',
     'field-collectionSlug-label': 'সংগ্রহ',
@@ -31,6 +33,7 @@ export const bnInTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'দ্বারা মিলান',
     mode: 'মোড',
     noDataToPreview: 'প্রিভিউ করার জন্য কোনও ডাটা নেই',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'সমস্ত ডকুমেন্ট ব্যবহার করুন',
     'selectionToUse-currentFilters': 'বর্তমান ফিল্টারগুলি ব্যবহার করুন',
     'selectionToUse-currentSelection': 'বর্তমান নির্বাচন ব্যবহার করুন',

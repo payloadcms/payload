@@ -4,6 +4,8 @@ export const koTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: '모든 지역 설정',
     collectionRequired: '미리보기를 보여주기 위해선 컬렉션이 필요합니다.',
+    documentsToExport: '{{count}}개 문서 내보내기',
+    documentsToImport: '{{count}}개 문서 가져오기',
     exportDocumentLabel: '{{label}} 내보내기',
     exportOptions: '수출 옵션',
     'field-collectionSlug-label': '컬렉션',
@@ -30,8 +32,8 @@ export const koTranslations: PluginDefaultTranslationsObject = {
     importResults: '수입 결과',
     matchBy: '일치시키다',
     mode: '모드',
-    noDataToPreview:
-      '원문의 의미를 Payload의 맥락 안에서 존중하십시오. 다음은 특정 의미를 가지는 일반적인 Payload 용어들의 목록입니다:\n    - Collection: 컬렉션은 공통의 구조와 목적을 공유하는 문서 그룹입니다. 컬렉션은 Payload에서 콘텐츠를 구성하고 관리하는 데 사용됩니다.\n    - Field: 필드는 컬렉션의 문서 안에 있는 특정한 데이터 조각입니다.',
+    noDataToPreview: '미리볼 데이터가 없습니다',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': '모든 문서를 사용하십시오.',
     'selectionToUse-currentFilters': '현재 필터를 사용하십시오.',
     'selectionToUse-currentSelection': '현재 선택 항목을 사용하십시오.',

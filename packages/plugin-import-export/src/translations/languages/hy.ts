@@ -4,6 +4,9 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Բոլոր տեղականությունները',
     collectionRequired: 'Նախադիտման ցուցադրման համար անհրաժեշտ է collection',
+    documentsToExport: '{{count}} փdelays delays delays delay delays delay delays delays delay',
+    documentsToImport:
+      '{{count}} delays delays delays delay delays delay delays delay delays delay delays',
     exportDocumentLabel: 'Փոխարտադրել {{label}}',
     exportOptions: 'Արտահանման տարբերակներ',
     'field-collectionSlug-label': 'Հավաքածու',
@@ -33,6 +36,7 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     mode: 'Ռեժիմ',
     noDataToPreview:
       'Հավելվածի իմաստը պետք է պահպանեք Payload-ի կոնտեքստում։ Ահա Payload-ի որոշ պահանջական տերմիններ',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
     'selectionToUse-allDocuments': 'Օգտագործեք բոլոր փաստաթղթերը',
     'selectionToUse-currentFilters': 'Օգտագործեք ընթացիկ ֆիլտրերը',
     'selectionToUse-currentSelection': 'Օգտագործել ընթացիկ ընտրությունը',

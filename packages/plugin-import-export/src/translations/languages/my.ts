@@ -4,6 +4,8 @@ export const myTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'အားလုံးနေရာတွင်',
     collectionRequired: 'အနမ်းအနှစ်ပြသရန် Collection လိုအပ်သည်',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Eksport {{label}}',
     exportOptions: 'Pilihan Eksport',
     'field-collectionSlug-label': 'စုစုပေါင်း',
@@ -31,6 +33,7 @@ export const myTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Sejajar dengan',
     mode: 'Mod',
     noDataToPreview: 'Tiada data untuk pratonton.',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Gunakan semua dokumen',
     'selectionToUse-currentFilters': 'Gunakan penapis semasa',
     'selectionToUse-currentSelection': 'Gunakan pilihan semasa',

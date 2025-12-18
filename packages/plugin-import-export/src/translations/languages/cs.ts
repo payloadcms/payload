@@ -4,6 +4,8 @@ export const csTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Všechny lokalizace',
     collectionRequired: 'Je nutné mít sbírku k zobrazení náhledu.',
+    documentsToExport: '{{count}} dokumentů k exportu',
+    documentsToImport: '{{count}} dokumentů k importu',
     exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Možnosti exportu',
     'field-collectionSlug-label': 'Kolekce',
@@ -31,6 +33,7 @@ export const csTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Shoda podle',
     mode: 'Mód',
     noDataToPreview: 'Žádná data k prohlížení',
+    previewPageInfo: '{{start}}-{{end}} z {{total}}',
     'selectionToUse-allDocuments': 'Použijte všechny dokumenty',
     'selectionToUse-currentFilters': 'Použijte aktuální filtry',
     'selectionToUse-currentSelection': 'Použijte aktuální výběr',

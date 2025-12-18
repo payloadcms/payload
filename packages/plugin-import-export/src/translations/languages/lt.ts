@@ -4,6 +4,8 @@ export const ltTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Visos vietovės',
     collectionRequired: 'Reikalinga kolekcija norint rodyti peržiūrą',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Eksportuoti {{label}}',
     exportOptions: 'Eksporto parinktys',
     'field-collectionSlug-label': 'Kolekcija',
@@ -32,6 +34,7 @@ export const ltTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Atitikmuo pagal',
     mode: 'Režimas',
     noDataToPreview: 'Nėra duomenų, kuriuos galima peržiūrėti',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Naudokite visus dokumentus.',
     'selectionToUse-currentFilters': 'Naudoti esamus filtrus',
     'selectionToUse-currentSelection': 'Naudoti dabartinį pasirinkimą',

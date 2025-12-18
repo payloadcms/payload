@@ -4,6 +4,8 @@ export const ruTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Все локали',
     collectionRequired: 'Требуется коллекция для показа предварительного просмотра',
+    documentsToExport: '{{count}} документов для экспорта',
+    documentsToImport: '{{count}} документов для импорта',
     exportDocumentLabel: 'Экспорт {{label}}',
     exportOptions: 'Опции экспорта',
     'field-collectionSlug-label': 'Коллекция',
@@ -30,8 +32,8 @@ export const ruTranslations: PluginDefaultTranslationsObject = {
     importResults: 'Результаты импорта',
     matchBy: 'Соответствует',
     mode: 'Режим',
-    noDataToPreview:
-      'Относитесь с уважением к значению оригинального текста в контексте Payload. Вот список общих терминов Payload, которые имеют очень конкретные значения:\n    - Коллекция: Коллекция - это группа документов, которые имеют общую структуру и цель. Коллекции используются для организации и управления контентом в Payload.\n    - Поле: Поле - это конкретный элемент данных в документе коллекции. Поля оп',
+    noDataToPreview: 'Нет данных для предпросмотра',
+    previewPageInfo: '{{start}}-{{end}} из {{total}}',
     'selectionToUse-allDocuments': 'Используйте все документы',
     'selectionToUse-currentFilters': 'Использовать текущие фильтры',
     'selectionToUse-currentSelection': 'Использовать текущий выбор',

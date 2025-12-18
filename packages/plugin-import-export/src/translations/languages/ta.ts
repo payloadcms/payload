@@ -4,6 +4,8 @@ export const taTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'அனைத்து மொழிகள்',
     collectionRequired: 'முன்னோட்டத்தைக் காட்ட வேண்டிய தொகுப்பு',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: '{{label}} ஏற்றுமதி',
     exportOptions: 'ஏற்றுமதி விருப்பங்கள்',
     'field-collectionSlug-label': 'தொகுப்பு',
@@ -32,6 +34,7 @@ export const taTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'பொருத்தமாக உள்ளது',
     mode: 'முறை',
     noDataToPreview: 'எதேனும் தரவை முன்னோட்டத்தில் காட்ட இல்லை.',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'அனைத்து ஆவணங்களையும் பயன்படுத்தவும்',
     'selectionToUse-currentFilters': 'தற்போதைய வடிப்பான்களை பயன்படுத்தவும்',
     'selectionToUse-currentSelection': 'தற்போதைய தேர்வைப் பயன்படுத்தவும்',

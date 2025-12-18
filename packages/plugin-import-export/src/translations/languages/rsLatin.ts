@@ -4,6 +4,8 @@ export const rsLatinTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Sve lokalne postavke',
     collectionRequired: 'Potrebna kolekcija za prikazivanje pregleda',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Izvoz {{label}}',
     exportOptions: 'Opcije izvoza',
     'field-collectionSlug-label': 'Kolekcija',
@@ -31,6 +33,7 @@ export const rsLatinTranslations: PluginDefaultTranslationsObject = {
     matchBy: 'Upari po',
     mode: 'Način',
     noDataToPreview: 'Nema podataka za pregled',
+    previewPageInfo: '{{start}}-{{end}} of {{total}}',
     'selectionToUse-allDocuments': 'Koristite sve dokumente',
     'selectionToUse-currentFilters': 'Koristite trenutne filtere',
     'selectionToUse-currentSelection': 'Koristi trenutni izbor',
