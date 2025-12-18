@@ -11,6 +11,8 @@ import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 
+const DEFAULT_PREVIEW_LIMIT = 10
+
 export const handlePreview = async (req: PayloadRequest) => {
   await addDataAndFileToRequest(req)
 
@@ -18,9 +20,10 @@ export const handlePreview = async (req: PayloadRequest) => {
     collectionSlug,
     draft: draftFromReq,
     fields,
-    limit,
+    limit: exportLimit,
     locale,
-    page,
+    previewLimit = DEFAULT_PREVIEW_LIMIT,
+    previewPage = 1,
     sort,
     where: whereFromReq = {},
   } = req.data as {
@@ -30,7 +33,8 @@ export const handlePreview = async (req: PayloadRequest) => {
     format?: 'csv' | 'json'
     limit?: number
     locale?: string
-    page?: number
+    previewLimit?: number
+    previewPage?: number
     sort?: any
     where?: any
   }
@@ -54,22 +58,68 @@ export const handlePreview = async (req: PayloadRequest) => {
     and: [whereFromReq, draft ? {} : publishedWhere],
   }
 
+  // Count total docs matching export criteria
+  const countResult = await req.payload.count({
+    collection: collectionSlug,
+    overrideAccess: false,
+    req,
+    where,
+  })
+
+  const totalMatchingDocs = countResult.totalDocs
+
+  // Calculate actual export count (respecting export limit)
+  const exportTotalDocs =
+    exportLimit && exportLimit > 0 ? Math.min(totalMatchingDocs, exportLimit) : totalMatchingDocs
+
+  // Calculate preview pagination that respects export limit
+  // Preview should only show docs that will actually be exported
+  const previewStartIndex = (previewPage - 1) * previewLimit
+
+  // Calculate pagination info based on export limit (not raw DB results)
+  const previewTotalPages = Math.ceil(exportTotalDocs / previewLimit)
+
+  // If we're beyond the export limit, return empty
+  if (exportLimit && exportLimit > 0 && previewStartIndex >= exportLimit) {
+    return Response.json({
+      columns: [],
+      docs: [],
+      exportTotalDocs,
+      hasNextPage: false,
+      hasPrevPage: previewPage > 1,
+      limit: previewLimit,
+      page: previewPage,
+      totalDocs: exportTotalDocs,
+      totalPages: previewTotalPages,
+    })
+  }
+
+  // Fetch preview page with full previewLimit to maintain consistent pagination offsets
+  // We'll trim the results afterwards if needed to respect export limit
   const result = await req.payload.find({
     collection: collectionSlug,
     depth: 1,
     draft,
-    limit: limit && limit > 10 ? 10 : limit,
+    limit: previewLimit,
     locale,
     overrideAccess: false,
-    page,
+    page: previewPage,
     req,
     select,
     sort,
     where,
   })
 
+  // Trim docs to respect export limit boundary
+  let docs = result.docs
+  if (exportLimit && exportLimit > 0) {
+    const remainingInExport = exportLimit - previewStartIndex
+    if (remainingInExport < docs.length) {
+      docs = docs.slice(0, remainingInExport)
+    }
+  }
+
   const isCSV = req?.data?.format === 'csv'
-  const docs = result.docs
 
   let transformed: Record<string, unknown>[] = []
   let columns: string[] = []
@@ -145,11 +195,20 @@ export const handlePreview = async (req: PayloadRequest) => {
     })
   }
 
+  const hasNextPage = previewPage < previewTotalPages
+  const hasPrevPage = previewPage > 1
+
   return Response.json({
     columns: isCSV ? columns : undefined,
     docs: transformed,
-    page: result.page,
-    totalDocs: result.totalDocs,
-    totalPages: result.totalPages,
+    // Export count - actual number of docs that will be exported
+    exportTotalDocs,
+    // Preview pagination info (based on exportTotalDocs, not raw DB count)
+    hasNextPage,
+    hasPrevPage,
+    limit: previewLimit,
+    page: previewPage,
+    totalDocs: exportTotalDocs,
+    totalPages: previewTotalPages,
   })
 }

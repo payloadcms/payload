@@ -4536,6 +4536,147 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
+    it('should respect export limit when paginating preview (limit 11, per page 10)', async () => {
+      // Create 15 documents
+      for (let i = 0; i < 15; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Preview Pagination Test ${i}`,
+            _status: 'published',
+          },
+        })
+      }
+
+      // Request preview with export limit 11, preview per page 10
+      // Page 1 should have 10 docs
+      const responsePage1: {
+        docs: unknown[]
+        exportTotalDocs: number
+        hasNextPage: boolean
+        hasPrevPage: boolean
+        page: number
+        totalPages: number
+      } = await restClient
+        .POST('/exports/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: 11, // Export limit
+            previewLimit: 10, // Per page
+            previewPage: 1,
+            where: {
+              title: { contains: 'Preview Pagination Test' },
+            },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(responsePage1.docs).toHaveLength(10)
+      expect(responsePage1.exportTotalDocs).toBe(11)
+      expect(responsePage1.page).toBe(1)
+      expect(responsePage1.totalPages).toBe(2)
+      expect(responsePage1.hasNextPage).toBe(true)
+      expect(responsePage1.hasPrevPage).toBe(false)
+
+      // Page 2 should only have 1 doc (not 10)
+      const responsePage2: {
+        docs: unknown[]
+        exportTotalDocs: number
+        hasNextPage: boolean
+        hasPrevPage: boolean
+        page: number
+        totalPages: number
+      } = await restClient
+        .POST('/exports/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: 11, // Export limit
+            previewLimit: 10, // Per page
+            previewPage: 2,
+            where: {
+              title: { contains: 'Preview Pagination Test' },
+            },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(responsePage2.docs).toHaveLength(1) // Only 1 doc remaining within export limit
+      expect(responsePage2.exportTotalDocs).toBe(11)
+      expect(responsePage2.page).toBe(2)
+      expect(responsePage2.totalPages).toBe(2)
+      expect(responsePage2.hasNextPage).toBe(false)
+      expect(responsePage2.hasPrevPage).toBe(true)
+
+      // Clean up
+      await payload.delete({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Preview Pagination Test' },
+        },
+      })
+    })
+
+    it('should return empty docs when preview page exceeds export limit boundary', async () => {
+      // Create 5 documents
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Preview Boundary Test ${i}`,
+            _status: 'published',
+          },
+        })
+      }
+
+      // Request page 2 when export limit is 5 and preview per page is 10
+      // Page 2 would start at index 10, which is beyond export limit 5
+      const response: {
+        docs: unknown[]
+        exportTotalDocs: number
+        hasNextPage: boolean
+        page: number
+        totalPages: number
+      } = await restClient
+        .POST('/exports/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: 5, // Export limit
+            previewLimit: 10, // Per page
+            previewPage: 2, // This page is beyond the export limit
+            where: {
+              title: { contains: 'Preview Boundary Test' },
+            },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.docs).toHaveLength(0)
+      expect(response.exportTotalDocs).toBe(5)
+      expect(response.page).toBe(2)
+      expect(response.totalPages).toBe(1) // Only 1 page needed for 5 docs at 10 per page
+      expect(response.hasNextPage).toBe(false)
+
+      // Clean up
+      await payload.delete({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Preview Boundary Test' },
+        },
+      })
+    })
+
     it('should have matching column order between preview and export when no fields selected', async () => {
       // Get preview response (no fields selected - uses default ordering)
       const previewResponse: { columns: string[]; docs: unknown[] } = await restClient

@@ -1,10 +1,12 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
-import type { ClientField, Where } from 'payload'
+import type { ClientField, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
   CodeEditorLazy,
+  Pagination,
+  PerPage,
   Table,
   Translation,
   useConfig,
@@ -13,7 +15,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useMemo, useState, useTransition } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import type {
   PluginImportExportTranslationKeys,
@@ -25,6 +27,8 @@ import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'export-preview'
+const DEFAULT_PREVIEW_LIMIT = 10
+const PREVIEW_LIMIT_OPTIONS = [10, 25, 50]
 
 export const ExportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -34,25 +38,52 @@ export const ExportPreview: React.FC = () => {
     config: { routes },
   } = useConfig()
   const { collectionSlug } = useDocumentInfo()
-  const { draft, fields, format, limit, locale, page, sort, where } = useFormFields(([fields]) => {
+  const { draft, fields, format, limit, locale, sort, where } = useFormFields(([fields]) => {
     return {
       draft: fields['drafts']?.value,
       fields: fields['fields']?.value,
       format: fields['format']?.value,
       limit: fields['limit']?.value as number,
       locale: fields['locale']?.value as string,
-      page: fields['page']?.value as number,
       sort: fields['sort']?.value as string,
       where: fields['where']?.value as Where,
     }
   })
   const [dataToRender, setDataToRender] = useState<any[]>([])
-  const [resultCount, setResultCount] = useState<any>('')
+  const [exportTotalDocs, setExportTotalDocs] = useState<number>(0)
   const [columns, setColumns] = useState<Column[]>([])
   const { i18n, t } = useTranslation<
     PluginImportExportTranslations,
     PluginImportExportTranslationKeys
   >()
+
+  // Preview pagination state (separate from export config)
+  const [previewPage, setPreviewPage] = useState(1)
+  const [previewLimit, setPreviewLimit] = useState(DEFAULT_PREVIEW_LIMIT)
+  const [paginationData, setPaginationData] = useState<null | Pick<
+    PaginatedDocs,
+    'hasNextPage' | 'hasPrevPage' | 'limit' | 'nextPage' | 'page' | 'prevPage' | 'totalPages'
+  >>(null)
+
+  // Track previous export config to reset preview page when it changes
+  const prevExportConfigRef = useRef({ draft, fields, format, limit, locale, sort, where })
+
+  // Reset preview page when export config changes
+  useEffect(() => {
+    const prevConfig = prevExportConfigRef.current
+    const configChanged =
+      prevConfig.draft !== draft ||
+      prevConfig.limit !== limit ||
+      prevConfig.locale !== locale ||
+      prevConfig.sort !== sort ||
+      JSON.stringify(prevConfig.fields) !== JSON.stringify(fields) ||
+      JSON.stringify(prevConfig.where) !== JSON.stringify(where)
+
+    if (configChanged) {
+      setPreviewPage(1)
+      prevExportConfigRef.current = { draft, fields, format, limit, locale, sort, where }
+    }
+  }, [draft, fields, format, limit, locale, sort, where])
 
   const targetCollectionSlug = typeof collection === 'string' && collection
 
@@ -88,7 +119,8 @@ export const ExportPreview: React.FC = () => {
               format,
               limit,
               locale,
-              page,
+              previewLimit,
+              previewPage,
               sort,
               where,
             }),
@@ -105,11 +137,21 @@ export const ExportPreview: React.FC = () => {
           const {
             columns: serverColumns,
             docs,
-            totalDocs,
+            exportTotalDocs: serverExportTotalDocs,
+            hasNextPage,
+            hasPrevPage,
+            limit: responseLimit,
+            page: responsePage,
+            totalPages,
           }: {
             columns?: string[]
             docs: Record<string, unknown>[]
-            totalDocs: number
+            exportTotalDocs: number
+            hasNextPage: boolean
+            hasPrevPage: boolean
+            limit: number
+            page: number
+            totalPages: number
           } = await res.json()
 
           // For CSV: use server-provided columns (from getSchemaColumns) for consistent ordering
@@ -145,7 +187,16 @@ export const ExportPreview: React.FC = () => {
             }),
           }))
 
-          setResultCount(totalDocs)
+          setExportTotalDocs(serverExportTotalDocs)
+          setPaginationData({
+            hasNextPage,
+            hasPrevPage,
+            limit: responseLimit,
+            nextPage: responsePage + 1,
+            page: responsePage,
+            prevPage: responsePage - 1,
+            totalPages,
+          })
           setColumns(newColumns)
           setDataToRender(docs)
         } catch (error) {
@@ -170,7 +221,8 @@ export const ExportPreview: React.FC = () => {
       i18n,
       limit,
       locale,
-      page,
+      previewLimit,
+      previewPage,
       sort,
       where,
       routes.api,
@@ -179,22 +231,33 @@ export const ExportPreview: React.FC = () => {
     500,
   )
 
+  const handlePageChange = (page: number) => {
+    setPreviewPage(page)
+  }
+
+  const handlePerPageChange = (newLimit: number) => {
+    setPreviewLimit(newLimit)
+    setPreviewPage(1)
+  }
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         <h3>
           <Translation i18nKey="version:preview" t={t} />
         </h3>
-        {resultCount && !isPending && (
-          <Translation
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            i18nKey="plugin-import-export:totalDocumentsCount"
-            t={t}
-            variables={{
-              count: resultCount,
-            }}
-          />
+        {exportTotalDocs > 0 && !isPending && (
+          <span className={`${baseClass}__export-count`}>
+            <Translation
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              i18nKey="plugin-import-export:documentsToExport"
+              t={t}
+              variables={{
+                count: exportTotalDocs,
+              }}
+            />
+          </span>
         )}
       </div>
       {isPending && !dataToRender && (
@@ -208,6 +271,27 @@ export const ExportPreview: React.FC = () => {
         ) : (
           <CodeEditorLazy language="json" readOnly value={JSON.stringify(dataToRender, null, 2)} />
         ))}
+      {paginationData && exportTotalDocs > 0 && (
+        <div className={`${baseClass}__pagination`}>
+          {paginationData.totalPages > 1 && (
+            <Pagination
+              hasNextPage={paginationData.hasNextPage}
+              hasPrevPage={paginationData.hasPrevPage}
+              nextPage={paginationData.nextPage ?? undefined}
+              numberOfNeighbors={1}
+              onChange={handlePageChange}
+              page={paginationData.page}
+              prevPage={paginationData.prevPage ?? undefined}
+              totalPages={paginationData.totalPages}
+            />
+          )}
+          <PerPage
+            handleChange={handlePerPageChange}
+            limit={previewLimit}
+            limits={PREVIEW_LIMIT_OPTIONS}
+          />
+        </div>
+      )}
     </div>
   )
 }

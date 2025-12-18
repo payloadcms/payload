@@ -1,9 +1,11 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
-import type { ClientField, ConditionalDateProps } from 'payload'
+import type { ClientField, ConditionalDateProps, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
+  Pagination,
+  PerPage,
   Table,
   Translation,
   useConfig,
@@ -25,6 +27,8 @@ import type {
 import './index.scss'
 
 const baseClass = 'import-preview'
+const DEFAULT_PREVIEW_LIMIT = 10
+const PREVIEW_LIMIT_OPTIONS = [10, 25, 50]
 
 export const ImportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -52,8 +56,16 @@ export const ImportPreview: React.FC = () => {
 
   const [dataToRender, setDataToRender] = useState<Record<string, unknown>[]>([])
   const [columns, setColumns] = useState<Column[]>([])
-  const [resultCount, setResultCount] = useState<number>(0)
+  const [totalDocs, setTotalDocs] = useState<number>(0)
   const [error, setError] = useState<null | string>(null)
+
+  // Preview pagination state
+  const [previewPage, setPreviewPage] = useState(1)
+  const [previewLimit, setPreviewLimit] = useState(DEFAULT_PREVIEW_LIMIT)
+  const [paginationData, setPaginationData] = useState<null | Pick<
+    PaginatedDocs,
+    'hasNextPage' | 'hasPrevPage' | 'limit' | 'nextPage' | 'page' | 'prevPage' | 'totalPages'
+  >>(null)
 
   const collectionConfig = React.useMemo(
     () => config.collections.find((c) => c.slug === targetCollectionSlug),
@@ -69,14 +81,16 @@ export const ImportPreview: React.FC = () => {
       if (!targetCollectionSlug || (!url && !fileField?.value)) {
         setDataToRender([])
         setColumns([])
-        setResultCount(0)
+        setTotalDocs(0)
+        setPaginationData(null)
         return
       }
 
       if (!collectionConfig) {
         setDataToRender([])
         setColumns([])
-        setResultCount(0)
+        setTotalDocs(0)
+        setPaginationData(null)
         return
       }
 
@@ -117,7 +131,8 @@ export const ImportPreview: React.FC = () => {
           if (!fileData) {
             setDataToRender([])
             setColumns([])
-            setResultCount(0)
+            setTotalDocs(0)
+            setPaginationData(null)
             return
           }
 
@@ -127,6 +142,8 @@ export const ImportPreview: React.FC = () => {
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
+              previewLimit,
+              previewPage,
             }),
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -138,10 +155,34 @@ export const ImportPreview: React.FC = () => {
             throw new Error('Failed to process file')
           }
 
-          const { docs, totalDocs }: { docs: Record<string, unknown>[]; totalDocs: number } =
-            await res.json()
+          const {
+            docs,
+            hasNextPage,
+            hasPrevPage,
+            limit: responseLimit,
+            page: responsePage,
+            totalDocs: serverTotalDocs,
+            totalPages,
+          }: {
+            docs: Record<string, unknown>[]
+            hasNextPage: boolean
+            hasPrevPage: boolean
+            limit: number
+            page: number
+            totalDocs: number
+            totalPages: number
+          } = await res.json()
 
-          setResultCount(totalDocs)
+          setTotalDocs(serverTotalDocs)
+          setPaginationData({
+            hasNextPage,
+            hasPrevPage,
+            limit: responseLimit,
+            nextPage: responsePage + 1,
+            page: responsePage,
+            prevPage: responsePage - 1,
+            totalPages,
+          })
 
           if (!Array.isArray(docs) || docs.length === 0) {
             setDataToRender([])
@@ -388,13 +429,14 @@ export const ImportPreview: React.FC = () => {
           })
 
           setColumns(fieldColumns)
-          setDataToRender(docs.slice(0, 10)) // Limit preview to 10 rows
+          setDataToRender(docs)
         } catch (err) {
           console.error('Error processing file data:', err)
           setError(err instanceof Error ? err.message : 'Failed to load preview')
           setDataToRender([])
           setColumns([])
-          setResultCount(0)
+          setTotalDocs(0)
+          setPaginationData(null)
         }
       }
 
@@ -416,6 +458,8 @@ export const ImportPreview: React.FC = () => {
       collectionConfig,
       config,
       i18n,
+      previewLimit,
+      previewPage,
       routes.api,
     ],
     500,
@@ -501,23 +545,34 @@ export const ImportPreview: React.FC = () => {
     )
   }
 
+  const handlePageChange = (page: number) => {
+    setPreviewPage(page)
+  }
+
+  const handlePerPageChange = (newLimit: number) => {
+    setPreviewLimit(newLimit)
+    setPreviewPage(1)
+  }
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         <h3>
           <Translation i18nKey="version:preview" t={t} />
         </h3>
-        {resultCount > 0 && !isPending && (
-          <div>
-            <Translation
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              i18nKey="plugin-import-export:totalDocumentsCount"
-              t={t}
-              variables={{
-                count: resultCount,
-              }}
-            />
+        {totalDocs > 0 && !isPending && (
+          <div className={`${baseClass}__info`}>
+            <span className={`${baseClass}__import-count`}>
+              <Translation
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                i18nKey="plugin-import-export:documentsToImport"
+                t={t}
+                variables={{
+                  count: totalDocs,
+                }}
+              />
+            </span>
             {' | '}
             {/* @ts-expect-error - translations are not typed in plugins */}
             <Translation i18nKey="plugin-import-export:mode" t={t} />: {importMode || 'create'}
@@ -542,6 +597,27 @@ export const ImportPreview: React.FC = () => {
           {/* @ts-expect-error - translations are not typed in plugins */}
           <Translation i18nKey="plugin-import-export:noDataToPreview" t={t} />
         </p>
+      )}
+      {paginationData && totalDocs > 0 && (
+        <div className={`${baseClass}__pagination`}>
+          {paginationData.totalPages > 1 && (
+            <Pagination
+              hasNextPage={paginationData.hasNextPage}
+              hasPrevPage={paginationData.hasPrevPage}
+              nextPage={paginationData.nextPage ?? undefined}
+              numberOfNeighbors={1}
+              onChange={handlePageChange}
+              page={paginationData.page}
+              prevPage={paginationData.prevPage ?? undefined}
+              totalPages={paginationData.totalPages}
+            />
+          )}
+          <PerPage
+            handleChange={handlePerPageChange}
+            limit={previewLimit}
+            limits={PREVIEW_LIMIT_OPTIONS}
+          />
+        </div>
       )}
     </div>
   )

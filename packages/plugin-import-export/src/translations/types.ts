@@ -4,6 +4,8 @@ import type { enTranslations } from './languages/en.js'
 
 export type PluginLanguage = Language<{
   'plugin-import-export': {
+    documentsToExport: string
+    documentsToImport: string
     exportDocumentLabel: string
     exportOptions: string
     'field-collectionSlug-label': string

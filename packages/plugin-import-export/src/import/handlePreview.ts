@@ -8,13 +8,23 @@ import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { unflattenObject } from '../utilities/unflattenObject.js'
 
+const DEFAULT_PREVIEW_LIMIT = 10
+
 export const handlePreview = async (req: PayloadRequest) => {
   await addDataAndFileToRequest(req)
 
-  const { collectionSlug, fileData, format } = req.data as {
+  const {
+    collectionSlug,
+    fileData,
+    format,
+    previewLimit = DEFAULT_PREVIEW_LIMIT,
+    previewPage = 1,
+  } = req.data as {
     collectionSlug: string
     fileData?: string
     format?: 'csv' | 'json'
+    previewLimit?: number
+    previewPage?: number
   }
 
   const targetCollection = req.payload.collections[collectionSlug]
@@ -66,9 +76,24 @@ export const handlePreview = async (req: PayloadRequest) => {
       parsedData = parsedData.map((doc) => removeDisabledFields(doc, disabledFields))
     }
 
+    // Calculate pagination
+    const totalDocs = parsedData.length
+    const totalPages = Math.ceil(totalDocs / previewLimit)
+    const startIndex = (previewPage - 1) * previewLimit
+    const endIndex = startIndex + previewLimit
+    const paginatedDocs = parsedData.slice(startIndex, endIndex)
+
+    const hasNextPage = previewPage < totalPages
+    const hasPrevPage = previewPage > 1
+
     return Response.json({
-      docs: parsedData,
-      totalDocs: parsedData.length,
+      docs: paginatedDocs,
+      hasNextPage,
+      hasPrevPage,
+      limit: previewLimit,
+      page: previewPage,
+      totalDocs,
+      totalPages,
     })
   } catch (error) {
     req.payload.logger.error({ err: error, msg: 'Error parsing import preview data' })

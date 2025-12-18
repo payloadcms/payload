@@ -3,6 +3,8 @@ export const enTranslations = {
   'plugin-import-export': {
     allLocales: 'All locales',
     collectionRequired: 'Collection required to show preview',
+    documentsToExport: '{{count}} documents to export',
+    documentsToImport: '{{count}} documents to import',
     exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Export Options',
     'field-collectionSlug-label': 'Collection',
