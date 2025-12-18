@@ -243,6 +243,7 @@ Your custom component can use helper components from `@payloadcms/richtext-lexic
 
 ```tsx
 'use client'
+import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
 import {
   BlockCollapsible,
   BlockEditButton,
@@ -250,7 +251,7 @@ import {
 } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 
-export const MyBlockComponent = () => {
+export const MyBlockComponent: React.FC<LexicalBlockClientProps> = () => {
   const style = useFormFields(([fields]) => fields.style)
 
   return (
@@ -269,6 +270,7 @@ For inline blocks, similar helper components are available:
 
 ```tsx
 'use client'
+import type { LexicalInlineBlockClientProps } from '@payloadcms/richtext-lexical'
 import {
   InlineBlockContainer,
   InlineBlockEditButton,
@@ -276,7 +278,9 @@ import {
   InlineBlockRemoveButton,
 } from '@payloadcms/richtext-lexical/client'
 
-export const MyInlineBlockComponent = () => {
+export const MyInlineBlockComponent: React.FC<
+  LexicalInlineBlockClientProps
+> = () => {
   return (
     <InlineBlockContainer>
       <InlineBlockLabel />
@@ -418,6 +422,53 @@ export const Code: React.FC<CodeFieldClientProps> = ({
   Make sure to explicitly install `@payloadcms/ui` in your project when creating
   custom field components.
 </Banner>
+
+### TypeScript
+
+When building custom block components, you can import the following types for proper typing:
+
+```ts
+import type {
+  // Block component types
+  LexicalBlockClientProps,
+  LexicalBlockServerProps,
+
+  // Block label component types
+  LexicalBlockLabelClientProps,
+  LexicalBlockLabelServerProps,
+
+  // Inline block component types
+  LexicalInlineBlockClientProps,
+  LexicalInlineBlockServerProps,
+
+  // Inline block label component types
+  LexicalInlineBlockLabelClientProps,
+  LexicalInlineBlockLabelServerProps,
+} from '@payloadcms/richtext-lexical'
+```
+
+| Type                                     | Use Case                                             |
+| ---------------------------------------- | ---------------------------------------------------- |
+| **`LexicalBlockClientProps`**            | Client component for `admin.components.Block`        |
+| **`LexicalBlockServerProps`**            | Server component for `admin.components.Block`        |
+| **`LexicalBlockLabelClientProps`**       | Client component for `admin.components.Label`        |
+| **`LexicalBlockLabelServerProps`**       | Server component for `admin.components.Label`        |
+| **`LexicalInlineBlockClientProps`**      | Client component for inline `admin.components.Block` |
+| **`LexicalInlineBlockServerProps`**      | Server component for inline `admin.components.Block` |
+| **`LexicalInlineBlockLabelClientProps`** | Client component for inline `admin.components.Label` |
+| **`LexicalInlineBlockLabelServerProps`** | Server component for inline `admin.components.Label` |
+
+Example usage:
+
+```tsx
+'use client'
+import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
+import { BlockCollapsible } from '@payloadcms/richtext-lexical/client'
+
+export const MyBlockComponent: React.FC<LexicalBlockClientProps> = (props) => {
+  return <BlockCollapsible>{/* Your custom block UI */}</BlockCollapsible>
+}
+```
 
 ## Data Structure
 
