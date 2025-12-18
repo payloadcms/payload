@@ -5,3 +5,4 @@ export const mediaWithAlwaysInsertFieldsSlug = 'media-with-always-insert-fields'
 export const prefix = 'test-prefix'
 
 export const mediaWithSignedDownloadsSlug = 'media-with-signed-downloads'
+export const mediaWithDirectAccessSlug = 'media-with-direct-access'

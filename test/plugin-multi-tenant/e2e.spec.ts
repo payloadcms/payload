@@ -17,6 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
+import { openRelationshipFieldDrawer } from '../helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import {
   clearSelectInput,
@@ -513,6 +514,78 @@ test.describe('Multi Tenant', () => {
       })
       await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
       await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
+    })
+  })
+
+  test.describe('Polymorphic Relationships', () => {
+    test('should not duplicate tenant constraints in polymorphic relationship queries', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Capture render-list server action requests
+      const renderListRequests: Array<{
+        payload: any[]
+        url: string
+      }> = []
+
+      page.on('request', (request) => {
+        // Check for server action POST requests
+        if (
+          request.method() === 'POST' &&
+          request.url().includes(`/admin/collections/${menuItemsSlug}`)
+        ) {
+          const postData = request.postData()
+          if (postData) {
+            try {
+              const parsedPayload = JSON.parse(postData)
+              // Check if this is a render-list action
+              if (Array.isArray(parsedPayload) && parsedPayload[0]?.name === 'render-list') {
+                renderListRequests.push({
+                  url: request.url(),
+                  payload: parsedPayload,
+                })
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
+      })
+
+      // Navigate to existing menu item
+      await page.goto(menuItemsURL.list)
+      await clearTenantFilter({ page })
+
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await openRelationshipFieldDrawer({
+        page,
+        fieldName: 'polymorphicRelationship',
+        selectRelation: 'Relationship', // select a tenant-enabled collection
+      })
+
+      await expect.poll(() => renderListRequests.length).toBeGreaterThan(0)
+
+      // Check the query.where clause for tenant constraint duplication
+      for (const request of renderListRequests) {
+        const renderListAction = request.payload[0]
+        await expect.poll(() => renderListAction.name).toBe('render-list')
+        await expect.poll(() => renderListAction.args).toBeDefined()
+        await expect.poll(() => renderListAction.args.query).toBeDefined()
+
+        const whereString = JSON.stringify(renderListAction.args.query.where)
+        const tenantMatches = whereString.match(/"tenant":/g)?.length
+
+        await expect.poll(() => tenantMatches).toEqual(1)
+      }
     })
   })
 
