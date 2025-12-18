@@ -129,6 +129,8 @@ BlocksFeature({
 
 ## Code Block
 
+<PayloadMedia mediaID="69448939caf2c46e92a857a9" />
+
 Payload provides a pre-built `CodeBlock` that you can use directly in your projects. It includes syntax highlighting, language selection, and optional TypeScript type definitions support:
 
 ```ts
@@ -225,6 +227,8 @@ You can customize how blocks appear in the editor by providing custom React comp
 
 ### Block Components
 
+<PayloadMedia mediaID="69448a6ecaf2c46e92a857c2" />
+
 For regular blocks, use the `admin.components.Block` property to provide a custom component:
 
 ```ts
@@ -250,6 +254,7 @@ Your custom component can use composable primitives from `@payloadcms/richtext-l
 ```tsx
 'use client'
 import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
+
 import {
   BlockCollapsible,
   BlockEditButton,
@@ -261,11 +266,63 @@ export const MyBlockComponent: React.FC<LexicalBlockClientProps> = () => {
   const style = useFormFields(([fields]) => fields.style)
 
   return (
-    <BlockCollapsible>
+    <BlockCollapsible removeButton={false}>
       <div>Style: {(style?.value as string) ?? 'none'}</div>
-      <BlockEditButton />
-      <BlockRemoveButton />
+      <div>
+        You can manually render the remove and edit buttons if you want to:
+      </div>
+      <div style={{ display: 'flex' }}>
+        <BlockEditButton />
+        <BlockRemoveButton />
+      </div>
     </BlockCollapsible>
+  )
+}
+```
+
+Just like inline blocks, the BlockCollapsible component will automatically render an edit button for custom blocks. This button displays a drawer with the block's fields so your editors can edit them. You can change this behavior and customize other aspects of the block's UI by passing props to the BlockCollapsible component.
+
+You can also choose to render something completely different in your custom block component:
+
+<PayloadMedia mediaID="69448bc4caf2c46e92a857db" />
+
+```tsx
+'use client'
+import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
+
+import {
+  BlockEditButton,
+  BlockRemoveButton,
+} from '@payloadcms/richtext-lexical/client'
+import { useFormFields } from '@payloadcms/ui'
+
+export const BlockComponent: React.FC<LexicalBlockClientProps> = () => {
+  const content = useFormFields(([fields]) => fields.content)
+
+  return (
+    <div
+      style={{
+        background: '#6198FF',
+        borderRadius: 8,
+        color: 'black',
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: 8,
+        }}
+      >
+        <strong>⚠️ Banner</strong>
+        <div style={{ display: 'flex' }}>
+          <BlockEditButton />
+          <BlockRemoveButton />
+        </div>
+      </div>
+      <p style={{ margin: 0 }}>{(content?.value as string) || 'No content'}</p>
+    </div>
   )
 }
 ```
@@ -274,9 +331,12 @@ export const MyBlockComponent: React.FC<LexicalBlockClientProps> = () => {
 
 For inline blocks, similar composable primitives are available:
 
+<PayloadMedia mediaID="69448c6c4c5a3ac5b9be6bd1" />
+
 ```tsx
 'use client'
 import type { LexicalInlineBlockClientProps } from '@payloadcms/richtext-lexical'
+
 import {
   InlineBlockContainer,
   InlineBlockEditButton,
@@ -289,10 +349,54 @@ export const MyInlineBlockComponent: React.FC<
 > = () => {
   return (
     <InlineBlockContainer>
+      <span style={{ backgroundColor: 'lightgreen', color: 'black' }}>1</span>
       <InlineBlockLabel />
+      <span style={{ backgroundColor: 'lightgreen', color: 'black' }}>2</span>
       <InlineBlockEditButton />
+      <span style={{ backgroundColor: 'lightgreen', color: 'black' }}>3</span>
       <InlineBlockRemoveButton />
     </InlineBlockContainer>
+  )
+}
+```
+
+Or, you can choose to render something completely different in your custom inline block component, for example a badge with a username:
+
+<PayloadMedia mediaID="69448fb34c5a3ac5b9be6bf3" />
+
+```tsx
+'use client'
+import type { LexicalInlineBlockClientProps } from '@payloadcms/richtext-lexical'
+
+import {
+  InlineBlockEditButton,
+  InlineBlockRemoveButton,
+} from '@payloadcms/richtext-lexical/client'
+import { useFormFields } from '@payloadcms/ui'
+
+export const MyInlineBlockComponent: React.FC<
+  LexicalInlineBlockClientProps
+> = () => {
+  const username = useFormFields(([fields]) => fields.username)
+
+  return (
+    <div
+      style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: 12,
+        color: 'white',
+        display: 'flex',
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        padding: '2px 8px',
+      }}
+    >
+      @{(username?.value as string) || 'username'}
+      <div style={{ color: 'white', fill: 'inline-flex' }}>
+        <InlineBlockEditButton />
+        <InlineBlockRemoveButton />
+      </div>
+    </div>
   )
 }
 ```
@@ -303,23 +407,33 @@ You can also customize the label shown in the block header using `admin.componen
 
 **Block Label:**
 
+<PayloadMedia mediaID="6944875ba6d8eab67a52bddb" />
+
 ```tsx
 'use client'
 import type { LexicalBlockLabelClientProps } from '@payloadcms/richtext-lexical'
+
 import { useFormFields } from '@payloadcms/ui'
 
 export const MyBlockLabel: React.FC<LexicalBlockLabelClientProps> = () => {
   const title = useFormFields(([fields]) => fields.title)
 
-  return <span>{(title?.value as string) || 'Untitled Block'}</span>
+  return (
+    <div style={{ backgroundColor: 'lightgreen', color: 'black' }}>
+      Custom Label. Value of title field: {title?.value as string}
+    </div>
+  )
 }
 ```
 
 **Inline Block Label:**
 
+<PayloadMedia mediaID="69448867caf2c46e92a85788" />
+
 ```tsx
 'use client'
 import type { LexicalInlineBlockLabelClientProps } from '@payloadcms/richtext-lexical'
+
 import { useFormFields } from '@payloadcms/ui'
 
 export const MyInlineBlockLabel: React.FC<
@@ -327,7 +441,11 @@ export const MyInlineBlockLabel: React.FC<
 > = () => {
   const name = useFormFields(([fields]) => fields.name)
 
-  return <span>@{(name?.value as string) || 'unknown'}</span>
+  return (
+    <span style={{ backgroundColor: 'lightgreen', color: 'black' }}>
+      Custom Label. Name field: {name?.value as string}
+    </span>
+  )
 }
 ```
 
