@@ -9181,10 +9181,6 @@
     "tables": {},
     "columns": {}
   },
-<<<<<<<< HEAD:templates/with-vercel-website/src/migrations/20251208_015431_initial.json
-  "id": "e5955cfa-7c36-4ec9-87fe-2fa9daf5c4e3",
-========
-  "id": "39a710ea-5b17-43d5-bf1c-6010b856e4d7",
->>>>>>>> origin/main:templates/with-vercel-website/src/migrations/20251216_194333_initial.json
+  "id": "e85f95b7-36fb-4c30-8a88-32389efa7d01",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
