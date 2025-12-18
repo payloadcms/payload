@@ -1,0 +1,453 @@
+---
+title: Blocks
+label: Blocks
+order: 36
+desc: Using the BlocksFeature to add custom blocks and inline blocks to the Lexical editor
+keywords: lexical, rich text, editor, blocks, inline blocks, custom blocks
+---
+
+The `BlocksFeature` allows you to embed Payload's [Blocks Field](/docs/fields/blocks) directly inside your Lexical rich text editor. This provides a powerful way to create structured, reusable content components within your rich text content.
+
+<Banner type="success">
+  Blocks within Lexical support the same features as standard Payload
+  blocks—including all field types, hooks, validation, access control, and
+  conditional logic. The only difference is that the data is stored within the
+  rich text JSON structure rather than as separate fields.
+</Banner>
+
+## Basic Setup
+
+To add blocks to your Lexical editor, include the `BlocksFeature` in your editor configuration:
+
+```ts
+import { lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
+
+{
+  name: 'content',
+  type: 'richText',
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            slug: 'banner',
+            fields: [
+              {
+                name: 'style',
+                type: 'select',
+                options: ['info', 'warning', 'error', 'success'],
+                defaultValue: 'info',
+              },
+              {
+                name: 'content',
+                type: 'textarea',
+                required: true,
+              },
+            ],
+          },
+          {
+            slug: 'cta',
+            fields: [
+              {
+                name: 'heading',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'link',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      }),
+    ],
+  }),
+}
+```
+
+<PayloadMedia mediaID="694343f20b5443302f1ac8ea" />
+
+## Blocks vs Inline Blocks
+
+The `BlocksFeature` supports two types of blocks:
+
+### Blocks
+
+Regular blocks are **block-level elements** that take up an entire line, similar to paragraphs or headings. They cannot be placed inline with text.
+
+Use blocks for:
+
+- Call-to-action sections
+- Image galleries
+- Code snippets
+- Embedded content (videos, maps)
+- Any component that should stand alone
+
+### Inline Blocks
+
+Inline blocks can be **inserted within text**, appearing alongside other content in the same paragraph. They're useful for elements that need to flow with text.
+
+Use inline blocks for:
+
+- Mentions (@user)
+- Custom badges or tags
+- Inline icons or emojis
+- Variable placeholders
+- Footnote references
+
+```ts
+BlocksFeature({
+  // Block-level blocks
+  blocks: [
+    {
+      slug: 'callout',
+      fields: [{ name: 'content', type: 'textarea' }],
+    },
+  ],
+  // Inline blocks (appear within text)
+  inlineBlocks: [
+    {
+      slug: 'mention',
+      fields: [
+        {
+          name: 'user',
+          type: 'relationship',
+          relationTo: 'users',
+          required: true,
+        },
+      ],
+    },
+  ],
+})
+```
+
+{/* IMAGE_PLACEHOLDER: Comparison showing a block vs inline block in the editor */}
+
+## Block Configuration
+
+Blocks use the same configuration schema as Payload's [Blocks Field](/docs/fields/blocks). Each block can include:
+
+| Option                       | Description                                          |
+| ---------------------------- | ---------------------------------------------------- |
+| **`slug`**                   | Unique identifier for the block                      |
+| **`fields`**                 | Array of [Payload fields](/docs/fields/overview)     |
+| **`labels`**                 | Singular and plural labels for the admin UI          |
+| **`imageURL`**               | URL to an image shown in the block selector          |
+| **`imageAltText`**           | Alt text for the block selector image                |
+| **`admin.components.Block`** | Custom component to render the block                 |
+| **`admin.components.Label`** | Custom component for the block label                 |
+| **`admin.disableBlockName`** | Hide the block name input field                      |
+| **`interfaceName`**          | Custom TypeScript interface name for generated types |
+
+## Code Block
+
+Payload provides a pre-built `CodeBlock` that you can use directly in your projects. It includes syntax highlighting, language selection, and optional TypeScript type definitions support:
+
+```ts
+import { BlocksFeature, CodeBlock } from '@payloadcms/richtext-lexical'
+
+BlocksFeature({
+  blocks: [
+    CodeBlock({
+      defaultLanguage: 'ts',
+      languages: {
+        plaintext: 'Plain Text',
+        js: 'JavaScript',
+        ts: 'TypeScript',
+        tsx: 'TSX',
+        jsx: 'JSX',
+      },
+    }),
+  ],
+})
+```
+
+{/* IMAGE_PLACEHOLDER: Screenshot of the CodeBlock in the editor with syntax highlighting */}
+
+### CodeBlock Options
+
+| Option                | Description                                                       |
+| --------------------- | ----------------------------------------------------------------- |
+| **`slug`**            | Override the block slug. Default: `'Code'`                        |
+| **`defaultLanguage`** | The default language selection. Default: first key in `languages` |
+| **`languages`**       | Object mapping language keys to display labels                    |
+| **`typescript`**      | TypeScript-specific configuration (see below)                     |
+| **`fieldOverrides`**  | Partial block config to override or extend the default CodeBlock  |
+
+### TypeScript Support
+
+When using TypeScript as a language option, you can load external type definitions to provide IntelliSense in the editor:
+
+```ts
+CodeBlock({
+  slug: 'PayloadCode',
+  languages: {
+    ts: 'TypeScript',
+  },
+  typescript: {
+    fetchTypes: [
+      {
+        url: 'https://unpkg.com/payload@3.59.0-internal.8435f3c/dist/index.bundled.d.ts',
+        filePath: 'file:///node_modules/payload/index.d.ts',
+      },
+      {
+        url: 'https://unpkg.com/@types/react@19.1.17/index.d.ts',
+        filePath: 'file:///node_modules/@types/react/index.d.ts',
+      },
+    ],
+    paths: {
+      payload: ['file:///node_modules/payload/index.d.ts'],
+      react: ['file:///node_modules/@types/react/index.d.ts'],
+    },
+    typeRoots: ['node_modules/@types', 'node_modules/payload'],
+    enableSemanticValidation: true,
+  },
+})
+```
+
+| TypeScript Option              | Description                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| **`fetchTypes`**               | Array of `{ url, filePath }` objects to fetch external type definitions        |
+| **`paths`**                    | Module path mappings for import resolution                                     |
+| **`typeRoots`**                | Directories to search for type definitions. Default: `['node_modules/@types']` |
+| **`target`**                   | TypeScript compilation target. Default: `'ESNext'`                             |
+| **`enableSemanticValidation`** | Enable full type checking (not just syntax). Default: `false`                  |
+
+## Custom Block Components
+
+You can customize how blocks appear in the editor by providing custom React components. This is useful when you want a more visual representation of your block content.
+
+### Block Components
+
+For regular blocks, use the `admin.components.Block` property to provide a custom component:
+
+```ts
+{
+  slug: 'myCustomBlock',
+  admin: {
+    components: {
+      Block: '/path/to/MyBlockComponent#MyBlockComponent',
+    },
+  },
+  fields: [
+    {
+      name: 'style',
+      type: 'select',
+      options: ['primary', 'secondary'],
+    },
+  ],
+}
+```
+
+Your custom component can use helper components from `@payloadcms/richtext-lexical/client`:
+
+```tsx
+'use client'
+import {
+  BlockCollapsible,
+  BlockEditButton,
+  BlockRemoveButton,
+} from '@payloadcms/richtext-lexical/client'
+import { useFormFields } from '@payloadcms/ui'
+
+export const MyBlockComponent = () => {
+  const style = useFormFields(([fields]) => fields.style)
+
+  return (
+    <BlockCollapsible>
+      <div>Style: {(style?.value as string) ?? 'none'}</div>
+      <BlockEditButton />
+      <BlockRemoveButton />
+    </BlockCollapsible>
+  )
+}
+```
+
+### Inline Block Components
+
+For inline blocks, similar helper components are available:
+
+```tsx
+'use client'
+import {
+  InlineBlockContainer,
+  InlineBlockEditButton,
+  InlineBlockLabel,
+  InlineBlockRemoveButton,
+} from '@payloadcms/richtext-lexical/client'
+
+export const MyInlineBlockComponent = () => {
+  return (
+    <InlineBlockContainer>
+      <InlineBlockLabel />
+      <InlineBlockEditButton />
+      <InlineBlockRemoveButton />
+    </InlineBlockContainer>
+  )
+}
+```
+
+### Example: Dynamic Code Block
+
+Here's a more complete example showing a custom code block with a dynamic language picker. This demonstrates how to access sibling field values and customize the field's behavior:
+
+**Field Config:**
+
+```ts
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const languages = {
+  ts: 'TypeScript',
+  plaintext: 'Plain Text',
+  tsx: 'TSX',
+  js: 'JavaScript',
+  jsx: 'JSX',
+}
+
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            slug: 'Code',
+            fields: [
+              {
+                type: 'select',
+                name: 'language',
+                options: Object.entries(languages).map(([key, value]) => ({
+                  label: value,
+                  value: key,
+                })),
+                defaultValue: 'ts',
+              },
+              {
+                admin: {
+                  components: {
+                    Field: '/path/to/CodeComponent#Code',
+                  },
+                },
+                name: 'code',
+                type: 'code',
+              },
+            ],
+          }
+        ],
+      }),
+    ],
+  }),
+}
+```
+
+**CodeComponent.tsx:**
+
+```tsx
+'use client'
+import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
+
+import { CodeField, useFormFields } from '@payloadcms/ui'
+import React, { useMemo } from 'react'
+
+import { languages } from './yourFieldConfig'
+
+const languageKeyToMonacoLanguageMap = {
+  plaintext: 'plaintext',
+  ts: 'typescript',
+  tsx: 'typescript',
+}
+
+type Language = keyof typeof languageKeyToMonacoLanguageMap
+
+export const Code: React.FC<CodeFieldClientProps> = ({
+  autoComplete,
+  field,
+  forceRender,
+  path,
+  permissions,
+  readOnly,
+  renderedBlocks,
+  schemaPath,
+  validate,
+}) => {
+  const languageField = useFormFields(([fields]) => fields['language'])
+
+  const language: Language =
+    (languageField?.value as Language) ||
+    (languageField?.initialValue as Language) ||
+    'ts'
+
+  const label = languages[language]
+
+  const props: CodeFieldClient = useMemo<CodeFieldClient>(
+    () => ({
+      ...field,
+      type: 'code',
+      admin: {
+        ...field.admin,
+        editorOptions: undefined,
+        language: languageKeyToMonacoLanguageMap[language] || language,
+      },
+      label,
+    }),
+    [field, language, label],
+  )
+
+  const key = `${field.name}-${language}-${label}`
+
+  return (
+    <CodeField
+      autoComplete={autoComplete}
+      field={props}
+      forceRender={forceRender}
+      key={key}
+      path={path}
+      permissions={permissions}
+      readOnly={readOnly}
+      renderedBlocks={renderedBlocks}
+      schemaPath={schemaPath}
+      validate={validate}
+    />
+  )
+}
+```
+
+<Banner type="warning">
+  Make sure to explicitly install `@payloadcms/ui` in your project when creating
+  custom field components.
+</Banner>
+
+{/* IMAGE_PLACEHOLDER: Screenshot of the custom code block with language dropdown */}
+
+## Data Structure
+
+Block data is stored within the Lexical JSON structure. Each block node contains a `fields` object with all the block's field values:
+
+```json
+{
+  "type": "block",
+  "version": 2,
+  "fields": {
+    "id": "65298b13db4ef8c744a7faaa", // <= default field available on all blocks
+    "blockType": "banner", // <= default field available on all blocks
+    "blockName": "Important Notice", // <= default field available on all blocks
+    "style": "warning", // <= custom field
+    "content": "This is the block content..." // <= custom field
+  }
+}
+```
+
+Inline blocks follow a similar structure with `type: "inlineBlock"`.
+
+## Rendering Blocks
+
+When rendering rich text content on the frontend, blocks need to be handled by your converter configuration. See the following guides for details:
+
+- [JSX Converters](/docs/rich-text/converting-jsx) - For React/Next.js applications
+- [HTML Converters](/docs/rich-text/converting-html) - For static HTML output
+- [Markdown Converters](/docs/rich-text/converting-markdown) - For markdown output
+  Each converter allows you to define custom renderers for your block types, giving you full control over how block content appears on your frontend.
