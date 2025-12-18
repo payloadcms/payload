@@ -64,13 +64,13 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       }
 
       const user = docs[0]?.user as TypedUser
-      user.collection =
+      const customUserCollection =
         typeof pluginOptions.userCollection === 'string'
           ? pluginOptions.userCollection
-          : (pluginOptions.userCollection?.slug as CollectionSlug) || ('users' as CollectionSlug)
+          : pluginOptions.userCollection?.slug
+      user.collection = customUserCollection ?? 'users'
       user._strategy = 'mcp-api-key' as const
 
-      console.log(user)
       return docs[0] as unknown as MCPAccessSettings
     }
 
