@@ -36,7 +36,6 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -285,7 +284,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, serverURL, t],
+    [i18n, addOptions, api, errorLoading, t],
   )
 
   /**

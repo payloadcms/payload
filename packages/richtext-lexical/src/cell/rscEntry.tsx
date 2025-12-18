@@ -72,6 +72,7 @@ export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) =
       ? formatAdminURL({
           adminRoute,
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          serverURL,
         })
       : ''
   }

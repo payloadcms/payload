@@ -57,6 +57,7 @@ export const RscEntrySlateCell: React.FC<
       ? formatAdminURL({
           adminRoute,
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          serverURL,
         })
       : ''
   }

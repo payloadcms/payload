@@ -144,7 +144,7 @@ const DocumentInfo: React.FC<
     [initialData, initialState, localeIsLoading],
   )
 
-  const baseAPIURL = formatApiURL({
+  const baseAPIPath = formatApiURL({
     apiRoute: api,
     path: '',
   })
@@ -173,7 +173,7 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const request = await requests.get(`${baseAPIURL}/payload-locked-documents`, {
+        const request = await requests.get(`${baseAPIPath}/payload-locked-documents`, {
           credentials: 'include',
           params: isGlobal
             ? {
@@ -189,7 +189,7 @@ const DocumentInfo: React.FC<
 
         if (docs?.length > 0) {
           const lockID = docs[0].id
-          await requests.delete(`${baseAPIURL}/payload-locked-documents/${lockID}`, {
+          await requests.delete(`${baseAPIPath}/payload-locked-documents/${lockID}`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [baseAPIURL, globalSlug, setDocumentIsLocked],
+    [baseAPIPath, globalSlug, setDocumentIsLocked],
   )
 
   const updateDocumentEditor = useCallback(
@@ -211,7 +211,7 @@ const DocumentInfo: React.FC<
         const isGlobal = slug === globalSlug
 
         // Check if the document is already locked
-        const request = await requests.get(`${baseAPIURL}/payload-locked-documents`, {
+        const request = await requests.get(`${baseAPIPath}/payload-locked-documents`, {
           credentials: 'include',
           params: isGlobal
             ? {
@@ -234,7 +234,7 @@ const DocumentInfo: React.FC<
               : { relationTo: 'users', value: user }
 
           // Send a patch request to update the _lastEdited info
-          await requests.patch(`${baseAPIURL}/payload-locked-documents/${lockID}`, {
+          await requests.patch(`${baseAPIPath}/payload-locked-documents/${lockID}`, {
             body: JSON.stringify({
               user: userData,
             }),
@@ -249,7 +249,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to update the document editor', error)
       }
     },
-    [baseAPIURL, globalSlug],
+    [baseAPIPath, globalSlug],
   )
 
   const getDocPermissions = useGetDocPermissions({
@@ -346,7 +346,7 @@ const DocumentInfo: React.FC<
   const action: string = React.useMemo(() => {
     const docPath = `${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
 
-    return `${baseAPIURL}${docPath}${qs.stringify(
+    return `${baseAPIPath}${docPath}${qs.stringify(
       {
         depth: 0,
         'fallback-locale': 'null',
@@ -357,7 +357,7 @@ const DocumentInfo: React.FC<
         addQueryPrefix: true,
       },
     )}`
-  }, [baseAPIURL, locale, pluralType, id, slug, uploadEdits])
+  }, [baseAPIPath, locale, pluralType, id, slug, uploadEdits])
 
   const value: DocumentInfoContext = {
     ...props,

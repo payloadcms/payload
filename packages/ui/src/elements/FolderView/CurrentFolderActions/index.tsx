@@ -52,7 +52,7 @@ export function CurrentFolderActions({ className }: Props) {
   const deleteCurrentFolder = React.useCallback(async () => {
     await fetch(
       formatApiURL({
-        apiRoute: routes.api as `/${string}`,
+        apiRoute: routes.api,
         path: `/${folderCollectionSlug}/${folderID}?depth=0`,
       }),
       {

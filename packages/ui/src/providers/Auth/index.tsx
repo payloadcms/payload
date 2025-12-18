@@ -119,11 +119,12 @@ export function AuthProvider({
   const id = user?.id
 
   const redirectToInactivityRoute = useCallback(() => {
+    const baseAdminRoute = formatAdminURL({ adminRoute, path: '' })
     startRouteTransition(() =>
       router.replace(
         formatAdminURL({
           adminRoute,
-          path: `${logoutInactivityRoute}${window.location.pathname.startsWith(adminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
+          path: `${logoutInactivityRoute}${window.location.pathname.startsWith(baseAdminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
         }),
       ),
     )

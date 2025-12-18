@@ -122,7 +122,7 @@ export const OrderableTable: React.FC<Props> = ({
 
       const response = await fetch(
         formatApiURL({
-          apiRoute: config.routes.api as `/${string}`,
+          apiRoute: config.routes.api,
           path: '/reorder',
         }),
         {

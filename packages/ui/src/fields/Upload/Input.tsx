@@ -280,7 +280,7 @@ export function UploadInput(props: UploadInputProps) {
         }
         const response = await fetch(
           formatApiURL({
-            apiRoute: api as `/${string}`,
+            apiRoute: api,
             path: `/${collection}`,
           }),
           {

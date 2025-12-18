@@ -57,7 +57,7 @@ export function ListEmptyTrashButton({
       try {
         const res = await requests.get(
           formatApiURL({
-            apiRoute: config.routes.api as `/${string}`,
+            apiRoute: config.routes.api,
             path: `/${collectionConfig.slug}${queryString}`,
           }),
           {
@@ -101,7 +101,7 @@ export function ListEmptyTrashButton({
 
     const res = await requests.delete(
       formatApiURL({
-        apiRoute: config.routes.api as `/${string}`,
+        apiRoute: config.routes.api,
         path: `/${slug}${queryString}`,
       }),
       {

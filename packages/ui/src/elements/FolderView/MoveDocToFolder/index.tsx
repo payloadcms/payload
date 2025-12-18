@@ -1,7 +1,5 @@
 'use client'
 
-import type { CollectionSlug } from 'payload'
-
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { type FolderOrDocument, formatApiURL } from 'payload/shared'
@@ -54,7 +52,7 @@ export function MoveDocToFolder({
       if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
         const response = await fetch(
           formatApiURL({
-            apiRoute: config.routes.api as `/${string}`,
+            apiRoute: config.routes.api,
             path: `/${folderCollectionSlug}/${fromFolderID}`,
           }),
         )

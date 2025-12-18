@@ -42,7 +42,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   }, [cellDataFromProps, field])
 
   const { config, getEntityConfig } = useConfig()
-  const { collections, routes } = config
+  const { collections } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
   const { documents, getRelationships } = useListRelationships()

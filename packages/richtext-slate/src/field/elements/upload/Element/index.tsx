@@ -77,7 +77,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}` }),
+    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}`, serverURL }),
     { initialParams },
   )
 

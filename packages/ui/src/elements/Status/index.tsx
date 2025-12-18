@@ -36,7 +36,6 @@ export const Status: React.FC = () => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -158,7 +157,6 @@ export const Status: React.FC = () => {
       incrementVersionCount,
       locale,
       resetForm,
-      serverURL,
       setUnpublishedVersionCount,
       setMostRecentVersionIsAutosaved,
       t,

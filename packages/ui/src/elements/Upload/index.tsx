@@ -159,7 +159,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -318,7 +317,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     fileUrl,
     handleFileChange,
     id,
-    serverURL,
     setUploadStatus,
     uploadConfig,
     uploadControlFileName,

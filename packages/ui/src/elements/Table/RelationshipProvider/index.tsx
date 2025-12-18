@@ -42,7 +42,6 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
     config: {
       collections,
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -112,7 +111,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         }
       })
     },
-    [debouncedDocuments, serverURL, api, i18n, locale, collections],
+    [debouncedDocuments, api, i18n, locale, collections],
   )
 
   useEffect(() => {

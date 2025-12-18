@@ -94,7 +94,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}` }),
+    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 

@@ -43,7 +43,7 @@ export const FolderTableCellClient = ({
       try {
         await fetch(
           formatApiURL({
-            apiRoute: config.routes.api as `/${string}`,
+            apiRoute: config.routes.api,
             path: `/${collectionSlug}/${docID}`,
           }),
           {
@@ -73,7 +73,7 @@ export const FolderTableCellClient = ({
       try {
         const req = await fetch(
           formatApiURL({
-            apiRoute: config.routes.api as `/${string}`,
+            apiRoute: config.routes.api,
             path: `/${folderCollectionSlug}${intialFolderID ? `/${intialFolderID}` : ''}`,
           }),
           {

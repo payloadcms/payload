@@ -158,7 +158,7 @@ export const handleEndpoints = async ({
 
     const pathname = path ?? new URL(req.url!).pathname
     const baseAPIPath = formatApiURL({
-      apiRoute: config.routes.api as `/${string}`,
+      apiRoute: config.routes.api,
       path: '',
     })
 

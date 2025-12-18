@@ -178,6 +178,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             formatApiURL({
               apiRoute: config.routes.api,
               path: `/${collection}/${id}`,
+              serverURL: config.serverURL,
             }),
             {
               headers: {

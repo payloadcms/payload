@@ -85,7 +85,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
     }
 
     const url = formatApiURL({
-      apiRoute: routes.api as `/${string}`,
+      apiRoute: routes.api,
       path: `/${slug}${qs.stringify(
         {
           limit: 0,

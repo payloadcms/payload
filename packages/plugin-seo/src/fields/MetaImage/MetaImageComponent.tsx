@@ -107,7 +107,6 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     setValue(newValue || '')
   }, [
     hasGenerateImageFn,
-
     api,
     docInfo.id,
     docInfo.collectionSlug,

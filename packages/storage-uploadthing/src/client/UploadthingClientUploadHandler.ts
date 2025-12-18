@@ -4,10 +4,11 @@ import { formatApiURL } from 'payload/shared'
 import { genUploader } from 'uploadthing/client'
 
 export const UploadthingClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath }) => {
+  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
     const endpointRoute = formatApiURL({
       apiRoute,
       path: `${serverHandlerPath}?collectionSlug=${collectionSlug}`,
+      serverURL,
     })
     const { uploadFiles } = genUploader({
       package: 'storage-uploadthing',

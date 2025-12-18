@@ -17,11 +17,13 @@ export const VercelBlobClientUploadHandler =
       extra: { addRandomSuffix, baseURL, prefix = '' },
       file,
       serverHandlerPath,
+      serverURL,
       updateFilename,
     }) => {
       const endpointRoute = formatApiURL({
         apiRoute,
         path: serverHandlerPath,
+        serverURL,
       })
       const result = await upload(`${prefix}${file.name}`, file, {
         access: 'public',

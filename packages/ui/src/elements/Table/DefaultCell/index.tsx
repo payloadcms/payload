@@ -33,7 +33,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     config: {
       routes: { admin: adminRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()

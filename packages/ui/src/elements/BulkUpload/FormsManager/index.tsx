@@ -145,12 +145,12 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
-  const apiRoute = formatApiURL({
+  const baseAPIPath = formatApiURL({
     apiRoute: api,
     path: '',
   })
 
-  const actionURL = `${apiRoute}/${collectionSlug}`
+  const actionURL = `${baseAPIPath}/${collectionSlug}`
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
@@ -158,7 +158,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     }
 
     const docAccessURL = `/${collectionSlug}/access`
-    const res = await fetch(`${apiRoute}${docAccessURL}?${qs.stringify(params)}`, {
+    const res = await fetch(`${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`, {
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -168,17 +168,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     })
 
     const json: SanitizedDocumentPermissions = await res.json()
-    const publishedAccessJSON = await fetch(`${apiRoute}${docAccessURL}?${qs.stringify(params)}`, {
-      body: JSON.stringify({
-        _status: 'published',
-      }),
-      credentials: 'include',
-      headers: {
-        'Accept-Language': i18n.language,
-        'Content-Type': 'application/json',
+    const publishedAccessJSON = await fetch(
+      `${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`,
+      {
+        body: JSON.stringify({
+          _status: 'published',
+        }),
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
       },
-      method: 'POST',
-    }).then((res) => res.json())
+    ).then((res) => res.json())
 
     setDocPermissions(json)
 
@@ -192,7 +195,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     setHasPublishPermission(publishedAccessJSON?.update)
     setHasInitializedDocPermissions(true)
-  }, [apiRoute, code, collectionSlug, i18n.language])
+  }, [baseAPIPath, code, collectionSlug, i18n.language])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {

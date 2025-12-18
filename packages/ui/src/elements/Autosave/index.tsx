@@ -9,6 +9,7 @@ import {
   hasDraftValidationEnabled,
   reduceFieldsToValues,
 } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
@@ -109,12 +110,24 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           let url: string
           let method: string
           let entitySlug: string
+          const queryParams = qs.stringify(
+            {
+              autosave: true,
+              depth: 0,
+              draft: true,
+              'fallback-locale': 'null',
+              locale,
+            },
+            {
+              addQueryPrefix: true,
+            },
+          )
 
           if (collection && id) {
             entitySlug = collection.slug
             url = formatApiURL({
               apiRoute: api,
-              path: `/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`,
+              path: `/${entitySlug}/${id}${queryParams}`,
             })
             method = 'PATCH'
           }
@@ -123,7 +136,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             entitySlug = globalDoc.slug
             url = formatApiURL({
               apiRoute: api,
-              path: `/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`,
+              path: `/globals/${entitySlug}${queryParams}`,
             })
             method = 'POST'
           }

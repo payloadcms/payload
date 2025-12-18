@@ -56,7 +56,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}` }),
+    formatApiURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 

@@ -67,12 +67,17 @@ export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
     try {
       const url = formatApiURL({
         apiRoute: api,
-        path: `/${collectionSlug}?${qs.stringify({
-          trash: true,
-          where: {
-            and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
+        path: `/${collectionSlug}${qs.stringify(
+          {
+            trash: true,
+            where: {
+              and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
+            },
           },
-        })}`,
+          {
+            addQueryPrefix: true,
+          },
+        )}`,
       })
 
       const res = await requests.delete(url, {

@@ -108,7 +108,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue(generatedTitle || '')
   }, [
     hasGenerateTitleFn,
-
     api,
     docInfo.id,
     docInfo.collectionSlug,

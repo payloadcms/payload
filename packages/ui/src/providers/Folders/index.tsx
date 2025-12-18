@@ -694,7 +694,7 @@ export function FolderProvider({
         )
         const req = await fetch(
           formatApiURL({
-            apiRoute: routes.api as `/${string}`,
+            apiRoute: routes.api,
             path: `/${folderCollectionSlug}/${folderID}${queryParams}`,
           }),
           {
@@ -729,7 +729,7 @@ export function FolderProvider({
           try {
             await fetch(
               formatApiURL({
-                apiRoute: routes.api as `/${string}`,
+                apiRoute: routes.api,
                 path: `/${collectionSlug}${queryParams}`,
               }),
               {
