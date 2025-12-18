@@ -5,6 +5,30 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/**
+ * Parse catalog entries from pnpm-workspace.yaml
+ * Simple parser that doesn't require external yaml library
+ */
+function parseCatalog(yaml: string): Record<string, string> {
+  const catalog: Record<string, string> = {}
+  const catalogMatch = yaml.match(/catalog:\n((?: {2}[^\n]+\n)+)/)
+  if (catalogMatch?.[1]) {
+    const lines = catalogMatch[1].split('\n').filter(Boolean)
+    for (const line of lines) {
+      // Match "  package-name: version" format - specific pattern to avoid backtracking
+      const colonIndex = line.indexOf(':')
+      if (colonIndex > 0) {
+        const key = line.slice(2, colonIndex).trim()
+        const value = line.slice(colonIndex + 1).trim()
+        if (key && value) {
+          catalog[key] = value
+        }
+      }
+    }
+  }
+  return catalog
+}
+
 export const tgzToPkgNameMap = {
   payload: 'payload-*',
   '@payloadcms/admin-bar': 'payloadcms-admin-bar-*',
@@ -65,14 +89,29 @@ export function setupProd() {
   const packageJsonString = fs.readFileSync(path.resolve(dirname, 'package.json'), 'utf8')
   const packageJson = JSON.parse(packageJsonString)
 
-  const allDependencies = {}
-  // Go through all the dependencies and devDependencies, replace the normal package entry with the tgz entry
+  // Parse catalog from root pnpm-workspace.yaml to resolve catalog: entries
+  // This is needed because --ignore-workspace ignores all workspace config including catalogs
+  const rootWorkspaceYamlPath = path.resolve(dirname, '../pnpm-workspace.yaml')
+  const rootWorkspaceYaml = fs.readFileSync(rootWorkspaceYamlPath, 'utf-8')
+  const catalog = parseCatalog(rootWorkspaceYaml)
+
+  const allDependencies: Record<string, string> = {}
+  // Go through all the dependencies and devDependencies:
+  // 1. Replace catalog: entries with actual versions from root catalog
+  // 2. Replace workspace packages with tgz entries
   for (const key of ['dependencies', 'devDependencies']) {
-    const dependencies = packageJson[key]
+    const dependencies = packageJson[key] as Record<string, string> | undefined
     if (dependencies) {
-      for (const [packageName, _packageVersion] of Object.entries(dependencies)) {
-        if (tgzToPkgNameMap[packageName]) {
-          const actualTgzPath = findActualTgzName(tgzToPkgNameMap[packageName])
+      for (const [packageName, packageVersion] of Object.entries(dependencies)) {
+        // Replace catalog: protocol with actual version
+        if (packageVersion === 'catalog:' && catalog[packageName]) {
+          dependencies[packageName] = catalog[packageName]
+        }
+
+        // Replace workspace packages with tgz paths
+        const tgzPattern = tgzToPkgNameMap[packageName as keyof typeof tgzToPkgNameMap]
+        if (tgzPattern) {
+          const actualTgzPath = findActualTgzName(tgzPattern)
           if (actualTgzPath) {
             dependencies[packageName] = actualTgzPath
             allDependencies[packageName] = actualTgzPath

@@ -70,8 +70,8 @@
     "@types/escape-html": "^1.0.4",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
+    "copyfiles": "catalog:",
+    "cross-env": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {
