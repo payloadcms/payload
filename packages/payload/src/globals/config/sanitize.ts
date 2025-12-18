@@ -123,6 +123,10 @@ export const sanitizeGlobal = async (
         }
       }
 
+      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
+        ? global.versions.drafts.localizeStatus
+        : false
+
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
