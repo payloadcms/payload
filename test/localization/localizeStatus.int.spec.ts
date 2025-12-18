@@ -98,7 +98,7 @@ describe('localizeStatus migration', () => {
 
         // Check that _status data was migrated to locales table
         const localesData = await db.drizzle.execute(sql`
-        SELECT _locale, _parent_id, _status
+        SELECT _locale, _parent_id, version__status as _status
         FROM _test_migration_posts_v_locales
         ORDER BY _parent_id, _locale
       `)
@@ -201,13 +201,13 @@ describe('localizeStatus migration', () => {
           sql,
         })
 
-        // Step 3: Verify that _status column was added to locales table
+        // Step 3: Verify that version__status column was added to locales table
         const columnCheck = await db.drizzle.execute(sql`
         SELECT EXISTS (
           SELECT FROM information_schema.columns
           WHERE table_schema = 'public'
           AND table_name = '_test_migration_articles_v_locales'
-          AND column_name = '_status'
+          AND column_name = 'version__status'
         ) as exists
       `)
 
@@ -215,7 +215,7 @@ describe('localizeStatus migration', () => {
 
         // Step 4: Verify migration completed successfully
         const localesData = await db.drizzle.execute(sql`
-        SELECT l._locale, l._status
+        SELECT l._locale, l.version__status as _status
         FROM _test_migration_articles_v_locales l
         JOIN _test_migration_articles_v v ON l._parent_id = v.id
         WHERE v.parent_id = ${article.id}
@@ -249,13 +249,13 @@ describe('localizeStatus migration', () => {
           sql,
         })
 
-        // Verify _status column dropped from locales table
+        // Verify version__status column dropped from locales table
         const afterDownColumnCheck = await db.drizzle.execute(sql`
         SELECT EXISTS (
           SELECT FROM information_schema.columns
           WHERE table_schema = 'public'
           AND table_name = '_test_migration_articles_v_locales'
-          AND column_name = '_status'
+          AND column_name = 'version__status'
         ) as exists
       `)
 
@@ -340,7 +340,7 @@ describe('localizeStatus migration', () => {
           v.id as version_id,
           v.created_at,
           l._locale,
-          l._status
+          l.version__status as _status
         FROM _test_migration_posts_v v
         JOIN _test_migration_posts_v_locales l ON l._parent_id = v.id
         WHERE v.parent_id = ${post.id}
@@ -478,7 +478,7 @@ describe('localizeStatus migration', () => {
         SELECT
           v.id as version_id,
           l._locale,
-          l._status
+          l.version__status as _status
         FROM _test_migration_articles_v v
         JOIN _test_migration_articles_v_locales l ON l._parent_id = v.id
         WHERE v.parent_id = ${parentId}

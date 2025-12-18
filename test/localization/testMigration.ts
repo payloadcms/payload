@@ -122,7 +122,7 @@ async function main() {
   } else {
     const db = payload.db as any
     const result = await db.drizzle.execute(sql`
-      SELECT v.id as version_id, l._locale, l._status
+      SELECT v.id as version_id, l._locale, l.version__status as _status
       FROM _test_migration_posts_v v
       JOIN _test_migration_posts_v_locales l ON l._parent_id = v.id
       WHERE v.parent_id = ${post.id}
