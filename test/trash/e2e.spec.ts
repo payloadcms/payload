@@ -175,7 +175,7 @@ describe('Trash', () => {
         await expect(threeDotMenu).toBeVisible()
         await threeDotMenu.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
         await expect(page.locator('#delete-forever')).toBeHidden()
       })
 
@@ -186,7 +186,7 @@ describe('Trash', () => {
         await expect(threeDotMenu).toBeVisible()
         await threeDotMenu.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
         await expect(page.locator('#delete-forever')).toBeVisible()
       })
 
@@ -197,7 +197,7 @@ describe('Trash', () => {
         await expect(threeDotMenuOne).toBeVisible()
         await threeDotMenuOne.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
 
         // Check the checkbox to delete permanently
         await page.locator('#delete-forever').check()
@@ -214,7 +214,7 @@ describe('Trash', () => {
         await expect(threeDotMenuTwo).toBeVisible()
         await threeDotMenuTwo.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
 
         // Skip the checkbox to delete permanently and default to trashing
 

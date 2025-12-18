@@ -26,6 +26,7 @@ export const Logout: React.FC<{
       routes: { logout: logoutRoute },
     },
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   return (
@@ -35,6 +36,7 @@ export const Logout: React.FC<{
       href={formatAdminURL({
         adminRoute,
         path: logoutRoute,
+        serverURL,
       })}
       prefetch={false}
       tabIndex={tabIndex}

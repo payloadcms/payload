@@ -224,7 +224,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 
 export async function openLocaleSelector(page: Page): Promise<void> {
   const button = page.locator('.localizer button.popup-button')
-  const popup = page.locator('.localizer .popup.popup--active')
+  const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {
     await button.click()
@@ -233,7 +233,7 @@ export async function openLocaleSelector(page: Page): Promise<void> {
 }
 
 export async function closeLocaleSelector(page: Page): Promise<void> {
-  const popup = page.locator('.localizer .popup.popup--active')
+  const popup = page.locator('.popup__content')
 
   if (await popup.isVisible()) {
     await page.click('body', { position: { x: 0, y: 0 } })
@@ -245,14 +245,12 @@ export async function changeLocale(page: Page, newLocale: string) {
   await openLocaleSelector(page)
 
   const currentlySelectedLocale = await page
-    .locator(
-      `.localizer .popup.popup--active .popup-button-list__button--selected .localizer__locale-code`,
-    )
+    .locator(`.popup__content .popup-button-list__button--selected .localizer__locale-code`)
     .textContent()
 
   if (currentlySelectedLocale !== `(${newLocale})`) {
     const localeToSelect = page
-      .locator('.localizer .popup.popup--active .popup-button-list__button')
+      .locator('.popup__content .popup-button-list__button')
       .locator('.localizer__locale-code', {
         hasText: `${newLocale}`,
       })

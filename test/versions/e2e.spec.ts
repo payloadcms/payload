@@ -63,6 +63,7 @@ import {
   disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftsNoReadVersionsSlug,
   draftWithChangeHookCollectionSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
@@ -96,6 +97,7 @@ describe('Versions', () => {
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
   let errorOnUnpublishURL: AdminUrlUtil
+  let draftsNoReadVersionsURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -134,6 +136,7 @@ describe('Versions', () => {
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
+      draftsNoReadVersionsURL = new AdminUrlUtil(serverURL, draftsNoReadVersionsSlug)
     })
 
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
@@ -937,6 +940,54 @@ describe('Versions', () => {
         expect(scanResults.elementsWithoutIndicators).toBe(0)
       })
     })
+
+    describe('without readVersions permission', () => {
+      test('should show Draft status when creating and saving a new draft document', async () => {
+        await page.goto(draftsNoReadVersionsURL.create)
+        await page.locator('#field-title').fill('Test Draft Title')
+        await page.locator('#field-description').fill('Test Draft Description')
+
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+
+        await expect(page.locator('#action-unpublish')).toBeHidden()
+      })
+
+      test('should show Published status after publishing a draft document', async () => {
+        await page.goto(draftsNoReadVersionsURL.create)
+        await page.locator('#field-title').fill('Test Publish Title')
+        await page.locator('#field-description').fill('Test Publish Description')
+
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+
+        await page.locator('#action-save').click()
+
+        await expect(page.locator('.doc-controls__status .status__value')).toContainText(
+          'Published',
+        )
+
+        await expect(page.locator('#action-unpublish')).toBeVisible()
+      })
+
+      test('should maintain Draft status when saving draft multiple times', async () => {
+        await page.goto(draftsNoReadVersionsURL.create)
+        await page.locator('#field-title').fill('Test Multiple Saves')
+        await page.locator('#field-description').fill('Initial Description')
+
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+
+        await page.locator('#field-description').fill('Updated Description')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+        await expect(page.locator('#action-unpublish')).toBeHidden()
+      })
+    })
   })
 
   describe('draft globals', () => {
@@ -1200,7 +1251,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+      const publishSpecificLocale = page.locator('.popup__content')
 
       await expect(publishSpecificLocale).toContainText('English')
     })
@@ -1645,7 +1696,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+      const publishSpecificLocale = page.locator('.popup__content')
 
       await expect(publishSpecificLocale).toContainText('English')
     })
@@ -2370,7 +2421,7 @@ describe('Versions', () => {
       await publishDropdown.click()
 
       const schedulePublishButton = page.locator(
-        '.popup-button-list__button:has-text("Schedule Publish")',
+        '.popup__content .popup-button-list__button:has-text("Schedule Publish")',
       )
       await schedulePublishButton.click()
 

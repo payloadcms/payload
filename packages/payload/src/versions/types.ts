@@ -39,10 +39,11 @@ export type IncomingDrafts = {
    */
   autosave?: Autosave | boolean
   /**
-   * If true, status will be localized
+   * Localizes the status field.
+   *
+   * Only effective if the experimental `experimental.localizeStatus` is enabled.
    *
    * @experimental
-   *
    * @default false
    */
   localizeStatus?: boolean
@@ -65,10 +66,11 @@ export type SanitizedDrafts = {
    */
   autosave: Autosave | false
   /**
-   * If true, status will be localized
+   * Localizes the status field.
+   *
+   * Only effective if the experimental `experimental.localizeStatus` is enabled.
    *
    * @experimental
-   *
    * @default false
    */
   localizeStatus?: boolean

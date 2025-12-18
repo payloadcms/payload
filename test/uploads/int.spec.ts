@@ -1285,6 +1285,116 @@ describe('Collections - Uploads', () => {
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
     })
   })
+
+  describe('HTTP Range Requests', () => {
+    let uploadedDoc: Media
+    let uploadedFilename: string
+    let fileSize: number
+
+    beforeAll(async () => {
+      // Upload a test file for range request testing
+      const filePath = path.join(dirname, './audio.mp3')
+      const file = await getFileByPath(filePath)
+
+      uploadedDoc = (await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      uploadedFilename = uploadedDoc.filename
+      const stats = await stat(filePath)
+      fileSize = stats.size
+    })
+
+    it('should return Accept-Ranges header on full file request', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`)
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Accept-Ranges')).toBe('bytes')
+      expect(response.headers.get('Content-Length')).toBe(String(fileSize))
+    })
+
+    it('should handle range request with single byte range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=0-1023' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 0-1023/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe('1024')
+      expect(response.headers.get('Accept-Ranges')).toBe('bytes')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1024)
+    })
+
+    it('should handle range request with open-ended range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=1024-' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 1024-${fileSize - 1}/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe(String(fileSize - 1024))
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(fileSize - 1024)
+    })
+
+    it('should handle range request for suffix bytes', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=-512' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(
+        `bytes ${fileSize - 512}-${fileSize - 1}/${fileSize}`,
+      )
+      expect(response.headers.get('Content-Length')).toBe('512')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(512)
+    })
+
+    it('should return 416 for invalid range (start > file size)', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: `bytes=${fileSize + 1000}-` },
+      })
+
+      expect(response.status).toBe(416)
+      expect(response.headers.get('Content-Range')).toBe(`bytes */${fileSize}`)
+    })
+
+    it('should handle multi-range requests by returning first range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=0-1023,2048-3071' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 0-1023/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe('1024')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1024)
+    })
+
+    it('should handle range at end of file', async () => {
+      const lastByte = fileSize - 1
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: `bytes=${lastByte}-${lastByte}` },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(
+        `bytes ${lastByte}-${lastByte}/${fileSize}`,
+      )
+      expect(response.headers.get('Content-Length')).toBe('1')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1)
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {

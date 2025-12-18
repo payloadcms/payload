@@ -74,6 +74,7 @@ export const Restore: React.FC<Props> = ({
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionConfig.slug}/${originalDocID}`,
+        serverURL,
       })
     }
 
@@ -82,6 +83,7 @@ export const Restore: React.FC<Props> = ({
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/globals/${globalConfig.slug}`,
+        serverURL,
       })
     }
 
