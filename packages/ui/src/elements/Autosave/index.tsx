@@ -117,7 +117,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               depth: 0,
               draft: true,
               'fallback-locale': 'null',
-              locale: localeRef.current,
+              locale,
             },
             {
               addQueryPrefix: true,
@@ -126,13 +126,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
+            url = `${serverURL}${api}/${entitySlug}/${id}${params}`
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
+            url = `${serverURL}${api}/globals/${entitySlug}${params}`
             method = 'POST'
           }
 
