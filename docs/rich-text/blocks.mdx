@@ -69,6 +69,8 @@ import { lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
 }
 ```
 
+Blocks use the same configuration schema as Blocks within Payload's [Blocks Field](/docs/fields/blocks).
+
 ## Blocks vs Inline Blocks
 
 <PayloadMedia mediaID="694363f344068e126d9341cb" />
@@ -124,22 +126,6 @@ BlocksFeature({
   ],
 })
 ```
-
-## Block Configuration
-
-Blocks use the same configuration schema as Payload's [Blocks Field](/docs/fields/blocks). Each block can include:
-
-| Option                       | Description                                          |
-| ---------------------------- | ---------------------------------------------------- |
-| **`slug`**                   | Unique identifier for the block                      |
-| **`fields`**                 | Array of [Payload fields](/docs/fields/overview)     |
-| **`labels`**                 | Singular and plural labels for the admin UI          |
-| **`imageURL`**               | URL to an image shown in the block selector          |
-| **`imageAltText`**           | Alt text for the block selector image                |
-| **`admin.components.Block`** | Custom component to render the block                 |
-| **`admin.components.Label`** | Custom component for the block label                 |
-| **`admin.disableBlockName`** | Hide the block name input field                      |
-| **`interfaceName`**          | Custom TypeScript interface name for generated types |
 
 ## Code Block
 
@@ -212,6 +198,26 @@ CodeBlock({
 | **`typeRoots`**                | Directories to search for type definitions. Default: `['node_modules/@types']` |
 | **`target`**                   | TypeScript compilation target. Default: `'ESNext'`                             |
 | **`enableSemanticValidation`** | Enable full type checking (not just syntax). Default: `false`                  |
+
+## Data Structure
+
+Block data is stored within the Lexical JSON structure. Each block node contains a `fields` object with all the block's field values:
+
+```json
+{
+  "type": "block",
+  "version": 2,
+  "fields": {
+    "id": "65298b13db4ef8c744a7faaa", // default field available on all blocks
+    "blockType": "banner", // default field available on all blocks
+    "blockName": "Important Notice", // default field available on all blocks
+    "style": "warning", // custom field
+    "content": "This is the block content..." // custom field
+  }
+}
+```
+
+Inline blocks follow a similar structure with `type: "inlineBlock"`.
 
 ## Custom Block Components
 
@@ -291,137 +297,43 @@ export const MyInlineBlockComponent: React.FC<
 }
 ```
 
-### Example: Dynamic Code Block
+### Label Components
 
-Here's a more complete example showing a custom code block with a dynamic language picker. This demonstrates how to access sibling field values and customize the field's behavior:
+You can also customize the label shown in the block header using `admin.components.Label`. This is useful for displaying dynamic information based on the block's field values.
 
-**Field Config:**
-
-```ts
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-
-export const languages = {
-  ts: 'TypeScript',
-  plaintext: 'Plain Text',
-  tsx: 'TSX',
-  js: 'JavaScript',
-  jsx: 'JSX',
-}
-
-{
-  name: 'richText',
-  type: 'richText',
-  editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [
-      ...defaultFeatures,
-      BlocksFeature({
-        blocks: [
-          {
-            slug: 'Code',
-            fields: [
-              {
-                type: 'select',
-                name: 'language',
-                options: Object.entries(languages).map(([key, value]) => ({
-                  label: value,
-                  value: key,
-                })),
-                defaultValue: 'ts',
-              },
-              {
-                admin: {
-                  components: {
-                    Field: '/path/to/CodeComponent#Code',
-                  },
-                },
-                name: 'code',
-                type: 'code',
-              },
-            ],
-          }
-        ],
-      }),
-    ],
-  }),
-}
-```
-
-**CodeComponent.tsx:**
+**Block Label:**
 
 ```tsx
 'use client'
-import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
+import type { LexicalBlockLabelClientProps } from '@payloadcms/richtext-lexical'
+import { useFormFields } from '@payloadcms/ui'
 
-import { CodeField, useFormFields } from '@payloadcms/ui'
-import React, { useMemo } from 'react'
+export const MyBlockLabel: React.FC<LexicalBlockLabelClientProps> = () => {
+  const title = useFormFields(([fields]) => fields.title)
 
-import { languages } from './yourFieldConfig'
-
-const languageKeyToMonacoLanguageMap = {
-  plaintext: 'plaintext',
-  ts: 'typescript',
-  tsx: 'typescript',
-}
-
-type Language = keyof typeof languageKeyToMonacoLanguageMap
-
-export const Code: React.FC<CodeFieldClientProps> = ({
-  autoComplete,
-  field,
-  forceRender,
-  path,
-  permissions,
-  readOnly,
-  renderedBlocks,
-  schemaPath,
-  validate,
-}) => {
-  const languageField = useFormFields(([fields]) => fields['language'])
-
-  const language: Language =
-    (languageField?.value as Language) ||
-    (languageField?.initialValue as Language) ||
-    'ts'
-
-  const label = languages[language]
-
-  const props: CodeFieldClient = useMemo<CodeFieldClient>(
-    () => ({
-      ...field,
-      type: 'code',
-      admin: {
-        ...field.admin,
-        editorOptions: undefined,
-        language: languageKeyToMonacoLanguageMap[language] || language,
-      },
-      label,
-    }),
-    [field, language, label],
-  )
-
-  const key = `${field.name}-${language}-${label}`
-
-  return (
-    <CodeField
-      autoComplete={autoComplete}
-      field={props}
-      forceRender={forceRender}
-      key={key}
-      path={path}
-      permissions={permissions}
-      readOnly={readOnly}
-      renderedBlocks={renderedBlocks}
-      schemaPath={schemaPath}
-      validate={validate}
-    />
-  )
+  return <span>{(title?.value as string) || 'Untitled Block'}</span>
 }
 ```
 
-<Banner type="warning">
-  Make sure to explicitly install `@payloadcms/ui` in your project when creating
-  custom field components.
-</Banner>
+**Inline Block Label:**
+
+```tsx
+'use client'
+import type { LexicalInlineBlockLabelClientProps } from '@payloadcms/richtext-lexical'
+import { useFormFields } from '@payloadcms/ui'
+
+export const MyInlineBlockLabel: React.FC<
+  LexicalInlineBlockLabelClientProps
+> = () => {
+  const name = useFormFields(([fields]) => fields.name)
+
+  return <span>@{(name?.value as string) || 'unknown'}</span>
+}
+```
+
+### Example: Pre-made CodeBlock
+
+For a real-world example of a custom block component, see the [source code for Payload's pre-made CodeBlock](https://github.com/payloadcms/payload/blob/main/packages/richtext-lexical/src/features/blocks/premade/CodeBlock/index.ts). It's a standard block with a custom `admin.components.Block` component that uses the same APIs documented above—including `useFormFields`, `BlockCollapsible`, and the helper buttons.
 
 ### TypeScript
 
@@ -457,38 +369,6 @@ import type {
 | **`LexicalInlineBlockServerProps`**      | Server component for inline `admin.components.Block` |
 | **`LexicalInlineBlockLabelClientProps`** | Client component for inline `admin.components.Label` |
 | **`LexicalInlineBlockLabelServerProps`** | Server component for inline `admin.components.Label` |
-
-Example usage:
-
-```tsx
-'use client'
-import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
-import { BlockCollapsible } from '@payloadcms/richtext-lexical/client'
-
-export const MyBlockComponent: React.FC<LexicalBlockClientProps> = (props) => {
-  return <BlockCollapsible>{/* Your custom block UI */}</BlockCollapsible>
-}
-```
-
-## Data Structure
-
-Block data is stored within the Lexical JSON structure. Each block node contains a `fields` object with all the block's field values:
-
-```json
-{
-  "type": "block",
-  "version": 2,
-  "fields": {
-    "id": "65298b13db4ef8c744a7faaa", // default field available on all blocks
-    "blockType": "banner", // default field available on all blocks
-    "blockName": "Important Notice", // default field available on all blocks
-    "style": "warning", // custom field
-    "content": "This is the block content..." // custom field
-  }
-}
-```
-
-Inline blocks follow a similar structure with `type: "inlineBlock"`.
 
 ## Rendering Blocks
 
