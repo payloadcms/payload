@@ -346,6 +346,7 @@ export const renderListView = async (
     const newDocumentURL = formatAdminURL({
       adminRoute,
       path: `/collections/${collectionSlug}/create`,
+      serverURL: config.serverURL,
     })
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create

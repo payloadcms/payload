@@ -11,6 +11,7 @@ import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff/index.js'
 import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
+import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
@@ -47,6 +48,7 @@ export default buildConfigWithDefaults({
     AutosaveWithMultiSelectPosts,
     AutosaveWithDraftValidate,
     DraftPosts,
+    DraftsNoReadVersions,
     DraftWithMax,
     DraftWithChangeHook,
     DraftsWithValidate,
