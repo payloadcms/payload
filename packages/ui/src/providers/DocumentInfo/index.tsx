@@ -5,6 +5,8 @@ import { formatApiURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
+
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
@@ -15,7 +17,6 @@ import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
-import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
 
 const Context = createContext({} as DocumentInfoContext)
@@ -61,7 +62,6 @@ const DocumentInfo: React.FC<
     config: {
       admin: { dateFormat },
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -260,7 +260,6 @@ const DocumentInfo: React.FC<
     i18n,
     locale,
     permissions,
-    serverURL,
     setDocPermissions,
     setHasPublishPermission,
     setHasSavePermission,

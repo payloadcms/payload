@@ -17,7 +17,6 @@ export const useGetDocPermissions = ({
   i18n,
   locale,
   permissions,
-  serverURL,
   setDocPermissions,
   setHasPublishPermission,
   setHasSavePermission,
@@ -29,7 +28,6 @@ export const useGetDocPermissions = ({
   id: string
   locale: string
   permissions: SanitizedPermissions
-  serverURL: string
   setDocPermissions: React.Dispatch<React.SetStateAction<SanitizedDocumentPermissions>>
   setHasPublishPermission: React.Dispatch<React.SetStateAction<boolean>>
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
@@ -128,7 +126,6 @@ export const useGetDocPermissions = ({
       id,
       collectionSlug,
       globalSlug,
-      serverURL,
       api,
       i18n.language,
       setDocPermissions,

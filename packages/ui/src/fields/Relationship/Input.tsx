@@ -359,7 +359,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       sortOptions,
       maxResultsPerRequest,
       locale,
-      serverURL,
       api,
       i18n,
       config,
