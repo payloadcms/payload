@@ -206,7 +206,7 @@ export const MyBlockComponent: React.FC<LexicalBlockClientProps> = () => {
 }
 ```
 
-Just like inline blocks, the BlockCollapsible component will automatically render an edit button for custom blocks. This button displays a drawer with the block's fields so your editors can edit them. You can change this behavior and customize other aspects of the block's UI by passing props to the BlockCollapsible component.
+The `BlockCollapsible` component automatically renders an edit button that opens a drawer with the block's fields. You can customize this behavior by passing props like `removeButton={false}` to hide the default remove button and render it yourself.
 
 You can also choose to render something completely different in your custom block component:
 
