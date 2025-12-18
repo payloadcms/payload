@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
