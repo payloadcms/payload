@@ -133,7 +133,7 @@ describe('formatAdminURL', () => {
 
     it('should handle basePath with no adminRoute', () => {
       const result = formatAdminURL({
-        adminRoute: undefined,
+        adminRoute: '',
         basePath: '/v1',
         path: dummyPath,
         serverURL,
@@ -204,7 +204,7 @@ describe('formatAdminURL', () => {
   describe('edge cases', () => {
     it('should return "/" when given minimal args', () => {
       const result = formatAdminURL({
-        adminRoute: undefined,
+        adminRoute: '',
         basePath: '',
         path: '',
         relative: true,
