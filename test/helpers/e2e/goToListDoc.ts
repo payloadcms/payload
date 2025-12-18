@@ -27,7 +27,7 @@ export async function goToListDoc({
   // Ensure we always have a full URL
   let fullURL: string
   if (!linkURL) {
-    fullURL = formatAdminURL({ adminRoute, path: '' })
+    fullURL = formatAdminURL({ adminRoute, serverURL: urlUtil.serverURL, path: '' })
   } else if (linkURL.startsWith('http://') || linkURL.startsWith('https://')) {
     // Already absolute
     fullURL = linkURL
