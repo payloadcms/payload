@@ -190,6 +190,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   } else {
     config.folders = false
   }
-  process.env.NEXT_PUBLIC_TEST = 'test'
+
   return config
 }
