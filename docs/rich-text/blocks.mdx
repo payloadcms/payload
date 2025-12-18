@@ -245,7 +245,7 @@ For regular blocks, use the `admin.components.Block` property to provide a custo
 }
 ```
 
-Your custom component can use helper components from `@payloadcms/richtext-lexical/client`:
+Your custom component can use composable primitives from `@payloadcms/richtext-lexical/client`. These components automatically receive block data from context, so you can use them to recreate the default block UI or arrange them in custom layouts:
 
 ```tsx
 'use client'
@@ -272,7 +272,7 @@ export const MyBlockComponent: React.FC<LexicalBlockClientProps> = () => {
 
 ### Inline Block Components
 
-For inline blocks, similar helper components are available:
+For inline blocks, similar composable primitives are available:
 
 ```tsx
 'use client'
