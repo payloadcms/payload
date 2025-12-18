@@ -41,6 +41,8 @@ export type IncomingDrafts = {
   /**
    * If true, status will be localized
    *
+   * @experimental
+   *
    * @default false
    */
   localizeStatus?: boolean
@@ -64,6 +66,8 @@ export type SanitizedDrafts = {
   autosave: Autosave | false
   /**
    * If true, status will be localized
+   *
+   * @experimental
    *
    * @default false
    */
