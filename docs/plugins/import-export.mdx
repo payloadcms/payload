@@ -22,6 +22,7 @@ This plugin adds features that give admin users the ability to download or creat
 - Create a file upload of the export data
 - Use the jobs queue for large exports
 - Import collection data
+- Preview data before exporting or importing
 
 ## Installation
 
@@ -392,6 +393,16 @@ By default, a user can use the Export drawer to create a file download by choosi
 
 The UI for creating exports provides options so that users can be selective about which documents to include and also which columns or fields to include.
 
+### Selection Modes
+
+When opening the export drawer from a collection's list view, you can choose which documents to export:
+
+| Mode                  | Description                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| Use all documents     | Export the entire collection (respects any limit you set)    |
+| Use current filters   | Export only documents matching your active list view filters |
+| Use current selection | Export only the documents you've checked in the list view    |
+
 It is necessary to add access control to the uploads collection configuration using the `overrideExportCollection` function if you have enabled this plugin on collections with data that some authenticated users should not have access to.
 
 <Banner type="warning">
@@ -404,15 +415,17 @@ The following parameters are used by the export function to handle requests:
 
 | Property         | Type     | Description                                                                                                       |
 | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `format`         | text     | Either `csv` or `json` to determine the shape of data exported                                                    |
-| `limit`          | number   | The max number of documents to return                                                                             |
-| `sort`           | select   | The field to use for ordering documents                                                                           |
-| `locale`         | string   | The locale code to query documents or `all`                                                                       |
-| `draft`          | string   | Either `yes` or `no` to return documents with their newest drafts for drafts enabled collections                  |
-| `fields`         | string[] | Which collection fields are used to create the export, defaults to all                                            |
-| `collectionSlug` | string   | The slug to query against                                                                                         |
+| `format`         | string   | Either `csv` or `json` to determine the shape of data exported                                                    |
+| `limit`          | number   | The max number of documents to export. Leave empty to export all matching documents.                              |
+| `page`           | number   | The page of documents to start from (used with limit for pagination).                                             |
+| `sort`           | string   | The field to use for ordering documents (e.g., `createdAt`, `-title` for descending).                             |
+| `depth`          | number   | How deeply to populate relationships. Default: `1`. Set to `0` to export IDs only.                                |
+| `locale`         | string   | The locale code to query documents or `all` for multi-locale export.                                              |
+| `drafts`         | boolean  | When `true`, includes draft versions for collections with drafts enabled.                                         |
+| `fields`         | string[] | Which collection fields to include in the export. Defaults to all fields.                                         |
+| `collectionSlug` | string   | The collection slug to export from.                                                                               |
 | `where`          | object   | The WhereObject used to query documents to export. This is set by making selections or filters from the list view |
-| `filename`       | text     | What to call the export being created                                                                             |
+| `filename`       | string   | The name for the exported file (without extension).                                                               |
 
 ## Importing Data
 
@@ -425,17 +438,34 @@ The plugin allows importing data from CSV or JSON files. There are several ways 
 
 ### Import Parameters
 
-| Property         | Type   | Description                                         |
-| ---------------- | ------ | --------------------------------------------------- |
-| `collectionSlug` | string | The collection to import into                       |
-| `importMode`     | string | `create`, `update`, or `upsert` (default: `create`) |
-| `locale`         | string | The locale to use for localized fields              |
+| Property         | Type   | Description                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `collectionSlug` | string | The collection to import into.                                                           |
+| `importMode`     | string | `create`, `update`, or `upsert` (default: `create`).                                     |
+| `matchField`     | string | The field to use for matching existing documents during `update` or `upsert` operations. |
+| `locale`         | string | The locale to use for localized fields.                                                  |
+
+The `matchField` option allows you to match documents by a field other than `id`. For example, if importing users, you could match by `email` instead of `id`:
+
+```ts
+payload.create({
+  collection: 'imports',
+  data: {
+    collectionSlug: 'users',
+    importMode: 'upsert',
+    matchField: 'email',
+  },
+  file: csvFile,
+})
+```
 
 ### Import Modes
 
-- **create** - Only creates new documents. Documents with existing IDs will fail.
-- **update** - Only updates existing documents. Requires `id` column in CSV. Documents without matching IDs will fail.
-- **upsert** - Creates new documents or updates existing ones based on `id`. Most flexible option.
+| Mode   | Description                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------- |
+| create | Only creates new documents. Documents with existing IDs will fail.                                      |
+| update | Only updates existing documents. Requires `id` column in CSV. Documents without matching IDs will fail. |
+| upsert | Creates new documents or updates existing ones based on `id`. Most flexible option.                     |
 
 ### Import Results
 
