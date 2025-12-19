@@ -5,11 +5,12 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Runs on port 27018 to avoid conflicts with locally installed MongoDB
 const mongooseAdapterArgs = `
     ensureIndexes: true,
     url:
         process.env.MONGODB_URL || process.env.DATABASE_URL ||
-      'mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0',
+      'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 `
 
 export const allDatabaseAdapters = {
@@ -21,7 +22,7 @@ export const allDatabaseAdapters = {
   })`,
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
   // Start with: pnpm docker:mongodb-atlas:start
-  // Runs on port 27018 to avoid conflicts with mongodb
+  // Runs on port 27019 to avoid conflicts with mongodb
   'mongodb-atlas': `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
@@ -29,7 +30,7 @@ export const allDatabaseAdapters = {
     ensureIndexes: true,
     url:
         process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
-      'mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local',
+      'mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local',
   })`,
   cosmosdb: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'

@@ -107,7 +107,7 @@ pnpm docker:mongodb:restart:clean  # Start fresh (removes data)
 pnpm docker:mongodb:stop           # Stop
 ```
 
-URL: `mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0`
+URL: `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0`
 
 ### MongoDB Atlas Local
 
@@ -117,7 +117,7 @@ pnpm docker:mongodb-atlas:restart:clean # Start fresh (removes data)
 pnpm docker:mongodb-atlas:stop          # Stop
 ```
 
-URL: `mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
+URL: `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
 
 ### SQLite
 
