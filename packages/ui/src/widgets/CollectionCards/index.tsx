@@ -22,7 +22,7 @@ export async function CollectionCards(props: WidgetServerProps) {
   const permissions = await getAccessResults({ req: props.req })
   const visibleEntities = getVisibleEntities({ req: props.req })
   const globalData = await getGlobalData(props.req)
-  // const { serverURL } = payload.config
+  const { serverURL } = payload.config
 
   const navGroups = getNavGroups(permissions, visibleEntities, payload.config, i18n)
 
@@ -55,13 +55,13 @@ export async function CollectionCards(props: WidgetServerProps) {
                       href = formatAdminURL({
                         adminRoute,
                         path: `/collections/${slug}`,
-                        // serverURL,
+                        serverURL,
                       })
 
                       createHREF = formatAdminURL({
                         adminRoute,
                         path: `/collections/${slug}/create`,
-                        // serverURL,
+                        serverURL,
                       })
 
                       hasCreatePermission = permissions?.collections?.[slug]?.create
