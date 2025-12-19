@@ -27,17 +27,17 @@
     "deepmerge": "4.3.1",
     "get-port": "5.1.1",
     "http-status": "1.6.2",
-    "mongoose": "8.8.0",
-    "mongoose-aggregate-paginate-v2": "1.1.4",
-    "mongoose-paginate-v2": "1.8.0",
+    "mongoose": "8.15.1",
+    "mongoose-aggregate-paginate-v2": "1.0.4",
+    "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",
     "uuid": "9.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
-    "mongodb": "6.12.0",
-    "mongodb-memory-server": "^9",
+    "mongodb": "6.16.0",
+    "mongodb-memory-server": "10.1.4",
     "payload": "workspace:*"
   },
   "peerDependencies": {

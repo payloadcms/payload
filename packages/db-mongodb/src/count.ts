@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseBaseQueryOptions, QueryOptions } from 'mongoose'
 import type { Count } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -7,13 +7,14 @@ import { flattenWhereToOperators } from 'payload/database'
 import type { MongooseAdapter } from '.'
 
 import { withSession } from './withSession'
+import { CountOptions } from 'mongodb'
 
 export const count: Count = async function count(
   this: MongooseAdapter,
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options: QueryOptions = await withSession(this, req)
+  const options: CountOptions & MongooseBaseQueryOptions<any> = await withSession(this, req)
 
   let hasNearConstraint = false
 
