@@ -38,8 +38,8 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
         },
       })
 
+      await this.mongoMemoryServer.waitUntilRunning()
       urlToConnect = `${this.mongoMemoryServer.getUri()}&retryWrites=true`
-      await new Promise((res) => setTimeout(res, 3000))
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
     }
   }
@@ -62,6 +62,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     this.payload.logger.info(successfulConnectionMessage)
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
+    console.error(err)
     process.exit(1)
   }
 }

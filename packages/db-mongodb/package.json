@@ -37,7 +37,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "mongodb": "6.16.0",
-    "mongodb-memory-server": "10.1.4",
+    "mongodb-memory-server": "8.15.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
