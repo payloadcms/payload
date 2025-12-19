@@ -279,7 +279,7 @@ export type PluginMCPServerConfig = {
   /**
    * Set the users collection that API keys should be associated with.
    */
-  userCollection?: CollectionConfig | string
+  userCollection?: CollectionSlug
 }
 
 /**

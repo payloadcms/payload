@@ -38,9 +38,7 @@ export const mcpPlugin =
 
     // User Collection
     pluginOptions.userCollection =
-      typeof pluginOptions.userCollection === 'string'
-        ? pluginOptions.userCollection
-        : (pluginOptions.userCollection?.slug ?? config?.admin?.user ?? defaults.userCollection)
+      pluginOptions.userCollection ?? config?.admin?.user ?? defaults.userCollection
 
     const experimentalTools = pluginOptions?.experimental?.tools || {}
 
