@@ -22,7 +22,7 @@ runs:
   steps:
     - name: Start MongoDB
       id: mongodb
-      if: inputs.database == 'mongodb'
+      if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
       shell: bash
       run: |
         docker compose -f test/helpers/db/mongodb/docker-compose.yml up -d --wait
