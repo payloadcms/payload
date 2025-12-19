@@ -62,7 +62,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   })`,
   'postgres-custom-schema': `
@@ -70,7 +70,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
     schemaName: 'custom',
   })`,
@@ -80,7 +80,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   })`,
   'postgres-read-replica': `
