@@ -109,7 +109,7 @@ describe('createProject', () => {
 
       // Check package name and description
       expect(packageJson.name).toStrictEqual(projectName)
-    })
+    }, 90_000)
 
     describe('creates project from template', () => {
       const templates = getValidTemplates()

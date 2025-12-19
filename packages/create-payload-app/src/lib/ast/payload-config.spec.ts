@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Project } from 'ts-morph'
 import {
   addDatabaseAdapter,
