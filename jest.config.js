@@ -16,6 +16,7 @@ const esModules = [
   '@faceless-ui/window-info',
   '@faceless-ui/modal',
   '@faceless-ui/scroll-info',
+  '@borewit/text-codec',
 ].join('|')
 
 import path from 'path'

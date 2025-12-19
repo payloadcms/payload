@@ -17,9 +17,6 @@ export default withBundleAnalyzer(
       devIndicators: {
         position: 'bottom-right',
       },
-      eslint: {
-        ignoreDuringBuilds: true,
-      },
       typescript: {
         ignoreBuildErrors: true,
       },
