@@ -2,13 +2,10 @@ name: ci
 
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+    types: [opened, reopened, synchronize]
+
   push:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -53,7 +50,7 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
-      - name: Log all filter results
+      - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
@@ -74,7 +71,7 @@ jobs:
 
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     runs-on: ubuntu-24.04
 
     steps:
@@ -96,7 +93,7 @@ jobs:
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -120,7 +117,7 @@ jobs:
   tests-types:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -144,7 +141,7 @@ jobs:
   tests-int:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}
     timeout-minutes: 45
     strategy:
@@ -210,12 +207,14 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+          MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
 
   tests-e2e:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     name: e2e-${{ matrix.suite }}
     timeout-minutes: 45
     strategy:
@@ -311,7 +310,13 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: matrix.suite == 'plugin-cloud-storage'
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
+        with:
+          database: mongodb
 
       - name: Store Playwright's Version
         run: |
@@ -455,7 +460,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: matrix.suite == 'plugin-cloud-storage'
 
       - name: Store Playwright's Version
         run: |
@@ -504,7 +509,7 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -634,7 +639,7 @@ jobs:
   tests-type-generation:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -661,14 +666,16 @@ jobs:
     if: always()
     runs-on: ubuntu-24.04
     needs:
-      - lint
-      - build
-      - build-and-test-templates
-      - tests-unit
-      - tests-int
-      - tests-e2e
-      - tests-types
-      - tests-type-generation
+      [
+        lint,
+        build,
+        build-and-test-templates,
+        tests-unit,
+        tests-int,
+        tests-e2e,
+        tests-types,
+        tests-type-generation,
+      ]
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
