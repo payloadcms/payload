@@ -141,7 +141,9 @@ export const generateFileData = async <T>({
         overwriteExistingFiles = true
       }
     } catch (err: unknown) {
-      throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
+      const message = err instanceof Error ? err.message : String(err)
+      const cause = err instanceof Error && err.cause instanceof Error ? err.cause : undefined
+      throw new FileRetrievalError(req.t, message, cause)
     }
   }
 
