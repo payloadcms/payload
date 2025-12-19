@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
