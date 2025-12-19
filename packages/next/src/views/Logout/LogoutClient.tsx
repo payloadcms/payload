@@ -52,7 +52,6 @@ export const LogoutClient: React.FC<{
           ? `?redirect=${encodeURIComponent(redirect)}`
           : ''
       }`,
-      serverURL: config.serverURL,
     }),
   )
 

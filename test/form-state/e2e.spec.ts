@@ -1,25 +1,13 @@
 import type { BrowserContext, CDPSession, Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { postSlug } from 'folders/shared.js'
-import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
-import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
-import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
-import {
-  addArrayRow,
-  addArrayRowAsync,
-  duplicateArrayRow,
-  removeArrayRow,
-} from 'helpers/e2e/fields/array/index.js'
-import { addBlock } from 'helpers/e2e/fields/blocks/index.js'
-import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { AutosavePost, Config, Post } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, Post } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -28,6 +16,17 @@ import {
   throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertElementStaysVisible } from '../helpers/e2e/assertElementStaysVisible.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
+import { assertRequestBody } from '../helpers/e2e/assertRequestBody.js'
+import {
+  addArrayRow,
+  addArrayRowAsync,
+  duplicateArrayRow,
+  removeArrayRow,
+} from '../helpers/e2e/fields/array/index.js'
+import { addBlock } from '../helpers/e2e/fields/blocks/index.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
@@ -175,7 +174,7 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array',
+          body[0].args.formState['array'].lastRenderedPath === 'array',
         ),
     })
 
@@ -194,9 +193,9 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array' &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField',
+          body[0].args.formState['array'].lastRenderedPath === 'array' &&
+          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+            'array.0.customTextField',
         ),
     })
 
@@ -216,11 +215,11 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField' &&
-            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
-              'array.1.customTextField',
+          body[0].args.formState['array'].lastRenderedPath &&
+          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+            'array.0.customTextField' &&
+          body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
+            'array.1.customTextField',
         ),
     })
   })
@@ -341,7 +340,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/posts/access/${doc.id}`,
+      formatAdminURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title')
         await wait(500)
@@ -356,7 +355,7 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/posts/access/${doc.id}`,
+      formatAdminURL({ apiRoute: '/api', path: `/posts/access/${doc.id}`, serverURL }),
       async () => {
         await titleField.fill('Updated Title 2')
         await wait(500)
@@ -384,7 +383,11 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosavePostsSlug}/access/${doc.id}`,
+        serverURL,
+      }),
       async () => {
         await titleField.fill('Updated Title')
       },
@@ -396,7 +399,11 @@ test.describe('Form State', () => {
 
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosavePostsSlug}/access/${doc.id}`,
+        serverURL,
+      }),
       async () => {
         await titleField.fill('Updated Title Again')
       },
@@ -409,7 +416,11 @@ test.describe('Form State', () => {
     // save manually and ensure the permissions are fetched again
     await assertNetworkRequests(
       page,
-      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosavePostsSlug}/access/${doc.id}`,
+        serverURL,
+      }),
       async () => {
         await page.click('#action-save', { delay: 100 })
       },
