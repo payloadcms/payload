@@ -9,5 +9,5 @@ import { testConnection } from './test-connection.js'
 
 await testConnection(
   process.env.MONGODB_URL ||
-    'mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0',
+    'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 )
