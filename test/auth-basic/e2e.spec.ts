@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
-import { formatAdminURL } from 'payload/shared'
 import type { SanitizedConfig } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -73,6 +73,7 @@ describe('Auth (Basic)', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -82,11 +83,15 @@ describe('Auth (Basic)', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    const {
+      routes: { admin },
+    } = getRoutes({})
+    adminRoute = admin
 
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: formatAdminURL({ path: '/**', serverURL }),
+      readyURL: formatAdminURL({ path: '/**', serverURL, adminRoute }),
       noAutoLogin: true,
     })
 
@@ -109,7 +114,7 @@ describe('Auth (Basic)', () => {
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: formatAdminURL({ path: '/create-first-user', serverURL }),
+      readyURL: formatAdminURL({ path: '/create-first-user', serverURL, adminRoute }),
     })
   })
 

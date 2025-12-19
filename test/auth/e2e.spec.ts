@@ -44,12 +44,18 @@ describe('Auth', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let apiURL: string
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -198,7 +204,9 @@ describe('Auth', () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
-        const loginPageRes = await page.goto(formatAdminURL({ path: '/login', serverURL }))
+        const loginPageRes = await page.goto(
+          formatAdminURL({ adminRoute, path: '/login', serverURL }),
+        )
         const loginPageSource = await loginPageRes?.text()
         expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
 
@@ -213,7 +221,7 @@ describe('Auth', () => {
 
         await login({ page, serverURL })
 
-        await page.goto(formatAdminURL({ path: '', serverURL }))
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
 
         // Inspect the client config (after authentication)
         await expect(page.locator('#authenticated-client-config')).toBeAttached()
@@ -225,7 +233,9 @@ describe('Auth', () => {
         ).toHaveCount(1)
 
         // Inspect the page source (after authentication)
-        const dashboardPageRes = await page.goto(formatAdminURL({ path: '', serverURL }))
+        const dashboardPageRes = await page.goto(
+          formatAdminURL({ adminRoute, path: '', serverURL }),
+        )
         const dashboardPageSource = await dashboardPageRes?.text()
         expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })
@@ -329,7 +339,7 @@ describe('Auth', () => {
         await openNav(page)
         await page
           .locator(
-            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout' })}"]`,
+            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout', adminRoute: '/admin' })}"]`,
           )
           .click()
 
@@ -454,6 +464,7 @@ describe('Auth', () => {
         })
 
         const userDocumentRoute = formatAdminURL({
+          adminRoute,
           path: `/collections/users/${users?.docs?.[0]?.id}`,
           serverURL,
         })
@@ -490,6 +501,7 @@ describe('Auth', () => {
         await logout(page, serverURL)
 
         const notInUserCollectionURL = formatAdminURL({
+          adminRoute,
           path: `/collections/relationsCollection/${notInUserCollection.id}`,
           serverURL,
         })

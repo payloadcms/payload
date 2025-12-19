@@ -5,7 +5,7 @@ import type {
   Locator,
   Page,
 } from '@playwright/test'
-import type { Config } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
@@ -15,7 +15,7 @@ import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-export type AdminRoutes = NonNullable<Config['admin']>['routes']
+export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -420,7 +420,7 @@ export function getRoutes({
   admin: {
     routes: AdminRoutes
   }
-  routes: Config['routes']
+  routes: NonNullable<SanitizedConfig['routes']>
 } {
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes

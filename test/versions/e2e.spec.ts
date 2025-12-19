@@ -40,6 +40,7 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   exactText,
+  getRoutes,
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
@@ -100,6 +101,7 @@ describe('Versions', () => {
   let postURL: AdminUrlUtil
   let errorOnUnpublishURL: AdminUrlUtil
   let draftsNoReadVersionsURL: AdminUrlUtil
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -108,6 +110,11 @@ describe('Versions', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     context = await browser.newContext()
     page = await context.newPage()
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
 
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
@@ -442,7 +449,11 @@ describe('Versions', () => {
 
       await assertNetworkRequests(
         page,
-        formatAdminURL({ path: `/collections/${postCollectionSlug}/${postID}`, serverURL }),
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${postCollectionSlug}/${postID}`,
+          serverURL,
+        }),
         async () => {
           await page
             .locator(
@@ -1777,6 +1788,7 @@ describe('Versions', () => {
 
     async function navigateToDraftVersionView(versionID: string) {
       const versionURL = formatAdminURL({
+        adminRoute,
         path: `/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`,
         serverURL,
       })
@@ -1786,6 +1798,7 @@ describe('Versions', () => {
 
     async function navigateToDiffVersionView(versionID?: string) {
       const versionURL = formatAdminURL({
+        adminRoute,
         path: `/collections/${diffCollectionSlug}/${diffID}/versions/${versionID ?? versionDiffID}`,
         serverURL,
       })
@@ -2417,7 +2430,11 @@ describe('Versions', () => {
       })
 
       await page.goto(
-        formatAdminURL({ path: `/collections/${draftCollectionSlug}/${post.id}`, serverURL }),
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${draftCollectionSlug}/${post.id}`,
+          serverURL,
+        }),
       )
 
       const publishDropdown = page.locator('.doc-controls__controls .popup-button')

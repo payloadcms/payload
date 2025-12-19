@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test'
-import { formatAdminURL } from 'payload/shared'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, getRoutes, initPageConsoleErrorCatch } from '../helpers.js'
 import { checkFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 
@@ -21,11 +21,17 @@ const { beforeAll, describe } = test
 
 let page: Page
 let serverURL: string
+let adminRoute: string
 
 describe('Focus Indicators Test Page', () => {
   beforeAll(async ({ browser }, testInfo) => {
     const { serverURL: url } = await initPayloadE2ENoConfig({ dirname })
     serverURL = url
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -36,7 +42,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Full Page Scan', () => {
     test('should detect all focusable elements on the page', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('.focus-indicators-test-page').waitFor()
 
       const result = await checkFocusIndicators({
@@ -58,7 +64,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 1: Good Payload Components', () => {
     test('should pass for all Payload buttons', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-good-payload"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -77,7 +83,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 2: Good HTML Elements', () => {
     test('should pass for standard HTML with good focus styles', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-good-html"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -96,7 +102,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should detect specific good buttons by ID', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -118,7 +124,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 3: Pseudo-element Focus Indicators', () => {
     test('should detect focus indicators on ::after and ::before pseudo-elements', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-pseudo"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -145,7 +151,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 4: Bad Focus Indicators (Expected Failures)', () => {
     test('should fail for elements without focus indicators', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-bad"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -164,7 +170,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should identify specific bad elements by ID', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -185,7 +191,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should provide useful selectors for violations', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -209,7 +215,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 5: Mixed Focus Indicators', () => {
     test('should correctly identify mix of good and bad elements', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-mixed"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -228,7 +234,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should correctly categorize good vs bad in mixed section', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -251,7 +257,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 6: Edge Cases', () => {
     test('should fail for edge cases with non-visible focus indicators', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-edge-cases"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -270,7 +276,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should detect zero-width borders as invalid', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -284,7 +290,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should detect zero-opacity shadows as invalid', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -298,7 +304,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should detect transparent outlines as invalid', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -312,7 +318,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should pass for focusable div with good focus indicator', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -328,7 +334,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Section 7: Disabled Elements', () => {
     test('should not include disabled elements in tab order', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
       await page.locator('[data-testid="section-disabled"]').waitFor()
 
       const result = await checkFocusIndicators({
@@ -349,7 +355,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Utility Validation', () => {
     test('should limit focusable elements count with maxFocusableElements', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -364,7 +370,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should run axe scans on each focused element when runAxeOnElements is true', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -394,7 +400,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should detect axe violations on specific elements', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -418,7 +424,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should provide detailed violation information', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
         page,
@@ -445,7 +451,7 @@ describe('Focus Indicators Test Page', () => {
     })
 
     test('should attach results to test info', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       await checkFocusIndicators({
         page,
@@ -468,7 +474,7 @@ describe('Focus Indicators Test Page', () => {
 
   describe('Performance & Limits', () => {
     test('should handle scanning large sections efficiently', async ({}, testInfo) => {
-      await page.goto(formatAdminURL({ path: '/focus-indicators', serverURL }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const startTime = Date.now()
 
