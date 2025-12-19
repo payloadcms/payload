@@ -72,7 +72,7 @@ more. [Click here to learn more](/docs/production/preventing-abuse).
 
 Payload can be used with any Postgres database or MongoDB-compatible database including AWS DocumentDB or Azure Cosmos DB. Make sure your production environment has access to the database that Payload uses.
 
-Out of the box, Payload templates pass the `process.env.DATABASE_URI` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
+Out of the box, Payload templates pass the `process.env.DATABASE_URL` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
 
 ### DocumentDB
 
@@ -140,7 +140,7 @@ Follow the docs to configure any one of these storage providers. For local devel
 ## Docker
 
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
-variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
+variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URL` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
 
 In your Next.js config, set the `output` property `standalone`.
 
@@ -249,7 +249,7 @@ services:
     env_file:
       - .env
 
-  # Ensure your DATABASE_URI uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
+  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
   mongo:
     image: mongo:latest
     ports:
