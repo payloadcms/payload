@@ -580,7 +580,8 @@ jobs:
 
       # Avoid dockerhub rate-limiting
       - name: Cache Docker images
-        uses: ScribeMD/docker-cache@0.5.0
+        # Use AndreKurait/docker-cache@0.6.0 instead of ScribeMD/docker-cache@0.5.0 to fix the following issue: https://github.com/ScribeMD/docker-cache/issues/837 ("Warning: Failed to restore: Cache service responded with 400")
+        uses: AndreKurait/docker-cache@0.6.0
         with:
           key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
 
