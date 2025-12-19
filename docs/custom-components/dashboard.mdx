@@ -1,0 +1,153 @@
+---
+title: Dashboard Widgets
+label: Dashboard
+order: 45
+desc: Create custom dashboard widgets to display data, analytics, or any other content in the Payload Admin Panel.
+keywords: dashboard, widgets, custom components, admin, React
+---
+
+<Banner type="warning">
+  This new Modular Dashboard is an experimental feature and may change in future
+  releases. Use at your own risk.
+</Banner>
+
+The Dashboard is the first page users see when they log into the Payload Admin Panel. By default, it displays cards with the collections and globals. You can customize the dashboard by adding **widgets** - modular components that can display data, analytics, or any other content.
+
+One of the coolest things about widgets is that each plugin can define its own. Some examples:
+
+- Analytics
+- Error Reporting
+- Number of documents that meet a certain filter
+- Jobs recently executed
+
+### Defining Widgets
+
+Define widgets in your Payload config using the `admin.dashboard.widgets` property:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    dashboard: {
+      widgets: [
+        {
+          slug: 'user-stats',
+          ComponentPath: './components/UserStats.tsx#default',
+          minWidth: 'medium',
+          maxWidth: 'full',
+        },
+        {
+          slug: 'revenue-chart',
+          ComponentPath: './components/RevenueChart.tsx#default',
+          minWidth: 'small',
+        },
+      ],
+    },
+  },
+})
+```
+
+### Widget Configuration
+
+| Property           | Type          | Description                                                          |
+| ------------------ | ------------- | -------------------------------------------------------------------- |
+| `slug` \*          | `string`      | Unique identifier for the widget                                     |
+| `ComponentPath` \* | `string`      | Path to the widget component (supports `#` syntax for named exports) |
+| `minWidth`         | `WidgetWidth` | Minimum width the widget can be resized to (default: `'x-small'`)    |
+| `maxWidth`         | `WidgetWidth` | Maximum width the widget can be resized to (default: `'full'`)       |
+
+**WidgetWidth Values:** `'x-small'` \| `'small'` \| `'medium'` \| `'large'` \| `'x-large'` \| `'full'`
+
+### Creating a Widget Component
+
+Widgets are React Server Components that receive `WidgetServerProps`:
+
+```tsx
+import type { WidgetServerProps } from 'payload'
+
+export default async function UserStatsWidget({ req }: WidgetServerProps) {
+  const { payload } = req
+
+  // Fetch data server-side
+  const userCount = await payload.count({ collection: 'users' })
+
+  return (
+    <div className="card">
+      <h3>Total Users</h3>
+      <p style={{ fontSize: '32px', fontWeight: 'bold' }}>
+        {userCount.totalDocs}
+      </p>
+    </div>
+  )
+}
+```
+
+For visual consistency with the Payload UI, we recommend:
+
+1. Using the `card` class for your root element, unless you don't want it to have a background color.
+2. Using our theme variables for backgrounds and text colors. For example, use `var(--theme-elevation-0)` for backgrounds and `var(--theme-text)` for text colors.
+
+### Default Layout
+
+Control the initial dashboard layout with the `defaultLayout` property:
+
+```ts
+export default buildConfig({
+  admin: {
+    dashboard: {
+      defaultLayout: ({ req }) => {
+        // Customize layout based on user role or other factors
+        const isAdmin = req.user?.roles?.includes('admin')
+
+        return [
+          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'user-stats', width: isAdmin ? 'medium' : 'full' },
+          { widgetSlug: 'revenue-chart', width: 'full' },
+        ]
+      },
+      widgets: [
+        // ... widget definitions
+      ],
+    },
+  },
+})
+```
+
+The `defaultLayout` function receives the request object and should return an array of `WidgetInstance` objects.
+
+#### WidgetInstance Type
+
+| Property        | Type          | Description                                     |
+| --------------- | ------------- | ----------------------------------------------- |
+| `widgetSlug` \* | `string`      | Slug of the widget to display                   |
+| `width`         | `WidgetWidth` | Initial width of the widget (default: minWidth) |
+
+<Banner type="success">
+  **Tip:** Users can customize their dashboard layout, which is saved to their
+  preferences. The `defaultLayout` is only used for first-time visitors or after
+  a layout reset.
+</Banner>
+
+### Built-in Widgets
+
+Payload includes a built-in `collections` widget that displays collection and global cards.
+
+If you don't define a `defaultLayout`, the collections widget will be automatically included in your dashboard.
+
+### User Customization
+
+{/* TODO: maybe a good GIF here? */}
+
+Users can customize their dashboard by:
+
+1. Clicking the dashboard dropdown in the breadcrumb
+2. Selecting "Edit Dashboard"
+3. Adding widgets via the "Add +" button
+4. Resizing widgets using the width dropdown on each widget
+5. Reordering widgets via drag-and-drop
+6. Deleting widgets using the delete button
+7. Saving changes or canceling to revert
+
+Users can also reset their dashboard to the default layout using the "Reset Layout" option.
