@@ -87,7 +87,9 @@ Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 - `supabase` - Supabase (PostgreSQL)
 - `d1` - D1 (SQLite)
 
-Then use Docker to start your database:
+Then use Docker to start your database.
+
+On MacOS, the easiest way to install Docker is to use brew. Simply run `pnpm install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
 
 ### PostgreSQL
 
@@ -107,7 +109,7 @@ pnpm docker:mongodb:restart:clean  # Start fresh (removes data)
 pnpm docker:mongodb:stop           # Stop
 ```
 
-URL: `mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0`
+URL: `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0`
 
 ### MongoDB Atlas Local
 
@@ -117,7 +119,7 @@ pnpm docker:mongodb-atlas:restart:clean # Start fresh (removes data)
 pnpm docker:mongodb-atlas:stop          # Stop
 ```
 
-URL: `mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
+URL: `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
 
 ### SQLite
 
@@ -125,9 +127,12 @@ SQLite databases don't require Docker - they're stored as files in the project.
 
 ### Testing with your own database
 
-If you wish to use your own MongoDB database for the `test` directory instead of using the docker database, all you need to do is add the following env variable to your `.env` file:
+If you wish to use your own MongoDB database for the `test` directory instead of using the docker database, add the following to your `.env` file:
 
-- `DATABASE_URL` to your database URL e.g. `mongodb://127.0.0.1/your-test-db`.
+```env
+MONGODB_URL=mongodb://127.0.0.1/payloadtests # Point this to your locally installed MongoDB database
+POSTGRES_URL=postgres://127.0.0.1:5432/payloadtests # Point this to your locally installed PostgreSQL database
+```
 
 ### Running the e2e and int tests
 
