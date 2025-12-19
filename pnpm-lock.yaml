@@ -196,8 +196,8 @@ importers:
         specifier: 1.2.8
         version: 1.2.8
       mongodb-memory-server:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: ^10
+        version: 10.4.2(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
       node-fetch:
         specifier: 2.6.12
         version: 2.6.12
@@ -492,13 +492,13 @@ importers:
         version: link:../eslint-config-payload
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.12
-        version: 1.0.12
+        version: 1.0.12(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
       mongodb:
         specifier: 6.16.0
         version: 6.16.0(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
       mongodb-memory-server:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: ^10
+        version: 10.4.2(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -4080,9 +4080,6 @@ packages:
   '@types/whatwg-url@11.0.5':
     resolution: {integrity: sha512-coYR071JRaHa+xoEvvYqvnIHaVqaYrLPbsufM9BF63HkwI5Lgmy2QR8Q5K/lYDYo5AK82wOvSOS0UsLTpTG7uQ==}
 
-  '@types/whatwg-url@13.0.0':
-    resolution: {integrity: sha512-N8WXpbE6Wgri7KUSvrmQcqrMllKZ9uxkYWMt+mCSGwNc0Hsw9VQTW7ApqI4XNrx6/SaM2QQJCzMPDEXE058s+Q==}
-
   '@types/ws@8.5.10':
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
 
@@ -4675,10 +4672,6 @@ packages:
   bson@6.10.4:
     resolution: {integrity: sha512-WIsKqkSC0ABoBJuT1LEX+2HEvNmNKKgnTAyd0fL8qzK4SH2i9NXg+t08YtdZp/V9IZ33cxe3iV4yM0qg8lMQng==}
     engines: {node: '>=16.20.1'}
-
-  bson@7.0.0:
-    resolution: {integrity: sha512-Kwc6Wh4lQ5OmkqqKhYGKIuELXl+EPYSCObVE6bWsp1T/cGkOCBN0I8wF/T44BiuhHyNi1mmKVPXk60d41xZ7kw==}
-    engines: {node: '>=20.19.0'}
 
   buffer-crc32@0.2.13:
     resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
@@ -7621,17 +7614,13 @@ packages:
   mongodb-connection-string-url@3.0.2:
     resolution: {integrity: sha512-rMO7CGo/9BFwyZABcKAWL8UJwH/Kc2x0g72uhDWzG48URRax5TCIcJ7Rc3RZqffZzO/Gwff/jyKwCU9TN8gehA==}
 
-  mongodb-connection-string-url@7.0.0:
-    resolution: {integrity: sha512-irhhjRVLE20hbkRl4zpAYLnDMM+zIZnp0IDB9akAFFUZp/3XdOfwwddc7y6cNvF2WCEtfTYRwYbIfYa2kVY0og==}
-    engines: {node: '>=20.19.0'}
+  mongodb-memory-server-core@10.4.2:
+    resolution: {integrity: sha512-/w7SWH+f/bpzmQlYu0lRWF33GLOo0GwZrflP1gkDhc6PCuLo5T1mnME/W+mrFmsowLGzthdJnezGBpOnIYNALw==}
+    engines: {node: '>=16.20.1'}
 
-  mongodb-memory-server-core@11.0.0:
-    resolution: {integrity: sha512-qg1XWrmX+7IL6SyRKiknHEcNYJomnvw14WxjEkRaAXh3IsJ/DPwEykQqAW5vzGedeSSETZtyWwxyXHQLPqnA/Q==}
-    engines: {node: '>=20.19.0'}
-
-  mongodb-memory-server@11.0.0:
-    resolution: {integrity: sha512-hx43BuFV4G48ghJBsS7BYqtCZ/UGQgEqu6V0/rUCfdYKYV2WpcYGHcXtFBYR0HxmlinpBvZAnRFS8IrqsU0L3Q==}
-    engines: {node: '>=20.19.0'}
+  mongodb-memory-server@10.4.2:
+    resolution: {integrity: sha512-r2swgOhmhGfx80TJIALb7t4hlrRtdl+uqc0qrGe+nqmjZQn3prd0SOioxxuLb5LjtmQrx3CPQqJf+PmH5hg+5A==}
+    engines: {node: '>=16.20.1'}
 
   mongodb@6.16.0:
     resolution: {integrity: sha512-D1PNcdT0y4Grhou5Zi/qgipZOYeWrhLEpk33n3nm6LGtz61jvO88WlrWCK/bigMjpnOdAUKKQwsGIl0NtWMyYw==}
@@ -7644,33 +7633,6 @@ packages:
       mongodb-client-encryption: '>=6.0.0 <7'
       snappy: ^7.2.2
       socks: ^2.7.1
-    peerDependenciesMeta:
-      '@aws-sdk/credential-providers':
-        optional: true
-      '@mongodb-js/zstd':
-        optional: true
-      gcp-metadata:
-        optional: true
-      kerberos:
-        optional: true
-      mongodb-client-encryption:
-        optional: true
-      snappy:
-        optional: true
-      socks:
-        optional: true
-
-  mongodb@7.0.0:
-    resolution: {integrity: sha512-vG/A5cQrvGGvZm2mTnCSz1LUcbOPl83hfB6bxULKQ8oFZauyox/2xbZOoGNl+64m8VBrETkdGCDBdOsCr3F3jg==}
-    engines: {node: '>=20.19.0'}
-    peerDependencies:
-      '@aws-sdk/credential-providers': ^3.806.0
-      '@mongodb-js/zstd': ^7.0.0
-      gcp-metadata: ^7.0.1
-      kerberos: ^7.0.0
-      mongodb-client-encryption: '>=7.0.0 <7.1.0'
-      snappy: ^7.3.2
-      socks: ^2.8.6
     peerDependenciesMeta:
       '@aws-sdk/credential-providers':
         optional: true
@@ -14137,7 +14099,7 @@ snapshots:
     dependencies:
       '@types/node': 20.6.2
 
-  '@types/mongoose-aggregate-paginate-v2@1.0.12':
+  '@types/mongoose-aggregate-paginate-v2@1.0.12(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)':
     dependencies:
       '@types/node': 16.18.96
       mongoose: 8.15.1(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
@@ -14384,10 +14346,6 @@ snapshots:
       source-map: 0.6.1
 
   '@types/whatwg-url@11.0.5':
-    dependencies:
-      '@types/webidl-conversions': 7.0.3
-
-  '@types/whatwg-url@13.0.0':
     dependencies:
       '@types/webidl-conversions': 7.0.3
 
@@ -15146,8 +15104,6 @@ snapshots:
   bson-objectid@2.0.4: {}
 
   bson@6.10.4: {}
-
-  bson@7.0.0: {}
 
   buffer-crc32@0.2.13: {}
 
@@ -18946,12 +18902,7 @@ snapshots:
       '@types/whatwg-url': 11.0.5
       whatwg-url: 14.2.0
 
-  mongodb-connection-string-url@7.0.0:
-    dependencies:
-      '@types/whatwg-url': 13.0.0
-      whatwg-url: 14.2.0
-
-  mongodb-memory-server-core@11.0.0:
+  mongodb-memory-server-core@10.4.2(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3):
     dependencies:
       async-mutex: 0.5.0
       camelcase: 6.3.0
@@ -18959,7 +18910,7 @@ snapshots:
       find-cache-dir: 3.3.2
       follow-redirects: 1.15.11(debug@4.4.3)
       https-proxy-agent: 7.0.6
-      mongodb: 7.0.0
+      mongodb: 6.16.0(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
       new-find-package-json: 2.0.0
       semver: 7.7.3
       tar-stream: 3.1.7
@@ -18975,9 +18926,9 @@ snapshots:
       - socks
       - supports-color
 
-  mongodb-memory-server@11.0.0:
+  mongodb-memory-server@10.4.2(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3):
     dependencies:
-      mongodb-memory-server-core: 11.0.0
+      mongodb-memory-server-core: 10.4.2(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
       tslib: 2.8.1
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -18998,12 +18949,6 @@ snapshots:
       '@aws-sdk/credential-providers': 3.563.0
       gcp-metadata: 5.3.0
       socks: 2.8.3
-
-  mongodb@7.0.0:
-    dependencies:
-      '@mongodb-js/saslprep': 1.4.4
-      bson: 7.0.0
-      mongodb-connection-string-url: 7.0.0
 
   mongoose-aggregate-paginate-v2@1.0.4: {}
 

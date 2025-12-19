@@ -34,7 +34,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
       this.mongoMemoryServer = await MongoMemoryReplSet.create({
         replSet: {
           args: ['--setParameter', 'maxTransactionLockRequestTimeoutMillis=5000'],
-          count: 1,
+          count: 3,
           dbName: 'payloadmemory',
         },
       })
