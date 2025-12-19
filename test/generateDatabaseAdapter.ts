@@ -30,9 +30,6 @@ export const allDatabaseAdapters = {
     url:
         process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
       'mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local',
-    collation: {
-      strength: 1,
-    },
   })`,
   cosmosdb: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
