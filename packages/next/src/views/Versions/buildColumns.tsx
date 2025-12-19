@@ -28,19 +28,13 @@ export const buildVersionColumns = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
-  currentlyPublishedVersion?: {
-    id: number | string
-    updatedAt: string
-  }
+  currentlyPublishedVersion?: TypeWithVersion<any>
   docID?: number | string
   docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
   isTrashed?: boolean
-  latestDraftVersion?: {
-    id: number | string
-    updatedAt: string
-  }
+  latestDraftVersion?: TypeWithVersion<any>
 }): Column[] => {
   const entityConfig = collectionConfig || globalConfig
 
