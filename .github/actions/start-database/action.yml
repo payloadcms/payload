@@ -3,7 +3,7 @@ description: Starts the required database for tests
 
 inputs:
   database:
-    description: 'Database type: mongodb , mongodb-atlas , cosmosdb , documentdb , firestore , postgres , postgres-custom-schema , postgres-uuid , postgres-read-replica , vercel-postgres-read-replica , sqlite , sqlite-uuid , supabase , d1'
+    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-read-replica, vercel-postgres-read-replica, sqlite, sqlite-uuid, supabase, d1'
     required: true
 
 outputs:
