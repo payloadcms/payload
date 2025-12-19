@@ -1,5 +1,7 @@
 import type { Block, Field, SanitizedConfig, TypedUser } from 'payload'
 
+import { combineWhereConstraints } from 'payload/shared'
+
 /**
  * Recursively applies baseFilter from collection config to relationship fields
  * within blocks. This ensures that relationship drawers in blocks respect
@@ -60,9 +62,7 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
         }
 
         // Combine original and baseFilter results
-        return {
-          and: [originalResult, baseFilterResult],
-        }
+        return combineWhereConstraints([originalResult, baseFilterResult], 'and')
       }
 
       return relationshipField
