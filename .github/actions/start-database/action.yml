@@ -20,6 +20,11 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Cache Docker images
+      uses: ScribeMD/docker-cache@0.5.0
+      with:
+        key: docker-${{ runner.os }}-${{ inputs.database }}
+
     - name: Start MongoDB
       id: mongodb
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
