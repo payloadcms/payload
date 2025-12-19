@@ -9,7 +9,7 @@ const mongooseAdapterArgs = `
     ensureIndexes: true,
     url:
         process.env.MONGODB_URL || process.env.DATABASE_URL ||
-      'mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true',
+      'mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 `
 
 export const allDatabaseAdapters = {
@@ -29,7 +29,7 @@ export const allDatabaseAdapters = {
     ensureIndexes: true,
     url:
         process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
-      'mongodb://localhost:27018/payload?directConnection=true',
+      'mongodb://localhost:27018/payload?directConnection=true&replicaSet=rs-localdev',
     collation: {
       strength: 1,
     },
