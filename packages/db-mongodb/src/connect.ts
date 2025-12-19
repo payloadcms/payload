@@ -18,7 +18,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
   let urlToConnect = this.url
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!'
 
-  const connectionOptions: ConnectOptions & { useFacet: undefined } = {
+  const connectionOptions: { useFacet: undefined } & ConnectOptions = {
     autoIndex: true,
     ...this.connectOptions,
     useFacet: undefined,
@@ -39,18 +39,13 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
       })
 
       urlToConnect = `${this.mongoMemoryServer.getUri()}&retryWrites=true`
+      await new Promise((res) => setTimeout(res, 3000))
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
     }
   }
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
-
-    if (this.mongoMemoryServer) {
-      await this.connection.db
-        .admin()
-        .command({ setParameter: 1, maxTransactionLockRequestTimeoutMillis: 5000 })
-    }
 
     const client = this.connection.getClient()
 
