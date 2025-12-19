@@ -1252,7 +1252,7 @@ importers:
   packages/plugin-relationship-object-ids:
     dependencies:
       mongoose:
-        specifier: ^8
+        specifier: ^8.15.1
         version: 8.15.1(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
     devDependencies:
       '@payloadcms/eslint-config':
