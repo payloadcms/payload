@@ -41,7 +41,7 @@ export default buildConfig({
   },
   collections: [CustomFields, CustomViews, CustomRootViews],
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI as string,
+    url: process.env.DATABASE_URL as string,
   }),
   editor: lexicalEditor({}),
   graphQL: {
