@@ -42,6 +42,14 @@ export const count: Count = async function count(
     }
   }
 
+  if (useEstimatedCount) {
+    const estimatedCount = await Model.estimatedDocumentCount({ session: options.session })
+
+    return {
+      totalDocs: estimatedCount,
+    }
+  }
+
   const result = await Model.countDocuments(query, options)
 
   return {
