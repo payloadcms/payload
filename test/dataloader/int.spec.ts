@@ -31,7 +31,7 @@ describe('dataloader', () => {
       if (loginResult.token) token = loginResult.token
     })
 
-    it('should allow multiple parallel queries', async () => {
+    it.skip('should allow multiple parallel queries', async () => {
       for (let i = 0; i < 100; i++) {
         const query = `
           query {

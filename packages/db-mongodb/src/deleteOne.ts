@@ -18,7 +18,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where,
   })
 
-  let doc = await Model.findOneAndDelete(query, options).lean()
+  let doc = await Model.findOneAndDelete(query, options).lean<Record<string, unknown>>()
 
   doc = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc
 

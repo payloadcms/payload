@@ -18,14 +18,12 @@ export type Arguments = {
   where?: Where
 }
 
-async function count<T extends TypeWithID & Record<string, unknown>>(
+async function count<T extends Record<string, unknown> & TypeWithID>(
   incomingArgs: Arguments,
 ): Promise<{ totalDocs: number }> {
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
-
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -100,8 +98,6 @@ async function count<T extends TypeWithID & Record<string, unknown>>(
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

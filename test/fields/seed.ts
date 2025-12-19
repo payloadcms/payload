@@ -56,19 +56,31 @@ export async function clearAndSeedEverything(_payload: Payload) {
       // Get both files in parallel
       const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
-      const [
-        createdArrayDoc,
-        createdAnotherArrayDoc,
-        createdTextDoc,
-        createdAnotherTextDoc,
-        createdPNGDoc,
-      ] = await Promise.all([
-        _payload.create({ collection: arrayFieldsSlug, data: arrayDoc }),
-        _payload.create({ collection: arrayFieldsSlug, data: anotherArrayDoc }),
-        _payload.create({ collection: textFieldsSlug, data: textDoc }),
-        _payload.create({ collection: textFieldsSlug, data: anotherTextDoc }),
-        _payload.create({ collection: uploadsSlug, data: {}, file: pngFile }),
-      ])
+      const createdArrayDoc = await _payload.create({
+        collection: arrayFieldsSlug,
+        data: arrayDoc,
+      })
+
+      const createdAnotherArrayDoc = await _payload.create({
+        collection: arrayFieldsSlug,
+        data: anotherArrayDoc,
+      })
+
+      const createdTextDoc = await _payload.create({
+        collection: textFieldsSlug,
+        data: textDoc,
+      })
+
+      const createdAnotherTextDoc = await _payload.create({
+        collection: textFieldsSlug,
+        data: anotherTextDoc,
+      })
+
+      const createdPNGDoc = await _payload.create({
+        collection: uploadsSlug,
+        data: {},
+        file: pngFile,
+      })
 
       const createdJPGDoc = await _payload.create({
         collection: uploadsSlug,
@@ -94,6 +106,7 @@ export async function clearAndSeedEverything(_payload: Payload) {
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
           .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
       )
+
       const richTextBulletsDocWithRelId = JSON.parse(
         JSON.stringify(richTextBulletsDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
@@ -110,7 +123,10 @@ export async function clearAndSeedEverything(_payload: Payload) {
       blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
       blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
-      await _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId })
+      await _payload.create({
+        collection: richTextFieldsSlug,
+        data: richTextBulletsDocWithRelId,
+      })
 
       const createdRichTextDoc = await _payload.create({
         collection: richTextFieldsSlug,
@@ -138,37 +154,43 @@ export async function clearAndSeedEverything(_payload: Payload) {
           .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
       )
 
-      await Promise.all([
-        _payload.create({
-          collection: usersSlug,
-          data: {
-            email: devUser.email,
-            password: devUser.password,
-          },
-        }),
-        _payload.create({ collection: collapsibleFieldsSlug, data: collapsibleDoc }),
-        _payload.create({ collection: conditionalLogicSlug, data: conditionalLogicDoc }),
-        _payload.create({ collection: groupFieldsSlug, data: groupDoc }),
-        _payload.create({ collection: selectFieldsSlug, data: selectsDoc }),
-        _payload.create({ collection: radioFieldsSlug, data: radiosDoc }),
-        _payload.create({ collection: tabsFieldsSlug, data: tabsDoc }),
-        _payload.create({ collection: pointFieldsSlug, data: pointDoc }),
-        _payload.create({ collection: dateFieldsSlug, data: dateDoc }),
-        _payload.create({ collection: codeFieldsSlug, data: codeDoc }),
-        _payload.create({ collection: jsonFieldsSlug, data: jsonDoc }),
+      await _payload.create({
+        collection: usersSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
 
-        _payload.create({ collection: blockFieldsSlug, data: blocksDocWithRichText }),
+      await _payload.create({ collection: collapsibleFieldsSlug, data: collapsibleDoc })
+      await _payload.create({ collection: conditionalLogicSlug, data: conditionalLogicDoc })
+      await _payload.create({ collection: groupFieldsSlug, data: groupDoc })
+      await _payload.create({ collection: selectFieldsSlug, data: selectsDoc })
+      await _payload.create({ collection: radioFieldsSlug, data: radiosDoc })
+      await _payload.create({ collection: tabsFieldsSlug, data: tabsDoc })
+      await _payload.create({ collection: pointFieldsSlug, data: pointDoc })
+      await _payload.create({ collection: dateFieldsSlug, data: dateDoc })
+      await _payload.create({ collection: codeFieldsSlug, data: codeDoc })
+      await _payload.create({ collection: jsonFieldsSlug, data: jsonDoc })
 
-        _payload.create({ collection: lexicalFieldsSlug, data: lexicalDocWithRelId }),
-        _payload.create({
-          collection: lexicalMigrateFieldsSlug,
-          data: lexicalMigrateDocWithRelId,
-        }),
+      await _payload.create({
+        collection: blockFieldsSlug,
+        data: blocksDocWithRichText,
+      })
 
-        _payload.create({ collection: numberFieldsSlug, data: { number: 2 } }),
-        _payload.create({ collection: numberFieldsSlug, data: { number: 3 } }),
-        _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
-      ])
+      await _payload.create({
+        collection: lexicalFieldsSlug,
+        data: lexicalDocWithRelId,
+      })
+
+      await _payload.create({
+        collection: lexicalMigrateFieldsSlug,
+        data: lexicalMigrateDocWithRelId,
+      })
+
+      await _payload.create({ collection: numberFieldsSlug, data: { number: 2 } })
+      await _payload.create({ collection: numberFieldsSlug, data: { number: 3 } })
+      await _payload.create({ collection: numberFieldsSlug, data: numberDoc })
     },
     shouldResetDB: true,
     snapshotKey: 'fieldsTest',

@@ -19,25 +19,24 @@ export async function clearAndSeedEverything(_payload: Payload) {
         },
       ]
 
-      await Promise.all([
-        _payload.create({
-          collection: 'users',
-          data: {
-            email: devUser.email,
-            password: devUser.password,
-          },
-        }),
-        _payload.create({
-          collection: draftCollectionSlug,
-          data: {
-            blocksField,
-            description: 'Description',
-            radio: 'test',
-            title: 'Draft Title',
-          },
-          draft: true,
-        }),
-      ])
+      await _payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await _payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          blocksField,
+          description: 'Description',
+          radio: 'test',
+          title: 'Draft Title',
+        },
+        draft: true,
+      })
 
       const { id: manyDraftsID } = await _payload.create({
         collection: draftCollectionSlug,

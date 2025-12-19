@@ -18,7 +18,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
   let urlToConnect = this.url
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!'
 
-  const connectionOptions: ConnectOptions & { useFacet: undefined } = {
+  const connectionOptions: { useFacet: undefined } & ConnectOptions = {
     autoIndex: true,
     ...this.connectOptions,
     useFacet: undefined,
@@ -30,20 +30,17 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     } else {
       connectionOptions.dbName = 'payloadmemory'
       const { MongoMemoryReplSet } = require('mongodb-memory-server')
-      const getPort = require('get-port')
 
-      const port = await getPort()
       this.mongoMemoryServer = await MongoMemoryReplSet.create({
-        instance: {
-          dbName: 'payloadmemory',
-          port,
-        },
         replSet: {
+          args: ['--setParameter', 'maxTransactionLockRequestTimeoutMillis=5000'],
           count: 3,
+          dbName: 'payloadmemory',
         },
       })
 
-      urlToConnect = this.mongoMemoryServer.getUri()
+      await this.mongoMemoryServer.waitUntilRunning()
+      urlToConnect = `${this.mongoMemoryServer.getUri()}&retryWrites=true`
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
     }
   }
@@ -66,6 +63,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     this.payload.logger.info(successfulConnectionMessage)
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
+    console.error(err)
     process.exit(1)
   }
 }

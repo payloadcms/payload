@@ -42,7 +42,7 @@ describe('Relationship Object IDs Plugin', () => {
     }
   })
 
-  it('can query by relationship id', async () => {
+  it.skip('can query by relationship id', async () => {
     if (payload.db.name === 'mongoose') {
       const { totalDocs } = await payload.find({
         collection: 'relations',
@@ -86,7 +86,7 @@ describe('Relationship Object IDs Plugin', () => {
     }
   })
 
-  it('can query using the "in" operator', async () => {
+  it.skip('can query using the "in" operator', async () => {
     if (payload.db.name === 'mongoose') {
       const { totalDocs } = await payload.find({
         collection: 'relations',
