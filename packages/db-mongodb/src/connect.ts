@@ -30,26 +30,27 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     } else {
       connectionOptions.dbName = 'payloadmemory'
       const { MongoMemoryReplSet } = require('mongodb-memory-server')
-      const getPort = require('get-port')
 
-      const port = await getPort()
       this.mongoMemoryServer = await MongoMemoryReplSet.create({
-        instance: {
-          dbName: 'payloadmemory',
-          port,
-        },
         replSet: {
           count: 3,
+          dbName: 'payloadmemory',
         },
       })
 
-      urlToConnect = this.mongoMemoryServer.getUri()
+      urlToConnect = `${this.mongoMemoryServer.getUri()}&retryWrites=true`
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
     }
   }
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+
+    if (this.mongoMemoryServer) {
+      await this.connection.db
+        .admin()
+        .command({ setParameter: 1, maxTransactionLockRequestTimeoutMillis: 5000 })
+    }
 
     const client = this.connection.getClient()
 
