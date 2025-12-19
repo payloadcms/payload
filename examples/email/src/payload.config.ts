@@ -21,7 +21,7 @@ export default buildConfig({
   },
   collections: [Newsletter, Users],
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URL || '',
   }),
   editor: lexicalEditor({}),
   // For example use case, we are passing nothing to nodemailerAdapter

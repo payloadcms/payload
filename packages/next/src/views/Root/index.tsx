@@ -12,6 +12,7 @@ import type {
 
 import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
@@ -21,7 +22,6 @@ import React from 'react'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
 import { initReq } from '../../utilities/initReq.js'
 import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
@@ -63,12 +63,9 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
-  // Intentionally omit `serverURL` to ensure relative path
   const currentRoute = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
-    relative: true,
-    serverURL: config.serverURL,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
@@ -229,8 +226,6 @@ export const RootPage = async ({
   const createFirstUserRoute = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
-    relative: true,
-    serverURL: config.serverURL,
   })
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
@@ -255,6 +250,7 @@ export const RootPage = async ({
     importMap,
     user: viewType === 'createFirstUser' ? true : req.user,
   })
+
   await applyLocaleFiltering({ clientConfig, config, req })
 
   // Ensure locale on req is still valid after filtering locales

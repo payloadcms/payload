@@ -79,6 +79,11 @@ export const arTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
+  dashboard: {
+    addWidget: 'أضف الواجهة البيانية',
+    deleteWidget: 'حذف الودجت {{id}}',
+    searchWidgets: 'ابحث عن الأدوات...',
+  },
   error: {
     accountAlreadyActivated: 'تم تفعيل هذا الحساب بالفعل.',
     autosaving: 'حدثت مشكلة أثناء حفظ هذا المستند تلقائيًا.',

@@ -4,6 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
+  formatAdminURL,
   getAutosaveInterval,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
@@ -46,7 +47,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -110,7 +110,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           let url: string
           let method: string
           let entitySlug: string
-
           const params = qs.stringify(
             {
               autosave: true,
@@ -126,13 +125,19 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}${params}`
+            url = formatAdminURL({
+              apiRoute: api,
+              path: `/${entitySlug}/${id}${params}`,
+            })
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}${params}`
+            url = formatAdminURL({
+              apiRoute: api,
+              path: `/globals/${entitySlug}${params}`,
+            })
             method = 'POST'
           }
 
