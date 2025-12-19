@@ -57,7 +57,6 @@ export const SetDocumentStepNav: React.FC<{
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
-                serverURL,
               })
             : undefined,
         })
@@ -70,7 +69,6 @@ export const SetDocumentStepNav: React.FC<{
               ? formatAdminURL({
                   adminRoute,
                   path: `/collections/${collectionSlug}/trash`,
-                  serverURL,
                 })
               : undefined,
           })
@@ -86,7 +84,6 @@ export const SetDocumentStepNav: React.FC<{
                   path: isTrashed
                     ? `/collections/${collectionSlug}/trash/${id}`
                     : `/collections/${collectionSlug}/${id}`,
-                  serverURL,
                 })
               : undefined,
           })
@@ -102,7 +99,6 @@ export const SetDocumentStepNav: React.FC<{
             ? formatAdminURL({
                 adminRoute,
                 path: `/globals/${globalSlug}`,
-                serverURL,
               })
             : undefined,
         })

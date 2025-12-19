@@ -4,7 +4,7 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -47,7 +47,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const {
     localization,
     routes: { api },
-    serverURL,
   } = config
 
   const { i18n, t } = useTranslation()
@@ -77,9 +76,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
-    hasPublishPermission &&
-    (globalSlug || (collectionSlug && id)) &&
-    (hasAutosave || !modified),
+      hasPublishPermission &&
+      (globalSlug || (collectionSlug && id)) &&
+      (hasAutosave || !modified),
   )
 
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
@@ -114,14 +113,20 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     let method = 'POST'
 
     if (collectionSlug) {
-      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${params}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}${id ? `/${id}` : ''}${params}`,
+      })
       if (id) {
         method = 'PATCH'
       }
     }
 
     if (globalSlug) {
-      action = `${serverURL}${api}/globals/${globalSlug}${params}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${globalSlug}${params}`,
+      })
     }
 
     await submit({
@@ -132,7 +137,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       },
       skipValidation: true,
     })
-  }, [disabled, localeCode, collectionSlug, globalSlug, submit, serverURL, api, id])
+  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -157,8 +162,12 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       { addQueryPrefix: true },
     )
 
-    const action = `${serverURL}${api}${globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
-      }${params}`
+    const action = formatAdminURL({
+      apiRoute: api,
+      path: `${
+        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
+      }${params}` as `/${string}`,
+    })
 
     const result = await submit({
       action,
@@ -178,7 +187,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     collectionSlug,
     globalSlug,
     id,
-    serverURL,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
@@ -201,8 +209,13 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         { addQueryPrefix: true },
       )
 
-      const action = `${serverURL}${api}${globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
-        }${params}`
+      const pathSegment = globalSlug
+        ? `/globals/${globalSlug}`
+        : `/${collectionSlug}${id ? `/${id}` : ''}`
+      const action = formatAdminURL({
+        apiRoute: api,
+        path: `${pathSegment}${params}` as `/${string}`,
+      })
 
       const result = await submit({
         action,
@@ -215,7 +228,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         setHasPublishedDoc(true)
       }
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
+    [api, collectionSlug, globalSlug, id, setHasPublishedDoc, submit, uploadStatus],
   )
 
   // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
@@ -246,37 +259,37 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled || canSchedulePublish
             ? ({ close }) => {
-              return (
-                <React.Fragment>
-                  {canSchedulePublish && (
-                    <PopupList.ButtonGroup key="schedule-publish">
-                      <PopupList.Button
-                        id="schedule-publish"
-                        onClick={() => [toggleModal(drawerSlug), close()]}
-                      >
-                        {t('version:schedulePublish')}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )}
-                  {isSpecificLocalePublishEnabled && (
-                    <PopupList.ButtonGroup>
-                      <PopupList.Button
-                        id="publish-locale"
-                        onClick={
-                          isDefaultPublishAll
-                            ? () => publishSpecificLocale(activeLocale.code)
-                            : publish
-                        }
-                      >
-                        {isDefaultPublishAll
-                          ? t('version:publishIn', { locale: activeLocaleLabel })
-                          : t('version:publishAllLocales')}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )}
-                </React.Fragment>
-              )
-            }
+                return (
+                  <React.Fragment>
+                    {canSchedulePublish && (
+                      <PopupList.ButtonGroup key="schedule-publish">
+                        <PopupList.Button
+                          id="schedule-publish"
+                          onClick={() => [toggleModal(drawerSlug), close()]}
+                        >
+                          {t('version:schedulePublish')}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )}
+                    {isSpecificLocalePublishEnabled && (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button
+                          id="publish-locale"
+                          onClick={
+                            isDefaultPublishAll
+                              ? () => publishSpecificLocale(activeLocale.code)
+                              : publish
+                          }
+                        >
+                          {isDefaultPublishAll
+                            ? t('version:publishIn', { locale: activeLocaleLabel })
+                            : t('version:publishAllLocales')}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )}
+                  </React.Fragment>
+                )
+              }
             : undefined
         }
         type="button"
@@ -288,7 +301,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
           schedulePublishConfig={
             scheduledPublishEnabled &&
-              typeof entityConfig.versions.drafts.schedulePublish === 'object'
+            typeof entityConfig.versions.drafts.schedulePublish === 'object'
               ? entityConfig.versions.drafts.schedulePublish
               : undefined
           }

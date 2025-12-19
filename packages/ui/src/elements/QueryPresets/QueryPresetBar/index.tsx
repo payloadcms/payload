@@ -3,7 +3,7 @@ import type { QueryPreset, SanitizedCollectionPermission } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import {
-  formatApiURL,
+  formatAdminURL,
   transformColumnsToPreferences,
   transformColumnsToSearchParams,
 } from 'payload/shared'
@@ -113,10 +113,9 @@ export const QueryPresetBar: React.FC<{
   const handleDeletePreset = useCallback(async () => {
     try {
       await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute,
           path: `/${queryPresetsSlug}/${activePreset.id}`,
-          serverURL,
         }),
         {
           method: 'DELETE',
@@ -148,24 +147,14 @@ export const QueryPresetBar: React.FC<{
     } catch (_err) {
       toast.error(t('error:deletingTitle', { title: activePreset.title }))
     }
-  }, [
-    apiRoute,
-    activePreset?.id,
-    activePreset?.title,
-    t,
-    presetConfig,
-    i18n,
-    resetQueryPreset,
-    serverURL,
-  ])
+  }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetQueryPreset])
 
   const saveCurrentChanges = useCallback(async () => {
     try {
       await fetch(
-        formatApiURL({
+        formatAdminURL({
           apiRoute,
           path: `/${queryPresetsSlug}/${activePreset.id}`,
-          serverURL,
         }),
         {
           body: JSON.stringify({
@@ -215,7 +204,6 @@ export const QueryPresetBar: React.FC<{
     presetConfig?.labels?.singular,
     i18n,
     setQueryModified,
-    serverURL,
   ])
 
   const hasModifiedPreset = activePreset && modified

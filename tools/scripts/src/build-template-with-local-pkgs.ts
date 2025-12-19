@@ -83,7 +83,7 @@ async function main() {
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
     `PAYLOAD_SECRET=secret
-DATABASE_URI=${databaseConnection}
+DATABASE_URL=${databaseConnection}
 POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )

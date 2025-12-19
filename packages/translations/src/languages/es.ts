@@ -79,6 +79,11 @@ export const esTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.',
   },
+  dashboard: {
+    addWidget: 'Agregar Widget',
+    deleteWidget: 'Eliminar widget {{id}}',
+    searchWidgets: 'Buscar widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Esta cuenta ya fue activada.',
     autosaving: 'Hubo un problema al guardar automáticamente este documento.',

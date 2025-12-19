@@ -284,16 +284,22 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
               sanitizeFilterOptionsQuery(query.where)
 
-              const response = await fetch(`${serverURL}${api}/${relation}`, {
-                body: qs.stringify(query),
-                credentials: 'include',
-                headers: {
-                  'Accept-Language': i18n.language,
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'X-Payload-HTTP-Method-Override': 'GET',
+              const response = await fetch(
+                formatAdminURL({
+                  apiRoute: api,
+                  path: `/${relation}`,
+                }),
+                {
+                  body: qs.stringify(query),
+                  credentials: 'include',
+                  headers: {
+                    'Accept-Language': i18n.language,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Payload-HTTP-Method-Override': 'GET',
+                  },
+                  method: 'POST',
                 },
-                method: 'POST',
-              })
+              )
 
               if (response.ok) {
                 const data: PaginatedDocs<unknown> = await response.json()
@@ -353,7 +359,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       sortOptions,
       maxResultsPerRequest,
       locale,
-      serverURL,
       api,
       i18n,
       config,
@@ -443,16 +448,22 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}`, {
-            body: qs.stringify(query),
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-Payload-HTTP-Method-Override': 'GET',
+          const response = await fetch(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/${relation}`,
+            }),
+            {
+              body: qs.stringify(query),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Payload-HTTP-Method-Override': 'GET',
+              },
+              method: 'POST',
             },
-            method: 'POST',
-          })
+          )
           let docs = []
 
           if (response.ok) {
