@@ -1,6 +1,7 @@
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { serialize } from 'object-to-formdata'
 import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
@@ -9,7 +10,9 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
+import { getFormDataSize } from '../helpers/getFormDataSize.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
   customIdSlug,
@@ -17,8 +20,8 @@ import {
   errorOnHookSlug,
   methods,
   pointSlug,
-  relationSlug,
   postsSlug,
+  relationSlug,
 } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -33,9 +36,7 @@ describe('collections-rest', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -119,6 +120,47 @@ describe('collections-rest', () => {
       expect(response.status).toEqual(200)
       expect(doc.title).toEqual(updatedTitle)
       expect(doc.description).toEqual(description) // Check was not modified
+    })
+
+    it('can handle REST API requests with over 1mb of multipart/form-data', async () => {
+      const doc = await payload.create({
+        collection: largeDocumentsCollectionSlug,
+        data: {},
+      })
+
+      const arrayData = new Array(500).fill({ text: randomUUID().repeat(100) })
+
+      // Now use the REST API and attempt to PATCH the document with a payload over 1mb
+      const dataToSerialize: Record<string, unknown> = {
+        _payload: JSON.stringify({
+          title: 'Hello, world!',
+          // fill with long, random string of text to exceed 1mb
+          array: arrayData,
+        }),
+      }
+
+      const formData: FormData = serialize(dataToSerialize, {
+        indices: true,
+        nullsAsUndefineds: false,
+      })
+
+      // Ensure the form data we are about to send is greater than the default limit (1mb)
+      // But less than the increased limit that we've set in the root config (2mb)
+      const docSize = getFormDataSize(formData)
+      expect(docSize).toBeGreaterThan(1 * 1024 * 1024)
+      expect(docSize).toBeLessThan(2 * 1024 * 1024)
+
+      // This request should not fail with error: "Unterminated string in JSON at position..."
+      // This is because we set `bodyParser.limits.fieldSize` to 2mb in the root config
+      const res = await restClient
+        .PATCH(`/${largeDocumentsCollectionSlug}/${doc.id}?limit=1`, {
+          body: formData,
+        })
+        .then((res) => res.json())
+
+      expect(res).not.toHaveProperty('errors')
+      expect(res.doc.id).toEqual(doc.id)
+      expect(res.doc.array[0].text).toEqual(arrayData[0].text)
     })
 
     describe('Bulk operations', () => {
@@ -1218,7 +1260,6 @@ describe('collections-rest', () => {
             .GET(`/${pointSlug}`, {
               query: {
                 limit: 5,
-                sort: 'point',
                 where: {
                   point: {
                     // querying large enough range to include all docs
@@ -1454,7 +1495,7 @@ describe('collections-rest', () => {
           for (let i = 0; i < 10; i++) {
             await createPost({
               number: i,
-              relationField: relatedDoc.id as string,
+              relationField: relatedDoc.id,
               title: 'paginate-test',
             })
           }
@@ -1732,6 +1773,95 @@ describe('collections-rest', () => {
         await expect(response.text()).resolves.toBe(`${method} response`)
       }
     })
+  })
+
+  it('should not mount auth endpoints for collection without auth', async () => {
+    const authEndpoints = [
+      {
+        method: 'post',
+        path: '/forgot-password',
+      },
+      {
+        method: 'post',
+        path: '/login',
+      },
+      {
+        method: 'post',
+        path: '/logout',
+      },
+      {
+        method: 'post',
+        path: '/refresh-token',
+      },
+      {
+        method: 'post',
+        path: '/first-register',
+      },
+      {
+        method: 'post',
+        path: '/reset-password',
+      },
+      {
+        method: 'post',
+        path: '/unlock',
+      },
+    ]
+
+    for (const endpoint of authEndpoints) {
+      const result = await restClient[endpoint.method.toUpperCase()](
+        `/${endpointsSlug}${endpoint.path}`,
+      )
+
+      expect(result.status).toBe(404)
+      const json = await result.json()
+
+      expect(json.message.startsWith('Route not found')).toBeTruthy()
+    }
+  })
+
+  it('should not mount upload endpoints for collection without auth', async () => {
+    const uploadEndpoints = [
+      {
+        method: 'get',
+        path: '/paste-url/some-id',
+      },
+      {
+        method: 'get',
+        path: '/file/some-filename.png',
+      },
+    ]
+
+    for (const endpoint of uploadEndpoints) {
+      const result = await restClient[endpoint.method.toUpperCase()](
+        `/${endpointsSlug}${endpoint.path}`,
+      )
+
+      expect(result.status).toBe(404)
+
+      expect((await result.json()).message.startsWith('Route not found')).toBeTruthy()
+    }
+  })
+
+  it('should disable bulk edit for the collection with disableBulkEdit: true', async () => {
+    const res = await restClient.PATCH('/disabled-bulk-edit-docs?where[id][equals]=0', {})
+    expect(res.status).toBe(403)
+
+    await expect(
+      payload.update({
+        collection: 'disabled-bulk-edit-docs',
+        where: {},
+        data: {},
+        overrideAccess: false,
+      }),
+    ).rejects.toBeInstanceOf(APIError)
+
+    await expect(
+      payload.update({
+        collection: 'disabled-bulk-edit-docs',
+        where: {},
+        data: {},
+      }),
+    ).resolves.toBeTruthy()
   })
 })
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Config, PaginatedDocs, TypedUser, Where } from 'payload'
+import type { PaginatedDocs, TypedUser, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 
@@ -110,8 +110,6 @@ type QueryResponse<T> = {
 }
 
 export class RESTClient {
-  private readonly config: Config
-
   private defaultSlug: string
 
   private token: string
@@ -120,8 +118,7 @@ export class RESTClient {
 
   public user: TypedUser
 
-  constructor(config: Config, args: Args) {
-    this.config = config
+  constructor(args: Args) {
     this.serverURL = args.serverURL
     this.defaultSlug = args.defaultSlug
   }

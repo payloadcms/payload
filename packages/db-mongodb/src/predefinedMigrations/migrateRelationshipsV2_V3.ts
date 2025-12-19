@@ -1,25 +1,28 @@
 import type { ClientSession, Model } from 'mongoose'
-import type { Field, PayloadRequest, SanitizedConfig } from 'payload'
+import type { Field, PayloadRequest } from 'payload'
 
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { getCollection, getGlobal } from '../utilities/getEntity.js'
 import { getSession } from '../utilities/getSession.js'
-import { sanitizeRelationshipIDs } from '../utilities/sanitizeRelationshipIDs.js'
+import { transform } from '../utilities/transform.js'
 
 const migrateModelWithBatching = async ({
   batchSize,
-  config,
+  db,
   fields,
   Model,
+  parentIsLocalized,
   session,
 }: {
   batchSize: number
-  config: SanitizedConfig
+  db: MongooseAdapter
   fields: Field[]
   Model: Model<any>
-  session: ClientSession
+  parentIsLocalized: boolean
+  session?: ClientSession
 }): Promise<void> => {
   let hasNext = true
   let skip = 0
@@ -47,10 +50,11 @@ const migrateModelWithBatching = async ({
     }
 
     for (const doc of docs) {
-      sanitizeRelationshipIDs({ config, data: doc, fields })
+      transform({ adapter: db, data: doc, fields, operation: 'write', parentIsLocalized })
     }
 
     await Model.collection.bulkWrite(
+      // @ts-expect-error bulkWrite has a weird type, insertOne, updateMany etc are required here as well.
       docs.map((doc) => ({
         updateOne: {
           filter: { _id: doc._id },
@@ -59,7 +63,10 @@ const migrateModelWithBatching = async ({
           },
         },
       })),
-      { session },
+      {
+        session, // Timestamps are manually added by the write transform
+        timestamps: false,
+      },
     )
 
     skip += batchSize
@@ -80,6 +87,10 @@ const hasRelationshipOrUploadField = ({ fields }: { fields: Field[] }): boolean 
 
     if ('blocks' in field) {
       for (const block of field.blocks) {
+        if (typeof block === 'string') {
+          // Skip - string blocks have been added in v3 and thus don't need to be migrated
+          continue
+        }
         if (hasRelationshipOrUploadField({ fields: block.fields })) {
           return true
         }
@@ -115,11 +126,14 @@ export async function migrateRelationshipsV2_V3({
     if (hasRelationshipOrUploadField(collection)) {
       payload.logger.info(`Migrating collection "${collection.slug}"`)
 
+      const { Model } = getCollection({ adapter: db, collectionSlug: collection.slug })
+
       await migrateModelWithBatching({
         batchSize,
-        config,
+        db,
         fields: collection.fields,
-        Model: db.collections[collection.slug],
+        Model,
+        parentIsLocalized: false,
         session,
       })
 
@@ -129,11 +143,18 @@ export async function migrateRelationshipsV2_V3({
     if (collection.versions) {
       payload.logger.info(`Migrating collection versions "${collection.slug}"`)
 
+      const { Model } = getCollection({
+        adapter: db,
+        collectionSlug: collection.slug,
+        versions: true,
+      })
+
       await migrateModelWithBatching({
         batchSize,
-        config,
+        db,
         fields: buildVersionCollectionFields(config, collection),
-        Model: db.versions[collection.slug],
+        Model,
+        parentIsLocalized: false,
         session,
       })
 
@@ -159,7 +180,12 @@ export async function migrateRelationshipsV2_V3({
 
       // in case if the global doesn't exist in the database yet  (not saved)
       if (doc) {
-        sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
+        transform({
+          adapter: db,
+          data: doc,
+          fields: global.fields,
+          operation: 'write',
+        })
 
         await GlobalsModel.collection.updateOne(
           {
@@ -176,11 +202,14 @@ export async function migrateRelationshipsV2_V3({
     if (global.versions) {
       payload.logger.info(`Migrating global versions "${global.slug}"`)
 
+      const { Model } = getGlobal({ adapter: db, globalSlug: global.slug, versions: true })
+
       await migrateModelWithBatching({
         batchSize,
-        config,
+        db,
         fields: buildVersionGlobalFields(config, global),
-        Model: db.versions[global.slug],
+        Model,
+        parentIsLocalized: false,
         session,
       })
 

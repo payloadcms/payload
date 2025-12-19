@@ -9,5 +9,5 @@ export const isEntityHidden = ({
   hidden: SanitizedCollectionConfig['admin']['hidden'] | SanitizedGlobalConfig['admin']['hidden']
   user: PayloadRequest['user']
 }) => {
-  return typeof hidden === 'function' ? hidden({ user }) : hidden === true
+  return typeof hidden === 'function' ? hidden({ user: user! }) : hidden === true
 }

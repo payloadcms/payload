@@ -1,4 +1,4 @@
-import { deepStrictEqual } from 'assert'
+import { dequal } from 'dequal'
 import prompts from 'prompts'
 
 import type { BasePostgresAdapter } from '../postgres/types.js'
@@ -23,18 +23,18 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
     const localeCodes =
       adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
 
-    try {
-      deepStrictEqual(previousSchema, {
-        localeCodes,
-        rawTables: adapter.rawTables,
-      })
+    const equal = dequal(previousSchema, {
+      localeCodes,
+      rawTables: adapter.rawTables,
+    })
 
+    if (equal) {
       if (adapter.logger) {
         adapter.payload.logger.info('No changes detected in schema, skipping schema push.')
       }
 
       return
-    } catch {
+    } else {
       previousSchema.localeCodes = localeCodes
       previousSchema.rawTables = adapter.rawTables
     }

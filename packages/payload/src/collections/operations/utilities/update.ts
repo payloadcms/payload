@@ -2,6 +2,14 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
 import type {
+  AccessResult,
+  CollectionSlug,
+  FileToSave,
+  SanitizedConfig,
+  TypedFallbackLocale,
+} from '../../../index.js'
+import type {
+  JsonObject,
   Payload,
   PayloadRequest,
   PopulateType,
@@ -12,6 +20,7 @@ import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
@@ -21,18 +30,15 @@ import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
-import {
-  type AccessResult,
-  type CollectionSlug,
-  deepCopyObjectSimple,
-  type FileToSave,
-  type SanitizedConfig,
-} from '../../../index.js'
+import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+} from '../../../utilities/getVersionsConfig.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
-import { saveVersion } from '../../../versions/saveVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   accessResults: AccessResult
@@ -41,9 +47,9 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
   depth: number
-  docWithLocales: any
+  docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
-  fallbackLocale: string
+  fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
@@ -96,9 +102,16 @@ export const updateDocument = async <
   showHiddenFields,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
-  const shouldSaveDraft =
-    Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
-  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+  const isSavingDraft =
+    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) && data._status !== 'published'
+  const shouldSavePassword = Boolean(
+    password &&
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      !isSavingDraft,
+  )
 
   // /////////////////////////////////////
   // Handle potentially locked documents
@@ -125,6 +138,8 @@ export const updateDocument = async <
     req,
     showHiddenFields: true,
   })
+
+  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
@@ -170,19 +185,19 @@ export const updateDocument = async <
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    data =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.beforeValidate?.length) {
+    for (const hook of collectionConfig.hooks.beforeValidate) {
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }
+  }
 
   // /////////////////////////////////////
   // Write files to local storage
@@ -196,26 +211,23 @@ export const updateDocument = async <
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    data =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.beforeChange?.length) {
+    for (const hook of collectionConfig.hooks.beforeChange) {
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }
+  }
 
   // /////////////////////////////////////
   // beforeChange - Fields
   // /////////////////////////////////////
-
-  let publishedDocWithLocales = docWithLocales
-  let versionSnapshotResult
 
   const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
     id,
@@ -223,49 +235,51 @@ export const updateDocument = async <
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
-    docWithLocales: undefined,
+    docWithLocales,
     global: null,
     operation: 'update',
+    overrideAccess,
     req,
     skipValidation:
-      shouldSaveDraft &&
-      collectionConfig.versions.drafts &&
-      !collectionConfig.versions.drafts.validate,
+      // only skip validation for drafts when draft validation is false
+      (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
+      // Skip validation for trash operations since they're just metadata updates
+      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
   }
 
-  if (publishSpecificLocale) {
-    versionSnapshotResult = await beforeChange({
-      ...beforeChangeArgs,
-      docWithLocales,
-    })
+  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let snapshotToSave: JsonObject | undefined
 
-    const lastPublished = await getLatestCollectionVersion({
-      id,
-      config: collectionConfig,
-      payload,
-      published: true,
-      query: {
-        collection: collectionConfig.slug,
-        locale,
-        req,
-        where: combineQueries({ id: { equals: id } }, accessResults),
-      },
-      req,
-    })
+  if (config.localization && collectionConfig.versions) {
+    if (publishSpecificLocale) {
+      snapshotToSave = deepCopyObjectSimple(result)
 
-    publishedDocWithLocales = lastPublished ? lastPublished : {}
+      // the published data to save to the main document
+      result = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales:
+          (await getLatestCollectionVersion({
+            id,
+            config: collectionConfig,
+            payload,
+            published: true,
+            query: {
+              collection: collectionConfig.slug,
+              locale,
+              req,
+              where: combineQueries({ id: { equals: id } }, accessResults),
+            },
+            req,
+          })) || {},
+      })
+    }
   }
-
-  let result = await beforeChange({
-    ...beforeChangeArgs,
-    docWithLocales: publishedDocWithLocales,
-  })
 
   // /////////////////////////////////////
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: JsonObject = { ...result }
 
   if (shouldSavePassword && typeof password === 'string') {
     const { hash, salt } = await generatePasswordSaltHash({
@@ -283,14 +297,15 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
-  if (!shouldSaveDraft) {
+  if (!isSavingDraft) {
+    // Ensure updatedAt date is always updated
+    dataToUpdate.updatedAt = new Date().toISOString()
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -304,12 +319,12 @@ export const updateDocument = async <
       autosave,
       collection: collectionConfig,
       docWithLocales: result,
-      draft: shouldSaveDraft,
+      draft: isSavingDraft,
+      operation: 'update',
       payload,
       publishSpecificLocale,
       req,
-      select,
-      snapshot: versionSnapshotResult,
+      snapshot: snapshotToSave,
     })
   }
 
@@ -337,17 +352,17 @@ export const updateDocument = async <
   // afterRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        doc: result,
-        req,
-      })) || result
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterRead?.length) {
+    for (const hook of collectionConfig.hooks.afterRead) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }
+  }
 
   // /////////////////////////////////////
   // afterChange - Fields
@@ -368,19 +383,20 @@ export const updateDocument = async <
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        doc: result,
-        operation: 'update',
-        previousDoc: originalDoc,
-        req,
-      })) || result
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterChange?.length) {
+    for (const hook of collectionConfig.hooks.afterChange) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          doc: result,
+          operation: 'update',
+          previousDoc: originalDoc,
+          req,
+        })) || result
+    }
+  }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>
 }

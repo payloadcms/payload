@@ -8,12 +8,12 @@ const RichText: React.FC<{
   className?: string
   content: any
   renderUploadFilenameOnly?: boolean
-  serializer?: 'lexical' | 'slate'
-}> = ({ className, content, renderUploadFilenameOnly, serializer = 'slate' }) => {
+}> = ({ className, content, renderUploadFilenameOnly }) => {
   if (!content) {
     return null
   }
 
+  const serializer = Array.isArray(content) ? 'slate' : 'lexical'
   return (
     <div className={[classes.richText, className].filter(Boolean).join(' ')}>
       {serializer === 'slate'
@@ -22,5 +22,4 @@ const RichText: React.FC<{
     </div>
   )
 }
-
 export default RichText

@@ -1,5 +1,6 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type {
@@ -12,19 +13,21 @@ import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  Payload,
   RequestContext,
   TypedCollectionJoins,
   TypedCollectionSelect,
+  TypedFallbackLocale,
   TypedLocale,
   TypedUser,
 } from '../index.js'
 import type { Operator } from './constants.js'
-export type { Payload as Payload } from '../index.js'
+export type { Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string
+  fallbackLocale?: TypedFallbackLocale
   i18n: I18n
   /**
    * The requested locale if specified
@@ -43,7 +46,19 @@ export type CustomPayloadRequestProperties = {
    */
   payloadAPI: 'GraphQL' | 'local' | 'REST'
   /** Optimized document loader */
-  payloadDataLoader?: DataLoader<string, TypeWithID>
+  payloadDataLoader: {
+    /**
+     * Wraps `payload.find` with a cache to deduplicate requests
+     * @experimental This is may be replaced by a more robust cache strategy in future versions
+     * By calling this method with the same arguments many times in one request, it will only be handled one time
+     * const result = await req.payloadDataLoader.find({
+     *  collection,
+     *  req,
+     *  where: findWhere,
+     * })
+     */
+    find: Payload['find']
+  } & DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
   /** Query params on the request */
@@ -85,10 +100,16 @@ type PayloadRequestData = {
    *
    *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
+   *
+   * You should not expect this object to be the document data. It is the request data.
    * */
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
+    /**
+     * Context of the file when it was uploaded via client side.
+     */
+    clientUploadContext?: unknown
     data: Buffer
     mimetype: string
     name: string
@@ -96,10 +117,12 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = CustomPayloadRequestProperties &
-  Partial<Request> &
-  PayloadRequestData &
-  Required<Pick<Request, 'headers'>>
+export interface PayloadRequest
+  extends CustomPayloadRequestProperties,
+    Partial<Request>,
+    PayloadRequestData {
+  headers: Request['headers']
+}
 
 export type { Operator }
 
@@ -119,7 +142,9 @@ export type WhereField = {
 
 export type Where = {
   [key: string]: Where[] | WhereField
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   and?: Where[]
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   or?: Where[]
 }
 
@@ -144,7 +169,9 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
+                  count?: boolean
                   limit?: number
+                  page?: number
                   sort?: string
                   where?: Where
                 }
@@ -239,3 +266,10 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }
+
+export type PickPreserveOptional<T, K extends keyof T> = Partial<
+  Pick<T, Extract<K, OptionalKeys<T>>>
+> &
+  Pick<T, Extract<K, RequiredKeys<T>>>

@@ -1,0 +1,71 @@
+---
+title: Indexes
+label: Indexes
+order: 40
+keywords: database, indexes
+desc: Index fields to produce faster queries.
+---
+
+Database indexes are a way to optimize the performance of your database by allowing it to quickly locate and retrieve data. If you have a field that you frequently query or sort by, adding an index to that field can significantly improve the speed of those operations.
+
+When your query runs, the database will not scan the entire document to find that one field, but will instead use the index to quickly locate the data.
+
+To index a field, set the `index` option to `true` in your field's config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'title',
+      type: 'text',
+      // highlight-start
+      index: true,
+      // highlight-end
+    },
+  ],
+}
+```
+
+<Banner type="info">
+  **Note:** The `id`, `createdAt`, and `updatedAt` fields are indexed by
+  default.
+</Banner>
+
+<Banner type="success">
+  **Tip:** If you're using MongoDB, you can use [MongoDB
+  Compass](https://www.mongodb.com/products/compass) to visualize and manage
+  your indexes.
+</Banner>
+
+## Compound Indexes
+
+In addition to indexing single fields, you can also create compound indexes that index multiple fields together. This can be useful for optimizing queries that filter or sort by multiple fields.
+
+To create a compound index, use the `indexes` option in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+  ],
+  indexes: [
+    {
+      fields: ['title', 'createdAt'],
+      unique: true, // Optional, if you want the combination of fields to be unique
+    },
+  ],
+}
+```
+
+## Localized fields and MongoDB indexes
+
+When you set `index: true` or `unique: true` on a localized field, MongoDB creates one index **per locale path** (e.g., `slug.en`, `slug.da-dk`, etc.). With many locales and indexed fields, this can quickly approach MongoDB's per-collection index limit.
+
+If you know you'll query specifically by a locale, you can insert a custom MongoDB index for the locale path manually or with a migration script.

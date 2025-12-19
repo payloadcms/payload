@@ -13,13 +13,13 @@ const hasAcceptableMethod = (req: Request): boolean => !UNACCEPTABLE_METHODS.has
 
 const hasAcceptableContentType = (req: Request): boolean => {
   const contType = req.headers.get('content-type')
-  return contType.includes('boundary=') && ACCEPTABLE_CONTENT_TYPE.test(contType)
+  return contType!.includes('boundary=') && ACCEPTABLE_CONTENT_TYPE.test(contType!)
 }
 
 export const isEligibleRequest = (req: Request): boolean => {
   try {
     return hasBody(req) && hasAcceptableMethod(req) && hasAcceptableContentType(req)
-  } catch (e) {
+  } catch (ignore) {
     return false
   }
 }

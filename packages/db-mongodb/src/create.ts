@@ -1,48 +1,69 @@
-import type { CreateOptions } from 'mongoose'
-import type { Create, Document } from 'payload'
+import type { Create } from 'payload'
+
+import { type CreateOptions, Types } from 'mongoose'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, req },
+  { collection: collectionSlug, data, req, returning },
 ) {
-  const Model = this.collections[collection]
-  const options: CreateOptions = {
-    session: await getSession(this, req),
-  }
+  const { collectionConfig, customIDType, Model } = getCollection({ adapter: this, collectionSlug })
 
   let doc
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
+
+  transform({
+    adapter: this,
     data,
-    fields: this.payload.collections[collection].config.fields,
+    fields: collectionConfig.fields,
+    operation: 'write',
   })
 
-  if (this.payload.collections[collection].customIDType) {
-    sanitizedData._id = sanitizedData.id
+  if (customIDType) {
+    data._id = data.id
+  } else if (this.allowIDOnCreate && data.id) {
+    try {
+      data._id = new Types.ObjectId(data.id as string)
+    } catch (error) {
+      this.payload.logger.error(
+        `It appears you passed ID to create operation data but it cannot be sanitized to ObjectID, value - ${JSON.stringify(data.id)}`,
+      )
+      throw error
+    }
+  }
+
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   try {
-    ;[doc] = await Model.create([sanitizedData], options)
+    ;[doc] = await Model.create([data], options)
   } catch (error) {
-    handleError({ collection, error, req })
+    handleError({ collection: collectionSlug, error, req })
+  }
+  if (returning === false) {
+    return null
   }
 
-  // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
+  doc = doc.toObject()
 
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
+  transform({
+    adapter: this,
+    data: doc,
+    fields: collectionConfig.fields,
+    operation: 'read',
+  })
 
-  return result
+  return doc
 }

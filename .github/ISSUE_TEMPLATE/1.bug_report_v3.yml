@@ -27,28 +27,35 @@ body:
 
   - type: dropdown
     attributes:
-      label: Which area(s) are affected? (Select all that apply)
+      label: Which area(s) are affected?
       multiple: true
       options:
         - 'Not sure'
         - 'area: core'
         - 'area: docs'
+        - 'area: graphql'
+        - 'area: live-preview'
         - 'area: templates'
         - 'area: ui'
-        - 'db-mongodb'
-        - 'db-postgres'
-        - 'db-sqlite'
-        - 'db-vercel-postgres'
-        - 'email-nodemailer'
-        - 'plugin: cloud'
+        - 'db: d1-sqlite'
+        - 'db: mongodb'
+        - 'db: postgres'
+        - 'db: sqlite'
+        - 'db: vercel-postgres'
         - 'plugin: cloud-storage'
+        - 'plugin: ecommerce'
         - 'plugin: form-builder'
+        - 'plugin: import-export'
+        - 'plugin: mcp'
+        - 'plugin: multi-tenant'
         - 'plugin: nested-docs'
+        - 'plugin: redirects'
         - 'plugin: richtext-lexical'
         - 'plugin: richtext-slate'
         - 'plugin: search'
         - 'plugin: sentry'
         - 'plugin: seo'
+        - 'plugin: storage-*'
         - 'plugin: stripe'
         - 'plugin: other'
     validations:
@@ -57,12 +64,9 @@ body:
   - type: textarea
     attributes:
       label: Environment Info
-      description: Paste output from `pnpm payload info` _or_ Payload, Node.js, and Next.js versions.
+      description: Paste output from `pnpm payload info` _or_ Payload, Node.js, and Next.js versions. Please avoid using "latest"—specific version numbers help us accurately diagnose and resolve issues.
       render: text
-      placeholder: |
-        Payload:
-        Node.js:
-        Next.js:
+      placeholder: Run `pnpm payload info` in your terminal and paste the output here.
     validations:
       required: true
 

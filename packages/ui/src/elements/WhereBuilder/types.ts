@@ -1,20 +1,30 @@
-import type { ClientField, Operator, SanitizedCollectionConfig, Where } from 'payload'
+import type {
+  ClientField,
+  Operator,
+  ResolvedFilterOptions,
+  SanitizedCollectionConfig,
+  Where,
+} from 'payload'
 
 export type WhereBuilderProps = {
   readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields?: ClientField[]
   readonly renderedFilters?: Map<string, React.ReactNode>
+  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
 
-export type FieldCondition = {
+export type Value = Date | number | number[] | string | string[]
+
+export type ReducedField = {
   field: ClientField
-  label: string
+  label: React.ReactNode
   operators: {
     label: string
     value: Operator
   }[]
-  value: string
+  plainTextLabel?: string
+  value: Value
 }
 
 export type Relation = 'and' | 'or'
@@ -47,3 +57,39 @@ export type Action = ADD | REMOVE | UPDATE
 export type State = {
   or: Where[]
 }
+
+export type AddCondition = ({
+  andIndex,
+  field,
+  orIndex,
+  relation,
+}: {
+  andIndex: number
+  field: ReducedField
+  orIndex: number
+  relation: 'and' | 'or'
+}) => Promise<void> | void
+
+export type UpdateCondition = ({
+  type,
+  andIndex,
+  field,
+  operator,
+  orIndex,
+  value,
+}: {
+  andIndex: number
+  field: ReducedField
+  operator: string
+  orIndex: number
+  type: 'field' | 'operator' | 'value'
+  value: Value
+}) => Promise<void> | void
+
+export type RemoveCondition = ({
+  andIndex,
+  orIndex,
+}: {
+  andIndex: number
+  orIndex: number
+}) => Promise<void> | void

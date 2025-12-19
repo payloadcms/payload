@@ -19,7 +19,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 const baseClass = 'tabs-diff'
 
 export const Tabs: TabsFieldDiffClientComponent = (props) => {
-  const { baseVersionField, comparisonValue, field, versionValue } = props
+  const { baseVersionField, comparisonValue: valueFrom, field, versionValue: valueTo } = props
   const { selectedLocales } = useSelectedLocales()
 
   return (
@@ -35,33 +35,32 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
               if ('name' in fieldTab && selectedLocales && fieldTab.localized) {
                 // Named localized tab
                 return selectedLocales.map((locale, index) => {
-                  const localizedTabProps = {
+                  const localizedTabProps: TabProps = {
                     ...props,
-                    comparison: comparisonValue?.[tab.name]?.[locale],
-                    version: versionValue?.[tab.name]?.[locale],
+                    comparisonValue: valueFrom?.[tab.name]?.[locale],
+                    fieldTab,
+                    locale,
+                    tab,
+                    versionValue: valueTo?.[tab.name]?.[locale],
                   }
                   return (
                     <div className={`${baseClass}__tab-locale`} key={[locale, index].join('-')}>
                       <div className={`${baseClass}__tab-locale-value`}>
-                        <Tab
-                          key={locale}
-                          {...localizedTabProps}
-                          fieldTab={fieldTab}
-                          locale={locale}
-                          tab={tab}
-                        />
+                        <Tab key={locale} {...localizedTabProps} />
                       </div>
                     </div>
                   )
                 })
               } else if ('name' in tab && tab.name) {
                 // Named tab
-                const namedTabProps = {
+                const namedTabProps: TabProps = {
                   ...props,
-                  comparison: comparisonValue?.[tab.name],
-                  version: versionValue?.[tab.name],
+                  comparisonValue: valueFrom?.[tab.name],
+                  fieldTab,
+                  tab,
+                  versionValue: valueTo?.[tab.name],
                 }
-                return <Tab fieldTab={fieldTab} key={i} {...namedTabProps} tab={tab} />
+                return <Tab key={i} {...namedTabProps} />
               } else {
                 // Unnamed tab
                 return <Tab fieldTab={fieldTab} key={i} {...props} tab={tab} />
@@ -79,7 +78,14 @@ type TabProps = {
   tab: VersionTab
 } & FieldDiffClientProps<TabsFieldClient>
 
-const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versionValue }) => {
+const Tab: React.FC<TabProps> = ({
+  comparisonValue: valueFrom,
+  fieldTab,
+  locale,
+  parentIsLocalized,
+  tab,
+  versionValue: valueTo,
+}) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
 
@@ -89,9 +95,8 @@ const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versi
 
   return (
     <DiffCollapser
-      comparison={comparisonValue}
       fields={fieldTab.fields}
-      label={
+      Label={
         'label' in tab &&
         tab.label &&
         typeof tab.label !== 'function' && (
@@ -102,7 +107,9 @@ const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versi
         )
       }
       locales={selectedLocales}
-      version={versionValue}
+      parentIsLocalized={parentIsLocalized || fieldTab.localized}
+      valueFrom={valueFrom}
+      valueTo={valueTo}
     >
       <RenderVersionFieldsToDiff versionFields={tab.fields} />
     </DiffCollapser>

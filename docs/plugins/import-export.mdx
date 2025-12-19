@@ -1,0 +1,155 @@
+---
+title: Import Export Plugin
+label: Import Export
+order: 40
+desc: Add Import and export functionality to create CSV and JSON data exports
+keywords: plugins, plugin, import, export, csv, JSON, data, ETL, download
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-import-export](https://img.shields.io/npm/v/@payloadcms/plugin-import-export)
+
+<Banner type="warning">
+  **Note**: This plugin is in **beta** as some aspects of it may change on any
+  minor releases. It is under development and currently only supports exporting
+  of collection data.
+</Banner>
+
+This plugin adds features that give admin users the ability to download or create export data as an upload collection and import it back into a project.
+
+## Core Features
+
+- Export data as CSV or JSON format via the admin UI
+- Download the export directly through the browser
+- Create a file upload of the export data
+- Use the jobs queue for large exports
+- (Coming soon) Import collection data
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+pnpm add @payloadcms/plugin-import-export
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+const config = buildConfig({
+  collections: [Pages, Media],
+  plugins: [
+    importExportPlugin({
+      collections: ['users', 'pages'],
+      // see below for a list of available options
+    }),
+  ],
+})
+
+export default config
+```
+
+## Options
+
+| Property                   | Type     | Description                                                                                                                          |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `collections`              | string[] | Collections to include Import/Export controls in. Defaults to all collections.                                                       |
+| `debug`                    | boolean  | If true, enables debug logging.                                                                                                      |
+| `disableDownload`          | boolean  | If true, disables the download button in the export preview UI.                                                                      |
+| `disableJobsQueue`         | boolean  | If true, forces the export to run synchronously.                                                                                     |
+| `disableSave`              | boolean  | If true, disables the save button in the export preview UI.                                                                          |
+| `format`                   | string   | Forces a specific export format (`csv` or `json`), hides the format dropdown, and prevents the user from choosing the export format. |
+| `overrideExportCollection` | function | Function to override the default export collection; takes the default export collection and allows you to modify and return it.      |
+
+## Field Options
+
+In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
+
+| Property   | Type     | Description                                                                                                                   |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                   |
+| `toCSV`    | function | Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value. |
+
+### Customizing the output of CSV data
+
+To manipulate the data that a field exports you can add `toCSV` custom functions. This allows you to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value.
+
+The toCSV function argument is an object with the following properties:
+
+| Property     | Type    | Description                                                       |
+| ------------ | ------- | ----------------------------------------------------------------- |
+| `columnName` | string  | The CSV column name given to the field.                           |
+| `doc`        | object  | The top level document                                            |
+| `row`        | object  | The object data that can be manipulated to assign data to the CSV |
+| `siblingDoc` | object  | The document data at the level where it belongs                   |
+| `value`      | unknown | The data for the field.                                           |
+
+Example function:
+
+```ts
+const pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row }) => {
+            // add both `author_id` and the `author_email` to the csv export
+            if (
+              value &&
+              typeof value === 'object' &&
+              'id' in value &&
+              'email' in value
+            ) {
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_email`] = (value as { email: string }).email
+            }
+          },
+        },
+      },
+    },
+  ],
+}
+```
+
+## Exporting Data
+
+There are four possible ways that the plugin allows for exporting documents, the first two are available in the admin UI from the list view of a collection:
+
+1. Direct download - Using a `POST` to `/api/exports/download` and streams the response as a file download
+2. File storage - Goes to the `exports` collection as an uploads enabled collection
+3. Local API - A create call to the uploads collection: `payload.create({ slug: 'uploads', ...parameters })`
+4. Jobs Queue - `payload.jobs.queue({ task: 'createCollectionExport', input: parameters })`
+
+By default, a user can use the Export drawer to create a file download by choosing `Save` or stream a downloadable file directly without persisting it by using the `Download` button. Either option can be disabled to provide the export experience you desire for your use-case.
+
+The UI for creating exports provides options so that users can be selective about which documents to include and also which columns or fields to include.
+
+It is necessary to add access control to the uploads collection configuration using the `overrideExportCollection` function if you have enabled this plugin on collections with data that some authenticated users should not have access to.
+
+<Banner type="warning">
+  **Note**: Users who have read access to the upload collection may be able to
+  download data that is normally not readable due to [access
+  control](../access-control/overview).
+</Banner>
+
+The following parameters are used by the export function to handle requests:
+
+| Property         | Type     | Description                                                                                                       |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `format`         | text     | Either `csv` or `json` to determine the shape of data exported                                                    |
+| `limit`          | number   | The max number of documents to return                                                                             |
+| `sort`           | select   | The field to use for ordering documents                                                                           |
+| `locale`         | string   | The locale code to query documents or `all`                                                                       |
+| `draft`          | string   | Either `yes` or `no` to return documents with their newest drafts for drafts enabled collections                  |
+| `fields`         | string[] | Which collection fields are used to create the export, defaults to all                                            |
+| `collectionSlug` | string   | The slug to query against                                                                                         |
+| `where`          | object   | The WhereObject used to query documents to export. This is set by making selections or filters from the list view |
+| `filename`       | text     | What to call the export being created                                                                             |

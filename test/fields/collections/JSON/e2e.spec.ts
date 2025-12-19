@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -59,7 +60,7 @@ describe('JSON', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -73,7 +74,6 @@ describe('JSON', () => {
   test('should create', async () => {
     const input = '{"foo": "bar"}'
     await page.goto(url.create)
-    await page.waitForURL(url.create)
     const jsonCodeEditor = page.locator('.json-field .code-editor').first()
     await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
@@ -90,7 +90,6 @@ describe('JSON', () => {
     const input = '{"foo.with.periods": "bar"}'
 
     await page.goto(url.create)
-    await page.waitForURL(url.create)
     const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
     await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
@@ -102,5 +101,69 @@ describe('JSON', () => {
     await expect(page.locator('.group-field .json-field')).toContainText(
       '"foo.with.periods": "bar"',
     )
+  })
+
+  test('should save field with "target" property', async () => {
+    const input = '{"target": "foo"}'
+    await page.goto(url.create)
+    const jsonCodeEditor = page.locator('.json-field .code-editor').first()
+    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+    await jsonFieldInputArea.fill(input)
+
+    await saveDocAndAssert(page)
+    const jsonField = page.locator('.json-field').first()
+    await expect(jsonField).toContainText('"target": "foo"')
+  })
+
+  test('should update', async () => {
+    const createdDoc = await payload.create({
+      collection: 'json-fields',
+      data: {
+        customJSON: {
+          default: 'value',
+        },
+      },
+    })
+
+    await page.goto(url.edit(createdDoc.id))
+    const jsonField = page.locator('.json-field:not(.read-only) #field-customJSON')
+    await expect(jsonField).toContainText('"default": "value"')
+
+    const boundingBox = await page
+      .locator('.json-field:not(.read-only) #field-customJSON')
+      .boundingBox()
+    await expect(() => expect(boundingBox).not.toBeNull()).toPass()
+    const originalHeight = boundingBox!.height
+
+    // click the button to set custom JSON
+    await page.locator('#set-custom-json').click({ delay: 1000 })
+
+    const newBoundingBox = await page
+      .locator('.json-field:not(.read-only) #field-customJSON')
+      .boundingBox()
+    await expect(() => expect(newBoundingBox).not.toBeNull()).toPass()
+    const newHeight = newBoundingBox!.height
+
+    await expect(() => {
+      expect(newHeight).toBeGreaterThan(originalHeight)
+    }).toPass()
+  })
+
+  describe('A11y', () => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-json').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

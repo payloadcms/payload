@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook } from 'payload'
+import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Email, FormattedEmail, FormBuilderPluginConfig } from '../../../types.js'
 
@@ -6,22 +6,21 @@ import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
 import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
-type BeforeChangeParams = Parameters<CollectionBeforeChangeHook>[0]
+type AfterChangeParams = Parameters<CollectionAfterChangeHook>[0]
 
 export const sendEmail = async (
-  beforeChangeParameters: BeforeChangeParams,
+  afterChangeParameters: AfterChangeParams,
   formConfig: FormBuilderPluginConfig,
-): Promise<BeforeChangeParams['data']> => {
-  const { data, operation, req } = beforeChangeParameters
-
-  if (operation === 'create') {
+) => {
+  if (afterChangeParameters.operation === 'create') {
     const {
-      data: { id: formSubmissionID },
+      data,
+      doc: { id: formSubmissionID },
       req: { locale, payload },
-    } = beforeChangeParameters
+      req,
+    } = afterChangeParameters
 
-    const { form: formID, submissionData } = data || {}
-
+    const { form: formID, submissionData: submissionDataFromProps } = data || {}
     const { beforeEmail, defaultToEmail, formOverrides } = formConfig || {}
 
     try {
@@ -34,9 +33,17 @@ export const sendEmail = async (
 
       const emails = form.emails as Email[]
 
+      const submissionData = [
+        ...submissionDataFromProps,
+        {
+          field: 'formSubmissionID',
+          value: String(formSubmissionID),
+        },
+      ]
+
       if (emails && emails.length) {
         const formattedEmails: FormattedEmail[] = await Promise.all(
-          emails.map(async (email: Email): Promise<FormattedEmail | null> => {
+          emails.map(async (email: Email): Promise<FormattedEmail> => {
             const {
               bcc: emailBCC,
               cc: emailCC,
@@ -76,7 +83,7 @@ export const sendEmail = async (
         let emailsToSend = formattedEmails
 
         if (typeof beforeEmail === 'function') {
-          emailsToSend = await beforeEmail(formattedEmails, beforeChangeParameters)
+          emailsToSend = await beforeEmail(formattedEmails, afterChangeParameters)
         }
 
         await Promise.all(
@@ -101,6 +108,4 @@ export const sendEmail = async (
       payload.logger.error({ err, msg })
     }
   }
-
-  return data
 }

@@ -1,5 +1,7 @@
 'use client'
 
+import type { ListDrawerProps } from '@payloadcms/ui'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -9,6 +11,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
@@ -16,8 +19,8 @@ import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-reac
 import type { RelationshipElementType } from '../types.js'
 
 import { useElement } from '../../../providers/ElementProvider.js'
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import './index.scss'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 
 const baseClass = 'rich-text-relationship'
 
@@ -57,7 +60,7 @@ const RelationshipElementComponent: React.FC = () => {
   const editor = useSlateStatic()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}`, serverURL }),
     { initialParams },
   )
 
@@ -103,8 +106,8 @@ const RelationshipElementComponent: React.FC = () => {
     [editor, element, relatedCollection, cacheBust, setParams, closeDrawer],
   )
 
-  const swapRelationship = React.useCallback(
-    ({ collectionSlug, docID }) => {
+  const swapRelationship = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       const elementPath = ReactEditor.findPath(editor, element)
 
       Transforms.setNodes(
@@ -113,7 +116,7 @@ const RelationshipElementComponent: React.FC = () => {
           type: 'relationship',
           children: [{ text: ' ' }],
           relationTo: collectionSlug,
-          value: { id: docID },
+          value: { id: doc.id },
         },
         { at: elementPath },
       )

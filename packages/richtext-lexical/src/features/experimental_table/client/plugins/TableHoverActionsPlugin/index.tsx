@@ -5,19 +5,20 @@ import type { EditorConfig, NodeKey } from 'lexical'
 import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   $getTableAndElementByKey,
   $getTableColumnIndexFromTableCellNode,
   $getTableRowIndexFromTableCellNode,
-  $insertTableColumn__EXPERIMENTAL,
-  $insertTableRow__EXPERIMENTAL,
+  $insertTableColumnAtSelection,
+  $insertTableRowAtSelection,
   $isTableCellNode,
   $isTableNode,
   getTableElement,
   TableNode,
 } from '@lexical/table'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
-import { $getNearestNodeFromDOMNode } from 'lexical'
+import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
@@ -33,6 +34,8 @@ function TableHoverActionsContainer({
   anchorElem: HTMLElement
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
+
   const editorConfig = useEditorConfigContext()
   const [isShownRow, setShownRow] = useState<boolean>(false)
   const [isShownColumn, setShownColumn] = useState<boolean>(false)
@@ -91,37 +94,60 @@ function TableHoverActionsContainer({
         { editor },
       )
 
-      if (tableDOMElement) {
-        const {
-          bottom: tableElemBottom,
+      if (!tableDOMElement) {
+        return
+      }
+
+      // this is the scrollable div container of the table (in case of overflow)
+      const tableContainerElement = (tableDOMElement as HTMLTableElement).parentElement
+
+      if (!tableContainerElement) {
+        return
+      }
+
+      const {
+        bottom: tableElemBottom,
+        height: tableElemHeight,
+        left: tableElemLeft,
+        right: tableElemRight,
+        width: tableElemWidth,
+        y: tableElemY,
+      } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
+
+      let tableHasScroll = false
+      if (
+        tableContainerElement &&
+        tableContainerElement.classList.contains('LexicalEditorTheme__tableScrollableWrapper')
+      ) {
+        tableHasScroll = tableContainerElement.scrollWidth > tableContainerElement.clientWidth
+      }
+
+      const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
+
+      if (hoveredRowNode) {
+        setShownColumn(false)
+        setShownRow(true)
+        setPosition({
+          height: BUTTON_WIDTH_PX,
+          left:
+            tableHasScroll && tableContainerElement
+              ? tableContainerElement.offsetLeft
+              : tableElemLeft - editorElemLeft,
+          top: tableElemBottom - editorElemY + 5,
+          width:
+            tableHasScroll && tableContainerElement
+              ? tableContainerElement.offsetWidth
+              : tableElemWidth,
+        })
+      } else if (hoveredColumnNode) {
+        setShownColumn(true)
+        setShownRow(false)
+        setPosition({
           height: tableElemHeight,
-          left: tableElemLeft,
-          right: tableElemRight,
-          width: tableElemWidth,
-          y: tableElemY,
-        } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
-
-        const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
-
-        if (hoveredRowNode) {
-          setShownColumn(false)
-          setShownRow(true)
-          setPosition({
-            height: BUTTON_WIDTH_PX,
-            left: tableElemLeft - editorElemLeft,
-            top: tableElemBottom - editorElemY + 5,
-            width: tableElemWidth,
-          })
-        } else if (hoveredColumnNode) {
-          setShownColumn(true)
-          setShownRow(false)
-          setPosition({
-            height: tableElemHeight,
-            left: tableElemRight - editorElemLeft + 5,
-            top: tableElemY - editorElemY,
-            width: BUTTON_WIDTH_PX,
-          })
-        }
+          left: tableElemRight - editorElemLeft + 5,
+          top: tableElemY - editorElemY,
+          width: BUTTON_WIDTH_PX,
+        })
       }
     },
     50,
@@ -200,17 +226,17 @@ function TableHoverActionsContainer({
         const maybeTableNode = $getNearestNodeFromDOMNode(tableCellDOMNodeRef.current)
         maybeTableNode?.selectEnd()
         if (insertRow) {
-          $insertTableRow__EXPERIMENTAL()
+          $insertTableRowAtSelection()
           setShownRow(false)
         } else {
-          $insertTableColumn__EXPERIMENTAL()
+          $insertTableColumnAtSelection()
           setShownColumn(false)
         }
       }
     })
   }
 
-  if (!editor?.isEditable()) {
+  if (!isEditable) {
     return null
   }
 
@@ -218,6 +244,7 @@ function TableHoverActionsContainer({
     <>
       {isShownRow && (
         <button
+          aria-label="Add Row"
           className={editorConfig.editorConfig.lexical.theme.tableAddRows}
           onClick={() => insertAction(true)}
           style={{ ...position }}
@@ -226,6 +253,7 @@ function TableHoverActionsContainer({
       )}
       {isShownColumn && (
         <button
+          aria-label="Add Column"
           className={editorConfig.editorConfig.lexical.theme.tableAddColumns}
           onClick={() => insertAction(false)}
           style={{ ...position }}
@@ -245,7 +273,7 @@ function getMouseInfo(
 } {
   const target = event.target
 
-  if (target && target instanceof HTMLElement) {
+  if (isHTMLElement(target)) {
     const tableDOMNode = target.closest<HTMLElement>(
       `td.${editorConfig.theme.tableCell}, th.${editorConfig.theme.tableCell}`,
     )
@@ -268,8 +296,9 @@ export function TableHoverActionsPlugin({
 }: {
   anchorElem?: HTMLElement
 }): null | React.ReactPortal {
-  const [editor] = useLexicalComposerContext()
-  if (!editor?.isEditable()) {
+  const isEditable = useLexicalEditable()
+
+  if (!isEditable) {
     return null
   }
 

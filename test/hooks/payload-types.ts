@@ -6,11 +6,68 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     'hooks-users': HooksUserAuthOperations;
   };
+  blocks: {};
   collections: {
+    beforeOperation: BeforeOperation;
     'before-change-hooks': BeforeChangeHook;
     'before-validate': BeforeValidate;
     afterOperation: AfterOperation;
@@ -18,17 +75,23 @@ export interface Config {
     transforms: Transform;
     hooks: Hook;
     'nested-after-read-hooks': NestedAfterReadHook;
+    'nested-after-change-hooks': NestedAfterChangeHook;
     'chaining-hooks': ChainingHook;
     relations: Relation;
     'hooks-users': HooksUser;
     'data-hooks': DataHook;
+    'before-delete-hooks': BeforeDeleteHook;
+    'before-delete-2-hooks': BeforeDelete2Hook;
     'field-paths': FieldPath;
+    'value-hooks': ValueHook;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
+    beforeOperation: BeforeOperationSelect<false> | BeforeOperationSelect<true>;
     'before-change-hooks': BeforeChangeHooksSelect<false> | BeforeChangeHooksSelect<true>;
     'before-validate': BeforeValidateSelect<false> | BeforeValidateSelect<true>;
     afterOperation: AfterOperationSelect<false> | AfterOperationSelect<true>;
@@ -36,11 +99,16 @@ export interface Config {
     transforms: TransformsSelect<false> | TransformsSelect<true>;
     hooks: HooksSelect<false> | HooksSelect<true>;
     'nested-after-read-hooks': NestedAfterReadHooksSelect<false> | NestedAfterReadHooksSelect<true>;
+    'nested-after-change-hooks': NestedAfterChangeHooksSelect<false> | NestedAfterChangeHooksSelect<true>;
     'chaining-hooks': ChainingHooksSelect<false> | ChainingHooksSelect<true>;
     relations: RelationsSelect<false> | RelationsSelect<true>;
     'hooks-users': HooksUsersSelect<false> | HooksUsersSelect<true>;
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
+    'before-delete-hooks': BeforeDeleteHooksSelect<false> | BeforeDeleteHooksSelect<true>;
+    'before-delete-2-hooks': BeforeDelete2HooksSelect<false> | BeforeDelete2HooksSelect<true>;
     'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
+    'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -48,6 +116,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     'data-hooks-global': DataHooksGlobal;
   };
@@ -80,6 +149,17 @@ export interface HooksUserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "beforeOperation".
+ */
+export interface BeforeOperation {
+  id: string;
+  category?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -195,6 +275,39 @@ export interface Relation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-after-change-hooks".
+ */
+export interface NestedAfterChangeHook {
+  id: string;
+  text?: string | null;
+  group?: {
+    array?:
+      | {
+          nestedAfterChange?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "chaining-hooks".
  */
 export interface ChainingHook {
@@ -220,6 +333,13 @@ export interface HooksUser {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -235,6 +355,26 @@ export interface DataHook {
   collection_beforeRead_collection?: string | null;
   collection_afterRead_collection?: string | null;
   collection_afterOperation_collection?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-delete-hooks".
+ */
+export interface BeforeDeleteHook {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-delete-2-hooks".
+ */
+export interface BeforeDelete2Hook {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -557,11 +697,44 @@ export interface FieldPath {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "value-hooks".
+ */
+export interface ValueHook {
+  id: string;
+  slug?: string | null;
+  beforeValidate_value?: string | null;
+  beforeChange_value?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'beforeOperation';
+        value: string | BeforeOperation;
+      } | null)
     | ({
         relationTo: 'before-change-hooks';
         value: string | BeforeChangeHook;
@@ -591,6 +764,10 @@ export interface PayloadLockedDocument {
         value: string | NestedAfterReadHook;
       } | null)
     | ({
+        relationTo: 'nested-after-change-hooks';
+        value: string | NestedAfterChangeHook;
+      } | null)
+    | ({
         relationTo: 'chaining-hooks';
         value: string | ChainingHook;
       } | null)
@@ -607,8 +784,20 @@ export interface PayloadLockedDocument {
         value: string | DataHook;
       } | null)
     | ({
+        relationTo: 'before-delete-hooks';
+        value: string | BeforeDeleteHook;
+      } | null)
+    | ({
+        relationTo: 'before-delete-2-hooks';
+        value: string | BeforeDelete2Hook;
+      } | null)
+    | ({
         relationTo: 'field-paths';
         value: string | FieldPath;
+      } | null)
+    | ({
+        relationTo: 'value-hooks';
+        value: string | ValueHook;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -651,6 +840,16 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "beforeOperation_select".
+ */
+export interface BeforeOperationSelect<T extends boolean = true> {
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -745,6 +944,26 @@ export interface NestedAfterReadHooksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-after-change-hooks_select".
+ */
+export interface NestedAfterChangeHooksSelect<T extends boolean = true> {
+  text?: T;
+  group?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              nestedAfterChange?: T;
+              id?: T;
+            };
+      };
+  lexical?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "chaining-hooks_select".
  */
 export interface ChainingHooksSelect<T extends boolean = true> {
@@ -777,6 +996,13 @@ export interface HooksUsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -790,6 +1016,24 @@ export interface DataHooksSelect<T extends boolean = true> {
   collection_beforeRead_collection?: T;
   collection_afterRead_collection?: T;
   collection_afterOperation_collection?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-delete-hooks_select".
+ */
+export interface BeforeDeleteHooksSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-delete-2-hooks_select".
+ */
+export interface BeforeDelete2HooksSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -854,6 +1098,25 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNamedTab_beforeDuplicate_FieldPaths?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "value-hooks_select".
+ */
+export interface ValueHooksSelect<T extends boolean = true> {
+  slug?: T;
+  beforeValidate_value?: T;
+  beforeChange_value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

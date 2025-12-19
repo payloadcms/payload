@@ -1,0 +1,72 @@
+{
+  "extraKnownMarketplaces": {
+    "superpowers-dev": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-dev": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-write-format.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(gh issue view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(git branch:*)",
+      "Bash(git describe:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git remote:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git show:*)",
+      "Bash(git status)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm audit:*)",
+      "Bash(pnpm install)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm turbo:*)",
+      "Bash(pnpm view:*)",
+      "Bash(pnpm why:*)",
+      "Bash(pwd)",
+      "Bash(which:*)",
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:executing-plans)",
+      "Skill(superpowers:requesting-code-review)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Skill(superpowers:systematic-debugging)",
+      "Skill(superpowers:testing-anti-patterns)",
+      "Skill(superpowers:using-git-worktrees)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:writing-skills)",
+      "WebFetch(domain:docs.aws.amazon.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:payloadcms.com)",
+      "WebFetch(domain:pure.md)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebSearch"
+    ]
+  }
+}

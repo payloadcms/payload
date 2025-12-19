@@ -7,7 +7,11 @@ export const createBlocksMap = (data: Record<string, unknown>): BlocksMap => {
 
   Object.entries(data).forEach(([key, rows]) => {
     if (key.startsWith('_blocks_') && Array.isArray(rows)) {
-      const blockType = key.replace('_blocks_', '')
+      let blockType = key.replace('_blocks_', '')
+      const parsed = blockType.split('_')
+      if (parsed.length === 2 && Number.isInteger(Number(parsed[1]))) {
+        blockType = parsed[0]
+      }
 
       rows.forEach((row) => {
         if ('_path' in row) {

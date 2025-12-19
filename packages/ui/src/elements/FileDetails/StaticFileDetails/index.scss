@@ -33,16 +33,16 @@
     }
 
     &__main-detail {
-      padding: base(0.8) base(1.2);
+      padding: var(--base) calc(var(--base) * 1.2);
       width: auto;
       flex-grow: 1;
       min-width: 280px;
       max-width: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-self: stretch;
-      gap: base(0.2);
+      gap: calc(var(--base) * 0.2);
     }
 
     &__toggle-more-info {
@@ -61,14 +61,14 @@
 
     &__sizes {
       margin: 0;
-      padding: base(1.5) $baseline 0;
+      padding: calc(var(--base) * 1.5) $baseline 0;
       list-style: none;
       display: flex;
       flex-wrap: wrap;
 
       li {
         width: 50%;
-        padding: 0 base(0.5);
+        padding: 0 calc(var(--base) * 0.5);
         margin-bottom: $baseline;
       }
     }
@@ -79,7 +79,7 @@
 
     &__file-mutation {
       display: flex;
-      margin-top: base(0.25);
+      margin-top: calc(var(--base) * 0.25);
       gap: calc(var(--base) / 2);
     }
 
@@ -88,7 +88,7 @@
       background-color: var(--theme-elevation-150);
       border: none;
       border-radius: $style-radius-m;
-      padding: base(0.25) base(0.5);
+      padding: calc(var(--base) * 0.25) calc(var(--base) * 0.5);
 
       &:hover {
         background-color: var(--theme-elevation-100);
@@ -102,7 +102,7 @@
 
       &__sizes {
         display: block;
-        padding: $baseline $baseline base(0.5);
+        padding: $baseline $baseline calc(var(--base) * 0.5);
 
         li {
           padding: 0;

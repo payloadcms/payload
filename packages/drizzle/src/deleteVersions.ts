@@ -1,7 +1,7 @@
-import type { DeleteVersions, SanitizedCollectionConfig } from 'payload'
+import type { DeleteVersions, FlattenedField, SanitizedCollectionConfig } from 'payload'
 
 import { inArray } from 'drizzle-orm'
-import { buildVersionCollectionFields } from 'payload'
+import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -11,16 +11,25 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
-  { collection, locale, req, where: where },
+  { collection: collectionSlug, globalSlug, locale, req, where: where },
 ) {
-  const db = await getTransaction(this, req)
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
+  let tableName: string
+  let fields: FlattenedField[]
 
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
-  )
-
-  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+  if (globalSlug) {
+    const globalConfig = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
+    tableName = this.tableNameMap.get(`_${toSnakeCase(globalSlug)}${this.versionsSuffix}`)
+    fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
+  } else if (collectionSlug) {
+    const collectionConfig: SanitizedCollectionConfig =
+      this.payload.collections[collectionSlug].config
+    tableName = this.tableNameMap.get(
+      `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
+    )
+    fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+  } else {
+    throw new APIError('Either collection or globalSlug must be passed.')
+  }
 
   const { docs } = await findMany({
     adapter: this,
@@ -42,6 +51,8 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   })
 
   if (ids.length > 0) {
+    const db = await getTransaction(this, req)
+
     await this.deleteWhere({
       db,
       tableName,

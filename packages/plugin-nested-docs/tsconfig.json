@@ -1,8 +1,4 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    /* TODO: remove the following lines */
-    "strict": false,
-  },
   "references": [{ "path": "../payload" }]
 }

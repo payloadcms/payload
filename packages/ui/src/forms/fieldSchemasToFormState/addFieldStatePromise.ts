@@ -1,19 +1,26 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
   FieldSchemaMap,
   FieldState,
+  FlattenedBlock,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  Row,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
+  TabAsField,
   Validate,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
+import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -27,11 +34,11 @@ import {
 
 import type { RenderFieldMethod } from './types.js'
 
-import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
+import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
+import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -39,6 +46,10 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -60,6 +71,7 @@ export type AddFieldStatePromiseArgs = {
    */
   includeSchema?: boolean
   indexPath: string
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -73,6 +85,7 @@ export type AddFieldStatePromiseArgs = {
   path: string
   preferences: DocumentPreferences
   previousFormState: FormState
+  readOnly?: boolean
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   /**
@@ -81,6 +94,8 @@ export type AddFieldStatePromiseArgs = {
    */
   req: PayloadRequest
   schemaPath: string
+  select?: SelectType
+  selectMode?: SelectMode
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -101,6 +116,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    blockData,
     clientFieldSchemaMap,
     collectionSlug,
     data,
@@ -111,6 +127,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fullData,
     includeSchema = false,
     indexPath,
+    mockRSCs,
     omitParents = false,
     operation,
     parentPath,
@@ -120,31 +137,50 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     path,
     preferences,
     previousFormState,
+    readOnly,
     renderAllFields,
     renderFieldFn,
     req,
     schemaPath,
+    select,
+    selectMode,
     skipConditionChecks = false,
     skipValidation = false,
     state,
   } = args
 
   if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
     )
   }
 
-  const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
-
   let fieldPermissions: SanitizedFieldPermissions = true
 
   const fieldState: FieldState = {}
 
+  const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
+
+  // Append only if true to avoid sending '$undefined' through the network
+  if (lastRenderedPath) {
+    fieldState.lastRenderedPath = lastRenderedPath
+  }
+
+  // If we're rendering all fields, no need to flag this as added by server
+  const addedByServer = !renderAllFields && !previousFormState?.[path]
+
+  // Append only if true to avoid sending '$undefined' through the network
+  if (addedByServer) {
+    fieldState.addedByServer = true
+  }
+
+  // Append only if true to avoid sending '$undefined' through the network
   if (passesCondition === false) {
     fieldState.passesCondition = false
   }
 
+  // Append only if true to avoid sending '$undefined' through the network
   if (includeSchema) {
     fieldState.fieldSchema = field
   }
@@ -159,7 +195,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
-      hasPermission = await field.access.read({ id, data: fullData, req, siblingData: data })
+      hasPermission = await field.access.read({
+        id,
+        blockData,
+        data: fullData,
+        req,
+        siblingData: data,
+      })
     } else {
       hasPermission = true
     }
@@ -187,6 +229,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         validationResult = await validate(data?.[field.name], {
           ...field,
           id,
+          blockData,
           collectionSlug,
           data: fullData,
           event: 'onChange',
@@ -209,6 +252,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
+    /**
+     * This function adds the error **path** to the current field and all its parents. If a field is invalid, all its parents are also invalid.
+     * It does not add the error **message** to the current field, as that shouldn't apply to all parents.
+     * This is done separately below.
+     */
     const addErrorPathToParent = (errorPath: string) => {
       if (typeof addErrorPathToParentArg === 'function') {
         addErrorPathToParentArg(errorPath)
@@ -234,6 +282,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'array': {
         const arrayValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
+        const arraySelect = select?.[field.name]
+
         const { promises, rows } = arrayValue.reduce(
           (acc, row, i: number) => {
             const parentPath = path + '.' + i
@@ -257,6 +307,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                blockData,
                 clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
@@ -266,6 +317,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 forceFullValue,
                 fullData,
                 includeSchema,
+                mockRSCs,
                 omitParents,
                 operation,
                 parentIndexPath: '',
@@ -276,9 +328,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   fieldPermissions === true ? fieldPermissions : fieldPermissions?.fields || {},
                 preferences,
                 previousFormState,
-                renderAllFields: requiresRender,
+                readOnly,
+                renderAllFields,
                 renderFieldFn,
                 req,
+                select: typeof arraySelect === 'object' ? arraySelect : undefined,
+                selectMode,
                 skipConditionChecks,
                 skipValidation,
                 state,
@@ -289,38 +344,43 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rows = []
             }
 
-            acc.rows.push({
+            // First, check if `previousFormState` has a matching row
+            const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+              (prevRow) => prevRow.id === row.id,
+            )
+
+            const newRow: Row = {
               id: row.id,
+              isLoading: false,
+            }
+
+            if (previousRow?.lastRenderedPath) {
+              newRow.lastRenderedPath = previousRow.lastRenderedPath
+            }
+
+            // add addedByServer flag
+            if (!previousRow) {
+              newRow.addedByServer = true
+            }
+
+            const isCollapsed = isRowCollapsed({
+              collapsedPrefs: preferences?.fields?.[path]?.collapsed,
+              field,
+              previousRow,
+              row,
             })
 
-            const previousRows = previousFormState?.[path]?.rows || []
-            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
-
-            const collapsed = (() => {
-              // First, check if `previousFormState` has a matching row
-              const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
-              if (previousRow) {
-                return previousRow.collapsed ?? false
-              }
-
-              // If previousFormState is undefined, check preferences
-              if (collapsedRowIDsFromPrefs !== undefined) {
-                return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
-              }
-
-              // If neither exists, fallback to `field.admin.initCollapsed`
-              return field.admin.initCollapsed
-            })()
-
-            if (collapsed) {
-              acc.rows[acc.rows.length - 1].collapsed = collapsed
+            if (isCollapsed) {
+              newRow.collapsed = true
             }
+
+            acc.rows.push(newRow)
 
             return acc
           },
           {
             promises: [],
-            rows: undefined,
+            rows: [],
           },
         )
 
@@ -330,10 +390,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         if (rows) {
           fieldState.rows = rows
         }
-
-        // Unset requiresRender
-        // so it will be removed from form state
-        fieldState.requiresRender = false
 
         // Add values to field state
         if (data[field.name] !== null) {
@@ -356,14 +412,44 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'blocks': {
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
+        // Handle blocks filterOptions
+        let filterOptionsValidationResult: Awaited<
+          ReturnType<typeof validateBlocksFilterOptions>
+        > | null = null
+        if (field.filterOptions) {
+          filterOptionsValidationResult = await validateBlocksFilterOptions({
+            id,
+            data: fullData,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData: data,
+            value: data[field.name],
+          })
+
+          fieldState.blocksFilterOptions = filterOptionsValidationResult.allowedBlockSlugs
+        }
+
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
-            const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+            const blockTypeToMatch: string = row.blockType
+
+            const block =
+              req.payload.blocks[blockTypeToMatch] ??
+              ((field.blockReferences ?? field.blocks).find(
+                (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
+              ) as FlattenedBlock | undefined)
+
             if (!block) {
               throw new Error(
                 `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,
               )
             }
+
+            const { blockSelect, blockSelectMode } = getBlockSelect({
+              block,
+              select: select?.[field.name],
+              selectMode,
+            })
 
             const parentPath = path + '.' + i
 
@@ -379,6 +465,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.id,
                 }
 
+                // If the blocks field fails filterOptions validation, add error paths to the individual blocks that are no longer allowed
+                if (
+                  filterOptionsValidationResult?.invalidBlockSlugs?.length &&
+                  filterOptionsValidationResult.invalidBlockSlugs.includes(row.blockType)
+                ) {
+                  state[idKey].errorMessage = req.t('validation:invalidBlock', {
+                    block: row.blockType,
+                  })
+                  state[idKey].valid = false
+                  addErrorPathToParent(idKey)
+
+                  // If the error is due to block filterOptions, we want the blocks field (fieldState) to include all the filterOptions-related
+                  // error paths for each sub-block, not for the validation result of the block itself. Otherwise, say there are 2 invalid blocks,
+                  // the blocks field will have 3 instead of 2 error paths - one for itself, and one for each invalid block.
+                  // Instead, we want only the 2 error paths for the individual, invalid blocks.
+                  fieldState.errorPaths = fieldState.errorPaths.filter(
+                    (errorPath) => errorPath !== path,
+                  )
+                }
+
                 if (includeSchema) {
                   state[idKey].fieldSchema = includeSchema
                     ? block.fields.find((blockField) => fieldIsID(blockField))
@@ -391,6 +497,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[fieldKey] = {
                   initialValue: row.blockType,
                   value: row.blockType,
+                }
+
+                if (addedByServer) {
+                  state[fieldKey].addedByServer = addedByServer
                 }
 
                 if (includeSchema) {
@@ -421,6 +531,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  blockData: row,
                   clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
@@ -430,6 +541,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   forceFullValue,
                   fullData,
                   includeSchema,
+                  mockRSCs,
                   omitParents,
                   operation,
                   parentIndexPath: '',
@@ -444,29 +556,44 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                         : parentPermissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
-                  renderAllFields: requiresRender,
+                  readOnly,
+                  renderAllFields,
                   renderFieldFn,
                   req,
+                  select: typeof blockSelect === 'object' ? blockSelect : undefined,
+                  selectMode: blockSelectMode,
                   skipConditionChecks,
                   skipValidation,
                   state,
                 }),
               )
 
-              acc.rowMetadata.push({
+              // First, check if `previousFormState` has a matching row
+              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+                (prevRow) => prevRow.id === row.id,
+              )
+
+              const newRow: Row = {
                 id: row.id,
                 blockType: row.blockType,
+                isLoading: false,
+              }
+
+              if (previousRow?.lastRenderedPath) {
+                newRow.lastRenderedPath = previousRow.lastRenderedPath
+              }
+
+              acc.rowMetadata.push(newRow)
+
+              const isCollapsed = isRowCollapsed({
+                collapsedPrefs: preferences?.fields?.[path]?.collapsed,
+                field,
+                previousRow,
+                row,
               })
 
-              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
-
-              const collapsed =
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id)
-
-              if (collapsed) {
-                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = collapsed
+              if (isCollapsed) {
+                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = true
               }
             }
 
@@ -495,10 +622,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         fieldState.rows = rowMetadata
 
-        // Unset requiresRender
-        // so it will be removed from form state
-        fieldState.requiresRender = false
-
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
           state[path] = fieldState
@@ -513,10 +636,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           state[path] = fieldState
         }
 
+        const groupSelect = select?.[field.name]
+
         await iterateFields({
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          blockData,
           clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
@@ -526,6 +652,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           forceFullValue,
           fullData,
           includeSchema,
+          mockRSCs,
           omitParents,
           operation,
           parentIndexPath: '',
@@ -536,9 +663,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             typeof fieldPermissions === 'boolean' ? fieldPermissions : fieldPermissions?.fields,
           preferences,
           previousFormState,
+          readOnly,
           renderAllFields,
           renderFieldFn,
           req,
+          select: typeof groupSelect === 'object' ? groupSelect : undefined,
+          selectMode,
           skipConditionChecks,
           skipValidation,
           state,
@@ -546,6 +676,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         break
       }
+
       case 'relationship':
       case 'upload': {
         if (field.filterOptions) {
@@ -563,8 +694,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
 
           if (typeof field.filterOptions === 'function') {
-            const query = await getFilterOptionsQuery(field.filterOptions, {
+            const query = await resolveFilterOptions(field.filterOptions, {
               id,
+              blockData,
               data: fullData,
               relationTo: field.relationTo,
               req,
@@ -633,6 +765,28 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         break
       }
 
+      case 'select': {
+        if (typeof field.filterOptions === 'function') {
+          fieldState.selectFilterOptions = field.filterOptions({
+            data: fullData,
+            options: field.options,
+            req,
+            siblingData: data,
+          })
+        }
+
+        if (data[field.name] !== undefined) {
+          fieldState.value = data[field.name]
+          fieldState.initialValue = data[field.name]
+        }
+
+        if (!filter || filter(args)) {
+          state[path] = fieldState
+        }
+
+        break
+      }
+
       default: {
         if (data[field.name] !== undefined) {
           fieldState.value = data[field.name]
@@ -648,7 +802,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
   } else if (fieldHasSubFields(field) && !fieldAffectsData(field)) {
-    // Handle field types that do not use names (row, etc)
+    // Handle field types that do not use names (row, collapsible, unnamed group etc)
 
     if (!filter || filter(args)) {
       state[path] = {
@@ -662,9 +816,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     await iterateFields({
       id,
+      mockRSCs,
+      select,
+      selectMode,
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
+      blockData,
       clientFieldSchemaMap,
       collectionSlug,
       data,
@@ -683,6 +841,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: parentPermissions, // TODO: Verify this is correct
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,
@@ -693,16 +852,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab, tabIndex) => {
       const isNamedTab = tabHasName(tab)
+      let tabSelect: SelectType | undefined
+
+      const tabField: TabAsField = {
+        ...tab,
+        type: 'tab',
+      }
 
       const {
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
       } = getFieldPaths({
-        field: {
-          ...tab,
-          type: 'tab',
-        },
+        field: tabField,
         index: tabIndex,
         parentIndexPath: indexPath,
         parentPath,
@@ -712,6 +874,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       let childPermissions: SanitizedFieldsPermissions = undefined
 
       if (isNamedTab) {
+        const shouldContinue = stripUnselectedFields({
+          field: tabField,
+          select,
+          selectMode,
+          siblingDoc: data?.[tab.name] || {},
+        })
+
+        if (!shouldContinue) {
+          return
+        }
+
         if (parentPermissions === true) {
           childPermissions = true
         } else {
@@ -722,14 +895,41 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             childPermissions = tabPermissions?.fields
           }
         }
+
+        if (typeof select?.[tab.name] === 'object') {
+          tabSelect = select?.[tab.name] as SelectType
+        }
       } else {
         childPermissions = parentPermissions
+        tabSelect = select
+      }
+
+      const pathSegments = path ? path.split('.') : []
+
+      // If passesCondition is false then this should always result to false
+      // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
+      let tabPassesCondition = passesCondition
+
+      if (passesCondition && typeof tab.admin?.condition === 'function') {
+        tabPassesCondition = tab.admin.condition(fullData, data, {
+          blockData,
+          operation,
+          path: pathSegments,
+          user: req.user,
+        })
+      }
+
+      if (tab?.id) {
+        state[tab.id] = {
+          passesCondition: tabPassesCondition,
+        }
       }
 
       return iterateFields({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
@@ -739,18 +939,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         forceFullValue,
         fullData,
         includeSchema,
+        mockRSCs,
         omitParents,
         operation,
         parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPassesCondition: passesCondition,
+        parentPassesCondition: tabPassesCondition,
         parentPath: isNamedTab ? tabPath : parentPath,
         parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,
         preferences,
         previousFormState,
+        readOnly,
         renderAllFields,
         renderFieldFn,
         req,
+        select: tabSelect,
+        selectMode,
         skipConditionChecks,
         skipValidation,
         state,
@@ -765,12 +969,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  if (requiresRender && renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
-    const fieldState = state[path]
-
+  if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
-    if (!fieldConfig) {
+    if (!fieldConfig && !mockRSCs) {
       if (schemaPath.endsWith('.blockType')) {
         return
       } else {
@@ -778,10 +980,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
-    if (!fieldState) {
+    if (!state[path]) {
       // Some fields (ie `Tab`) do not live in form state
       // therefore we cannot attach customComponents to them
       return
+    }
+
+    if (addedByServer) {
+      state[path].addedByServer = addedByServer
     }
 
     renderFieldFn({
@@ -791,9 +997,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,
-      fieldState,
+      fieldState: state[path],
       formState: state,
       indexPath,
+      lastRenderedPath,
+      mockRSCs,
       operation,
       parentPath,
       parentSchemaPath,
@@ -801,6 +1009,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: fieldPermissions,
       preferences,
       previousFieldState: previousFormState?.[path],
+      readOnly,
+      renderAllFields,
       req,
       schemaPath,
       siblingData: data,

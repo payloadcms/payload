@@ -19,9 +19,12 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  '**/*.spec.ts',
+  'packages/**/*.spec.ts',
   'next-env.d.ts',
   '**/app',
+  'src/**/*.spec.ts',
+  '**/jest.setup.js',
+  'packages/payload/rollup.dts.config.mjs',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -29,10 +32,7 @@ export const defaultESLintIgnores = [
 export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
-  projectService: {
-    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
-  },
+  projectService: true,
 }
 
 /** @type {Config[]} */
@@ -75,21 +75,13 @@ export const rootEslintConfig = [
       'no-console': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',
+      'payload/no-relative-monorepo-imports': 'off',
     },
   },
 ]
 
 export default [
   ...rootEslintConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
   {
     files: ['packages/eslint-config/**/*.ts'],
     rules: {

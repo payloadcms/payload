@@ -1,12 +1,12 @@
 ---
 title: Sentry Plugin
 label: Sentry
-order: 40
+order: 90
 desc: Integrate Sentry error tracking into your Payload application
 keywords: plugins, sentry, error, tracking, monitoring, logging, bug, reporting, performance
 ---
 
-[![npm](https://img.shields.io/npm/v/@payloadcms/plugin-sentry)](https://www.npmjs.com/package/@payloadcms/plugin-sentry)
+![https://www.npmjs.com/package/@payloadcms/plugin-sentry](https://img.shields.io/npm/v/@payloadcms/plugin-sentry)
 
 This plugin allows you to integrate [Sentry](https://sentry.io/) seamlessly with your [Payload](https://github.com/payloadcms/payload) application.
 
@@ -15,7 +15,8 @@ This plugin allows you to integrate [Sentry](https://sentry.io/) seamlessly with
 Sentry is a powerful error tracking and performance monitoring tool that helps developers identify, diagnose, and resolve issues in their applications.
 
 <Banner type="success">
-  Sentry does smart stuff with error data to make bugs easier to find and fix. - [sentry.io](https://sentry.io/)
+  Sentry does smart stuff with error data to make bugs easier to find and fix. -
+  [sentry.io](https://sentry.io/)
 </Banner>
 
 This multi-faceted software offers a range of features that will help you manage errors with greater ease and ultimately ensure your application is running smoothly:
@@ -31,7 +32,13 @@ This multi-faceted software offers a range of features that will help you manage
 - **Integrations**: Connects with various tools and services for enhanced workflow and issue management
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-sentry). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-sentry%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-sentry).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-sentry%3A)
+  with as much detail as possible.
 </Banner>
 
 ## Installation
@@ -43,12 +50,15 @@ Install the plugin using any JavaScript package manager like [pnpm](https://pnpm
 ```
 
 ## Sentry for Next.js setup
+
 This plugin requires to complete the [Sentry + Next.js setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/) before.
 
 You can use either the [automatic setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/#install) with the installation wizard:
+
 ```sh
 npx @sentry/wizard@latest -i nextjs
 ```
+
 Or the [Manual Setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/)
 
 ## Basic Usage
@@ -64,14 +74,30 @@ import * as Sentry from '@sentry/nextjs'
 
 const config = buildConfig({
   collections: [Pages, Media],
-  plugins: [
-    sentryPlugin({
-      Sentry,
-    }),
-  ],
+  plugins: [sentryPlugin({ Sentry })],
 })
 
 export default config
+```
+
+## Instrumenting Database Queries
+
+If you want Sentry to capture Postgres query performance traces, you need to inject the Sentry-patched `pg` driver into the Postgres adapter. This ensures Sentry’s instrumentation hooks into your database calls.
+
+```ts
+import * as Sentry from '@sentry/nextjs'
+import { buildConfig } from 'payload'
+import { sentryPlugin } from '@payloadcms/plugin-sentry'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import pg from 'pg'
+
+export default buildConfig({
+  db: postgresAdapter({
+    pool: { connectionString: process.env.DATABASE_URL },
+    pg, // Inject the patched pg driver for Sentry instrumentation
+  }),
+  plugins: [sentryPlugin({ Sentry })],
+})
 ```
 
 ## Options
@@ -81,7 +107,8 @@ export default config
   The `Sentry` instance
 
 <Banner type="warning">
-  Make sure to complete the [Sentry for Next.js Setup](#sentry-for-nextjs-setup) before.
+  Make sure to complete the [Sentry for Next.js Setup](#sentry-for-nextjs-setup)
+  before.
 </Banner>
 
 - `enabled`: boolean | optional

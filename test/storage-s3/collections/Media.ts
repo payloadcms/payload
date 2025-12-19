@@ -3,6 +3,9 @@ import type { CollectionConfig } from 'payload'
 export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
+    modifyResponseHeaders({ headers }) {
+      headers.set('X-Universal-Truth', 'Set')
+    },
     disableLocalStorage: true,
     resizeOptions: {
       position: 'center',

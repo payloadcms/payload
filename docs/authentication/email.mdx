@@ -2,7 +2,7 @@
 title: Authentication Emails
 label: Email Verification
 order: 30
-desc: Email Verification allows users to verify their email address before they're account is fully activated. Email Verification ties directly into the Email functionality that Payload provides.
+desc: Email Verification allows users to verify their email address before their account is fully activated. Email Verification ties directly into the Email functionality that Payload provides.
 keywords: authentication, email, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
@@ -20,19 +20,19 @@ import type { CollectionConfig } from 'payload'
 export const Customers: CollectionConfig = {
   // ...
   auth: {
-    verify: true // highlight-line
+    verify: true, // highlight-line
   },
 }
 ```
 
 <Banner type="info">
-  **Tip:**
-  Verification emails are fully customizable. [More details](#generateemailhtml).
+  **Tip:** Verification emails are fully customizable. [More
+  details](#generateemailhtml).
 </Banner>
 
 The following options are available:
 
-| Option                     | Description                                                                                                                                                                                                                         |
+| Option                     | Description                                                                                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`generateEmailHTML`**    | Allows for overriding the HTML within emails that are sent to users indicating how to validate their account. [More details](#generateemailhtml).     |
 | **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users indicating how to validate their account. [More details](#generateemailsubject). |
@@ -62,16 +62,16 @@ export const Customers: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Important:**
-  If you specify a different URL to send your users to for email verification, such as a page on the
-  frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL
-  verification operation yourself on your frontend, using the token that was provided for you.
-  Above, it was passed via query parameter.
+  **Important:** If you specify a different URL to send your users to for email
+  verification, such as a page on the frontend of your app or similar, you need
+  to handle making the call to the Payload REST or GraphQL verification
+  operation yourself on your frontend, using the token that was provided for
+  you. Above, it was passed via query parameter.
 </Banner>
 
 #### generateEmailSubject
 
-Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
+Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function arguments are the same but you can only return a string - not HTML.
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -82,11 +82,11 @@ export const Customers: CollectionConfig = {
     verify: {
       // highlight-start
       generateEmailSubject: ({ req, user }) => {
-        return `Hey ${user.email}, reset your password!`;
-      }
+        return `Hey ${user.email}, reset your password!`
+      },
       // highlight-end
-    }
-  }
+    },
+  },
 }
 ```
 
@@ -100,7 +100,8 @@ import type { CollectionConfig } from 'payload'
 export const Customers: CollectionConfig = {
   // ...
   auth: {
-    forgotPassword: { // highlight-line
+    forgotPassword: {
+      // highlight-line
       // ...
     },
   },
@@ -109,11 +110,18 @@ export const Customers: CollectionConfig = {
 
 The following options are available:
 
-| Option               | Description                                                                                                                                                                                                                         |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`expiration`** | Configure how long password reset tokens remain valid, specified in milliseconds. |
-| **`generateEmailHTML`** | Allows for overriding the HTML within emails that are sent to users attempting to reset their password. [More details](#generateEmailHTML). |
+| Option                     | Description                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`expiration`**           | Configure how long password reset tokens remain valid, specified in milliseconds.                                                               |
+| **`generateEmailHTML`**    | Allows for overriding the HTML within emails that are sent to users attempting to reset their password. [More details](#generateEmailHTML).     |
 | **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users attempting to reset their password. [More details](#generateEmailSubject). |
+
+<Banner type="success">
+  **Tip:** Payload provides a built-in password reset page. If you don't need a
+  custom frontend, you can link directly to `${serverURL}/admin/reset/${token}`.
+  The admin and reset routes are configurable via `config.routes.admin` and
+  `config.admin.routes.reset` respectively.
+</Banner>
 
 #### generateEmailHTML
 
@@ -152,32 +160,32 @@ export const Customers: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Important:**
-  If you specify a different URL to send your users to for resetting their password, such as a page
-  on the frontend of your app or similar, you need to handle making the call to the Payload REST or
-  GraphQL reset-password operation yourself on your frontend, using the token that was provided for
-  you. Above, it was passed via query parameter.
+  **Important:** If you specify a different URL to send your users to for
+  resetting their password, such as a page on the frontend of your app or
+  similar, you need to handle making the call to the Payload REST or GraphQL
+  reset-password operation yourself on your frontend, using the token that was
+  provided for you. Above, it was passed via query parameter.
 </Banner>
 
 <Banner type="success">
-  **Tip:**
-  HTML templating can be used to create custom email templates, inline CSS automatically, and more.
-  You can make a reusable function that standardizes all email sent from Payload, which makes
-  sending custom emails more DRY. Payload doesn't ship with an HTML templating engine, so you are
-  free to choose your own.
+  **Tip:** HTML templating can be used to create custom email templates, inline
+  CSS automatically, and more. You can make a reusable function that
+  standardizes all email sent from Payload, which makes sending custom emails
+  more DRY. Payload doesn't ship with an HTML templating engine, so you are free
+  to choose your own.
 </Banner>
 
 The following arguments are passed to the `generateEmailHTML` function:
 
-| Argument | Description                                                                                   |
-|----------|-----------------------------------------------------------------------------------------------|
-| `req`    | The request object.                                                                           |
-| `token`  | The token that is generated for the user to reset their password.                             |
-| `user`   | The user document that is attempting to reset their password.                                 |
+| Argument | Description                                                       |
+| -------- | ----------------------------------------------------------------- |
+| `req`    | The request object.                                               |
+| `token`  | The token that is generated for the user to reset their password. |
+| `user`   | The user document that is attempting to reset their password.     |
 
 #### generateEmailSubject
 
-Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
+Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function arguments are the same but you can only return a string - not HTML.
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -188,17 +196,17 @@ export const Customers: CollectionConfig = {
     forgotPassword: {
       // highlight-start
       generateEmailSubject: ({ req, user }) => {
-        return `Hey ${user.email}, reset your password!`;
-      }
+        return `Hey ${user.email}, reset your password!`
+      },
       // highlight-end
-    }
-  }
+    },
+  },
 }
 ```
 
 The following arguments are passed to the `generateEmailSubject` function:
 
-| Argument | Description                                                                                   |
-|----------|-----------------------------------------------------------------------------------------------|
-| `req`    | The request object.                                                                           |
-| `user`   | The user document that is attempting to reset their password.                                 |
+| Argument | Description                                                   |
+| -------- | ------------------------------------------------------------- |
+| `req`    | The request object.                                           |
+| `user`   | The user document that is attempting to reset their password. |

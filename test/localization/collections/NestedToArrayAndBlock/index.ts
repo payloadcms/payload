@@ -13,6 +13,11 @@ export const NestedToArrayAndBlock: CollectionConfig = {
           slug: 'block',
           fields: [
             {
+              name: 'someText',
+              type: 'text',
+              localized: true,
+            },
+            {
               name: 'array',
               type: 'array',
               fields: [

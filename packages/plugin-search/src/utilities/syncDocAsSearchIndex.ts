@@ -24,15 +24,36 @@ export const syncDocAsSearchIndex = async ({
     },
     title,
   }
+  const docKeyPrefix = `${collection}:${id}`
+  const docKey = pluginConfig.locales?.length ? `${docKeyPrefix}:${syncLocale}` : docKeyPrefix
+  const syncedDocsSet = (req.context?.syncedDocsSet as Set<string>) || new Set<string>()
+
+  if (syncedDocsSet.has(docKey)) {
+    /*
+     * prevents duplicate syncing of documents in the same request
+     * this can happen when hooks call `payload.update` within the create lifecycle
+     * like the nested-docs plugin does
+     */
+    return doc
+  } else {
+    syncedDocsSet.add(docKey)
+  }
+
+  req.context.syncedDocsSet = syncedDocsSet
 
   if (typeof beforeSync === 'function') {
     let docToSyncWith = doc
     if (payload.config?.localization) {
+      // Check if document is trashed (has deletedAt field)
+      const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
+
       docToSyncWith = await payload.findByID({
         id,
         collection,
         locale: syncLocale,
         req,
+        // Include trashed documents when the document being synced is trashed
+        trash: isTrashDocument,
       })
     }
     dataToSave = await beforeSync({
@@ -56,7 +77,7 @@ export const syncDocAsSearchIndex = async ({
           `Error gathering default priority for ${searchSlug} documents related to ${collection}`,
         )
       }
-    } else {
+    } else if (priority !== undefined) {
       defaultPriority = priority
     }
   }
@@ -64,18 +85,17 @@ export const syncDocAsSearchIndex = async ({
   const doSync = syncDrafts || (!syncDrafts && status !== 'draft')
 
   try {
-    if (operation === 'create') {
-      if (doSync) {
-        await payload.create({
-          collection: searchSlug,
-          data: {
-            ...dataToSave,
-            priority: defaultPriority,
-          },
-          locale: syncLocale,
-          req,
-        })
-      }
+    if (operation === 'create' && doSync) {
+      await payload.create({
+        collection: searchSlug,
+        data: {
+          ...dataToSave,
+          priority: defaultPriority,
+        },
+        depth: 0,
+        locale: syncLocale,
+        req,
+      })
     }
 
     if (operation === 'update') {
@@ -110,6 +130,7 @@ export const syncDocAsSearchIndex = async ({
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             await payload.delete({
               collection: searchSlug,
+              depth: 0,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
@@ -134,6 +155,7 @@ export const syncDocAsSearchIndex = async ({
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                depth: 0,
                 locale: syncLocale,
                 req,
               })
@@ -141,16 +163,67 @@ export const syncDocAsSearchIndex = async ({
               payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
             }
           }
-          if (deleteDrafts && status === 'draft') {
-            // do not include draft docs in search results, so delete the record
+
+          // Check if document is trashed and delete from search
+          const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
+
+          if (isTrashDocument) {
             try {
               await payload.delete({
                 id: searchDocID,
                 collection: searchSlug,
+                depth: 0,
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+              payload.logger.error({
+                err,
+                msg: `Error deleting ${searchSlug} document for trashed doc.`,
+              })
+            }
+          }
+
+          if (deleteDrafts && status === 'draft') {
+            // Check to see if there's a published version of the doc
+            // We don't want to remove the search doc if there is a published version but a new draft has been created
+            const {
+              docs: [docWithPublish],
+            } = await payload.find({
+              collection,
+              depth: 0,
+              draft: false,
+              limit: 1,
+              locale: syncLocale,
+              pagination: false,
+              req,
+              where: {
+                and: [
+                  {
+                    _status: {
+                      equals: 'published',
+                    },
+                  },
+                  {
+                    id: {
+                      equals: id,
+                    },
+                  },
+                ],
+              },
+            })
+
+            if (!docWithPublish && !isTrashDocument) {
+              // do not include draft docs in search results, so delete the record
+              try {
+                await payload.delete({
+                  id: searchDocID,
+                  collection: searchSlug,
+                  depth: 0,
+                  req,
+                })
+              } catch (err: unknown) {
+                payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+              }
             }
           }
         } else if (doSync) {
@@ -161,6 +234,7 @@ export const syncDocAsSearchIndex = async ({
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              depth: 0,
               locale: syncLocale,
               req,
             })

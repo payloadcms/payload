@@ -1,13 +1,13 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
-import defaultAccess from '../../auth/defaultAccess.js'
+import { defaultAccess } from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
-import baseVersionFields from '../../versions/baseFields.js'
+import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
 
@@ -19,8 +19,13 @@ export const sanitizeGlobal = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedGlobalConfig> => {
-  const { collections } = config
+  if (global._sanitized) {
+    return global as SanitizedGlobalConfig
+  }
+
+  global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
 
@@ -29,12 +34,15 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
 
   global.endpoints = global.endpoints ?? []
+
   if (!global.hooks) {
     global.hooks = {}
   }
+
   if (!global.access) {
     global.access = {}
   }
+
   if (!global.admin) {
     global.admin = {}
   }
@@ -42,6 +50,7 @@ export const sanitizeGlobal = async (
   if (!global.access.read) {
     global.access.read = defaultAccess
   }
+
   if (!global.access.update) {
     global.access.update = defaultAccess
   }
@@ -49,24 +58,30 @@ export const sanitizeGlobal = async (
   if (!global.hooks.beforeValidate) {
     global.hooks.beforeValidate = []
   }
+
   if (!global.hooks.beforeChange) {
     global.hooks.beforeChange = []
   }
+
   if (!global.hooks.afterChange) {
     global.hooks.afterChange = []
   }
+
   if (!global.hooks.beforeRead) {
     global.hooks.beforeRead = []
   }
+
   if (!global.hooks.afterRead) {
     global.hooks.afterRead = []
   }
 
   // Sanitize fields
-  const validRelationships = collections.map((c) => c.slug) || []
+  const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
+
   global.fields = await sanitizeFields({
     config,
     fields: global.fields,
+    globalConfig: global,
     parentIsLocalized: false,
     richTextSanitizationPromises,
     validRelationships,
@@ -118,8 +133,8 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
   // Sanitize fields
   // /////////////////////////////////
-  let hasUpdatedAt = null
-  let hasCreatedAt = null
+  let hasUpdatedAt: boolean | null = null
+  let hasCreatedAt: boolean | null = null
   global.fields.some((field) => {
     if (fieldAffectsData(field)) {
       if (field.name === 'updatedAt') {

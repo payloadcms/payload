@@ -29,6 +29,7 @@ export const refreshHandler: PayloadHandler = async (req) => {
     })
 
     if (collection.config.auth.removeTokenFromResponses) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       delete result.refreshedToken
     }
 

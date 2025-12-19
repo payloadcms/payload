@@ -1,7 +1,7 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { initI18n } from '@payloadcms/translations'
-import fs from 'fs'
+import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -44,6 +44,8 @@ export async function generateTypes(
     // If a field defines an interfaceName, it should be included in the generated types
     // even if it's not used by another type. Reason: the user might want to use it in their own code.
     unreachableDefinitions: true,
+    // Allow resolving external file references in $ref pointers
+    cwd: process.cwd(),
   })
 
   compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
@@ -58,7 +60,7 @@ export async function generateTypes(
 
   // Diff the compiled types against the existing types file
   try {
-    const existingTypes = fs.readFileSync(outputFile, 'utf-8')
+    const existingTypes = await fs.readFile(outputFile, 'utf-8')
 
     if (compiled === existingTypes) {
       return
@@ -67,7 +69,7 @@ export async function generateTypes(
     // swallow err
   }
 
-  fs.writeFileSync(outputFile, compiled)
+  await fs.writeFile(outputFile, compiled)
   if (shouldLog) {
     logger.info(`Types written to ${outputFile}`)
   }

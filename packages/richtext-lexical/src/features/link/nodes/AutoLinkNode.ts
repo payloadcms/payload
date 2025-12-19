@@ -1,4 +1,4 @@
-import type { ElementNode, LexicalNode, RangeSelection } from 'lexical'
+import type { ElementNode, LexicalNode, LexicalUpdateJSON, RangeSelection } from 'lexical'
 
 import { $applyNodeReplacement, $isElementNode } from 'lexical'
 
@@ -11,7 +11,7 @@ import { LinkNode } from './LinkNode.js'
 
 export class AutoLinkNode extends LinkNode {
   static override clone(node: AutoLinkNode): AutoLinkNode {
-    return new AutoLinkNode({ id: '', fields: node.__fields, key: node.__key })
+    return new this({ id: '', fields: node.__fields, key: node.__key })
   }
 
   static override getType(): string {
@@ -24,6 +24,11 @@ export class AutoLinkNode extends LinkNode {
   }
 
   static override importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
+    const node = $createAutoLinkNode({}).updateFromJSON(serializedNode)
+
+    /**
+     * @todo remove in 4.0
+     */
     if (
       serializedNode.version === 1 &&
       typeof serializedNode.fields?.doc?.value === 'object' &&
@@ -33,11 +38,6 @@ export class AutoLinkNode extends LinkNode {
       serializedNode.version = 2
     }
 
-    const node = $createAutoLinkNode({ fields: serializedNode.fields })
-
-    node.setFormat(serializedNode.format)
-    node.setIndent(serializedNode.indent)
-    node.setDirection(serializedNode.direction)
     return node
   }
 
@@ -64,9 +64,13 @@ export class AutoLinkNode extends LinkNode {
     }
     return null
   }
+
+  override updateFromJSON(serializedNode: LexicalUpdateJSON<SerializedAutoLinkNode>): this {
+    return super.updateFromJSON(serializedNode).setFields(serializedNode.fields)
+  }
 }
 
-export function $createAutoLinkNode({ fields }: { fields: LinkFields }): AutoLinkNode {
+export function $createAutoLinkNode({ fields }: { fields?: LinkFields }): AutoLinkNode {
   return $applyNodeReplacement(new AutoLinkNode({ id: '', fields }))
 }
 export function $isAutoLinkNode(node: LexicalNode | null | undefined): node is AutoLinkNode {

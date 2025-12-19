@@ -1,43 +1,29 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
+import { validateWhereQuery } from 'payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
+import type { ListControlsProps } from './types.js'
+
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { SearchIcon } from '../../icons/Search/index.js'
+import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import { DeleteMany } from '../DeleteMany/index.js'
-import { EditMany } from '../EditMany/index.js'
+import { GroupByBuilder } from '../GroupByBuilder/index.js'
 import { Pill } from '../Pill/index.js'
-import { PublishMany } from '../PublishMany/index.js'
-import { SearchFilter } from '../SearchFilter/index.js'
-import { UnpublishMany } from '../UnpublishMany/index.js'
+import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
+import { SearchBar } from '../SearchBar/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
-import './index.scss'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
-
-export type ListControlsProps = {
-  readonly beforeActions?: React.ReactNode[]
-  readonly collectionConfig: ClientCollectionConfig
-  readonly collectionSlug: string
-  readonly disableBulkDelete?: boolean
-  readonly disableBulkEdit?: boolean
-  readonly enableColumns?: boolean
-  readonly enableSort?: boolean
-  readonly handleSearchChange?: (search: string) => void
-  readonly handleSortChange?: (sort: string) => void
-  readonly handleWhereChange?: (where: Where) => void
-  readonly renderedFilters?: Map<string, React.ReactNode>
-}
 
 /**
  * The ListControls component is used to render the controls (search, filter, where)
@@ -49,16 +35,22 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableBulkDelete,
-    disableBulkEdit,
+    disableQueryPresets,
     enableColumns = true,
+    enableFilters = true,
     enableSort = false,
+    listMenuItems,
+    queryPreset: activePreset,
+    queryPresetPermissions,
     renderedFilters,
+    resolvedFilterOptions,
   } = props
 
   const { handleSearchChange, query } = useListQuery()
+
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
+
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
@@ -66,7 +58,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const searchLabel =
     (titleField &&
       getTranslation(
-        'label' in titleField && typeof titleField.label === 'string'
+        'label' in titleField &&
+          (typeof titleField.label === 'string' || typeof titleField.label === 'object')
           ? titleField.label
           : 'name' in titleField
             ? titleField.name
@@ -78,6 +71,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const listSearchableFields = getTextFieldsToBeSearched(
     collectionConfig.admin.listSearchableFields,
     collectionConfig.fields,
+    i18n,
   )
 
   const searchLabelTranslated = useRef(
@@ -87,13 +81,13 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const hasWhereParam = useRef(Boolean(query?.where))
 
   const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
-  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
+
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'group-by' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
   useEffect(() => {
     if (hasWhereParam.current && !query?.where) {
-      setVisibleDrawer(undefined)
       hasWhereParam.current = false
     } else if (query?.where) {
       hasWhereParam.current = true
@@ -130,72 +124,105 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
-        <SearchIcon />
-        <SearchFilter
-          fieldName={titleField && 'name' in titleField ? titleField?.name : null}
-          handleChange={(search) => {
-            return void handleSearchChange(search)
-          }}
-          // @ts-expect-error @todo: fix types
-          initialParams={query}
-          key={collectionSlug}
-          label={searchLabelTranslated.current}
+      {collectionConfig?.enableQueryPresets && !disableQueryPresets && (
+        <QueryPresetBar
+          activePreset={activePreset}
+          collectionSlug={collectionSlug}
+          queryPresetPermissions={queryPresetPermissions}
         />
-        <div className={`${baseClass}__buttons`}>
-          <div className={`${baseClass}__buttons-wrap`}>
-            {!smallBreak && (
-              <React.Fragment>
-                {beforeActions && beforeActions}
-                {!disableBulkEdit && (
-                  <Fragment>
-                    <EditMany collection={collectionConfig} />
-                    <PublishMany collection={collectionConfig} />
-                    <UnpublishMany collection={collectionConfig} />
-                  </Fragment>
-                )}
-                {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
-              </React.Fragment>
-            )}
-            {enableColumns && (
-              <Pill
-                aria-controls={`${baseClass}-columns`}
-                aria-expanded={visibleDrawer === 'columns'}
-                className={`${baseClass}__toggle-columns`}
-                icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
-                onClick={() =>
-                  setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                }
-                pillStyle="light"
-              >
-                {t('general:columns')}
-              </Pill>
-            )}
+      )}
+      <SearchBar
+        Actions={[
+          !smallBreak && (
+            <React.Fragment key="before-actions">{beforeActions && beforeActions}</React.Fragment>
+          ),
+          enableColumns && (
+            <Pill
+              aria-controls={`${baseClass}-columns`}
+              aria-expanded={visibleDrawer === 'columns'}
+              className={`${baseClass}__toggle-columns`}
+              icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+              id="toggle-list-columns"
+              key="toggle-list-columns"
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
+              pillStyle="light"
+              size="small"
+            >
+              {t('general:columns')}
+            </Pill>
+          ),
+          enableFilters && (
             <Pill
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
               className={`${baseClass}__toggle-where`}
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+              id="toggle-list-filters"
+              key="toggle-list-filters"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
+              size="small"
             >
               {t('general:filters')}
             </Pill>
-            {enableSort && (
-              <Pill
-                aria-controls={`${baseClass}-sort`}
-                aria-expanded={visibleDrawer === 'sort'}
-                className={`${baseClass}__toggle-sort`}
-                icon={<ChevronIcon />}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                pillStyle="light"
-              >
-                {t('general:sort')}
-              </Pill>
-            )}
-          </div>
-        </div>
-      </div>
+          ),
+          enableSort && (
+            <Pill
+              aria-controls={`${baseClass}-sort`}
+              aria-expanded={visibleDrawer === 'sort'}
+              className={`${baseClass}__toggle-sort`}
+              icon={<ChevronIcon />}
+              id="toggle-list-sort"
+              key="toggle-list-sort"
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+              pillStyle="light"
+              size="small"
+            >
+              {t('general:sort')}
+            </Pill>
+          ),
+          collectionConfig.admin.groupBy && (
+            <Pill
+              aria-controls={`${baseClass}-group-by`}
+              aria-expanded={visibleDrawer === 'group-by'}
+              className={`${baseClass}__toggle-group-by`}
+              icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
+              id="toggle-group-by"
+              key="toggle-group-by"
+              onClick={() =>
+                setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
+              }
+              pillStyle="light"
+              size="small"
+            >
+              {t('general:groupByLabel', {
+                label: '',
+              })}
+            </Pill>
+          ),
+          listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+            <Popup
+              button={<Dots ariaLabel={t('general:moreOptions')} />}
+              className={`${baseClass}__popup`}
+              horizontalAlign="right"
+              id="list-menu"
+              key="list-menu"
+              size="small"
+              verticalAlign="bottom"
+            >
+              <PopupList.ButtonGroup>
+                {listMenuItems.map((item, i) => (
+                  <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                ))}
+              </PopupList.ButtonGroup>
+            </Popup>
+          ),
+        ].filter(Boolean)}
+        key={collectionSlug}
+        label={searchLabelTranslated.current}
+        onSearchChange={handleSearchChange}
+        searchQueryParam={query?.search}
+      />
       {enableColumns && (
         <AnimateHeight
           className={`${baseClass}__columns`}
@@ -214,22 +241,17 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
-          key={String(hasWhereParam.current && !query?.where)}
           renderedFilters={renderedFilters}
+          resolvedFilterOptions={resolvedFilterOptions}
         />
       </AnimateHeight>
-      {enableSort && (
+      {collectionConfig.admin.groupBy && (
         <AnimateHeight
-          className={`${baseClass}__sort`}
-          height={visibleDrawer === 'sort' ? 'auto' : 0}
-          id={`${baseClass}-sort`}
+          className={`${baseClass}__group-by`}
+          height={visibleDrawer === 'group-by' ? 'auto' : 0}
+          id={`${baseClass}-group-by`}
         >
-          <p>Sort Complex</p>
-          {/* <SortComplex
-            collection={collection}
-            handleChange={handleSortChange}
-            modifySearchQuery={modifySearchQuery}
-          /> */}
+          <GroupByBuilder collectionSlug={collectionConfig.slug} fields={collectionConfig.fields} />
         </AnimateHeight>
       )}
     </div>

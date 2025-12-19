@@ -1,4 +1,4 @@
-@import '../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .LexicalEditorTheme {
@@ -16,14 +16,11 @@
       position: relative;
       line-height: 1.5;
       letter-spacing: normal;
-    }
-
-    // No bottom margin for last paragraph in editor. This also created nice animations when adding a new line at the end
-    .ContentEditable__root {
-      font-size: base(0.8);
+      color: var(--theme-text);
     }
 
     &__quote {
+      color: var(--theme-text);
       font-size: base(0.8);
       margin-block: base(0.8);
       margin-inline: base(0.2);
@@ -34,52 +31,52 @@
       padding-block: base(0.2);
     }
 
+    &__h1,
+    &__h2,
+    &__h3,
+    &__h4,
+    &__h5,
+    &__h6 {
+      font-family: var(--font-body);
+      line-height: 1.125;
+      letter-spacing: 0;
+      color: var(--theme-text);
+    }
+
     &__h1 {
       font-size: base(1.4);
       font-weight: 700;
       margin-block: 0.5em 0.4em;
-      line-height: base(1.2);
-      letter-spacing: normal;
     }
 
     &__h2 {
       font-size: base(1.25);
       font-weight: 700;
       margin-block: 0.55em 0.4em;
-      line-height: base(1.2);
-      letter-spacing: normal;
     }
 
     &__h3 {
       font-size: base(1.1);
       font-weight: 700;
       margin-block: 0.6em 0.4em;
-      line-height: base(1.3);
-      letter-spacing: normal;
     }
 
     &__h4 {
       font-size: base(1);
       font-weight: 700;
       margin-block: 0.65em 0.4em;
-      line-height: base(1.4);
-      letter-spacing: normal;
     }
 
     &__h5 {
       font-size: base(0.9);
       font-weight: 700;
       margin-block: 0.7em 0.4em;
-      line-height: base(1.5);
-      letter-spacing: normal;
     }
 
     &__h6 {
       font-size: base(0.8);
       font-weight: 700;
       margin-block: 0.75em 0.4em;
-      line-height: base(1.5);
-      letter-spacing: 0.1em;
     }
 
     &__indent {
@@ -106,6 +103,47 @@
       text-decoration: underline line-through;
     }
 
+    &__tabNode {
+      position: relative;
+      text-decoration: none;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderline::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.15em;
+      border-bottom: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textStrikethrough::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0.69em;
+      border-top: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::before,
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::before {
+      top: 0.69em;
+      border-top: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::after {
+      bottom: 0.05em;
+      border-bottom: 0.1em solid currentColor;
+    }
+
     &__textSubscript {
       font-size: 0.8em;
       vertical-align: sub !important;
@@ -128,52 +166,34 @@
       -webkit-box-decoration-break: clone;
     }
 
-    &__hashtag {
-      background-color: rgba(88, 144, 255, 0.15);
-      border-bottom: 1px solid rgba(88, 144, 255, 0.3);
-    }
-
-    .ContentEditable__root &__link {
-      pointer-events: none;
-    }
-
     &__link {
       color: var(--theme-success-750);
       text-decoration: none;
       border-bottom: 1px dotted;
+      pointer-events: none;
     }
 
-    &__code {
-      /*background-color: rgb(240, 242, 245);*/
-      font-family: Menlo, Consolas, Monaco, monospace;
+    // Renders cursor when native browser does not. See https://github.com/facebook/lexical/issues/3417
+    &__blockCursor {
       display: block;
-      padding: 8px 8px 8px 52px;
-      line-height: 1.53;
-      font-size: 13px;
-      margin: 8px 0;
-      tab-size: 2;
-      /* white-space: pre; */
-      overflow-x: auto;
-      position: relative;
-    }
-
-    &__code:before {
-      content: attr(data-gutter);
+      pointer-events: none;
       position: absolute;
-      /*background-color: #eee;*/
-      left: 0;
-      top: 0;
-      border-right: 1px solid #ccc;
-      padding: 8px;
-      color: #777;
-      white-space: pre-wrap;
-      text-align: right;
-      min-width: 25px;
+
+      &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: -2px;
+        width: 20px;
+        border-top: 1px solid var(--theme-text);
+        animation: CursorBlink 1.1s steps(2, start) infinite;
+      }
     }
 
-    &__characterLimit {
-      display: inline;
-      background-color: #ffbbbb !important;
+    @keyframes CursorBlink {
+      to {
+        visibility: hidden;
+      }
     }
 
     &__ol1 {
@@ -223,6 +243,16 @@
     &__listItem {
       font-size: base(0.8);
       margin: 0 0 0.4em 40px;
+      color: var(--theme-text);
+    }
+
+    &__listItem::marker {
+      // See https://github.com/facebook/lexical/pull/7325/files#diff-915a0be0588ee3ceb38aca4ae182f51291c8885e7af5f8dca2a91f8d92a95e0c
+      // These are applied by the ListItemNode
+      color: var(--listitem-marker-color);
+      background-color: var(--listitem-marker-background-color);
+      font-family: var(--listitem-marker-font-family);
+      font-size: var(--listitem-marker-font-size);
     }
 
     &__listItem[dir='rtl'] {
@@ -316,73 +346,6 @@
     &__nestedListItem:before,
     &__nestedListItem:after {
       display: none;
-    }
-
-    &__tokenComment {
-      color: slategray;
-    }
-
-    &__tokenPunctuation {
-      color: #999;
-    }
-
-    &__tokenProperty {
-      color: #905;
-    }
-
-    &__tokenSelector {
-      color: #690;
-    }
-
-    &__tokenOperator {
-      color: #9a6e3a;
-    }
-
-    &__tokenAttr {
-      color: #07a;
-    }
-
-    &__tokenVariable {
-      color: #e90;
-    }
-
-    &__tokenFunction {
-      color: #dd4a68;
-    }
-
-    &__mark {
-      background: rgba(255, 212, 0, 0.14);
-      border-bottom: 2px solid rgba(255, 212, 0, 0.3);
-      padding-bottom: 2px;
-    }
-
-    &__markOverlap {
-      background: rgba(255, 212, 0, 0.3);
-      border-bottom: 2px solid rgba(255, 212, 0, 0.7);
-    }
-
-    &__mark.selected {
-      background: rgba(255, 212, 0, 0.5);
-      border-bottom: 2px solid rgba(255, 212, 0, 1);
-    }
-
-    &__markOverlap.selected {
-      background: rgba(255, 212, 0, 0.7);
-      border-bottom: 2px solid rgba(255, 212, 0, 0.7);
-    }
-
-    &__embedBlock {
-      user-select: none;
-    }
-
-    &__embedBlockFocus {
-      outline: 2px solid rgb(60, 132, 244);
-    }
-
-    .ContentEditable__root {
-      &:first-child {
-        margin-top: 0;
-      }
     }
   }
 

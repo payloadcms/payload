@@ -22,7 +22,7 @@ import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 export default buildConfig({
   db: vercelPostgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI,
+      connectionString: process.env.DATABASE_URL,
     },
   }),
   // ...rest of config

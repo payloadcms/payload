@@ -1,6 +1,6 @@
-# payload-postgres-template
+# with-postgres
 
-payload-postgres-template
+with-postgres
 
 ## Attributes
 

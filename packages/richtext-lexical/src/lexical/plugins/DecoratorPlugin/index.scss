@@ -1,4 +1,4 @@
-@import '../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   [data-lexical-decorator='true'] {
@@ -7,7 +7,7 @@
   }
 
   .decorator-selected {
-    box-shadow: $focus-box-shadow;
-    outline: none;
+    box-shadow: $focus-box-shadow !important;
+    outline: none !important;
   }
 }

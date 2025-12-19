@@ -57,6 +57,7 @@ async function upgradeGlobal({
   const found = upgradeDocument({
     document,
     fields: global.fields,
+    payload,
   })
 
   if (found) {
@@ -129,6 +130,7 @@ async function upgradeCollection({
       const found = upgradeDocument({
         document,
         fields: collection.fields,
+        payload,
       })
 
       if (found) {
@@ -148,13 +150,16 @@ async function upgradeCollection({
 function upgradeDocument({
   document,
   fields,
+  payload,
 }: {
   document: Record<string, unknown>
   fields: Field[]
+  payload: Payload
 }): boolean {
   return !!upgradeDocumentFieldsRecursively({
     data: document,
     fields,
     found: 0,
+    payload,
   })
 }

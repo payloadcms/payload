@@ -1,0 +1,102 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .lexical-diff .field-diff-content {
+    .html-diff {
+      font-family: var(--font-serif);
+      font-size: base(0.8);
+      letter-spacing: 0.02em;
+    }
+
+    blockquote {
+      font-size: base(0.8);
+      margin-block: base(0.8);
+      margin-inline: 0;
+      padding-inline-start: base(0.6);
+      padding-block: base(0.2);
+      position: relative; // Required for absolute positioning of ::after
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        inset-inline-start: 0;
+        width: base(0.2);
+        background-color: var(--theme-elevation-150);
+      }
+
+      &:has([data-match-type='create'])::after {
+        background-color: var(--theme-success-150);
+      }
+
+      &:has([data-match-type='delete'])::after {
+        background-color: var(--theme-error-150);
+      }
+    }
+
+    a {
+      border-bottom: 1px dotted;
+      text-decoration: none;
+    }
+
+    h1 {
+      padding: base(0.7) 0px base(0.55);
+      line-height: base(1.5);
+      font-weight: 600;
+      font-size: base(1.4);
+      font-family: var(--font-body);
+    }
+    h2 {
+      padding: base(0.7) 0px base(0.5);
+      line-height: base(1.4);
+      font-weight: 600;
+      font-size: base(1.25);
+      font-family: var(--font-body);
+    }
+    h3 {
+      padding: base(0.6) 0px base(0.45);
+      line-height: base(1.4);
+      font-weight: 600;
+      font-size: base(1.1);
+      font-family: var(--font-body);
+    }
+    h4 {
+      padding: base(0.4) 0px base(0.35);
+      line-height: base(1.5);
+      font-weight: 600;
+      font-size: base(1.05);
+      font-family: var(--font-body);
+    }
+    h5 {
+      padding: base(0.3) 0px base(0.3);
+      line-height: base(1.4);
+      font-weight: 600;
+      font-size: base(0.9);
+      font-family: var(--font-body);
+    }
+
+    h6 {
+      padding: base(0.55) 0px base(0.25);
+      line-height: base(0.5);
+      font-weight: 600;
+      font-size: base(0.75);
+      font-family: var(--font-body);
+    }
+
+    p {
+      padding: base(0.4) 0 base(0.4);
+
+      // First paraagraph has no top padding
+      &:first-child {
+        padding: 0 0 base(0.4);
+      }
+    }
+
+    ul,
+    ol {
+      padding-top: base(0.4);
+      padding-bottom: base(0.4);
+    }
+  }
+}

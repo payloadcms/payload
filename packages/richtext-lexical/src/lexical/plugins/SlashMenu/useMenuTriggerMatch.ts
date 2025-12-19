@@ -47,18 +47,18 @@ export function useMenuTriggerMatch(
       )
       const match = TypeaheadTriggerRegex.exec(query)
       if (match !== null) {
-        const maybeLeadingWhitespace = match[1]
+        const maybeLeadingWhitespace = match[1]!
 
         /**
          * matchingString is only the text AFTER the trigger text. (So everything after the /)
          */
-        const matchingString = match[3]
+        const matchingString = match[3]!
 
         if (matchingString.length >= minLength) {
           return {
             leadOffset: match.index + maybeLeadingWhitespace.length,
             matchingString,
-            replaceableString: match[2], // replaceableString is the trigger text + the matching string
+            replaceableString: match[2]!, // replaceableString is the trigger text + the matching string
           }
         }
       }

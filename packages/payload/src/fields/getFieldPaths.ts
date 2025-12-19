@@ -49,6 +49,9 @@ export function getFieldPaths({
   }
 }
 
+/**
+ * @deprecated - will be removed in 4.0. Use `getFieldPaths` instead.
+ */
 export function getFieldPathsModified({
   field,
   index,
@@ -58,7 +61,7 @@ export function getFieldPathsModified({
 }: Args): FieldPaths {
   const parentPathSegments = parentPath.split('.')
 
-  const parentIsUnnamed = parentPathSegments[parentPathSegments.length - 1].startsWith('_index-')
+  const parentIsUnnamed = parentPathSegments[parentPathSegments.length - 1]!.startsWith('_index-')
 
   const parentWithoutIndex = parentIsUnnamed
     ? parentPathSegments.slice(0, -1).join('.')

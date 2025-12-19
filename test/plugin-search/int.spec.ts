@@ -1,5 +1,6 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -65,9 +66,7 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a search collection', async () => {
@@ -131,6 +130,78 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(results).toHaveLength(0)
+  })
+
+  it('should not delete a search doc if a published item has a new draft but remains published', async () => {
+    const publishedPage = await payload.create({
+      collection: 'pages',
+      data: {
+        _status: 'published',
+        title: 'Published title!',
+      },
+    })
+
+    // wait for the search document to be potentially created
+    // we do not await this within the `syncToSearch` hook
+    await wait(200)
+
+    const { docs: results } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPage.id,
+        },
+      },
+    })
+
+    expect(results).toHaveLength(1)
+
+    // Create a new draft
+    await payload.update({
+      collection: 'pages',
+      id: publishedPage.id,
+      draft: true,
+      data: {
+        _status: 'draft',
+        title: 'Draft title!',
+      },
+    })
+
+    // This should remain with the published content
+    const { docs: updatedResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPage.id,
+        },
+      },
+    })
+
+    expect(updatedResults).toHaveLength(1)
+
+    await payload.update({
+      collection: 'pages',
+      id: publishedPage.id,
+      data: {
+        _status: 'draft',
+        title: 'Drafted again',
+      },
+    })
+
+    // Should now be deleted given we've unpublished the page
+    const { docs: deletedResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPage.id,
+        },
+      },
+    })
+
+    expect(deletedResults).toHaveLength(0)
   })
 
   it('should sync changes made to an existing search document', async () => {
@@ -228,8 +299,8 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        'doc.value': {
-          equals: page.id,
+        id: {
+          equals: results[0].id,
         },
       },
     })
@@ -401,11 +472,13 @@ describe('@payloadcms/plugin-search', () => {
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
-        collections: [postsSlug, pagesSlug],
+        collections: [postsSlug],
       }),
     })
 
     expect(endpointRes.status).toBe(200)
+
+    await wait(200)
 
     const { docs: results } = await payload.find({
       collection: 'search',
@@ -423,20 +496,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
-    await payload.create({
-      collection: pagesSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+    ])
 
     await wait(200)
 
@@ -460,5 +535,202 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
+  })
+
+  it('should exclude drafts from reindexing by default', async () => {
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page published',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page draft',
+          _status: 'draft',
+        },
+      }),
+    ])
+
+    await wait(200)
+
+    const { totalDocs: totalBeforeReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalBeforeReindex).toBe(1)
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [pagesSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { totalDocs: totalAfterReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalAfterReindex).toBe(totalBeforeReindex)
+
+    const data = await endpointRes.json()
+
+    const totalDocs = 2
+    const nonDrafts = 1
+    expect(data.message).toBe(
+      `Successfully reindexed ${nonDrafts} of ${totalDocs} documents from ${pagesSlug} and skipped ${totalDocs - nonDrafts} drafts.`,
+    )
+  })
+
+  it('should reindex all configured locales', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      locale: 'en',
+      data: {
+        title: 'Test page published',
+        _status: 'published',
+        slug: 'test-en',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'es',
+      data: {
+        _status: 'published',
+        slug: 'test-es',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'de',
+      data: {
+        _status: 'published',
+        slug: 'test-de',
+      },
+    })
+
+    const {
+      docs: [postBeforeReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postBeforeReindex?.slug).not.toBeFalsy()
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [postsSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const {
+      docs: [postAfterReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postAfterReindex?.slug).not.toBeFalsy()
+    expect(postAfterReindex?.slug).toStrictEqual(postBeforeReindex?.slug)
+  })
+
+  it('should sync trashed documents correctly with search plugin', async () => {
+    // Create a published post
+    const publishedPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Post to be trashed',
+        excerpt: 'This post will be soft deleted',
+        _status: 'published',
+      },
+    })
+
+    // Wait for the search document to be created
+    await wait(200)
+
+    // Verify the search document was created
+    const { docs: initialSearchResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPost.id,
+        },
+      },
+    })
+
+    expect(initialSearchResults).toHaveLength(1)
+    expect(initialSearchResults[0]?.title).toBe('Post to be trashed')
+
+    // Soft delete the post (move to trash)
+    await payload.update({
+      collection: postsSlug,
+      id: publishedPost.id,
+      data: {
+        deletedAt: new Date().toISOString(),
+      },
+    })
+
+    // Wait for the search plugin to sync the trashed document
+    await wait(200)
+
+    // Verify the search document still exists but is properly synced
+    // The search document should remain and be updated correctly
+    const { docs: trashedSearchResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPost.id,
+        },
+      },
+    })
+
+    // The search document should still exist
+    expect(trashedSearchResults).toHaveLength(0)
+
+    // Clean up by permanently deleting the trashed post
+    await payload.delete({
+      collection: postsSlug,
+      id: publishedPost.id,
+      trash: true, // permanently delete
+    })
   })
 })

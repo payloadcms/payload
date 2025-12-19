@@ -1,5 +1,6 @@
 'use client'
 
+import type { ListDrawerProps } from '@payloadcms/ui'
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -14,6 +15,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
@@ -75,7 +77,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}`, serverURL }),
     { initialParams },
   )
 
@@ -110,13 +112,13 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
     [editor, element, setParams, cacheBust, closeDrawer],
   )
 
-  const swapUpload = React.useCallback(
-    ({ collectionSlug, docID }) => {
+  const swapUpload = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       const newNode = {
         type: uploadName,
         children: [{ text: ' ' }],
         relationTo: collectionSlug,
-        value: { id: docID },
+        value: { id: doc.id },
       }
 
       const elementPath = ReactEditor.findPath(editor, element)

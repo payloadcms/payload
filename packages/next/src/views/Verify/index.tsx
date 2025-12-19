@@ -1,6 +1,6 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
@@ -9,13 +9,7 @@ import './index.scss'
 
 export const verifyBaseClass = 'verify'
 
-export { generateVerifyMetadata } from './meta.js'
-
-export const Verify: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function Verify({ initPageResult, params, searchParams }: AdminViewServerProps) {
   // /:collectionSlug/verify/:token
 
   const [collectionSlug, verify, token] = params.segments
@@ -30,6 +24,7 @@ export const Verify: React.FC<AdminViewProps> = async ({
 
   const {
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   let textToRender
