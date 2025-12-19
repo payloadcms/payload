@@ -20,15 +20,6 @@ outputs:
 runs:
   using: composite
   steps:
-    # Cache invalidates when any db docker-compose file changes (e.g., image version bump)
-    # Skip for supabase - too many images, exceeds disk space
-    - name: Cache Docker images
-      if: inputs.database != 'supabase'
-      # Use AndreKurait/docker-cache@0.6.0 instead of ScribeMD/docker-cache@0.5.0 to fix the following issue: https://github.com/ScribeMD/docker-cache/issues/837 ("Warning: Failed to restore: Cache service responded with 400")
-      uses: AndreKurait/docker-cache@0.6.0
-      with:
-        key: docker-${{ runner.os }}-${{ inputs.database }}-${{ hashFiles('test/helpers/db/**/docker-compose.yml') }}
-
     - name: Start MongoDB
       id: mongodb
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
