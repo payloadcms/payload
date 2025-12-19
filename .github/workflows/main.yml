@@ -152,6 +152,7 @@ jobs:
       matrix:
         database:
           - mongodb
+          - mongodb-atlas
           - documentdb
           - cosmosdb
           - firestore
