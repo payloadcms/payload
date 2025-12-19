@@ -55,7 +55,7 @@ A typical directory with `test/` will be structured like this:
 ```
 
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
-- `int.spec.ts` - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
+- `int.spec.ts` - This is the test file run by vitest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests. These tests are typically only needed if a large change is being made to the Admin UI.
 - `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types my-test-dir`. Replace `my-test-dir` with the name of your testing directory.
 
