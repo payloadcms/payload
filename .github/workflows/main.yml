@@ -163,28 +163,12 @@ jobs:
           - sqlite-uuid
 
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
 
     services:
-      postgres:
-        # Custom postgres 17 docker image that supports both pg-vector and postgis: https://github.com/payloadcms/postgis-vector
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'ghcr.io/payloadcms/postgis-vector:latest' || '' }}
-        env:
-          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
       redis:
         image: redis:latest
         ports:
@@ -210,38 +194,15 @@ jobs:
       - name: Start LocalStack
         run: pnpm docker:start
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
-
       - name: Configure Redis
         run: |
-          echo  "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+          echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
+        with:
+          database: ${{ matrix.database }}
 
       - name: Integration Tests
         run: pnpm test:int
