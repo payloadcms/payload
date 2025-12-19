@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-conditional-in-test */
 import type { CompilerOptions } from 'typescript'
 
 import * as CommentJson from 'comment-json'
@@ -10,6 +9,7 @@ import path from 'path'
 import shelljs from 'shelljs'
 import tempy from 'tempy'
 import { promisify } from 'util'
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
@@ -64,7 +64,7 @@ describe('create-payload-app', () => {
       let userTsConfigContent = await readFile(tsConfigPath, { encoding: 'utf8' })
       userTsConfigContent = userTsConfigContent.replace('""@/*""', '"@/*"')
       await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
-    })
+    }, 90000)
 
     afterEach(() => {
       if (fs.existsSync(projectDir)) {
@@ -129,7 +129,7 @@ describe('create-payload-app', () => {
       }
 
       // Check that `@payload-config` path is added to tsconfig
-      expect(userTsConfig.compilerOptions?.paths?.['@payload-config']).toStrictEqual([
+      expect(userTsConfig.compilerOptions?.paths?.['@payload-config']).toEqual([
         `./${result.isSrcDir ? 'src/' : ''}payload.config.ts`,
       ])
 

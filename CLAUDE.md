@@ -96,7 +96,7 @@ Each test directory in `test/` follows this pattern:
 ```
 test/<feature-name>/
 ├── config.ts        # Lightweight Payload config for testing
-├── int.spec.ts      # Integration tests (Jest)
+├── int.spec.ts      # Integration tests (Vitest)
 ├── e2e.spec.ts      # End-to-end tests (Playwright)
 └── payload-types.ts # Generated types
 ```

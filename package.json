@@ -131,12 +131,12 @@
     "test:e2e:prod": "pnpm prepare-run-test-against-prod && pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:ci": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:ci:noturbo": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod --no-turbo",
-    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
-    "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
-    "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
-    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --project int",
+    "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
+    "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
+    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
     "test:types": "tstyche",
-    "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
+    "test:unit": "vitest run --project unit",
     "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
   "lint-staged": {
@@ -152,7 +152,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",
-    "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "15.4.7",
     "@payloadcms/db-postgres": "workspace:*",
@@ -167,7 +166,6 @@
     "@swc/core": "1.15.3",
     "@swc/jest": "0.2.39",
     "@types/fs-extra": "^11.0.2",
-    "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
     "@types/node": "22.15.30",
     "@types/react": "19.2.1",
@@ -188,7 +186,6 @@
     "fs-extra": "10.1.0",
     "globby": "11.1.0",
     "husky": "9.0.11",
-    "jest": "29.7.0",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongoose": "8.15.1",
@@ -212,6 +209,7 @@
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
     "typescript": "5.7.3",
+    "vitest": "4.0.15",
     "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@9.7.1",
@@ -224,7 +222,7 @@
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
-      "graphql": "^16.8.1",
+      "graphql": "16.8.1",
       "react": "$react",
       "react-dom": "$react-dom",
       "typescript": "$typescript"

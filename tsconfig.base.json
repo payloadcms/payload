@@ -22,7 +22,7 @@
     "emitDeclarationOnly": true,
     "sourceMap": true,
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "jest"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
