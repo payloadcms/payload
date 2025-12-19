@@ -1,12 +1,14 @@
 import type { Payload } from 'payload'
+import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
+import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
-import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
@@ -15,6 +17,25 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
+
+// needs to be here as it imports vitest functions and conflicts with playwright that uses jest
+export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
+  if (process.env.CI) {
+    return describe
+  }
+
+  // Check that localstack is running
+  const { code } = shelljs.exec(`docker ps | grep localstack`)
+
+  if (code !== 0) {
+    console.warn('Localstack is not running. Skipping test suite.')
+    return describe.skip
+  }
+
+  console.log('Localstack is running. Running test suite.')
+
+  return describe
+}
 
 describe('@payloadcms/plugin-cloud-storage', () => {
   let TEST_BUCKET: string

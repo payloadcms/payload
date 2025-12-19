@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { parseParams, booleanParams, numberParams } from './index.js'
 
 describe('parseParams', () => {
