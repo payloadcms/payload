@@ -84,7 +84,7 @@
     "lexical": "0.13.1",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
-    "mongodb-memory-server": "8.15.1",
+    "mongodb-memory-server": "11.0.0",
     "node-fetch": "2.6.12",
     "nodemon": "3.0.3",
     "playwright": "1.50.0",
