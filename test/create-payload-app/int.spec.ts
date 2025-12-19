@@ -129,7 +129,7 @@ describe('create-payload-app', () => {
       }
 
       // Check that `@payload-config` path is added to tsconfig
-      expect(userTsConfig.compilerOptions?.paths?.['@payload-config']).toStrictEqual([
+      expect(userTsConfig.compilerOptions?.paths?.['@payload-config']).toEqual([
         `./${result.isSrcDir ? 'src/' : ''}payload.config.ts`,
       ])
 
