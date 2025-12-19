@@ -56,7 +56,7 @@ export const RenderWidget: React.FC<{
                 textAlign: 'center',
               },
             },
-            `Failed to load widget: ${error.message}`,
+            'Failed to load widget. Please try again later.',
           ),
         )
       }

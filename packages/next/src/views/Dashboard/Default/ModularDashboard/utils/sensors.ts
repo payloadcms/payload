@@ -214,8 +214,6 @@ const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
   // Get all droppable widgets and their positions
   const droppables = getDroppablePositions()
 
-  // showDroppableDebugDots(droppables)
-
   if (droppables.length === 0) {
     return currentCoordinates
   }
@@ -318,30 +316,4 @@ export function useDashboardSensors() {
       coordinateGetter: droppableJumpKeyboardCoordinateGetter,
     }),
   )
-}
-
-/**
- * DEBUG: Show red dots at droppable positions (viewport-relative)
- */
-function _showDroppableDebugDots(droppables: DroppablePosition[]) {
-  // Remove any existing debug dots
-  document.querySelectorAll('.debug-droppable-dot').forEach((el) => el.remove())
-
-  // Create new debug dots
-  droppables.forEach((droppable, index) => {
-    // centerX/Y are already viewport coordinates (from getBoundingClientRect)
-    const dot = document.createElement('div')
-    dot.className = 'debug-droppable-dot'
-    dot.style.position = 'fixed'
-    dot.style.left = `${droppable.centerX - 4}px`
-    dot.style.top = `${droppable.centerY - 4}px`
-    dot.style.width = '8px'
-    dot.style.height = '8px'
-    dot.style.backgroundColor = 'red'
-    dot.style.borderRadius = '50%'
-    dot.style.zIndex = '9999'
-    dot.style.pointerEvents = 'none'
-    dot.title = `Row ${droppable.row}, Index ${index}`
-    document.body.appendChild(dot)
-  })
 }

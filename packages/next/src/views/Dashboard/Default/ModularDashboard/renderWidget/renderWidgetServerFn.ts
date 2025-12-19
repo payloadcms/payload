@@ -73,9 +73,11 @@ export const renderWidgetHandler: ServerFunction<
 
     return { component }
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+
     req.payload.logger.error({
       err: error,
-      msg: `Error rendering widget: ${widgetSlug}`,
+      msg: `Error rendering widget "${widgetSlug}": ${errorMessage}`,
     })
 
     return {
