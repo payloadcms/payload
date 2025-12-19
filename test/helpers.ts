@@ -5,17 +5,17 @@ import type {
   Locator,
   Page,
 } from '@playwright/test'
-import type { Config } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-export type AdminRoutes = NonNullable<Config['admin']>['routes']
+export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -69,7 +69,7 @@ export async function ensureCompilationIsDone({
 }): Promise<void> {
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
-  const adminURL = `${serverURL}${adminRoute}`
+  const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
   const maxAttempts = 50
   let attempt = 1
@@ -425,7 +425,7 @@ export function getRoutes({
   admin: {
     routes: AdminRoutes
   }
-  routes: Config['routes']
+  routes: NonNullable<SanitizedConfig['routes']>
 } {
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes
