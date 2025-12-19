@@ -78,6 +78,11 @@ export const heTranslations: DefaultTranslationsObject = {
       'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
+  dashboard: {
+    addWidget: "הוסף וידג'ט",
+    deleteWidget: "מחק וידג'ט {{id}}",
+    searchWidgets: "חפש ווידג'טים...",
+  },
   error: {
     accountAlreadyActivated: 'חשבון זה כבר הופעל.',
     autosaving: 'אירעה בעיה בזמן שמירה אוטומטית של מסמך זה.',
