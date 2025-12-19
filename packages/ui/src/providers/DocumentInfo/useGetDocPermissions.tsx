@@ -1,5 +1,6 @@
 import type { Data, SanitizedDocumentPermissions, SanitizedPermissions } from 'payload'
 
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -16,7 +17,6 @@ export const useGetDocPermissions = ({
   i18n,
   locale,
   permissions,
-  serverURL,
   setDocPermissions,
   setHasPublishPermission,
   setHasSavePermission,
@@ -28,7 +28,6 @@ export const useGetDocPermissions = ({
   id: string
   locale: string
   permissions: SanitizedPermissions
-  serverURL: string
   setDocPermissions: React.Dispatch<React.SetStateAction<SanitizedDocumentPermissions>>
   setHasPublishPermission: React.Dispatch<React.SetStateAction<boolean>>
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
@@ -43,30 +42,39 @@ export const useGetDocPermissions = ({
       const newIsEditing = getIsEditing({ id: idToUse, collectionSlug, globalSlug })
 
       if (newIsEditing) {
-        const docAccessURL = collectionSlug
+        const docAccessPath: `/${string}` = collectionSlug
           ? `/${collectionSlug}/access/${idToUse}`
           : globalSlug
             ? `/globals/${globalSlug}/access`
             : null
 
-        if (docAccessURL) {
-          const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-            body: JSON.stringify({
-              ...(data || {}),
-              _status: 'draft',
+        if (docAccessPath) {
+          const res = await fetch(
+            formatAdminURL({
+              apiRoute: api,
+              path: `${docAccessPath}${qs.stringify(params, { addQueryPrefix: true })}`,
             }),
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
+            {
+              body: JSON.stringify({
+                ...(data || {}),
+                _status: 'draft',
+              }),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+              method: 'post',
             },
-            method: 'post',
-          })
+          )
 
           const json: SanitizedDocumentPermissions = await res.json()
 
           const publishedAccessJSON = await fetch(
-            `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
+            formatAdminURL({
+              apiRoute: api,
+              path: `${docAccessPath}${qs.stringify(params, { addQueryPrefix: true })}`,
+            }),
             {
               body: JSON.stringify({
                 ...(data || {}),
@@ -118,7 +126,6 @@ export const useGetDocPermissions = ({
       id,
       collectionSlug,
       globalSlug,
-      serverURL,
       api,
       i18n.language,
       setDocPermissions,
