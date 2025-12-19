@@ -111,7 +111,7 @@
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
     "uuid": "10.0.0",
-    "vitest": "4.0.15",
+    "vitest": "4.0.16",
     "wrangler": "~4.42.0",
     "zod": "^3.25.5"
   },
