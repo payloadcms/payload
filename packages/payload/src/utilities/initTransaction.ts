@@ -26,7 +26,7 @@ export async function initTransaction(
     req.transactionID = promise as Promise<number | string>
     const transactionID = await promise
 
-    if (transactionID) {
+    if (typeof transactionID === 'string' || typeof transactionID === 'number') {
       req.transactionID = transactionID
     } else {
       req.transactionID = undefined
