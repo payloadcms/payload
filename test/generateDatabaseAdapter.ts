@@ -29,7 +29,7 @@ export const allDatabaseAdapters = {
     ensureIndexes: true,
     url:
         process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
-      'mongodb://localhost:27018/payload?directConnection=true&replicaSet=rs-localdev',
+      'mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local',
     collation: {
       strength: 1,
     },

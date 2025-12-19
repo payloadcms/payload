@@ -34,12 +34,7 @@ runs:
       shell: bash
       run: |
         docker compose -f test/helpers/db/mongodb-atlas/docker-compose.yml up -d --wait
-        # Wait a moment for replica set to be fully ready
-        sleep 2
-        # Get the replica set name dynamically (it can vary between container instances)
-        RS_NAME=$(docker exec mongodb-atlas-payload-test mongosh --quiet --eval "rs.status().set")
-        echo "Detected replica set name: $RS_NAME"
-        echo "url=mongodb://localhost:27018/payload?directConnection=true&replicaSet=$RS_NAME" >> $GITHUB_OUTPUT
+        echo "url=mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
 
     - name: Start PostgreSQL
       id: postgres

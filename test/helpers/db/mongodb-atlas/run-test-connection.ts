@@ -9,5 +9,5 @@ import { testConnection } from '../mongodb/test-connection.js'
 
 await testConnection(
   process.env.MONGODB_ATLAS_URL ||
-    'mongodb://localhost:27018/payload?directConnection=true&replicaSet=rs-localdev',
+    'mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local',
 )
