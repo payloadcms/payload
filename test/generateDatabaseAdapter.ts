@@ -70,7 +70,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
     },
     schemaName: 'custom',
   })`,
@@ -80,7 +80,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
     },
   })`,
   'postgres-read-replica': `
@@ -88,7 +88,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL,
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
     },
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
@@ -98,7 +98,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = vercelPostgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL,
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
     },
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
@@ -108,7 +108,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = sqliteAdapter({
     client: {
-      url: process.env.SQLITE_URL || 'file:./payload.db',
+      url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
     },
     autoIncrement: true
   })`,
@@ -118,7 +118,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = sqliteAdapter({
     idType: 'uuid',
     client: {
-      url: process.env.SQLITE_URL || 'file:./payload.db',
+      url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
     },
   })`,
   supabase: `
@@ -127,7 +127,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     pool: {
       connectionString:
-        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+        process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
     },
   })`,
   d1: `
