@@ -11,7 +11,6 @@ import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
-import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
@@ -23,13 +22,6 @@ const prod = process.argv.includes('--prod')
 if (prod) {
   process.argv = process.argv.filter((arg) => arg !== '--prod')
   process.env.PAYLOAD_TEST_PROD = 'true'
-}
-
-const shouldStartMemoryDB =
-  process.argv.includes('--start-memory-db') || process.env.START_MEMORY_DB === 'true'
-if (shouldStartMemoryDB) {
-  process.argv = process.argv.filter((arg) => arg !== '--start-memory-db')
-  process.env.START_MEMORY_DB = 'true'
 }
 
 loadEnv()
@@ -71,12 +63,8 @@ const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
 await runInit(testSuiteArg, true)
 
-if (shouldStartMemoryDB) {
-  await startMemoryDB()
-}
-
 // This is needed to forward the environment variables to the next process that were created after loadEnv()
-// for example process.env.MONGODB_MEMORY_SERVER_URI otherwise app.prepare() will clear them
+// for example process.env.DATABASE_URL otherwise app.prepare() will clear them
 nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed

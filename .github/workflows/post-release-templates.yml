@@ -62,7 +62,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -75,7 +75,7 @@ jobs:
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-          echo "DATABASE_URI=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.0
@@ -108,13 +108,13 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GH_TOKEN_POST_RELEASE_TEMPLATES }}
-          labels: 'area: templates'
+          labels: "area: templates"
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-          commit-message: 'templates: bump templates for ${{ needs.wait_for_release.outputs.release_tag }}'
+          commit-message: "templates: bump templates for ${{ needs.wait_for_release.outputs.release_tag }}"
           branch: ${{ steps.commit.outputs.branch }}
           base: main
           assignees: ${{ github.actor }}
-          title: 'templates: bump for ${{ needs.wait_for_release.outputs.release_tag }}'
+          title: "templates: bump for ${{ needs.wait_for_release.outputs.release_tag }}"
           body: |
             🤖 Automated bump of templates for ${{ needs.wait_for_release.outputs.release_tag }}
 
