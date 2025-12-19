@@ -72,7 +72,11 @@ export interface Config {
     media: Media;
     posts: Post;
     products: Product;
+    rolls: Roll;
+    'modified-prompts': ModifiedPrompt;
+    'returned-resources': ReturnedResource;
     'payload-mcp-api-keys': PayloadMcpApiKey;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -83,7 +87,11 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    rolls: RollsSelect<false> | RollsSelect<true>;
+    'modified-prompts': ModifiedPromptsSelect<false> | ModifiedPromptsSelect<true>;
+    'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -223,6 +231,71 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls".
+ */
+export interface Roll {
+  id: string;
+  /**
+   * The number of sides on the die that was rolled
+   */
+  sides: number;
+  /**
+   * The result of the die roll
+   */
+  result: number;
+  /**
+   * The user who rolled the die
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts".
+ */
+export interface ModifiedPrompt {
+  id: string;
+  /**
+   * The original prompt
+   */
+  original: string;
+  /**
+   * The modified prompt
+   */
+  modified: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources".
+ */
+export interface ReturnedResource {
+  id: string;
+  /**
+   * The URI of the resource
+   */
+  uri: string;
+  /**
+   * The content of the resource
+   */
+  content: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */
 export interface PayloadMcpApiKey {
@@ -277,11 +350,27 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
-  custom?: {
+  'payload-mcp-tool'?: {
     /**
      * Rolls a virtual dice with a specified number of sides
      */
     diceRoll?: boolean | null;
+  };
+  'payload-mcp-resource'?: {
+    /**
+     * Data is a resource that contains special data.
+     */
+    data?: boolean | null;
+    /**
+     * Data is a resource that contains special data.
+     */
+    dataByID?: boolean | null;
+  };
+  'payload-mcp-prompt'?: {
+    /**
+     * Creates a prompt to process a message
+     */
+    echo?: boolean | null;
   };
   collections?: {
     /**
@@ -363,6 +452,23 @@ export interface PayloadMcpApiKey {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -383,6 +489,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: string | Product;
+      } | null)
+    | ({
+        relationTo: 'rolls';
+        value: string | Roll;
+      } | null)
+    | ({
+        relationTo: 'modified-prompts';
+        value: string | ModifiedPrompt;
+      } | null)
+    | ({
+        relationTo: 'returned-resources';
+        value: string | ReturnedResource;
       } | null)
     | ({
         relationTo: 'payload-mcp-api-keys';
@@ -507,6 +625,39 @@ export interface ProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls_select".
+ */
+export interface RollsSelect<T extends boolean = true> {
+  sides?: T;
+  result?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts_select".
+ */
+export interface ModifiedPromptsSelect<T extends boolean = true> {
+  original?: T;
+  modified?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources_select".
+ */
+export interface ReturnedResourcesSelect<T extends boolean = true> {
+  uri?: T;
+  content?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -533,10 +684,21 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         update?: T;
       };
-  custom?:
+  'payload-mcp-tool'?:
     | T
     | {
         diceRoll?: T;
+      };
+  'payload-mcp-resource'?:
+    | T
+    | {
+        data?: T;
+        dataByID?: T;
+      };
+  'payload-mcp-prompt'?:
+    | T
+    | {
+        echo?: T;
       };
   collections?:
     | T
@@ -575,6 +737,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

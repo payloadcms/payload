@@ -8,6 +8,7 @@ import {
   type SanitizedGlobalConfig,
   type TypedUser,
 } from 'payload'
+import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -59,7 +60,8 @@ export const getVersions = async ({
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
-    const hasPublishedDoc = Boolean((collectionConfig && id) || globalConfig)
+    // Without readVersions permission, determine published status from the _status field
+    const hasPublishedDoc = doc?._status !== 'draft'
 
     return {
       hasPublishedDoc,
@@ -79,7 +81,7 @@ export const getVersions = async ({
       }
     }
 
-    if (versionsConfig?.drafts) {
+    if (hasDraftsEnabled(collectionConfig)) {
       // Find out if a published document exists
       if (doc?._status === 'published') {
         publishedDoc = doc
@@ -126,7 +128,7 @@ export const getVersions = async ({
         hasPublishedDoc = true
       }
 
-      if (versionsConfig.drafts?.autosave) {
+      if (hasAutosaveEnabled(collectionConfig)) {
         const mostRecentVersion = await payload.findVersions({
           collection: collectionConfig.slug,
           depth: 0,
@@ -209,7 +211,7 @@ export const getVersions = async ({
 
   if (globalConfig) {
     // Find out if a published document exists
-    if (versionsConfig?.drafts) {
+    if (hasDraftsEnabled(globalConfig)) {
       if (doc?._status === 'published') {
         publishedDoc = doc
       } else {
@@ -228,7 +230,7 @@ export const getVersions = async ({
         hasPublishedDoc = true
       }
 
-      if (versionsConfig.drafts?.autosave) {
+      if (hasAutosaveEnabled(globalConfig)) {
         const mostRecentVersion = await payload.findGlobalVersions({
           slug: globalConfig.slug,
           limit: 1,

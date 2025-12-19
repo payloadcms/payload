@@ -331,6 +331,7 @@ export const faTranslations: DefaultTranslationsObject = {
     loading: 'در حال بارگذاری...',
     locale: 'زبان',
     locales: 'زبان‌ها',
+    lock: 'قفل',
     menu: 'منو',
     moreOptions: 'گزینه‌های بیشتر',
     move: 'انتقال',
@@ -419,6 +420,7 @@ export const faTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} به سطل زباله منتقل شد.',
     true: 'بله',
     unauthorized: 'غیرمجاز',
+    unlock: 'باز کردن',
     unsavedChanges: 'تغییرات ذخیره نشده‌ای دارید. قبل از ادامه، آن‌ها را ذخیره یا لغو کنید.',
     unsavedChangesDuplicate:
       'شما تغییرات ذخیره نشده‌ای دارید. آیا می‌خواهید بدون ذخیره، کپی ایجاد کنید؟',
@@ -448,7 +450,9 @@ export const faTranslations: DefaultTranslationsObject = {
     copyTo: 'کپی به',
     copyToLocale: 'کپی به زبان دیگر',
     localeToPublish: 'زبان مورد نظر برای انتشار',
+    selectedLocales: 'انتخاب مناطق',
     selectLocaleToCopy: 'یک زبان برای کپی کردن اطلاعات انتخاب کنید',
+    selectLocaleToDuplicate: 'انتخاب مکان‌ها برای تکثیر',
   },
   operators: {
     contains: 'شامل می‌شود',
@@ -555,6 +559,7 @@ export const faTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'در حال مشاهده',
     currentPublishedVersion: 'آخرین نسخه منتشر شده',
     draft: 'پیش‌نویس',
+    draftHasPublishedVersion: 'پیش‌نویس (نسخه منتشر شده دارد)',
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
     lastSavedAgo: 'آخرین ذخیره {{distance}} پیش',
     modifiedOnly: 'فقط موارد تغییر کرده',

@@ -1,10 +1,15 @@
+import {
+  buildEditorState,
+  type DefaultNodeTypes,
+  type SerializedInlineBlockNode,
+} from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
 import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../helpers/sdk/index.js'
-import type { Config } from '../../../payload-types.js'
+import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
 
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../helpers/adminUrlUtil.js'
@@ -172,5 +177,122 @@ describe('Lexical Fully Featured - database', () => {
       await page.reload()
       await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
     })
+  })
+
+  test('ensure inline block initial form state is applied on load for inline blocks with select fields', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: 'lexical-fully-featured',
+      data: {
+        richText: buildEditorState<
+          DefaultNodeTypes | SerializedInlineBlockNode<InlineBlockWithSelect>
+        >({
+          nodes: [
+            {
+              type: 'inlineBlock',
+              version: 1,
+              fields: {
+                blockType: 'inlineBlockWithSelect',
+                id: '1',
+              },
+            },
+            {
+              type: 'inlineBlock',
+              version: 1,
+              fields: {
+                blockType: 'inlineBlockWithSelect',
+                id: '2',
+              },
+            },
+            {
+              type: 'inlineBlock',
+              version: 1,
+              fields: {
+                blockType: 'inlineBlockWithSelect',
+                id: '3',
+              },
+            },
+          ],
+        }),
+      },
+    })
+
+    /**
+     * Ensure there are no unnecessary, additional form state requests made, since we already have the form state as part of the initial state.
+     */
+    await assertNetworkRequests(
+      page,
+      `/admin/collections/${lexicalFullyFeaturedSlug}`,
+      async () => {
+        await page.goto(url.edit(doc.id))
+        await lexical.editor.first().focus()
+      },
+      {
+        minimumNumberOfRequests: 0,
+        allowedNumberOfRequests: 0,
+        requestFilter: (request) => {
+          // Ensure it's a form state request
+          if (request.method() === 'POST') {
+            const requestBody = request.postDataJSON()
+
+            return (
+              Array.isArray(requestBody) &&
+              requestBody.length > 0 &&
+              requestBody[0].name === 'form-state'
+            )
+          }
+          return false
+        },
+      },
+    )
+  })
+
+  test('ensure block name can be saved and loaded', async ({ page }) => {
+    await lexical.slashCommand('myblock')
+    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
+
+    const blockNameInput = lexical.editor.locator('#blockName')
+
+    /**
+     * Test on create
+     */
+    await assertNetworkRequests(
+      page,
+      `/admin/collections/${lexicalFullyFeaturedSlug}`,
+      async () => {
+        await blockNameInput.fill('Testing 123')
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 3,
+      },
+    )
+
+    await expect(blockNameInput).toHaveValue('Testing 123')
+    await saveDocAndAssert(page)
+    await expect(blockNameInput).toHaveValue('Testing 123')
+    await page.reload()
+    await expect(blockNameInput).toHaveValue('Testing 123')
+
+    /**
+     * Test on update
+     */
+    await assertNetworkRequests(
+      page,
+      `/admin/collections/${lexicalFullyFeaturedSlug}`,
+      async () => {
+        await blockNameInput.fill('Updated blockname')
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 2,
+      },
+    )
+    await expect(blockNameInput).toHaveValue('Updated blockname')
+    await saveDocAndAssert(page)
+    await expect(blockNameInput).toHaveValue('Updated blockname')
+    await page.reload()
+    await expect(blockNameInput).toHaveValue('Updated blockname')
   })
 })

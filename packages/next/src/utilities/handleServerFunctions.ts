@@ -10,6 +10,7 @@ import { renderDocumentHandler } from '../views/Document/handleServerFunction.js
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { initReq } from './initReq.js'
+import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
@@ -20,6 +21,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
   'schedule-publish': schedulePublishHandler,
+  slugify: slugifyHandler,
   'table-state': buildTableStateHandler,
 }
 

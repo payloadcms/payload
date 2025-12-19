@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "3.62.0",
+  "version": "3.68.5",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",

@@ -88,6 +88,7 @@ export const RootLayout = async ({
     importMap,
     user: req.user,
   })
+
   await applyLocaleFiltering({ clientConfig, config, req })
 
   return (

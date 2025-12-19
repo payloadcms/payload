@@ -35,6 +35,7 @@ import {
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   placeholderCollectionSlug,
@@ -75,6 +76,7 @@ describe('Document View', () => {
   let collectionCustomViewPathId: string
   let editMenuItemsURL: AdminUrlUtil
   let reorderTabsURL: AdminUrlUtil
+  let localizedURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -93,6 +95,7 @@ describe('Document View', () => {
     placeholderURL = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
     reorderTabsURL = new AdminUrlUtil(serverURL, reorderTabsSlug)
+    localizedURL = new AdminUrlUtil(serverURL, localizedCollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -688,11 +691,19 @@ describe('Document View', () => {
   })
 
   describe('publish button', () => {
-    test('should show publish active locale button with defaultLocalePublishOption', async () => {
-      await navigateToDoc(page, postsUrl)
+    test('should show publish active locale button with defaultLocalePublishOption set to active', async () => {
+      await navigateToDoc(page, localizedURL)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
+    })
+
+    test('should not show publish active locale button with defaultLocalePublishOption set to active but no localized fields', async () => {
+      await navigateToDoc(page, postsUrl)
+      const publishButton = page.locator('#action-save')
+      await expect(publishButton).toBeVisible()
+      await expect(publishButton).toContainText('Publish changes')
+      await expect(publishButton).not.toContainText('Publish in')
     })
   })
 
@@ -755,7 +766,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
+      const customEditMenuItem = page.locator('.popup__content .popup-button-list__button', {
         hasText: 'Custom Edit Menu Item',
       })
 
@@ -771,7 +782,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {
@@ -790,7 +801,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {

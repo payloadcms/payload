@@ -112,6 +112,7 @@ The `useCart` hook is used to manage the cart state and actions. It provides met
 | `clearCart`     | `() => void`                                       | Method to clear the cart.                                                                 |
 | `decrementItem` | `(item: IDType) => void`                           | Method to decrement the quantity of an item. Will remove it entirely if it reaches 0.     |
 | `incrementItem` | `(item: IDType) => void`                           | Method to increment the quantity of an item.                                              |
+| `isLoading`     | `boolean`                                          | Boolean indicating if any async operation is in progress (e.g., adding/removing items).   |
 | `removeItem`    | `(item: IDType) => void`                           | Method to remove an item from the cart.                                                   |
 
 Example usage:
@@ -120,10 +121,18 @@ Example usage:
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 
 const CartComponent = () => {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } =
-    useCart()
+  const {
+    addItem,
+    cart,
+    clearCart,
+    decrementItem,
+    incrementItem,
+    isLoading,
+    removeItem,
+  } = useCart()
 
   // Your component logic here
+  // Use isLoading to show loading states in your UI
 }
 ```
 
@@ -131,11 +140,12 @@ const CartComponent = () => {
 
 The `useAddresses` hook is used to fetch and manage addresses. It provides methods to create, update, and delete addresses, as well as to fetch the list of addresses. It has the following properties:
 
-| Property        | Type                                                              | Description                                                       |
-| --------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `addresses`     | `Address[]`                                                       | The list of addresses, if any are available for the current user. |
-| `createAddress` | `(data: Address) => Promise<Address>`                             | Method to create a new address.                                   |
-| `updateAddress` | `(addressID: IDType, data: Partial<Address>) => Promise<Address>` | Method to update an existing address by ID.                       |
+| Property        | Type                                                              | Description                                                                                 |
+| --------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `addresses`     | `Address[]`                                                       | The list of addresses, if any are available for the current user.                           |
+| `createAddress` | `(data: Address) => Promise<Address>`                             | Method to create a new address.                                                             |
+| `isLoading`     | `boolean`                                                         | Boolean indicating if any async operation is in progress (e.g., creating/updating address). |
+| `updateAddress` | `(addressID: IDType, data: Partial<Address>) => Promise<Address>` | Method to update an existing address by ID.                                                 |
 
 Example usage:
 
@@ -143,9 +153,10 @@ Example usage:
 import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
 
 const AddressesComponent = () => {
-  const { addresses, createAddress, updateAddress } = useAddresses()
+  const { addresses, createAddress, isLoading, updateAddress } = useAddresses()
 
   // Your component logic here
+  // Use isLoading to show loading states while creating or updating addresses
 }
 ```
 
@@ -153,12 +164,13 @@ const AddressesComponent = () => {
 
 The `usePayments` hook is used to manage the checkout process. It provides methods to initiate payments, confirm orders, and handle payment status. It has the following properties:
 
-| Property                | Type                       | Description                                                         |
-| ----------------------- | -------------------------- | ------------------------------------------------------------------- |
-| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmOrder)             |
-| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatePayment) |
-| `paymentMethods`        | `PaymentMethod[]`          | The list of available payment methods.                              |
-| `selectedPaymentMethod` | `PaymentMethod`            | The currently selected payment method, if any.                      |
+| Property                | Type                       | Description                                                                                   |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmOrder)                                       |
+| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatePayment)                           |
+| `isLoading`             | `boolean`                  | Boolean indicating if any async operation is in progress (e.g., initiating/confirming order). |
+| `paymentMethods`        | `PaymentMethod[]`          | The list of available payment methods.                                                        |
+| `selectedPaymentMethod` | `PaymentMethod`            | The currently selected payment method, if any.                                                |
 
 Example usage:
 
@@ -169,11 +181,13 @@ const CheckoutComponent = () => {
   const {
     confirmOrder,
     initiatePayment,
+    isLoading,
     paymentMethods,
     selectedPaymentMethod,
   } = usePayments()
 
   // Your component logic here
+  // Use isLoading to show loading states during payment initiation or order confirmation
 }
 ```
 
@@ -255,7 +269,7 @@ const PriceComponent = ({ amount }) => {
 
 ### useEcommerce
 
-The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks.
+The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks, along with a unified `isLoading` state that tracks any async operations across all these features.
 
 Example usage:
 
@@ -263,8 +277,9 @@ Example usage:
 import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
 
 const EcommerceComponent = () => {
-  const { cart, addresses, selectedPaymentMethod } = useEcommerce()
+  const { cart, addresses, isLoading, selectedPaymentMethod } = useEcommerce()
 
   // Your component logic here
+  // isLoading tracks loading states for cart, addresses, and payment operations
 }
 ```

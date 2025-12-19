@@ -22,7 +22,7 @@ export interface KVAdapter {
    * @param key - The key to look up.
    * @returns A promise that resolves to the value, or `null` if not found.
    */
-  get(key: string): Promise<KVStoreValue | null>
+  get<T extends KVStoreValue>(key: string): Promise<null | T>
 
   /**
    * Checks if a key exists in the store.

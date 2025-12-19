@@ -88,6 +88,7 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -116,6 +117,7 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -138,7 +140,7 @@ export interface Config {
     'global-3': Global3Select<false> | Global3Select<true>;
     'virtual-relation-global': VirtualRelationGlobalSelect<false> | VirtualRelationGlobalSelect<true>;
   };
-  locale: 'en' | 'es';
+  locale: 'en' | 'es' | 'uk';
   user: User & {
     collection: 'users';
   };
@@ -676,6 +678,23 @@ export interface UniqueField {
   slugField?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1279,6 +1298,14 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
   slugField?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

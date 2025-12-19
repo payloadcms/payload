@@ -48,6 +48,7 @@ export const NotFoundPage = async ({
 
   const searchParams = await searchParamsPromise
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
     locale,
     permissions,
@@ -65,6 +66,7 @@ export const NotFoundPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
+      // intentionally omit `serverURL` to keep URL relative
       urlSuffix: `${formatAdminURL({ adminRoute, path: '/not-found' })}${searchParams ? queryString : ''}`,
     },
   })

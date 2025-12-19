@@ -15,20 +15,20 @@ export const executeAccess = async (
   access: Access,
 ): Promise<AccessResult> => {
   if (access) {
-    const result = await access({
+    const resolvedConstraint = await access({
       id,
       data,
       isReadingStaticFile,
       req,
     })
 
-    if (!result) {
+    if (!resolvedConstraint) {
       if (!disableErrors) {
         throw new Forbidden(req.t)
       }
     }
 
-    return result
+    return resolvedConstraint
   }
 
   if (req.user) {
