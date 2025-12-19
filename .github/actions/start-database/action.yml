@@ -26,7 +26,7 @@ runs:
       shell: bash
       run: |
         docker compose -f test/helpers/db/mongodb/docker-compose.yml up -d --wait
-        echo "url=mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
+        echo "url=mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
 
     - name: Start MongoDB Atlas Local
       id: mongodb-atlas
@@ -34,7 +34,7 @@ runs:
       shell: bash
       run: |
         docker compose -f test/helpers/db/mongodb-atlas/docker-compose.yml up -d --wait
-        echo "url=mongodb://localhost:27018/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
+        echo "url=mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
 
     - name: Start PostgreSQL
       id: postgres
