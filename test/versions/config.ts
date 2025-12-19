@@ -31,7 +31,8 @@ import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
 import { seed } from './seed.js'
-
+import { BASE_PATH } from './shared.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
   admin: {
     importMap: {

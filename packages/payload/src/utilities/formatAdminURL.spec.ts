@@ -40,7 +40,9 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}${defaultAdminRoute}${dummyPath}`)
+      expect(result).toBe(
+        `${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}${dummyPath}`,
+      )
     })
 
     it('should handle serverURL with trailing slash', () => {
@@ -50,7 +52,9 @@ describe('formatAdminURL', () => {
         serverURL: 'https://example.com/',
       })
 
-      expect(result).toBe('https://example.com/admin/collections/posts')
+      expect(result).toBe(
+        `https://example.com${process.env.NEXT_BASE_PATH || ''}/admin/collections/posts`,
+      )
     })
 
     it('should handle serverURL with subdirectory', () => {
@@ -60,7 +64,9 @@ describe('formatAdminURL', () => {
         serverURL: 'https://example.com/api/v1',
       })
 
-      expect(result).toBe('https://example.com/admin/collections/posts')
+      expect(result).toBe(
+        `https://example.com${process.env.NEXT_BASE_PATH || ''}/admin/collections/posts`,
+      )
     })
   })
 
@@ -68,7 +74,6 @@ describe('formatAdminURL', () => {
     it('should return relative URL for adminRoute="/", no path, no `serverURL`', () => {
       const result = formatAdminURL({
         adminRoute: rootAdminRoute,
-        relative: true,
       })
 
       expect(result).toBe('/')
@@ -78,7 +83,6 @@ describe('formatAdminURL', () => {
       const result = formatAdminURL({
         adminRoute: rootAdminRoute,
         path: dummyPath,
-        relative: true,
       })
 
       expect(result).toBe(dummyPath)
@@ -100,7 +104,7 @@ describe('formatAdminURL', () => {
         path: dummyPath,
       })
 
-      expect(result).toBe(`${serverURL}${dummyPath}`)
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}${dummyPath}`)
     })
   })
 
@@ -113,7 +117,9 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}/v1${defaultAdminRoute}${dummyPath}`)
+      expect(result).toBe(
+        `${serverURL}${process.env.NEXT_BASE_PATH || ''}/v1${defaultAdminRoute}${dummyPath}`,
+      )
     })
 
     it('should handle basePath with adminRoute="/"', () => {
@@ -123,7 +129,7 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}/v1`)
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}/v1`)
     })
 
     it('should handle basePath with no adminRoute', () => {
@@ -134,7 +140,7 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}/v1${dummyPath}`)
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}/v1${dummyPath}`)
     })
 
     it('should handle empty basePath', () => {
@@ -145,7 +151,9 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}${defaultAdminRoute}${dummyPath}`)
+      expect(result).toBe(
+        `${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}${dummyPath}`,
+      )
     })
   })
 
@@ -157,7 +165,7 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}${defaultAdminRoute}`)
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}`)
     })
 
     it('should handle null path', () => {
@@ -166,7 +174,7 @@ describe('formatAdminURL', () => {
         path: null,
         serverURL,
       })
-      expect(result).toBe(`${serverURL}${defaultAdminRoute}`)
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}`)
     })
 
     it('should handle undefined path', () => {
@@ -176,7 +184,7 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}${defaultAdminRoute}`)
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}`)
     })
 
     it('should handle path with query parameters', () => {
@@ -188,7 +196,9 @@ describe('formatAdminURL', () => {
         serverURL,
       })
 
-      expect(result).toBe(`${serverURL}${defaultAdminRoute}${path}`)
+      expect(result).toBe(
+        `${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}${path}`,
+      )
     })
   })
 
