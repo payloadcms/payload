@@ -434,9 +434,12 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
+      const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
+      // flaky
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(1000)
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
@@ -567,7 +570,10 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
-      await page.locator('.dashboard__card-list .card').first().click()
+      await page.locator('.collections__card-list .card__click').first().click()
+      // flaky
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(1000)
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
@@ -960,7 +966,7 @@ describe('General', () => {
   describe('progress bar', () => {
     test('should show progress bar on page navigation', async () => {
       await page.goto(postsUrl.admin)
-      await page.locator('.dashboard__card-list .card').first().click()
+      await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
     })
   })

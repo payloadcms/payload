@@ -80,6 +80,12 @@ export function iterateConfig({
     }
   }
 
+  if (config.admin?.dashboard?.widgets?.length) {
+    for (const dashboardWidget of config.admin.dashboard.widgets) {
+      addToImportMap(dashboardWidget.ComponentPath)
+    }
+  }
+
   if (config?.admin?.importMap?.generators?.length) {
     for (const generator of config.admin.importMap.generators) {
       generator({
