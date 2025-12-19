@@ -3,8 +3,8 @@ import type { Config } from 'payload'
 import type { AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
+import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
-import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -116,13 +116,13 @@ export const cloudStoragePlugin =
             fields,
             hooks: {
               ...(existingCollection.hooks || {}),
+              afterChange: [
+                ...(existingCollection.hooks?.afterChange || []),
+                getAfterChangeHook({ adapter, collection: existingCollection }),
+              ],
               afterDelete: [
                 ...(existingCollection.hooks?.afterDelete || []),
                 getAfterDeleteHook({ adapter, collection: existingCollection }),
-              ],
-              beforeChange: [
-                ...(existingCollection.hooks?.beforeChange || []),
-                getBeforeChangeHook({ adapter, collection: existingCollection }),
               ],
             },
             upload: {
