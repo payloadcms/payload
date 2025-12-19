@@ -11,6 +11,8 @@ declare module 'payload' {
   }
 }
 
+import { defaults } from './defaults.js'
+
 export type { MCPAccessSettings }
 /**
  * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
@@ -33,6 +35,12 @@ export const mcpPlugin =
         name: tool.name,
         description: tool.description,
       })) || []
+
+    // User Collection
+    pluginOptions.userCollection =
+      typeof pluginOptions.userCollection === 'string'
+        ? pluginOptions.userCollection
+        : (pluginOptions.userCollection?.slug ?? config?.admin?.user ?? defaults.userCollection)
 
     const experimentalTools = pluginOptions?.experimental?.tools || {}
 
