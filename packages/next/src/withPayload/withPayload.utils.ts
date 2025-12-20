@@ -129,7 +129,7 @@ export function supportsTurbopackExternalizeTransitiveDependencies(
       return true
     }
     if (minor === 1) {
-      // 16.1.1+ and canaries always supports this feature
+      // 16.1.1+ and canaries support this feature
       if (patch > 0) {
         return true
       }
