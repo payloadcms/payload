@@ -232,17 +232,15 @@ export const rootEslintConfig = [
     files: ['**/*.tsx'],
   },
   {
-    name: 'Unit Tests',
+    name: 'Unit and Integration Tests',
     plugins: {
-      vitest
+      vitest,
     },
     rules: {
       ...vitest.configs.recommended.rules,
     },
-    files: [
-      '**/*.spec.ts',
-      '!**/*.e2e.spec.ts',
-    ],
+    files: ['**/*.spec.ts'],
+    ignores: ['**/*.e2e.spec.ts'],
   },
   {
     name: 'Payload Config',
@@ -257,6 +255,7 @@ export const rootEslintConfig = [
   {
     name: 'React Compiler',
     ...reactCompiler.configs.recommended,
+    files: ['**/*.tsx'],
   },
 ]
 
