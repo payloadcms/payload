@@ -78,8 +78,16 @@ export const zhTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword: '如果您没有要求这样做，请忽略这封邮件，您的密码将保持不变。',
   },
   dashboard: {
+    addButton: '添加 +',
     addWidget: '添加小部件',
     deleteWidget: '删除小部件 {{id}}',
+    discardConfirmLabel: '丢弃',
+    discardMessage: '您的仪表板布局有未保存的更改。您确定要放弃它们吗？',
+    discardTitle: '放弃更改？',
+    editDashboard: '编辑仪表板',
+    editingDashboard: '编辑仪表板',
+    noItems: '您的仪表板上没有小部件。您可以从位于顶部栏的“仪表板”菜单中添加它们。',
+    resetLayout: '重置布局',
     searchWidgets: '搜索小工具...',
   },
   error: {

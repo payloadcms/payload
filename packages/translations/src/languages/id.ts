@@ -81,8 +81,18 @@ export const idTranslations: DefaultTranslationsObject = {
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
   dashboard: {
+    addButton: 'Tambah +',
     addWidget: 'Tambah Widget',
     deleteWidget: 'Hapus widget {{id}}',
+    discardConfirmLabel: 'Buang',
+    discardMessage:
+      'Anda memiliki perubahan yang belum disimpan pada tata letak dashboard Anda. Apakah Anda yakin ingin membuangnya?',
+    discardTitle: 'Buang perubahan?',
+    editDashboard: 'Sunting Dasbor',
+    editingDashboard: 'Mengedit Dashboard',
+    noItems:
+      'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
+    resetLayout: 'Atur Ulang Tata Letak',
     searchWidgets: 'Cari widget...',
   },
   error: {

@@ -80,8 +80,18 @@ export const esTranslations: DefaultTranslationsObject = {
       'Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.',
   },
   dashboard: {
+    addButton: 'Añadir +',
     addWidget: 'Agregar Widget',
     deleteWidget: 'Eliminar widget {{id}}',
+    discardConfirmLabel: 'Descartar',
+    discardMessage:
+      'Tiene cambios no guardados en el diseño de su tablero. ¿Está seguro de que desea descartarlos?',
+    discardTitle: '¿Desecha los cambios?',
+    editDashboard: 'Editar el Panel de Control',
+    editingDashboard: 'Editando el Tablero',
+    noItems:
+      'No hay widgets en su tablero. Puede agregarlos desde el menú "Tablero" ubicado en la barra superior.',
+    resetLayout: 'Restablecer Diseño',
     searchWidgets: 'Buscar widgets...',
   },
   error: {

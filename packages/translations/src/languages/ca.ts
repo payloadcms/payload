@@ -80,8 +80,18 @@ export const caTranslations: DefaultTranslationsObject = {
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
   dashboard: {
+    addButton: 'Afegeix +',
     addWidget: 'Afegeix Widget',
     deleteWidget: 'Esborra el widget {{id}}',
+    discardConfirmLabel: 'Descarta',
+    discardMessage:
+      'Tens canvis no desats en el disseny del teu tauler. Estàs segur que vols descartar-los?',
+    discardTitle: 'Descartar canvis?',
+    editDashboard: 'Edita el Tauler',
+    editingDashboard: 'Editant el Tauler',
+    noItems:
+      'No hi ha cap widget al vostre tauler de control. Podeu afegir-los des del menú "Dashboard" situat a la barra superior.',
+    resetLayout: 'Restableix la disposició',
     searchWidgets: 'Cerca de ginys...',
   },
   error: {

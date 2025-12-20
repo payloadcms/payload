@@ -80,8 +80,16 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
   dashboard: {
+    addButton: 'Ավելացնել +',
     addWidget: 'Ավելացնել վիճակագրություն',
     deleteWidget: 'Ջնջել վիդջեթը {{id}}',
+    discardConfirmLabel: 'Չեղարկել',
+    discardMessage: 'Ձեր վահանակի ձևավորումը չի պահված։ Համոզված եք, որ ցանկանում եք հերքել դրանք։',
+    discardTitle: 'Հրաժարվե՞լ փոփոխություններից։',
+    editDashboard: 'Փոփոխել վահանակը',
+    editingDashboard: 'Խմբագրման Վահանակ',
+    noItems: 'Ձեր վահագործի վրա վիջեթներ չկան։ Դուք կարող եք ավելացնել դրանք "Վահագործ" մենյուից',
+    resetLayout: 'Վերադասավորել Կառուցվածքը',
     searchWidgets: 'Որոնել վիջեթներ...',
   },
   error: {

@@ -8,6 +8,7 @@ import {
   useModal,
   usePreferences,
   useServerFunctions,
+  useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
@@ -24,6 +25,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
   const { serverFunction } = useServerFunctions()
+  const { t } = useTranslation()
 
   const saveLayout = useCallback(async () => {
     try {
@@ -173,9 +175,9 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   )
 
   const cancelModal = React.createElement(ConfirmationModal, {
-    body: 'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
-    confirmLabel: 'Discard',
-    heading: 'Discard changes?',
+    body: t('dashboard:discardMessage'),
+    confirmLabel: t('dashboard:discardConfirmLabel'),
+    heading: t('dashboard:discardTitle'),
     modalSlug: cancelModalSlug,
     onConfirm: performCancel,
   })

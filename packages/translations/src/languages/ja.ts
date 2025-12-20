@@ -81,8 +81,18 @@ export const jaTranslations: DefaultTranslationsObject = {
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
   dashboard: {
+    addButton: '追加 +',
     addWidget: 'ウィジェットを追加する',
     deleteWidget: 'ウィジェット{{id}}を削除します',
+    discardConfirmLabel: '破棄',
+    discardMessage:
+      'あなたのダッシュボードのレイアウトに保存されていない変更があります。それらを破棄してもよろしいですか？',
+    discardTitle: '変更を破棄しますか？',
+    editDashboard: 'ダッシュボードを編集する',
+    editingDashboard: 'ダッシュボードの編集',
+    noItems:
+      'あなたのダッシュボードにはウィジェットがありません。 上部バーにある「ダッシュボード」メニューからそれらを追加することができます。',
+    resetLayout: 'レイアウトをリセット',
     searchWidgets: 'ウィジェットを検索...',
   },
   error: {

@@ -80,8 +80,18 @@ export const viTranslations: DefaultTranslationsObject = {
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
   dashboard: {
+    addButton: 'Thêm +',
     addWidget: 'Thêm Widget',
     deleteWidget: 'Xóa widget {{id}}',
+    discardConfirmLabel: 'Loại bỏ',
+    discardMessage:
+      'Bạn có những thay đổi chưa được lưu trên bố cục bảng điều khiển của mình. Bạn có chắc chắn muốn hủy chúng không?',
+    discardTitle: 'Hủy thay đổi?',
+    editDashboard: 'Chỉnh sửa Bảng điều khiển',
+    editingDashboard: 'Chỉnh sửa Bảng điều khiển',
+    noItems:
+      'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
+    resetLayout: 'Đặt lại Bố cục',
     searchWidgets: 'Tìm kiếm các widget...',
   },
   error: {

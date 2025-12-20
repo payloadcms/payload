@@ -81,8 +81,18 @@ export const enTranslations = {
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
   dashboard: {
+    addButton: 'Add +',
     addWidget: 'Add Widget',
     deleteWidget: 'Delete widget {{id}}',
+    discardConfirmLabel: 'Discard',
+    discardMessage:
+      'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
+    discardTitle: 'Discard changes?',
+    editDashboard: 'Edit Dashboard',
+    editingDashboard: 'Editing Dashboard',
+    noItems:
+      '  There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
+    resetLayout: 'Reset Layout',
     searchWidgets: 'Search widgets...',
   },
   error: {

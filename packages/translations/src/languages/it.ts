@@ -80,8 +80,18 @@ export const itTranslations: DefaultTranslationsObject = {
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
   dashboard: {
+    addButton: 'Aggiungi +',
     addWidget: 'Aggiungi Widget',
     deleteWidget: 'Elimina widget {{id}}',
+    discardConfirmLabel: 'Scartare',
+    discardMessage:
+      'Hai delle modifiche non salvate al layout della tua dashboard. Sei sicuro di volerle scartare?',
+    discardTitle: 'Annullare le modifiche?',
+    editDashboard: 'Modifica Dashboard',
+    editingDashboard: 'Modifica la Dashboard',
+    noItems:
+      'Non ci sono widget sulla tua dashboard. Puoi aggiungerli dal menu "Dashboard" situato nella barra superiore.',
+    resetLayout: 'Ripristina Layout',
     searchWidgets: 'Cerca widget...',
   },
   error: {

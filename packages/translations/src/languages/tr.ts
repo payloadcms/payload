@@ -81,8 +81,18 @@ export const trTranslations: DefaultTranslationsObject = {
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
   dashboard: {
+    addButton: 'Ekle +',
     addWidget: 'Widget Ekle',
     deleteWidget: "Widget'i sil {{id}}",
+    discardConfirmLabel: 'Atla',
+    discardMessage:
+      'Kontrol panelinizin düzeninde kaydedilmemiş değişiklikleriniz var. Bunları atmak istediğinize emin misiniz?',
+    discardTitle: 'Değişikliklerden vazgeçilsin mi?',
+    editDashboard: 'Gösterge Panelini Düzenle',
+    editingDashboard: 'Gösterge Tablosunu Düzenleme',
+    noItems:
+      'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
+    resetLayout: 'Düzeni Sıfırla',
     searchWidgets: "Arama widget'ları...",
   },
   error: {

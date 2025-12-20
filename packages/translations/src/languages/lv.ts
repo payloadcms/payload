@@ -80,8 +80,18 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
   dashboard: {
+    addButton: 'Pievienot +',
     addWidget: 'Pievienot logrīku',
     deleteWidget: 'Dzēst logrīku {{id}}',
+    discardConfirmLabel: 'Atmest',
+    discardMessage:
+      'Jums ir nesaglabātas izmaiņas savā informācijas panela izkārtojumā. Vai esat pārliecināts, ka vēlaties tās atmest?',
+    discardTitle: 'Atcelt izmaiņas?',
+    editDashboard: 'Rediģēt informācijas paneli',
+    editingDashboard: 'Rediģēšanas panelis',
+    noItems:
+      'Jūsu informācijas panelī nav logrīku. Tos varat pievienot no izvēlnes "Informācijas panelis", kas atrodas augšējā josla.',
+    resetLayout: 'Atiestatīt Izkārtojumu',
     searchWidgets: 'Meklēt logrīkus...',
   },
   error: {

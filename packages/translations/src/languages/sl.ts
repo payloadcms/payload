@@ -80,8 +80,18 @@ export const slTranslations: DefaultTranslationsObject = {
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj pripomoček',
     deleteWidget: 'Izbriši pripomoček {{id}}',
+    discardConfirmLabel: 'Zavrzi',
+    discardMessage:
+      'Imate neshranjene spremembe postavitve vaše nadzorne plošče. Ste prepričani, da jih želite zavreči?',
+    discardTitle: 'Zavržem spremembe?',
+    editDashboard: 'Uredi nadzorno ploščo',
+    editingDashboard: 'Urejanje nadzorne plošče',
+    noItems:
+      'Na vaši nadzorni plošči ni pripomočkov. Dodate jih lahko iz menija "Nadzorna plošča", ki se nahaja v zgornji vrstici.',
+    resetLayout: 'Ponastavi postavitev',
     searchWidgets: 'Išči gradnike...',
   },
   error: {

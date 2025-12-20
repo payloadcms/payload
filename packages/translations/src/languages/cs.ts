@@ -80,8 +80,18 @@ export const csTranslations: DefaultTranslationsObject = {
       'Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno.',
   },
   dashboard: {
+    addButton: 'Přidat +',
     addWidget: 'Přidat widget',
     deleteWidget: 'Odstranit widget {{id}}',
+    discardConfirmLabel: 'Zahodit',
+    discardMessage:
+      'Máte neuložené změny ve vašem uspořádání nástěnky. Jste si jisti, že je chcete zahodit?',
+    discardTitle: 'Zahodit změny?',
+    editDashboard: 'Upravit řídicí panel',
+    editingDashboard: 'Úprava řídícího panelu',
+    noItems:
+      'Na vaší nástěnce nejsou žádné widgety. Můžete je přidat z menu „Nástěnka“, které se nachází v horní liště.',
+    resetLayout: 'Obnovit rozložení',
     searchWidgets: 'Hledat widgety...',
   },
   error: {

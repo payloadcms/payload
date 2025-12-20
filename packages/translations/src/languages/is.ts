@@ -81,8 +81,18 @@ export const isTranslations: DefaultTranslationsObject = {
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
   dashboard: {
+    addButton: 'Bæta við +',
     addWidget: 'Bæta við smáforriti',
     deleteWidget: 'Eyða græju {{id}}',
+    discardConfirmLabel: 'Hætta við',
+    discardMessage:
+      'Þú hefur óvistaðar breytingar á mælaborðsútlitinu þínu. Ertu viss um að þú viljir eyða þeim?',
+    discardTitle: 'Hætta við breytingar?',
+    editDashboard: 'Breyta mælaborði',
+    editingDashboard: 'Breytaborð Breytingar',
+    noItems:
+      'Það eru engar flísar á mælaborðinu þínu. Þú getur bætt þeim við úr "Mælaborði" valmyndinni sem er staðsett í efsta stikanum.',
+    resetLayout: 'Endurstilla útlit',
     searchWidgets: 'Leita að græjum...',
   },
   error: {

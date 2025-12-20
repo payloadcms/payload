@@ -80,8 +80,17 @@ export const koTranslations: DefaultTranslationsObject = {
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
   dashboard: {
+    addButton: '더하다',
     addWidget: '위젯 추가',
     deleteWidget: '위젯 {{id}} 삭제',
+    discardConfirmLabel: '버리다',
+    discardMessage:
+      '대시보드 레이아웃에 저장되지 않은 변경 사항이 있습니다. 정말로 이를 버리시겠습니까?',
+    discardTitle: '변경 사항을 취소하시겠습니까?',
+    editDashboard: '대시보드 편집',
+    editingDashboard: '대시보드 편집',
+    noItems: '대시보드에 위젯이 없습니다. 상단 바에 위치한 "대시보드" 메뉴에서 추가할 수 있습니다.',
+    resetLayout: '레이아웃 재설정',
     searchWidgets: '위젯 검색...',
   },
   error: {

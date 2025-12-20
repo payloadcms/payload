@@ -79,8 +79,17 @@ export const heTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
   dashboard: {
+    addButton: 'הוסף +',
     addWidget: "הוסף וידג'ט",
     deleteWidget: "מחק וידג'ט {{id}}",
+    discardConfirmLabel: 'בטל',
+    discardMessage: 'יש לך שינויים שלא נשמרו לפריסת הלוח. האם אתה בטוח שאתה רוצה להתעלם מהם?',
+    discardTitle: 'לבטל שינויים?',
+    editDashboard: 'ערוך את לוח המחוונים',
+    editingDashboard: 'עריכת לוח בקרה',
+    noItems:
+      'אין יישומונים בלוח הבקרה שלך. אתה יכול להוסיף אותם מתפריט "לוח הבקרה" שממוקם בבר העליון.',
+    resetLayout: 'איפוס תצוגה',
     searchWidgets: "חפש ווידג'טים...",
   },
   error: {

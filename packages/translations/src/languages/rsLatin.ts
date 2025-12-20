@@ -81,8 +81,18 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Obriši widget {{id}}',
+    discardConfirmLabel: 'Odbaci',
+    discardMessage:
+      'Imate nesačuvane promene na rasporedu vaše komandne table. Da li ste sigurni da želite da ih odbacite?',
+    discardTitle: 'Odbaciti promene?',
+    editDashboard: 'Izmeni kontrolnu tablu',
+    editingDashboard: 'Izmena kontrolne table',
+    noItems:
+      'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu stranice.',
+    resetLayout: 'Resetuj raspored',
     searchWidgets: 'Pretraži dodatke...',
   },
   error: {

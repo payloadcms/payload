@@ -80,8 +80,18 @@ export const svTranslations: DefaultTranslationsObject = {
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
   dashboard: {
+    addButton: 'Lägg till +',
     addWidget: 'Lägg till Widget',
     deleteWidget: 'Radera widget {{id}}',
+    discardConfirmLabel: 'Kasta',
+    discardMessage:
+      'Du har osparade ändringar i din instrumentpanelslayout. Är du säker på att du vill kasta bort dem?',
+    discardTitle: 'Kasta ändringar?',
+    editDashboard: 'Redigera instrumentpanel',
+    editingDashboard: 'Redigeringspanel',
+    noItems:
+      'Det finns inga widgets på din instrumentpanel. Du kan lägga till dem från "Instrumentpanel" -menyn som finns i den översta fältet.',
+    resetLayout: 'Återställ layout',
     searchWidgets: 'Sök widgetar...',
   },
   error: {

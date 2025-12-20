@@ -80,8 +80,18 @@ export const azTranslations: DefaultTranslationsObject = {
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
   dashboard: {
+    addButton: 'Əlavə et +',
     addWidget: 'Vidjet əlavə et',
     deleteWidget: 'Vidgeti silin {{id}}',
+    discardConfirmLabel: 'Atılma',
+    discardMessage:
+      'Sizin panel düzenlemənizdə saxlanmamış dəyişikliklər var. Onları ləğvetmək istədiyinizə əminsinizmi?',
+    discardTitle: 'Dəyişiklikləri ləğv edin?',
+    editDashboard: 'İdarə Panelini Redaktə Et',
+    editingDashboard: 'Redaktə Paneli',
+    noItems:
+      'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
+    resetLayout: 'Düzəni sıfırlama',
     searchWidgets: 'Widgetləri axtarın...',
   },
   error: {

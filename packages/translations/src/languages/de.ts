@@ -82,8 +82,18 @@ export const deTranslations: DefaultTranslationsObject = {
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail und dein Passwort bleibt unverändert.',
   },
   dashboard: {
+    addButton: 'Hinzufügen +',
     addWidget: 'Widget hinzufügen',
     deleteWidget: 'Löschen Sie das Widget {{id}}',
+    discardConfirmLabel: 'Verwerfen',
+    discardMessage:
+      'Sie haben ungespeicherte Änderungen an Ihrem Dashboard-Layout. Sind Sie sicher, dass Sie diese verwerfen möchten?',
+    discardTitle: 'Änderungen verwerfen?',
+    editDashboard: 'Dashboard bearbeiten',
+    editingDashboard: 'Bearbeitungsdashboard',
+    noItems:
+      'Auf Ihrem Dashboard befinden sich keine Widgets. Sie können diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
+    resetLayout: 'Layout zurücksetzen',
     searchWidgets: 'Suche Widgets...',
   },
   error: {

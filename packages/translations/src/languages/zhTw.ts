@@ -77,8 +77,16 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword: '如果這不是您本人操作，請忽略這封郵件，您的密碼將不會改變。',
   },
   dashboard: {
+    addButton: '添加 +',
     addWidget: '添加小工具',
     deleteWidget: '刪除小工具 {{id}}',
+    discardConfirmLabel: '丟棄',
+    discardMessage: '您的儀表板佈局有未保存的更改。您確定要放棄它們嗎？',
+    discardTitle: '放棄變更？',
+    editDashboard: '編輯儀表板',
+    editingDashboard: '編輯儀表板',
+    noItems: '您的儀表板上沒有小工具。您可以從頂部工具欄中的"儀表板"選單添加它們。',
+    resetLayout: '重設版面配置',
     searchWidgets: '搜索小工具...',
   },
   error: {

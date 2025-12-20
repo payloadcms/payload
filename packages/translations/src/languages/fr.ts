@@ -82,8 +82,18 @@ export const frTranslations: DefaultTranslationsObject = {
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
   dashboard: {
+    addButton: 'Ajouter +',
     addWidget: 'Ajouter un Widget',
     deleteWidget: 'Supprimer le widget {{id}}',
+    discardConfirmLabel: 'Rejeter',
+    discardMessage:
+      'Vous avez des modifications non enregistrées dans la disposition de votre tableau de bord. Êtes-vous sûr de vouloir les abandonner ?',
+    discardTitle: 'Annuler les modifications ?',
+    editDashboard: 'Modifier le tableau de bord',
+    editingDashboard: "Tableau de bord d'édition",
+    noItems:
+      'Il n\'y a pas de widgets sur votre tableau de bord. Vous pouvez les ajouter depuis le menu "Tableau de bord" situé dans la barre supérieure.',
+    resetLayout: 'Réinitialiser la mise en page',
     searchWidgets: 'Rechercher des widgets...',
   },
   error: {

@@ -80,8 +80,18 @@ export const plTranslations: DefaultTranslationsObject = {
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj Widżet',
     deleteWidget: 'Usuń widget {{id}}',
+    discardConfirmLabel: 'Odrzuć',
+    discardMessage:
+      'Masz niezapisane zmiany w układzie swojego pulpitu. Czy na pewno chcesz je odrzucić?',
+    discardTitle: 'Odrzucić zmiany?',
+    editDashboard: 'Edytuj Pulpit',
+    editingDashboard: 'Edycja Panelu sterowania',
+    noItems:
+      'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
+    resetLayout: 'Zresetuj Układ',
     searchWidgets: 'Szukaj widgetów...',
   },
   error: {

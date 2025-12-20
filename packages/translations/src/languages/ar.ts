@@ -80,8 +80,18 @@ export const arTranslations: DefaultTranslationsObject = {
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
   dashboard: {
+    addButton: 'اضف +',
     addWidget: 'أضف الواجهة البيانية',
     deleteWidget: 'حذف الودجت {{id}}',
+    discardConfirmLabel: 'تجاهل',
+    discardMessage:
+      'لديك تغييرات غير محفوظة في تخطيط لوحة التحكم الخاصة بك. هل أنت متأكد أنك تريد التخلي عنها؟',
+    discardTitle: 'هل تريد التخلص من التغييرات؟',
+    editDashboard: 'تعديل لوحة التحكم',
+    editingDashboard: 'لوحة تحرير',
+    noItems:
+      'لا توجد أدوات على لوحة التحكم الخاصة بك. يمكنك إضافتها من القائمة "لوحة التحكم" الموجودة في الشريط العلوي.',
+    resetLayout: 'إعادة تعيين التخطيط',
     searchWidgets: 'ابحث عن الأدوات...',
   },
   error: {
