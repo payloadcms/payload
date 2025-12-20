@@ -105,6 +105,8 @@ export const skTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID {{id}} sa nepodarilo nájsť. Možno bol vymazaný, nikdy neexistoval, alebo k nemu nemáte prístup.',
     emailOrPasswordIncorrect: 'Zadaný email alebo heslo nie je správne.',
+    failedToResetLayout: 'Nepodarilo sa obnoviť rozloženie.',
+    failedToSaveLayout: 'Nepodarilo sa uložiť rozloženie.',
     followingFieldsInvalid_one: 'Nasledujúce pole je neplatné:',
     followingFieldsInvalid_other: 'Nasledujúce polia sú neplatné:',
     incorrectCollection: 'Nesprávna kolekcia',

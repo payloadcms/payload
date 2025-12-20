@@ -105,6 +105,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument sa ID-om {{id}} nije mogao biti pronađen. Moguće je da je obrisan ili nikada nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'Емаил или лозинка су неисправни.',
+    failedToResetLayout: 'Неуспело ресетовање распореда.',
+    failedToSaveLayout: 'Неуспешно сачуван распоред.',
     followingFieldsInvalid_one: 'Ово поље је невалидно:',
     followingFieldsInvalid_other: 'Ова поља су невалидна:',
     incorrectCollection: 'Невалидна колекција',

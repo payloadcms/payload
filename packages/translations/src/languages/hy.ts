@@ -102,6 +102,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Գրառումը ID-ով {{id}} չի գտնվել։ Այն կարող է ջնջվել կամ նույնիսկ էլ գոյություն չունել։ Ֆո',
     emailOrPasswordIncorrect: 'Տրամադրված էլ. փոստը կամ գաղտնաբառը սխալ է։',
+    failedToResetLayout: 'Հաջողվել է դասավորությունը վերակայել:',
+    failedToSaveLayout: 'Չհաջողվեց հիմնադրել ձևավորումը:',
     followingFieldsInvalid_one: 'Հետևյալ դաշտն անվավեր է։',
     followingFieldsInvalid_other: 'Հետևյալ դաշտերն անվավեր են։',
     incorrectCollection: 'Սխալ հավաքածու',

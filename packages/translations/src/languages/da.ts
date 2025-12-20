@@ -103,6 +103,8 @@ export const daTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunne ikke findes. Det kan være slettet eller har aldrig eksisteret, eller du har muligvis ikke adgang til det.',
     emailOrPasswordIncorrect: 'Email eller adgangskode er forkert.',
+    failedToResetLayout: 'Kunne ikke nulstille layout.',
+    failedToSaveLayout: 'Kunne ikke gemme layoutet.',
     followingFieldsInvalid_one: 'Feltet er ugyldigt:',
     followingFieldsInvalid_other: 'Felterne er ugyldige:',
     incorrectCollection: 'Forkert samling',

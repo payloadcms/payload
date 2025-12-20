@@ -104,6 +104,8 @@ export const myTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumen dengan ID {{id}} tidak dapat ditemui. Ia mungkin telah dipadam atau tidak pernah wujud, atau anda mungkin tidak mempunyai akses kepadanya.',
     emailOrPasswordIncorrect: 'ထည့်သွင်းထားသော အီးမေးလ် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
+    failedToResetLayout: 'Gagal untuk menetapkan semula susun atur.',
+    failedToSaveLayout: 'Gagal menyimpan tata letak.',
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',
     incorrectCollection: 'မှားယွင်းသော စုစည်းမှု',

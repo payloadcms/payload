@@ -97,6 +97,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     deletingTitle: '刪除 {{title}} 時發生錯誤。請檢查網路連線後再試一次。',
     documentNotFound: '找不到 ID 為 {{id}} 的文件。可能已被刪除、不存在，或您沒有權限存取。',
     emailOrPasswordIncorrect: '電子郵件或密碼錯誤。',
+    failedToResetLayout: '無法重設版面配置。',
+    failedToSaveLayout: '保存布局失败。',
     followingFieldsInvalid_one: '以下欄位無效：',
     followingFieldsInvalid_other: '以下欄位無效：',
     incorrectCollection: '集合不正確',

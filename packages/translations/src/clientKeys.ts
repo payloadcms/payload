@@ -104,6 +104,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unPublishingDocument',
   'error:problemUploadingFile',
   'error:restoringTitle',
+  'error:failedToSaveLayout',
+  'error:failedToResetLayout',
 
   'fields:addLabel',
   'fields:addLink',

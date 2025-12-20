@@ -102,6 +102,8 @@ export const faTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'صفحهی با شناسه {{id}} پیدا نشد. ممکن است حذف شده باشد یا شما اجازه دسترسی به آن را نداشته باشید.',
     emailOrPasswordIncorrect: 'ایمیل یا رمز عبور اشتباه است.',
+    failedToResetLayout: 'تنظیم مجدد طرح ناموفق بود.',
+    failedToSaveLayout: 'تنظیمات ذخیره نشد.',
     followingFieldsInvalid_one: 'فیلد زیر نامعتبر است:',
     followingFieldsInvalid_other: 'فیلدهای زیر نامعتبر هستند:',
     incorrectCollection: 'مجموعه (Collection) نامعتبر است.',

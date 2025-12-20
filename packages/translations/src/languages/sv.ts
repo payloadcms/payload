@@ -104,6 +104,8 @@ export const svTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunde inte hittas. Det kan ha raderats eller aldrig existerat, eller så kanske du inte har tillgång till det.',
     emailOrPasswordIncorrect: 'E-postadressen eller lösenordet som angivits är felaktigt.',
+    failedToResetLayout: 'Misslyckades med att återställa layouten.',
+    failedToSaveLayout: 'Det gick inte att spara layouten.',
     followingFieldsInvalid_one: 'Följande fält är ogiltigt:',
     followingFieldsInvalid_other: 'Följande fält är ogiltiga:',
     incorrectCollection: 'Felaktig samling',

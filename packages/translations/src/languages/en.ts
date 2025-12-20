@@ -105,6 +105,8 @@ export const enTranslations = {
     documentNotFound:
       'The document with ID {{id}} could not be found. It may have been deleted or never existed, or you may not have access to it.',
     emailOrPasswordIncorrect: 'The email or password provided is incorrect.',
+    failedToResetLayout: 'Failed to reset layout.',
+    failedToSaveLayout: 'Failed to save layout.',
     followingFieldsInvalid_one: 'The following field is invalid:',
     followingFieldsInvalid_other: 'The following fields are invalid:',
     incorrectCollection: 'Incorrect Collection',

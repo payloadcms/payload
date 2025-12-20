@@ -104,6 +104,8 @@ export const esTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'No se pudo encontrar el documento con ID {{id}}. Puede haber sido eliminado o nunca existió, o puede que no tenga acceso a él.',
     emailOrPasswordIncorrect: 'El correo o la contraseña son incorrectos.',
+    failedToResetLayout: 'Error al restablecer la disposición.',
+    failedToSaveLayout: 'Error al guardar la disposición.',
     followingFieldsInvalid_one: 'El siguiente campo es inválido:',
     followingFieldsInvalid_other: 'Los siguientes campos son inválidos:',
     incorrectCollection: 'Colección Incorrecta',

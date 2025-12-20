@@ -104,6 +104,8 @@ export const csTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID {{id}} nebyl nalezen. Mohlo být smazáno nebo nikdy neexistovalo, nebo k němu nemáte přístup.',
     emailOrPasswordIncorrect: 'Zadaný email nebo heslo není správné.',
+    failedToResetLayout: 'Nepodařilo se obnovit rozložení.',
+    failedToSaveLayout: 'Nepodařilo se uložit rozložení.',
     followingFieldsInvalid_one: 'Následující pole je neplatné:',
     followingFieldsInvalid_other: 'Následující pole jsou neplatná:',
     incorrectCollection: 'Nesprávná kolekce',

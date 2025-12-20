@@ -105,6 +105,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID-om {{id}} nije mogao biti pronađen. Možda je izbrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'E-mail adresa ili lozinka netočni.',
+    failedToResetLayout: 'Ponovno postavljanje rasporeda nije uspjelo.',
+    failedToSaveLayout: 'Spremanje rasporeda nije uspjelo.',
     followingFieldsInvalid_one: 'Ovo polje je neispravno:',
     followingFieldsInvalid_other: 'Ova polja su neispravna:',
     incorrectCollection: 'Neispravna kolekcija',

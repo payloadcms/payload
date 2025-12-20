@@ -104,6 +104,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документът с ID {{id}} не можа да бъде намерен. Възможно е да е бил изтрит или никога да не е съществувал или може би нямате достъп до него.',
     emailOrPasswordIncorrect: 'Имейлът или паролата не са правилни.',
+    failedToResetLayout: 'Неуспешно нулиране на оформлението.',
+    failedToSaveLayout: 'Неуспешно запазване на оформлението.',
     followingFieldsInvalid_one: 'Следното поле е некоректно:',
     followingFieldsInvalid_other: 'Следните полета са некоректни:',
     incorrectCollection: 'Грешна колекция',

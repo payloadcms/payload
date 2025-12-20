@@ -104,6 +104,8 @@ export const slTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumenta z ID {{id}} ni bilo mogoče najti. Morda je bil izbrisan ali nikoli ni obstajal, ali pa do njega nimate dostopa.',
     emailOrPasswordIncorrect: 'Vnesena e-pošta ali geslo je napačno.',
+    failedToResetLayout: 'Ni uspelo ponastaviti razporeda.',
+    failedToSaveLayout: 'Shranjevanje postavitve ni uspelo.',
     followingFieldsInvalid_one: 'Naslednje polje je neveljavno:',
     followingFieldsInvalid_other: 'Naslednja polja so neveljavna:',
     incorrectCollection: 'Napačna zbirka',

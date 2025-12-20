@@ -104,6 +104,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID সহ {{id}} ডকুমেন্টটি পাওয়া যায়নি। এটি মুছে ফেলা হতে পারে বা কখনই ছিল না, অথবা আপনার এটির অ্যাক্সেস নেই।',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
+    failedToResetLayout: 'লেআউট পুনরায় সেট করতে ব্যর্থ হয়েছে।',
+    failedToSaveLayout: 'লেআউট সংরক্ষণ করতে ব্যর্থ।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',
     incorrectCollection: 'ভুল সংগ্রহ',

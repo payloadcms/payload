@@ -101,6 +101,8 @@ export const thTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ไม่พบเอกสารที่มี ID {{id}} อาจจะถูกลบหรือไม่เคยมีอยู่ หรือคุณอาจไม่มีสิทธิ์เข้าถึง',
     emailOrPasswordIncorrect: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    failedToResetLayout: 'ไม่สามารถรีเซ็ตเค้าโครงได้',
+    failedToSaveLayout: 'ไม่สามารถบันทึกเค้าโครงได้',
     followingFieldsInvalid_one: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     followingFieldsInvalid_other: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     incorrectCollection: 'Collection ไม่ถูกต้อง',

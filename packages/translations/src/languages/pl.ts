@@ -104,6 +104,8 @@ export const plTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument o ID {{id}} nie mógł zostać znaleziony. Mogło zostać usunięte lub nigdy nie istniało, lub może nie masz do niego dostępu.',
     emailOrPasswordIncorrect: 'Podany adres e-mail lub hasło jest nieprawidłowe.',
+    failedToResetLayout: 'Nie udało się zresetować układu.',
+    failedToSaveLayout: 'Nie udało się zapisać układu.',
     followingFieldsInvalid_one: 'To pole jest nieprawidłowe:',
     followingFieldsInvalid_other: 'Następujące pola są nieprawidłowe:',
     incorrectCollection: 'Nieprawidłowa kolekcja',

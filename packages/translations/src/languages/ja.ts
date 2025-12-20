@@ -105,6 +105,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID {{id}}のドキュメントが見つかりませんでした。削除されたか、存在しなかったか、またはアクセス権限がない可能性があります。',
     emailOrPasswordIncorrect: 'メールアドレス、または、パスワードが正しくありません。',
+    failedToResetLayout: 'レイアウトのリセットに失敗しました。',
+    failedToSaveLayout: 'レイアウトの保存に失敗しました。',
     followingFieldsInvalid_one: '次のフィールドは無効です:',
     followingFieldsInvalid_other: '次のフィールドは無効です:',
     incorrectCollection: '不正なコレクション',

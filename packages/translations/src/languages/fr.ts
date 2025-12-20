@@ -106,6 +106,8 @@ export const frTranslations: DefaultTranslationsObject = {
     documentNotFound:
       "Le document avec l'ID {{id}} n'a pas pu être trouvé. Il a peut-être été supprimé ou n'a jamais existé, ou vous n'avez peut-être pas accès à celui-ci.",
     emailOrPasswordIncorrect: 'L’adresse e-mail ou le mot de passe fourni est incorrect.',
+    failedToResetLayout: 'Échec de la réinitialisation de la mise en page.',
+    failedToSaveLayout: "Échec de l'enregistrement de la disposition.",
     followingFieldsInvalid_one: 'Le champ suivant n’est pas valide :',
     followingFieldsInvalid_other: 'Les champs suivants ne sont pas valides :',
     incorrectCollection: 'Collection incorrecte',

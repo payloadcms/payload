@@ -103,6 +103,8 @@ export const etTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumenti ID-ga {{id}} ei leitud. Võimalik, et see on kustutatud või pole seda kunagi olnud, või ei pruugi teil sellele juurdepääsu olla.',
     emailOrPasswordIncorrect: 'Sisestatud e-post või parool on vale.',
+    failedToResetLayout: 'Paigutuse lähtestamine ebaõnnestus.',
+    failedToSaveLayout: 'Paigutuse salvestamine ebaõnnestus.',
     followingFieldsInvalid_one: 'Järgmine väli on vigane:',
     followingFieldsInvalid_other: 'Järgmised väljad on vigased:',
     incorrectCollection: 'Vale kollektsioon',

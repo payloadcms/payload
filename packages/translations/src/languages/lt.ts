@@ -105,6 +105,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentas su ID {{id}} nerastas. Gali būti, kad jis buvo ištrintas arba niekada neegzistavo, arba jūs neturite prieigos prie jo.',
     emailOrPasswordIncorrect: 'Pateiktas el. pašto adresas arba slaptažodis yra neteisingi.',
+    failedToResetLayout: 'Nepavyko atstatyti išdėstymo.',
+    failedToSaveLayout: 'Nepavyko išsaugoti išdėstymo.',
     followingFieldsInvalid_one: 'Šis laukas yra netinkamas:',
     followingFieldsInvalid_other: 'Šie laukai yra neteisingi:',
     incorrectCollection: 'Neteisinga kolekcija',

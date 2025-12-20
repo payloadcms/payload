@@ -104,6 +104,8 @@ export const arTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'لم يتم العثور على المستند بالمعرف {{id}}. قد يكون قد تم حذفه أو لم يكن موجودًا أصلاً ، أو قد لا يكون لديك الوصول إليه.',
     emailOrPasswordIncorrect: 'البريد الإلكتروني أو كلمة المرور المقدمة غير صحيحة.',
+    failedToResetLayout: 'فشل في إعادة تعيين التخطيط.',
+    failedToSaveLayout: 'فشل في حفظ التخطيط.',
     followingFieldsInvalid_one: 'الحقل التالي غير صالح:',
     followingFieldsInvalid_other: 'الحقول التالية غير صالحة:',
     incorrectCollection: 'مجموعة غير صحيحة',

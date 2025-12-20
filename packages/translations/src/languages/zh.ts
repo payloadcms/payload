@@ -99,6 +99,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     documentNotFound:
       '无法找到 ID 为 {{id}} 的文档。可能是已经被删除，或者从未存在，或者您可能无法访问它。',
     emailOrPasswordIncorrect: '提供的电子邮件或密码不正确。',
+    failedToResetLayout: '未能重置布局。',
+    failedToSaveLayout: '未能保存布局。',
     followingFieldsInvalid_one: '下面的字段是无效的：',
     followingFieldsInvalid_other: '以下字段是无效的：',
     incorrectCollection: '不正确的集合',

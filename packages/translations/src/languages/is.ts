@@ -105,6 +105,8 @@ export const isTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Færsla með auðkenni {{id}} fannst ekki. Því kann að hafa verið eytt eða aldrei til, eða þú gætir ekki haft aðgang að því.',
     emailOrPasswordIncorrect: 'Netfangið eða lykilorðið sem gefið var upp er rangt.',
+    failedToResetLayout: 'Mistókst við að endurstilla útlit.',
+    failedToSaveLayout: 'Mistókst við að vista útlag.',
     followingFieldsInvalid_one: 'Eftirfarandi svæði er ógilt:',
     followingFieldsInvalid_other: 'Eftirfarandi svæði eru ógild:',
     incorrectCollection: 'Rangt safn',

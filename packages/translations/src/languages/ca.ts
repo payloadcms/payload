@@ -105,6 +105,8 @@ export const caTranslations: DefaultTranslationsObject = {
       "El document amb ID {{id}} no s'ha pogut trobar. Pot haver estat esborrat o mai haver existit, o potser no tens accés a aquest.",
     emailOrPasswordIncorrect:
       'El correu electrònic o la contrasenya proporcionats no són correctes.',
+    failedToResetLayout: "No s'ha pogut restablir la disposició.",
+    failedToSaveLayout: "No s'ha pogut guardar la disposició.",
     followingFieldsInvalid_one: 'El següent camp no és vàlid:',
     followingFieldsInvalid_other: 'Els següents camps no són vàlids:',
     incorrectCollection: 'Col·lecció incorrecta',

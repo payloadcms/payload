@@ -105,6 +105,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документ з ID {{id}} не вдалося знайти. Можливо, він був видалений або ніколи не існував, або у вас немає доступу до нього.',
     emailOrPasswordIncorrect: 'Вказана адреса електронної пошти або пароль є невірними',
+    failedToResetLayout: 'Не вдалося скинути макет.',
+    failedToSaveLayout: 'Не вдалося зберегти макет.',
     followingFieldsInvalid_one: 'Наступне поле невірне:',
     followingFieldsInvalid_other: 'Наступні поля невірні',
     incorrectCollection: 'Неправильна колекція',

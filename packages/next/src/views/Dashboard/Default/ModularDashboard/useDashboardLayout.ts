@@ -34,7 +34,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       await setLayoutPreference(layoutData)
     } catch {
       setIsEditing(true)
-      toast.error('Failed to save layout')
+      toast.error(t('error:failedToSaveLayout'))
     }
   }, [setLayoutPreference, currentLayout])
 
@@ -50,7 +50,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       setCurrentLayout(result.layout)
       setIsEditing(false)
     } catch {
-      toast.error('Failed to reset layout')
+      toast.error(t('error:failedToResetLayout'))
     }
   }, [setLayoutPreference, serverFunction])
 

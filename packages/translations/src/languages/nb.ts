@@ -104,6 +104,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunne ikke bli funnet. Det kan ha blitt slettet eller aldri eksistert, eller du har kanskje ikke tilgang til det.',
     emailOrPasswordIncorrect: 'E-postadressen eller passordet er feil.',
+    failedToResetLayout: 'Klarte ikke å tilbakestille layout.',
+    failedToSaveLayout: 'Kunne ikke lagre layout.',
     followingFieldsInvalid_one: 'Følgende felt er ugyldig:',
     followingFieldsInvalid_other: 'Følgende felter er ugyldige:',
     incorrectCollection: 'Ugyldig samling',

@@ -101,6 +101,8 @@ export const heTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'המסמך עם המזהה {{id}} לא נמצא. ייתכן שהוא נמחק או שלעולם לא היה, או שאין לך גישה אליו.',
     emailOrPasswordIncorrect: 'כתובת הדוא"ל או הסיסמה שסופקו אינם נכונים.',
+    failedToResetLayout: 'נכשל באיפוס הפריסה.',
+    failedToSaveLayout: 'נכשל בשמירת הפריסה.',
     followingFieldsInvalid_one: 'השדה הבא אינו תקין:',
     followingFieldsInvalid_other: 'השדות הבאים אינם תקינים:',
     incorrectCollection: 'אוסף שגוי',

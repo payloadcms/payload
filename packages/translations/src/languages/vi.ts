@@ -104,6 +104,8 @@ export const viTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Tài liệu có ID {{id}} không thể tìm thấy. Nó có thể đã bị xóa hoặc chưa từng tồn tại, hoặc bạn có thể không có quyền truy cập vào nó.',
     emailOrPasswordIncorrect: 'Lỗi - Email hoặc mật khẩu không chính xác.',
+    failedToResetLayout: 'Không thể đặt lại bố cục.',
+    failedToSaveLayout: 'Không thể lưu bố cục.',
     followingFieldsInvalid_one: 'Lỗi - Field sau không hợp lệ:',
     followingFieldsInvalid_other: 'Lỗi - Những fields sau không hợp lệ:',
     incorrectCollection: 'Lỗi - Collection không hợp lệ.',

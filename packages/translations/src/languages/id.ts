@@ -105,6 +105,8 @@ export const idTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumen dengan ID {{id}} tidak dapat ditemukan. Mungkin telah dihapus atau tidak pernah ada, atau Anda mungkin tidak memiliki akses ke sana.',
     emailOrPasswordIncorrect: 'Email atau kata sandi yang diberikan salah.',
+    failedToResetLayout: 'Gagal mereset tata letak.',
+    failedToSaveLayout: 'Gagal menyimpan tata letak.',
     followingFieldsInvalid_one: 'Isian berikut tidak valid:',
     followingFieldsInvalid_other: 'Isian-isian berikut tidak valid:',
     incorrectCollection: 'Koleksi Salah',

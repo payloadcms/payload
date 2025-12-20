@@ -104,6 +104,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokuments ar ID {{id}} netika atrasts. Iespējams, tas ir izdzēsts vai nekad nav eksistējis, vai arī jums nav pieejas tam.',
     emailOrPasswordIncorrect: 'Norādītais e-pasts vai parole nav pareiza.',
+    failedToResetLayout: 'Neizdevās atjaunot izkārtojumu.',
+    failedToSaveLayout: 'Neizdevās saglabāt izkārtojumu.',
     followingFieldsInvalid_one: 'Šis lauks nav derīgs:',
     followingFieldsInvalid_other: 'Šie lauki nav derīgi:',
     incorrectCollection: 'Nepareiza kolekcija',

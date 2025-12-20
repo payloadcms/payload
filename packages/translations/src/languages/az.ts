@@ -104,6 +104,8 @@ export const azTranslations: DefaultTranslationsObject = {
     documentNotFound:
       '{{id}} ID-li sənəd tapılmadı. Bu, onun silinmiş və ya heç vaxt mövcud olmamış ola bilər və ya sizin ona giriş hüququnuz olmayabilir.',
     emailOrPasswordIncorrect: 'Təqdim olunan e-poçt və ya şifrə yanlışdır.',
+    failedToResetLayout: 'Düzeni sıfırlamaq uğursuz oldu.',
+    failedToSaveLayout: 'Dizaynı saxlamaq alınmadı.',
     followingFieldsInvalid_one: 'Aşağıdakı sahə yanlışdır:',
     followingFieldsInvalid_other: 'Aşağıdaki sahələr yanlışdır:',
     incorrectCollection: 'Yanlış Kolleksiya',

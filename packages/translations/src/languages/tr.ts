@@ -105,6 +105,8 @@ export const trTranslations: DefaultTranslationsObject = {
     documentNotFound:
       "ID'si {{id}} olan belge bulunamadı. Silinmiş olabilir, hiç var olmamış olabilir veya belgeye erişiminiz olmayabilir.",
     emailOrPasswordIncorrect: 'Girilen e-posta veya parola hatalı',
+    failedToResetLayout: 'Yerleşimi sıfırlama başarısız oldu.',
+    failedToSaveLayout: 'Düzeni kaydetme başarısız oldu.',
     followingFieldsInvalid_one: 'Lütfen geçersiz alanı düzeltin:',
     followingFieldsInvalid_other: 'Lütfen geçersiz alanları düzeltin:',
     incorrectCollection: 'Hatalı koleksiyon',

@@ -103,6 +103,8 @@ export const koTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID가 {{id}}인 문서를 찾을 수 없습니다. 이 문서는 삭제되었거나 존재하지 않았거나, 당신이 접근 권한이 없을 수 있습니다.',
     emailOrPasswordIncorrect: '입력한 이메일 또는 비밀번호가 올바르지 않습니다.',
+    failedToResetLayout: '레이아웃 리셋에 실패하였습니다.',
+    failedToSaveLayout: '레이아웃 저장에 실패했습니다.',
     followingFieldsInvalid_one: '다음 입력란이 유효하지 않습니다:',
     followingFieldsInvalid_other: '다음 입력란이 유효하지 않습니다:',
     incorrectCollection: '잘못된 컬렉션',

@@ -106,6 +106,8 @@ export const deTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Das Dokument mit der ID {{id}} konnte nicht gefunden werden. Es könnte gelöscht oder niemals existiert haben, oder Sie haben möglicherweise keinen Zugang dazu.',
     emailOrPasswordIncorrect: 'Die E-Mail-Adresse oder das Passwort sind nicht korrekt.',
+    failedToResetLayout: 'Layout konnte nicht zurückgesetzt werden.',
+    failedToSaveLayout: 'Layout konnte nicht gespeichert werden.',
     followingFieldsInvalid_one: 'Das folgende Feld ist nicht korrekt:',
     followingFieldsInvalid_other: 'Die folgenden Felder sind nicht korrekt:',
     incorrectCollection: 'Falsche Sammlung',

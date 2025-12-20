@@ -103,6 +103,8 @@ export const taTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID {{id}} கொண்ட ஆவணம் காணப்படவில்லை. அது நீக்கப்பட்டிருக்கலாம் அல்லது இல்லாமல் இருக்கலாம், அல்லது உங்களுக்கு அதற்கான அணுகல் அனுமதி இல்லாமல் இருக்கலாம்.',
     emailOrPasswordIncorrect: 'கொடுக்கப்பட்ட மின்னஞ்சல் அல்லது கடவுச்சொல் தவறானது.',
+    failedToResetLayout: 'ஒழுங்கமைப்பை மீட்டமைக்க முடியவில்லை.',
+    failedToSaveLayout: 'ஏற்கப்படவில்லை அமைப்பு சேமிக்க.',
     followingFieldsInvalid_one: 'பின்வரும் புலம் தவறானது:',
     followingFieldsInvalid_other: 'பின்வரும் புலங்கள் தவறானவை:',
     incorrectCollection: 'தவறான தொகுப்பு',

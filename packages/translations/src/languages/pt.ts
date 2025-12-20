@@ -105,6 +105,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'O documento com o ID {{id}} não pôde ser encontrado. Ele pode ter sido deletado ou nunca ter existido, ou você pode não ter acesso a ele.',
     emailOrPasswordIncorrect: 'O email ou senha fornecido está incorreto.',
+    failedToResetLayout: 'Falha ao redefinir layout.',
+    failedToSaveLayout: 'Falha ao salvar o layout.',
     followingFieldsInvalid_one: 'O campo a seguir está inválido:',
     followingFieldsInvalid_other: 'Os campos a seguir estão inválidos:',
     incorrectCollection: 'Coleção Incorreta',

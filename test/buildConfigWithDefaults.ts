@@ -29,7 +29,6 @@ import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
-import { uk } from 'payload/i18n/uk'
 import sharp from 'sharp'
 
 import { databaseAdapter } from './databaseAdapter.js'
@@ -142,7 +141,6 @@ export async function buildConfigWithDefaults(
         de,
         en,
         es,
-        uk,
         ...(testConfig?.i18n?.supportedLanguages || {}),
       },
       ...(testConfig?.i18n || {}),

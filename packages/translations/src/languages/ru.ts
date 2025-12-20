@@ -105,6 +105,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документ с ID {{id}} не удалось найти. Возможно, он был удален или никогда не существовал, или у вас нет доступа к нему.',
     emailOrPasswordIncorrect: 'Указанный email или пароль неверен.',
+    failedToResetLayout: 'Не удалось сбросить макет.',
+    failedToSaveLayout: 'Не удалось сохранить макет.',
     followingFieldsInvalid_one: 'Следующее поле недействительно:',
     followingFieldsInvalid_other: 'Следующие поля недействительны:',
     incorrectCollection: 'Неправильная Коллекция',

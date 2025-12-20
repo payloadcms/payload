@@ -105,6 +105,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Het document met ID {{id}} kon niet worden gevonden. Het kan zijn verwijderd of heeft nooit bestaan, of u heeft mogelijk geen toegang tot het.',
     emailOrPasswordIncorrect: 'Het opgegeven e-mailadres of wachtwoord is onjuist.',
+    failedToResetLayout: 'Het opnieuw instellen van de lay-out is mislukt.',
+    failedToSaveLayout: 'Opslaan lay-out mislukt.',
     followingFieldsInvalid_one: 'Het volgende veld is ongeldig:',
     followingFieldsInvalid_other: 'De volgende velden zijn ongeldig:',
     incorrectCollection: 'Ongeldige collectie',
