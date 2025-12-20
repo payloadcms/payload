@@ -6,7 +6,11 @@ type Args = {
   fields: FlattenedField[]
 }
 
-export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
+/**
+ * Gets custom toCSV field functions for export.
+ * These functions transform field values when flattening documents for CSV export.
+ */
+export const getExportFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
   const result: Record<string, ToCSVFunction> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
@@ -22,6 +26,19 @@ export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVF
     if (typeof field.custom?.['plugin-import-export']?.toCSV === 'function') {
       // @ts-expect-error ref is untyped
       result[`${ref.prefix}${field.name}`] = field.custom['plugin-import-export']?.toCSV
+    } else if (field.type === 'json' || field.type === 'richText') {
+      // Serialize JSON and richText fields as JSON strings in a single column
+      // This prevents them from being flattened into multiple columns
+      // @ts-expect-error ref is untyped
+      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+        if (value === null || value === undefined) {
+          return value
+        }
+        if (typeof value === 'object') {
+          return JSON.stringify(value)
+        }
+        return value
+      }
     } else if (field.type === 'relationship' || field.type === 'upload') {
       if (field.hasMany !== true) {
         if (!Array.isArray(field.relationTo)) {

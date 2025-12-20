@@ -17,16 +17,24 @@ export const flattenObject = ({
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
 
+  // Helper to get toCSV function by full path or base field name
+  // This allows functions registered for field names (e.g., 'richText') to work
+  // even when the field is nested in arrays/blocks (e.g., 'blocks_0_content_richText')
+  const getToCSVFunction = (fullPath: string, baseFieldName: string): ToCSVFunction | undefined => {
+    return toCSVFunctions?.[fullPath] ?? toCSVFunctions?.[baseFieldName]
+  }
+
   const flatten = (siblingDoc: Document, prefix?: string) => {
     Object.entries(siblingDoc).forEach(([key, value]) => {
       const newKey = prefix ? `${prefix}_${key}` : key
+      const toCSVFn = getToCSVFunction(newKey, key)
 
       if (Array.isArray(value)) {
         // If a custom toCSV function exists for this array field, run it first.
         // If it produces output, skip per-item handling; otherwise, fall back.
-        if (toCSVFunctions?.[newKey]) {
+        if (toCSVFn) {
           try {
-            const result = toCSVFunctions[newKey]({
+            const result = toCSVFn({
               columnName: newKey,
               data: row,
               doc,
@@ -83,11 +91,11 @@ export const flattenObject = ({
         })
       } else if (typeof value === 'object' && value !== null) {
         // Object field: use custom toCSV if present, else recurse.
-        if (!toCSVFunctions?.[newKey]) {
+        if (!toCSVFn) {
           flatten(value, newKey)
         } else {
           try {
-            const result = toCSVFunctions[newKey]({
+            const result = toCSVFn({
               columnName: newKey,
               data: row,
               doc,
@@ -107,9 +115,9 @@ export const flattenObject = ({
           }
         }
       } else {
-        if (toCSVFunctions?.[newKey]) {
+        if (toCSVFn) {
           try {
-            const result = toCSVFunctions[newKey]({
+            const result = toCSVFn({
               columnName: newKey,
               data: row,
               doc,

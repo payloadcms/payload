@@ -432,3 +432,18 @@ export function getRoutes({
     routes,
   }
 }
+
+type RunJobsQueueArgs = {
+  queue?: string
+  serverURL: string
+}
+
+export async function runJobsQueue(args: RunJobsQueueArgs) {
+  const { serverURL } = args
+  const queue = args?.queue ?? 'default'
+
+  return await fetch(`${serverURL}/api/payload-jobs/run?queue=${queue}`, {
+    method: 'get',
+    credentials: 'include',
+  })
+}
