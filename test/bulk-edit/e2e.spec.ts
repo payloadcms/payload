@@ -75,7 +75,6 @@ test.describe('Bulk Edit', () => {
     // Deselect the first row
     await page.locator('.row-1 input').click()
 
-    // eslint-disable-next-line jest-dom/prefer-checked
     await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
   })
 
