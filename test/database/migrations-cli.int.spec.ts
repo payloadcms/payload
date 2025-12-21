@@ -25,46 +25,42 @@ describe('migrations CLI', () => {
     removeFiles(migrationDir)
   })
 
-  it(
-    'should create migration from external file path via CLI (plugin predefined migration)',
-    { db: 'drizzle' },
-    async () => {
-      // Tests: Absolute file path imports (goes through Path 2 in getPredefinedMigration.ts)
-      // Example: pnpm payload migrate:create --file /absolute/path/to/migration.ts
+  it('should create migration from external file path via CLI (plugin predefined migration)', async () => {
+    // Tests: Absolute file path imports (goes through Path 2 in getPredefinedMigration.ts)
+    // Example: pnpm payload migrate:create --file /absolute/path/to/migration.ts
 
-      const config = await configPromise
-      const predefinedMigrationPath = path.join(
-        dirname,
-        './predefinedMigrations/testPluginMigration.ts',
-      )
+    const config = await configPromise
+    const predefinedMigrationPath = path.join(
+      dirname,
+      './predefinedMigrations/testPluginMigration.ts',
+    )
 
-      // Use the CLI interface directly, simulating:
-      // pnpm payload migrate:create --file /path/to/predefinedMigrations/testPluginMigration.ts
-      await migrateCLI({
-        config,
-        migrationDir,
-        parsedArgs: {
-          _: ['migrate:create'],
-          file: predefinedMigrationPath,
-          forceAcceptWarning: true,
-        },
-      })
+    // Use the CLI interface directly, simulating:
+    // pnpm payload migrate:create --file /path/to/predefinedMigrations/testPluginMigration.ts
+    await migrateCLI({
+      config,
+      migrationDir,
+      parsedArgs: {
+        _: ['migrate:create'],
+        file: predefinedMigrationPath,
+        forceAcceptWarning: true,
+      },
+    })
 
-      // Find the created migration file
-      const migrationFiles = fs
-        .readdirSync(migrationDir)
-        .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+    // Find the created migration file
+    const migrationFiles = fs
+      .readdirSync(migrationDir)
+      .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
 
-      expect(migrationFiles.length).toBeGreaterThan(0)
+    expect(migrationFiles.length).toBeGreaterThan(0)
 
-      const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
+    const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
 
-      // Verify the migration contains the predefined SQL from the plugin
-      expect(migrationContent).toContain('Test predefined migration UP from plugin')
-      expect(migrationContent).toContain('Test predefined migration DOWN from plugin')
-      expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
-    },
-  )
+    // Verify the migration contains the predefined SQL from the plugin
+    expect(migrationContent).toContain('Test predefined migration UP from plugin')
+    expect(migrationContent).toContain('Test predefined migration DOWN from plugin')
+    expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
+  })
 
   it(
     'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
@@ -103,41 +99,37 @@ describe('migrations CLI', () => {
     },
   )
 
-  it(
-    'should create migration from package.json export (non-db package)',
-    { db: 'drizzle' },
-    async () => {
-      // Tests: Path 2 in getPredefinedMigration.ts - module specifier via package.json exports
-      // Packages WITHOUT @payloadcms/db-* prefix MUST use package.json exports
-      // Example: pnpm payload migrate:create --file payload/__testing__/predefinedMigration
+  it('should create migration from package.json export (non-db package)', async () => {
+    // Tests: Path 2 in getPredefinedMigration.ts - module specifier via package.json exports
+    // Packages WITHOUT @payloadcms/db-* prefix MUST use package.json exports
+    // Example: pnpm payload migrate:create --file payload/__testing__/predefinedMigration
 
-      const config = await configPromise
+    const config = await configPromise
 
-      // Use the CLI interface directly, simulating:
-      // pnpm payload migrate:create --file payload/__testing__/predefinedMigration
-      // payload/__testing__/predefinedMigration is explicitly defined in payload's package.json exports
-      await migrateCLI({
-        config,
-        migrationDir,
-        parsedArgs: {
-          _: ['migrate:create'],
-          file: 'payload/__testing__/predefinedMigration',
-          forceAcceptWarning: true,
-        },
-      })
+    // Use the CLI interface directly, simulating:
+    // pnpm payload migrate:create --file payload/__testing__/predefinedMigration
+    // payload/__testing__/predefinedMigration is explicitly defined in payload's package.json exports
+    await migrateCLI({
+      config,
+      migrationDir,
+      parsedArgs: {
+        _: ['migrate:create'],
+        file: 'payload/__testing__/predefinedMigration',
+        forceAcceptWarning: true,
+      },
+    })
 
-      // Find the created migration file
-      const migrationFiles = fs
-        .readdirSync(migrationDir)
-        .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
-      expect(migrationFiles.length).toBeGreaterThan(0)
+    // Find the created migration file
+    const migrationFiles = fs
+      .readdirSync(migrationDir)
+      .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+    expect(migrationFiles.length).toBeGreaterThan(0)
 
-      const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
+    const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
 
-      // Verify the migration contains the predefined content from the payload package export
-      expect(migrationContent).toContain(
-        'Test predefined migration from payload/__testing__/predefinedMigration',
-      )
-    },
-  )
+    // Verify the migration contains the predefined content from the payload package export
+    expect(migrationContent).toContain(
+      'Test predefined migration from payload/__testing__/predefinedMigration',
+    )
+  })
 })
