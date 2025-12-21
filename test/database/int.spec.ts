@@ -25,11 +25,12 @@ import {
   initTransaction,
   isolateObjectProperty,
   killTransaction,
+  migrateCLI,
   QueryError,
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { Global2, Post } from './payload-types.js'
 
@@ -38,6 +39,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { it } from '../helpers/testHelpers.js'
 import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
 
@@ -51,8 +53,6 @@ let restClient: NextRESTClient
 const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
-
-const itMongo = process.env.PAYLOAD_DATABASE?.startsWith('mongodb') ? it : it.skip
 
 describe('database', () => {
   beforeAll(async () => {
@@ -609,7 +609,7 @@ describe('database', () => {
       await noTimestampsTestDB(true)
     })
 
-    itMongo(
+    it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
@@ -617,9 +617,10 @@ describe('database', () => {
         await noTimestampsTestLocalAPI()
         payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
       },
+      { db: 'mongo' },
     )
 
-    itMongo(
+    it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
@@ -628,6 +629,7 @@ describe('database', () => {
 
         payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
       },
+      { db: 'mongo' },
     )
   })
 
@@ -1729,6 +1731,136 @@ describe('database', () => {
 
       await payload.db.collections['relationships-migration'].deleteMany({})
       await payload.db.versions['relationships-migration'].deleteMany({})
+    })
+
+    describe('CLI', () => {
+      // These tests verify that predefined migrations are correctly imported and created.
+      // Migration execution is tested separately - here we focus on file creation/content.
+
+      it(
+        'should create migration from external file path via CLI (plugin predefined migration)',
+        async () => {
+          // Tests: Absolute file path imports (goes through Path 2 in getPredefinedMigration.ts)
+          // Example: pnpm payload migrate:create --file /absolute/path/to/migration.ts
+
+          removeFiles(path.join(dirname, './migrations'))
+
+          const predefinedMigrationPath = path.join(
+            dirname,
+            './predefinedMigrations/testPluginMigration.ts',
+          )
+
+          // Use the CLI interface directly, simulating:
+          // pnpm payload migrate:create --file /path/to/predefinedMigrations/testPluginMigration.ts
+          await migrateCLI({
+            config: payload.config,
+            migrationDir: payload.db.migrationDir,
+            parsedArgs: {
+              _: ['migrate:create'],
+              file: predefinedMigrationPath,
+              forceAcceptWarning: true,
+            },
+          })
+
+          // Find the created migration file
+          const migrationFiles = fs
+            .readdirSync(payload.db.migrationDir)
+            .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+          expect(migrationFiles.length).toBeGreaterThan(0)
+
+          const migrationContent = fs.readFileSync(
+            path.join(payload.db.migrationDir, migrationFiles[0]!),
+            'utf8',
+          )
+
+          // Verify the migration contains the predefined SQL from the plugin
+          expect(migrationContent).toContain('Test predefined migration UP from plugin')
+          expect(migrationContent).toContain('Test predefined migration DOWN from plugin')
+          expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
+        },
+        { db: 'drizzle' },
+      )
+
+      it(
+        'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
+        async () => {
+          // Tests: Path 1 in getPredefinedMigration.ts - @payloadcms/db-* prefix handling
+          // These load directly from adapter's predefinedMigrations folder WITHOUT package.json exports
+          // Example: pnpm payload migrate:create --file @payloadcms/db-mongodb/__testing__
+
+          removeFiles(path.join(dirname, './migrations'))
+
+          // Use the CLI interface directly, simulating:
+          // pnpm payload migrate:create --file @payloadcms/db-mongodb/__testing__
+          await migrateCLI({
+            config: payload.config,
+            migrationDir: payload.db.migrationDir,
+            parsedArgs: {
+              _: ['migrate:create'],
+              file: '@payloadcms/db-mongodb/__testing__',
+              forceAcceptWarning: true,
+            },
+          })
+
+          // Find the created migration file
+          const migrationFiles = fs
+            .readdirSync(payload.db.migrationDir)
+            .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+          expect(migrationFiles.length).toBeGreaterThan(0)
+
+          const migrationContent = fs.readFileSync(
+            path.join(payload.db.migrationDir, migrationFiles[0]!),
+            'utf8',
+          )
+
+          // Verify the migration contains the predefined content from the package export
+          expect(migrationContent).toContain(
+            'Test predefined migration from @payloadcms/db-mongodb/__testing__',
+          )
+        },
+        { db: 'mongo' },
+      )
+
+      it(
+        'should create migration from package.json export (non-db package)',
+        async () => {
+          // Tests: Path 2 in getPredefinedMigration.ts - module specifier via package.json exports
+          // Packages WITHOUT @payloadcms/db-* prefix MUST use package.json exports
+          // Example: pnpm payload migrate:create --file payload/__testing__/predefinedMigration
+
+          removeFiles(path.join(dirname, './migrations'))
+
+          // Use the CLI interface directly, simulating:
+          // pnpm payload migrate:create --file payload/__testing__/predefinedMigration
+          // payload/__testing__/predefinedMigration is explicitly defined in payload's package.json exports
+          await migrateCLI({
+            config: payload.config,
+            migrationDir: payload.db.migrationDir,
+            parsedArgs: {
+              _: ['migrate:create'],
+              file: 'payload/__testing__/predefinedMigration',
+              forceAcceptWarning: true,
+            },
+          })
+
+          // Find the created migration file
+          const migrationFiles = fs
+            .readdirSync(payload.db.migrationDir)
+            .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+          expect(migrationFiles.length).toBeGreaterThan(0)
+
+          const migrationContent = fs.readFileSync(
+            path.join(payload.db.migrationDir, migrationFiles[0]!),
+            'utf8',
+          )
+
+          // Verify the migration contains the predefined content from the payload package export
+          expect(migrationContent).toContain(
+            'Test predefined migration from payload/__testing__/predefinedMigration',
+          )
+        },
+        { db: 'drizzle' },
+      )
     })
   })
 
@@ -5225,51 +5357,55 @@ describe('database', () => {
     expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 
-  itMongo('ensure mongodb respects collation when using collection in the config', async () => {
-    // Clear any existing documents
-    await payload.delete({ collection: 'simple', where: {} })
+  it(
+    'ensure mongodb respects collation when using collection in the config',
+    async () => {
+      // Clear any existing documents
+      await payload.delete({ collection: 'simple', where: {} })
 
-    const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
-    const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
+      const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
+      const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
 
-    const simple_1 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Роман' },
-    })
-    const simple_2 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Віктор' },
-    })
-    const simple_3 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Євген' },
-    })
+      const simple_1 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Роман' },
+      })
+      const simple_2 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Віктор' },
+      })
+      const simple_3 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Євген' },
+      })
 
-    const results = await payload.find({
-      collection: 'simple',
-      locale: 'uk',
-      sort: 'text',
-    })
+      const results = await payload.find({
+        collection: 'simple',
+        locale: 'uk',
+        sort: 'text',
+      })
 
-    const initialMappedResults = results.docs.map((doc) => doc.text)
+      const initialMappedResults = results.docs.map((doc) => doc.text)
 
-    expect(initialMappedResults).toEqual(expectedUnsortedItems)
+      expect(initialMappedResults).toEqual(expectedUnsortedItems)
 
-    payload.db.collation = { strength: 1 }
+      payload.db.collation = { strength: 1 }
 
-    const resultsWithCollation = await payload.find({
-      collection: 'simple',
-      locale: 'uk',
-      sort: 'text',
-    })
+      const resultsWithCollation = await payload.find({
+        collection: 'simple',
+        locale: 'uk',
+        sort: 'text',
+      })
 
-    const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
+      const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
 
-    console.log({ docs: JSON.stringify(collatedMappedResults) })
+      console.log({ docs: JSON.stringify(collatedMappedResults) })
 
-    expect(collatedMappedResults).toEqual(expectedSortedItems)
-  })
+      expect(collatedMappedResults).toEqual(expectedSortedItems)
+    },
+    { db: 'mongo' },
+  )
 })
