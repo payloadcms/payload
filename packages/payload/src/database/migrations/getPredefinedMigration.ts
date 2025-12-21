@@ -1,9 +1,10 @@
 import fs from 'fs'
 import path from 'path'
-import { pathToFileURL } from 'url'
 
 import type { Payload } from '../../index.js'
 import type { MigrationTemplateArgs } from '../types.js'
+
+import { dynamicImport } from '../../utilities/dynamicImport.js'
 
 /**
  * Get predefined migration 'up', 'down' and 'imports'
@@ -38,9 +39,8 @@ export const getPredefinedMigration = async ({
       process.exit(1)
     }
     cleanPath = cleanPath.replaceAll('\\', '/')
-    const moduleURL = pathToFileURL(cleanPath)
     try {
-      const { downSQL, imports, upSQL } = await eval(`import('${moduleURL.href}')`)
+      const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(cleanPath)
       return {
         downSQL,
         imports,
@@ -55,7 +55,7 @@ export const getPredefinedMigration = async ({
     }
   } else if (importPath) {
     try {
-      const { downSQL, imports, upSQL } = await eval(`import('${importPath}')`)
+      const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(importPath)
       return {
         downSQL,
         imports,
