@@ -4,7 +4,7 @@ import { describe as vitestDescribe, it as vitestIt } from 'vitest'
 
 import { mongooseList } from './isMongoose.js'
 
-type DbOptions = {
+type ItOptions = {
   /** Which database adapter(s) this test/suite should run on. Defaults to 'all'. */
   db?: 'all' | 'drizzle' | 'mongo'
 }
@@ -26,11 +26,11 @@ const isMongo = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
  */
 const itWithOptions = (
   name: string,
-  optionsOrFn?: DbOptions | TestFunction,
+  optionsOrFn?: ItOptions | TestFunction,
   fn?: TestFunction,
 ): ReturnType<typeof vitestIt> => {
   // Handle overloads: it(name, fn) or it(name, options, fn)
-  const options: DbOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
+  const options: ItOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
   const testFn: TestFunction | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
 
   const db = options?.db ?? 'all'
@@ -65,11 +65,11 @@ export const it = itWithOptions
  */
 const describeWithOptions = (
   name: string,
-  optionsOrFn?: DbOptions | SuiteFactory,
+  optionsOrFn?: ItOptions | SuiteFactory,
   fn?: SuiteFactory,
 ): ReturnType<typeof vitestDescribe> => {
   // Handle overloads: describe(name, fn) or describe(name, options, fn)
-  const options: DbOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
+  const options: ItOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
   const suiteFn: SuiteFactory | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
 
   const db = options?.db ?? 'all'

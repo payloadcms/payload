@@ -38,7 +38,7 @@ import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/saniti
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/testHelpers.js'
+import { describe, it } from '../helpers/vitest.js
 import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
 
