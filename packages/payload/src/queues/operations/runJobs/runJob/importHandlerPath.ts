@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'url'
+
 import type { TaskConfig, TaskHandler, TaskType } from '../../../config/types/taskTypes.js'
 
 /**
@@ -9,7 +11,11 @@ export async function importHandlerPath<T>(path: string): Promise<T> {
 
   let runnerModule
   try {
-    runnerModule = await import(runnerPath!.replaceAll('\\', '/'))
+    // Without the eval, the Next.js bundler will throw this error when encountering the import statement:
+    // ⚠ Compiled with warnings in X.Xs
+    // .../node_modules/payload/dist/queues/operations/runJobs/runJob/importHandlerPath.js
+    // Critical dependency: the request of a dependency is an expression
+    runnerModule = await eval(`import('${pathToFileURL(runnerPath!).href}')`)
   } catch (e) {
     throw new Error(
       `Error importing job queue handler module for path ${path}. This is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the /api/payload-jobs/run endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. If you're using an endpoint to execute your jobs, it's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js. Import Error: \n${e instanceof Error ? e.message : 'Unknown error'}`,

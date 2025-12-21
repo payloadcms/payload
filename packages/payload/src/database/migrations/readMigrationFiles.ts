@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { pathToFileURL } from 'url'
 
 import type { Payload } from '../../index.js'
 import type { Migration } from '../types.js'
@@ -35,7 +36,11 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
-      let migration = await import(filePath.replaceAll('\\', '/'))
+      // Without the eval, the Next.js bundler will throw this error when encountering the import statement:
+      // ⚠ Compiled with warnings in X.Xs
+      // .../node_modules/payload/dist/database/migrations/readMigrationFiles.js
+      // Critical dependency: the request of a dependency is an expression
+      let migration = await eval(`import('${pathToFileURL(filePath).href}')`)
       if ('default' in migration) {
         migration = migration.default
       }
