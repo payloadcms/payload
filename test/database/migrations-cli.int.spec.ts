@@ -9,7 +9,7 @@ import fs from 'fs'
 import path from 'path'
 import { migrateCLI } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterEach, expect } from 'vitest'
+import { afterEach, beforeEach, expect } from 'vitest'
 
 import removeFiles from '../helpers/removeFiles.js'
 import { describe, it } from '../helpers/vitest.js'
@@ -22,6 +22,10 @@ const migrationDir = path.join(dirname, './migrations')
 
 describe('migrations CLI', () => {
   afterEach(() => {
+    removeFiles(migrationDir)
+  })
+
+  beforeEach(() => {
     removeFiles(migrationDir)
   })
 
@@ -52,7 +56,7 @@ describe('migrations CLI', () => {
       .readdirSync(migrationDir)
       .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
 
-    expect(migrationFiles.length).toBeGreaterThan(0)
+    expect(migrationFiles.length).toBe(1)
 
     const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
 
@@ -88,7 +92,7 @@ describe('migrations CLI', () => {
       const migrationFiles = fs
         .readdirSync(migrationDir)
         .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
-      expect(migrationFiles.length).toBeGreaterThan(0)
+      expect(migrationFiles.length).toBe(1)
 
       const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
 
@@ -123,7 +127,7 @@ describe('migrations CLI', () => {
     const migrationFiles = fs
       .readdirSync(migrationDir)
       .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
-    expect(migrationFiles.length).toBeGreaterThan(0)
+    expect(migrationFiles.length).toBe(1)
 
     const migrationContent = fs.readFileSync(path.join(migrationDir, migrationFiles[0]!), 'utf8')
 
