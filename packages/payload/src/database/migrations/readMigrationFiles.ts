@@ -37,17 +37,18 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
-      const migrationModule = await dynamicImport<{
-        default?: { down: Migration['down']; up: Migration['up'] }
-        down?: Migration['down']
-        up?: Migration['up']
-      }>(filePath)
-      const migration = migrationModule.default ?? migrationModule
+      const migrationModule = await dynamicImport<
+        | {
+            default: Migration
+          }
+        | Migration
+      >(filePath)
+      const migration = 'default' in migrationModule ? migrationModule.default : migrationModule
 
       const result: Migration = {
         name: path.basename(filePath).split('.')[0]!,
-        down: migration.down!,
-        up: migration.up!,
+        down: migration.down,
+        up: migration.up,
       }
 
       return result
