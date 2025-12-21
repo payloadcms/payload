@@ -30,16 +30,15 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect } from 'vitest'
+import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
 
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { it } from '../helpers/testHelpers.js'
+import { describe, it } from '../helpers/testHelpers.js'
 import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
 
@@ -611,17 +610,18 @@ describe('database', () => {
 
     it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
         await noTimestampsTestLocalAPI()
         payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
       },
-      { db: 'mongo' },
     )
 
     it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -629,7 +629,6 @@ describe('database', () => {
 
         payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
       },
-      { db: 'mongo' },
     )
   })
 
@@ -1550,12 +1549,8 @@ describe('database', () => {
       ranFreshTest = true
     })
 
-    it('should run migrate:down', async () => {
-      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      if (!isMongoose(payload)) {
-        return
-      }
-
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    it('should run migrate:down', { db: 'mongo' }, async () => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1588,11 +1583,8 @@ describe('database', () => {
       await payload.delete({ collection: 'payload-migrations', where: {} })
     })
 
-    it('should run migrate:refresh', async () => {
-      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      if (!isMongoose(payload)) {
-        return
-      }
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    it('should run migrate:refresh', { db: 'mongo' }, async () => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -1609,11 +1601,8 @@ describe('database', () => {
     })
   })
 
-  it('should run migrate:reset', async () => {
-    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    if (!isMongoose(payload)) {
-      return
-    }
+  // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+  it('should run migrate:reset', { db: 'mongo' }, async () => {
     let error
     try {
       await payload.db.migrateReset()
@@ -1739,6 +1728,7 @@ describe('database', () => {
 
       it(
         'should create migration from external file path via CLI (plugin predefined migration)',
+        { db: 'drizzle' },
         async () => {
           // Tests: Absolute file path imports (goes through Path 2 in getPredefinedMigration.ts)
           // Example: pnpm payload migrate:create --file /absolute/path/to/migration.ts
@@ -1778,11 +1768,11 @@ describe('database', () => {
           expect(migrationContent).toContain('Test predefined migration DOWN from plugin')
           expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
         },
-        { db: 'drizzle' },
       )
 
       it(
         'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
+        { db: 'mongo' },
         async () => {
           // Tests: Path 1 in getPredefinedMigration.ts - @payloadcms/db-* prefix handling
           // These load directly from adapter's predefinedMigrations folder WITHOUT package.json exports
@@ -1818,11 +1808,11 @@ describe('database', () => {
             'Test predefined migration from @payloadcms/db-mongodb/__testing__',
           )
         },
-        { db: 'mongo' },
       )
 
       it(
         'should create migration from package.json export (non-db package)',
+        { db: 'drizzle' },
         async () => {
           // Tests: Path 2 in getPredefinedMigration.ts - module specifier via package.json exports
           // Packages WITHOUT @payloadcms/db-* prefix MUST use package.json exports
@@ -1859,7 +1849,6 @@ describe('database', () => {
             'Test predefined migration from payload/__testing__/predefinedMigration',
           )
         },
-        { db: 'drizzle' },
       )
     })
   })
@@ -2896,11 +2885,7 @@ describe('database', () => {
     })
   })
 
-  const describeSQL = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
-    ? describe.skip
-    : describe
-
-  describeSQL('Schema generation', () => {
+  describe('Schema generation', { db: 'drizzle' }, () => {
     if (
       process.env.PAYLOAD_DATABASE.includes('postgres') ||
       process.env.PAYLOAD_DATABASE === 'supabase'
@@ -5334,11 +5319,7 @@ describe('database', () => {
     await payload.db.connect()
   })
 
-  it('ensure mongodb query sanitization does not duplicate IDs', () => {
-    if (!isMongoose(payload)) {
-      return
-    }
-
+  it('ensure mongodb query sanitization does not duplicate IDs', { db: 'mongo' }, () => {
     const res: any = sanitizeQueryValue({
       field: {
         name: '_id',
@@ -5359,6 +5340,7 @@ describe('database', () => {
 
   it(
     'ensure mongodb respects collation when using collection in the config',
+    { db: 'mongo' },
     async () => {
       // Clear any existing documents
       await payload.delete({ collection: 'simple', where: {} })
@@ -5406,6 +5388,5 @@ describe('database', () => {
 
       expect(collatedMappedResults).toEqual(expectedSortedItems)
     },
-    { db: 'mongo' },
   )
 })
