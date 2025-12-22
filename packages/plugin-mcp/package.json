@@ -48,7 +48,7 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.2",
+    "@modelcontextprotocol/sdk": "~1.21.0",
     "@types/json-schema": "7.0.15",
     "@vercel/mcp-adapter": "^1.0.0",
     "json-schema-to-zod": "2.6.1",
