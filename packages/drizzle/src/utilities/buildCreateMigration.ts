@@ -22,7 +22,7 @@ export const buildCreateMigration = ({
   const dirname = path.dirname(filename)
   return async function createMigration(
     this: DrizzleAdapter,
-    { file, forceAcceptWarning, migrationName, payload, skipEmpty },
+    { file, forceAcceptWarning, migrationName, nonInteractive, payload, skipEmpty },
   ) {
     const dir = payload.db.migrationDir
     if (!fs.existsSync(dir)) {
@@ -90,6 +90,12 @@ export const buildCreateMigration = ({
 
       if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
         if (skipEmpty) {
+          process.exit(0)
+        }
+        if (nonInteractive) {
+          payload.logger.info({
+            msg: 'No schema changes detected. Exiting due to non-interactive mode.',
+          })
           process.exit(0)
         }
 
