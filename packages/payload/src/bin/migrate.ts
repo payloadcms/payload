@@ -22,7 +22,6 @@ export const availableCommands = [
   'migrate:reset',
   'migrate:status',
   'migrate:fresh',
-  'migrate:snapshot',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
@@ -53,6 +52,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
 
   const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
   const skipEmpty = formattedArgs.includes('skipEmpty')
+  const nonInteractive = formattedArgs.includes('nonInteractive')
 
   if (help) {
     // eslint-disable-next-line no-console
@@ -93,6 +93,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           file,
           forceAcceptWarning,
           migrationName: args[1],
+          nonInteractive,
           payload,
           skipEmpty,
         })
