@@ -22,6 +22,7 @@ export const availableCommands = [
   'migrate:reset',
   'migrate:status',
   'migrate:fresh',
+  'migrate:snapshot',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
