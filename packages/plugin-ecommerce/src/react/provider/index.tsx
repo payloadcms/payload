@@ -50,6 +50,7 @@ const defaultContext: EcommerceContextType = {
   initiatePayment: async () => {},
   isLoading: false,
   paymentMethods: [],
+  refreshCart: async () => {},
   removeItem: async () => {},
   setCurrency: () => {},
   updateAddress: async () => {},
@@ -251,6 +252,12 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     },
     [baseAPIURL, cartQuery, cartsSlug, cartSecret],
   )
+
+  const refreshCart = useCallback<EcommerceContextType['refreshCart']>(async () => {
+    if (!cartID) {return}
+    const updatedCart = await getCart(cartID)
+    setCart(updatedCart)
+  }, [cartID, getCart])
 
   const deleteCart = useCallback(
     async (cartID: DefaultDocumentIDType) => {
@@ -898,6 +905,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         initiatePayment,
         isLoading,
         paymentMethods,
+        refreshCart,
         removeItem,
         selectedPaymentMethod,
         setCurrency,
@@ -960,8 +968,7 @@ export const useCurrency = () => {
 }
 
 export function useCart<T extends CartsCollection>() {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, isLoading, removeItem } =
-    useEcommerce()
+  const { addItem, cart, clearCart, decrementItem, incrementItem, refreshCart, isLoading, removeItem } = useEcommerce()
 
   if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
@@ -973,6 +980,7 @@ export function useCart<T extends CartsCollection>() {
     clearCart,
     decrementItem,
     incrementItem,
+    refreshCart,
     isLoading,
     removeItem,
   }
