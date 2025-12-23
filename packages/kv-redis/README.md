@@ -20,6 +20,13 @@ export default buildConfig({
     redisURL: 'redis://localhost:6379',
     // Optional prefix for Redis keys to isolate the store. Defaults to 'payload-kv'
     keyPrefix: 'kv-storage',
+    // Optional TTL resolver automatic cache invalidation
+    resolveTTL: (key) => {
+      // Set different TTLs based on key patterns
+      if (key.startsWith('session:')) return 3600
+      if (key.startsWith('cache:')) return 300
+      return undefined // No TTL for other keys
+    }
   }),
 })
 ```
