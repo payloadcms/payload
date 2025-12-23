@@ -2,19 +2,34 @@ import type { KVAdapter, KVAdapterResult, KVStoreValue } from 'payload'
 
 import { Redis } from 'ioredis'
 
-export type TTLResolver = (key: string) => number | undefined
+export type TTLRule = {
+  prefix: string
+  ttl: number
+}
+
+export type TTLConfig = TTLRule[]
 
 export class RedisKVAdapter implements KVAdapter {
   redisClient: Redis
-  resolveTTL?: TTLResolver
+  resolveTTL?: (key: string) => number | undefined
 
   constructor(
     readonly keyPrefix: string,
     redisURL: string,
-    resolveTTL?: TTLResolver,
+    ttlConfig?: TTLConfig,
   ) {
     this.redisClient = new Redis(redisURL)
-    this.redisTTL = resolveTTL
+
+    if (ttlConfig) {
+      this.resolveTTL = (key: string) => {
+        for (const rule of ttlConfig) {
+          if (key.startsWith(rule.prefix)) {
+            return rule.ttl
+          }
+        }
+        return undefined
+      }
+    }
   }
 
   async clear(): Promise<void> {
@@ -76,8 +91,8 @@ export type RedisKVAdapterOptions = {
   keyPrefix?: string
   /** Redis connection URL (e.g., 'redis://localhost:6379'). Defaults to process.env.REDIS_URL */
   redisURL?: string
-  /** Optional TTL resolver function that returns TTL in seconds for a given key */
-  resolveTTL?: TTLResolver
+  /** Optional TTL configuration for automatic cache invalidation */
+  ttl?: TTLConfig
 }
 
 export const redisKVAdapter = (options: RedisKVAdapterOptions = {}): KVAdapterResult => {
@@ -89,6 +104,6 @@ export const redisKVAdapter = (options: RedisKVAdapterOptions = {}): KVAdapterRe
   }
 
   return {
-    init: () => new RedisKVAdapter(keyPrefix, redisURL, options.resolveTTL),
+    init: () => new RedisKVAdapter(keyPrefix, redisURL, options.ttl),
   }
 }
