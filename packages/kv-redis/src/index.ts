@@ -2,14 +2,34 @@ import type { KVAdapter, KVAdapterResult, KVStoreValue } from 'payload'
 
 import { Redis } from 'ioredis'
 
+export type TTLRule = {
+  prefix: string
+  ttl: number
+}
+
+export type TTLConfig = TTLRule[]
+
 export class RedisKVAdapter implements KVAdapter {
   redisClient: Redis
+  resolveTTL?: (key: string) => number | undefined
 
   constructor(
     readonly keyPrefix: string,
     redisURL: string,
+    ttlConfig?: TTLConfig,
   ) {
     this.redisClient = new Redis(redisURL)
+
+    if (ttlConfig) {
+      this.resolveTTL = (key: string) => {
+        for (const rule of ttlConfig) {
+          if (key.startsWith(rule.prefix)) {
+            return rule.ttl
+          }
+        }
+        return undefined
+      }
+    }
   }
 
   async clear(): Promise<void> {
@@ -50,7 +70,15 @@ export class RedisKVAdapter implements KVAdapter {
   }
 
   async set(key: string, data: KVStoreValue): Promise<void> {
-    await this.redisClient.set(`${this.keyPrefix}${key}`, JSON.stringify(data))
+    const redisKey = `${this.keyPrefix}${key}`
+    const value = JSON.stringify(data)
+    const ttl = this.resolveTTL?.(key)
+
+    if (ttl && ttl > 0) {
+      await this.redisClient.set(redisKey, value, 'EX', ttl)
+    } else {
+      await this.redisClient.set(redisKey, value)
+    }
   }
 }
 
@@ -63,6 +91,8 @@ export type RedisKVAdapterOptions = {
   keyPrefix?: string
   /** Redis connection URL (e.g., 'redis://localhost:6379'). Defaults to process.env.REDIS_URL */
   redisURL?: string
+  /** Optional TTL configuration for automatic cache invalidation */
+  ttl?: TTLConfig
 }
 
 export const redisKVAdapter = (options: RedisKVAdapterOptions = {}): KVAdapterResult => {
@@ -74,6 +104,6 @@ export const redisKVAdapter = (options: RedisKVAdapterOptions = {}): KVAdapterRe
   }
 
   return {
-    init: () => new RedisKVAdapter(keyPrefix, redisURL),
+    init: () => new RedisKVAdapter(keyPrefix, redisURL, options.ttl),
   }
 }
