@@ -7,10 +7,10 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
-
 export const sanitizeGlobal = async (
   config: Config,
   global: GlobalConfig,
@@ -99,7 +99,10 @@ export const sanitizeGlobal = async (
 
   if (global.versions) {
     if (global.versions === true) {
-      global.versions = { drafts: false, max: 100 }
+      global.versions = {
+        drafts: false,
+        max: 100,
+      }
     }
 
     global.versions.max = typeof global.versions.max === 'number' ? global.versions.max : 100
@@ -112,6 +115,18 @@ export const sanitizeGlobal = async (
         }
       }
 
+      const hasLocalizedFields = traverseForLocalizedFields(global.fields)
+
+      if (config.localization && hasLocalizedFields) {
+        if (global.versions.drafts.localizeStatus === undefined) {
+          global.versions.drafts.localizeStatus = false
+        }
+      }
+
+      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
+        ? global.versions.drafts.localizeStatus
+        : false
+
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
@@ -122,7 +137,12 @@ export const sanitizeGlobal = async (
         global.versions.drafts.validate = false
       }
 
-      global.fields = mergeBaseFields(global.fields, baseVersionFields)
+      global.fields = mergeBaseFields(
+        global.fields,
+        baseVersionFields({
+          localized: global.versions.drafts.localizeStatus ?? false,
+        }),
+      )
     }
   }
 

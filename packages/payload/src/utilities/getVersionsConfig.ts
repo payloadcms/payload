@@ -14,6 +14,19 @@ export const hasDraftsEnabled = (config: EntityConfig): boolean => {
 }
 
 /**
+ * Check if an entity has localized status enabled
+ */
+export const hasLocalizeStatusEnabled = (config: EntityConfig): boolean => {
+  return Boolean(
+    config?.versions &&
+      typeof config.versions === 'object' &&
+      config.versions.drafts &&
+      typeof config.versions.drafts === 'object' &&
+      config.versions.drafts.localizeStatus,
+  )
+}
+
+/**
  * Check if an entity has autosave enabled
  */
 export const hasAutosaveEnabled = (
@@ -71,10 +84,10 @@ export const getVersionsMax = (config: EntityConfig): number => {
   }
   // Collections have maxPerDoc, globals have max
   if ('maxPerDoc' in config.versions) {
-    return config.versions.maxPerDoc ?? 0
+    return config.versions.maxPerDoc ?? 100
   }
   if ('max' in config.versions) {
-    return config.versions.max ?? 0
+    return config.versions.max ?? 100
   }
   return 0
 }
