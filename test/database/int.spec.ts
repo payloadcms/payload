@@ -29,15 +29,15 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
 
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
 
@@ -51,8 +51,6 @@ let restClient: NextRESTClient
 const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
-
-const itMongo = process.env.PAYLOAD_DATABASE?.startsWith('mongodb') ? it : it.skip
 
 describe('database', () => {
   beforeAll(async () => {
@@ -609,8 +607,9 @@ describe('database', () => {
       await noTimestampsTestDB(true)
     })
 
-    itMongo(
+    it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -619,8 +618,9 @@ describe('database', () => {
       },
     )
 
-    itMongo(
+    it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -1548,12 +1548,8 @@ describe('database', () => {
       ranFreshTest = true
     })
 
-    it('should run migrate:down', async () => {
-      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      if (!isMongoose(payload)) {
-        return
-      }
-
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    it('should run migrate:down', { db: 'mongo' }, async () => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1586,11 +1582,8 @@ describe('database', () => {
       await payload.delete({ collection: 'payload-migrations', where: {} })
     })
 
-    it('should run migrate:refresh', async () => {
-      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      if (!isMongoose(payload)) {
-        return
-      }
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    it('should run migrate:refresh', { db: 'mongo' }, async () => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -1607,11 +1600,8 @@ describe('database', () => {
     })
   })
 
-  it('should run migrate:reset', async () => {
-    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    if (!isMongoose(payload)) {
-      return
-    }
+  // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+  it('should run migrate:reset', { db: 'mongo' }, async () => {
     let error
     try {
       await payload.db.migrateReset()
@@ -1730,6 +1720,7 @@ describe('database', () => {
       await payload.db.collections['relationships-migration'].deleteMany({})
       await payload.db.versions['relationships-migration'].deleteMany({})
     })
+
   })
 
   describe('schema', () => {
@@ -2764,11 +2755,7 @@ describe('database', () => {
     })
   })
 
-  const describeSQL = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
-    ? describe.skip
-    : describe
-
-  describeSQL('Schema generation', () => {
+  describe('Schema generation', { db: 'drizzle' }, () => {
     if (
       process.env.PAYLOAD_DATABASE.includes('postgres') ||
       process.env.PAYLOAD_DATABASE === 'supabase'
@@ -5202,11 +5189,7 @@ describe('database', () => {
     await payload.db.connect()
   })
 
-  it('ensure mongodb query sanitization does not duplicate IDs', () => {
-    if (!isMongoose(payload)) {
-      return
-    }
-
+  it('ensure mongodb query sanitization does not duplicate IDs', { db: 'mongo' }, () => {
     const res: any = sanitizeQueryValue({
       field: {
         name: '_id',
@@ -5225,51 +5208,55 @@ describe('database', () => {
     expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 
-  itMongo('ensure mongodb respects collation when using collection in the config', async () => {
-    // Clear any existing documents
-    await payload.delete({ collection: 'simple', where: {} })
+  it(
+    'ensure mongodb respects collation when using collection in the config',
+    { db: 'mongo' },
+    async () => {
+      // Clear any existing documents
+      await payload.delete({ collection: 'simple', where: {} })
 
-    const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
-    const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
+      const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
+      const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
 
-    const simple_1 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Роман' },
-    })
-    const simple_2 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Віктор' },
-    })
-    const simple_3 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Євген' },
-    })
+      const simple_1 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Роман' },
+      })
+      const simple_2 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Віктор' },
+      })
+      const simple_3 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Євген' },
+      })
 
-    const results = await payload.find({
-      collection: 'simple',
-      locale: 'uk',
-      sort: 'text',
-    })
+      const results = await payload.find({
+        collection: 'simple',
+        locale: 'uk',
+        sort: 'text',
+      })
 
-    const initialMappedResults = results.docs.map((doc) => doc.text)
+      const initialMappedResults = results.docs.map((doc) => doc.text)
 
-    expect(initialMappedResults).toEqual(expectedUnsortedItems)
+      expect(initialMappedResults).toEqual(expectedUnsortedItems)
 
-    payload.db.collation = { strength: 1 }
+      payload.db.collation = { strength: 1 }
 
-    const resultsWithCollation = await payload.find({
-      collection: 'simple',
-      locale: 'uk',
-      sort: 'text',
-    })
+      const resultsWithCollation = await payload.find({
+        collection: 'simple',
+        locale: 'uk',
+        sort: 'text',
+      })
 
-    const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
+      const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
 
-    console.log({ docs: JSON.stringify(collatedMappedResults) })
+      console.log({ docs: JSON.stringify(collatedMappedResults) })
 
-    expect(collatedMappedResults).toEqual(expectedSortedItems)
-  })
+      expect(collatedMappedResults).toEqual(expectedSortedItems)
+    },
+  )
 })
