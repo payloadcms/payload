@@ -80,8 +80,18 @@ export const plTranslations: DefaultTranslationsObject = {
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj Widżet',
     deleteWidget: 'Usuń widget {{id}}',
+    discardConfirmLabel: 'Odrzuć',
+    discardMessage:
+      'Masz niezapisane zmiany w układzie swojego pulpitu. Czy na pewno chcesz je odrzucić?',
+    discardTitle: 'Odrzucić zmiany?',
+    editDashboard: 'Edytuj Pulpit',
+    editingDashboard: 'Edycja Panelu sterowania',
+    noItems:
+      'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
+    resetLayout: 'Zresetuj Układ',
     searchWidgets: 'Szukaj widgetów...',
   },
   error: {
@@ -94,6 +104,8 @@ export const plTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument o ID {{id}} nie mógł zostać znaleziony. Mogło zostać usunięte lub nigdy nie istniało, lub może nie masz do niego dostępu.',
     emailOrPasswordIncorrect: 'Podany adres e-mail lub hasło jest nieprawidłowe.',
+    failedToResetLayout: 'Nie udało się zresetować układu.',
+    failedToSaveLayout: 'Nie udało się zapisać układu.',
     followingFieldsInvalid_one: 'To pole jest nieprawidłowe:',
     followingFieldsInvalid_other: 'Następujące pola są nieprawidłowe:',
     incorrectCollection: 'Nieprawidłowa kolekcja',

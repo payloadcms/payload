@@ -146,7 +146,7 @@ export class DashboardHelper {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
       await expect(this.stepNavLast.locator('button')).toHaveCount(3)
       await expect(this.stepNavLast.locator('button').nth(0)).toHaveText('Add +')
-      await expect(this.stepNavLast.locator('button').nth(1)).toHaveText('Save Changes')
+      await expect(this.stepNavLast.locator('button').nth(1)).toHaveText('Save changes')
       await expect(this.stepNavLast.locator('button').nth(2)).toHaveText('Cancel')
     } else {
       await expect(this.stepNavLast.locator('button')).toHaveCount(1)

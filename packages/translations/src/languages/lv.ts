@@ -80,8 +80,18 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
   dashboard: {
+    addButton: 'Pievienot +',
     addWidget: 'Pievienot logrīku',
     deleteWidget: 'Dzēst logrīku {{id}}',
+    discardConfirmLabel: 'Atmest',
+    discardMessage:
+      'Jums ir nesaglabātas izmaiņas savā informācijas panela izkārtojumā. Vai esat pārliecināts, ka vēlaties tās atmest?',
+    discardTitle: 'Atcelt izmaiņas?',
+    editDashboard: 'Rediģēt informācijas paneli',
+    editingDashboard: 'Rediģēšanas panelis',
+    noItems:
+      'Jūsu informācijas panelī nav logrīku. Tos varat pievienot no izvēlnes "Informācijas panelis", kas atrodas augšējā josla.',
+    resetLayout: 'Atiestatīt Izkārtojumu',
     searchWidgets: 'Meklēt logrīkus...',
   },
   error: {
@@ -94,6 +104,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokuments ar ID {{id}} netika atrasts. Iespējams, tas ir izdzēsts vai nekad nav eksistējis, vai arī jums nav pieejas tam.',
     emailOrPasswordIncorrect: 'Norādītais e-pasts vai parole nav pareiza.',
+    failedToResetLayout: 'Neizdevās atjaunot izkārtojumu.',
+    failedToSaveLayout: 'Neizdevās saglabāt izkārtojumu.',
     followingFieldsInvalid_one: 'Šis lauks nav derīgs:',
     followingFieldsInvalid_other: 'Šie lauki nav derīgi:',
     incorrectCollection: 'Nepareiza kolekcija',
