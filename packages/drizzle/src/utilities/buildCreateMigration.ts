@@ -89,14 +89,13 @@ export const buildCreateMigration = ({
       }
 
       if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
-        if (skipEmpty) {
-          process.exit(0)
-        }
-        if (nonInteractive) {
-          payload.logger.info({
-            msg: 'No schema changes detected. Exiting due to non-interactive mode.',
-          })
-          process.exit(0)
+        if (skipEmpty || nonInteractive) {
+          if (nonInteractive) {
+            payload.logger.info({
+              msg: 'No schema changes detected. Exiting due to non-interactive mode.',
+            })
+          }
+          return
         }
 
         const { confirm: shouldCreateBlankMigration } = await prompts(
