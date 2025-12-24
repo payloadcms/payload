@@ -1,5 +1,7 @@
 import type { DocToSync, SyncDocArgs } from '../types.js'
 
+import { getLocalesToSync } from './getLocalesToSync.js'
+
 export const syncDocAsSearchIndex = async ({
   collection,
   doc,
@@ -15,7 +17,24 @@ export const syncDocAsSearchIndex = async ({
   const { beforeSync, defaultPriorities, deleteDrafts, searchOverrides, syncDrafts } = pluginConfig
 
   const searchSlug = searchOverrides?.slug || 'search'
+
+  // Get allowed locales for this document
+  const allowedLocales = await getLocalesToSync({
+    collection,
+    config: req.payload.config,
+    doc,
+    pluginConfig,
+    req,
+  })
+
+  // Determine sync locale
   const syncLocale = locale || req.locale
+
+  // Check if this locale should be synced
+  if (syncLocale && !allowedLocales.includes(syncLocale)) {
+    // Skip sync - this locale is filtered out
+    return doc
+  }
 
   let dataToSave: DocToSync = {
     doc: {
@@ -25,7 +44,7 @@ export const syncDocAsSearchIndex = async ({
     title,
   }
   const docKeyPrefix = `${collection}:${id}`
-  const docKey = pluginConfig.locales?.length ? `${docKeyPrefix}:${syncLocale}` : docKeyPrefix
+  const docKey = req.payload.config.localization ? `${docKeyPrefix}:${syncLocale}` : docKeyPrefix
   const syncedDocsSet = (req.context?.syncedDocsSet as Set<string>) || new Set<string>()
 
   if (syncedDocsSet.has(docKey)) {
