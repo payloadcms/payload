@@ -33,4 +33,8 @@ export type SanitizedClientEditorConfig = {
   features: SanitizedClientFeatures
   lexical: LexicalEditorConfig
   resolvedFeatureMap: ResolvedClientFeatureMap
+  /**
+   * To identify what view this editor config was created for.
+   */
+  view?: string
 }
