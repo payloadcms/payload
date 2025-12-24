@@ -36,6 +36,13 @@ export const testEslintConfig = [
   },
   {
     files: ['**/*.int.spec.ts', '**/int.spec.ts'],
+    settings: {
+      vitest: {
+        // See https://github.com/vitest-dev/eslint-plugin-vitest?tab=readme-ov-file#custom-fixtures
+        // This ensures that the eslint plugin recognizes the `it` wrapper function in our helpers/vitest.ts file.
+        vitestImports: [/helpers\/vitest/],
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
