@@ -46,12 +46,16 @@ export const slugifyHandler: ServerFunction<
     path,
   })
 
-  const customSlugify = (
+  const fieldLevelSlugify = (
     typeof field?.custom?.slugify === 'function' ? field.custom.slugify : undefined
   ) as Slugify
 
-  const result = customSlugify
-    ? await customSlugify({ data, req, valueToSlugify })
+  const configLevelSlugify = req.payload.config.slugify
+
+  const slugifyToUse = fieldLevelSlugify || configLevelSlugify
+
+  const result = slugifyToUse
+    ? await slugifyToUse({ data, req, valueToSlugify })
     : defaultSlugify(valueToSlugify)
 
   return result
