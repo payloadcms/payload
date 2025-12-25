@@ -840,6 +840,26 @@ describe('Joins Field', () => {
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
+
+    it('should populate the join field if the version is unpublished and draft: true', async () => {
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: { title: 'category', _status: 'draft' },
+        draft: true,
+      })
+      const post = await payload.create({
+        collection: 'versions',
+        data: { title: 'post', categoryVersion: category.id },
+        draft: true,
+      })
+      const res = await payload.find({
+        collection: 'categories-versions',
+        // id: category.id,
+        draft: true,
+      })
+      expect(res.docs[0].relatedVersions?.docs[0].id).toBe(post.id)
+      expect(res.docs[0].relatedVersions?.docs[0].title).toBe(post.title)
+    })
   })
 
   describe('REST', () => {
