@@ -1,9 +1,11 @@
 import type {
   createMollieClient,
   MollieClient,
+  Customer as MollieCustomer,
   Payment as MolliePayment,
   PaymentStatus as MolliePaymentStatus,
 } from '@mollie/api-client'
+import type { CreateParameters } from '@mollie/api-client/dist/types/binders/payments/parameters.js'
 import type { Field, GroupField, PayloadRequest } from 'payload'
 
 import type {
@@ -30,8 +32,26 @@ type MollieWebhookHandlers = {
   [paymentStatus in MolliePaymentStatus]: MollieWebhookHandler
 }
 
+type CreatePaymentParameters = Partial<Omit<CreateParameters, 'amount' | 'customerId'>>
+
 export type MollieAdapterArgs = {
   apiKey: string
+  createPayment?: (args: {
+    /**
+     * The amount of the payment in cents.
+     * @example 1000 (10.00 USD)
+     */
+    amount: number
+    /**
+     * The currency of the payment.
+     * @example 'USD'
+     */
+    currency: string
+    /**
+     * The Mollie customer object.
+     */
+    customer: MollieCustomer
+  }) => CreatePaymentParameters | Promise<CreatePaymentParameters>
   webhooks?: MollieWebhookHandlers
 } & PaymentAdapterArgs
 

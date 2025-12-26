@@ -7,13 +7,14 @@ import { getOrCreateMollieCustomer } from './utils.js'
 
 type Props = {
   apiKey: MollieAdapterArgs['apiKey']
+  createPayment?: MollieAdapterArgs['createPayment']
 }
 
 export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['initiatePayment'] =
   (props) =>
   async ({ customersSlug = 'users', data, req, transactionsSlug }) => {
     const payload = req.payload
-    const { apiKey } = props || {}
+    const { apiKey, createPayment } = props || {}
 
     const customerEmail = data.customerEmail
     const currency = data.currency
@@ -71,18 +72,29 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
 
       const shippingAddressAsString = JSON.stringify(shippingAddressFromData)
 
+      const parameters = await createPayment?.({
+        amount,
+        currency,
+        customer,
+      })
+
       const payment = await mollie.payments.create({
+        ...parameters,
         amount: {
           // Must be in format '10.00' as string
           value: (amount / 100).toFixed(2),
           // Must be a valid ISO 4217 currency code
           currency: currency.toUpperCase(),
         },
+        customerId: customer.id,
         // This will appear on the customer's bank statement
         // Use the cart ID as a description for now
-        customerId: customer.id,
-        description: `${cart.id}`,
+        description: parameters?.description || `${cart.id}`,
+        // TODO: billingAddress: {},
+        // TODO: shippingAddress: {},
         metadata: {
+          ...(parameters?.metadata ?? {}),
+          // Ensure that these are always included and cannot be overridden
           cartID: cart.id,
           cartItemsSnapshot: JSON.stringify(flattenedCart),
           shippingAddress: shippingAddressAsString,

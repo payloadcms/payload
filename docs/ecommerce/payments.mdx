@@ -178,10 +178,11 @@ export default buildConfig({
 
 The Mollie payment adapter takes the following configuration options:
 
-| Option   | Type     | Description                                                                                                                                                                                      |
-| -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| apiKey   | `string` | Your Mollie API Key, found in the [Mollie Dashboard](https://www.mollie.com/dashboard/settings/profiles).                                                                                        |
-| webhooks | `object` | (Optional) An object where the keys are Mollie payment statuses and the values are functions that will be called when that event is received. See [Webhooks](#mollie-webhooks) for more details. |
+| Option        | Type       | Description                                                                                                                                                                                      |
+| ------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| apiKey        | `string`   | Your Mollie API Key, found in the [Mollie Dashboard](https://www.mollie.com/dashboard/settings/profiles).                                                                                        |
+| createPayment | `function` | (Optional) A function that returns custom values for the payment object such as custom description, webhook url or success/cancellation url.                                                     |
+| webhooks      | `object`   | (Optional) An object where the keys are Mollie payment statuses and the values are functions that will be called when that event is received. See [Webhooks](#mollie-webhooks) for more details. |
 
 ### Mollie Webhooks
 
@@ -209,6 +210,14 @@ export default buildConfig({
         paymentMethods: [
           mollieAdapter({
             apiKey: process.env.MOLLIE_API_KEY,
+            createPayment: ({ amount, currency, customer }) => {
+              return {
+                // This url must be publicly reachable. It's recommended to use a local tunnel during development.
+                webhookUrl: 'https://example.com/api/mollie/webhooks',
+                // additional props...
+                // see https://docs.mollie.com/reference/create-payment
+              }
+            },
             webhooks: {
               paid: ({ payment, req }) => {
                 console.log(payment)
