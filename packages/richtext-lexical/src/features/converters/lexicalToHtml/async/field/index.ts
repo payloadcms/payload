@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field } from 'payload'
+import type { Field, FieldAdmin } from 'payload'
 
 import type { HTMLConvertersAsync, HTMLConvertersFunctionAsync } from '../types.js'
 
@@ -7,9 +7,19 @@ import { getPayloadPopulateFn } from '../../../utilities/payloadPopulateFn.js'
 import { convertLexicalToHTMLAsync } from '../index.js'
 
 type Args = {
+  /**
+   * Admin config for the lexicalHTML field
+   *
+   * The `editorOptions` property will be omitted and set to `{ language: 'html' }` by default.
+   * @since v3.62.0
+   */
+  admin?: Omit<FieldAdmin, 'editorOptions'>
   converters?: HTMLConvertersAsync | HTMLConvertersFunctionAsync
   /**
    * Whether the lexicalHTML field should be hidden in the admin panel
+   *
+   * @deprecated since v3.62.0 - use the `admin` property instead
+   * @todo remove deprecated hidden property in 4.0
    *
    * @default true
    */
@@ -36,15 +46,27 @@ type Args = {
  * @todo will be renamed to lexicalHTML in 4.0, replacing the deprecated `lexicalHTML` converter
  */
 export const lexicalHTMLField: (args: Args) => Field = (args) => {
-  const { converters, hidden = true, htmlFieldName, lexicalFieldName, storeInDB = false } = args
+  const {
+    admin,
+    converters,
+    hidden = true, // TODO: remove deprecated `hidden` property in 4.0
+    htmlFieldName,
+    lexicalFieldName,
+    storeInDB = false,
+  } = args
+
   const field: Field = {
     name: htmlFieldName,
     type: 'code',
     admin: {
+      ...{
+        disableListColumn: true, // Disable list column by default for HTML field
+        hidden, // TODO: remove deprecated `hidden` property in 4.0
+        ...(admin || {}),
+      },
       editorOptions: {
         language: 'html',
       },
-      hidden,
     },
     hooks: {
       afterRead: [
