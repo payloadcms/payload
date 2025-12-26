@@ -56,7 +56,7 @@ export type MollieAdapterArgs = {
 } & PaymentAdapterArgs
 
 export const mollieAdapter: (props: MollieAdapterArgs) => PaymentAdapter = (props) => {
-  const { apiKey, groupOverrides, webhooks } = props
+  const { apiKey, createPayment, groupOverrides, webhooks } = props
   const label = props?.label || 'Mollie'
 
   const baseFields: Field[] = [
@@ -99,6 +99,7 @@ export const mollieAdapter: (props: MollieAdapterArgs) => PaymentAdapter = (prop
     group: groupField,
     initiatePayment: initiatePayment({
       apiKey,
+      createPayment,
     }),
     label,
   }
