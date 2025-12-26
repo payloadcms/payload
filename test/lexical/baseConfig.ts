@@ -7,6 +7,7 @@ import { type Config } from 'payload'
 
 import { LexicalFullyFeatured } from './collections/_LexicalFullyFeatured/index.js'
 import ArrayFields from './collections/Array/index.js'
+import { Hooks } from './collections/Hooks/index.js'
 import {
   getLexicalFieldsCollection,
   lexicalBlocks,
@@ -51,6 +52,7 @@ export const baseConfig: Partial<Config> = {
     LexicalInBlock,
     LexicalAccessControl,
     LexicalRelationshipsFields,
+    Hooks,
     RichTextFields,
     TextFields,
     Uploads,
