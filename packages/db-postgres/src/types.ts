@@ -87,13 +87,14 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   : GeneratedDatabaseSchema['schemaUntyped']
 
 type Drizzle =
+  | any
   | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
   | PgWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
 
 export type PostgresAdapter = {
   drizzle: Drizzle
   pg: PgDependency
-  pool: Pool
+  pool: any | Pool
   poolOptions: PoolConfig
 } & BasePostgresAdapter
 
