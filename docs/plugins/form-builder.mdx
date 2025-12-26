@@ -125,9 +125,9 @@ formBuilderPlugin({
 For full types with `beforeChangeParams`, you can import the types from the plugin:
 
 ```ts
-import type { BeforeEmail } from '@payloadcms/plugin-form-builder'
+import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
 // Your generated FormSubmission type
-import type { FormSubmission } from '@payload-types'
+import type { FormSubmission } from '@/payload-types'
 
 // Pass it through and 'data' or 'originalDoc' will now be typed
 const beforeEmail: BeforeEmail<FormSubmission> = (
