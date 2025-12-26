@@ -61,7 +61,15 @@
     span {
       max-width: base(8);
       text-overflow: ellipsis;
+      overflow: hidden;
       white-space: nowrap;
+
+      // Exception: don't truncate modular dashboard elements
+      &:has(.dashboard-breadcrumb-select, .dashboard-breadcrumb-dropdown__editing) {
+        max-width: none;
+        overflow: visible;
+        white-space: normal;
+      }
     }
 
     @include mid-break {
