@@ -78,6 +78,7 @@ export interface Config {
     movies: Movie;
     directors: Director;
     movieReviews: MovieReview;
+    'restricted-filter-options': RestrictedFilterOption;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
     pages: Page;
@@ -88,6 +89,7 @@ export interface Config {
     relations: Relation1;
     items: Item;
     blocks: Block;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -110,6 +112,7 @@ export interface Config {
     movies: MoviesSelect<false> | MoviesSelect<true>;
     directors: DirectorsSelect<false> | DirectorsSelect<true>;
     movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
+    'restricted-filter-options': RestrictedFilterOptionsSelect<false> | RestrictedFilterOptionsSelect<true>;
     'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
     tree: TreeSelect<false> | TreeSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -120,6 +123,7 @@ export interface Config {
     relations: RelationsSelect<false> | RelationsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     blocks: BlocksSelect<false> | BlocksSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -334,6 +338,29 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-filter-options".
+ */
+export interface RestrictedFilterOption {
+  id: string;
+  relationWithFilterOptions: (
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }
+    | {
+        relationTo: 'directors';
+        value: string | Director;
+      }
+    | {
+        relationTo: 'custom-id';
+        value: string | CustomId;
+      }
+  )[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "polymorphic-relationships".
  */
 export interface PolymorphicRelationship {
@@ -508,6 +535,23 @@ export interface Block {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -556,6 +600,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'movieReviews';
         value: string | MovieReview;
+      } | null)
+    | ({
+        relationTo: 'restricted-filter-options';
+        value: string | RestrictedFilterOption;
       } | null)
     | ({
         relationTo: 'polymorphic-relationships';
@@ -787,6 +835,15 @@ export interface MovieReviewsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-filter-options_select".
+ */
+export interface RestrictedFilterOptionsSelect<T extends boolean = true> {
+  relationWithFilterOptions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "polymorphic-relationships_select".
  */
 export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
@@ -915,6 +972,14 @@ export interface BlocksSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
