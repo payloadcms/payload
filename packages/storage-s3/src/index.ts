@@ -54,6 +54,11 @@ export type S3StorageOptions = {
     Record<
       UploadCollectionSlug,
       | ({
+          /**
+           * Cache-Control header value to set on uploaded files.
+           * For example: 'max-age=31536000, public'.
+           */
+          cacheControl?: string
           signedDownloads?: SignedDownloadsConfig
         } & Omit<CollectionOptions, 'adapter'>)
       | true
@@ -216,6 +221,7 @@ function s3StorageInternal(
         acl,
         bucket,
         collection,
+        collections,
         getStorageClient,
         prefix,
       }),

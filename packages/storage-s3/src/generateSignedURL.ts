@@ -52,7 +52,14 @@ export const getGenerateSignedURLHandler = ({
     const url = await getSignedUrl(
       // @ts-expect-error mismatch versions or something
       getStorageClient(),
-      new AWS.PutObjectCommand({ ACL: acl, Bucket: bucket, ContentType: mimeType, Key: fileKey }),
+      new AWS.PutObjectCommand({
+        ACL: acl,
+        Bucket: bucket,
+        CacheControl:
+          typeof collectionS3Config === 'object' ? collectionS3Config.cacheControl : undefined,
+        ContentType: mimeType,
+        Key: fileKey,
+      }),
       {
         expiresIn: 600,
       },
