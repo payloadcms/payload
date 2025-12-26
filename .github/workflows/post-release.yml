@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Dispatch event
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
           repository: payloadcms/website
