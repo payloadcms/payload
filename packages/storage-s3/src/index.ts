@@ -19,6 +19,7 @@ import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
+import { versioningField } from './versionField.js'
 
 export type S3StorageOptions = {
   /**
@@ -83,6 +84,16 @@ export type S3StorageOptions = {
    * Use pre-signed URLs for files downloading. Can be overriden per-collection.
    */
   signedDownloads?: SignedDownloadsConfig
+
+  /**
+   * If S3 bucket versioning is turned on and this is enabled,
+   * the VersionId from S3 will be stored in a field on the uploaded file
+   *
+   * NOTE: This requires that versioning is enabled on the S3 bucket itself.
+   *
+   * @default false
+   */
+  versionFieldEnabled?: boolean
 }
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
@@ -122,6 +133,10 @@ export const s3Storage: S3StoragePlugin =
     }
 
     const isPluginDisabled = s3StorageOptions.enabled === false
+
+    if (!s3StorageOptions.versionFieldEnabled) {
+      s3StorageOptions.versionFieldEnabled = false
+    }
 
     initClientUploads({
       clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
@@ -171,6 +186,11 @@ export const s3Storage: S3StoragePlugin =
 
         return {
           ...collection,
+          // Add storageVersionId field to collection if versioning is enabled
+          fields: [
+            ...collection.fields,
+            ...(s3StorageOptions.versionFieldEnabled ? [versioningField] : []),
+          ],
           upload: {
             ...(typeof collection.upload === 'object' ? collection.upload : {}),
             disableLocalStorage: true,
@@ -193,6 +213,7 @@ function s3StorageInternal(
     collections,
     config = {},
     signedDownloads: topLevelSignedDownloads,
+    versionFieldEnabled,
   }: S3StorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
@@ -218,6 +239,7 @@ function s3StorageInternal(
         collection,
         getStorageClient,
         prefix,
+        versionFieldEnabled,
       }),
       staticHandler: getHandler({
         bucket,
