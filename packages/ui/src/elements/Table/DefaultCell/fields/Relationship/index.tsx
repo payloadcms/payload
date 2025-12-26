@@ -131,7 +131,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
       })}
       {Array.isArray(cellData) &&
         cellData.length > totalToShow &&
-        t('fields:itemsAndMore', { count: cellData.length - totalToShow, items: '' })}
+        `, ${t('fields:itemsAndMore', { count: cellData.length - totalToShow, items: '' })}`}
       {values.length === 0 && t('general:noLabel', { label: getTranslation(label || '', i18n) })}
     </div>
   )
