@@ -3,6 +3,8 @@ import type { Payload } from 'payload'
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import {
+  collectionSlugs,
+  customDocumentControlsSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
@@ -71,6 +73,15 @@ export const seed = async (_payload: Payload) => {
           overrideAccess: true,
         })
       }),
+      () =>
+        _payload.create({
+          collection: customDocumentControlsSlug,
+          data: {
+            title: 'Custom Document Controls',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
       () =>
         _payload.create({
           collection: customViews1CollectionSlug,
