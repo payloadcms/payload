@@ -297,10 +297,12 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
+  let resultWithLocales: JsonObject = result
+
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
-    result = await req.payload.db.updateOne({
+    resultWithLocales = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
@@ -314,7 +316,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (collectionConfig.versions) {
-    result = await saveVersion({
+    resultWithLocales = await saveVersion({
       id,
       autosave,
       collection: collectionConfig,
@@ -336,7 +338,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     depth,
-    doc: result,
+    doc: resultWithLocales,
     draft: draftArg,
     fallbackLocale,
     global: null,
@@ -359,6 +361,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           doc: result,
+          docWithLocales: resultWithLocales,
           req,
         })) || result
     }
@@ -391,8 +394,10 @@ export const updateDocument = async <
           context: req.context,
           data,
           doc: result,
+          docWithLocales: resultWithLocales,
           operation: 'update',
           previousDoc: originalDoc,
+          previousDocWithLocales: docWithLocales,
           req,
         })) || result
     }
