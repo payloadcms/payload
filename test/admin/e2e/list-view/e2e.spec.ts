@@ -91,10 +91,10 @@ describe('List View', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
-      dirname,
-      prebuild,
-    }))
+      ; ({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+        dirname,
+        prebuild,
+      }))
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     arrayUrl = new AdminUrlUtil(serverURL, arrayCollectionSlug)
@@ -424,11 +424,11 @@ describe('List View', () => {
       await whereBuilder.locator('.where-builder__add-first-filter').click()
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
-      await conditionField.locator('input.rs__input').fill('Tab 1 > Title')
+      await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
         conditionField.locator('.rs__menu-list').locator('div', {
-          hasText: exactText('Tab 1 > Title'),
+          hasText: exactText('Title'),
         }),
       ).toBeVisible()
     })
@@ -615,8 +615,7 @@ describe('List View', () => {
     test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
       // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
       await page.goto(
-        `${
-          new AdminUrlUtil(serverURL, 'geo').list
+        `${new AdminUrlUtil(serverURL, 'geo').list
         }?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`,
       )
 
@@ -693,7 +692,7 @@ describe('List View', () => {
 
       await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'test',
       })
@@ -707,7 +706,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'Test',
       })
@@ -718,7 +717,7 @@ describe('List View', () => {
 
       await expect(
         secondLi.locator('.condition__field').locator('.rs__single-value'),
-      ).toContainText('Tab 1 > Title')
+      ).toContainText('Title')
 
       await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
       await expect(secondLi.locator('.condition__value >> input')).toHaveValue('')
@@ -729,7 +728,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
       })
 
@@ -778,7 +777,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'Test 1',
       })
@@ -794,11 +793,9 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField
-        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
-        .click()
+      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
 
-      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
       await secondOperatorField.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')

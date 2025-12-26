@@ -66,9 +66,11 @@ export const reduceFieldsToOptions = ({
         if (typeof tab.label !== 'boolean') {
           const localizedTabLabel = getTranslation(tab.label, i18n)
 
-          const labelWithPrefix = labelPrefix
-            ? labelPrefix + ' > ' + localizedTabLabel
-            : localizedTabLabel
+          const labelWithPrefix = tabHasName(tab)
+            ? labelPrefix
+              ? labelPrefix + ' > ' + localizedTabLabel
+              : localizedTabLabel
+            : labelPrefix
 
           // Make sure we handle nested tabs
           const tabPathPrefix =
