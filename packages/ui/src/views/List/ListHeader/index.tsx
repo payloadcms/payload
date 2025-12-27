@@ -34,6 +34,7 @@ export type ListHeaderProps = {
   i18n: I18nClient
   isBulkUploadEnabled: boolean
   isTrashEnabled?: boolean
+  listSelectionItems?: React.ReactNode[]
   newDocumentURL: string
   onBulkUploadSuccess?: () => void
   /** @deprecated This prop will be removed in the next major version.
@@ -61,6 +62,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   i18n,
   isBulkUploadEnabled,
   isTrashEnabled,
+  listSelectionItems,
   newDocumentURL,
   onBulkUploadSuccess,
   openBulkUpload,
@@ -113,6 +115,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             disableBulkEdit={disableBulkEdit}
             key="list-selection"
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+            ListSelectionItems={listSelectionItems}
             showSelectAllAcrossPages={!isGroupingBy}
             viewType={viewType}
           />
