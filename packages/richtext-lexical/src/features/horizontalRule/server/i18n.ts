@@ -11,7 +11,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Хоризонтална линия',
   },
   cs: {
-    label: 'Vodorovný pravítko',
+    label: 'Vodorovné pravítko',
   },
   da: {
     label: 'Horisontal Regel',
