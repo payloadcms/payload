@@ -6,6 +6,8 @@ import type {
   BeforeListServerPropsOnly,
   BeforeListTableClientProps,
   BeforeListTableServerPropsOnly,
+  ListSelectionItemsClientProps,
+  ListSelectionItemsServerPropsOnly,
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
@@ -57,6 +59,19 @@ export const renderListViewSlots = ({
         Component: listMenuItems,
         importMap: payload.importMap,
         serverProps,
+      }),
+    ]
+  }
+
+  const listSelectionItems = collectionConfig.admin.components?.listSelectionItems
+
+  if (Array.isArray(listSelectionItems)) {
+    result.listSelectionItems = [
+      RenderServerComponent({
+        clientProps: clientProps satisfies ListSelectionItemsClientProps,
+        Component: listSelectionItems,
+        importMap: payload.importMap,
+        serverProps: serverProps satisfies ListSelectionItemsServerPropsOnly,
       }),
     ]
   }

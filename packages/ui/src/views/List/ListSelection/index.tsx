@@ -17,6 +17,7 @@ export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   label: string
+  ListSelectionItems?: React.ReactNode[]
   modalPrefix?: string
   showSelectAllAcrossPages?: boolean
   viewType?: ViewTypes
@@ -28,6 +29,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   label,
+  ListSelectionItems,
   modalPrefix,
   showSelectAllAcrossPages = true,
   viewType,
@@ -104,6 +106,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             viewType={viewType}
           />
         ),
+        ...(ListSelectionItems || []),
       ].filter(Boolean)}
     />
   )
