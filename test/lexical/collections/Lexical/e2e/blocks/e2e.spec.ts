@@ -1630,10 +1630,6 @@ async function createBlock({
   slashMenuPopover: Locator
 }> {
   const lastParagraph = richTextField.locator('p').last()
-  const blocksLocator = richTextField.locator(
-    '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
-  ) // The :not(.LexicalEditorTheme__block .LexicalEditorTheme__block) makes sure this does not select sub-blocks
-  const existingBlocksCount = await blocksLocator.count()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
@@ -1657,8 +1653,11 @@ async function createBlock({
   await blockSelectButton.click()
   await expect(slashMenuPopover).toBeHidden()
 
-  await expect(blocksLocator).toHaveCount(existingBlocksCount + 1)
-  const newBlock = blocksLocator.nth(existingBlocksCount)
+  const newBlock = richTextField
+    .locator(
+      '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
+    )
+    .nth(8) // The :not(.LexicalEditorTheme__block .LexicalEditorTheme__block) makes sure this does not select sub-blocks
   await newBlock.scrollIntoViewIfNeeded()
   return { newBlock, slashMenuPopover }
 }
