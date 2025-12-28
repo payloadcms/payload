@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { formatAdminURL, wait  } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -282,21 +282,19 @@ describe('Access Control', () => {
       ).not.toBeAttached()
 
       await expect(
-        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
+        page.locator('#field-array [id$="-row-0"] .rich-text-lexical .ContentEditable__root'),
       ).toBeVisible()
       await expect(
-        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
+        page.locator('#field-array [id$="-row-0"] .rich-text-lexical--read-only'),
       ).not.toBeAttached()
 
       await expect(
         page.locator(
-          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical .ContentEditable__root',
+          '#field-arrayWithAccessFalse [id$="-row-0"] .rich-text-lexical .ContentEditable__root',
         ),
       ).toBeVisible()
       await expect(
-        page.locator(
-          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical--read-only',
-        ),
+        page.locator('#field-arrayWithAccessFalse [id$="-row-0"] .rich-text-lexical--read-only'),
       ).toBeVisible()
 
       await expect(
@@ -341,10 +339,10 @@ describe('Access Control', () => {
       await expect(page.locator('#field-group #field-group__text')).toBeEnabled()
 
       await expect(
-        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
+        page.locator('#field-array [id$="-row-0"] .rich-text-lexical .ContentEditable__root'),
       ).toBeVisible()
       await expect(
-        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
+        page.locator('#field-array [id$="-row-0"] .rich-text-lexical--read-only'),
       ).toBeVisible() // => is read-only
     }
 

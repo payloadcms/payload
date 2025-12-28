@@ -24,7 +24,7 @@ export async function copyPasteField({
   }
 
   const popupBtnSelector = rowAction
-    ? `#${fieldName}-row-${rowIndex} .collapsible__actions button.array-actions__button`
+    ? `[id$="-row-${rowIndex}"] .collapsible__actions button.array-actions__button`
     : 'header .clipboard-action__popup button.popup-button'
   const popupBtn = field.locator(popupBtnSelector).first()
   await expect(popupBtn).toBeVisible()

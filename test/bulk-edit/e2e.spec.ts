@@ -504,7 +504,7 @@ test.describe('Bulk Edit', () => {
 
     await addArrayRow(page, { fieldName: 'array' })
 
-    const row = page.locator(`#array-row-0`)
+    const row = field.locator('[id$="-row-0"]')
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
