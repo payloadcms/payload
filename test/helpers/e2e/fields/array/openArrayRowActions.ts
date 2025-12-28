@@ -20,8 +20,9 @@ export const openArrayRowActions = async (
   rowActionsButtonLocator: Locator
 }> => {
   const formattedRowID = fieldName.toString().replace(/__/g, '.')
+  const rowSuffix = `${formattedRowID}-row-${rowIndex}`
   const rowActions = page
-    .locator(`#field-${fieldName} [id$="-${formattedRowID}-row-${rowIndex}"] .array-actions`)
+    .locator(`#field-${fieldName} :is([id$="-${rowSuffix}"], [id$="${rowSuffix}"]) .array-actions`)
     .first()
 
   const popupContentLocator = page.locator('.popup__content')
