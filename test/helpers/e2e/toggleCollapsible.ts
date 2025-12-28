@@ -52,7 +52,8 @@ export const toggleBlockOrArrayRow = async ({
   rowIndex: number
   targetState?: 'collapsed' | 'open'
 }) => {
-  const row = page.locator(`#field-${fieldName} [id$="-row-${rowIndex}"]`).first()
+  const formattedRowID = fieldName.replace(/__/g, '.')
+  const row = page.locator(`#field-${fieldName} [id$="-${formattedRowID}-row-${rowIndex}"]`).first()
 
   const toggler = row.locator('button.collapsible__toggle')
 

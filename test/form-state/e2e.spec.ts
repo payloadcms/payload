@@ -228,10 +228,14 @@ test.describe('Form State', () => {
     await page.goto(postsUrl.create)
 
     await addArrayRowAsync(page, 'array')
-    await page.locator('#field-array [id$="-row-0"] #field-array__0__customTextField').fill('1')
+    await page
+      .locator('#field-array [id$="-array-row-0"] #field-array__0__customTextField')
+      .fill('1')
 
     await addArrayRowAsync(page, 'array')
-    await page.locator('#field-array [id$="-row-1"] #field-array__1__customTextField').fill('2')
+    await page
+      .locator('#field-array [id$="-array-row-1"] #field-array__1__customTextField')
+      .fill('2')
 
     // block the next form state request from firing to ensure the field remains in stale state
     await page.route(postsUrl.create, async (route) => {
@@ -245,7 +249,7 @@ test.describe('Form State', () => {
     await removeArrayRow(page, { fieldName: 'array' })
 
     await expect(
-      page.locator('#field-array [id$="-row-0"] #field-array__0__customTextField'),
+      page.locator('#field-array [id$="-array-row-0"] #field-array__0__customTextField'),
     ).toHaveValue('2')
 
     await page.unroute(postsUrl.create)
@@ -317,18 +321,20 @@ test.describe('Form State', () => {
 
     // Now test array rows, as their merge logic is different
 
-    await page.locator('#field-computedArray [id$="-row-0"]').isVisible()
+    await page.locator('#field-computedArray [id$="-computedArray-row-0"]').isVisible()
 
     await removeArrayRow(page, { fieldName: 'computedArray' })
 
-    await page.locator('#field-computedArray [id$="-row-0"]').isHidden()
+    await page.locator('#field-computedArray [id$="-computedArray-row-0"]').isHidden()
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('#field-computedArray [id$="-row-0"]')).toBeVisible()
+    await expect(page.locator('#field-computedArray [id$="-computedArray-row-0"]')).toBeVisible()
 
     await expect(
-      page.locator('#field-computedArray [id$="-row-0"] #field-computedArray__0__text'),
+      page.locator(
+        '#field-computedArray [id$="-computedArray-row-0"] #field-computedArray__0__text',
+      ),
     ).toHaveValue('This is a computed value.')
   })
 
@@ -475,7 +481,7 @@ test.describe('Form State', () => {
     await page.goto(postsUrl.create)
     await addArrayRow(page, { fieldName: 'array' })
 
-    const row0 = page.locator('#field-array [id$="-row-0"]')
+    const row0 = page.locator('#field-array [id$="-array-row-0"]')
 
     await expect(row0.locator('#custom-array-row-label')).toHaveAttribute('data-id')
 
@@ -485,7 +491,7 @@ test.describe('Form State', () => {
 
     await duplicateArrayRow(page, { fieldName: 'array' })
 
-    const row1 = page.locator('#field-array [id$="-row-1"]')
+    const row1 = page.locator('#field-array [id$="-array-row-1"]')
 
     await expect(row1.locator('#custom-array-row-label')).toHaveAttribute('data-id')
 
@@ -586,22 +592,22 @@ test.describe('Form State', () => {
 
       // Add the first row and expect an optimistic loading state
       await addArrayRowAsync(page, 'array')
-      await expect(page.locator('#field-array [id$="-row-0"]')).toBeVisible()
+      await expect(page.locator('#field-array [id$="-array-row-0"]')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
       // eslint-disable-next-line playwright/no-wait-for-selector
-      await page.waitForSelector('#field-array [id$="-row-0"] .shimmer-effect')
+      await page.waitForSelector('#field-array [id$="-array-row-0"] .shimmer-effect')
 
       // Wait for the first request to be sent
       await page.waitForRequest((request) => request.url() === postsUrl.create)
 
       // Before the first request comes back, add the second row and expect an optimistic loading state
       await addArrayRowAsync(page, 'array')
-      await expect(page.locator('#field-array [id$="-row-1"]')).toBeVisible()
+      await expect(page.locator('#field-array [id$="-array-row-1"]')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
       // eslint-disable-next-line playwright/no-wait-for-selector
-      await page.waitForSelector('#field-array [id$="-row-0"] .shimmer-effect')
+      await page.waitForSelector('#field-array [id$="-array-row-0"] .shimmer-effect')
 
       // At this point there should have been a single request sent for the first row
       expect(requestCount).toBe(1)
@@ -623,7 +629,7 @@ test.describe('Form State', () => {
         await route.continue()
       })
 
-      await assertElementStaysVisible(page, '#field-array [id$="-row-1"]')
+      await assertElementStaysVisible(page, '#field-array [id$="-array-row-1"]')
 
       await page.unroute(postsUrl.create)
     })
@@ -658,14 +664,14 @@ test.describe('Form State', () => {
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector
           await page.waitForSelector(
-            '#field-array [id$="-row-0"] #field-array__0__customTextField',
+            '#field-array [id$="-array-row-0"] #field-array__0__customTextField',
             {
               timeout: TEST_TIMEOUT,
             },
           )
 
           await expect(
-            page.locator('#field-array [id$="-row-0"] #field-array__0__customTextField'),
+            page.locator('#field-array [id$="-array-row-0"] #field-array__0__customTextField'),
           ).toBeVisible()
 
           await expect(page.locator('#field-title')).toHaveValue('Test 2')
@@ -690,7 +696,7 @@ test.describe('Form State', () => {
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector
           await page.waitForSelector(
-            '#field-array [id$="-row-0"] #field-array__0__customTextField',
+            '#field-array [id$="-array-row-0"] #field-array__0__customTextField',
             {
               timeout: TEST_TIMEOUT,
             },
@@ -699,18 +705,18 @@ test.describe('Form State', () => {
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector
           await page.waitForSelector(
-            '#field-array [id$="-row-1"] #field-array__1__customTextField',
+            '#field-array [id$="-array-row-1"] #field-array__1__customTextField',
             {
               timeout: TEST_TIMEOUT,
             },
           )
 
           await expect(
-            page.locator('#field-array [id$="-row-0"] #field-array__0__customTextField'),
+            page.locator('#field-array [id$="-array-row-0"] #field-array__0__customTextField'),
           ).toBeVisible()
 
           await expect(
-            page.locator('#field-array [id$="-row-1"] #field-array__1__customTextField'),
+            page.locator('#field-array [id$="-array-row-1"] #field-array__1__customTextField'),
           ).toBeVisible()
         },
         {

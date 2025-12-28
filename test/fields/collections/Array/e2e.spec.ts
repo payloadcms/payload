@@ -110,7 +110,7 @@ describe('Array', () => {
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
     const customRowLabel = page.locator(
-      '#field-rowLabelAsComponent [id$="-row-0"] >> .array-field__row-header > :text("custom row label")',
+      '#field-rowLabelAsComponent [id$="-rowLabelAsComponent-row-0"] >> .array-field__row-header > :text("custom row label")',
     )
     await expect(customRowLabel).toBeVisible()
 
@@ -126,7 +126,7 @@ describe('Array', () => {
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
     const customRowLabel = page.locator(
-      '#field-rowLabelAsComponent [id$="-row-0"] >> .array-field__row-header > :text("test custom row label")',
+      '#field-rowLabelAsComponent [id$="-rowLabelAsComponent-row-0"] >> .array-field__row-header > :text("test custom row label")',
     )
 
     await expect(customRowLabel).toBeVisible()
@@ -134,16 +134,18 @@ describe('Array', () => {
 
     await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
-    await expect(page.locator('#field-rowLabelAsComponent [id$="-row-1"]')).toBeVisible()
+    await expect(
+      page.locator('#field-rowLabelAsComponent [id$="-rowLabelAsComponent-row-1"]'),
+    ).toBeVisible()
     await expect(
       page.locator(
-        '#field-rowLabelAsComponent [id$="-row-1"] >> .array-field__row-header > :text("test custom row label")',
+        '#field-rowLabelAsComponent [id$="-rowLabelAsComponent-row-1"] >> .array-field__row-header > :text("test custom row label")',
       ),
     ).toBeVisible()
 
     await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
     const duplicatedRowLabel = page.locator(
-      '#field-rowLabelAsComponent [id$="-row-1"] >> .array-field__row-header > :text("updated custom row label")',
+      '#field-rowLabelAsComponent [id$="-rowLabelAsComponent-row-1"] >> .array-field__row-header > :text("updated custom row label")',
     )
 
     await expect(duplicatedRowLabel).toBeVisible()
@@ -166,9 +168,13 @@ describe('Array', () => {
     await addArrayRow(page, { fieldName: 'arrayWithMinRows' })
 
     // Ensure new array row is visible and fields are rendered
-    await expect(page.locator('#field-arrayWithMinRows [id$="-row-0"]')).toBeVisible()
     await expect(
-      page.locator('#field-arrayWithMinRows [id$="-row-0"] #field-arrayWithMinRows__0__text'),
+      page.locator('#field-arrayWithMinRows [id$="-arrayWithMinRows-row-0"]'),
+    ).toBeVisible()
+    await expect(
+      page.locator(
+        '#field-arrayWithMinRows [id$="-arrayWithMinRows-row-0"] #field-arrayWithMinRows__0__text',
+      ),
     ).toBeVisible()
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
@@ -181,7 +187,9 @@ describe('Array', () => {
 
   test('should show singular label for array rows', async () => {
     await loadCreatePage()
-    await expect(page.locator('#field-items [id$="-row-0"] .row-label')).toContainText('Item 01')
+    await expect(page.locator('#field-items [id$="-items-row-0"] .row-label')).toContainText(
+      'Item 01',
+    )
   })
 
   test('ensure functions passed to array field labels property are respected', async () => {
@@ -427,7 +435,7 @@ describe('Array', () => {
 
     await addArrayRow(page, { fieldName: 'collapsedArray' })
 
-    const row = page.locator('#field-collapsedArray [id$="-row-0"]')
+    const row = page.locator('#field-collapsedArray [id$="-collapsedArray-row-0"]')
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
@@ -439,7 +447,7 @@ describe('Array', () => {
 
     await addArrayRow(page, { fieldName: 'collapsedArray' })
 
-    const row = page.locator('#field-collapsedArray [id$="-row-0"]')
+    const row = page.locator('#field-collapsedArray [id$="-collapsedArray-row-0"]')
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
@@ -527,7 +535,7 @@ describe('Array', () => {
     test('should copy and paste array fields', async () => {
       await page.goto(url.create)
       const arrayField = page.locator('#field-items')
-      const row = arrayField.locator('[id$="-row-0"]')
+      const row = arrayField.locator('[id$="-items-row-0"]')
       const rowTextInput = row.locator('#field-items__0__text')
 
       const textVal = 'row one copy'
@@ -554,7 +562,7 @@ describe('Array', () => {
     test('should copy and paste array rows', async () => {
       await page.goto(url.create)
       const arrayField = page.locator('#field-items')
-      const row = arrayField.locator('[id$="-row-0"]')
+      const row = arrayField.locator('[id$="-items-row-0"]')
       const rowTextInput = row.locator('#field-items__0__text')
 
       const textVal = 'row one copy'
@@ -618,7 +626,7 @@ describe('Array', () => {
       await expect(addArrayBtn).toBeVisible()
       await addArrayBtn.click()
 
-      const row = field.locator('[id$="-row-0"]')
+      const row = field.locator('[id$="-disableSort-row-0"]')
       await expect(row).toBeVisible()
 
       await copyPasteField({ page, action: 'paste', fieldName: 'disableSort' })

@@ -1069,14 +1069,14 @@ describe('lexicalBlocks', () => {
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
       await expect(
         conditionalArrayBlock.locator(
-          '.array-field__draggable-rows [id$="-row-0"] input[type="text"]',
+          '.array-field__draggable-rows [id$="-columns2-row-0"] input[type="text"]',
         ),
       ).toBeVisible()
 
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
       await expect(
         conditionalArrayBlock.locator(
-          '.array-field__draggable-rows [id$="-row-1"] input[type="text"]',
+          '.array-field__draggable-rows [id$="-columns2-row-1"] input[type="text"]',
         ),
       ).toBeVisible()
 
@@ -1549,6 +1549,10 @@ async function createInlineBlock({
   }>
 }> {
   const lastParagraph = richTextField.locator('p').last()
+  const blocksLocator = richTextField.locator(
+    '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
+  )
+  const existingBlocksCount = await blocksLocator.count()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
@@ -1630,6 +1634,10 @@ async function createBlock({
   slashMenuPopover: Locator
 }> {
   const lastParagraph = richTextField.locator('p').last()
+  const blocksLocator = richTextField.locator(
+    '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
+  )
+  const existingBlocksCount = await blocksLocator.count()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
@@ -1653,11 +1661,8 @@ async function createBlock({
   await blockSelectButton.click()
   await expect(slashMenuPopover).toBeHidden()
 
-  const newBlock = richTextField
-    .locator(
-      '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
-    )
-    .nth(8) // The :not(.LexicalEditorTheme__block .LexicalEditorTheme__block) makes sure this does not select sub-blocks
+  await expect(blocksLocator).toHaveCount(existingBlocksCount + 1)
+  const newBlock = blocksLocator.nth(existingBlocksCount)
   await newBlock.scrollIntoViewIfNeeded()
   return { newBlock, slashMenuPopover }
 }
