@@ -1549,10 +1549,6 @@ async function createInlineBlock({
   }>
 }> {
   const lastParagraph = richTextField.locator('p').last()
-  const blocksLocator = richTextField.locator(
-    '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
-  )
-  const existingBlocksCount = await blocksLocator.count()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
@@ -1636,7 +1632,7 @@ async function createBlock({
   const lastParagraph = richTextField.locator('p').last()
   const blocksLocator = richTextField.locator(
     '.LexicalEditorTheme__block:not(.LexicalEditorTheme__block .LexicalEditorTheme__block)',
-  )
+  ) // The :not(.LexicalEditorTheme__block .LexicalEditorTheme__block) makes sure this does not select sub-blocks
   const existingBlocksCount = await blocksLocator.count()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
