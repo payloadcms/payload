@@ -56,7 +56,14 @@ export const NavProvider: React.FC<{
   // this is because getting the preference is async
   // so instead of closing it after the preference is loaded
   // we will open it after the preference is loaded
-  const [navOpen, setNavOpen] = React.useState(initialIsOpen)
+  const [navOpen, setNavOpen] = React.useState(() => {
+    if (typeof window === 'undefined') {
+      return initialIsOpen
+    }
+
+    const shouldCloseForViewport = window.matchMedia('(max-width: 1024px)').matches
+    return shouldCloseForViewport ? false : initialIsOpen
+  })
 
   const [shouldAnimate, setShouldAnimate] = React.useState(false)
   const [hydrated, setHydrated] = React.useState(false)
