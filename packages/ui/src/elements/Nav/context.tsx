@@ -97,7 +97,7 @@ export const NavProvider: React.FC<{
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
   useEffect(() => {
-    if (largeBreak === true || midBreak === true || smallBreak === true) {
+    if (midBreak === true || smallBreak === true) {
       setNavOpen(false)
     }
     setHydrated(true)
