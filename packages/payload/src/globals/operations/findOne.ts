@@ -25,6 +25,7 @@ export type GlobalFindOneArgs = {
    */
   data?: Record<string, unknown>
   depth?: number
+  disableErrors?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
@@ -42,6 +43,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   const {
     slug,
     depth,
+    disableErrors,
     draft: replaceWithVersion = false,
     flattenLocales,
     globalConfig,
@@ -79,11 +81,14 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     let accessResult!: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, globalConfig.access.read)
+      accessResult = await executeAccess({ disableErrors, req }, globalConfig.access.read)
     }
 
     if (accessResult === false) {
-      throw new NotFound(req.t)
+      if (!disableErrors) {
+        throw new NotFound(req.t)
+      }
+      return null!
     }
 
     const select = sanitizeSelect({
@@ -108,7 +113,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
 
     if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
-      return {} as any
+      if (!disableErrors) {
+        return {} as any
+      }
+      return null!
     }
 
     let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}

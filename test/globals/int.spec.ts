@@ -173,6 +173,16 @@ describe('globals', () => {
       expect(es).toMatchObject(localized.es)
     })
 
+    it('should return null when user is unauthorised and using findGlobal with disableErrors: true', async () => {
+      const doc = await payload.findGlobal({
+        disableErrors: true,
+        overrideAccess: false,
+        slug: accessControlSlug,
+      })
+
+      expect(doc).toBeNull()
+    })
+
     it('should respect valid access query constraint', async () => {
       const emptyGlobal = await payload.findGlobal({
         overrideAccess: false,
