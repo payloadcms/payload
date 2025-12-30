@@ -2585,6 +2585,7 @@ describe('Versions', () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
+        draft: false,
       })
 
       expect(retrieved._status).toStrictEqual('published')
@@ -2649,7 +2650,6 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
       })
 
       expect(published._status).toStrictEqual('published')
