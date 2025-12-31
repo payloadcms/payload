@@ -10,11 +10,11 @@ import { getFields } from './fields/getFields.js'
 export const cloudStorage =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    const { collections: allCollectionOptions, enabled } = pluginOptions
+    const { alwaysInsertFields, collections: allCollectionOptions, enabled } = pluginOptions
     const config = { ...incomingConfig }
 
-    // Return early if disabled. Only webpack config mods are applied.
-    if (enabled === false) {
+    // If disabled and alwaysInsertFields is not true, skip processing
+    if (enabled === false && !alwaysInsertFields) {
       return config
     }
 
@@ -23,8 +23,10 @@ export const cloudStorage =
       collections: (config.collections || []).map((existingCollection) => {
         const options = allCollectionOptions[existingCollection.slug]
 
-        if (options?.adapter) {
+        // Process if adapter exists OR if alwaysInsertFields is true and this collection is configured
+        if (options?.adapter || (alwaysInsertFields && options)) {
           const fields = getFields({
+            alwaysInsertFields,
             collection: existingCollection,
             prefix: options.prefix,
           })

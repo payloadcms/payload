@@ -35,6 +35,17 @@ export type VercelBlobStorageOptions = {
   addRandomSuffix?: boolean
 
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * Cache-Control max-age in seconds
    *
    * @default 365 * 24 * 60 * 60 // (1 Year)
@@ -165,6 +176,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: options.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }

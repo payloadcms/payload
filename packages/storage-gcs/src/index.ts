@@ -22,6 +22,17 @@ export interface GcsStorageOptions {
   acl?: 'Private' | 'Public'
 
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * The name of the bucket to use.
    */
   bucket: string
@@ -131,6 +142,7 @@ export const gcsStorage: GcsStoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: gcsStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }
