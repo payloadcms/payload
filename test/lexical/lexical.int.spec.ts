@@ -31,6 +31,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
+  hooksSlug,
   lexicalFieldsSlug,
   lexicalMigrateFieldsSlug,
   richTextFieldsSlug,
@@ -679,6 +680,63 @@ describe('Lexical', () => {
       expect(
         (lexicalDocENUpdated.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
       ).toEqual(210) // Initial: 20. BeforeChange: +1 (21). AfterRead: *10 (210)
+    })
+
+    it('ensure all hooks run on relationship field with lexical block', async () => {
+      const logs: string[] = []
+      const originalLog = console.log
+      console.log = (...args: any[]) => {
+        logs.push(args.join(' '))
+        originalLog(...args)
+      }
+
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          lexical: {
+            root: {
+              children: [
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693ae9ed9fa38e0dfe3e98c8',
+                    blockName: '',
+                    textInBlock: 'test',
+                    blockType: 'text-block',
+                  },
+                },
+                {
+                  children: [],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      expect(logs.some((line) => line.includes('beforeValidate hook fired: textInBlock'))).toBe(
+        true,
+      )
+      expect(logs.some((line) => line.includes('beforeChange hook fired: textInBlock'))).toBe(true)
+      expect(logs.some((line) => line.includes('afterChange hook fired: textInBlock'))).toBe(true)
+      expect(logs.some((line) => line.includes('afterRead hook fired: textInBlock'))).toBe(true)
+      expect(logs.some((line) => line.includes('beforeDuplicate hook fired: textInBlock'))).toBe(
+        false,
+      )
     })
   })
 
