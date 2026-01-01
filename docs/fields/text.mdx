@@ -249,9 +249,11 @@ export const ExampleCollection: CollectionConfig = {
 
 ### Custom Slugify Function
 
-You can also override the default slugify function of the slug field. This is necessary if the slug requires special treatment, such as character encoding, additional language support, etc.
+You can override the default slugify function of the slug field. This is necessary if the slug requires special treatment, such as character encoding, additional language support, etc.
 
-This functions receives the value of the `useAsSlug` field as `valueToSlugify` and must return a string.
+You can also set a global default slugify function in the [Payload Config](../configuration/overview#custom-slugify-function) that will apply to all slug fields across your application. Field-level slugify will override the config-level setting.
+
+This function receives the value of the `useAsSlug` field as `valueToSlugify` and must return a string.
 
 For example, if you wanted to use the [`slugify`](https://www.npmjs.com/package/slugify) package, you could do something like this:
 
