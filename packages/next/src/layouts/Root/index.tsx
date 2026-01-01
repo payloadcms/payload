@@ -1,5 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ReactNode } from 'react'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
@@ -24,12 +25,14 @@ export const metadata = {
 export const RootLayout = async ({
   children,
   config: configPromise,
+  customHeadElements,
   htmlProps = {},
   importMap,
   serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly customHeadElements?: ReactNode[]
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
@@ -101,6 +104,11 @@ export const RootLayout = async ({
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
+
+        {customHeadElements &&
+          customHeadElements.map((element, index) => (
+            <React.Fragment key={index}>{element}</React.Fragment>
+          ))}
       </head>
       <body>
         <RootProvider
