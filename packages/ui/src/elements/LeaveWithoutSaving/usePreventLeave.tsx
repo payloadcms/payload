@@ -59,7 +59,7 @@ export const useBeforeUnload = (enabled: (() => boolean) | boolean = true, messa
 
 export const usePreventLeave = ({
   hasAccepted = false,
-  message = 'Are you sure want to leave this page?',
+  message = 'Are you sure you want to leave this page?',
   onAccept,
   onPrevent,
   prevent = true,
