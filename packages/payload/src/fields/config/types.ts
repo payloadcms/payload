@@ -152,6 +152,7 @@ import type {
   NumberFieldSingleValidation,
   RelationshipFieldManyValidation,
   RelationshipFieldSingleValidation,
+  RichTextFieldValidation,
   SelectFieldManyValidation,
   SelectFieldSingleValidation,
   TextFieldManyValidation,
@@ -1316,7 +1317,8 @@ export type RichTextField<
    */
   maxDepth?: number
   type: 'richText'
-} & FieldBase &
+  validate?: RichTextFieldValidation
+} & Omit<FieldBase, 'validate'> &
   TExtraProperties
 
 export type RichTextFieldClient<
