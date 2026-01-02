@@ -45,6 +45,7 @@ type ArrayRowProps = {
   readonly removeRow: (rowIndex: number) => void
   readonly row: Row
   readonly rowCount: number
+  readonly rowIdPrefix: string
   readonly rowIndex: number
   readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
@@ -75,6 +76,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   removeRow,
   row,
   rowCount,
+  rowIdPrefix,
   rowIndex,
   schemaPath,
   setCollapse,
@@ -103,7 +105,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   return (
     <div
-      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
+      id={`${rowIdPrefix}-row-${rowIndex}`}
       key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}
       style={{
