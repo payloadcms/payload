@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { AdminBulkUploadControl } from './collections/AdminBulkUploadControl/index.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
@@ -791,6 +792,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
     AdminUploadControl,
+    AdminBulkUploadControl,
     {
       slug: 'optional-file',
       fields: [],
