@@ -71,7 +71,7 @@ export const LoginForm: React.FC = () => {
         <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
           <p>
             Forgot your password?{' '}
-            <Link href={`/recover-password${allParams}`}>Click here to reset it</Link>
+            <Link href={`/forgot-password${allParams}`}>Click here to reset it</Link>
           </p>
         </div>
       </div>
