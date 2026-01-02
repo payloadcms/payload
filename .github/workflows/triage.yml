@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: View context attributes
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: console.log({ context })
 
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Tag with 'created-by'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -90,7 +90,7 @@ jobs:
     if: github.event_name == 'issues'
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -17,7 +17,7 @@ jobs:
       release_tag: ${{ steps.determine_tag.outputs.release_tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           sparse-checkout: .github/workflows
@@ -54,7 +54,7 @@ jobs:
       POSTGRES_DB: payloadtests
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -78,7 +78,7 @@ jobs:
           echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.0
+        uses: supercharge/mongodb-github-action@1.12.1
         with:
           mongodb-version: 6.0
 
@@ -105,7 +105,7 @@ jobs:
           echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GH_TOKEN_POST_RELEASE_TEMPLATES }}
           labels: 'area: templates'

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:
@@ -44,7 +44,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Github Releases To Discord
         uses: SethCohen/github-releases-to-discord@v1.19.0
         with:
@@ -57,10 +57,10 @@ jobs:
     name: Notify website repo
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Dispatch event
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
           repository: payloadcms/website
