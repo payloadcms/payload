@@ -1,3 +1,5 @@
+import type { LexicalInlineBlockServerProps } from '@payloadcms/richtext-lexical'
+
 import {
   InlineBlockContainer,
   InlineBlockEditButton,
@@ -6,7 +8,7 @@ import {
 } from '@payloadcms/richtext-lexical/client'
 import React from 'react'
 
-export const BlockComponent: React.FC = () => {
+export const BlockComponent: React.FC<LexicalInlineBlockServerProps> = () => {
   return (
     <InlineBlockContainer>
       <p>Test</p>
