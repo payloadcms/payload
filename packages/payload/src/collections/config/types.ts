@@ -362,6 +362,7 @@ export type CollectionAdminOptions = {
       Upload?: CustomUpload
     }
     listMenuItems?: CustomComponent[]
+    listSelectionItems?: CustomComponent[]
     views?: {
       /**
        * Replace, modify, or add new "document" views.

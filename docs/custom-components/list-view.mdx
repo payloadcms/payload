@@ -88,14 +88,15 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `beforeList`      | An array of custom components to inject before the list of documents in the List View. [More details](#beforelist).       |
-| `beforeListTable` | An array of custom components to inject before the table of documents in the List View. [More details](#beforelisttable). |
-| `afterList`       | An array of custom components to inject after the list of documents in the List View. [More details](#afterlist).         |
-| `afterListTable`  | An array of custom components to inject after the table of documents in the List View. [More details](#afterlisttable).   |
-| `listMenuItems`   | An array of components to render within a menu next to the List Controls (after the Columns and Filters options)          |
-| `Description`     | A component to render a description of the Collection. [More details](#description).                                      |
+| Path                 | Description                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `beforeList`         | An array of custom components to inject before the list of documents in the List View. [More details](#beforelist).       |
+| `beforeListTable`    | An array of custom components to inject before the table of documents in the List View. [More details](#beforelisttable). |
+| `afterList`          | An array of custom components to inject after the list of documents in the List View. [More details](#afterlist).         |
+| `afterListTable`     | An array of custom components to inject after the table of documents in the List View. [More details](#afterlisttable).   |
+| `listMenuItems`      | An array of components to render within a menu next to the List Controls (after the Columns and Filters options).         |
+| `listSelectionItems` | An array of components to render within the List Selection menu. [More details](#listselectionitems).                     |
+| `Description`        | A component to render a description of the Collection. [More details](#description).                                      |
 
 ### beforeList
 
@@ -278,6 +279,61 @@ import type { AfterListTableClientProps } from 'payload'
 
 export function MyAfterListTableComponent(props: AfterListTableClientProps) {
   return <div>This is a custom afterListTable component (Client)</div>
+}
+```
+
+### listSelectionItems
+
+The `listSelectionItems` property allows you to add custom action buttons to the list selection menu. These components will appear when one or more documents are selected.
+
+To add `listSelectionItems` components, use the `components.listSelectionItems` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      listSelectionItems: ['/path/to/MyListSelectionItemsComponent'],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a custom `ListSelectionItems` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { ListSelectionItemsServerProps } from 'payload'
+
+export function MyListSelectionItemsComponent(
+  props: ListSelectionItemsServerProps,
+) {
+  return <div>This is a custom listSelectionItems component (Server)</div>
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { ListSelectionItemsClientProps } from 'payload'
+import { ListSelectionButton } from '@payloadcms/ui'
+
+export function MyListSelectionItemsComponent(
+  props: ListSelectionItemsClientProps,
+) {
+  return (
+    <ListSelectionButton>
+      This is a custom listSelectionItems component (Client)
+    </ListSelectionButton>
+  )
 }
 ```
 

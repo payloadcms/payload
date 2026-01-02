@@ -20,6 +20,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
+import { ListSelectionItems } from './collections/ListSelectionItems.js'
 import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
 import { Localized } from './collections/Localized.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
@@ -193,6 +194,7 @@ export default buildConfigWithDefaults({
     EditMenuItems,
     FormatDocURL,
     BaseListFilter,
+    ListSelectionItems,
     with300Documents,
     ListDrawer,
     Placeholder,
