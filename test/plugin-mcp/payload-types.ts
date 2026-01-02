@@ -99,9 +99,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user:
     | (User & {
         collection: 'users';
@@ -339,6 +340,14 @@ export interface PayloadMcpApiKey {
      * Allow clients to create posts.
      */
     create?: boolean | null;
+    /**
+     * Allow clients to update posts.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts.
+     */
+    delete?: boolean | null;
   };
   media?: {
     /**
@@ -677,6 +686,8 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | {
         find?: T;
         create?: T;
+        update?: T;
+        delete?: T;
       };
   media?:
     | T
