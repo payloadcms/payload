@@ -80,8 +80,18 @@ export const arTranslations: DefaultTranslationsObject = {
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
   dashboard: {
+    addButton: 'اضف +',
     addWidget: 'أضف الواجهة البيانية',
     deleteWidget: 'حذف الودجت {{id}}',
+    discardConfirmLabel: 'تجاهل',
+    discardMessage:
+      'لديك تغييرات غير محفوظة في تخطيط لوحة التحكم الخاصة بك. هل أنت متأكد أنك تريد التخلي عنها؟',
+    discardTitle: 'هل تريد التخلص من التغييرات؟',
+    editDashboard: 'تعديل لوحة التحكم',
+    editingDashboard: 'لوحة تحرير',
+    noItems:
+      'لا توجد أدوات على لوحة التحكم الخاصة بك. يمكنك إضافتها من القائمة "لوحة التحكم" الموجودة في الشريط العلوي.',
+    resetLayout: 'إعادة تعيين التخطيط',
     searchWidgets: 'ابحث عن الأدوات...',
   },
   error: {
@@ -94,6 +104,8 @@ export const arTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'لم يتم العثور على المستند بالمعرف {{id}}. قد يكون قد تم حذفه أو لم يكن موجودًا أصلاً ، أو قد لا يكون لديك الوصول إليه.',
     emailOrPasswordIncorrect: 'البريد الإلكتروني أو كلمة المرور المقدمة غير صحيحة.',
+    failedToResetLayout: 'فشل في إعادة تعيين التخطيط.',
+    failedToSaveLayout: 'فشل في حفظ التخطيط.',
     followingFieldsInvalid_one: 'الحقل التالي غير صالح:',
     followingFieldsInvalid_other: 'الحقول التالية غير صالحة:',
     incorrectCollection: 'مجموعة غير صحيحة',

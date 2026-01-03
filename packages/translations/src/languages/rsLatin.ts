@@ -81,8 +81,18 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Obriši widget {{id}}',
+    discardConfirmLabel: 'Odbaci',
+    discardMessage:
+      'Imate nesačuvane promene na rasporedu vaše komandne table. Da li ste sigurni da želite da ih odbacite?',
+    discardTitle: 'Odbaciti promene?',
+    editDashboard: 'Izmeni kontrolnu tablu',
+    editingDashboard: 'Izmena kontrolne table',
+    noItems:
+      'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu stranice.',
+    resetLayout: 'Resetuj raspored',
     searchWidgets: 'Pretraži dodatke...',
   },
   error: {
@@ -95,6 +105,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument sa ID {{id}} nije mogao biti pronađen. Moguće je da je obrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'Adresa e-pošte ili lozinka su neispravni.',
+    failedToResetLayout: 'Nije uspelo resetovanje rasporeda.',
+    failedToSaveLayout: 'Pogreška pri čuvanju rasporeda.',
     followingFieldsInvalid_one: 'Ovo polje je nevalidno:',
     followingFieldsInvalid_other: 'Ova polja su nevalidna:',
     incorrectCollection: 'Nevalidna kolekcija',

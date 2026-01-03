@@ -61,7 +61,7 @@ export async function translateText(text: string, targetLang: string) {
           role: 'user',
         },
       ],
-      model: 'gpt-4',
+      model: 'gpt-4.1',
     }),
     headers: {
       Authorization: `Bearer ${process.env.OPENAI_KEY}`,
