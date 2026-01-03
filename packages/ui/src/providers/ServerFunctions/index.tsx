@@ -190,11 +190,24 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
+      // Strip file data from formState to avoid exceeding Server Action body size limit (5MB)
+      // File objects don't need to be sent for form state validation - only for actual submission
+      const formStateArgs = rest as typeof rest & { formState?: FormState }
+      if (formStateArgs.formState?.file?.value instanceof File) {
+        formStateArgs.formState = {
+          ...formStateArgs.formState,
+          file: {
+            ...formStateArgs.formState.file,
+            value: null,
+          },
+        }
+      }
+
       try {
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
-            args: { fallbackLocale: false, ...rest },
+            args: { fallbackLocale: false, ...formStateArgs },
           })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
