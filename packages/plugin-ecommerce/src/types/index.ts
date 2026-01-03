@@ -883,6 +883,10 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   isLoading: boolean
   paymentMethods: PaymentAdapterClient[]
   /**
+   * Refresh the cart.
+   */
+  refreshCart: () => Promise<void>
+  /**
    * Remove an item from the cart by its index ID.
    */
   removeItem: (item: DefaultDocumentIDType) => Promise<void>
