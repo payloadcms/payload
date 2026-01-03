@@ -157,8 +157,19 @@ export function extractHeaderLanguage(acceptLanguageHeader: string): AcceptedLan
   let matchedLanguage: AcceptedLanguages | undefined
 
   for (const { language } of parsedHeader) {
-    if (!matchedLanguage && acceptedLanguages.includes(language)) {
+    if (matchedLanguage) {
+      break
+    }
+
+    if (acceptedLanguages.includes(language)) {
       matchedLanguage = language
+      break
+    }
+
+    const baseLanguage = language.split('-')[0] as AcceptedLanguages
+    if (acceptedLanguages.includes(baseLanguage)) {
+      matchedLanguage = baseLanguage
+      break
     }
   }
 
