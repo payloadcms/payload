@@ -190,7 +190,7 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
-      // Strip file data from formState to avoid exceeding Server Action body size limit (5MB)
+      // Strip file data from formState to avoid exceeding Server Action body size limit (~1MB)
       // File objects don't need to be sent for form state validation - only for actual submission
       const formStateArgs = rest as typeof rest & { formState?: FormState }
       if (formStateArgs.formState?.file?.value instanceof File) {
