@@ -1,13 +1,14 @@
-import type { AdminRoutes } from 'helpers.js'
 import type { Config } from 'payload'
 import type { Page } from 'playwright/test'
 
-import { devUser } from 'credentials.js'
-import { getRoutes } from 'helpers.js'
 import { formatAdminURL, wait } from 'payload/shared'
-import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 import { expect } from 'playwright/test'
 
+import type { AdminRoutes } from '../../../helpers.js'
+
+import { devUser } from '../../../credentials.js'
+import { getRoutes } from '../../../helpers.js'
+import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
 import { openNav } from '../toggleNav.js'
 
 type LoginArgs = {

@@ -4,6 +4,7 @@ import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@p
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -116,7 +117,10 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             user={user}
           />
         }
-        apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
+        apiURL={formatAdminURL({
+          apiRoute: api,
+          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
+        })}
         collectionSlug={userSlug}
         currentEditor={currentEditor}
         docPermissions={docPermissions}

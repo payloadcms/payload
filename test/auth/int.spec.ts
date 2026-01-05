@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-conditional-in-test */
 import type {
   BasePayload,
   EmailFieldValidation,
@@ -14,6 +13,7 @@ import path from 'path'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
@@ -1149,7 +1149,7 @@ describe('Auth', () => {
     it('should not allow reset password if forgotPassword expiration token is expired', async () => {
       // Mock Date.now() to simulate the forgotPassword call happening 6 minutes ago (current expiration is set to 5 minutes)
       const originalDateNow = Date.now
-      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+      const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
         // Move the current time back by 6 minutes (360,000 ms)
         return originalDateNow() - 6 * 60 * 1000
       })
@@ -1313,7 +1313,7 @@ describe('Auth', () => {
   })
 
   describe('Email - format validation', () => {
-    const mockT = jest.fn((key) => key) // Mocks translation function
+    const mockT = vitest.fn((key) => key) // Mocks translation function
 
     const mockContext: Parameters<EmailFieldValidation>[1] = {
       // @ts-expect-error: Mocking context for email validation

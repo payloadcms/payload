@@ -1,8 +1,11 @@
 'use client'
 import type { ClientUser, DocumentPreferences } from 'payload'
 
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -14,7 +17,6 @@ import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
-import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
 
 const Context = createContext({} as DocumentInfoContext)
@@ -61,7 +63,6 @@ const DocumentInfo: React.FC<
       admin: { dateFormat },
       collections,
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -149,7 +150,11 @@ const DocumentInfo: React.FC<
     [initialData, initialState, localeIsLoading],
   )
 
-  const baseURL = `${serverURL}${api}`
+  const baseAPIPath = formatAdminURL({
+    apiRoute: api,
+    path: '',
+  })
+
   let slug: string
   let pluralType: 'collections' | 'globals'
   let preferencesKey: string
@@ -179,7 +184,7 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
+        const request = await requests.get(`${baseAPIPath}/payload-locked-documents`, {
           credentials: 'include',
           params: isGlobal
             ? {
@@ -195,7 +200,7 @@ const DocumentInfo: React.FC<
 
         if (docs?.length > 0) {
           const lockID = docs[0].id
-          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
+          await requests.delete(`${baseAPIPath}/payload-locked-documents/${lockID}`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
@@ -208,7 +213,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [serverURL, api, globalSlug, setDocumentIsLocked, hasLockedDocumentsCollection],
+    [baseAPIPath, globalSlug, setDocumentIsLocked, hasLockedDocumentsCollection],
   )
 
   const updateDocumentEditor = useCallback(
@@ -222,7 +227,7 @@ const DocumentInfo: React.FC<
         const isGlobal = slug === globalSlug
 
         // Check if the document is already locked
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
+        const request = await requests.get(`${baseAPIPath}/payload-locked-documents`, {
           credentials: 'include',
           params: isGlobal
             ? {
@@ -245,7 +250,7 @@ const DocumentInfo: React.FC<
               : { relationTo: 'users', value: user }
 
           // Send a patch request to update the _lastEdited info
-          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
+          await requests.patch(`${baseAPIPath}/payload-locked-documents/${lockID}`, {
             body: JSON.stringify({
               user: userData,
             }),
@@ -260,7 +265,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to update the document editor', error)
       }
     },
-    [serverURL, api, globalSlug, hasLockedDocumentsCollection],
+    [baseAPIPath, globalSlug, hasLockedDocumentsCollection],
   )
 
   const getDocPermissions = useGetDocPermissions({
@@ -271,7 +276,6 @@ const DocumentInfo: React.FC<
     i18n,
     locale,
     permissions,
-    serverURL,
     setDocPermissions,
     setHasPublishPermission,
     setHasSavePermission,
@@ -355,18 +359,20 @@ const DocumentInfo: React.FC<
   }, [])
 
   const action: string = React.useMemo(() => {
-    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
-    const params = {
-      depth: 0,
-      'fallback-locale': 'null',
-      locale,
-      uploadEdits: uploadEdits || undefined,
-    }
+    const docPath = `${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
 
-    return `${docURL}${qs.stringify(params, {
-      addQueryPrefix: true,
-    })}`
-  }, [baseURL, locale, pluralType, id, slug, uploadEdits])
+    return `${baseAPIPath}${docPath}${qs.stringify(
+      {
+        depth: 0,
+        'fallback-locale': 'null',
+        locale,
+        uploadEdits: uploadEdits || undefined,
+      },
+      {
+        addQueryPrefix: true,
+      },
+    )}`
+  }, [baseAPIPath, locale, pluralType, id, slug, uploadEdits])
 
   const value: DocumentInfoContext = {
     ...props,

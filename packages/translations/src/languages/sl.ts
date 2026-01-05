@@ -79,6 +79,11 @@ export const slTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
+  dashboard: {
+    addWidget: 'Dodaj pripomoček',
+    deleteWidget: 'Izbriši pripomoček {{id}}',
+    searchWidgets: 'Išči gradnike...',
+  },
   error: {
     accountAlreadyActivated: 'Ta račun je že aktiviran.',
     autosaving: 'Pri samodejnem shranjevanju tega dokumenta je prišlo do težave.',

@@ -17,6 +17,7 @@ import {
 } from '../../errors/index.js'
 import { sanitizeFields } from './sanitize.js'
 import { CollectionConfig } from '../../index.js'
+import { describe, it, expect } from 'vitest'
 
 describe('sanitizeFields', () => {
   const config = {} as Config
