@@ -109,13 +109,13 @@ export const generateFileData = async <T>({
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
-  const { filename, url } = incomingFileData as unknown as FileData
   let isLocalFile = false
 
   if (
     !file &&
     (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
   ) {
+    const { filename, url } = incomingFileData as unknown as FileData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
