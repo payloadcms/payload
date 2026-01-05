@@ -21,6 +21,9 @@
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
+  "dependencies": {
+    "recharts": "3.2.1"
+  },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
     "@azure/storage-blob": "^12.11.0",
@@ -74,9 +77,8 @@
     "@sentry/react": "^7.77.0",
     "@stripe/react-stripe-js": "3.7.0",
     "@stripe/stripe-js": "7.3.1",
-    "@types/jest": "29.5.12",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "better-sqlite3": "11.10.0",
     "comment-json": "^4.2.3",
@@ -91,11 +93,10 @@
     "execa": "5.1.1",
     "file-type": "19.3.0",
     "http-status": "2.1.0",
-    "jest": "29.7.0",
     "jwt-decode": "4.0.0",
     "mongoose": "8.15.1",
-    "next": "15.4.8",
-    "nodemailer": "7.0.9",
+    "next": "15.4.10",
+    "nodemailer": "7.0.12",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
     "pg": "8.16.3",
@@ -110,10 +111,14 @@
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
     "uuid": "10.0.0",
+    "vitest": "4.0.15",
     "wrangler": "~4.42.0",
     "zod": "^3.25.5"
   },
   "pnpm": {
-    "neverBuiltDependencies": []
+    "neverBuiltDependencies": [],
+    "overrides": {
+      "graphql": "16.8.1"
+    }
   }
 }

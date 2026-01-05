@@ -3,6 +3,7 @@
 import type { Data, ViewTypes } from 'payload'
 import type { FolderOrDocument } from 'payload/shared'
 
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
@@ -40,16 +41,22 @@ export const FolderTableCellClient = ({
   const onConfirm = React.useCallback(
     async ({ id, name }) => {
       try {
-        await fetch(`${config.routes.api}/${collectionSlug}/${docID}`, {
-          body: JSON.stringify({
-            [folderFieldName]: id,
+        await fetch(
+          formatAdminURL({
+            apiRoute: config.routes.api,
+            path: `/${collectionSlug}/${docID}`,
           }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+          {
+            body: JSON.stringify({
+              [folderFieldName]: id,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'PATCH',
           },
-          method: 'PATCH',
-        })
+        )
 
         setFromFolderID(id)
         setFromFolderName(name || t('folder:noFolder'))
@@ -65,7 +72,10 @@ export const FolderTableCellClient = ({
     const loadFolderName = async () => {
       try {
         const req = await fetch(
-          `${config.routes.api}/${folderCollectionSlug}${intialFolderID ? `/${intialFolderID}` : ''}`,
+          formatAdminURL({
+            apiRoute: config.routes.api,
+            path: `/${folderCollectionSlug}${intialFolderID ? `/${intialFolderID}` : ''}`,
+          }),
           {
             credentials: 'include',
             headers: {
