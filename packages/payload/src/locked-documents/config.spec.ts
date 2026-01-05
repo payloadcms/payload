@@ -1,5 +1,5 @@
 import type { Config } from '../config/types.js'
-
+import { describe, it, expect } from 'vitest'
 import { getLockedDocumentsCollection } from './config.js'
 
 describe('getLockedDocumentsCollection', () => {
