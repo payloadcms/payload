@@ -136,9 +136,9 @@ Block data is stored within the Lexical JSON structure. Each block node contains
   "type": "block",
   "version": 2,
   "fields": {
-    "id": "65298b13db4ef8c744a7faaa", // default field available on all blocks
-    "blockType": "banner", // default field available on all blocks
-    "blockName": "Important Notice", // default field available on all blocks
+    "id": "65298b13db4ef8c744a7faaa", // default field (required, auto-generated)
+    "blockType": "banner", // default field (required, identifies the block)
+    "blockName": "Important Notice", // default field (optional, custom label for the block instance)
     "style": "warning", // custom field
     "content": "This is the block content..." // custom field
   }
@@ -472,11 +472,12 @@ CodeBlock({
   typescript: {
     fetchTypes: [
       {
-        url: 'https://unpkg.com/payload@3.68.5/dist/index.bundled.d.ts',
+        // In the url you can use @latest or a specific version (e.g. @3.68.5)
+        url: 'https://unpkg.com/payload@latest/dist/index.bundled.d.ts',
         filePath: 'file:///node_modules/payload/index.d.ts',
       },
       {
-        url: 'https://unpkg.com/@types/react@19.2.3/index.d.ts',
+        url: 'https://unpkg.com/@types/react@latest/index.d.ts',
         filePath: 'file:///node_modules/@types/react/index.d.ts',
       },
     ],
