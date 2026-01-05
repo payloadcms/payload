@@ -1,39 +1,33 @@
 import type { Field } from 'payload'
 
-import type { PluginMCPServerConfig } from '../types.js'
+import type { CollectionOrGlobalConfig } from '../types.js'
 
+import { adminOperationSettings } from './adminOperationSettings.js'
 import { toCamelCase } from './camelCase.js'
 import { getEnabledSlugs } from './getEnabledSlugs.js'
-
-type EntityConfig = PluginMCPServerConfig['collections'] | PluginMCPServerConfig['globals']
-
-type Operation = {
-  description: (slug: string, entityType: string) => string
-  label: string
-  name: string
-}
-
 /**
- * Creates API key permission fields for collections or globals.
+ * Creates MCP API key permission fields using collections or globals.
  * Generates collapsible field groups with checkboxes for each enabled operation.
  *
  * @param config - The collections or globals configuration object
- * @param entityType - Type of entity ('collection' or 'global')
- * @param operations - Array of operations to create checkboxes for
- * @returns Array of Payload fields for the API Keys collection
+ * @param configType - The type of configuration ('collection' or 'global')
+ * @returns Array of fields for the MCP API Keys collection
  */
-export const createApiKeyFields = (
-  config: EntityConfig,
-  entityType: 'collection' | 'global',
-  operations: Operation[],
-): Field[] => {
+export const createApiKeyFields = ({
+  config,
+  configType,
+}: {
+  config: CollectionOrGlobalConfig | undefined
+  configType: 'collection' | 'global'
+}): Field[] => {
+  const operations = adminOperationSettings[configType]
+
   const operationNames = operations.map((op) => op.name)
   const enabledSlugs = getEnabledSlugs(config, operationNames)
 
   return enabledSlugs.map((slug) => {
     const entityConfig = config?.[slug]
 
-    // Determine which operations are enabled for this entity
     const enabledOperations = operations.filter((operation) => {
       // If fully enabled, all operations are available
       if (entityConfig?.enabled === true) {
@@ -41,11 +35,13 @@ export const createApiKeyFields = (
       }
 
       // If partially enabled, check if this specific operation is enabled
-      return (
-        typeof entityConfig?.enabled !== 'boolean' &&
-        typeof entityConfig?.enabled?.[operation.name] === 'boolean' &&
-        entityConfig?.enabled?.[operation.name] === true
-      )
+      const enabled = entityConfig?.enabled
+      if (typeof enabled !== 'boolean' && enabled) {
+        const operationEnabled = enabled[operation.name as keyof typeof enabled]
+        return typeof operationEnabled === 'boolean' && operationEnabled === true
+      }
+
+      return false
     })
 
     // Generate checkbox fields for each enabled operation
@@ -53,13 +49,12 @@ export const createApiKeyFields = (
       name: operation.name,
       type: 'checkbox' as const,
       admin: {
-        description: operation.description(slug, entityType),
+        description: operation.description(slug),
       },
       defaultValue: false,
       label: operation.label,
     }))
 
-    // Return collapsible field group
     return {
       type: 'collapsible' as const,
       admin: {
@@ -70,9 +65,10 @@ export const createApiKeyFields = (
           name: toCamelCase(slug),
           type: 'group' as const,
           fields: operationFields,
+          label: configType,
         },
       ],
-      label: `${slug.charAt(0).toUpperCase() + toCamelCase(slug).slice(1)} (${entityType === 'collection' ? 'Collection' : 'Global'})`,
+      label: `${slug.charAt(0).toUpperCase() + toCamelCase(slug).slice(1)}`,
     }
   })
 }

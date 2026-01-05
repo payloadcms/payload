@@ -1,6 +1,4 @@
-import type { PluginMCPServerConfig } from '../types.js'
-
-type EntityConfig = PluginMCPServerConfig['collections'] | PluginMCPServerConfig['globals']
+import type { CollectionOrGlobalConfig } from '../types.js'
 
 /**
  * Extracts enabled slugs from collections or globals configuration.
@@ -13,7 +11,7 @@ type EntityConfig = PluginMCPServerConfig['collections'] | PluginMCPServerConfig
  * @returns Array of enabled slugs
  */
 export const getEnabledSlugs = (
-  config: EntityConfig,
+  config: CollectionOrGlobalConfig | undefined,
   operations: string[] = ['find', 'create', 'update', 'delete'],
 ): string[] => {
   return Object.keys(config || {}).filter((slug) => {
@@ -28,14 +26,14 @@ export const getEnabledSlugs = (
     }
 
     // Check if partially enabled (at least one operation is enabled)
-    const partiallyEnabled =
-      typeof entityConfig?.enabled !== 'boolean' &&
-      operations.some(
-        (operation) =>
-          typeof entityConfig?.enabled?.[operation] === 'boolean' &&
-          entityConfig?.enabled?.[operation] === true,
-      )
+    const enabled = entityConfig?.enabled
+    if (typeof enabled !== 'boolean' && enabled) {
+      return operations.some((operation) => {
+        const operationEnabled = enabled[operation as keyof typeof enabled]
+        return typeof operationEnabled === 'boolean' && operationEnabled === true
+      })
+    }
 
-    return partiallyEnabled
+    return false
   })
 }

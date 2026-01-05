@@ -5,44 +5,6 @@ import type { PluginMCPServerConfig } from '../types.js'
 import { toCamelCase } from '../utils/camelCase.js'
 import { createApiKeyFields } from '../utils/createApiKeyFields.js'
 
-// Define operations for collections
-const COLLECTION_OPERATIONS = [
-  {
-    name: 'find',
-    description: (slug: string) => `Allow clients to find ${slug}.`,
-    label: 'Find',
-  },
-  {
-    name: 'create',
-    description: (slug: string) => `Allow clients to create ${slug}.`,
-    label: 'Create',
-  },
-  {
-    name: 'update',
-    description: (slug: string) => `Allow clients to update ${slug}.`,
-    label: 'Update',
-  },
-  {
-    name: 'delete',
-    description: (slug: string) => `Allow clients to delete ${slug}.`,
-    label: 'Delete',
-  },
-]
-
-// Define operations for globals
-const GLOBAL_OPERATIONS = [
-  {
-    name: 'find',
-    description: (slug: string) => `Allow clients to find ${slug} global.`,
-    label: 'Find',
-  },
-  {
-    name: 'update',
-    description: (slug: string) => `Allow clients to update ${slug} global.`,
-    label: 'Update',
-  },
-]
-
 export const createAPIKeysCollection = (
   collections: PluginMCPServerConfig['collections'],
   globals: PluginMCPServerConfig['globals'],
@@ -134,9 +96,15 @@ export const createAPIKeysCollection = (
         },
       },
 
-      ...createApiKeyFields(collections, 'collection', COLLECTION_OPERATIONS),
+      ...createApiKeyFields({
+        config: collections,
+        configType: 'collection',
+      }),
 
-      ...createApiKeyFields(globals, 'global', GLOBAL_OPERATIONS),
+      ...createApiKeyFields({
+        config: globals,
+        configType: 'global',
+      }),
 
       ...(customTools.length > 0
         ? [
