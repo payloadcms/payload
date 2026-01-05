@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation.js'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { windowInfoBreakpoints } from '../../providers/WindowInfo/index.js'
 
 type NavContextType = {
   hydrated: boolean
@@ -61,7 +62,7 @@ export const NavProvider: React.FC<{
       return initialIsOpen
     }
 
-    const shouldCloseForViewport = window.matchMedia('(max-width: 1024px)').matches
+    const shouldCloseForViewport = window.matchMedia(windowInfoBreakpoints.m).matches
     return shouldCloseForViewport ? false : initialIsOpen
   })
 
