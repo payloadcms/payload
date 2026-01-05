@@ -193,7 +193,7 @@ export const AddNewRelation: React.FC<Props> = ({
             render={({ close: closePopup }) => (
               <PopupList.ButtonGroup>
                 {relatedCollections.map((relatedCollection) => {
-                  if (permissions.collections[relatedCollection?.slug].create) {
+                  if (permissions.collections[relatedCollection?.slug]?.create) {
                     return (
                       <PopupList.Button
                         className={`${baseClass}__relation-button--${relatedCollection?.slug}`}

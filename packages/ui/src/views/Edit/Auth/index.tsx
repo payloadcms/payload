@@ -2,7 +2,7 @@
 
 import type { SanitizedFieldPermissions } from 'payload'
 
-import { getFieldPermissions } from 'payload/shared'
+import { formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -48,7 +48,6 @@ export const Auth: React.FC<Props> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -166,7 +165,10 @@ export const Auth: React.FC<Props> = (props) => {
   )
 
   const unlock = useCallback(async () => {
-    const url = `${serverURL}${api}/${collectionSlug}/unlock`
+    const url = formatAdminURL({
+      apiRoute: api,
+      path: `/${collectionSlug}/unlock`,
+    })
     const response = await fetch(url, {
       body:
         loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
@@ -183,7 +185,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, username, t, loginWithUsername])
+  }, [i18n, api, collectionSlug, email, username, t, loginWithUsername])
 
   useEffect(() => {
     if (!modified) {

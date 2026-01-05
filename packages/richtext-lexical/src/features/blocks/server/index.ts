@@ -9,6 +9,7 @@ import type {
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
+import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -58,7 +59,11 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
         )
       }
-      blockConfigs.push(block)
+      // Apply baseFilter to relationship fields in the block
+      blockConfigs.push({
+        ...block,
+        fields: applyBaseFilterToFields(block.fields, _config),
+      })
     }
 
     const inlineBlockConfigs: Block[] = []
@@ -71,7 +76,11 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
         )
       }
-      inlineBlockConfigs.push(block)
+      // Apply baseFilter to relationship fields in the block
+      inlineBlockConfigs.push({
+        ...block,
+        fields: applyBaseFilterToFields(block.fields, _config),
+      })
     }
 
     return {

@@ -1,0 +1,80 @@
+# Docker Compose for MongoDB Community Server 8.2 with Search and Vector Search (mongot)
+# This setup enables $search, $searchMeta, and $vectorSearch aggregation stages
+#
+# Usage:
+#   pnpm docker:mongodb:start    - Start MongoDB with vector search
+#   pnpm docker:mongodb:stop     - Stop MongoDB
+#   pnpm docker:mongodb:restart:clean - Restart and remove all data
+#
+# For more information, see:
+# https://www.mongodb.com/docs/atlas/atlas-search/tutorial/run-local-community/
+# https://hub.docker.com/r/mongodb/mongodb-community-search
+
+services:
+  # MongoDB Community Server 8.2 with replica set and keyfile auth
+  # Custom entrypoint bootstraps: init replica set, create users, restart with auth
+  mongodb:
+    image: mongodb/mongodb-community-server:8.2-ubi9
+    container_name: mongodb-payload-test
+    ports:
+      - '27018:27017'
+    volumes:
+      - mongodb_data:/data/db
+      - ./keyfile:/etc/mongodb/keyfile:ro
+      - ./docker-compose-entrypoint.sh:/docker-compose-entrypoint.sh:ro
+    entrypoint: ['/bin/bash', '/docker-compose-entrypoint.sh']
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mongosh',
+          '-u',
+          'admin',
+          '-p',
+          'adminPassword',
+          '--authenticationDatabase',
+          'admin',
+          '--eval',
+          "db.adminCommand('ping')",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  # mongot - MongoDB Community Search for $search and $vectorSearch
+  mongot:
+    image: mongodb/mongodb-community-search:latest
+    container_name: mongot-payload-test
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - mongot_data:/var/lib/mongot
+      - ./mongot-config.yml:/etc/mongot/config-readonly.yml:ro
+      - ./passwordFile:/etc/mongot/secrets/passwordFile-readonly:ro
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        # Copy files to writable location with correct permissions
+        cp /etc/mongot/config-readonly.yml /var/lib/mongot/config.yml
+        cp /etc/mongot/secrets/passwordFile-readonly /var/lib/mongot/passwordFile
+        chmod 400 /var/lib/mongot/passwordFile
+        # Update config to use the new password file location
+        sed -i 's|/etc/mongot/secrets/passwordFile|/var/lib/mongot/passwordFile|g' /var/lib/mongot/config.yml
+        # Start mongot
+        /mongot-community/mongot --config /var/lib/mongot/config.yml
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:8080/health || exit 1']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongot_data:
+    driver: local

@@ -68,7 +68,10 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
 
   return (
     <Form
-      action={`${serverURL}${apiRoute}/${userSlug}/reset-password`}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/reset-password`,
+      })}
       initialState={initialState}
       method="POST"
       onSuccess={onSuccess}
