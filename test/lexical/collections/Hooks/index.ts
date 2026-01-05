@@ -1,6 +1,6 @@
 import type { Block, CollectionConfig } from 'payload'
 
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
 
 import { hooksSlug } from '../../slugs.js'
 
@@ -31,7 +31,7 @@ const RelationshipBlock: Block = {
       name: 'relationshipField',
       type: 'relationship',
       relationTo: 'uploads',
-      // hooks,
+      hooks,
     },
   ],
 }
@@ -64,6 +64,15 @@ export const Hooks: CollectionConfig = {
           ...defaultFeatures,
           BlocksFeature({
             blocks: [RelationshipBlock, TextBlock],
+          }),
+          LinkFeature({
+            fields: [
+              {
+                name: 'linkBlocks',
+                type: 'blocks',
+                blocks: [RelationshipBlock, TextBlock],
+              },
+            ],
           }),
         ],
       }),
