@@ -18,7 +18,7 @@ export default buildConfig({
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URL || '',
   }),
   editor: slateEditor({}),
   secret: process.env.PAYLOAD_SECRET || '',

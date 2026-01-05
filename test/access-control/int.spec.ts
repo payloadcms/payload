@@ -12,6 +12,7 @@ import path from 'path'
 import { createLocalReq, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
@@ -698,7 +699,7 @@ describe('Access Control', () => {
     it('should not allow reset password if forgotPassword expiration token is expired', async () => {
       // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
       const originalDateNow = Date.now
-      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+      const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
         // Move the current time back by 1 hour
         return originalDateNow() - 60 * 60 * 1000
       })

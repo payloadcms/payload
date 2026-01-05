@@ -5,17 +5,16 @@ import type {
   Locator,
   Page,
 } from '@playwright/test'
-import type { Config } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
-import { wait } from 'payload/shared'
-import shelljs from 'shelljs'
+import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-export type AdminRoutes = NonNullable<Config['admin']>['routes']
+export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -69,7 +68,7 @@ export async function ensureCompilationIsDone({
 }): Promise<void> {
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
-  const adminURL = `${serverURL}${adminRoute}`
+  const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
   const maxAttempts = 50
   let attempt = 1
@@ -362,7 +361,9 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
-      throw new Error(`Browser console error: ${msg.text()}`)
+      const { url, lineNumber, columnNumber } = msg.location() || {}
+      const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
+      throw new Error(`Browser console error: ${msg.text()}${locationSuffix}`)
     }
 
     // Log ignored CORS-related errors for visibility
@@ -379,9 +380,12 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
   // Capture uncaught errors that do not appear in the console
   page.on('pageerror', (error) => {
     if (shouldCollectErrors) {
-      consoleErrors.push(`Page error: ${error.message}`)
+      const stack = error?.stack
+      const message = error?.message ?? String(error)
+      consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
     } else {
-      throw new Error(`Page error: ${error.message}`)
+      // Rethrow the original error to preserve stack, name, and other metadata
+      throw error
     }
   })
 
@@ -390,24 +394,6 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
     collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
     stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
   }
-}
-
-export function describeIfInCIOrHasLocalstack(): jest.Describe {
-  if (process.env.CI) {
-    return describe
-  }
-
-  // Check that localstack is running
-  const { code } = shelljs.exec(`docker ps | grep localstack`)
-
-  if (code !== 0) {
-    console.warn('Localstack is not running. Skipping test suite.')
-    return describe.skip
-  }
-
-  console.log('Localstack is running. Running test suite.')
-
-  return describe
 }
 
 export function getRoutes({
@@ -420,7 +406,7 @@ export function getRoutes({
   admin: {
     routes: AdminRoutes
   }
-  routes: Config['routes']
+  routes: NonNullable<SanitizedConfig['routes']>
 } {
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes

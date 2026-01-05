@@ -27,8 +27,7 @@
       "ES2022"
     ],
     "types": [
-      "node",
-      "jest"
+      "node"
     ],
     "incremental": true,
     "isolatedModules": true,

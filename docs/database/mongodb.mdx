@@ -23,7 +23,7 @@ export default buildConfig({
   db: mongooseAdapter({
     // Mongoose-specific arguments go here.
     // URL is required.
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
   }),
 })
 ```
@@ -67,7 +67,7 @@ import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
     // For example, if you're using firestore:
     ...compatibilityOptions.firestore,
   }),
@@ -99,7 +99,7 @@ export default buildConfig({
   db: mongooseAdapter({
     // Mongoose-specific arguments go here.
     // URL is required.
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
     collation: {
       // Set any MongoDB collation options here.
       // The locale will be set automatically based on the request locale.

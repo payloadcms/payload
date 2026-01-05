@@ -416,6 +416,45 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
       await expect(page.getByText('Pretzel Bites')).toBeHidden()
     })
+
+    test('should filter relationship fields in Lexical BlocksFeature', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+      await page.goto(menuItemsURL.create)
+      await selectDocumentTenant({
+        page,
+        payload,
+        tenant: 'Blue Dog',
+      })
+
+      // Fill in the required name field
+      await page.fill('#field-name', 'Test Menu Item')
+
+      // Find the bug-repro richtext field and insert a block
+      const rte = page.locator('.rich-text-lexical [data-lexical-editor="true"]')
+      await rte.click()
+      await rte.focus()
+
+      // Open slash menu and insert block
+      await page.keyboard.type('/')
+      await expect(page.locator('.slash-menu-popup')).toBeVisible()
+      await page.getByText('Block With Relationship').click()
+
+      // Wait for block to be inserted
+      await expect(page.locator('.LexicalEditorTheme__block')).toBeVisible()
+
+      // Open the relationship field in the block
+      await page.locator('.LexicalEditorTheme__block .rs__input').click()
+
+      // Should only show Blue Dog Menu, not Steel Cat Menu or others
+      await expect(page.getByText('Blue Dog Menu')).toBeVisible()
+      await expect(page.getByText('Steel Cat Menu')).toBeHidden()
+      await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
+      await expect(page.locator('.rs__menu')).toHaveCount(1)
+    })
   })
 
   test.describe('Globals', () => {

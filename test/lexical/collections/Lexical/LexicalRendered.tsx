@@ -13,6 +13,7 @@ import {
 } from '@payloadcms/richtext-lexical/html-async'
 import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
 import { useConfig, useDocumentInfo, usePayloadAPI } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 
 const jsxConverters: JSXConvertersFunction<DefaultNodeTypes | SerializedBlockNode<any>> = ({
@@ -61,17 +62,23 @@ export const LexicalRendered: React.FC = () => {
     },
   } = useConfig()
 
-  const [{ data }] = usePayloadAPI(`${serverURL}${api}/${collectionSlug}/${id}`, {
-    initialParams: {
-      depth: 1,
+  const [{ data }] = usePayloadAPI(
+    formatAdminURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }),
+    {
+      initialParams: {
+        depth: 1,
+      },
     },
-  })
+  )
 
-  const [{ data: unpopulatedData }] = usePayloadAPI(`${serverURL}${api}/${collectionSlug}/${id}`, {
-    initialParams: {
-      depth: 0,
+  const [{ data: unpopulatedData }] = usePayloadAPI(
+    formatAdminURL({ apiRoute: api, path: `/${collectionSlug}/${id}`, serverURL }),
+    {
+      initialParams: {
+        depth: 0,
+      },
     },
-  })
+  )
 
   const html: null | string = useMemo(() => {
     if (!data.lexicalWithBlocks) {
@@ -92,7 +99,7 @@ export const LexicalRendered: React.FC = () => {
         converters: htmlConvertersAsync,
         data: unpopulatedData.lexicalWithBlocks as SerializedEditorState,
         populate: getRestPopulateFn({
-          apiURL: `${serverURL}${api}`,
+          apiURL: formatAdminURL({ apiRoute: api, path: '', serverURL }),
         }),
       })
 
