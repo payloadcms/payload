@@ -18,43 +18,63 @@ export async function getGlobalData(req: PayloadRequest) {
   }> = []
 
   if (config.globals.length > 0) {
-    const lockedDocuments = await payload.find({
-      collection: 'payload-locked-documents',
-      depth: 1,
-      overrideAccess: false,
-      pagination: false,
-      req,
-      select: {
-        globalSlug: true,
-        updatedAt: true,
-        user: true,
-      },
-      where: {
-        globalSlug: {
-          exists: true,
+    if (payload.collections?.['payload-locked-documents']) {
+      const lockedDocuments = await payload.find({
+        collection: 'payload-locked-documents',
+        depth: 1,
+        overrideAccess: false,
+        pagination: false,
+        req,
+        select: {
+          globalSlug: true,
+          updatedAt: true,
+          user: true,
         },
-      },
-    })
-
-    // Map over globals to include `lockDuration` and lock data for each global slug
-    globalData = config.globals.map((global) => {
-      const lockDuration =
-        typeof global.lockDocuments === 'object'
-          ? global.lockDocuments.duration
-          : globalLockDurationDefault
-
-      const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
-
-      return {
-        slug: global.slug,
-        data: {
-          _isLocked: !!lockedDoc,
-          _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
-          _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null!,
+        where: {
+          globalSlug: {
+            exists: true,
+          },
         },
-        lockDuration,
-      }
-    })
+      })
+
+      // Map over globals to include `lockDuration` and lock data for each global slug
+      globalData = config.globals.map((global) => {
+        const lockDuration =
+          typeof global.lockDocuments === 'object'
+            ? global.lockDocuments.duration
+            : globalLockDurationDefault
+
+        const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
+
+        return {
+          slug: global.slug,
+          data: {
+            _isLocked: !!lockedDoc,
+            _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
+            _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null,
+          },
+          lockDuration,
+        }
+      })
+    } else {
+      // If locked-documents collection doesn't exist, return globals without lock data
+      globalData = config.globals.map((global) => {
+        const lockDuration =
+          typeof global.lockDocuments === 'object'
+            ? global.lockDocuments.duration
+            : globalLockDurationDefault
+
+        return {
+          slug: global.slug,
+          data: {
+            _isLocked: false,
+            _lastEditedAt: null,
+            _userEditing: null,
+          },
+          lockDuration,
+        }
+      })
+    }
   }
 
   return globalData
