@@ -114,7 +114,7 @@ export function supportsTurbopackExternalizeTransitiveDependencies(
     return false
   }
 
-  const { canaryVersion, major, minor } = version
+  const { canaryVersion, major, minor, patch } = version
 
   if (major === undefined || minor === undefined) {
     return false
@@ -129,11 +129,15 @@ export function supportsTurbopackExternalizeTransitiveDependencies(
       return true
     }
     if (minor === 1) {
+      // 16.1.1+ and canaries support this feature
+      if (patch > 0) {
+        return true
+      }
       if (canaryVersion !== undefined) {
         // 16.1.0-canary.3+
         return canaryVersion >= 3
       } else {
-        // Assume that Next.js 16.1 inherits support for this feature from the canary release
+        // Next.js 16.1.0
         return true
       }
     }
