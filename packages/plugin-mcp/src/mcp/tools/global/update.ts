@@ -64,7 +64,7 @@ export const updateGlobalTool = (
 
       const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
         slug: globalSlug,
-        data: globals?.[globalSlug]?.override?.(parsedData, req) || parsedData,
+        data: parsedData,
         depth,
         draft,
         user,
@@ -89,7 +89,6 @@ export const updateGlobalTool = (
           {
             type: 'text' as const,
             text: `Global "${globalSlug}" updated successfully!
-Updated global:
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
 \`\`\``,
