@@ -372,7 +372,7 @@ export const generateFileData = async <T>({
       req.payloadUploadSizes = {}
       // Focal point adjustments
       const focalPoint =
-        collectionConfig.upload.focalPoint && uploadEdits?.focalPoint
+        focalPointEnabled && uploadEdits?.focalPoint
           ? {
               x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
               y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
@@ -454,7 +454,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
     if (isDuplicating) {
       uploadEdits.focalPoint = {
         x: incomingData?.focalX || origDoc.focalX!,
-        y: incomingData?.focalY || origDoc.focalX!,
+        y: incomingData?.focalY || origDoc.focalY!,
       }
       return uploadEdits
     }
