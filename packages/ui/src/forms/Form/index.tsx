@@ -402,12 +402,6 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        if (!modifiedWhileProcessingRef.current) {
-          setModified(false)
-        } else {
-          modifiedWhileProcessingRef.current = false
-        }
-
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
@@ -426,6 +420,13 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          // Only reset modified state on successful submission
+          if (!modifiedWhileProcessingRef.current) {
+            setModified(false)
+          } else {
+            modifiedWhileProcessingRef.current = false
+          }
+
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,

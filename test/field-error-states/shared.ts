@@ -3,6 +3,7 @@ import type { CollectionSlug, GlobalSlug } from 'payload'
 export const collectionSlugs: {
   [key: string]: CollectionSlug
 } = {
+  users: 'users',
   validateDraftsOff: 'validate-drafts-off',
   validateDraftsOn: 'validate-drafts-on',
   validateDraftsOnAutosave: 'validate-drafts-on-autosave',
