@@ -968,6 +968,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Publicación Española',
           content: 'Contenido Español',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'es',
       })
 
@@ -1019,6 +1020,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Título Español',
           content: 'Contenido Español',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'es',
       })
 
@@ -1029,6 +1031,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Titre Français',
           content: 'Contenu Français',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'fr',
       })
 
@@ -1075,6 +1078,7 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           title: 'English Only Title',
         },
+        // @ts-expect-error - locale is a valid property
         locale: 'en',
       })
 
