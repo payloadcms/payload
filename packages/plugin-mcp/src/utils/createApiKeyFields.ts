@@ -2,7 +2,7 @@ import type { Field } from 'payload'
 
 import type { EntityConfig } from '../types.js'
 
-import { adminOperationSettings } from './adminOperationSettings.js'
+import { adminEntitySettings } from './adminEntitySettings.js'
 import { toCamelCase } from './camelCase.js'
 import { getEnabledSlugs } from './getEnabledSlugs.js'
 /**
@@ -20,7 +20,7 @@ export const createApiKeyFields = ({
   config: EntityConfig | undefined
   configType: 'collection' | 'global'
 }): Field[] => {
-  const operations = adminOperationSettings[configType]
+  const operations = adminEntitySettings[configType]
   const enabledSlugs = getEnabledSlugs(config, configType)
 
   return enabledSlugs.map((slug) => {

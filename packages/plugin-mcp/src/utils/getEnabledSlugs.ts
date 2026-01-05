@@ -1,6 +1,6 @@
 import type { EntityConfig } from '../types.js'
 
-import { adminOperationSettings } from './adminOperationSettings.js'
+import { adminEntitySettings } from './adminEntitySettings.js'
 
 /**
  * Extracts enabled slugs from collections or globals configuration.
@@ -18,7 +18,7 @@ export const getEnabledSlugs = (
 ): string[] => {
   return Object.keys(config || {}).filter((slug) => {
     const entityConfig = config?.[slug]
-    const operations = adminOperationSettings[configType]
+    const operations = adminEntitySettings[configType]
 
     // Check if fully enabled (boolean true)
     const fullyEnabled =
