@@ -416,9 +416,7 @@ export type MCPAccessSettings = {
   user: TypedUser
 } & Record<string, unknown>
 
-export type CollectionOrGlobalConfig =
-  | PluginMCPServerConfig['collections']
-  | PluginMCPServerConfig['globals']
+export type EntityConfig = PluginMCPServerConfig['collections'] | PluginMCPServerConfig['globals']
 
 export type FieldDefinition = {
   description?: string

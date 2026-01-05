@@ -1,4 +1,6 @@
-import type { CollectionOrGlobalConfig } from '../types.js'
+import type { EntityConfig } from '../types.js'
+
+import { adminOperationSettings } from './adminOperationSettings.js'
 
 /**
  * Extracts enabled slugs from collections or globals configuration.
@@ -7,15 +9,16 @@ import type { CollectionOrGlobalConfig } from '../types.js'
  * 2. enabled is an object with at least one operation set to true
  *
  * @param config - The collections or globals configuration object
- * @param operations - List of valid operations to check (e.g., ['find', 'create', 'update', 'delete'])
+ * @param configType - The type of configuration ('collection' or 'global')
  * @returns Array of enabled slugs
  */
 export const getEnabledSlugs = (
-  config: CollectionOrGlobalConfig | undefined,
-  operations: string[] = ['find', 'create', 'update', 'delete'],
+  config: EntityConfig | undefined,
+  configType: 'collection' | 'global',
 ): string[] => {
   return Object.keys(config || {}).filter((slug) => {
     const entityConfig = config?.[slug]
+    const operations = adminOperationSettings[configType]
 
     // Check if fully enabled (boolean true)
     const fullyEnabled =
@@ -29,7 +32,7 @@ export const getEnabledSlugs = (
     const enabled = entityConfig?.enabled
     if (typeof enabled !== 'boolean' && enabled) {
       return operations.some((operation) => {
-        const operationEnabled = enabled[operation as keyof typeof enabled]
+        const operationEnabled = enabled[operation.name as keyof typeof enabled]
         return typeof operationEnabled === 'boolean' && operationEnabled === true
       })
     }

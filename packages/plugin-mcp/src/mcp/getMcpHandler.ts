@@ -102,12 +102,7 @@ export const getMCPHandler = (
     return createMcpHandler(
       (server) => {
         // Get enabled collections
-        const enabledCollectionSlugs = getEnabledSlugs(collectionsPluginConfig, [
-          'find',
-          'create',
-          'update',
-          'delete',
-        ])
+        const enabledCollectionSlugs = getEnabledSlugs(collectionsPluginConfig, 'collection')
 
         // Collection Operation Tools
         enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
@@ -201,7 +196,7 @@ export const getMCPHandler = (
         })
 
         // Global Operation Tools
-        const enabledGlobalSlugs = getEnabledSlugs(globalsPluginConfig, ['find', 'update'])
+        const enabledGlobalSlugs = getEnabledSlugs(globalsPluginConfig, 'global')
 
         enabledGlobalSlugs.forEach((enabledGlobalSlug) => {
           try {
