@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { addSelectGenericsToGeneratedTypes } from './addSelectGenericsToGeneretedTypes.js'
 
 const INPUT_AND_OUTPUT = [
@@ -272,7 +273,7 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
 `,
@@ -546,7 +547,7 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
 `,

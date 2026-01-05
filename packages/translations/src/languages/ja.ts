@@ -80,6 +80,11 @@ export const jaTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
+  dashboard: {
+    addWidget: 'ウィジェットを追加する',
+    deleteWidget: 'ウィジェット{{id}}を削除します',
+    searchWidgets: 'ウィジェットを検索...',
+  },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',
     autosaving: 'このデータを自動保存する際に問題が発生しました。',
