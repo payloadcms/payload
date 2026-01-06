@@ -19,17 +19,6 @@ export async function initDevAndTest(
   skipGenImportMap: string,
   configFile?: string,
 ): Promise<void> {
-  const importMapPath: string = path.resolve(
-    getNextRootDir(testSuiteArg).rootDir,
-    './app/(payload)/admin/importMap.js',
-  )
-
-  try {
-    fs.writeFileSync(importMapPath, 'export const importMap = {}')
-  } catch (error) {
-    console.log('Error writing importMap.js', error)
-  }
-
   if (writeDBAdapter === 'true') {
     const dbAdapter: keyof typeof allDatabaseAdapters =
       (process.env.PAYLOAD_DATABASE as keyof typeof allDatabaseAdapters) || 'mongodb'
@@ -49,8 +38,6 @@ export async function initDevAndTest(
   const config: SanitizedConfig = await (await import(configUrl)).default
 
   process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
-
-  await generateImportMap(config, { log: true, force: true })
 
   console.log('Done')
 }

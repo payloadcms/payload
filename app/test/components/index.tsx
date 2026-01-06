@@ -2,6 +2,7 @@ import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
+import './index.scss'
 
 const baseClass = 'nav'
 
