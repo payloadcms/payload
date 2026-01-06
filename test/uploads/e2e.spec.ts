@@ -463,8 +463,10 @@ describe('Uploads', () => {
     // fill the title with 'draft'
     await page.locator('#field-title').fill('draft')
 
-    // save draft
-    await page.locator('#action-save-draft').click()
+    await saveDocAndAssert(
+      page,
+      '.payload__modal-item .collection-edit--versions button#action-save-draft',
+    )
 
     // close the drawer
     await page.locator('.doc-drawer__header-close').click()
@@ -1640,7 +1642,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/enlarge\/file\/test-image-180x50\.jpg$/,
+      )
     })
 
     test('should select next smallest image outside of range but smaller than original', async () => {
@@ -1649,7 +1654,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/focal-only\/file\/test-image-400x300\.jpg$/,
+      )
     })
 
     test('should select original if smaller than next available size', async () => {
@@ -1658,7 +1666,7 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
+      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png$/)
     })
   })
 
