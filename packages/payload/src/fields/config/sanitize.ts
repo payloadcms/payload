@@ -231,7 +231,7 @@ export const sanitizeFields = async ({
 
     if (fieldAffectsData) {
       if (existingFieldNames.has(field.name)) {
-        throw new DuplicateFieldName(field.name)
+        throw new DuplicateFieldName(field.name, collectionConfig?.slug)
       } else if (!['blockName', 'id'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
@@ -320,7 +320,7 @@ export const sanitizeFields = async ({
         const blockSlug = typeof block === 'string' ? block : block.slug
 
         if (blockSlugs.includes(blockSlug)) {
-          throw new DuplicateFieldName(blockSlug)
+          throw new DuplicateFieldName(blockSlug, collectionConfig?.slug, field.name)
         }
 
         blockSlugs.push(blockSlug)
