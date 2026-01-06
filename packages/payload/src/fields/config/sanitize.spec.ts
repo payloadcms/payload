@@ -16,14 +16,17 @@ import {
   MissingFieldType,
 } from '../../errors/index.js'
 import { sanitizeFields } from './sanitize.js'
-import { CollectionConfig } from '../../index.js'
-import { describe, it, expect } from 'vitest'
+import { CollectionConfig, GlobalConfig } from '../../index.js'
+import { describe, expect, it } from 'vitest'
 
 describe('sanitizeFields', () => {
   const config = {} as Config
   const collectionConfig = {
     slug: 'example-collection',
   } as CollectionConfig
+  const globalConfig = {
+    slug: 'example-global',
+  } as GlobalConfig
 
   it('should throw on missing type field', async () => {
     const fields: Field[] = [
@@ -90,7 +93,7 @@ describe('sanitizeFields', () => {
     }
     expect(error).toBeInstanceOf(DuplicateFieldName)
     expect(error?.message).toBe(
-      "A field with the name 'someField' was found multiple times on the same level in collection 'example-collection'. Field names must be unique.",
+      "A field with path 'example-collection > someField' was found multiple times on the same level. Field names must be unique.",
     )
   })
 
@@ -135,7 +138,58 @@ describe('sanitizeFields', () => {
     }
     expect(error).toBeInstanceOf(DuplicateFieldName)
     expect(error?.message).toBe(
-      "A field with the name 'block' was found multiple times on the same level in collection 'example-collection' in field 'blocks'. Field names must be unique.",
+      "A field with path 'example-collection > blocks > block' was found multiple times on the same level. Field names must be unique.",
+    )
+  })
+
+  it('should recursively build error message', async () => {
+    const fields: Field[] = [
+      {
+        name: 'blocks',
+        type: 'blocks',
+        blocks: [
+          {
+            slug: 'block',
+            fields: [
+              {
+                name: 'blockField',
+                type: 'blocks',
+                blocks: [
+                  {
+                    slug: 'innerBlock',
+                    fields: [
+                      {
+                        name: 'innerField',
+                        type: 'text',
+                      },
+                      {
+                        name: 'innerField',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]
+
+    let error: Error | null = null
+    try {
+      await sanitizeFields({
+        config,
+        globalConfig,
+        fields,
+        validRelationships: [],
+      })
+    } catch (e) {
+      error = e
+    }
+    expect(error).toBeInstanceOf(DuplicateFieldName)
+    expect(error?.message).toBe(
+      "A field with path 'example-global > blocks > block > blockField > innerBlock > innerField' was found multiple times on the same level. Field names must be unique.",
     )
   })
 
