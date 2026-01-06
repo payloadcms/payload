@@ -352,7 +352,6 @@ export const DocumentControls: React.FC<{
                             href={formatAdminURL({
                               adminRoute,
                               path: `/collections/${collectionConfig?.slug}/create`,
-                              serverURL,
                             })}
                             id="action-create"
                           >

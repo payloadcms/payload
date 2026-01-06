@@ -81,6 +81,11 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  dashboard: {
+    addWidget: 'Ajouter un Widget',
+    deleteWidget: 'Supprimer le widget {{id}}',
+    searchWidgets: 'Rechercher des widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',
     autosaving: 'Un problème est survenu lors de l’enregistrement automatique de ce document.',

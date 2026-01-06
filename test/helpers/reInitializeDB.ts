@@ -1,3 +1,4 @@
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 export const path = '/re-initialize'
@@ -32,12 +33,15 @@ export const reInitializeDB = async ({
         },
       )
 
-      const response = await fetch(`${serverURL}/api${path}${queryParams}`, {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      })
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)

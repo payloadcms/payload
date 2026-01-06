@@ -1,0 +1,19 @@
+# mongot configuration for local development
+syncSource:
+  replicaSet:
+    hostAndPort: 'mongodb:27017'
+    username: mongotUser
+    passwordFile: '/etc/mongot/secrets/passwordFile'
+storage:
+  dataPath: '/var/lib/mongot'
+server:
+  grpc:
+    address: '0.0.0.0:27028'
+    tls:
+      mode: 'disabled'
+metrics:
+  enabled: false
+healthCheck:
+  address: '0.0.0.0:8080'
+logging:
+  verbosity: INFO

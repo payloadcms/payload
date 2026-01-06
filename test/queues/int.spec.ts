@@ -10,6 +10,7 @@ import {
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -1607,7 +1608,6 @@ describe('Queues - Payload', () => {
   })
 
   it('can reliably run workflows with parallel tasks', async () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (process.env.PAYLOAD_DATABASE === 'supabase') {
       // TODO: This test is flaky on supabase in CI, so we skip it for now
       return

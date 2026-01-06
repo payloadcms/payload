@@ -11,6 +11,7 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -103,7 +104,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { config } = useConfig()
   const {
     routes: { api },
-    serverURL,
   } = config
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
@@ -145,7 +145,12 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
-  const actionURL = `${serverURL}${api}/${collectionSlug}`
+  const baseAPIPath = formatAdminURL({
+    apiRoute: api,
+    path: '',
+  })
+
+  const actionURL = `${baseAPIPath}/${collectionSlug}`
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
@@ -153,7 +158,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     }
 
     const docAccessURL = `/${collectionSlug}/access`
-    const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+    const res = await fetch(`${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`, {
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -164,7 +169,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     const json: SanitizedDocumentPermissions = await res.json()
     const publishedAccessJSON = await fetch(
-      `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
+      `${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`,
       {
         body: JSON.stringify({
           _status: 'published',
@@ -190,7 +195,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     setHasPublishPermission(publishedAccessJSON?.update)
     setHasInitializedDocPermissions(true)
-  }, [api, code, collectionSlug, i18n.language, serverURL])
+  }, [baseAPIPath, code, collectionSlug, i18n.language])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {
