@@ -22,6 +22,7 @@ import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
+import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
@@ -426,6 +427,11 @@ export const sanitizeFields = async ({
         typeof supportedTimezones === 'function'
           ? supportedTimezones({ defaultTimezones })
           : supportedTimezones
+
+      validateTimezones({
+        source: `field "${field.name}" timezone.supportedTimezones`,
+        timezones: options,
+      })
 
       if (options && options.length === 1 && options[0]?.value) {
         defaultTimezone = options[0].value
