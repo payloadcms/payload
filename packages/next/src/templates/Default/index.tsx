@@ -7,21 +7,11 @@ import type {
   VisibleEntities,
 } from 'payload'
 
-import {
-  ActionsProvider,
-  AppHeader,
-  BulkUploadProvider,
-  EntityVisibilityProvider,
-  NavToggler,
-} from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-
 import './index.scss'
 
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
-import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
 const baseClass = 'template-default'
@@ -54,21 +44,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   req,
   searchParams,
   user,
-  viewActions,
   viewType,
   visibleEntities,
 }) => {
-  const {
-    admin: {
-      avatar,
-      components,
-      components: { header: CustomHeader, Nav: CustomNav } = {
-        header: undefined,
-        Nav: undefined,
-      },
-    } = {},
-  } = payload.config || {}
-
   const clientProps = {
     documentSubViewType,
     viewType,
@@ -94,75 +72,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     user,
   }
 
-  const Actions: Record<string, React.ReactNode> = {}
-  for (const action of viewActions ?? []) {
-    if (!action) {
-      continue
-    }
-    const key = typeof action === 'object' ? action.path : action
-    Actions[key] = RenderServerComponent({
-      clientProps,
-      Component: action,
-      importMap: payload.importMap,
-      serverProps,
-    })
-  }
-
-  const NavComponent = RenderServerComponent({
-    clientProps,
-    Component: CustomNav,
-    Fallback: DefaultNav,
-    importMap: payload.importMap,
-    serverProps,
-  })
-
   return (
-    <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions}>
-          {RenderServerComponent({
-            clientProps,
-            Component: CustomHeader,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-          <div style={{ position: 'relative' }}>
-            <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-              <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
-                <NavToggler className={`${baseClass}__nav-toggler`}>
-                  <NavHamburger />
-                </NavToggler>
-              </div>
-            </div>
-            <Wrapper baseClass={baseClass} className={className}>
-              {NavComponent}
-              <div className={`${baseClass}__wrap`}>
-                <AppHeader
-                  CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default'
-                      ? RenderServerComponent({
-                          Component: avatar.Component,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  CustomIcon={
-                    components?.graphics?.Icon
-                      ? RenderServerComponent({
-                          Component: components.graphics.Icon,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                />
-                {children}
-              </div>
-            </Wrapper>
-          </div>
-        </ActionsProvider>
-      </BulkUploadProvider>
-    </EntityVisibilityProvider>
+    <div style={{ position: 'relative' }}>
+      <Wrapper baseClass={baseClass} className={className}>
+        <DefaultNav {...serverProps} {...clientProps} />
+      </Wrapper>
+    </div>
   )
 }
