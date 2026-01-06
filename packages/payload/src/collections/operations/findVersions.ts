@@ -1,15 +1,22 @@
+import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -23,34 +30,47 @@ export type Arguments = {
   select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
 ): Promise<PaginatedDocs<TData>> => {
-  const {
-    collection: { config: collectionConfig },
-    depth,
-    limit,
-    overrideAccess,
-    page,
-    pagination = true,
-    populate,
-    req: { fallbackLocale, locale, payload },
-    req,
-    select,
-    showHiddenFields,
-    sort,
-    where,
-  } = args
-
   try {
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'findVersions',
+    })
+
+    const {
+      collection: { config: collectionConfig },
+      depth,
+      limit,
+      overrideAccess,
+      page,
+      pagination = true,
+      populate,
+      select: incomingSelect,
+      showHiddenFields,
+      sort,
+      trash = false,
+      where,
+    } = args
+
+    const req = args.req!
+    const { fallbackLocale, locale, payload } = req
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    let accessResults
+    let accessResults!: AccessResult
 
     if (!overrideAccess) {
       accessResults = await executeAccess({ req }, collectionConfig.access.readVersions)
@@ -60,23 +80,44 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       versionFields,
-      where,
+      where: where!,
     })
 
-    const fullWhere = combineQueries(where, accessResults)
+    let fullWhere = combineQueries(where!, accessResults)
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
+    sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
+    const select = sanitizeSelect({
+      fields: versionFields,
+      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
+      select: incomingSelect,
+      versions: true,
+    })
 
     // /////////////////////////////////////
     // Find
     // /////////////////////////////////////
 
+    const usePagination = pagination && limit !== 0
+    const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
+    const sanitizedPage = page || 1
+
     const paginatedDocs = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
-      limit: limit ?? 10,
-      locale,
-      page: page || 1,
+      limit: sanitizedLimit,
+      locale: locale!,
+      page: sanitizedPage,
       pagination,
       req,
       select,
@@ -87,7 +128,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // /////////////////////////////////////
     // beforeRead - Collection
     // /////////////////////////////////////
-    const result: PaginatedDocs<TData> = paginatedDocs as unknown as PaginatedDocs<TData>
+    let result: PaginatedDocs<TData> = paginatedDocs as unknown as PaginatedDocs<TData>
     result.docs = (await Promise.all(
       paginatedDocs.docs.map(async (doc) => {
         const docRef = doc
@@ -95,18 +136,19 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         if (!docRef.version) {
           ;(docRef as any).version = {}
         }
-        await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-          await priorHook
 
-          docRef.version =
-            (await hook({
-              collection: collectionConfig,
-              context: req.context,
-              doc: docRef.version,
-              query: fullWhere,
-              req,
-            })) || docRef.version
-        }, Promise.resolve())
+        if (collectionConfig.hooks?.beforeRead?.length) {
+          for (const hook of collectionConfig.hooks.beforeRead) {
+            docRef.version =
+              (await hook({
+                collection: collectionConfig,
+                context: req.context,
+                doc: docRef.version,
+                query: fullWhere,
+                req,
+              })) || docRef.version
+          }
+        }
 
         return docRef
       }),
@@ -120,18 +162,19 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         data.version = await afterRead({
           collection: collectionConfig,
           context: req.context,
-          depth,
+          depth: depth!,
           doc: data.version,
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
-          fallbackLocale,
+          fallbackLocale: fallbackLocale!,
           findMany: true,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select: typeof select?.version === 'object' ? select.version : undefined,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         })
         return data
       }),
@@ -146,9 +189,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         result.docs.map(async (doc) => {
           const docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef.version =
               (await hook({
                 collection: collectionConfig,
@@ -158,7 +199,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 query: fullWhere,
                 req,
               })) || doc.version
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
@@ -170,9 +211,20 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // /////////////////////////////////////
     result.docs = result.docs.map((doc) => sanitizeInternalFields<TData>(doc))
 
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'findVersions',
+      result,
+    })
+
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req!)
     throw error
   }
 }

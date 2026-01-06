@@ -2,8 +2,8 @@
 
 @layer payload-default {
   .icon--chevron {
-    height: calc(var(--base) / 2);
-    width: calc(var(--base) / 2);
+    height: var(--base);
+    width: var(--base);
 
     .stroke {
       fill: none;
@@ -18,8 +18,8 @@
     }
 
     &.icon--size-small {
-      height: 8px;
-      width: 8px;
+      height: 12px;
+      width: 12px;
     }
   }
 }

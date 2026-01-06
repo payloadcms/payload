@@ -1,9 +1,9 @@
-import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
+import type { DocumentViewServerProps } from 'payload'
 
 import React from 'react'
 
 import { APIViewClient } from './index.client.js'
 
-export const APIView: PayloadServerReactComponent<EditViewComponent> = () => {
+export function APIView(props: DocumentViewServerProps) {
   return <APIViewClient />
 }

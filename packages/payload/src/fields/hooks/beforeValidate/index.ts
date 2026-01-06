@@ -43,16 +43,17 @@ export const beforeValidate = async <T extends JsonObject>({
     context,
     data: incomingData,
     doc,
-    fields: collection?.fields || global?.fields,
+    fields: (collection?.fields || global?.fields)!,
     global,
     operation,
     overrideAccess,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,
     siblingData: incomingData,
-    siblingDoc: doc,
+    siblingDoc: doc!,
   })
 
   return incomingData

@@ -78,7 +78,9 @@ export const createTableName = ({
 
   if (result.length > 63) {
     throw new APIError(
-      `Exceeded max identifier length for table or enum name of 63 characters. Invalid name: ${result}`,
+      `Exceeded max identifier length for table or enum name of 63 characters. Invalid name: ${result}.
+Tip: You can use the dbName property to reduce the table name length.
+      `,
     )
   }
 

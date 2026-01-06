@@ -20,8 +20,14 @@ export function setHandlePosition(
 
   let top: number
 
-  const isBlockStyle = ['lexical-block', 'lexical-upload', 'lexical-relationship'].some((classes) =>
-    targetElem.firstElementChild?.classList.contains(classes),
+  const isBlockStyle = [
+    'LexicalEditorTheme__block',
+    'LexicalEditorTheme__upload',
+    'LexicalEditorTheme__relationship',
+  ].some(
+    (classes) =>
+      targetElem.classList.contains(classes) ||
+      targetElem.firstElementChild?.classList.contains(classes),
   )
 
   if (!isBlockStyle) {

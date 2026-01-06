@@ -2,19 +2,18 @@ import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { seedDB } from '../helpers/seed.js'
 import {
-  collectionSlugs,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
   with300DocumentsSlug,
 } from './slugs.js'
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   await executePromises(
     [
       () =>
@@ -115,6 +114,15 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
+      () =>
+        _payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            title: 'Localized Doc',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
     ],
     false,
   )
@@ -138,13 +146,4 @@ export const seed = async (_payload) => {
   })
 
   await Promise.all([...manyDocumentsPromises])
-}
-
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'adminTests',
-  })
 }

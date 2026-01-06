@@ -1,7 +1,7 @@
 ---
 title: Postgres
 label: Postgres
-order: 50
+order: 60
 desc: Payload supports Postgres through an officially supported Drizzle Database Adapter.
 keywords: Postgres, documentation, typescript, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -27,7 +27,7 @@ export default buildConfig({
     // Postgres-specific arguments go here.
     // `pool` is required.
     pool: {
-      connectionString: process.env.DATABASE_URI,
+      connectionString: process.env.DATABASE_URL,
     },
   }),
 })
@@ -39,50 +39,62 @@ export default buildConfig({
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 
 export default buildConfig({
-  // Automatically uses proces.env.POSTGRES_URL if no options are provided.
+  // Automatically uses process.env.POSTGRES_URL if no options are provided.
   db: vercelPostgresAdapter(),
   // Optionally, can accept the same options as the @vercel/postgres package.
   db: vercelPostgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL
+      connectionString: process.env.DATABASE_URL,
     },
   }),
 })
 ```
 
 <Banner type="info">
-  **Note:**
-  If you're using `vercelPostgresAdapter` your `process.env.POSTGRES_URL` or `pool.connectionString` points to a local database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres` doesn't work with local databases, if you want to disable that behavior, you can pass `forceUseVercelPostgres: true` to the adapter's args and follow [Vercel guide](https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker) for a Docker Neon DB setup.
+  **Note:** If you're using `vercelPostgresAdapter` and your
+  `process.env.POSTGRES_URL` or `pool.connectionString` points to a local
+  database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module
+  for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres`
+  doesn't work with local databases, if you want to disable that behavior, you
+  can pass `forceUseVercelPostgres: true` to the adapter's args and follow
+  [Vercel
+  guide](https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker)
+  for a Docker Neon DB setup.
 </Banner>
 
 ## Options
 
 | Option                      | Description                                                                                                                                                                      |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pool` *                   | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`              |
+| `pool` \*                   | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`              |
 | `push`                      | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
 | `migrationDir`              | Customize the directory that migrations are stored.                                                                                                                              |
 | `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
 | `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
 | `disableCreateDatabase`     | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                          |
-| `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
-| `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
-| `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |
+| `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                |
+| `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                      |
+| `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                             |
 | `beforeSchemaInit`          | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
 | `afterSchemaInit`           | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
 | `generateSchemaOutputFile`  | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
+| `allowIDOnCreate`           | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
+| `readReplicas`              | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                      |
+| `blocksAsJSON`              | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
 
 ## Access to Drizzle
 
 After Payload is initialized, this adapter will expose the full power of Drizzle to you for use if you need it.
 
 To ensure type-safety, you need to generate Drizzle schema first with:
+
 ```sh
 npx payload generate:db-schema
 ```
 
 Then, you can access Drizzle as follows:
+
 ```ts
 import { posts } from './payload-generated-schema'
 // To avoid installing Drizzle, you can import everything that drizzle has from our re-export path.
@@ -91,7 +103,12 @@ import { eq, sql, and } from '@payloadcms/db-postgres/drizzle'
 // Drizzle's Querying API: https://orm.drizzle.team/docs/rqb
 const posts = await payload.db.drizzle.query.posts.findMany()
 // Drizzle's Select API https://orm.drizzle.team/docs/select
-const result = await payload.db.drizzle.select().from(posts).where(and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`))
+const result = await payload.db.drizzle
+  .select()
+  .from(posts)
+  .where(
+    and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`),
+  )
 ```
 
 ## Tables, relations, and enums
@@ -126,7 +143,11 @@ Runs before the schema is built. You can use this hook to extend your database s
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { integer, pgTable, serial } from '@payloadcms/db-postgres/drizzle/pg-core'
+import {
+  integer,
+  pgTable,
+  serial,
+} from '@payloadcms/db-postgres/drizzle/pg-core'
 
 postgresAdapter({
   beforeSchemaInit: [
@@ -150,7 +171,13 @@ To quickly generate the Drizzle schema from your database you can use [Drizzle I
 You should get the `schema.ts` file which may look like this:
 
 ```ts
-import { pgTable, uniqueIndex, serial, varchar, text } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uniqueIndex,
+  serial,
+  varchar,
+  text,
+} from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -170,7 +197,6 @@ export const countries = pgTable(
     }
   },
 )
-
 ```
 
 You can import them into your config and append to the schema with the `beforeSchemaInit` hook like this:
@@ -187,7 +213,7 @@ postgresAdapter({
         tables: {
           ...schema.tables,
           users,
-          countries
+          countries,
         },
       }
     },
@@ -197,11 +223,10 @@ postgresAdapter({
 
 Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection.
 
-
 ### afterSchemaInit
 
 Runs after the Drizzle schema is built. You can use this hook to modify the schema with features that aren't supported by Payload, or if you want to add a column that you don't want to be in the Payload config.
-To extend a table, Payload exposes `extendTable` utillity to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+To extend a table, Payload exposes `extendTable` utility to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
 The following example adds the `extra_integer_column` column and a composite index on `country` and `city` columns.
 
 ```ts
@@ -234,10 +259,9 @@ export default buildConfig({
             extraIntegerColumn: integer('extra_integer_column'),
           },
           extraConfig: (table) => ({
-            country_city_composite_index: index('country_city_composite_index').on(
-              table.country,
-              table.city,
-            ),
+            country_city_composite_index: index(
+              'country_city_composite_index',
+            ).on(table.country, table.city),
           }),
         })
 
@@ -246,10 +270,10 @@ export default buildConfig({
     ],
   }),
 })
-
 ```
 
 ### Note for generated schema:
+
 Columns and tables, added in schema hooks won't be added to the generated via `payload generate:db-schema` Drizzle schema.
 If you want them to be there, you either have to edit this file manually or mutate the internal Payload "raw" SQL schema in the `beforeSchemaInit`:
 
@@ -266,9 +290,9 @@ postgresAdapter({
           my_id: {
             name: 'my_id',
             type: 'serial',
-            primaryKey: true
-          }
-        }
+            primaryKey: true,
+          },
+        },
       }
 
       // Add a new column to generated by Payload table:
@@ -276,13 +300,13 @@ postgresAdapter({
         name: 'custom_column',
         // Note that Payload SQL doesn't support everything that Drizzle does.
         type: 'integer',
-        notNull: true
+        notNull: true,
       }
       // Add a new index to generated by Payload table:
       adapter.rawTables.posts.indexes.customColumnIdx = {
         name: 'custom_column_idx',
         unique: true,
-        on: ['custom_column']
+        on: ['custom_column'],
       }
 
       return schema

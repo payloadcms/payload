@@ -2,7 +2,7 @@ import type { ProjectTemplate } from '../types.js'
 
 import { error, info } from '../utils/log.js'
 
-export function validateTemplate(templateName: string): boolean {
+export function validateTemplate({ templateName }: { templateName: string }): boolean {
   const validTemplates = getValidTemplates()
   if (!validTemplates.map((t) => t.name).includes(templateName)) {
     error(`'${templateName}' is not a valid template.`)
@@ -26,6 +26,19 @@ export function getValidTemplates(): ProjectTemplate[] {
       type: 'starter',
       description: 'Website Template',
       url: `https://github.com/payloadcms/payload/templates/website#main`,
+    },
+    {
+      name: 'ecommerce',
+      type: 'starter',
+      description: 'Ecommerce template',
+      url: 'https://github.com/payloadcms/payload/templates/ecommerce#main',
+    },
+    {
+      name: 'with-cloudflare-d1',
+      type: 'starter',
+      dbType: 'd1-sqlite',
+      description: 'Blank template with Cloudflare D1 and Workers integration',
+      url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1#main',
     },
     {
       name: 'plugin',

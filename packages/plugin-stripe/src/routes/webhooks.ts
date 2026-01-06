@@ -26,7 +26,7 @@ export const stripeWebhooks = async (args: {
       },
     })
 
-    const body = await req.text()
+    const body = await req.text!()
     const stripeSignature = req.headers.get('stripe-signature')
 
     if (stripeSignature) {
@@ -41,7 +41,7 @@ export const stripeWebhooks = async (args: {
       }
 
       if (event) {
-        handleWebhooks({
+        void handleWebhooks({
           config,
           event,
           payload: req.payload,
@@ -52,7 +52,7 @@ export const stripeWebhooks = async (args: {
 
         // Fire external webhook handlers if they exist
         if (typeof webhooks === 'function') {
-          webhooks({
+          void webhooks({
             config,
             event,
             payload: req.payload,
@@ -65,7 +65,7 @@ export const stripeWebhooks = async (args: {
         if (typeof webhooks === 'object') {
           const webhookEventHandler = webhooks[event.type]
           if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler({
+            void webhookEventHandler({
               config,
               event,
               payload: req.payload,

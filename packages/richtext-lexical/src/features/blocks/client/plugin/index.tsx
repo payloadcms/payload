@@ -56,22 +56,15 @@ export const BlocksPlugin: PluginComponent = () => {
 
             if ($isRangeSelection(selection)) {
               const blockNode = $createBlockNode(payload)
+
+              // we need to get the focus node before inserting the block node, as $insertNodeToNearestRoot can change the focus node
+              const { focus } = selection
+              const focusNode = focus.getNode()
               // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
               $insertNodeToNearestRoot(blockNode)
 
-              const { focus } = selection
-              const focusNode = focus.getNode()
-
-              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
-              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
-              if (
-                $isParagraphNode(focusNode) &&
-                focusNode.getTextContentSize() === 0 &&
-                focusNode
-                  .getParentOrThrow()
-                  .getChildren()
-                  .filter((node) => $isParagraphNode(node)).length > 1
-              ) {
+              // Delete the node it it's an empty paragraph
+              if ($isParagraphNode(focusNode) && !focusNode.__first) {
                 focusNode.remove()
               }
             }

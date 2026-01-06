@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -16,9 +17,7 @@ describe('@payloadcms/plugin-sentry', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('tests', () => {

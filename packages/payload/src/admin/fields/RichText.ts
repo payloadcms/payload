@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -78,3 +80,10 @@ export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type RichTextFieldErrorClientComponent =
   FieldErrorClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldDiffServerComponent = FieldDiffServerComponent<
+  RichTextField,
+  RichTextFieldClient
+>
+
+export type RichTextFieldDiffClientComponent = FieldDiffClientComponent<RichTextFieldClient>

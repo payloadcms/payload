@@ -20,7 +20,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 export default buildConfig({
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI,
+      connectionString: process.env.DATABASE_URL,
     },
   }),
   // ...rest of config

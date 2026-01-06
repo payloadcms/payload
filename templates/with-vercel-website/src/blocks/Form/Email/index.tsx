@@ -10,11 +10,7 @@ import { Width } from '../Width'
 
 export const Email: React.FC<
   EmailField & {
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
+    errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
   }
 > = ({ name, defaultValue, errors, label, register, required, width }) => {
@@ -36,7 +32,7 @@ export const Email: React.FC<
         {...register(name, { pattern: /^\S[^\s@]*@\S+$/, required })}
       />
 
-      {errors[name] && <Error />}
+      {errors[name] && <Error name={name} />}
     </Width>
   )
 }

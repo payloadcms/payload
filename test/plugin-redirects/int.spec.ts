@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -27,9 +28,7 @@ describe('@payloadcms/plugin-redirects', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a redirects collection', async () => {

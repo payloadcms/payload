@@ -16,10 +16,10 @@ Upload fields are useful for a variety of use cases, such as:
 - To give a layout building block the ability to feature a background image
 
 <LightDarkImage
-srcLight="https://payloadcms.com/images/docs/fields/upload.png"
-srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
-alt="Shows an upload field in the Payload Admin Panel"
-caption="Admin Panel screenshot of an Upload field"
+  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+  alt="Shows an upload field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of an Upload field"
 />
 
 To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
@@ -37,44 +37,43 @@ export const MyUploadField: Field = {
 ```
 
 <Banner type="warning">
-  **Important:**
-  To use the Upload Field, you must have a [Collection](../configuration/collections) configured to allow [Uploads](../upload/overview).
+  **Important:** To use the Upload Field, you must have a
+  [Collection](../configuration/collections) configured to allow
+  [Uploads](../upload/overview).
 </Banner>
 
 ## Config Options
 
-| Option                 | Description                                                                                                                                                                 |
-|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`relationTo`** *    | Provide a single collection `slug` to allow this field to accept a relation to. **Note: the related collection must be configured to support Uploads.**        |
-| **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
-| **`hasMany`**          | Boolean which, if set to true, allows this field to have many relations instead of only one.                                                                                |
-| **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with hasMany.                                                                         |
-| **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with hasMany.                                                                           |
-| **`maxDepth`**         | Sets a number limit on iterations of related documents to populate when queried. [Depth](../queries/depth)                                                                  |
-| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
-| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
-| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
-| **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                             |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                       |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                          |
-| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                            |
-| **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
-| **`displayPreview`**   | Enable displaying preview of the uploaded file. Overrides related Collection's `displayPreview` option. [More](/docs/upload/overview#collection-upload-options).            |
-| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
-| **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [Admin Options](./overview#admin-options).                                                                                               |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
-| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
-| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
-| **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                         |
+| Option                 | Description                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                                                                                                                         |
+| **`relationTo`** \*    | Provide a single collection `slug` or an array of slugs to allow this field to accept a relation to. **Note: the related collections must be configured to support Uploads.**                                                                                                                           |
+| **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More details](#filtering-upload-options).                                                                                                                                                                                       |
+| **`hasMany`**          | Boolean which, if set to true, allows this field to have many relations instead of only one.                                                                                                                                                                                                            |
+| **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with hasMany.                                                                                                                                                                                                     |
+| **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with hasMany.                                                                                                                                                                                                       |
+| **`maxDepth`**         | Sets a number limit on iterations of related documents to populate when queried. [Depth](../queries/depth)                                                                                                                                                                                              |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                                                                                 |
+| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                                                                                                            |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More details](/docs/fields/overview#validation).                                                                                                                                                   |
+| **`index`**            | Build an [index](../database/indexes) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.                                                                                                                                 |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                                         |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                                                   |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                                      |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                                                                                                                        |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More details](/docs/fields/overview#default-values).                                                                                                                                                                                           |
+| **`displayPreview`**   | Enable displaying preview of the uploaded file. Overrides related Collection's `displayPreview` option. [More details](/docs/upload/overview#collection-upload-options).                                                                                                                                |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                                                                                                                         |
+| **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                                     |
+| **`admin`**            | Admin-specific configuration. [Admin Options](./overview#admin-options).                                                                                                                                                                                                                                |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                                             |
+| **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
+| **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                                                                                                                                                     |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -102,7 +101,7 @@ prevent all, or a `Where` query. When using a function, it will be
 called with an argument object with the following properties:
 
 | Property      | Description                                                                                           |
-|---------------|-------------------------------------------------------------------------------------------------------|
+| ------------- | ----------------------------------------------------------------------------------------------------- |
 | `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
 | `data`        | An object containing the full collection or global document currently being edited                    |
 | `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
@@ -128,10 +127,11 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   **Note:**
 
-  When an upload field has both **filterOptions** and a custom
-  **validate** function, the api will not validate **filterOptions**
-  unless you call the default upload field validation function imported from
-  **payload/shared** in your validate function.
+When an upload field has both **filterOptions** and a custom
+**validate** function, the api will not validate **filterOptions**
+unless you call the default upload field validation function imported from
+**payload/shared** in your validate function.
+
 </Banner>
 
 ## Bi-directional relationships
@@ -140,3 +140,40 @@ The `upload` field on its own is used to reference documents in an upload collec
 relationship. If you wish to allow an editor to visit the upload document and see where it is being used, you may use
 the `join` field in the upload enabled collection. Read more about bi-directional relationships using
 the [Join field](./join)
+
+## Polymorphic Uploads
+
+Upload fields can reference multiple upload collections by providing an array of collection slugs to the `relationTo` property.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'media',
+      type: 'upload',
+      relationTo: ['images', 'documents', 'videos'], // references multiple upload collections
+    },
+  ],
+}
+```
+
+This can be combined with the `hasMany` property to allow multiple uploads from multiple collections.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'media',
+      type: 'upload',
+      relationTo: ['images', 'documents', 'videos'], // references multiple upload collections
+      hasMany: true, // allows multiple uploads
+    },
+  ],
+}
+```

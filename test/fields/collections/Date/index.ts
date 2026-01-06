@@ -8,6 +8,13 @@ const DateFields: CollectionConfig = {
   slug: dateFieldsSlug,
   admin: {
     useAsTitle: 'default',
+    defaultColumns: [
+      'default',
+      'timeOnly',
+      'dayAndTimeWithTimezone',
+      'timezoneGroup.dayAndTime',
+      'dayAndTimeWithTimezoneFixed',
+    ],
   },
   fields: [
     {
@@ -21,6 +28,16 @@ const DateFields: CollectionConfig = {
       admin: {
         date: {
           pickerAppearance: 'timeOnly',
+        },
+      },
+    },
+    {
+      name: 'timeOnlyWithMiliseconds',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'timeOnly',
+          displayFormat: 'h:mm.ss.SSS aa',
         },
       },
     },
@@ -60,6 +77,123 @@ const DateFields: CollectionConfig = {
           pickerAppearance: 'monthOnly',
         },
       },
+    },
+    {
+      name: 'defaultWithTimezone',
+      type: 'date',
+      timezone: true,
+    },
+    {
+      name: 'dayAndTimeWithTimezone',
+      type: 'date',
+      required: true,
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        description: 'This date here should be required.',
+      },
+      timezone: true,
+    },
+    {
+      name: 'dayAndTimeWithTimezoneFixed',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        defaultTimezone: 'Europe/London',
+        supportedTimezones: [{ label: 'London', value: 'Europe/London' }],
+      },
+    },
+    {
+      name: 'dayAndTimeWithTimezoneRequired',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        defaultTimezone: 'America/New_York',
+        required: true,
+      },
+    },
+    {
+      name: 'dayAndTimeWithTimezoneReadOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        readOnly: true,
+      },
+      timezone: true,
+    },
+    {
+      type: 'blocks',
+      name: 'timezoneBlocks',
+      blocks: [
+        {
+          slug: 'dateBlock',
+          fields: [
+            {
+              name: 'dayAndTime',
+              type: 'date',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+              },
+              timezone: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'timezoneArray',
+      fields: [
+        {
+          name: 'dayAndTime',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+          },
+          timezone: true,
+        },
+      ],
+    },
+    {
+      type: 'group',
+      name: 'timezoneGroup',
+      fields: [
+        {
+          name: 'dayAndTime',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+          },
+          timezone: true,
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'array',
+      fields: [
+        {
+          name: 'date',
+          type: 'date',
+        },
+      ],
     },
   ],
 }

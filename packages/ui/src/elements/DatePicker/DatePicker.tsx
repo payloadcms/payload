@@ -3,8 +3,10 @@ import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
-const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
-  ReactDatePickerDefaultImport) as unknown as typeof ReactDatePickerDefaultImport.default
+const ReactDatePicker =
+  'default' in ReactDatePickerDefaultImport
+    ? ReactDatePickerDefaultImport.default
+    : ReactDatePickerDefaultImport
 
 import type { Props } from './types.js'
 
@@ -19,6 +21,7 @@ const baseClass = 'date-time-picker'
 
 const DatePicker: React.FC<Props> = (props) => {
   const {
+    id,
     displayFormat: customDisplayFormat,
     maxDate,
     maxTime,
@@ -64,6 +67,13 @@ const DatePicker: React.FC<Props> = (props) => {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
     }
+
+    if (newDate instanceof Date && !dateFormat.includes('SSS')) {
+      // Unless the dateFormat includes milliseconds, set milliseconds to 0
+      // This is to ensure that the timestamp is consistent with the displayFormat
+      newDate.setMilliseconds(0)
+    }
+
     if (typeof onChangeFromProps === 'function') {
       onChangeFromProps(newDate)
     }
@@ -113,7 +123,7 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes}>
+    <div className={classes} id={id}>
       <div className={`${baseClass}__icon-wrap`}>
         {dateTimePickerProps.selected && (
           <button

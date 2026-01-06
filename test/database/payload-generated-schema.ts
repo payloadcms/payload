@@ -6,6 +6,7 @@
  * and re-run `payload generate:db-schema` to regenerate this file.
  */
 
+import type {} from '@payloadcms/db-sqlite'
 import {
   sqliteTable,
   index,
@@ -17,13 +18,100 @@ import {
 } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 import { sql, relations } from '@payloadcms/db-sqlite/drizzle'
 
-export const posts = sqliteTable(
-  'posts',
+export const no_time_stamps = sqliteTable('no_time_stamps', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title'),
+})
+
+export const categories = sqliteTable(
+  'categories',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    title: text('title').notNull(),
-    hasTransaction: integer('has_transaction', { mode: 'boolean' }),
-    throwAfterChange: integer('throw_after_change', { mode: 'boolean' }).default(false),
+    title: text('title'),
+    simple: integer('simple_id').references(() => simple.id, {
+      onDelete: 'set null',
+    }),
+    hideout_camera1_time1Image: integer('hideout_camera1_time1_image_id').references(
+      () => posts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    _status: text('_status', { enum: ['draft', 'published'] }).default('draft'),
+  },
+  (columns) => [
+    index('categories_simple_idx').on(columns.simple),
+    uniqueIndex('categories_hideout_camera1_hideout_camera1_time1_image_idx').on(
+      columns.hideout_camera1_time1Image,
+    ),
+    index('categories_updated_at_idx').on(columns.updatedAt),
+    index('categories_created_at_idx').on(columns.createdAt),
+    index('categories__status_idx').on(columns._status),
+  ],
+)
+
+export const _categories_v = sqliteTable(
+  '_categories_v',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    parent: integer('parent_id').references(() => categories.id, {
+      onDelete: 'set null',
+    }),
+    version_title: text('version_title'),
+    version_simple: integer('version_simple_id').references(() => simple.id, {
+      onDelete: 'set null',
+    }),
+    version_hideout_camera1_time1Image: integer(
+      'version_hideout_camera1_time1_image_id',
+    ).references(() => posts.id, {
+      onDelete: 'set null',
+    }),
+    version_updatedAt: text('version_updated_at').default(
+      sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    ),
+    version_createdAt: text('version_created_at').default(
+      sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    ),
+    version__status: text('version__status', { enum: ['draft', 'published'] }).default('draft'),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    snapshot: integer('snapshot', { mode: 'boolean' }),
+    publishedLocale: text('published_locale', { enum: ['en', 'es'] }),
+    latest: integer('latest', { mode: 'boolean' }),
+  },
+  (columns) => [
+    index('_categories_v_parent_idx').on(columns.parent),
+    index('_categories_v_version_version_simple_idx').on(columns.version_simple),
+    index('_categories_v_version_hideout_camera1_version_hideout_ca_idx').on(
+      columns.version_hideout_camera1_time1Image,
+    ),
+    index('_categories_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_categories_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_categories_v_version_version__status_idx').on(columns.version__status),
+    index('_categories_v_created_at_idx').on(columns.createdAt),
+    index('_categories_v_updated_at_idx').on(columns.updatedAt),
+    index('_categories_v_snapshot_idx').on(columns.snapshot),
+    index('_categories_v_published_locale_idx').on(columns.publishedLocale),
+    index('_categories_v_latest_idx').on(columns.latest),
+  ],
+)
+
+export const simple = sqliteTable(
+  'simple',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    text: text('text'),
+    number: numeric('number', { mode: 'number' }),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -31,10 +119,313 @@ export const posts = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    posts_updated_at_idx: index('posts_updated_at_idx').on(columns.updatedAt),
-    posts_created_at_idx: index('posts_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('simple_updated_at_idx').on(columns.updatedAt),
+    index('simple_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const categories_custom_id = sqliteTable(
+  'categories_custom_id',
+  {
+    id: numeric('id', { mode: 'number' }).primaryKey(),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    _status: text('_status', { enum: ['draft', 'published'] }).default('draft'),
+  },
+  (columns) => [
+    index('categories_custom_id_updated_at_idx').on(columns.updatedAt),
+    index('categories_custom_id_created_at_idx').on(columns.createdAt),
+    index('categories_custom_id__status_idx').on(columns._status),
+  ],
+)
+
+export const _categories_custom_id_v = sqliteTable(
+  '_categories_custom_id_v',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    parent: numeric('parent_id', { mode: 'number' }).references(() => categories_custom_id.id, {
+      onDelete: 'set null',
+    }),
+    version_updatedAt: text('version_updated_at').default(
+      sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    ),
+    version_createdAt: text('version_created_at').default(
+      sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    ),
+    version__status: text('version__status', { enum: ['draft', 'published'] }).default('draft'),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    snapshot: integer('snapshot', { mode: 'boolean' }),
+    publishedLocale: text('published_locale', { enum: ['en', 'es'] }),
+    latest: integer('latest', { mode: 'boolean' }),
+  },
+  (columns) => [
+    index('_categories_custom_id_v_parent_idx').on(columns.parent),
+    index('_categories_custom_id_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_categories_custom_id_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_categories_custom_id_v_version_version__status_idx').on(columns.version__status),
+    index('_categories_custom_id_v_created_at_idx').on(columns.createdAt),
+    index('_categories_custom_id_v_updated_at_idx').on(columns.updatedAt),
+    index('_categories_custom_id_v_snapshot_idx').on(columns.snapshot),
+    index('_categories_custom_id_v_published_locale_idx').on(columns.publishedLocale),
+    index('_categories_custom_id_v_latest_idx').on(columns.latest),
+  ],
+)
+
+export const posts_blocks_block_fourth = sqliteTable(
+  'posts_blocks_block_fourth',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: text('id').primaryKey(),
+    blockName: text('block_name'),
+  },
+  (columns) => [
+    index('posts_blocks_block_fourth_order_idx').on(columns._order),
+    index('posts_blocks_block_fourth_parent_id_idx').on(columns._parentID),
+    index('posts_blocks_block_fourth_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts.id],
+      name: 'posts_blocks_block_fourth_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts_blocks_block_third = sqliteTable(
+  'posts_blocks_block_third',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: text('id').primaryKey(),
+    blockName: text('block_name'),
+  },
+  (columns) => [
+    index('posts_blocks_block_third_order_idx').on(columns._order),
+    index('posts_blocks_block_third_parent_id_idx').on(columns._parentID),
+    index('posts_blocks_block_third_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts.id],
+      name: 'posts_blocks_block_third_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts_array_with_i_ds = sqliteTable(
+  'posts_array_with_i_ds',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    text: text('text'),
+  },
+  (columns) => [
+    index('posts_array_with_i_ds_order_idx').on(columns._order),
+    index('posts_array_with_i_ds_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts.id],
+      name: 'posts_array_with_i_ds_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts_array_with_i_ds_locales = sqliteTable(
+  'posts_array_with_i_ds_locales',
+  {
+    textLocalized: text('text_localized'),
+    id: integer('id').primaryKey(),
+    _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
+    _parentID: text('_parent_id').notNull(),
+  },
+  (columns) => [
+    uniqueIndex('posts_array_with_i_ds_locales_locale_parent_id_unique').on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts_array_with_i_ds.id],
+      name: 'posts_array_with_i_ds_locales_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts_array_with_i_ds_localized = sqliteTable(
+  'posts_array_with_i_ds_localized',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
+    id: text('id').primaryKey(),
+    text: text('text'),
+  },
+  (columns) => [
+    index('posts_array_with_i_ds_localized_order_idx').on(columns._order),
+    index('posts_array_with_i_ds_localized_parent_id_idx').on(columns._parentID),
+    index('posts_array_with_i_ds_localized_locale_idx').on(columns._locale),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts.id],
+      name: 'posts_array_with_i_ds_localized_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts_blocks_block_first = sqliteTable(
+  'posts_blocks_block_first',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: text('id').primaryKey(),
+    text: text('text'),
+    blockName: text('block_name'),
+  },
+  (columns) => [
+    index('posts_blocks_block_first_order_idx').on(columns._order),
+    index('posts_blocks_block_first_parent_id_idx').on(columns._parentID),
+    index('posts_blocks_block_first_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts.id],
+      name: 'posts_blocks_block_first_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts = sqliteTable(
+  'posts',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    title: text('title').notNull(),
+    category: integer('category_id').references(() => categories.id, {
+      onDelete: 'set null',
+    }),
+    categoryCustomID: numeric('category_custom_i_d_id', { mode: 'number' }).references(
+      () => categories_custom_id.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    text: text('text'),
+    number: numeric('number', { mode: 'number' }),
+    numberDefault: numeric('number_default', { mode: 'number' }).default(1),
+    testNestedGroup_nestedText1: text('test_nested_group_nested_text1'),
+    testNestedGroup_nestedText2: text('test_nested_group_nested_text2'),
+    D1_D2_D3_D4: text('d1_d2_d3_d4'),
+    hasTransaction: integer('has_transaction', { mode: 'boolean' }),
+    throwAfterChange: integer('throw_after_change', { mode: 'boolean' }).default(false),
+    group_text: text('group_text'),
+    tab_text: text('tab_text'),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    index('posts_category_idx').on(columns.category),
+    index('posts_category_custom_i_d_idx').on(columns.categoryCustomID),
+    index('posts_updated_at_idx').on(columns.updatedAt),
+    index('posts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const posts_locales = sqliteTable(
+  'posts_locales',
+  {
+    localized: text('localized'),
+    testNestedGroup_nestedLocalizedText: text('test_nested_group_nested_localized_text'),
+    id: integer('id').primaryKey(),
+    _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
+    _parentID: integer('_parent_id').notNull(),
+  },
+  (columns) => [
+    uniqueIndex('posts_locales_locale_parent_id_unique').on(columns._locale, columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [posts.id],
+      name: 'posts_locales_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const posts_rels = sqliteTable(
+  'posts_rels',
+  {
+    id: integer('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: text('path').notNull(),
+    locale: text('locale', { enum: ['en', 'es'] }),
+    categoriesID: integer('categories_id'),
+    'categories-custom-idID': numeric('categories_custom_id_id', { mode: 'number' }),
+    simpleID: integer('simple_id'),
+  },
+  (columns) => [
+    index('posts_rels_order_idx').on(columns.order),
+    index('posts_rels_parent_idx').on(columns.parent),
+    index('posts_rels_path_idx').on(columns.path),
+    index('posts_rels_locale_idx').on(columns.locale),
+    index('posts_rels_categories_id_idx').on(columns.categoriesID, columns.locale),
+    index('posts_rels_categories_custom_id_id_idx').on(
+      columns['categories-custom-idID'],
+      columns.locale,
+    ),
+    index('posts_rels_simple_id_idx').on(columns.simpleID, columns.locale),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [posts.id],
+      name: 'posts_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['categoriesID']],
+      foreignColumns: [categories.id],
+      name: 'posts_rels_categories_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['categories-custom-idID']],
+      foreignColumns: [categories_custom_id.id],
+      name: 'posts_rels_categories_custom_id_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['simpleID']],
+      foreignColumns: [simple.id],
+      name: 'posts_rels_simple_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const error_on_unnamed_fields = sqliteTable(
+  'error_on_unnamed_fields',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    groupWithinUnnamedTab_text: text('group_within_unnamed_tab_text').notNull(),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    index('error_on_unnamed_fields_updated_at_idx').on(columns.updatedAt),
+    index('error_on_unnamed_fields_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const default_values_array = sqliteTable(
@@ -45,15 +436,15 @@ export const default_values_array = sqliteTable(
     id: text('id').primaryKey(),
     defaultValue: text('default_value').default('default value from database'),
   },
-  (columns) => ({
-    _orderIdx: index('default_values_array_order_idx').on(columns._order),
-    _parentIDIdx: index('default_values_array_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('default_values_array_order_idx').on(columns._order),
+    index('default_values_array_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [default_values.id],
       name: 'default_values_array_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const default_values = sqliteTable(
@@ -65,6 +456,7 @@ export const default_values = sqliteTable(
     group_defaultValue: text('group_default_value').default('default value from database'),
     select: text('select', { enum: ['option0', 'option1', 'default'] }).default('default'),
     point: text('point', { mode: 'json' }).default('[10,20]'),
+    escape: text('escape').default("Thanks, we're excited for you to join us."),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -72,10 +464,10 @@ export const default_values = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    default_values_updated_at_idx: index('default_values_updated_at_idx').on(columns.updatedAt),
-    default_values_created_at_idx: index('default_values_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('default_values_updated_at_idx').on(columns.updatedAt),
+    index('default_values_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const relation_a = sqliteTable(
@@ -91,10 +483,10 @@ export const relation_a = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    relation_a_updated_at_idx: index('relation_a_updated_at_idx').on(columns.updatedAt),
-    relation_a_created_at_idx: index('relation_a_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('relation_a_updated_at_idx').on(columns.updatedAt),
+    index('relation_a_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const relation_b = sqliteTable(
@@ -113,11 +505,11 @@ export const relation_b = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    relation_b_relationship_idx: index('relation_b_relationship_idx').on(columns.relationship),
-    relation_b_updated_at_idx: index('relation_b_updated_at_idx').on(columns.updatedAt),
-    relation_b_created_at_idx: index('relation_b_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('relation_b_relationship_idx').on(columns.relationship),
+    index('relation_b_updated_at_idx').on(columns.updatedAt),
+    index('relation_b_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const pg_migrations_my_array_my_sub_array = sqliteTable(
@@ -127,15 +519,15 @@ export const pg_migrations_my_array_my_sub_array = sqliteTable(
     _parentID: text('_parent_id').notNull(),
     id: text('id').primaryKey(),
   },
-  (columns) => ({
-    _orderIdx: index('pg_migrations_my_array_my_sub_array_order_idx').on(columns._order),
-    _parentIDIdx: index('pg_migrations_my_array_my_sub_array_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('pg_migrations_my_array_my_sub_array_order_idx').on(columns._order),
+    index('pg_migrations_my_array_my_sub_array_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [pg_migrations_my_array.id],
       name: 'pg_migrations_my_array_my_sub_array_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const pg_migrations_my_array_my_sub_array_locales = sqliteTable(
@@ -148,19 +540,21 @@ export const pg_migrations_my_array_my_sub_array_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: text('_parent_id').notNull(),
   },
-  (columns) => ({
-    pg_migrations_my_array_my_sub_array_relation3_idx: index(
-      'pg_migrations_my_array_my_sub_array_relation3_idx',
-    ).on(columns.relation3, columns._locale),
-    _localeParent: uniqueIndex(
-      'pg_migrations_my_array_my_sub_array_locales_locale_parent_id_unique',
-    ).on(columns._locale, columns._parentID),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('pg_migrations_my_array_my_sub_array_relation3_idx').on(
+      columns.relation3,
+      columns._locale,
+    ),
+    uniqueIndex('pg_migrations_my_array_my_sub_array_locales_locale_parent_id').on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [pg_migrations_my_array_my_sub_array.id],
       name: 'pg_migrations_my_array_my_sub_array_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const pg_migrations_my_array = sqliteTable(
@@ -173,18 +567,16 @@ export const pg_migrations_my_array = sqliteTable(
       onDelete: 'set null',
     }),
   },
-  (columns) => ({
-    _orderIdx: index('pg_migrations_my_array_order_idx').on(columns._order),
-    _parentIDIdx: index('pg_migrations_my_array_parent_id_idx').on(columns._parentID),
-    pg_migrations_my_array_relation2_idx: index('pg_migrations_my_array_relation2_idx').on(
-      columns.relation2,
-    ),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('pg_migrations_my_array_order_idx').on(columns._order),
+    index('pg_migrations_my_array_parent_id_idx').on(columns._parentID),
+    index('pg_migrations_my_array_relation2_idx').on(columns.relation2),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [pg_migrations.id],
       name: 'pg_migrations_my_array_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const pg_migrations_blocks_my_block = sqliteTable(
@@ -199,19 +591,17 @@ export const pg_migrations_blocks_my_block = sqliteTable(
     }),
     blockName: text('block_name'),
   },
-  (columns) => ({
-    _orderIdx: index('pg_migrations_blocks_my_block_order_idx').on(columns._order),
-    _parentIDIdx: index('pg_migrations_blocks_my_block_parent_id_idx').on(columns._parentID),
-    _pathIdx: index('pg_migrations_blocks_my_block_path_idx').on(columns._path),
-    pg_migrations_blocks_my_block_relation5_idx: index(
-      'pg_migrations_blocks_my_block_relation5_idx',
-    ).on(columns.relation5),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('pg_migrations_blocks_my_block_order_idx').on(columns._order),
+    index('pg_migrations_blocks_my_block_parent_id_idx').on(columns._parentID),
+    index('pg_migrations_blocks_my_block_path_idx').on(columns._path),
+    index('pg_migrations_blocks_my_block_relation5_idx').on(columns.relation5),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [pg_migrations.id],
       name: 'pg_migrations_blocks_my_block_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const pg_migrations_blocks_my_block_locales = sqliteTable(
@@ -224,20 +614,18 @@ export const pg_migrations_blocks_my_block_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: text('_parent_id').notNull(),
   },
-  (columns) => ({
-    pg_migrations_blocks_my_block_relation6_idx: index(
-      'pg_migrations_blocks_my_block_relation6_idx',
-    ).on(columns.relation6, columns._locale),
-    _localeParent: uniqueIndex('pg_migrations_blocks_my_block_locales_locale_parent_id_unique').on(
+  (columns) => [
+    index('pg_migrations_blocks_my_block_relation6_idx').on(columns.relation6, columns._locale),
+    uniqueIndex('pg_migrations_blocks_my_block_locales_locale_parent_id_uniqu').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [pg_migrations_blocks_my_block.id],
       name: 'pg_migrations_blocks_my_block_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const pg_migrations = sqliteTable(
@@ -254,11 +642,11 @@ export const pg_migrations = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    pg_migrations_relation1_idx: index('pg_migrations_relation1_idx').on(columns.relation1),
-    pg_migrations_updated_at_idx: index('pg_migrations_updated_at_idx').on(columns.updatedAt),
-    pg_migrations_created_at_idx: index('pg_migrations_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('pg_migrations_relation1_idx').on(columns.relation1),
+    index('pg_migrations_updated_at_idx').on(columns.updatedAt),
+    index('pg_migrations_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const pg_migrations_locales = sqliteTable(
@@ -271,20 +659,21 @@ export const pg_migrations_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    pg_migrations_my_group_my_group_relation4_idx: index(
-      'pg_migrations_my_group_my_group_relation4_idx',
-    ).on(columns.myGroup_relation4, columns._locale),
-    _localeParent: uniqueIndex('pg_migrations_locales_locale_parent_id_unique').on(
+  (columns) => [
+    index('pg_migrations_my_group_my_group_relation4_idx').on(
+      columns.myGroup_relation4,
+      columns._locale,
+    ),
+    uniqueIndex('pg_migrations_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [pg_migrations.id],
       name: 'pg_migrations_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _pg_migrations_v_version_my_array_my_sub_array = sqliteTable(
@@ -295,17 +684,15 @@ export const _pg_migrations_v_version_my_array_my_sub_array = sqliteTable(
     id: integer('id').primaryKey({ autoIncrement: true }),
     _uuid: text('_uuid'),
   },
-  (columns) => ({
-    _orderIdx: index('_pg_migrations_v_version_my_array_my_sub_array_order_idx').on(columns._order),
-    _parentIDIdx: index('_pg_migrations_v_version_my_array_my_sub_array_parent_id_idx').on(
-      columns._parentID,
-    ),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('_pg_migrations_v_version_my_array_my_sub_array_order_idx').on(columns._order),
+    index('_pg_migrations_v_version_my_array_my_sub_array_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v_version_my_array.id],
       name: '_pg_migrations_v_version_my_array_my_sub_array_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _pg_migrations_v_version_my_array_my_sub_array_locales = sqliteTable(
@@ -318,19 +705,21 @@ export const _pg_migrations_v_version_my_array_my_sub_array_locales = sqliteTabl
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _pg_migrations_v_version_my_array_my_sub_array_relation3_idx: index(
-      '_pg_migrations_v_version_my_array_my_sub_array_relation3_idx',
-    ).on(columns.relation3, columns._locale),
-    _localeParent: uniqueIndex(
-      '_pg_migrations_v_version_my_array_my_sub_array_locales_locale_parent_id_unique',
-    ).on(columns._locale, columns._parentID),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('_pg_migrations_v_version_my_array_my_sub_array_relation3_idx').on(
+      columns.relation3,
+      columns._locale,
+    ),
+    uniqueIndex('_pg_migrations_v_version_my_array_my_sub_array_locales_local').on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v_version_my_array_my_sub_array.id],
-      name: '_pg_migrations_v_version_my_array_my_sub_array_locales_parent_id_fk',
+      name: '_pg_migrations_v_version_my_array_my_sub_array_locales_pa_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _pg_migrations_v_version_my_array = sqliteTable(
@@ -344,18 +733,16 @@ export const _pg_migrations_v_version_my_array = sqliteTable(
     }),
     _uuid: text('_uuid'),
   },
-  (columns) => ({
-    _orderIdx: index('_pg_migrations_v_version_my_array_order_idx').on(columns._order),
-    _parentIDIdx: index('_pg_migrations_v_version_my_array_parent_id_idx').on(columns._parentID),
-    _pg_migrations_v_version_my_array_relation2_idx: index(
-      '_pg_migrations_v_version_my_array_relation2_idx',
-    ).on(columns.relation2),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('_pg_migrations_v_version_my_array_order_idx').on(columns._order),
+    index('_pg_migrations_v_version_my_array_parent_id_idx').on(columns._parentID),
+    index('_pg_migrations_v_version_my_array_relation2_idx').on(columns.relation2),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v.id],
       name: '_pg_migrations_v_version_my_array_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _pg_migrations_v_blocks_my_block = sqliteTable(
@@ -371,19 +758,17 @@ export const _pg_migrations_v_blocks_my_block = sqliteTable(
     _uuid: text('_uuid'),
     blockName: text('block_name'),
   },
-  (columns) => ({
-    _orderIdx: index('_pg_migrations_v_blocks_my_block_order_idx').on(columns._order),
-    _parentIDIdx: index('_pg_migrations_v_blocks_my_block_parent_id_idx').on(columns._parentID),
-    _pathIdx: index('_pg_migrations_v_blocks_my_block_path_idx').on(columns._path),
-    _pg_migrations_v_blocks_my_block_relation5_idx: index(
-      '_pg_migrations_v_blocks_my_block_relation5_idx',
-    ).on(columns.relation5),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('_pg_migrations_v_blocks_my_block_order_idx').on(columns._order),
+    index('_pg_migrations_v_blocks_my_block_parent_id_idx').on(columns._parentID),
+    index('_pg_migrations_v_blocks_my_block_path_idx').on(columns._path),
+    index('_pg_migrations_v_blocks_my_block_relation5_idx').on(columns.relation5),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v.id],
       name: '_pg_migrations_v_blocks_my_block_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _pg_migrations_v_blocks_my_block_locales = sqliteTable(
@@ -396,19 +781,18 @@ export const _pg_migrations_v_blocks_my_block_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _pg_migrations_v_blocks_my_block_relation6_idx: index(
-      '_pg_migrations_v_blocks_my_block_relation6_idx',
-    ).on(columns.relation6, columns._locale),
-    _localeParent: uniqueIndex(
-      '_pg_migrations_v_blocks_my_block_locales_locale_parent_id_unique',
-    ).on(columns._locale, columns._parentID),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('_pg_migrations_v_blocks_my_block_relation6_idx').on(columns.relation6, columns._locale),
+    uniqueIndex('_pg_migrations_v_blocks_my_block_locales_locale_parent_id_un').on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v_blocks_my_block.id],
       name: '_pg_migrations_v_blocks_my_block_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _pg_migrations_v = sqliteTable(
@@ -434,20 +818,14 @@ export const _pg_migrations_v = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    _pg_migrations_v_parent_idx: index('_pg_migrations_v_parent_idx').on(columns.parent),
-    _pg_migrations_v_version_version_relation1_idx: index(
-      '_pg_migrations_v_version_version_relation1_idx',
-    ).on(columns.version_relation1),
-    _pg_migrations_v_version_version_updated_at_idx: index(
-      '_pg_migrations_v_version_version_updated_at_idx',
-    ).on(columns.version_updatedAt),
-    _pg_migrations_v_version_version_created_at_idx: index(
-      '_pg_migrations_v_version_version_created_at_idx',
-    ).on(columns.version_createdAt),
-    _pg_migrations_v_created_at_idx: index('_pg_migrations_v_created_at_idx').on(columns.createdAt),
-    _pg_migrations_v_updated_at_idx: index('_pg_migrations_v_updated_at_idx').on(columns.updatedAt),
-  }),
+  (columns) => [
+    index('_pg_migrations_v_parent_idx').on(columns.parent),
+    index('_pg_migrations_v_version_version_relation1_idx').on(columns.version_relation1),
+    index('_pg_migrations_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_pg_migrations_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_pg_migrations_v_created_at_idx').on(columns.createdAt),
+    index('_pg_migrations_v_updated_at_idx').on(columns.updatedAt),
+  ],
 )
 
 export const _pg_migrations_v_locales = sqliteTable(
@@ -463,20 +841,21 @@ export const _pg_migrations_v_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _pg_migrations_v_version_my_group_version_my_group_relation4_idx: index(
-      '_pg_migrations_v_version_my_group_version_my_group_relation4_idx',
-    ).on(columns.version_myGroup_relation4, columns._locale),
-    _localeParent: uniqueIndex('_pg_migrations_v_locales_locale_parent_id_unique').on(
+  (columns) => [
+    index('_pg_migrations_v_version_my_group_version_my_group_relat_idx').on(
+      columns.version_myGroup_relation4,
+      columns._locale,
+    ),
+    uniqueIndex('_pg_migrations_v_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v.id],
       name: '_pg_migrations_v_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customs_customSelect = sqliteTable(
@@ -487,15 +866,15 @@ export const customs_customSelect = sqliteTable(
     value: text('value', { enum: ['a', 'b', 'c'] }),
     id: integer('id').primaryKey({ autoIncrement: true }),
   },
-  (columns) => ({
-    orderIdx: index('customs_customSelect_order_idx').on(columns.order),
-    parentIdx: index('customs_customSelect_parent_idx').on(columns.parent),
-    parentFk: foreignKey({
+  (columns) => [
+    index('customs_customSelect_order_idx').on(columns.order),
+    index('customs_customSelect_parent_idx').on(columns.parent),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [customs.id],
       name: 'customs_customSelect_parent_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customArrays = sqliteTable(
@@ -506,15 +885,15 @@ export const customArrays = sqliteTable(
     id: text('id').primaryKey(),
     text: text('text'),
   },
-  (columns) => ({
-    _orderIdx: index('customArrays_order_idx').on(columns._order),
-    _parentIDIdx: index('customArrays_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('customArrays_order_idx').on(columns._order),
+    index('customArrays_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [customs.id],
       name: 'customArrays_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customArrays_locales = sqliteTable(
@@ -525,17 +904,17 @@ export const customArrays_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: text('_parent_id').notNull(),
   },
-  (columns) => ({
-    _localeParent: uniqueIndex('customArrays_locales_locale_parent_id_unique').on(
+  (columns) => [
+    uniqueIndex('customArrays_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [customArrays.id],
       name: 'customArrays_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customBlocks = sqliteTable(
@@ -548,16 +927,16 @@ export const customBlocks = sqliteTable(
     text: text('text'),
     blockName: text('block_name'),
   },
-  (columns) => ({
-    _orderIdx: index('customBlocks_order_idx').on(columns._order),
-    _parentIDIdx: index('customBlocks_parent_id_idx').on(columns._parentID),
-    _pathIdx: index('customBlocks_path_idx').on(columns._path),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('customBlocks_order_idx').on(columns._order),
+    index('customBlocks_parent_id_idx').on(columns._parentID),
+    index('customBlocks_path_idx').on(columns._path),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [customs.id],
       name: 'customBlocks_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customBlocks_locales = sqliteTable(
@@ -568,17 +947,17 @@ export const customBlocks_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: text('_parent_id').notNull(),
   },
-  (columns) => ({
-    _localeParent: uniqueIndex('customBlocks_locales_locale_parent_id_unique').on(
+  (columns) => [
+    uniqueIndex('customBlocks_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [customBlocks.id],
       name: 'customBlocks_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customs = sqliteTable(
@@ -595,11 +974,11 @@ export const customs = sqliteTable(
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
     _status: text('_status', { enum: ['draft', 'published'] }).default('draft'),
   },
-  (columns) => ({
-    customs_updated_at_idx: index('customs_updated_at_idx').on(columns.updatedAt),
-    customs_created_at_idx: index('customs_created_at_idx').on(columns.createdAt),
-    customs__status_idx: index('customs__status_idx').on(columns._status),
-  }),
+  (columns) => [
+    index('customs_updated_at_idx').on(columns.updatedAt),
+    index('customs_created_at_idx').on(columns.createdAt),
+    index('customs__status_idx').on(columns._status),
+  ],
 )
 
 export const customs_locales = sqliteTable(
@@ -610,17 +989,14 @@ export const customs_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _localeParent: uniqueIndex('customs_locales_locale_parent_id_unique').on(
-      columns._locale,
-      columns._parentID,
-    ),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    uniqueIndex('customs_locales_locale_parent_id_unique').on(columns._locale, columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [customs.id],
       name: 'customs_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const customs_rels = sqliteTable(
@@ -632,24 +1008,22 @@ export const customs_rels = sqliteTable(
     path: text('path').notNull(),
     'relation-aID': integer('relation_a_id'),
   },
-  (columns) => ({
-    order: index('customs_rels_order_idx').on(columns.order),
-    parentIdx: index('customs_rels_parent_idx').on(columns.parent),
-    pathIdx: index('customs_rels_path_idx').on(columns.path),
-    customs_rels_relation_a_id_idx: index('customs_rels_relation_a_id_idx').on(
-      columns['relation-aID'],
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('customs_rels_order_idx').on(columns.order),
+    index('customs_rels_parent_idx').on(columns.parent),
+    index('customs_rels_path_idx').on(columns.path),
+    index('customs_rels_relation_a_id_idx').on(columns['relation-aID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [customs.id],
       name: 'customs_rels_parent_fk',
     }).onDelete('cascade'),
-    'relation-aIdFk': foreignKey({
+    foreignKey({
       columns: [columns['relation-aID']],
       foreignColumns: [relation_a.id],
       name: 'customs_rels_relation_a_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const __customs_v_version_customSelect_v = sqliteTable(
@@ -660,15 +1034,15 @@ export const __customs_v_version_customSelect_v = sqliteTable(
     value: text('value', { enum: ['a', 'b', 'c'] }),
     id: integer('id').primaryKey({ autoIncrement: true }),
   },
-  (columns) => ({
-    orderIdx: index('__customs_v_version_customSelect_v_order_idx').on(columns.order),
-    parentIdx: index('__customs_v_version_customSelect_v_parent_idx').on(columns.parent),
-    parentFk: foreignKey({
+  (columns) => [
+    index('__customs_v_version_customSelect_v_order_idx').on(columns.order),
+    index('__customs_v_version_customSelect_v_parent_idx').on(columns.parent),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [_customs_v.id],
       name: '__customs_v_version_customSelect_v_parent_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _customArrays_v = sqliteTable(
@@ -680,15 +1054,15 @@ export const _customArrays_v = sqliteTable(
     text: text('text'),
     _uuid: text('_uuid'),
   },
-  (columns) => ({
-    _orderIdx: index('_customArrays_v_order_idx').on(columns._order),
-    _parentIDIdx: index('_customArrays_v_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('_customArrays_v_order_idx').on(columns._order),
+    index('_customArrays_v_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_customs_v.id],
       name: '_customArrays_v_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _customArrays_v_locales = sqliteTable(
@@ -699,17 +1073,17 @@ export const _customArrays_v_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _localeParent: uniqueIndex('_customArrays_v_locales_locale_parent_id_unique').on(
+  (columns) => [
+    uniqueIndex('_customArrays_v_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_customArrays_v.id],
       name: '_customArrays_v_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _customBlocks_v = sqliteTable(
@@ -723,16 +1097,16 @@ export const _customBlocks_v = sqliteTable(
     _uuid: text('_uuid'),
     blockName: text('block_name'),
   },
-  (columns) => ({
-    _orderIdx: index('_customBlocks_v_order_idx').on(columns._order),
-    _parentIDIdx: index('_customBlocks_v_parent_id_idx').on(columns._parentID),
-    _pathIdx: index('_customBlocks_v_path_idx').on(columns._path),
-    _parentIdFk: foreignKey({
+  (columns) => [
+    index('_customBlocks_v_order_idx').on(columns._order),
+    index('_customBlocks_v_parent_id_idx').on(columns._parentID),
+    index('_customBlocks_v_path_idx').on(columns._path),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_customs_v.id],
       name: '_customBlocks_v_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _customBlocks_v_locales = sqliteTable(
@@ -743,17 +1117,17 @@ export const _customBlocks_v_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _localeParent: uniqueIndex('_customBlocks_v_locales_locale_parent_id_unique').on(
+  (columns) => [
+    uniqueIndex('_customBlocks_v_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_customBlocks_v.id],
       name: '_customBlocks_v_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _customs_v = sqliteTable(
@@ -782,25 +1156,17 @@ export const _customs_v = sqliteTable(
     publishedLocale: text('published_locale', { enum: ['en', 'es'] }),
     latest: integer('latest', { mode: 'boolean' }),
   },
-  (columns) => ({
-    _customs_v_parent_idx: index('_customs_v_parent_idx').on(columns.parent),
-    _customs_v_version_version_updated_at_idx: index(
-      '_customs_v_version_version_updated_at_idx',
-    ).on(columns.version_updatedAt),
-    _customs_v_version_version_created_at_idx: index(
-      '_customs_v_version_version_created_at_idx',
-    ).on(columns.version_createdAt),
-    _customs_v_version_version__status_idx: index('_customs_v_version_version__status_idx').on(
-      columns.version__status,
-    ),
-    _customs_v_created_at_idx: index('_customs_v_created_at_idx').on(columns.createdAt),
-    _customs_v_updated_at_idx: index('_customs_v_updated_at_idx').on(columns.updatedAt),
-    _customs_v_snapshot_idx: index('_customs_v_snapshot_idx').on(columns.snapshot),
-    _customs_v_published_locale_idx: index('_customs_v_published_locale_idx').on(
-      columns.publishedLocale,
-    ),
-    _customs_v_latest_idx: index('_customs_v_latest_idx').on(columns.latest),
-  }),
+  (columns) => [
+    index('_customs_v_parent_idx').on(columns.parent),
+    index('_customs_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_customs_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_customs_v_version_version__status_idx').on(columns.version__status),
+    index('_customs_v_created_at_idx').on(columns.createdAt),
+    index('_customs_v_updated_at_idx').on(columns.updatedAt),
+    index('_customs_v_snapshot_idx').on(columns.snapshot),
+    index('_customs_v_published_locale_idx').on(columns.publishedLocale),
+    index('_customs_v_latest_idx').on(columns.latest),
+  ],
 )
 
 export const _customs_v_locales = sqliteTable(
@@ -811,17 +1177,17 @@ export const _customs_v_locales = sqliteTable(
     _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
     _parentID: integer('_parent_id').notNull(),
   },
-  (columns) => ({
-    _localeParent: uniqueIndex('_customs_v_locales_locale_parent_id_unique').on(
+  (columns) => [
+    uniqueIndex('_customs_v_locales_locale_parent_id_unique').on(
       columns._locale,
       columns._parentID,
     ),
-    _parentIdFk: foreignKey({
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_customs_v.id],
       name: '_customs_v_locales_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _customs_v_rels = sqliteTable(
@@ -833,24 +1199,22 @@ export const _customs_v_rels = sqliteTable(
     path: text('path').notNull(),
     'relation-aID': integer('relation_a_id'),
   },
-  (columns) => ({
-    order: index('_customs_v_rels_order_idx').on(columns.order),
-    parentIdx: index('_customs_v_rels_parent_idx').on(columns.parent),
-    pathIdx: index('_customs_v_rels_path_idx').on(columns.path),
-    _customs_v_rels_relation_a_id_idx: index('_customs_v_rels_relation_a_id_idx').on(
-      columns['relation-aID'],
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('_customs_v_rels_order_idx').on(columns.order),
+    index('_customs_v_rels_parent_idx').on(columns.parent),
+    index('_customs_v_rels_path_idx').on(columns.path),
+    index('_customs_v_rels_relation_a_id_idx').on(columns['relation-aID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [_customs_v.id],
       name: '_customs_v_rels_parent_fk',
     }).onDelete('cascade'),
-    'relation-aIdFk': foreignKey({
+    foreignKey({
       columns: [columns['relation-aID']],
       foreignColumns: [relation_a.id],
       name: '_customs_v_rels_relation_a_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const places = sqliteTable(
@@ -866,10 +1230,136 @@ export const places = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    places_updated_at_idx: index('places_updated_at_idx').on(columns.updatedAt),
-    places_created_at_idx: index('places_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('places_updated_at_idx').on(columns.updatedAt),
+    index('places_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const virtual_relations = sqliteTable(
+  'virtual_relations',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    post: integer('post_id').references(() => posts.id, {
+      onDelete: 'set null',
+    }),
+    customID: text('custom_i_d_id').references(() => custom_ids.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    _status: text('_status', { enum: ['draft', 'published'] }).default('draft'),
+  },
+  (columns) => [
+    index('virtual_relations_post_idx').on(columns.post),
+    index('virtual_relations_custom_i_d_idx').on(columns.customID),
+    index('virtual_relations_updated_at_idx').on(columns.updatedAt),
+    index('virtual_relations_created_at_idx').on(columns.createdAt),
+    index('virtual_relations__status_idx').on(columns._status),
+  ],
+)
+
+export const virtual_relations_rels = sqliteTable(
+  'virtual_relations_rels',
+  {
+    id: integer('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: text('path').notNull(),
+    postsID: integer('posts_id'),
+  },
+  (columns) => [
+    index('virtual_relations_rels_order_idx').on(columns.order),
+    index('virtual_relations_rels_parent_idx').on(columns.parent),
+    index('virtual_relations_rels_path_idx').on(columns.path),
+    index('virtual_relations_rels_posts_id_idx').on(columns.postsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [virtual_relations.id],
+      name: 'virtual_relations_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['postsID']],
+      foreignColumns: [posts.id],
+      name: 'virtual_relations_rels_posts_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _virtual_relations_v = sqliteTable(
+  '_virtual_relations_v',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    parent: integer('parent_id').references(() => virtual_relations.id, {
+      onDelete: 'set null',
+    }),
+    version_post: integer('version_post_id').references(() => posts.id, {
+      onDelete: 'set null',
+    }),
+    version_customID: text('version_custom_i_d_id').references(() => custom_ids.id, {
+      onDelete: 'set null',
+    }),
+    version_updatedAt: text('version_updated_at').default(
+      sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    ),
+    version_createdAt: text('version_created_at').default(
+      sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    ),
+    version__status: text('version__status', { enum: ['draft', 'published'] }).default('draft'),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    snapshot: integer('snapshot', { mode: 'boolean' }),
+    publishedLocale: text('published_locale', { enum: ['en', 'es'] }),
+    latest: integer('latest', { mode: 'boolean' }),
+  },
+  (columns) => [
+    index('_virtual_relations_v_parent_idx').on(columns.parent),
+    index('_virtual_relations_v_version_version_post_idx').on(columns.version_post),
+    index('_virtual_relations_v_version_version_custom_i_d_idx').on(columns.version_customID),
+    index('_virtual_relations_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_virtual_relations_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_virtual_relations_v_version_version__status_idx').on(columns.version__status),
+    index('_virtual_relations_v_created_at_idx').on(columns.createdAt),
+    index('_virtual_relations_v_updated_at_idx').on(columns.updatedAt),
+    index('_virtual_relations_v_snapshot_idx').on(columns.snapshot),
+    index('_virtual_relations_v_published_locale_idx').on(columns.publishedLocale),
+    index('_virtual_relations_v_latest_idx').on(columns.latest),
+  ],
+)
+
+export const _virtual_relations_v_rels = sqliteTable(
+  '_virtual_relations_v_rels',
+  {
+    id: integer('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: text('path').notNull(),
+    postsID: integer('posts_id'),
+  },
+  (columns) => [
+    index('_virtual_relations_v_rels_order_idx').on(columns.order),
+    index('_virtual_relations_v_rels_parent_idx').on(columns.parent),
+    index('_virtual_relations_v_rels_path_idx').on(columns.path),
+    index('_virtual_relations_v_rels_posts_id_idx').on(columns.postsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_virtual_relations_v.id],
+      name: '_virtual_relations_v_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['postsID']],
+      foreignColumns: [posts.id],
+      name: '_virtual_relations_v_rels_posts_fk',
+    }).onDelete('cascade'),
+  ],
 )
 
 export const fields_persistance = sqliteTable(
@@ -883,14 +1373,10 @@ export const fields_persistance = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    fields_persistance_updated_at_idx: index('fields_persistance_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    fields_persistance_created_at_idx: index('fields_persistance_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('fields_persistance_updated_at_idx').on(columns.updatedAt),
+    index('fields_persistance_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const custom_ids = sqliteTable(
@@ -906,11 +1392,11 @@ export const custom_ids = sqliteTable(
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
     _status: text('_status', { enum: ['draft', 'published'] }).default('draft'),
   },
-  (columns) => ({
-    custom_ids_updated_at_idx: index('custom_ids_updated_at_idx').on(columns.updatedAt),
-    custom_ids_created_at_idx: index('custom_ids_created_at_idx').on(columns.createdAt),
-    custom_ids__status_idx: index('custom_ids__status_idx').on(columns._status),
-  }),
+  (columns) => [
+    index('custom_ids_updated_at_idx').on(columns.updatedAt),
+    index('custom_ids_created_at_idx').on(columns.createdAt),
+    index('custom_ids__status_idx').on(columns._status),
+  ],
 )
 
 export const _custom_ids_v = sqliteTable(
@@ -938,25 +1424,17 @@ export const _custom_ids_v = sqliteTable(
     publishedLocale: text('published_locale', { enum: ['en', 'es'] }),
     latest: integer('latest', { mode: 'boolean' }),
   },
-  (columns) => ({
-    _custom_ids_v_parent_idx: index('_custom_ids_v_parent_idx').on(columns.parent),
-    _custom_ids_v_version_version_updated_at_idx: index(
-      '_custom_ids_v_version_version_updated_at_idx',
-    ).on(columns.version_updatedAt),
-    _custom_ids_v_version_version_created_at_idx: index(
-      '_custom_ids_v_version_version_created_at_idx',
-    ).on(columns.version_createdAt),
-    _custom_ids_v_version_version__status_idx: index(
-      '_custom_ids_v_version_version__status_idx',
-    ).on(columns.version__status),
-    _custom_ids_v_created_at_idx: index('_custom_ids_v_created_at_idx').on(columns.createdAt),
-    _custom_ids_v_updated_at_idx: index('_custom_ids_v_updated_at_idx').on(columns.updatedAt),
-    _custom_ids_v_snapshot_idx: index('_custom_ids_v_snapshot_idx').on(columns.snapshot),
-    _custom_ids_v_published_locale_idx: index('_custom_ids_v_published_locale_idx').on(
-      columns.publishedLocale,
-    ),
-    _custom_ids_v_latest_idx: index('_custom_ids_v_latest_idx').on(columns.latest),
-  }),
+  (columns) => [
+    index('_custom_ids_v_parent_idx').on(columns.parent),
+    index('_custom_ids_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_custom_ids_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_custom_ids_v_version_version__status_idx').on(columns.version__status),
+    index('_custom_ids_v_created_at_idx').on(columns.createdAt),
+    index('_custom_ids_v_updated_at_idx').on(columns.updatedAt),
+    index('_custom_ids_v_snapshot_idx').on(columns.snapshot),
+    index('_custom_ids_v_published_locale_idx').on(columns.publishedLocale),
+    index('_custom_ids_v_latest_idx').on(columns.latest),
+  ],
 )
 
 export const fake_custom_ids = sqliteTable(
@@ -971,10 +1449,10 @@ export const fake_custom_ids = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    fake_custom_ids_updated_at_idx: index('fake_custom_ids_updated_at_idx').on(columns.updatedAt),
-    fake_custom_ids_created_at_idx: index('fake_custom_ids_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('fake_custom_ids_updated_at_idx').on(columns.updatedAt),
+    index('fake_custom_ids_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const relationships_migration = sqliteTable(
@@ -991,17 +1469,11 @@ export const relationships_migration = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    relationships_migration_relationship_idx: index('relationships_migration_relationship_idx').on(
-      columns.relationship,
-    ),
-    relationships_migration_updated_at_idx: index('relationships_migration_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    relationships_migration_created_at_idx: index('relationships_migration_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('relationships_migration_relationship_idx').on(columns.relationship),
+    index('relationships_migration_updated_at_idx').on(columns.updatedAt),
+    index('relationships_migration_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const relationships_migration_rels = sqliteTable(
@@ -1013,24 +1485,22 @@ export const relationships_migration_rels = sqliteTable(
     path: text('path').notNull(),
     'default-valuesID': integer('default_values_id'),
   },
-  (columns) => ({
-    order: index('relationships_migration_rels_order_idx').on(columns.order),
-    parentIdx: index('relationships_migration_rels_parent_idx').on(columns.parent),
-    pathIdx: index('relationships_migration_rels_path_idx').on(columns.path),
-    relationships_migration_rels_default_values_id_idx: index(
-      'relationships_migration_rels_default_values_id_idx',
-    ).on(columns['default-valuesID']),
-    parentFk: foreignKey({
+  (columns) => [
+    index('relationships_migration_rels_order_idx').on(columns.order),
+    index('relationships_migration_rels_parent_idx').on(columns.parent),
+    index('relationships_migration_rels_path_idx').on(columns.path),
+    index('relationships_migration_rels_default_values_id_idx').on(columns['default-valuesID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [relationships_migration.id],
       name: 'relationships_migration_rels_parent_fk',
     }).onDelete('cascade'),
-    'default-valuesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['default-valuesID']],
       foreignColumns: [default_values.id],
       name: 'relationships_migration_rels_default_values_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _relationships_migration_v = sqliteTable(
@@ -1056,26 +1526,20 @@ export const _relationships_migration_v = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    _relationships_migration_v_parent_idx: index('_relationships_migration_v_parent_idx').on(
-      columns.parent,
+  (columns) => [
+    index('_relationships_migration_v_parent_idx').on(columns.parent),
+    index('_relationships_migration_v_version_version_relationship_idx').on(
+      columns.version_relationship,
     ),
-    _relationships_migration_v_version_version_relationship_idx: index(
-      '_relationships_migration_v_version_version_relationship_idx',
-    ).on(columns.version_relationship),
-    _relationships_migration_v_version_version_updated_at_idx: index(
-      '_relationships_migration_v_version_version_updated_at_idx',
-    ).on(columns.version_updatedAt),
-    _relationships_migration_v_version_version_created_at_idx: index(
-      '_relationships_migration_v_version_version_created_at_idx',
-    ).on(columns.version_createdAt),
-    _relationships_migration_v_created_at_idx: index(
-      '_relationships_migration_v_created_at_idx',
-    ).on(columns.createdAt),
-    _relationships_migration_v_updated_at_idx: index(
-      '_relationships_migration_v_updated_at_idx',
-    ).on(columns.updatedAt),
-  }),
+    index('_relationships_migration_v_version_version_updated_at_idx').on(
+      columns.version_updatedAt,
+    ),
+    index('_relationships_migration_v_version_version_created_at_idx').on(
+      columns.version_createdAt,
+    ),
+    index('_relationships_migration_v_created_at_idx').on(columns.createdAt),
+    index('_relationships_migration_v_updated_at_idx').on(columns.updatedAt),
+  ],
 )
 
 export const _relationships_migration_v_rels = sqliteTable(
@@ -1087,24 +1551,203 @@ export const _relationships_migration_v_rels = sqliteTable(
     path: text('path').notNull(),
     'default-valuesID': integer('default_values_id'),
   },
-  (columns) => ({
-    order: index('_relationships_migration_v_rels_order_idx').on(columns.order),
-    parentIdx: index('_relationships_migration_v_rels_parent_idx').on(columns.parent),
-    pathIdx: index('_relationships_migration_v_rels_path_idx').on(columns.path),
-    _relationships_migration_v_rels_default_values_id_idx: index(
-      '_relationships_migration_v_rels_default_values_id_idx',
-    ).on(columns['default-valuesID']),
-    parentFk: foreignKey({
+  (columns) => [
+    index('_relationships_migration_v_rels_order_idx').on(columns.order),
+    index('_relationships_migration_v_rels_parent_idx').on(columns.parent),
+    index('_relationships_migration_v_rels_path_idx').on(columns.path),
+    index('_relationships_migration_v_rels_default_values_id_idx').on(columns['default-valuesID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [_relationships_migration_v.id],
       name: '_relationships_migration_v_rels_parent_fk',
     }).onDelete('cascade'),
-    'default-valuesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['default-valuesID']],
       foreignColumns: [default_values.id],
       name: '_relationships_migration_v_rels_default_values_fk',
     }).onDelete('cascade'),
-  }),
+  ],
+)
+
+export const compound_indexes = sqliteTable(
+  'compound_indexes',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    one: text('one'),
+    two: text('two'),
+    three: text('three'),
+    group_four: text('group_four'),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    index('compound_indexes_updated_at_idx').on(columns.updatedAt),
+    index('compound_indexes_created_at_idx').on(columns.createdAt),
+    uniqueIndex('one_two_idx').on(columns.one, columns.two),
+    uniqueIndex('three_group_four_idx').on(columns.three, columns.group_four),
+  ],
+)
+
+export const short_nested_1 = sqliteTable(
+  'short_nested_1',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: text('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    text: text('text'),
+  },
+  (columns) => [
+    index('short_nested_1_order_idx').on(columns._order),
+    index('short_nested_1_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [shortname.id],
+      name: 'short_nested_1_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const shortname = sqliteTable(
+  'shortname',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+  },
+  (columns) => [
+    index('shortname_order_idx').on(columns._order),
+    index('shortname_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [aliases.id],
+      name: 'shortname_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const aliases = sqliteTable(
+  'aliases',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    index('aliases_updated_at_idx').on(columns.updatedAt),
+    index('aliases_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const blocks_docs_blocks_cta = sqliteTable(
+  'blocks_docs_blocks_cta',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    _locale: text('_locale', { enum: ['en', 'es'] }).notNull(),
+    id: text('id').primaryKey(),
+    text: text('text'),
+    blockName: text('block_name'),
+  },
+  (columns) => [
+    index('blocks_docs_blocks_cta_order_idx').on(columns._order),
+    index('blocks_docs_blocks_cta_parent_id_idx').on(columns._parentID),
+    index('blocks_docs_blocks_cta_path_idx').on(columns._path),
+    index('blocks_docs_blocks_cta_locale_idx').on(columns._locale),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [blocks_docs.id],
+      name: 'blocks_docs_blocks_cta_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const blocks_docs_blocks_cta_2 = sqliteTable(
+  'blocks_docs_blocks_cta_2',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: text('id').primaryKey(),
+    text: text('text'),
+    blockName: text('block_name'),
+  },
+  (columns) => [
+    index('blocks_docs_blocks_cta_2_order_idx').on(columns._order),
+    index('blocks_docs_blocks_cta_2_parent_id_idx').on(columns._parentID),
+    index('blocks_docs_blocks_cta_2_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [blocks_docs.id],
+      name: 'blocks_docs_blocks_cta_2_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const blocks_docs = sqliteTable(
+  'blocks_docs',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    index('blocks_docs_updated_at_idx').on(columns.updatedAt),
+    index('blocks_docs_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const unique_fields = sqliteTable(
+  'unique_fields',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    slugField: text('slug_field'),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    uniqueIndex('unique_fields_slug_field_idx').on(columns.slugField),
+    index('unique_fields_updated_at_idx').on(columns.updatedAt),
+    index('unique_fields_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const users_sessions = sqliteTable(
+  'users_sessions',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    createdAt: text('created_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    expiresAt: text('expires_at')
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [
+    index('users_sessions_order_idx').on(columns._order),
+    index('users_sessions_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [users.id],
+      name: 'users_sessions_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
 )
 
 export const users = sqliteTable(
@@ -1124,14 +1767,14 @@ export const users = sqliteTable(
     ),
     salt: text('salt'),
     hash: text('hash'),
-    loginAttempts: numeric('login_attempts').default('0'),
+    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
     lockUntil: text('lock_until').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    users_updated_at_idx: index('users_updated_at_idx').on(columns.updatedAt),
-    users_created_at_idx: index('users_created_at_idx').on(columns.createdAt),
-    users_email_idx: uniqueIndex('users_email_idx').on(columns.email),
-  }),
+  (columns) => [
+    index('users_updated_at_idx').on(columns.updatedAt),
+    index('users_created_at_idx').on(columns.createdAt),
+    uniqueIndex('users_email_idx').on(columns.email),
+  ],
 )
 
 export const payload_locked_documents = sqliteTable(
@@ -1146,17 +1789,11 @@ export const payload_locked_documents = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    payload_locked_documents_global_slug_idx: index('payload_locked_documents_global_slug_idx').on(
-      columns.globalSlug,
-    ),
-    payload_locked_documents_updated_at_idx: index('payload_locked_documents_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    payload_locked_documents_created_at_idx: index('payload_locked_documents_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('payload_locked_documents_global_slug_idx').on(columns.globalSlug),
+    index('payload_locked_documents_updated_at_idx').on(columns.updatedAt),
+    index('payload_locked_documents_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const payload_locked_documents_rels = sqliteTable(
@@ -1166,125 +1803,183 @@ export const payload_locked_documents_rels = sqliteTable(
     order: integer('order'),
     parent: integer('parent_id').notNull(),
     path: text('path').notNull(),
+    noTimeStampsID: integer('no_time_stamps_id'),
+    categoriesID: integer('categories_id'),
+    simpleID: integer('simple_id'),
+    'categories-custom-idID': numeric('categories_custom_id_id', { mode: 'number' }),
     postsID: integer('posts_id'),
+    'error-on-unnamed-fieldsID': integer('error_on_unnamed_fields_id'),
     'default-valuesID': integer('default_values_id'),
     'relation-aID': integer('relation_a_id'),
     'relation-bID': integer('relation_b_id'),
     'pg-migrationsID': integer('pg_migrations_id'),
     'custom-schemaID': integer('customs_id'),
     placesID: integer('places_id'),
+    'virtual-relationsID': integer('virtual_relations_id'),
     'fields-persistanceID': integer('fields_persistance_id'),
     'custom-idsID': text('custom_ids_id'),
     'fake-custom-idsID': integer('fake_custom_ids_id'),
     'relationships-migrationID': integer('relationships_migration_id'),
+    'compound-indexesID': integer('compound_indexes_id'),
+    aliasesID: integer('aliases_id'),
+    'blocks-docsID': integer('blocks_docs_id'),
+    'unique-fieldsID': integer('unique_fields_id'),
     usersID: integer('users_id'),
   },
-  (columns) => ({
-    order: index('payload_locked_documents_rels_order_idx').on(columns.order),
-    parentIdx: index('payload_locked_documents_rels_parent_idx').on(columns.parent),
-    pathIdx: index('payload_locked_documents_rels_path_idx').on(columns.path),
-    payload_locked_documents_rels_posts_id_idx: index(
-      'payload_locked_documents_rels_posts_id_idx',
-    ).on(columns.postsID),
-    payload_locked_documents_rels_default_values_id_idx: index(
-      'payload_locked_documents_rels_default_values_id_idx',
-    ).on(columns['default-valuesID']),
-    payload_locked_documents_rels_relation_a_id_idx: index(
-      'payload_locked_documents_rels_relation_a_id_idx',
-    ).on(columns['relation-aID']),
-    payload_locked_documents_rels_relation_b_id_idx: index(
-      'payload_locked_documents_rels_relation_b_id_idx',
-    ).on(columns['relation-bID']),
-    payload_locked_documents_rels_pg_migrations_id_idx: index(
-      'payload_locked_documents_rels_pg_migrations_id_idx',
-    ).on(columns['pg-migrationsID']),
-    payload_locked_documents_rels_customs_id_idx: index(
-      'payload_locked_documents_rels_customs_id_idx',
-    ).on(columns['custom-schemaID']),
-    payload_locked_documents_rels_places_id_idx: index(
-      'payload_locked_documents_rels_places_id_idx',
-    ).on(columns.placesID),
-    payload_locked_documents_rels_fields_persistance_id_idx: index(
-      'payload_locked_documents_rels_fields_persistance_id_idx',
-    ).on(columns['fields-persistanceID']),
-    payload_locked_documents_rels_custom_ids_id_idx: index(
-      'payload_locked_documents_rels_custom_ids_id_idx',
-    ).on(columns['custom-idsID']),
-    payload_locked_documents_rels_fake_custom_ids_id_idx: index(
-      'payload_locked_documents_rels_fake_custom_ids_id_idx',
-    ).on(columns['fake-custom-idsID']),
-    payload_locked_documents_rels_relationships_migration_id_idx: index(
-      'payload_locked_documents_rels_relationships_migration_id_idx',
-    ).on(columns['relationships-migrationID']),
-    payload_locked_documents_rels_users_id_idx: index(
-      'payload_locked_documents_rels_users_id_idx',
-    ).on(columns.usersID),
-    parentFk: foreignKey({
+  (columns) => [
+    index('payload_locked_documents_rels_order_idx').on(columns.order),
+    index('payload_locked_documents_rels_parent_idx').on(columns.parent),
+    index('payload_locked_documents_rels_path_idx').on(columns.path),
+    index('payload_locked_documents_rels_no_time_stamps_id_idx').on(columns.noTimeStampsID),
+    index('payload_locked_documents_rels_categories_id_idx').on(columns.categoriesID),
+    index('payload_locked_documents_rels_simple_id_idx').on(columns.simpleID),
+    index('payload_locked_documents_rels_categories_custom_id_id_idx').on(
+      columns['categories-custom-idID'],
+    ),
+    index('payload_locked_documents_rels_posts_id_idx').on(columns.postsID),
+    index('payload_locked_documents_rels_error_on_unnamed_fields_id_idx').on(
+      columns['error-on-unnamed-fieldsID'],
+    ),
+    index('payload_locked_documents_rels_default_values_id_idx').on(columns['default-valuesID']),
+    index('payload_locked_documents_rels_relation_a_id_idx').on(columns['relation-aID']),
+    index('payload_locked_documents_rels_relation_b_id_idx').on(columns['relation-bID']),
+    index('payload_locked_documents_rels_pg_migrations_id_idx').on(columns['pg-migrationsID']),
+    index('payload_locked_documents_rels_customs_id_idx').on(columns['custom-schemaID']),
+    index('payload_locked_documents_rels_places_id_idx').on(columns.placesID),
+    index('payload_locked_documents_rels_virtual_relations_id_idx').on(
+      columns['virtual-relationsID'],
+    ),
+    index('payload_locked_documents_rels_fields_persistance_id_idx').on(
+      columns['fields-persistanceID'],
+    ),
+    index('payload_locked_documents_rels_custom_ids_id_idx').on(columns['custom-idsID']),
+    index('payload_locked_documents_rels_fake_custom_ids_id_idx').on(columns['fake-custom-idsID']),
+    index('payload_locked_documents_rels_relationships_migration_id_idx').on(
+      columns['relationships-migrationID'],
+    ),
+    index('payload_locked_documents_rels_compound_indexes_id_idx').on(
+      columns['compound-indexesID'],
+    ),
+    index('payload_locked_documents_rels_aliases_id_idx').on(columns.aliasesID),
+    index('payload_locked_documents_rels_blocks_docs_id_idx').on(columns['blocks-docsID']),
+    index('payload_locked_documents_rels_unique_fields_id_idx').on(columns['unique-fieldsID']),
+    index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
       name: 'payload_locked_documents_rels_parent_fk',
     }).onDelete('cascade'),
-    postsIdFk: foreignKey({
+    foreignKey({
+      columns: [columns['noTimeStampsID']],
+      foreignColumns: [no_time_stamps.id],
+      name: 'payload_locked_documents_rels_no_time_stamps_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['categoriesID']],
+      foreignColumns: [categories.id],
+      name: 'payload_locked_documents_rels_categories_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['simpleID']],
+      foreignColumns: [simple.id],
+      name: 'payload_locked_documents_rels_simple_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['categories-custom-idID']],
+      foreignColumns: [categories_custom_id.id],
+      name: 'payload_locked_documents_rels_categories_custom_id_fk',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [columns['postsID']],
       foreignColumns: [posts.id],
       name: 'payload_locked_documents_rels_posts_fk',
     }).onDelete('cascade'),
-    'default-valuesIdFk': foreignKey({
+    foreignKey({
+      columns: [columns['error-on-unnamed-fieldsID']],
+      foreignColumns: [error_on_unnamed_fields.id],
+      name: 'payload_locked_documents_rels_error_on_unnamed_fields_fk',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [columns['default-valuesID']],
       foreignColumns: [default_values.id],
       name: 'payload_locked_documents_rels_default_values_fk',
     }).onDelete('cascade'),
-    'relation-aIdFk': foreignKey({
+    foreignKey({
       columns: [columns['relation-aID']],
       foreignColumns: [relation_a.id],
       name: 'payload_locked_documents_rels_relation_a_fk',
     }).onDelete('cascade'),
-    'relation-bIdFk': foreignKey({
+    foreignKey({
       columns: [columns['relation-bID']],
       foreignColumns: [relation_b.id],
       name: 'payload_locked_documents_rels_relation_b_fk',
     }).onDelete('cascade'),
-    'pg-migrationsIdFk': foreignKey({
+    foreignKey({
       columns: [columns['pg-migrationsID']],
       foreignColumns: [pg_migrations.id],
       name: 'payload_locked_documents_rels_pg_migrations_fk',
     }).onDelete('cascade'),
-    'custom-schemaIdFk': foreignKey({
+    foreignKey({
       columns: [columns['custom-schemaID']],
       foreignColumns: [customs.id],
       name: 'payload_locked_documents_rels_custom_schema_fk',
     }).onDelete('cascade'),
-    placesIdFk: foreignKey({
+    foreignKey({
       columns: [columns['placesID']],
       foreignColumns: [places.id],
       name: 'payload_locked_documents_rels_places_fk',
     }).onDelete('cascade'),
-    'fields-persistanceIdFk': foreignKey({
+    foreignKey({
+      columns: [columns['virtual-relationsID']],
+      foreignColumns: [virtual_relations.id],
+      name: 'payload_locked_documents_rels_virtual_relations_fk',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [columns['fields-persistanceID']],
       foreignColumns: [fields_persistance.id],
       name: 'payload_locked_documents_rels_fields_persistance_fk',
     }).onDelete('cascade'),
-    'custom-idsIdFk': foreignKey({
+    foreignKey({
       columns: [columns['custom-idsID']],
       foreignColumns: [custom_ids.id],
       name: 'payload_locked_documents_rels_custom_ids_fk',
     }).onDelete('cascade'),
-    'fake-custom-idsIdFk': foreignKey({
+    foreignKey({
       columns: [columns['fake-custom-idsID']],
       foreignColumns: [fake_custom_ids.id],
       name: 'payload_locked_documents_rels_fake_custom_ids_fk',
     }).onDelete('cascade'),
-    'relationships-migrationIdFk': foreignKey({
+    foreignKey({
       columns: [columns['relationships-migrationID']],
       foreignColumns: [relationships_migration.id],
       name: 'payload_locked_documents_rels_relationships_migration_fk',
     }).onDelete('cascade'),
-    usersIdFk: foreignKey({
+    foreignKey({
+      columns: [columns['compound-indexesID']],
+      foreignColumns: [compound_indexes.id],
+      name: 'payload_locked_documents_rels_compound_indexes_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['aliasesID']],
+      foreignColumns: [aliases.id],
+      name: 'payload_locked_documents_rels_aliases_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['blocks-docsID']],
+      foreignColumns: [blocks_docs.id],
+      name: 'payload_locked_documents_rels_blocks_docs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['unique-fieldsID']],
+      foreignColumns: [unique_fields.id],
+      name: 'payload_locked_documents_rels_unique_fields_fk',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [columns['usersID']],
       foreignColumns: [users.id],
       name: 'payload_locked_documents_rels_users_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const payload_preferences = sqliteTable(
@@ -1300,15 +1995,11 @@ export const payload_preferences = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    payload_preferences_key_idx: index('payload_preferences_key_idx').on(columns.key),
-    payload_preferences_updated_at_idx: index('payload_preferences_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    payload_preferences_created_at_idx: index('payload_preferences_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('payload_preferences_key_idx').on(columns.key),
+    index('payload_preferences_updated_at_idx').on(columns.updatedAt),
+    index('payload_preferences_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const payload_preferences_rels = sqliteTable(
@@ -1320,24 +2011,22 @@ export const payload_preferences_rels = sqliteTable(
     path: text('path').notNull(),
     usersID: integer('users_id'),
   },
-  (columns) => ({
-    order: index('payload_preferences_rels_order_idx').on(columns.order),
-    parentIdx: index('payload_preferences_rels_parent_idx').on(columns.parent),
-    pathIdx: index('payload_preferences_rels_path_idx').on(columns.path),
-    payload_preferences_rels_users_id_idx: index('payload_preferences_rels_users_id_idx').on(
-      columns.usersID,
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('payload_preferences_rels_order_idx').on(columns.order),
+    index('payload_preferences_rels_parent_idx').on(columns.parent),
+    index('payload_preferences_rels_path_idx').on(columns.path),
+    index('payload_preferences_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_preferences.id],
       name: 'payload_preferences_rels_parent_fk',
     }).onDelete('cascade'),
-    usersIdFk: foreignKey({
+    foreignKey({
       columns: [columns['usersID']],
       foreignColumns: [users.id],
       name: 'payload_preferences_rels_users_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const payload_migrations = sqliteTable(
@@ -1345,7 +2034,7 @@ export const payload_migrations = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     name: text('name'),
-    batch: numeric('batch'),
+    batch: numeric('batch', { mode: 'number' }),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -1353,15 +2042,93 @@ export const payload_migrations = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    payload_migrations_updated_at_idx: index('payload_migrations_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    payload_migrations_created_at_idx: index('payload_migrations_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('payload_migrations_updated_at_idx').on(columns.updatedAt),
+    index('payload_migrations_created_at_idx').on(columns.createdAt),
+  ],
 )
+
+export const header_items_lvl4 = sqliteTable(
+  'header_items_lvl4',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: text('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    label: text('label'),
+  },
+  (columns) => [
+    index('header_items_lvl4_order_idx').on(columns._order),
+    index('header_items_lvl4_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [header_items_lvl3.id],
+      name: 'header_items_lvl4_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const header_items_lvl3 = sqliteTable(
+  'header_items_lvl3',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: text('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    label: text('label'),
+  },
+  (columns) => [
+    index('header_items_lvl3_order_idx').on(columns._order),
+    index('header_items_lvl3_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [header_items_lvl2.id],
+      name: 'header_items_lvl3_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const header_items_lvl2 = sqliteTable(
+  'header_items_lvl2',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: text('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    label: text('label'),
+  },
+  (columns) => [
+    index('header_items_lvl2_order_idx').on(columns._order),
+    index('header_items_lvl2_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [header_items_lvl1.id],
+      name: 'header_items_lvl2_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const header_items_lvl1 = sqliteTable(
+  'header_items_lvl1',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: text('id').primaryKey(),
+    label: text('label'),
+  },
+  (columns) => [
+    index('header_items_lvl1_order_idx').on(columns._order),
+    index('header_items_lvl1_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [header.id],
+      name: 'header_items_lvl1_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const header = sqliteTable('header', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  updatedAt: text('updated_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  createdAt: text('created_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+})
 
 export const customGlobal = sqliteTable('customGlobal', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -1388,13 +2155,204 @@ export const _customGlobal_v = sqliteTable(
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (columns) => ({
-    _customGlobal_v_created_at_idx: index('_customGlobal_v_created_at_idx').on(columns.createdAt),
-    _customGlobal_v_updated_at_idx: index('_customGlobal_v_updated_at_idx').on(columns.updatedAt),
-  }),
+  (columns) => [
+    index('_customGlobal_v_created_at_idx').on(columns.createdAt),
+    index('_customGlobal_v_updated_at_idx').on(columns.updatedAt),
+  ],
 )
 
-export const relations_posts = relations(posts, () => ({}))
+export const global_2 = sqliteTable('global_2', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  text: text('text'),
+  updatedAt: text('updated_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  createdAt: text('created_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+})
+
+export const global_3 = sqliteTable('global_3', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  text: text('text'),
+  updatedAt: text('updated_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  createdAt: text('created_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+})
+
+export const virtual_relation_global = sqliteTable(
+  'virtual_relation_global',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    post: integer('post_id').references(() => posts.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: text('updated_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: text('created_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (columns) => [index('virtual_relation_global_post_idx').on(columns.post)],
+)
+
+export const relations_no_time_stamps = relations(no_time_stamps, () => ({}))
+export const relations_categories = relations(categories, ({ one }) => ({
+  simple: one(simple, {
+    fields: [categories.simple],
+    references: [simple.id],
+    relationName: 'simple',
+  }),
+  hideout_camera1_time1Image: one(posts, {
+    fields: [categories.hideout_camera1_time1Image],
+    references: [posts.id],
+    relationName: 'hideout_camera1_time1Image',
+  }),
+}))
+export const relations__categories_v = relations(_categories_v, ({ one }) => ({
+  parent: one(categories, {
+    fields: [_categories_v.parent],
+    references: [categories.id],
+    relationName: 'parent',
+  }),
+  version_simple: one(simple, {
+    fields: [_categories_v.version_simple],
+    references: [simple.id],
+    relationName: 'version_simple',
+  }),
+  version_hideout_camera1_time1Image: one(posts, {
+    fields: [_categories_v.version_hideout_camera1_time1Image],
+    references: [posts.id],
+    relationName: 'version_hideout_camera1_time1Image',
+  }),
+}))
+export const relations_simple = relations(simple, () => ({}))
+export const relations_categories_custom_id = relations(categories_custom_id, () => ({}))
+export const relations__categories_custom_id_v = relations(_categories_custom_id_v, ({ one }) => ({
+  parent: one(categories_custom_id, {
+    fields: [_categories_custom_id_v.parent],
+    references: [categories_custom_id.id],
+    relationName: 'parent',
+  }),
+}))
+export const relations_posts_blocks_block_fourth = relations(
+  posts_blocks_block_fourth,
+  ({ one }) => ({
+    _parentID: one(posts, {
+      fields: [posts_blocks_block_fourth._parentID],
+      references: [posts.id],
+      relationName: '_blocks_block-fourth',
+    }),
+  }),
+)
+export const relations_posts_blocks_block_third = relations(
+  posts_blocks_block_third,
+  ({ one }) => ({
+    _parentID: one(posts, {
+      fields: [posts_blocks_block_third._parentID],
+      references: [posts.id],
+      relationName: '_blocks_block-third',
+    }),
+  }),
+)
+export const relations_posts_array_with_i_ds_locales = relations(
+  posts_array_with_i_ds_locales,
+  ({ one }) => ({
+    _parentID: one(posts_array_with_i_ds, {
+      fields: [posts_array_with_i_ds_locales._parentID],
+      references: [posts_array_with_i_ds.id],
+      relationName: '_locales',
+    }),
+  }),
+)
+export const relations_posts_array_with_i_ds = relations(
+  posts_array_with_i_ds,
+  ({ one, many }) => ({
+    _parentID: one(posts, {
+      fields: [posts_array_with_i_ds._parentID],
+      references: [posts.id],
+      relationName: 'arrayWithIDs',
+    }),
+    _locales: many(posts_array_with_i_ds_locales, {
+      relationName: '_locales',
+    }),
+  }),
+)
+export const relations_posts_array_with_i_ds_localized = relations(
+  posts_array_with_i_ds_localized,
+  ({ one }) => ({
+    _parentID: one(posts, {
+      fields: [posts_array_with_i_ds_localized._parentID],
+      references: [posts.id],
+      relationName: 'arrayWithIDsLocalized',
+    }),
+  }),
+)
+export const relations_posts_blocks_block_first = relations(
+  posts_blocks_block_first,
+  ({ one }) => ({
+    _parentID: one(posts, {
+      fields: [posts_blocks_block_first._parentID],
+      references: [posts.id],
+      relationName: '_blocks_block-first',
+    }),
+  }),
+)
+export const relations_posts_locales = relations(posts_locales, ({ one }) => ({
+  _parentID: one(posts, {
+    fields: [posts_locales._parentID],
+    references: [posts.id],
+    relationName: '_locales',
+  }),
+}))
+export const relations_posts_rels = relations(posts_rels, ({ one }) => ({
+  parent: one(posts, {
+    fields: [posts_rels.parent],
+    references: [posts.id],
+    relationName: '_rels',
+  }),
+  categoriesID: one(categories, {
+    fields: [posts_rels.categoriesID],
+    references: [categories.id],
+    relationName: 'categories',
+  }),
+  'categories-custom-idID': one(categories_custom_id, {
+    fields: [posts_rels['categories-custom-idID']],
+    references: [categories_custom_id.id],
+    relationName: 'categories-custom-id',
+  }),
+  simpleID: one(simple, {
+    fields: [posts_rels.simpleID],
+    references: [simple.id],
+    relationName: 'simple',
+  }),
+}))
+export const relations_posts = relations(posts, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [posts.category],
+    references: [categories.id],
+    relationName: 'category',
+  }),
+  categoryCustomID: one(categories_custom_id, {
+    fields: [posts.categoryCustomID],
+    references: [categories_custom_id.id],
+    relationName: 'categoryCustomID',
+  }),
+  '_blocks_block-fourth': many(posts_blocks_block_fourth, {
+    relationName: '_blocks_block-fourth',
+  }),
+  '_blocks_block-third': many(posts_blocks_block_third, {
+    relationName: '_blocks_block-third',
+  }),
+  arrayWithIDs: many(posts_array_with_i_ds, {
+    relationName: 'arrayWithIDs',
+  }),
+  arrayWithIDsLocalized: many(posts_array_with_i_ds_localized, {
+    relationName: 'arrayWithIDsLocalized',
+  }),
+  '_blocks_block-first': many(posts_blocks_block_first, {
+    relationName: '_blocks_block-first',
+  }),
+  _locales: many(posts_locales, {
+    relationName: '_locales',
+  }),
+  _rels: many(posts_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_error_on_unnamed_fields = relations(error_on_unnamed_fields, () => ({}))
 export const relations_default_values_array = relations(default_values_array, ({ one }) => ({
   _parentID: one(default_values, {
     fields: [default_values_array._parentID],
@@ -1696,7 +2654,7 @@ export const relations_customBlocks = relations(customBlocks, ({ one, many }) =>
   _parentID: one(customs, {
     fields: [customBlocks._parentID],
     references: [customs.id],
-    relationName: '_blocks_block',
+    relationName: '_blocks_block-second',
   }),
   _locales: many(customBlocks_locales, {
     relationName: '_locales',
@@ -1728,8 +2686,8 @@ export const relations_customs = relations(customs, ({ many }) => ({
   array: many(customArrays, {
     relationName: 'array',
   }),
-  _blocks_block: many(customBlocks, {
-    relationName: '_blocks_block',
+  '_blocks_block-second': many(customBlocks, {
+    relationName: '_blocks_block-second',
   }),
   _locales: many(customs_locales, {
     relationName: '_locales',
@@ -1776,7 +2734,7 @@ export const relations__customBlocks_v = relations(_customBlocks_v, ({ one, many
   _parentID: one(_customs_v, {
     fields: [_customBlocks_v._parentID],
     references: [_customs_v.id],
-    relationName: '_blocks_block',
+    relationName: '_blocks_block-second',
   }),
   _locales: many(_customBlocks_v_locales, {
     relationName: '_locales',
@@ -1813,8 +2771,8 @@ export const relations__customs_v = relations(_customs_v, ({ one, many }) => ({
   version_array: many(_customArrays_v, {
     relationName: 'version_array',
   }),
-  _blocks_block: many(_customBlocks_v, {
-    relationName: '_blocks_block',
+  '_blocks_block-second': many(_customBlocks_v, {
+    relationName: '_blocks_block-second',
   }),
   _locales: many(_customs_v_locales, {
     relationName: '_locales',
@@ -1824,6 +2782,68 @@ export const relations__customs_v = relations(_customs_v, ({ one, many }) => ({
   }),
 }))
 export const relations_places = relations(places, () => ({}))
+export const relations_virtual_relations_rels = relations(virtual_relations_rels, ({ one }) => ({
+  parent: one(virtual_relations, {
+    fields: [virtual_relations_rels.parent],
+    references: [virtual_relations.id],
+    relationName: '_rels',
+  }),
+  postsID: one(posts, {
+    fields: [virtual_relations_rels.postsID],
+    references: [posts.id],
+    relationName: 'posts',
+  }),
+}))
+export const relations_virtual_relations = relations(virtual_relations, ({ one, many }) => ({
+  post: one(posts, {
+    fields: [virtual_relations.post],
+    references: [posts.id],
+    relationName: 'post',
+  }),
+  customID: one(custom_ids, {
+    fields: [virtual_relations.customID],
+    references: [custom_ids.id],
+    relationName: 'customID',
+  }),
+  _rels: many(virtual_relations_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations__virtual_relations_v_rels = relations(
+  _virtual_relations_v_rels,
+  ({ one }) => ({
+    parent: one(_virtual_relations_v, {
+      fields: [_virtual_relations_v_rels.parent],
+      references: [_virtual_relations_v.id],
+      relationName: '_rels',
+    }),
+    postsID: one(posts, {
+      fields: [_virtual_relations_v_rels.postsID],
+      references: [posts.id],
+      relationName: 'posts',
+    }),
+  }),
+)
+export const relations__virtual_relations_v = relations(_virtual_relations_v, ({ one, many }) => ({
+  parent: one(virtual_relations, {
+    fields: [_virtual_relations_v.parent],
+    references: [virtual_relations.id],
+    relationName: 'parent',
+  }),
+  version_post: one(posts, {
+    fields: [_virtual_relations_v.version_post],
+    references: [posts.id],
+    relationName: 'version_post',
+  }),
+  version_customID: one(custom_ids, {
+    fields: [_virtual_relations_v.version_customID],
+    references: [custom_ids.id],
+    relationName: 'version_customID',
+  }),
+  _rels: many(_virtual_relations_v_rels, {
+    relationName: '_rels',
+  }),
+}))
 export const relations_fields_persistance = relations(fields_persistance, () => ({}))
 export const relations_custom_ids = relations(custom_ids, () => ({}))
 export const relations__custom_ids_v = relations(_custom_ids_v, ({ one }) => ({
@@ -1895,7 +2915,67 @@ export const relations__relationships_migration_v = relations(
     }),
   }),
 )
-export const relations_users = relations(users, () => ({}))
+export const relations_compound_indexes = relations(compound_indexes, () => ({}))
+export const relations_short_nested_1 = relations(short_nested_1, ({ one }) => ({
+  _parentID: one(shortname, {
+    fields: [short_nested_1._parentID],
+    references: [shortname.id],
+    relationName: 'nestedArray',
+  }),
+}))
+export const relations_shortname = relations(shortname, ({ one, many }) => ({
+  _parentID: one(aliases, {
+    fields: [shortname._parentID],
+    references: [aliases.id],
+    relationName: '_shortname',
+  }),
+  nestedArray: many(short_nested_1, {
+    relationName: 'nestedArray',
+  }),
+}))
+export const relations_aliases = relations(aliases, ({ many }) => ({
+  _shortname: many(shortname, {
+    relationName: '_shortname',
+  }),
+}))
+export const relations_blocks_docs_blocks_cta = relations(blocks_docs_blocks_cta, ({ one }) => ({
+  _parentID: one(blocks_docs, {
+    fields: [blocks_docs_blocks_cta._parentID],
+    references: [blocks_docs.id],
+    relationName: '_blocks_cta',
+  }),
+}))
+export const relations_blocks_docs_blocks_cta_2 = relations(
+  blocks_docs_blocks_cta_2,
+  ({ one }) => ({
+    _parentID: one(blocks_docs, {
+      fields: [blocks_docs_blocks_cta_2._parentID],
+      references: [blocks_docs.id],
+      relationName: '_blocks_cta_2',
+    }),
+  }),
+)
+export const relations_blocks_docs = relations(blocks_docs, ({ many }) => ({
+  _blocks_cta: many(blocks_docs_blocks_cta, {
+    relationName: '_blocks_cta',
+  }),
+  _blocks_cta_2: many(blocks_docs_blocks_cta_2, {
+    relationName: '_blocks_cta_2',
+  }),
+}))
+export const relations_unique_fields = relations(unique_fields, () => ({}))
+export const relations_users_sessions = relations(users_sessions, ({ one }) => ({
+  _parentID: one(users, {
+    fields: [users_sessions._parentID],
+    references: [users.id],
+    relationName: 'sessions',
+  }),
+}))
+export const relations_users = relations(users, ({ many }) => ({
+  sessions: many(users_sessions, {
+    relationName: 'sessions',
+  }),
+}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
   ({ one }) => ({
@@ -1904,10 +2984,35 @@ export const relations_payload_locked_documents_rels = relations(
       references: [payload_locked_documents.id],
       relationName: '_rels',
     }),
+    noTimeStampsID: one(no_time_stamps, {
+      fields: [payload_locked_documents_rels.noTimeStampsID],
+      references: [no_time_stamps.id],
+      relationName: 'noTimeStamps',
+    }),
+    categoriesID: one(categories, {
+      fields: [payload_locked_documents_rels.categoriesID],
+      references: [categories.id],
+      relationName: 'categories',
+    }),
+    simpleID: one(simple, {
+      fields: [payload_locked_documents_rels.simpleID],
+      references: [simple.id],
+      relationName: 'simple',
+    }),
+    'categories-custom-idID': one(categories_custom_id, {
+      fields: [payload_locked_documents_rels['categories-custom-idID']],
+      references: [categories_custom_id.id],
+      relationName: 'categories-custom-id',
+    }),
     postsID: one(posts, {
       fields: [payload_locked_documents_rels.postsID],
       references: [posts.id],
       relationName: 'posts',
+    }),
+    'error-on-unnamed-fieldsID': one(error_on_unnamed_fields, {
+      fields: [payload_locked_documents_rels['error-on-unnamed-fieldsID']],
+      references: [error_on_unnamed_fields.id],
+      relationName: 'error-on-unnamed-fields',
     }),
     'default-valuesID': one(default_values, {
       fields: [payload_locked_documents_rels['default-valuesID']],
@@ -1939,6 +3044,11 @@ export const relations_payload_locked_documents_rels = relations(
       references: [places.id],
       relationName: 'places',
     }),
+    'virtual-relationsID': one(virtual_relations, {
+      fields: [payload_locked_documents_rels['virtual-relationsID']],
+      references: [virtual_relations.id],
+      relationName: 'virtual-relations',
+    }),
     'fields-persistanceID': one(fields_persistance, {
       fields: [payload_locked_documents_rels['fields-persistanceID']],
       references: [fields_persistance.id],
@@ -1958,6 +3068,26 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels['relationships-migrationID']],
       references: [relationships_migration.id],
       relationName: 'relationships-migration',
+    }),
+    'compound-indexesID': one(compound_indexes, {
+      fields: [payload_locked_documents_rels['compound-indexesID']],
+      references: [compound_indexes.id],
+      relationName: 'compound-indexes',
+    }),
+    aliasesID: one(aliases, {
+      fields: [payload_locked_documents_rels.aliasesID],
+      references: [aliases.id],
+      relationName: 'aliases',
+    }),
+    'blocks-docsID': one(blocks_docs, {
+      fields: [payload_locked_documents_rels['blocks-docsID']],
+      references: [blocks_docs.id],
+      relationName: 'blocks-docs',
+    }),
+    'unique-fieldsID': one(unique_fields, {
+      fields: [payload_locked_documents_rels['unique-fieldsID']],
+      references: [unique_fields.id],
+      relationName: 'unique-fields',
     }),
     usersID: one(users, {
       fields: [payload_locked_documents_rels.usersID],
@@ -1995,11 +3125,77 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
   }),
 }))
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
+export const relations_header_items_lvl4 = relations(header_items_lvl4, ({ one }) => ({
+  _parentID: one(header_items_lvl3, {
+    fields: [header_items_lvl4._parentID],
+    references: [header_items_lvl3.id],
+    relationName: 'itemsLvl4',
+  }),
+}))
+export const relations_header_items_lvl3 = relations(header_items_lvl3, ({ one, many }) => ({
+  _parentID: one(header_items_lvl2, {
+    fields: [header_items_lvl3._parentID],
+    references: [header_items_lvl2.id],
+    relationName: 'itemsLvl3',
+  }),
+  itemsLvl4: many(header_items_lvl4, {
+    relationName: 'itemsLvl4',
+  }),
+}))
+export const relations_header_items_lvl2 = relations(header_items_lvl2, ({ one, many }) => ({
+  _parentID: one(header_items_lvl1, {
+    fields: [header_items_lvl2._parentID],
+    references: [header_items_lvl1.id],
+    relationName: 'itemsLvl2',
+  }),
+  itemsLvl3: many(header_items_lvl3, {
+    relationName: 'itemsLvl3',
+  }),
+}))
+export const relations_header_items_lvl1 = relations(header_items_lvl1, ({ one, many }) => ({
+  _parentID: one(header, {
+    fields: [header_items_lvl1._parentID],
+    references: [header.id],
+    relationName: 'itemsLvl1',
+  }),
+  itemsLvl2: many(header_items_lvl2, {
+    relationName: 'itemsLvl2',
+  }),
+}))
+export const relations_header = relations(header, ({ many }) => ({
+  itemsLvl1: many(header_items_lvl1, {
+    relationName: 'itemsLvl1',
+  }),
+}))
 export const relations_customGlobal = relations(customGlobal, () => ({}))
 export const relations__customGlobal_v = relations(_customGlobal_v, () => ({}))
+export const relations_global_2 = relations(global_2, () => ({}))
+export const relations_global_3 = relations(global_3, () => ({}))
+export const relations_virtual_relation_global = relations(virtual_relation_global, ({ one }) => ({
+  post: one(posts, {
+    fields: [virtual_relation_global.post],
+    references: [posts.id],
+    relationName: 'post',
+  }),
+}))
 
 type DatabaseSchema = {
+  no_time_stamps: typeof no_time_stamps
+  categories: typeof categories
+  _categories_v: typeof _categories_v
+  simple: typeof simple
+  categories_custom_id: typeof categories_custom_id
+  _categories_custom_id_v: typeof _categories_custom_id_v
+  posts_blocks_block_fourth: typeof posts_blocks_block_fourth
+  posts_blocks_block_third: typeof posts_blocks_block_third
+  posts_array_with_i_ds: typeof posts_array_with_i_ds
+  posts_array_with_i_ds_locales: typeof posts_array_with_i_ds_locales
+  posts_array_with_i_ds_localized: typeof posts_array_with_i_ds_localized
+  posts_blocks_block_first: typeof posts_blocks_block_first
   posts: typeof posts
+  posts_locales: typeof posts_locales
+  posts_rels: typeof posts_rels
+  error_on_unnamed_fields: typeof error_on_unnamed_fields
   default_values_array: typeof default_values_array
   default_values: typeof default_values
   relation_a: typeof relation_a
@@ -2035,6 +3231,10 @@ type DatabaseSchema = {
   _customs_v_locales: typeof _customs_v_locales
   _customs_v_rels: typeof _customs_v_rels
   places: typeof places
+  virtual_relations: typeof virtual_relations
+  virtual_relations_rels: typeof virtual_relations_rels
+  _virtual_relations_v: typeof _virtual_relations_v
+  _virtual_relations_v_rels: typeof _virtual_relations_v_rels
   fields_persistance: typeof fields_persistance
   custom_ids: typeof custom_ids
   _custom_ids_v: typeof _custom_ids_v
@@ -2043,15 +3243,47 @@ type DatabaseSchema = {
   relationships_migration_rels: typeof relationships_migration_rels
   _relationships_migration_v: typeof _relationships_migration_v
   _relationships_migration_v_rels: typeof _relationships_migration_v_rels
+  compound_indexes: typeof compound_indexes
+  short_nested_1: typeof short_nested_1
+  shortname: typeof shortname
+  aliases: typeof aliases
+  blocks_docs_blocks_cta: typeof blocks_docs_blocks_cta
+  blocks_docs_blocks_cta_2: typeof blocks_docs_blocks_cta_2
+  blocks_docs: typeof blocks_docs
+  unique_fields: typeof unique_fields
+  users_sessions: typeof users_sessions
   users: typeof users
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
   payload_preferences: typeof payload_preferences
   payload_preferences_rels: typeof payload_preferences_rels
   payload_migrations: typeof payload_migrations
+  header_items_lvl4: typeof header_items_lvl4
+  header_items_lvl3: typeof header_items_lvl3
+  header_items_lvl2: typeof header_items_lvl2
+  header_items_lvl1: typeof header_items_lvl1
+  header: typeof header
   customGlobal: typeof customGlobal
   _customGlobal_v: typeof _customGlobal_v
+  global_2: typeof global_2
+  global_3: typeof global_3
+  virtual_relation_global: typeof virtual_relation_global
+  relations_no_time_stamps: typeof relations_no_time_stamps
+  relations_categories: typeof relations_categories
+  relations__categories_v: typeof relations__categories_v
+  relations_simple: typeof relations_simple
+  relations_categories_custom_id: typeof relations_categories_custom_id
+  relations__categories_custom_id_v: typeof relations__categories_custom_id_v
+  relations_posts_blocks_block_fourth: typeof relations_posts_blocks_block_fourth
+  relations_posts_blocks_block_third: typeof relations_posts_blocks_block_third
+  relations_posts_array_with_i_ds_locales: typeof relations_posts_array_with_i_ds_locales
+  relations_posts_array_with_i_ds: typeof relations_posts_array_with_i_ds
+  relations_posts_array_with_i_ds_localized: typeof relations_posts_array_with_i_ds_localized
+  relations_posts_blocks_block_first: typeof relations_posts_blocks_block_first
+  relations_posts_locales: typeof relations_posts_locales
+  relations_posts_rels: typeof relations_posts_rels
   relations_posts: typeof relations_posts
+  relations_error_on_unnamed_fields: typeof relations_error_on_unnamed_fields
   relations_default_values_array: typeof relations_default_values_array
   relations_default_values: typeof relations_default_values
   relations_relation_a: typeof relations_relation_a
@@ -2087,6 +3319,10 @@ type DatabaseSchema = {
   relations__customs_v_rels: typeof relations__customs_v_rels
   relations__customs_v: typeof relations__customs_v
   relations_places: typeof relations_places
+  relations_virtual_relations_rels: typeof relations_virtual_relations_rels
+  relations_virtual_relations: typeof relations_virtual_relations
+  relations__virtual_relations_v_rels: typeof relations__virtual_relations_v_rels
+  relations__virtual_relations_v: typeof relations__virtual_relations_v
   relations_fields_persistance: typeof relations_fields_persistance
   relations_custom_ids: typeof relations_custom_ids
   relations__custom_ids_v: typeof relations__custom_ids_v
@@ -2095,17 +3331,34 @@ type DatabaseSchema = {
   relations_relationships_migration: typeof relations_relationships_migration
   relations__relationships_migration_v_rels: typeof relations__relationships_migration_v_rels
   relations__relationships_migration_v: typeof relations__relationships_migration_v
+  relations_compound_indexes: typeof relations_compound_indexes
+  relations_short_nested_1: typeof relations_short_nested_1
+  relations_shortname: typeof relations_shortname
+  relations_aliases: typeof relations_aliases
+  relations_blocks_docs_blocks_cta: typeof relations_blocks_docs_blocks_cta
+  relations_blocks_docs_blocks_cta_2: typeof relations_blocks_docs_blocks_cta_2
+  relations_blocks_docs: typeof relations_blocks_docs
+  relations_unique_fields: typeof relations_unique_fields
+  relations_users_sessions: typeof relations_users_sessions
   relations_users: typeof relations_users
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels
   relations_payload_preferences: typeof relations_payload_preferences
   relations_payload_migrations: typeof relations_payload_migrations
+  relations_header_items_lvl4: typeof relations_header_items_lvl4
+  relations_header_items_lvl3: typeof relations_header_items_lvl3
+  relations_header_items_lvl2: typeof relations_header_items_lvl2
+  relations_header_items_lvl1: typeof relations_header_items_lvl1
+  relations_header: typeof relations_header
   relations_customGlobal: typeof relations_customGlobal
   relations__customGlobal_v: typeof relations__customGlobal_v
+  relations_global_2: typeof relations_global_2
+  relations_global_3: typeof relations_global_3
+  relations_virtual_relation_global: typeof relations_virtual_relation_global
 }
 
-declare module '@payloadcms/db-sqlite/types' {
+declare module '@payloadcms/db-sqlite' {
   export interface GeneratedDatabaseSchema {
     schema: DatabaseSchema
   }

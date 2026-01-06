@@ -54,6 +54,8 @@ function handleValue(propsString: string, startIndex: number): { newIndex: numbe
 
   if (char === '"') {
     return handleQuotedString(propsString, startIndex)
+  } else if (char === "'") {
+    return handleQuotedString(propsString, startIndex, true)
   } else if (char === '{') {
     return handleObject(propsString, startIndex)
   } else if (char === '[') {
@@ -86,10 +88,14 @@ function handleArray(propsString: string, startIndex: number): { newIndex: numbe
 function handleQuotedString(
   propsString: string,
   startIndex: number,
+  isSingleQuoted = false,
 ): { newIndex: number; value: string } {
   let value = ''
   let i = startIndex + 1
-  while (i < propsString.length && (propsString[i] !== '"' || propsString[i - 1] === '\\')) {
+  while (
+    i < propsString.length &&
+    (propsString[i] !== (isSingleQuoted ? "'" : '"') || propsString[i - 1] === '\\')
+  ) {
     value += propsString[i]
     i++
   }

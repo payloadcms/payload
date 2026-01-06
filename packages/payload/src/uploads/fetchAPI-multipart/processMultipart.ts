@@ -15,6 +15,12 @@ import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 
+declare global {
+  interface Request {
+    [waitFlushProperty]?: Promise<any>[]
+  }
+}
+
 type ProcessMultipart = (args: {
   options: FetchAPIFileUploadOptions
   request: Request
@@ -34,16 +40,16 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   })
 
   const result: FetchAPIFileUploadResponse = {
-    fields: undefined,
-    files: undefined,
+    fields: undefined!,
+    files: undefined!,
   }
 
-  const headersObject = {}
+  const headersObject: Record<string, string> = {}
   request.headers.forEach((value, name) => {
     headersObject[name] = value
   })
 
-  const reader = request.body.getReader()
+  const reader = request.body?.getReader()
 
   const busboy = Busboy({ ...options, headers: headersObject })
 
@@ -65,6 +71,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     const { encoding, filename: name, mimeType: mime } = info
     const filename = parseFileName(options, name)
 
+    const inferredMimeType =
+      (filename && filename.endsWith('.glb') && 'model/gltf-binary') ||
+      (filename && filename.endsWith('.gltf') && 'model/gltf+json') ||
+      mime
+
     // Define methods and handlers for upload process.
     const { cleanup, complete, dataHandler, getFilePath, getFileSize, getHash, getWritePromise } =
       options.useTempFiles
@@ -72,7 +83,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         : memHandler(options, field, filename) // Upload into RAM.
 
     const writePromise = options.useTempFiles
-      ? getWritePromise().catch((err) => {
+      ? getWritePromise().catch(() => {
           busboy.end()
           cleanup()
         })
@@ -99,7 +110,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         cleanup()
         abortAndDestroyFile(
           file,
-          new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+          new APIError(options.responseOnLimit!, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
             size: getFileSize(),
           }),
         )
@@ -136,7 +147,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
             buffer: complete(),
             encoding,
             hash: getHash(),
-            mimetype: mime,
+            mimetype: inferredMimeType,
             size,
             tempFilePath: getFilePath(),
             truncated: Boolean('truncated' in file && file.truncated) || false,
@@ -196,7 +207,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   )
 
   while (parsingRequest) {
-    const { done, value } = await reader.read()
+    const { done, value } = await reader!.read()
 
     if (done) {
       parsingRequest = false

@@ -18,6 +18,8 @@ type Args = {
   tenantFieldName: string
   tenantsCollectionSlug: string
   usersSlug: string
+  usersTenantsArrayFieldName: string
+  usersTenantsArrayTenantFieldName: string
 }
 /**
  * Add cleanup logic when tenant is deleted
@@ -30,6 +32,8 @@ export const addTenantCleanup = ({
   tenantFieldName,
   tenantsCollectionSlug,
   usersSlug,
+  usersTenantsArrayFieldName,
+  usersTenantsArrayTenantFieldName,
 }: Args) => {
   if (!collection.hooks) {
     collection.hooks = {}
@@ -43,6 +47,8 @@ export const addTenantCleanup = ({
       tenantFieldName,
       tenantsCollectionSlug,
       usersSlug,
+      usersTenantsArrayFieldName,
+      usersTenantsArrayTenantFieldName,
     }),
   )
 }
@@ -53,6 +59,8 @@ export const afterTenantDelete =
     tenantFieldName,
     tenantsCollectionSlug,
     usersSlug,
+    usersTenantsArrayFieldName,
+    usersTenantsArrayTenantFieldName,
   }: Omit<Args, 'collection'>): CollectionAfterDeleteHook =>
   async ({ id, req }) => {
     const idType = getCollectionIDType({
@@ -82,7 +90,7 @@ export const afterTenantDelete =
           collection: slug,
           where: {
             [tenantFieldName]: {
-              equals: id,
+              in: [id],
             },
           },
         }),
@@ -95,8 +103,8 @@ export const afterTenantDelete =
         depth: 0,
         limit: 0,
         where: {
-          'tenants.tenant': {
-            equals: id,
+          [`${usersTenantsArrayFieldName}.${usersTenantsArrayTenantFieldName}`]: {
+            in: [id],
           },
         },
       })) as PaginatedDocs<UserWithTenantsField>
@@ -107,7 +115,13 @@ export const afterTenantDelete =
             id: user.id,
             collection: usersSlug,
             data: {
-              tenants: (user.tenants || []).filter(({ tenant: tenantID }) => tenantID !== id),
+              [usersTenantsArrayFieldName]: (user[usersTenantsArrayFieldName] || []).filter(
+                (row: Record<string, string>) => {
+                  if (row[usersTenantsArrayTenantFieldName]) {
+                    return row[usersTenantsArrayTenantFieldName] !== id
+                  }
+                },
+              ),
             },
           }),
         )

@@ -8,6 +8,9 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 
+/**
+ * @deprecated Import from `payload` instead
+ */
 export enum EntityType {
   collection = 'collections',
   global = 'globals',
@@ -53,7 +56,9 @@ export function groupNavItems(
             : entityToGroup.entity.label
 
         const label =
-          typeof labelOrFunction === 'function' ? labelOrFunction({ t: i18n.t }) : labelOrFunction
+          typeof labelOrFunction === 'function'
+            ? labelOrFunction({ i18n, t: i18n.t })
+            : labelOrFunction
 
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(

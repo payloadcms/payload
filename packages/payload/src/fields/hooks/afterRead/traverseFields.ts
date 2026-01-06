@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -13,13 +13,17 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: TypedFallbackLocale
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -31,6 +35,10 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   populate?: PopulateType
@@ -45,6 +53,7 @@ type Args = {
 }
 
 export const traverseFields = ({
+  blockData,
   collection,
   context,
   currentDepth,
@@ -60,6 +69,7 @@ export const traverseFields = ({
   locale,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   populate,
@@ -75,6 +85,7 @@ export const traverseFields = ({
   fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
       promise({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -91,6 +102,7 @@ export const traverseFields = ({
         locale,
         overrideAccess,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         populate,
@@ -100,6 +112,7 @@ export const traverseFields = ({
         selectMode,
         showHiddenFields,
         siblingDoc,
+        siblingFields: fields,
         triggerAccessControl,
         triggerHooks,
       }),

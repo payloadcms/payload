@@ -3,8 +3,11 @@ import { URL } from 'url'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { InitializedEmailAdapter } from '../email/types.js'
+import type { TypedUser } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
-import type { User, VerifyConfig } from './types.js'
+import type { VerifyConfig } from './types.js'
+
+import { formatAdminURL } from '../utilities/formatAdminURL.js'
 
 type Args = {
   collection: Collection
@@ -13,7 +16,7 @@ type Args = {
   email: InitializedEmailAdapter
   req: PayloadRequest
   token: string
-  user: User
+  user: TypedUser
 }
 
 export async function sendVerificationEmail(args: Args): Promise<void> {
@@ -29,13 +32,17 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
   } = args
 
   if (!disableEmail) {
-    const protocol = new URL(req.url).protocol // includes the final :
+    const protocol = new URL(req.url!).protocol // includes the final :
     const serverURL =
       config.serverURL !== null && config.serverURL !== ''
         ? config.serverURL
         : `${protocol}//${req.headers.get('host')}`
 
-    const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
+    const verificationURL = formatAdminURL({
+      adminRoute: config.routes.admin,
+      path: `/${collectionConfig.slug}/verify/${token}`,
+      serverURL,
+    })
 
     let html = `${req.t('authentication:newAccountCreated', {
       serverURL: config.serverURL,

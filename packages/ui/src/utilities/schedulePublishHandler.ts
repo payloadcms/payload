@@ -1,4 +1,4 @@
-import type { PayloadRequest, SchedulePublishTaskInput } from 'payload'
+import { canAccessAdmin, type PayloadRequest, type SchedulePublishTaskInput } from 'payload'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date
@@ -7,6 +7,7 @@ export type SchedulePublishHandlerArgs = {
    */
   deleteID?: number | string
   req: PayloadRequest
+  timezone?: string
 } & SchedulePublishTaskInput
 
 export const schedulePublishHandler = async ({
@@ -17,30 +18,11 @@ export const schedulePublishHandler = async ({
   global,
   locale,
   req,
+  timezone,
 }: SchedulePublishHandlerArgs) => {
   const { i18n, payload, user } = req
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = payload.config.admin.user
-
-  if (!incomingUserSlug) {
-    throw new Error('Unauthorized')
-  }
-
-  const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-  // Run the admin access function from the config if it exists
-  if (adminAccessFunction) {
-    const canAccessAdmin = await adminAccessFunction({ req })
-
-    if (!canAccessAdmin) {
-      throw new Error('Unauthorized')
-    }
-    // Match the user collection to the global admin config
-  } else if (adminUserSlug !== incomingUserSlug) {
-    throw new Error('Unauthorized')
-  }
+  await canAccessAdmin({ req })
 
   try {
     if (deleteID) {
@@ -57,6 +39,7 @@ export const schedulePublishHandler = async ({
         doc,
         global,
         locale,
+        timezone,
         user: user.id,
       },
       task: 'schedulePublish',

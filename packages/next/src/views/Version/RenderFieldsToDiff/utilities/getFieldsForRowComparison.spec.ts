@@ -1,5 +1,7 @@
-import { getFieldsForRowComparison } from './getFieldsForRowComparison'
 import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
+import { describe, it, expect } from 'vitest'
+
+import { getFieldsForRowComparison } from './getFieldsForRowComparison'
 
 describe('getFieldsForRowComparison', () => {
   describe('array fields', () => {
@@ -15,13 +17,16 @@ describe('getFieldsForRowComparison', () => {
         fields: arrayFields,
       }
 
-      const result = getFieldsForRowComparison({
+      const { fields } = getFieldsForRowComparison({
         field,
-        versionRow: {},
-        comparisonRow: {},
+        valueToRow: {},
+        valueFromRow: {},
+        row: 0,
+        baseVersionField: { fields: [], path: 'items', schemaPath: 'items', type: 'array' },
+        config: {} as any,
       })
 
-      expect(result).toEqual(arrayFields)
+      expect(fields).toEqual(arrayFields)
     })
   })
 
@@ -43,16 +48,19 @@ describe('getFieldsForRowComparison', () => {
         ],
       }
 
-      const versionRow = { blockType: 'blockA' }
-      const comparisonRow = { blockType: 'blockA' }
+      const valueToRow = { blockType: 'blockA' }
+      const valueFromRow = { blockType: 'blockA' }
 
-      const result = getFieldsForRowComparison({
+      const { fields } = getFieldsForRowComparison({
         field,
-        versionRow,
-        comparisonRow,
+        valueToRow,
+        valueFromRow,
+        row: 0,
+        baseVersionField: { fields: [], path: 'myBlocks', schemaPath: 'myBlocks', type: 'blocks' },
+        config: {} as any,
       })
 
-      expect(result).toEqual(blockAFields)
+      expect(fields).toEqual(blockAFields)
     })
 
     it('should return unique combined fields when block types differ', () => {
@@ -77,17 +85,20 @@ describe('getFieldsForRowComparison', () => {
         ],
       }
 
-      const versionRow = { blockType: 'blockA' }
-      const comparisonRow = { blockType: 'blockB' }
+      const valueToRow = { blockType: 'blockA' }
+      const valueFromRow = { blockType: 'blockB' }
 
-      const result = getFieldsForRowComparison({
+      const { fields } = getFieldsForRowComparison({
         field,
-        versionRow,
-        comparisonRow,
+        valueToRow,
+        valueFromRow,
+        row: 0,
+        baseVersionField: { fields: [], path: 'myBlocks', schemaPath: 'myBlocks', type: 'blocks' },
+        config: {} as any,
       })
 
       // Should contain all unique fields from both blocks
-      expect(result).toEqual([
+      expect(fields).toEqual([
         { name: 'a', type: 'text' },
         { name: 'b', type: 'text' },
         { name: 'c', type: 'text' },

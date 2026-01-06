@@ -1,7 +1,8 @@
-import type { CreateVersionArgs, TypeWithID, TypeWithVersion } from 'payload'
+import type { CreateVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -9,7 +10,7 @@ import type { DrizzleAdapter } from './types.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function createVersion<T extends TypeWithID>(
+export async function createVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     autosave,
@@ -18,13 +19,13 @@ export async function createVersion<T extends TypeWithID>(
     parent,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
     versionData,
   }: CreateVersionArgs<T>,
-) {
-  const db = await getTransaction(this, req)
+): Promise<TypeWithVersion<T>> {
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
 
@@ -46,6 +47,8 @@ export async function createVersion<T extends TypeWithID>(
     version,
   }
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
     data,
@@ -59,7 +62,7 @@ export async function createVersion<T extends TypeWithID>(
 
   const table = this.tables[tableName]
 
-  if (collection.versions.drafts) {
+  if (hasDraftsEnabled(collection)) {
     await this.execute({
       db,
       sql: sql`
@@ -70,6 +73,10 @@ export async function createVersion<T extends TypeWithID>(
           AND ${table.updatedAt} < ${result.updatedAt}
       `,
     })
+  }
+
+  if (returning === false) {
+    return null
   }
 
   return result

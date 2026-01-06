@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -70,9 +71,7 @@ describe('@payloadcms/plugin-form-builder', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('plugin collections', () => {

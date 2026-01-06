@@ -2,6 +2,8 @@
 
 @layer payload-default {
   .field-type.row {
+    margin-bottom: 0;
+
     .row__fields {
       display: flex;
       flex-wrap: wrap;
@@ -12,6 +14,11 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+      }
+
+      // add margin if the row has children
+      &:has(> *:nth-child(1)) {
+        margin-bottom: var(--base);
       }
 
       // If there is more than one child, add inline-margins to space them out.

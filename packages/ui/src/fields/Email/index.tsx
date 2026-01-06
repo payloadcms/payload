@@ -16,8 +16,8 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
@@ -33,7 +33,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -51,11 +51,13 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -63,7 +65,13 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
 
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+      className={[
+        fieldBaseClass,
+        'email',
+        className,
+        showError && 'error',
+        (readOnly || disabled) && 'read-only',
+      ]
         .filter(Boolean)
         .join(' ')}
       style={styles}
@@ -84,7 +92,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
-          disabled={readOnly}
+          disabled={readOnly || disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

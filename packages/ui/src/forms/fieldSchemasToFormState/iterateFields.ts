@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -8,9 +9,12 @@ import type {
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
   TabAsField,
 } from 'payload'
 
+import { stripUnselectedFields } from 'payload'
 import { getFieldPaths } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
@@ -24,6 +28,10 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -40,6 +48,7 @@ type Args = {
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -55,9 +64,12 @@ type Args = {
   permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
+  readOnly?: boolean
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -76,6 +88,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  blockData,
   clientFieldSchemaMap,
   collectionSlug,
   data,
@@ -85,6 +98,7 @@ export const iterateFields = async ({
   forceFullValue = false,
   fullData,
   includeSchema = false,
+  mockRSCs,
   omitParents = false,
   operation,
   parentIndexPath,
@@ -94,9 +108,12 @@ export const iterateFields = async ({
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn: renderFieldFn,
   req,
+  select,
+  selectMode,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -114,11 +131,33 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
+    if (path !== 'id') {
+      const shouldContinue = stripUnselectedFields({
+        field,
+        select,
+        selectMode,
+        siblingDoc: data,
+      })
+
+      if (!shouldContinue) {
+        return
+      }
+    }
+
+    const pathSegments = path ? path.split('.') : []
+
     if (!skipConditionChecks) {
       try {
         passesCondition = Boolean(
           (field?.admin?.condition
-            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
+            ? Boolean(
+                field.admin.condition(fullData || {}, data || {}, {
+                  blockData,
+                  operation,
+                  path: pathSegments,
+                  user: req.user,
+                }),
+              )
             : true) && parentPassesCondition,
         )
       } catch (err) {
@@ -136,6 +175,7 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data,
@@ -147,6 +187,7 @@ export const iterateFields = async ({
         fullData,
         includeSchema,
         indexPath,
+        mockRSCs,
         omitParents,
         operation,
         parentIndexPath,
@@ -157,10 +198,13 @@ export const iterateFields = async ({
         path,
         preferences,
         previousFormState,
+        readOnly,
         renderAllFields,
         renderFieldFn,
         req,
         schemaPath,
+        select,
+        selectMode,
         skipConditionChecks,
         skipValidation,
         state,

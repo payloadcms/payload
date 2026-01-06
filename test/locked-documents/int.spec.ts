@@ -1,40 +1,38 @@
-import type { Payload, SanitizedCollectionConfig } from 'payload'
+import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import { describe, beforeAll, afterAll, afterEach, it, expect } from 'vitest'
 
 import path from 'path'
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Menu, Page, Post } from './payload-types.js'
+import type { Post, User } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug } from './collections/Pages/index.js'
-import { postsSlug } from './collections/Posts/index.js'
 import { menuSlug } from './globals/Menu/index.js'
+import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
 let payload: Payload
-let token: string
-let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Locked documents', () => {
   let post: Post
-  let page: Page
-  let menu: Menu
   let user: any
   let user2: any
   let postConfig: SanitizedCollectionConfig
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    // @ts-expect-error: initPayloadInt does not have a proper type definition
+    ;({ payload } = await initPayloadInt(dirname))
 
-    postConfig = payload.config.collections.find(({ slug }) => slug === postsSlug)
+    postConfig = payload.config.collections.find(
+      ({ slug }) => slug === postsSlug,
+    ) as SanitizedCollectionConfig
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -45,7 +43,6 @@ describe('Locked documents', () => {
     })
 
     user = loginResult.user
-    token = loginResult.token
 
     user2 = await payload.create({
       collection: 'users',
@@ -62,14 +59,14 @@ describe('Locked documents', () => {
       },
     })
 
-    page = await payload.create({
+    await payload.create({
       collection: pagesSlug,
       data: {
         text: 'some page',
       },
     })
 
-    menu = await payload.updateGlobal({
+    await payload.updateGlobal({
       slug: menuSlug,
       data: {
         globalText: 'global text',
@@ -78,9 +75,7 @@ describe('Locked documents', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   afterEach(() => {
@@ -198,7 +193,9 @@ describe('Locked documents', () => {
 
   it('should allow update of stale locked document - global', async () => {
     // Set lock duration to 1 second for testing purposes
-    const globalConfig = payload.config.globals.find(({ slug }) => slug === menuSlug)
+    const globalConfig = payload.config.globals.find(
+      ({ slug }) => slug === menuSlug,
+    ) as SanitizedGlobalConfig
     globalConfig.lockDocuments = { duration: 1 }
     // Give locking ownership to another user
     const lockedGlobalInstance = await payload.create({
@@ -266,7 +263,6 @@ describe('Locked documents', () => {
           relationTo: 'posts',
           value: newPost.id,
         },
-        editedAt: new Date().toISOString(),
         globalSlug: undefined,
         user: {
           relationTo: 'users',
@@ -284,7 +280,7 @@ describe('Locked documents', () => {
         overrideLock: false, // necessary to trigger the lock check
         id: newPost.id,
       })
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
@@ -304,7 +300,6 @@ describe('Locked documents', () => {
       collection: lockedDocumentCollection,
       data: {
         document: undefined,
-        editedAt: new Date().toISOString(),
         globalSlug: menuSlug,
         user: {
           relationTo: 'users',
@@ -321,7 +316,7 @@ describe('Locked documents', () => {
         overrideLock: false, // necessary to trigger the lock check
         slug: menuSlug,
       })
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
@@ -351,7 +346,6 @@ describe('Locked documents', () => {
           relationTo: 'posts',
           value: newPost3.id,
         },
-        editedAt: new Date().toISOString(),
         globalSlug: undefined,
         user: {
           relationTo: 'users',
@@ -366,7 +360,7 @@ describe('Locked documents', () => {
         id: newPost3.id,
         overrideLock: false, // necessary to trigger the lock check
       })
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked and cannot be deleted/)
     }
@@ -457,7 +451,6 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -509,7 +502,6 @@ describe('Locked documents', () => {
     const lockedGlobalInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         globalSlug: menuSlug,
         user: {
           relationTo: 'users',
@@ -564,7 +556,6 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -623,7 +614,6 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -653,6 +643,6 @@ describe('Locked documents', () => {
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(1)
-    expect(docsFromLocksCollection.docs[0].user.value?.id).toEqual(user.id)
+    expect((docsFromLocksCollection.docs[0]?.user.value as User)?.id).toEqual(user.id)
   })
 })

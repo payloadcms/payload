@@ -18,7 +18,8 @@
     "payload": "latest",
     "payload-app": "workspace:*",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sharp": "0.32.6"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.15.2",

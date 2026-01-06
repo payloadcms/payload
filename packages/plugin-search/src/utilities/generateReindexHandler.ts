@@ -1,4 +1,4 @@
-import type { PayloadHandler } from 'payload'
+import type { PayloadHandler, Where } from 'payload'
 
 import {
   addLocalesToRequestFromData,
@@ -9,7 +9,7 @@ import {
   killTransaction,
 } from 'payload'
 
-import type { SearchPluginConfigWithLocales } from '../types.js'
+import type { SanitizedSearchPluginConfig } from '../types.js'
 
 import { syncDocAsSearchIndex } from './syncDocAsSearchIndex.js'
 
@@ -19,19 +19,24 @@ type ValidationResult = {
 }
 
 export const generateReindexHandler =
-  (pluginConfig: SearchPluginConfigWithLocales): PayloadHandler =>
+  (pluginConfig: SanitizedSearchPluginConfig): PayloadHandler =>
   async (req) => {
     addLocalesToRequestFromData(req)
+    if (!req.json) {
+      return new Response('Req.json is undefined', { status: 400 })
+    }
     const { collections = [] } = (await req.json()) as { collections: string[] }
     const t = req.t
 
     const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
     const searchCollections = pluginConfig?.collections || []
-    const reindexLocales = pluginConfig?.locales?.length ? pluginConfig.locales : [req.locale]
 
-    const validatePermissions = async (): Promise<ValidationResult> => {
+    async function validatePermissions(): Promise<ValidationResult> {
       const accessResults = await getAccessResults({ req })
-      const searchAccessResults = accessResults.collections[searchSlug]
+      const searchAccessResults = accessResults.collections?.[searchSlug]
+      if (!searchAccessResults) {
+        return { isValid: false, message: t('error:notAllowedToPerformAction') }
+      }
 
       const permissions = [searchAccessResults.delete, searchAccessResults.update]
       // plugin doesn't allow create by default:
@@ -49,7 +54,7 @@ export const generateReindexHandler =
         : { isValid: false, message: t('error:notAllowedToPerformAction') }
     }
 
-    const validateCollections = (): ValidationResult => {
+    function validateCollections(): ValidationResult {
       const collectionsAreValid = collections.every((col) => searchCollections.includes(col))
       return collections.length && collectionsAreValid
         ? { isValid: true }
@@ -72,26 +77,33 @@ export const generateReindexHandler =
     }
 
     const payload = req.payload
-    const batchSize = pluginConfig.reindexBatchSize
+    const { reindexBatchSize: batchSize, syncDrafts } = pluginConfig
 
     const defaultLocalApiProps = {
       overrideAccess: false,
       req,
       user: req.user,
     }
+    const whereStatusPublished: Where = {
+      _status: {
+        equals: 'published',
+      },
+    }
+    let aggregateDocsWithDrafts = 0
     let aggregateErrors = 0
     let aggregateDocs = 0
 
-    const countDocuments = async (collection: string): Promise<number> => {
+    async function countDocuments(collection: string, drafts?: boolean): Promise<number> {
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
         req: undefined,
+        where: drafts ? undefined : whereStatusPublished,
       })
       return totalDocs
     }
 
-    const deleteIndexes = async (collection: string) => {
+    async function deleteIndexes(collection: string) {
       await payload.delete({
         collection: searchSlug,
         depth: 0,
@@ -101,67 +113,117 @@ export const generateReindexHandler =
       })
     }
 
-    const reindexCollection = async (collection: string) => {
-      const totalDocs = await countDocuments(collection)
+    async function reindexCollection(collection: string) {
+      const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
+
+      const totalDocsWithDrafts = await countDocuments(collection, true)
+      const totalDocs =
+        syncDrafts || !draftsEnabled
+          ? totalDocsWithDrafts
+          : await countDocuments(collection, !draftsEnabled)
       const totalBatches = Math.ceil(totalDocs / batchSize)
+
+      aggregateDocsWithDrafts += totalDocsWithDrafts
       aggregateDocs += totalDocs
 
-      for (let j = 0; j < reindexLocales.length; j++) {
-        // create first index, then we update with other locales accordingly
-        const operation = j === 0 ? 'create' : 'update'
-        const localeToSync = reindexLocales[j]
+      // Loop through batches, then documents, then locales per document
+      for (let i = 0; i < totalBatches; i++) {
+        const defaultLocale = req.payload.config.localization
+          ? req.payload.config.localization.defaultLocale
+          : req.locale
 
-        for (let i = 0; i < totalBatches; i++) {
-          const { docs } = await payload.find({
-            collection,
-            limit: batchSize,
-            locale: localeToSync,
-            page: i + 1,
-            ...defaultLocalApiProps,
-          })
+        const { docs } = await payload.find({
+          collection,
+          depth: 0,
+          limit: batchSize,
+          locale: defaultLocale,
+          page: i + 1,
+          where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
+          ...defaultLocalApiProps,
+        })
 
-          const promises = docs.map((doc) =>
-            syncDocAsSearchIndex({
+        for (const doc of docs) {
+          // Get all configured locales
+          // If no localization, use [undefined] to sync once without a locale
+          const allLocales = req.payload.config.localization
+            ? req.payload.config.localization.localeCodes
+            : [undefined]
+
+          // Loop through all locales and check each one
+          let firstAllowedLocale = true
+          for (const localeToSync of allLocales) {
+            // Check if we should skip this locale for this document
+            let shouldSkip = false
+            if (typeof pluginConfig.skipSync === 'function') {
+              try {
+                shouldSkip = await pluginConfig.skipSync({
+                  collectionSlug: collection,
+                  doc,
+                  locale: localeToSync,
+                  req,
+                })
+              } catch (err) {
+                req.payload.logger.error({
+                  err,
+                  msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
+                })
+              }
+            }
+
+            if (shouldSkip) {
+              continue // Skip this locale
+            }
+
+            // Sync this locale (create first index, then update with other locales accordingly)
+            const operation = firstAllowedLocale ? 'create' : 'update'
+            firstAllowedLocale = false
+
+            await syncDocAsSearchIndex({
               collection,
+              data: doc,
               doc,
               locale: localeToSync,
               onSyncError: () => operation === 'create' && aggregateErrors++,
               operation,
               pluginConfig,
               req,
-            }),
-          )
-
-          // Sequentially await promises to avoid transaction issues
-          for (const promise of promises) {
-            await promise
+            })
           }
         }
       }
     }
 
-    await initTransaction(req)
+    const shouldCommit = await initTransaction(req)
 
-    for (const collection of collections) {
-      try {
-        await deleteIndexes(collection)
-        await reindexCollection(collection)
-      } catch (err) {
-        const message = t('error:unableToReindexCollection', { collection })
-        payload.logger.error({ err, msg: message })
+    try {
+      const promises = collections.map(async (collection) => {
+        try {
+          await deleteIndexes(collection)
+          await reindexCollection(collection)
+        } catch (err) {
+          const message = t('error:unableToReindexCollection', { collection })
+          payload.logger.error({ err, msg: message })
+        }
+      })
 
+      await Promise.all(promises)
+    } catch (err: any) {
+      if (shouldCommit) {
         await killTransaction(req)
-        return Response.json({ message }, { headers, status: 500 })
       }
+      return Response.json({ message: err.message }, { headers, status: 500 })
     }
 
     const message = t('general:successfullyReindexed', {
       collections: collections.join(', '),
       count: aggregateDocs - aggregateErrors,
-      total: aggregateDocs,
+      skips: syncDrafts ? 0 : aggregateDocsWithDrafts - aggregateDocs,
+      total: aggregateDocsWithDrafts,
     })
 
-    await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return Response.json({ message }, { headers, status: 200 })
   }

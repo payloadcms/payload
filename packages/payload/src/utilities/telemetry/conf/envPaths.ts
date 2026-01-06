@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /**
  * Taken from https://github.com/sindresorhus/env-paths/blob/main/index.js
  *
@@ -20,7 +21,7 @@ const homedir = os.homedir()
 const tmpdir = os.tmpdir()
 const { env } = process
 
-const macos = (name) => {
+const macos = (name: string) => {
   const library = path.join(homedir, 'Library')
 
   return {
@@ -32,7 +33,7 @@ const macos = (name) => {
   }
 }
 
-const windows = (name) => {
+const windows = (name: string) => {
   const appData = env.APPDATA || path.join(homedir, 'AppData', 'Roaming')
   const localAppData = env.LOCALAPPDATA || path.join(homedir, 'AppData', 'Local')
 
@@ -47,7 +48,7 @@ const windows = (name) => {
 }
 
 // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-const linux = (name) => {
+const linux = (name: string) => {
   const username = path.basename(homedir)
 
   return {
@@ -60,7 +61,7 @@ const linux = (name) => {
   }
 }
 
-export function envPaths(name, { suffix = 'nodejs' } = {}) {
+export function envPaths(name: string, { suffix = 'nodejs' } = {}) {
   if (typeof name !== 'string') {
     throw new TypeError(`Expected a string, got ${typeof name}`)
   }

@@ -1,1 +1,1 @@
-export const titleToDelete = 'Title To Delete'
+export const BASE_PATH: '' | `/${string}` = ''

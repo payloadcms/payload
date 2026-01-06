@@ -1,18 +1,21 @@
 'use client'
 
-import type { JsonObject } from 'payload'
+import type { CollectionSlug, JsonObject } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { validateMimeType } from 'payload/shared'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { Drawer, useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
-import { FormsManagerProvider, useFormsManager } from './FormsManager/index.js'
+import { FormsManagerProvider, type InitialForms, useFormsManager } from './FormsManager/index.js'
 
 const drawerSlug = 'bulk-upload-drawer-slug'
 
@@ -70,105 +73,197 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const { drawerSlug } = useBulkUpload()
+  const {
+    drawerSlug,
+    onCancel,
+    setInitialFiles,
+    setInitialForms,
+    setOnCancel,
+    setOnSuccess,
+    setSelectableCollections,
+    setSuccessfullyUploaded,
+    successfullyUploaded,
+  } = useBulkUpload()
+  const { modalState } = useModal()
+  const previousModalStateRef = React.useRef(modalState)
+
+  /**
+   * This is used to trigger onCancel when the drawer is closed (=> forms reset, as FormsManager is unmounted)
+   */
+  const onModalStateChanged = useEffectEvent((modalState) => {
+    const previousModalState = previousModalStateRef.current[drawerSlug]
+    const currentModalState = modalState[drawerSlug]
+
+    if (typeof currentModalState === 'undefined' && typeof previousModalState === 'undefined') {
+      return
+    }
+
+    if (previousModalState?.isOpen !== currentModalState?.isOpen) {
+      if (!currentModalState?.isOpen) {
+        if (!successfullyUploaded) {
+          // It's only cancelled if successfullyUploaded is not set. Otherwise, this would simply be a modal close after success
+          // => do not call cancel, just reset everything
+          if (typeof onCancel === 'function') {
+            onCancel()
+          }
+        }
+
+        // Reset everything to defaults
+        setInitialFiles(undefined)
+        setInitialForms(undefined)
+        setOnCancel(() => () => null)
+        setOnSuccess(() => () => null)
+        setSelectableCollections(null)
+        setSuccessfullyUploaded(false)
+      }
+    }
+    previousModalStateRef.current = modalState
+  })
+
+  useEffect(() => {
+    onModalStateChanged(modalState)
+  }, [modalState])
 
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
-        <DrawerContent />
+        <UploadControlsProvider>
+          <EditDepthProvider>
+            <DrawerContent />
+          </EditDepthProvider>
+        </UploadControlsProvider>
       </FormsManagerProvider>
     </Drawer>
   )
 }
 
-type BulkUploadContext = {
-  collectionSlug: string
-  currentActivePath: string
+export type BulkUploadContext = {
+  collectionSlug: CollectionSlug
   drawerSlug: string
   initialFiles: FileList
+  /**
+   * Like initialFiles, but allows manually providing initial form state or the form ID for each file
+   */
+  initialForms: InitialForms
   maxFiles: number
   onCancel: () => void
-  onSuccess: (newDocs: JsonObject[], errorCount: number) => void
+  onSuccess: (
+    uploadedForms: Array<{
+      collectionSlug: CollectionSlug
+      doc: JsonObject
+      /**
+       * ID of the form that created this document
+       */
+      formID: string
+    }>,
+    errorCount: number,
+  ) => void
+  /**
+   * An array of collection slugs that can be selected in the collection dropdown (if applicable)
+   * @default null - collection cannot be selected
+   */
+  selectableCollections?: null | string[]
   setCollectionSlug: (slug: string) => void
-  setCurrentActivePath: (path: string) => void
   setInitialFiles: (files: FileList) => void
+  setInitialForms: (
+    forms: ((forms: InitialForms | undefined) => InitialForms | undefined) | InitialForms,
+  ) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
-  setOnSuccess: (path: string, onSuccess: BulkUploadContext['onSuccess']) => void
+  setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
+  /**
+   * Set the collections that can be selected in the collection dropdown (if applicable)
+   *
+   * @default null - collection cannot be selected
+   */
+  setSelectableCollections: (collections: null | string[]) => void
+  setSuccessfullyUploaded: (successfullyUploaded: boolean) => void
+  successfullyUploaded: boolean
 }
 
 const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
-  currentActivePath: undefined,
   drawerSlug: '',
   initialFiles: undefined,
+  initialForms: [],
   maxFiles: undefined,
   onCancel: () => null,
   onSuccess: () => null,
+  selectableCollections: null,
   setCollectionSlug: () => null,
-  setCurrentActivePath: () => null,
   setInitialFiles: () => null,
+  setInitialForms: () => null,
   setMaxFiles: () => null,
   setOnCancel: () => null,
   setOnSuccess: () => null,
+  setSelectableCollections: () => null,
+  setSuccessfullyUploaded: () => false,
+  successfullyUploaded: false,
 })
-export function BulkUploadProvider({ children }: { readonly children: React.ReactNode }) {
+export function BulkUploadProvider({
+  children,
+  drawerSlugPrefix,
+}: {
+  readonly children: React.ReactNode
+  readonly drawerSlugPrefix?: string
+}) {
+  const [selectableCollections, setSelectableCollections] = React.useState<null | string[]>(null)
   const [collection, setCollection] = React.useState<string>()
-  const [onSuccessFunctionMap, setOnSuccessFunctionMap] =
-    React.useState<Record<string, BulkUploadContext['onSuccess']>>()
+  const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
+  const [initialForms, setInitialForms] = React.useState<InitialForms>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
-  const [currentActivePath, setCurrentActivePath] = React.useState<string>(undefined)
-  const drawerSlug = useBulkUploadDrawerSlug()
+  const [successfullyUploaded, setSuccessfullyUploaded] = React.useState<boolean>(false)
 
-  const setCollectionSlug: BulkUploadContext['setCollectionSlug'] = (slug) => {
-    setCollection(slug)
+  const drawerSlug = `${drawerSlugPrefix ? `${drawerSlugPrefix}-` : ''}${useBulkUploadDrawerSlug()}`
+
+  const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
+    setOnSuccessFunction(() => onSuccess)
+  }
+  const setOnCancel: BulkUploadContext['setOnCancel'] = (onCancel) => {
+    setOnCancelFunction(() => onCancel)
   }
 
-  const setOnSuccess: BulkUploadContext['setOnSuccess'] = React.useCallback((path, onSuccess) => {
-    setOnSuccessFunctionMap((prev) => ({
-      ...prev,
-      [path]: onSuccess,
-    }))
-  }, [])
-
   return (
-    <Context.Provider
+    <Context
       value={{
         collectionSlug: collection,
-        currentActivePath,
         drawerSlug,
         initialFiles,
+        initialForms,
         maxFiles,
         onCancel: () => {
           if (typeof onCancelFunction === 'function') {
             onCancelFunction()
           }
         },
-        onSuccess: (docIDs, errorCount) => {
-          if (onSuccessFunctionMap && Object.hasOwn(onSuccessFunctionMap, currentActivePath)) {
-            const onSuccessFunction = onSuccessFunctionMap[currentActivePath]
-            onSuccessFunction(docIDs, errorCount)
+        onSuccess: (newDocs, errorCount) => {
+          if (typeof onSuccessFunction === 'function') {
+            onSuccessFunction(newDocs, errorCount)
           }
         },
-        setCollectionSlug,
-        setCurrentActivePath,
+        selectableCollections,
+        setCollectionSlug: setCollection,
         setInitialFiles,
+        setInitialForms,
         setMaxFiles,
-        setOnCancel: setOnCancelFunction,
+        setOnCancel,
         setOnSuccess,
+        setSelectableCollections,
+        setSuccessfullyUploaded,
+        successfullyUploaded,
       }}
     >
       <React.Fragment>
         {children}
         <BulkUploadDrawer />
       </React.Fragment>
-    </Context.Provider>
+    </Context>
   )
 }
 
-export const useBulkUpload = () => React.useContext(Context)
+export const useBulkUpload = () => React.use(Context)
 
 export function useBulkUploadDrawerSlug() {
   const depth = useDrawerDepth()

@@ -1,5 +1,7 @@
 'use client'
+import type { ListDrawerProps } from '@payloadcms/ui'
 import type { LexicalEditor } from 'lexical'
+import type { UploadCollectionSlug } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { toast } from '@payloadcms/ui'
@@ -7,7 +9,6 @@ import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useLexicalListDrawer } from '../../../../utilities/fieldsDrawer/useLexicalListDrawer.js'
-import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
 import { $createUploadNode } from '../nodes/UploadNode.js'
 import { INSERT_UPLOAD_COMMAND } from '../plugin/index.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands.js'
@@ -50,7 +51,7 @@ const insertUpload = ({
 }
 
 type Props = {
-  enabledCollectionSlugs: string[]
+  enabledCollectionSlugs: UploadCollectionSlug[]
 }
 
 const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
@@ -77,14 +78,14 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
     )
   }, [editor, openListDrawer])
 
-  const onSelect = useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
+  const onSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       closeListDrawer()
       insertUpload({
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
-        value: docID,
+        value: doc.id,
       })
     },
     [editor, closeListDrawer, replaceNodeKey],
@@ -112,14 +113,10 @@ const UploadDrawerComponentFallback: React.FC = () => {
   return null
 }
 
-export const UploadDrawer = (props: Props): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition
-      {...props}
-      FallbackComponent={UploadDrawerComponentFallback}
-      uploads
-    >
-      <UploadDrawerComponent {...props} />
-    </EnabledRelationshipsCondition>
-  )
+export const UploadDrawer = ({ enabledCollectionSlugs }: Props): React.ReactNode => {
+  if (!enabledCollectionSlugs?.length) {
+    return <UploadDrawerComponentFallback />
+  }
+
+  return <UploadDrawerComponent enabledCollectionSlugs={enabledCollectionSlugs} />
 }

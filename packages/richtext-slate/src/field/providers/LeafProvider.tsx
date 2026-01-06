@@ -32,18 +32,18 @@ export const LeafProvider: React.FC<
   const { children, result, ...rest } = props
 
   return (
-    <LeafContext.Provider
+    <LeafContext
       value={{
         ...rest,
         children: result,
       }}
     >
       {children}
-    </LeafContext.Provider>
+    </LeafContext>
   )
 }
 
 export const useLeaf = () => {
-  const path = React.useContext(LeafContext)
+  const path = React.use(LeafContext)
   return path
 }

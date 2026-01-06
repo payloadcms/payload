@@ -5,16 +5,15 @@ import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req, where },
+  { collection: collectionSlug, locale, req, where = {} },
 ) {
-  const Model = this.collections[collection]
-  const options: CountOptions = {
-    session: await getSession(this, req),
-  }
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
   let hasNearConstraint = false
 
@@ -23,14 +22,20 @@ export const count: Count = async function count(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+
+  const options: CountOptions = {
+    session: await getSession(this, req),
+  }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding

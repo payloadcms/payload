@@ -22,12 +22,13 @@
 <hr/>
 
 > [!IMPORTANT]
-> 🎉 <strong>We've released 3.0!</strong> Star this repo or keep an eye on it to follow along.
+> Star this repo or keep an eye on it to follow along.
 
 Payload is the first-ever Next.js native CMS that can install directly in your existing `/app` folder. It's the start of a new era for headless CMS.
 
 <h3>Benefits over a regular CMS</h3>
 <ul>
+   <li>It's both an app framework & headless CMS</li>
   <li>Deploy anywhere, including serverless on Vercel for free</li>
   <li>Combine your front+backend in the same <code>/app</code> folder if you want</li>
   <li>Don't sign up for yet another SaaS - Payload is open source</li>
@@ -48,20 +49,39 @@ pnpx create-payload-app@latest
 
 **If you're new to Payload, you should start with the website template** (`pnpx create-payload-app@latest -t website`). It shows how to do _everything_ - including custom Rich Text blocks, on-demand revalidation, live preview, and more. It comes with a frontend built with Tailwind all in one `/app` folder.
 
+## One-click deployment options
+
+You can deploy Payload serverlessly in one-click via Vercel and Cloudflare—giving everything you need without the hassle of the plumbing.
+
+### Deploy on Cloudflare
+
+Fully self-contained — one click to deploy Payload with **Workers**, **R2** for uploads, and **D1** for a globally replicated database.
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://dub.sh/payload-cloudflare)
+
+### Deploy on Vercel
+
+All-in-one on Vercel — one click to deploy Payload with a **Next.js** front end, **Neon** database, and **Vercel Blob** for media storage.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://dub.sh/payload-vercel)
+
 ## One-click templates
 
-Jumpstart your next project by starting with a pre-made template. These are production-ready, end-to-end solutions designed to get you to market as fast as possible.
+Jumpstart your next project with a ready-to-go template. These are **production-ready, end-to-end solutions** designed to get you to market fast. Build any kind of **website**, **ecommerce store**, **blog**, or **portfolio** — complete with a modern front end built using **React Server Components** and **Tailwind**.
 
-### [🌐 Website](https://github.com/payloadcms/payload/tree/main/templates/website)
+#### 🌐 [Website](https://github.com/payloadcms/payload/tree/main/templates/website)
 
-Build any kind of website, blog, or portfolio from small to enterprise. Comes with a fully functional front-end built with RSCs and Tailwind.
+#### 🛍️ [Ecommerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) 🎉 _**NEW**_ 🎉
 
-We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
+We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/main/templates).
+If you maintain your own, add the `payload-template` topic to your GitHub repo so others can discover it.
+
+**🔗 Explore more:**
 
 - [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
 - [Community Templates](https://github.com/topics/payload-template)
 
-## ✨ Features
+## ✨ Payload Features
 
 - Completely free and open-source
 - Next.js native, built to run inside _your_ `/app` folder
@@ -125,8 +145,6 @@ There are lots of good conversations and resources in our Github Discussions boa
 - [Community Help](https://payloadcms.com/community-help)
 
 ## ⭐ Like what we're doing? Give us a star
-
-![payload-github-star](https://cms.payloadcms.com/media/payload-github-star.gif)
 
 ## 👏 Thanks to all our contributors
 

@@ -19,7 +19,10 @@ const collections: CollectionSlug[] = [
   'form-submissions',
   'search',
 ]
+
 const globals: GlobalSlug[] = ['header', 'footer']
+
+const categories = ['Technology', 'News', 'Finance', 'Design', 'Software', 'Engineering']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -95,19 +98,7 @@ export const seed = async ({
     ),
   ])
 
-  const [
-    demoAuthor,
-    image1Doc,
-    image2Doc,
-    image3Doc,
-    imageHomeDoc,
-    technologyCategory,
-    newsCategory,
-    financeCategory,
-    designCategory,
-    softwareCategory,
-    engineeringCategory,
-  ] = await Promise.all([
+  const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
       collection: 'users',
       data: {
@@ -136,99 +127,16 @@ export const seed = async ({
       data: imageHero1,
       file: hero1Buffer,
     }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Technology',
-        breadcrumbs: [
-          {
-            label: 'Technology',
-            url: '/technology',
-          },
-        ],
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'News',
-        breadcrumbs: [
-          {
-            label: 'News',
-            url: '/news',
-          },
-        ],
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Finance',
-        breadcrumbs: [
-          {
-            label: 'Finance',
-            url: '/finance',
-          },
-        ],
-      },
-    }),
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Design',
-        breadcrumbs: [
-          {
-            label: 'Design',
-            url: '/design',
-          },
-        ],
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Software',
-        breadcrumbs: [
-          {
-            label: 'Software',
-            url: '/software',
-          },
-        ],
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Engineering',
-        breadcrumbs: [
-          {
-            label: 'Engineering',
-            url: '/engineering',
-          },
-        ],
-      },
-    }),
+    categories.map((category) =>
+      payload.create({
+        collection: 'categories',
+        data: {
+          title: category,
+          slug: category,
+        },
+      }),
+    ),
   ])
-
-  let demoAuthorID: number | string = demoAuthor.id
-
-  let image1ID: number | string = image1Doc.id
-  let image2ID: number | string = image2Doc.id
-  let image3ID: number | string = image3Doc.id
-  let imageHomeID: number | string = imageHomeDoc.id
-
-  if (payload.db.defaultIDType === 'text') {
-    image1ID = `"${image1Doc.id}"`
-    image2ID = `"${image2Doc.id}"`
-    image3ID = `"${image3Doc.id}"`
-    imageHomeID = `"${imageHomeDoc.id}"`
-    demoAuthorID = `"${demoAuthorID}"`
-  }
 
   payload.logger.info(`— Seeding posts...`)
 
@@ -240,12 +148,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: JSON.parse(
-      JSON.stringify({ ...post1, categories: [technologyCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
-        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
-    ),
+    data: post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }),
   })
 
   const post2Doc = await payload.create({
@@ -254,12 +157,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: JSON.parse(
-      JSON.stringify({ ...post2, categories: [newsCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image2ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image3ID))
-        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
-    ),
+    data: post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }),
   })
 
   const post3Doc = await payload.create({
@@ -268,12 +166,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: JSON.parse(
-      JSON.stringify({ ...post3, categories: [financeCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image3ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image1ID))
-        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
-    ),
+    data: post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
   })
 
   // update each post with related posts
@@ -304,14 +197,8 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
-    data: JSON.parse(JSON.stringify(contactFormData)),
+    data: contactFormData,
   })
-
-  let contactFormID: number | string = contactForm.id
-
-  if (payload.db.defaultIDType === 'text') {
-    contactFormID = `"${contactFormID}"`
-  }
 
   payload.logger.info(`— Seeding pages...`)
 
@@ -319,21 +206,12 @@ export const seed = async ({
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: JSON.parse(
-        JSON.stringify(home)
-          .replace(/"\{\{IMAGE_1\}\}"/g, String(imageHomeID))
-          .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
-      ),
+      data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: JSON.parse(
-        JSON.stringify(contactPageData).replace(
-          /"\{\{CONTACT_FORM_ID\}\}"/g,
-          String(contactFormID),
-        ),
-      ),
+      data: contactPageData({ contactForm: contactForm }),
     }),
   ])
 

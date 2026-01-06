@@ -8,9 +8,13 @@ import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { AllFieldsLocalized } from './collections/AllFields/index.js'
 import { ArrayCollection } from './collections/Array/index.js'
+import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
+import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
@@ -24,6 +28,7 @@ import {
   defaultLocale,
   englishTitle,
   hungarianLocale,
+  localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -37,7 +42,6 @@ import {
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
 } from './shared.js'
-
 export type LocalizedPostAllLocale = {
   title: {
     en?: string
@@ -63,9 +67,20 @@ export default buildConfigWithDefaults({
     BlocksCollection,
     NestedArray,
     NestedFields,
+    LocalizedDrafts,
+    LocalizedDateFields,
+    AllFieldsLocalized,
     {
+      admin: {
+        listSearchableFields: 'name',
+      },
       auth: true,
       fields: [
+        {
+          name: 'name',
+          label: { en: 'Full name' },
+          type: 'text',
+        },
         {
           name: 'relation',
           relationTo: localizedPostsSlug,
@@ -83,6 +98,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
+          label: { en: 'Full title' },
           index: true,
           localized: true,
           type: 'text',
@@ -384,6 +400,7 @@ export default buildConfigWithDefaults({
       ],
     },
     LocalizedWithinLocalized,
+    ArrayWithFallbackCollection,
   ],
   globals: [
     {
@@ -414,32 +431,59 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
+    filterAvailableLocales: ({ locales }) => {
+      return locales.filter((locale) => locale.code !== 'xx')
+    },
     defaultLocale,
     fallback: true,
     locales: [
       {
+        code: 'xx',
+        label: 'FILTERED',
+      },
+      {
         code: defaultLocale,
-        label: 'English',
+        label: {
+          de: 'Englisch',
+          en: 'English',
+          es: 'Inglés',
+        },
         rtl: false,
       },
       {
         code: spanishLocale,
-        label: 'Spanish',
+        label: {
+          de: 'Spanisch',
+          en: 'Spanish',
+          es: 'Español',
+        },
         rtl: false,
       },
       {
         code: portugueseLocale,
         fallbackLocale: spanishLocale,
-        label: 'Portuguese',
+        label: {
+          de: 'Portugiesisch',
+          en: 'Portuguese',
+          es: 'Portugués',
+        },
       },
       {
         code: 'ar',
-        label: 'Arabic',
+        label: {
+          de: 'Arabisch',
+          en: 'Arabic',
+          es: 'Árabe',
+        },
         rtl: true,
       },
       {
         code: hungarianLocale,
-        label: 'Hungarian',
+        label: {
+          de: 'Ungarische',
+          en: 'Hungarian',
+          es: 'Húngaro',
+        },
         rtl: false,
       },
     ],
@@ -458,6 +502,14 @@ export default buildConfigWithDefaults({
       collection,
       data: {
         title: englishTitle,
+      },
+    })
+
+    await payload.create({
+      collection: localizedDateFieldsSlug,
+      data: {
+        localizedDate: new Date().toISOString(),
+        date: new Date().toISOString(),
       },
     })
 

@@ -1,46 +1,45 @@
 'use client'
+import type { CollapsibleFieldDiffClientComponent } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'collapsible-diff'
 
-export const Collapsible: React.FC<DiffComponentProps> = ({
-  comparison,
-  diffComponents,
+export const Collapsible: CollapsibleFieldDiffClientComponent = ({
+  baseVersionField,
+  comparisonValue: valueFrom,
   field,
-  fieldPermissions,
-  fields,
-  i18n,
-  locales,
-  version,
+  parentIsLocalized,
+  versionValue: valueTo,
 }) => {
+  const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
+
+  if (!baseVersionField.fields?.length) {
+    return null
+  }
+
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparison}
-        fields={fields}
-        label={
+        fields={field.fields}
+        Label={
           'label' in field &&
           field.label &&
           typeof field.label !== 'function' && <span>{getTranslation(field.label, i18n)}</span>
         }
-        locales={locales}
-        version={version}
+        locales={selectedLocales}
+        parentIsLocalized={parentIsLocalized || field.localized}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
       >
-        <RenderFieldsToDiff
-          comparison={comparison}
-          diffComponents={diffComponents}
-          fieldPermissions={fieldPermissions}
-          fields={fields}
-          i18n={i18n}
-          locales={locales}
-          version={version}
-        />
+        <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />
       </DiffCollapser>
     </div>
   )

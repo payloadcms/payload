@@ -10,7 +10,7 @@ import type {
 } from 'payload'
 
 import { createClientFields } from 'payload'
-import { getFieldPaths, tabHasName } from 'payload/shared'
+import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
@@ -47,8 +47,7 @@ export const traverseFields = ({
     clientSchemaMap.set(schemaPath, field)
 
     switch (field.type) {
-      case 'array':
-      case 'group': {
+      case 'array': {
         traverseFields({
           clientSchemaMap,
           config,
@@ -64,8 +63,15 @@ export const traverseFields = ({
         break
       }
 
-      case 'blocks': {
-        field.blocks.map((block) => {
+      case 'blocks':
+        ;(field.blockReferences ?? field.blocks).map((_block) => {
+          const block =
+            typeof _block === 'string'
+              ? config.blocksMap
+                ? config.blocksMap[_block]
+                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
+              : _block
+
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
           clientSchemaMap.set(blockSchemaPath, block)
@@ -83,7 +89,6 @@ export const traverseFields = ({
         })
 
         break
-      }
 
       case 'collapsible':
       case 'row': {
@@ -98,6 +103,35 @@ export const traverseFields = ({
           payload,
           schemaMap,
         })
+        break
+      }
+
+      case 'group': {
+        if (fieldAffectsData(field)) {
+          traverseFields({
+            clientSchemaMap,
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: '',
+            parentPath: path,
+            parentSchemaPath: schemaPath,
+            payload,
+            schemaMap,
+          })
+        } else {
+          traverseFields({
+            clientSchemaMap,
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: indexPath,
+            parentPath,
+            parentSchemaPath,
+            payload,
+            schemaMap,
+          })
+        }
         break
       }
 

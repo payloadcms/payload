@@ -19,8 +19,8 @@ export function deepMergeWithCombinedArrays<T extends object>(
 
       source.forEach((item, index) => {
         if (typeof destination[index] === 'undefined') {
-          destination[index] = options.cloneUnlessOtherwiseSpecified(item, options)
-        } else if (options.isMergeableObject(item)) {
+          destination[index] = options?.cloneUnlessOtherwiseSpecified(item, options)
+        } else if (options?.isMergeableObject(item)) {
           destination[index] = deepMerge(target[index], item, options)
         } else if (target.indexOf(item) === -1) {
           destination.push(item)

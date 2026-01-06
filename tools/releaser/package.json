@@ -1,10 +1,10 @@
 {
   "name": "@tools/releaser",
   "version": "0.0.1",
-  "description": "",
+  "description": "Release scripts for Payload",
   "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
@@ -29,12 +29,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
+    "publish-prerelease": "tsx src/publish-prerelease.ts",
     "release": "tsx src/release.ts",
-    "release:canary": "tsx src/publish-canary.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@swc-node/register": "1.10.9",
+    "@swc-node/register": "1.11.1",
     "@tools/constants": "workspace:*",
     "chalk": "^4.1.2",
     "changelogen": "^0.5.5",

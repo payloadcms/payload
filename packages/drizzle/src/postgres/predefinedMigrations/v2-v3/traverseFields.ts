@@ -42,6 +42,11 @@ export const traverseFields = (args: Args) => {
 
       case 'blocks': {
         return field.blocks.forEach((block) => {
+          // Can ignore string blocks, as those were added in v3 and don't need to be migrated
+          if (typeof block === 'string') {
+            return
+          }
+
           const newTableName = args.adapter.tableNameMap.get(
             `${args.rootTableName}_blocks_${toSnakeCase(block.slug)}`,
           )

@@ -15,15 +15,20 @@ import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
 import { InlineBlocksIcon } from '../../../lexical/ui/icons/InlineBlocks/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { getBlockImageComponent } from './getBlockImageComponent.js'
+import { getBlockMarkdownTransformers } from './markdown/markdownTransformer.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 export const BlocksFeatureClient = createClientFeature(
-  ({ featureClientSchemaMap, props, schemaPath }) => {
+  ({ config, featureClientSchemaMap, props, schemaPath }) => {
     const schemaMapRenderedBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
     const schemaMapRenderedInlineBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks`
     const clientSchema = featureClientSchemaMap['blocks']
+
+    if (!clientSchema) {
+      return {}
+    }
 
     const blocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
       .filter(
@@ -31,7 +36,7 @@ export const BlocksFeatureClient = createClientFeature(
           key.startsWith(schemaMapRenderedBlockPathPrefix + '.') &&
           !key.replace(schemaMapRenderedBlockPathPrefix + '.', '').includes('.'),
       )
-      .map(([key, value]) => value[0] as BlocksFieldClient)
+      .map(([, value]) => value[0] as BlocksFieldClient)
 
     const inlineBlocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
       .filter(
@@ -39,17 +44,33 @@ export const BlocksFeatureClient = createClientFeature(
           key.startsWith(schemaMapRenderedInlineBlockPathPrefix + '.') &&
           !key.replace(schemaMapRenderedInlineBlockPathPrefix + '.', '').includes('.'),
       )
-      .map(([key, value]) => value[0] as BlocksFieldClient)
+      .map(([, value]) => value[0] as BlocksFieldClient)
 
-    const clientBlocks: ClientBlock[] = blocksFields.map((field) => {
-      return field.blocks[0]
-    })
+    const clientBlocks: ClientBlock[] = blocksFields
+      .map((field) => {
+        return field.blockReferences
+          ? typeof field.blockReferences[0] === 'string'
+            ? config.blocksMap[field.blockReferences[0]]
+            : field.blockReferences[0]
+          : field.blocks[0]
+      })
+      .filter((block) => block !== undefined)
 
-    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields.map((field) => {
-      return field.blocks[0]
-    })
+    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields
+      .map((field) => {
+        return field.blockReferences
+          ? typeof field.blockReferences[0] === 'string'
+            ? config.blocksMap[field.blockReferences[0]]
+            : field.blockReferences[0]
+          : field.blocks[0]
+      })
+      .filter((block) => block !== undefined)
 
     return {
+      markdownTransformers: getBlockMarkdownTransformers({
+        blocks: clientBlocks,
+        inlineBlocks: clientInlineBlocks,
+      }),
       nodes: [BlockNode, InlineBlockNode],
       plugins: [
         {

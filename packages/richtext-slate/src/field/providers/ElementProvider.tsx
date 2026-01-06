@@ -33,17 +33,17 @@ export const ElementProvider: React.FC<
   const { childNodes, children, ...rest } = props
 
   return (
-    <ElementContext.Provider
+    <ElementContext
       value={{
         ...rest,
         children: childNodes,
       }}
     >
       {children}
-    </ElementContext.Provider>
+    </ElementContext>
   )
 }
 
 export const useElement = <T,>(): ElementContextType<T> => {
-  return React.useContext(ElementContext) as ElementContextType<T>
+  return React.use(ElementContext) as ElementContextType<T>
 }

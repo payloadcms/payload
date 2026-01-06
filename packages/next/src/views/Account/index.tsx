@@ -1,9 +1,10 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -16,13 +17,7 @@ import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
-export { generateAccountMetadata } from './meta.js'
-
-export const Account: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -122,7 +117,10 @@ export const Account: React.FC<AdminViewProps> = async ({
             user={user}
           />
         }
-        apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
+        apiURL={formatAdminURL({
+          apiRoute: api,
+          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
+        })}
         collectionSlug={userSlug}
         currentEditor={currentEditor}
         docPermissions={docPermissions}
@@ -143,9 +141,8 @@ export const Account: React.FC<AdminViewProps> = async ({
           <DocumentHeader
             collectionConfig={collectionConfig}
             hideTabs
-            i18n={i18n}
-            payload={payload}
             permissions={permissions}
+            req={req}
           />
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
@@ -153,6 +150,8 @@ export const Account: React.FC<AdminViewProps> = async ({
             Fallback: EditView,
             importMap: payload.importMap,
             serverProps: {
+              doc: data,
+              hasPublishedDoc,
               i18n,
               initPageResult,
               locale,
@@ -162,7 +161,7 @@ export const Account: React.FC<AdminViewProps> = async ({
               routeSegments: [],
               searchParams,
               user,
-            },
+            } satisfies DocumentViewServerPropsOnly,
           })}
           <AccountClient />
         </EditDepthProvider>

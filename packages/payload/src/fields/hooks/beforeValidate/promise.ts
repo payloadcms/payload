@@ -3,17 +3,20 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
-import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
-import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
+import { getFallbackValue } from './getFallbackValue.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
@@ -28,6 +31,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -36,6 +40,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 // This function is responsible for the following actions, in order:
@@ -47,6 +52,7 @@ type Args<T> = {
 
 export const promise = async <T>({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -57,11 +63,13 @@ export const promise = async <T>({
   operation,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args<T>): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -264,15 +272,25 @@ export const promise = async <T>({
       }
     }
 
-    // Execute hooks
-    if (field.hooks?.beforeValidate) {
-      await field.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-        await priorHook
+    // ensure the fallback value is only computed one time
+    // either here or when access control returns false
+    const fallbackResult: { executed: boolean; value: unknown } = {
+      executed: false,
+      value: undefined,
+    }
+    if (typeof siblingData[field.name] === 'undefined') {
+      fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
+      fallbackResult.executed = true
+    }
 
-        const hookedValue = await currentHook({
+    // Execute hooks
+    if ('hooks' in field && field.hooks?.beforeValidate) {
+      for (const hook of field.hooks.beforeValidate) {
+        const hookedValue = await hook({
+          blockData,
           collection,
           context,
-          data,
+          data: data as Partial<T>,
           field,
           global,
           indexPath: indexPathSegments,
@@ -285,20 +303,31 @@ export const promise = async <T>({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          value: siblingData[field.name],
+          siblingFields,
+          value:
+            typeof siblingData[field.name] === 'undefined'
+              ? fallbackResult.value
+              : siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
           siblingData[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
 
     // Execute access control
     if (field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({ id, data, doc, req, siblingData })
+        : await field.access[operation]({
+            id,
+            blockData,
+            data: data as Partial<T>,
+            doc,
+            req,
+            siblingData,
+          })
 
       if (!result) {
         delete siblingData[field.name]
@@ -306,20 +335,9 @@ export const promise = async <T>({
     }
 
     if (typeof siblingData[field.name] === 'undefined') {
-      // If no incoming data, but existing document data is found, merge it in
-      if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
-
-        // Otherwise compute default value
-      } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getDefaultValue({
-          defaultValue: field.defaultValue,
-          locale: req.locale,
-          req,
-          user: req.user,
-          value: siblingData[field.name],
-        })
-      }
+      siblingData[field.name] = !fallbackResult.executed
+        ? await getFallbackValue({ field, req, siblingDoc })
+        : fallbackResult.value
     }
   }
 
@@ -329,12 +347,13 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
               id,
+              blockData,
               collection,
               context,
               data,
@@ -344,6 +363,7 @@ export const promise = async <T>({
               operation,
               overrideAccess,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -362,12 +382,17 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           if (block) {
             ;(row as JsonObject).blockType = blockTypeToMatch
@@ -375,6 +400,7 @@ export const promise = async <T>({
             promises.push(
               traverseFields({
                 id,
+                blockData: row,
                 collection,
                 context,
                 data,
@@ -384,6 +410,7 @@ export const promise = async <T>({
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -404,6 +431,7 @@ export const promise = async <T>({
     case 'row': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -413,6 +441,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -424,19 +453,27 @@ export const promise = async <T>({
     }
 
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
+      let groupSiblingData = siblingData
+      let groupSiblingDoc = siblingDoc
 
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
+      const isNamedGroup = fieldAffectsData(field)
 
-      const groupData = siblingData[field.name] as Record<string, unknown>
-      const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+      if (isNamedGroup) {
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+
+        groupSiblingData = siblingData[field.name] as Record<string, unknown>
+        groupSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
+      }
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -445,12 +482,13 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        parentIndexPath: '',
-        parentPath: path,
+        parentIndexPath: isNamedGroup ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        parentPath: isNamedGroup ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
-        siblingData: groupData as JsonObject,
-        siblingDoc: groupDoc as JsonObject,
+        siblingData: groupSiblingData,
+        siblingDoc: groupSiblingDoc,
       })
 
       break
@@ -468,19 +506,18 @@ export const promise = async <T>({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.beforeValidate?.length) {
-        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.beforeValidate) {
+          const hookedValue = await hook({
             collection,
             context,
-            data,
+            data: data as Partial<T>,
             field,
             global,
             indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
             overrideAccess,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingData[field.name],
@@ -493,7 +530,7 @@ export const promise = async <T>({
           if (hookedValue !== undefined) {
             siblingData[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }
@@ -522,6 +559,7 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -531,6 +569,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -544,6 +583,7 @@ export const promise = async <T>({
     case 'tabs': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -553,6 +593,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

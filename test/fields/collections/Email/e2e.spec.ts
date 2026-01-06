@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -57,7 +57,7 @@ describe('Email', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -126,135 +126,33 @@ describe('Email', () => {
     expect(nextSiblingText).toEqual('#after-input')
   })
 
-  test('should reset filter conditions when adding additional filters', async () => {
-    await page.goto(url.list)
+  describe('A11y', () => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-email').waitFor()
 
-    // open the first filter options
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
 
-    const firstInitialField = page.locator('.condition__field')
-    const firstOperatorField = page.locator('.condition__operator')
-    const firstValueField = page.locator('.condition__value >> input')
+      expect(scanResults.violations.length).toBe(0)
+    })
 
-    await firstInitialField.click()
-    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
-    await firstInitialFieldOptions.locator('text=text').first().click()
-    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
+    test('Email inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-email').waitFor()
 
-    await firstOperatorField.click()
-    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.document-fields__main',
+      })
 
-    await firstValueField.fill('hello')
-
-    await wait(500)
-
-    await expect(firstValueField).toHaveValue('hello')
-
-    // open the second filter options
-    await page.locator('.condition__actions-add').click()
-
-    const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
-
-    await expect(secondLi).toBeVisible()
-
-    const secondInitialField = secondLi.locator('.condition__field')
-    const secondOperatorField = secondLi.locator('.condition__operator >> input')
-    const secondValueField = secondLi.locator('.condition__value >> input')
-
-    await expect(secondInitialField.locator('.rs__single-value')).toContainText('Email')
-    await expect(secondOperatorField).toHaveValue('')
-    await expect(secondValueField).toHaveValue('')
-  })
-
-  test('should not re-render page upon typing in a value in the filter value field', async () => {
-    await page.goto(url.list)
-
-    // open the first filter options
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
-
-    const firstInitialField = page.locator('.condition__field')
-    const firstOperatorField = page.locator('.condition__operator')
-    const firstValueField = page.locator('.condition__value >> input')
-
-    await firstInitialField.click()
-    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
-    await firstInitialFieldOptions.locator('text=text').first().click()
-    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
-
-    await firstOperatorField.click()
-    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
-
-    // Type into the input field instead of filling it
-    await firstValueField.click()
-    await firstValueField.type('hello', { delay: 100 }) // Add a delay to simulate typing speed
-
-    // Wait for a short period to see if the input loses focus
-    await page.waitForTimeout(500)
-
-    // Check if the input still has the correct value
-    await expect(firstValueField).toHaveValue('hello')
-  })
-
-  test('should still show second filter if two filters exist and first filter is removed', async () => {
-    await page.goto(url.list)
-
-    // open the first filter options
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
-
-    const firstInitialField = page.locator('.condition__field')
-    const firstOperatorField = page.locator('.condition__operator')
-    const firstValueField = page.locator('.condition__value >> input')
-
-    await firstInitialField.click()
-    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
-    await firstInitialFieldOptions.locator('text=text').first().click()
-    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
-
-    await firstOperatorField.click()
-    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
-
-    await firstValueField.fill('hello')
-
-    await wait(500)
-
-    await expect(firstValueField).toHaveValue('hello')
-
-    // open the second filter options
-    await page.locator('.condition__actions-add').click()
-
-    const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
-
-    await expect(secondLi).toBeVisible()
-
-    const secondInitialField = secondLi.locator('.condition__field')
-    const secondOperatorField = secondLi.locator('.condition__operator')
-    const secondValueField = secondLi.locator('.condition__value >> input')
-
-    await secondInitialField.click()
-    const secondInitialFieldOptions = secondInitialField.locator('.rs__option')
-    await secondInitialFieldOptions.locator('text=text').first().click()
-    await expect(secondInitialField.locator('.rs__single-value')).toContainText('Text')
-
-    await secondOperatorField.click()
-    await secondOperatorField.locator('.rs__option').locator('text=equals').click()
-
-    await secondValueField.fill('world')
-    await expect(secondValueField).toHaveValue('world')
-
-    await wait(500)
-
-    const firstLi = page.locator('.where-builder__and-filters li:nth-child(1)')
-    const removeButton = firstLi.locator('.condition__actions-remove')
-
-    // remove first filter
-    await removeButton.click()
-
-    const filterListItems = page.locator('.where-builder__and-filters li')
-    await expect(filterListItems).toHaveCount(1)
-
-    await expect(firstValueField).toHaveValue('world')
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })

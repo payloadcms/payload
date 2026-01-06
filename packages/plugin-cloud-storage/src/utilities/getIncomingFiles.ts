@@ -16,6 +16,7 @@ export function getIncomingFiles({
   if (file && data.filename && data.mimeType) {
     const mainFile: File = {
       buffer: file.data,
+      clientUploadContext: file.clientUploadContext,
       filename: data.filename,
       filesize: file.size,
       mimeType: data.mimeType,
@@ -26,13 +27,13 @@ export function getIncomingFiles({
 
     if (data?.sizes) {
       Object.entries(data.sizes).forEach(([key, resizedFileData]) => {
-        if (req.payloadUploadSizes?.[key] && data.mimeType) {
+        if (req.payloadUploadSizes?.[key] && resizedFileData.mimeType) {
           files = files.concat([
             {
               buffer: req.payloadUploadSizes[key],
               filename: `${resizedFileData.filename}`,
               filesize: req.payloadUploadSizes[key].length,
-              mimeType: data.mimeType,
+              mimeType: resizedFileData.mimeType,
             },
           ])
         }

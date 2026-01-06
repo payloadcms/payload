@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { pagesSlug } from './config.js'
@@ -17,9 +18,7 @@ describe('Collections - Plugins', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('created pages collection', async () => {

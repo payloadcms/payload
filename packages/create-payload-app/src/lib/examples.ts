@@ -7,7 +7,7 @@ export async function getExamples({ branch }: { branch: string }): Promise<Proje
 
   const response = await fetch(url)
 
-  const examplesResponseList: { name: string; path: string }[] = await response.json()
+  const examplesResponseList = (await response.json()) as { name: string; path: string }[]
 
   const examples: ProjectExample[] = examplesResponseList.map((example) => ({
     name: example.name,

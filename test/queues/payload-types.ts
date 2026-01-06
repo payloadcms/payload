@@ -6,13 +6,70 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     simple: Simple;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -23,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -32,6 +90,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
@@ -47,6 +106,10 @@ export interface Config {
       CreateSimpleRetries0: TaskCreateSimpleRetries0;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
+      ThrowError: TaskThrowError;
+      ReturnError: TaskReturnError;
+      ReturnCustomError: TaskReturnCustomError;
+      DoNothingTask: TaskDoNothingTask;
       inline: {
         input: unknown;
         output: unknown;
@@ -64,10 +127,15 @@ export interface Config {
       workflowRetries2TasksRetriesUndefined: WorkflowWorkflowRetries2TasksRetriesUndefined;
       workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
+      failsImmediately: WorkflowFailsImmediately;
+      fastParallelTask: WorkflowFastParallelTask;
+      inlineTaskTestDelayed: WorkflowInlineTaskTestDelayed;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
       subTask: WorkflowSubTask;
       subTaskFails: WorkflowSubTaskFails;
+      longRunning: WorkflowLongRunning;
+      parallelTask: WorkflowParallelTask;
     };
   };
 }
@@ -100,7 +168,7 @@ export interface Post {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -128,6 +196,23 @@ export interface Simple {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -141,6 +226,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -203,7 +295,11 @@ export interface PayloadJob {
           | 'CreateSimpleRetriesUndefined'
           | 'CreateSimpleRetries0'
           | 'CreateSimpleWithDuplicateMessage'
-          | 'ExternalTask';
+          | 'ExternalTask'
+          | 'ThrowError'
+          | 'ReturnError'
+          | 'ReturnCustomError'
+          | 'DoNothingTask';
         taskID: string;
         input?:
           | {
@@ -223,21 +319,6 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
-        parent?: {
-          taskSlug?:
-            | (
-                | 'inline'
-                | 'UpdatePost'
-                | 'UpdatePostStep2'
-                | 'CreateSimple'
-                | 'CreateSimpleRetriesUndefined'
-                | 'CreateSimpleRetries0'
-                | 'CreateSimpleWithDuplicateMessage'
-                | 'ExternalTask'
-              )
-            | null;
-          taskID?: string | null;
-        };
         state: 'failed' | 'succeeded';
         error?:
           | {
@@ -264,10 +345,15 @@ export interface PayloadJob {
         | 'workflowRetries2TasksRetriesUndefined'
         | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
+        | 'failsImmediately'
+        | 'fastParallelTask'
+        | 'inlineTaskTestDelayed'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
         | 'subTask'
         | 'subTaskFails'
+        | 'longRunning'
+        | 'parallelTask'
       )
     | null;
   taskSlug?:
@@ -280,6 +366,10 @@ export interface PayloadJob {
         | 'CreateSimpleRetries0'
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
+        | 'ThrowError'
+        | 'ReturnError'
+        | 'ReturnCustomError'
+        | 'DoNothingTask'
       )
     | null;
   queue?: string | null;
@@ -306,10 +396,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-jobs';
-        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -376,6 +462,14 @@ export interface SimpleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -388,6 +482,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -409,12 +510,6 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         taskID?: T;
         input?: T;
         output?: T;
-        parent?:
-          | T
-          | {
-              taskSlug?: T;
-              taskID?: T;
-            };
         state?: T;
         error?: T;
         id?: T;
@@ -549,6 +644,42 @@ export interface TaskExternalTask {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskThrowError".
+ */
+export interface TaskThrowError {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReturnError".
+ */
+export interface TaskReturnError {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReturnCustomError".
+ */
+export interface TaskReturnCustomError {
+  input: {
+    errorMessage: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDoNothingTask".
+ */
+export interface TaskDoNothingTask {
+  input: {
+    message: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyUpdatePostWorkflowType".
  */
 export interface MyUpdatePostWorkflowType {
@@ -650,6 +781,31 @@ export interface WorkflowInlineTaskTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFailsImmediately".
+ */
+export interface WorkflowFailsImmediately {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFastParallelTask".
+ */
+export interface WorkflowFastParallelTask {
+  input: {
+    amount: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowInlineTaskTestDelayed".
+ */
+export interface WorkflowInlineTaskTestDelayed {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WorkflowExternalWorkflow".
  */
 export interface WorkflowExternalWorkflow {
@@ -682,6 +838,22 @@ export interface WorkflowSubTask {
 export interface WorkflowSubTaskFails {
   input: {
     message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowLongRunning".
+ */
+export interface WorkflowLongRunning {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowParallelTask".
+ */
+export interface WorkflowParallelTask {
+  input: {
+    amount: number;
   };
 }
 /**
