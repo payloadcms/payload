@@ -3,12 +3,10 @@ import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { Wrapper } from '../../templates/Default/Wrapper/index.js'
-import { initReq } from '../../utilities/initReq.js'
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
   i18n: I18nClient
@@ -33,40 +31,7 @@ export const RootPage = async ({
 }) => {
   const config = await configPromise
 
-  const {
-    admin: {
-      routes: { createFirstUser: _createFirstUserRoute },
-    },
-    routes: { admin: adminRoute },
-  } = config
-
-  const params = await paramsPromise
-
-  const currentRoute = formatAdminURL({
-    adminRoute,
-    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
-  })
-
-  const searchParams = await searchParamsPromise
-
-  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
-
-  await initReq({
-    configPromise: config,
-    importMap,
-    key: 'initPage',
-    overrides: {
-      fallbackLocale: false,
-      req: {
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
-      },
-      // intentionally omit `serverURL` to keep URL relative
-      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
-    },
-  })
+  await new Promise((resolve) => setTimeout(resolve, 300))
 
   return (
     <div style={{ position: 'relative' }}>

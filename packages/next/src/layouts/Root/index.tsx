@@ -2,9 +2,6 @@ import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { NavProvider, WindowInfoProvider } from '@payloadcms/ui'
 import React from 'react'
-
-import { initReq } from '../../utilities/initReq.js'
-
 import '@payloadcms/ui/scss/app.scss'
 
 export const metadata = {
@@ -14,10 +11,7 @@ export const metadata = {
 
 export const RootLayout = async ({
   children,
-  config: configPromise,
   htmlProps = {},
-  importMap,
-  serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
@@ -25,12 +19,10 @@ export const RootLayout = async ({
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
-  const { languageCode } = await initReq({ configPromise, importMap, key: 'RootLayout' })
-
   const theme = 'dark'
 
   return (
-    <html data-theme={theme} dir={'LTR'} lang={languageCode} {...htmlProps}>
+    <html data-theme={theme} dir={'LTR'} lang={'en'} {...htmlProps}>
       <head>
         <style>{`@layer payload-default, payload;`}</style>
       </head>
