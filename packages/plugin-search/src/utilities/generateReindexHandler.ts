@@ -11,7 +11,6 @@ import {
 
 import type { SanitizedSearchPluginConfig } from '../types.js'
 
-import { getLocalesToSync } from './getLocalesToSync.js'
 import { syncDocAsSearchIndex } from './syncDocAsSearchIndex.js'
 
 type ValidationResult = {
@@ -32,7 +31,7 @@ export const generateReindexHandler =
     const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
     const searchCollections = pluginConfig?.collections || []
 
-    const validatePermissions = async (): Promise<ValidationResult> => {
+    async function validatePermissions(): Promise<ValidationResult> {
       const accessResults = await getAccessResults({ req })
       const searchAccessResults = accessResults.collections?.[searchSlug]
       if (!searchAccessResults) {
@@ -55,7 +54,7 @@ export const generateReindexHandler =
         : { isValid: false, message: t('error:notAllowedToPerformAction') }
     }
 
-    const validateCollections = (): ValidationResult => {
+    function validateCollections(): ValidationResult {
       const collectionsAreValid = collections.every((col) => searchCollections.includes(col))
       return collections.length && collectionsAreValid
         ? { isValid: true }
@@ -94,7 +93,7 @@ export const generateReindexHandler =
     let aggregateErrors = 0
     let aggregateDocs = 0
 
-    const countDocuments = async (collection: string, drafts?: boolean): Promise<number> => {
+    async function countDocuments(collection: string, drafts?: boolean): Promise<number> {
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
@@ -104,7 +103,7 @@ export const generateReindexHandler =
       return totalDocs
     }
 
-    const deleteIndexes = async (collection: string) => {
+    async function deleteIndexes(collection: string) {
       await payload.delete({
         collection: searchSlug,
         depth: 0,
@@ -114,7 +113,7 @@ export const generateReindexHandler =
       })
     }
 
-    const reindexCollection = async (collection: string) => {
+    async function reindexCollection(collection: string) {
       const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
 
       const totalDocsWithDrafts = await countDocuments(collection, true)
@@ -144,20 +143,40 @@ export const generateReindexHandler =
         })
 
         for (const doc of docs) {
-          // Get locales to sync for this specific document
-          const docLocales = await getLocalesToSync({
-            collection,
-            config: req.payload.config,
-            doc,
-            pluginConfig,
-            req,
-          })
+          // Get all configured locales
+          // If no localization, use [undefined] to sync once without a locale
+          const allLocales = req.payload.config.localization
+            ? req.payload.config.localization.localeCodes
+            : [undefined]
 
-          // Sync each allowed locale for this document
-          for (let j = 0; j < docLocales.length; j++) {
-            // create first index, then we update with other locales accordingly
-            const operation = j === 0 ? 'create' : 'update'
-            const localeToSync = docLocales[j]
+          // Loop through all locales and check each one
+          let firstAllowedLocale = true
+          for (const localeToSync of allLocales) {
+            // Check if we should skip this locale for this document
+            let shouldSkip = false
+            if (typeof pluginConfig.shouldSkipSync === 'function') {
+              try {
+                shouldSkip = await pluginConfig.shouldSkipSync({
+                  collectionSlug: collection,
+                  doc,
+                  locale: localeToSync,
+                  req,
+                })
+              } catch (err) {
+                req.payload.logger.error({
+                  err,
+                  msg: 'Search plugin: Error executing shouldSkipSync. Proceeding with sync.',
+                })
+              }
+            }
+
+            if (shouldSkip) {
+              continue // Skip this locale
+            }
+
+            // Sync this locale (create first index, then update with other locales accordingly)
+            const operation = firstAllowedLocale ? 'create' : 'update'
+            firstAllowedLocale = false
 
             await syncDocAsSearchIndex({
               collection,

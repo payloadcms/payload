@@ -29,14 +29,12 @@ export type BeforeSync = (args: {
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
-export type FilterLocalesToSyncFunction<ConfigTypes = unknown> = (args: {
+export type ShouldSkipSyncFunction<ConfigTypes = unknown> = (args: {
   collectionSlug: string
   doc: any
-  localeCodes: ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'][] : string[]
+  locale: ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'] : string | undefined
   req: PayloadRequest
-}) =>
-  | (ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'][] : string[])
-  | Promise<ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'][] : string[]>
+}) => boolean | Promise<boolean>
 
 export type SearchPluginConfig<ConfigTypes = unknown> = {
   /**
@@ -57,23 +55,6 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    * @default true
    */
   deleteDrafts?: boolean
-  /**
-   * Filter which locales should be synced to the search index.
-   * Useful for multi-tenant applications where each tenant uses different languages.
-   *
-   * @default undefined - All configured locales will be synced
-   *
-   * @example
-   * // Filter based on document's tenant
-   * filterLocalesToSync: async ({ localeCodes, req, doc, collectionSlug }) => {
-   *   const tenant = await req.payload.findByID({
-   *     collection: 'tenants',
-   *     id: doc.tenant.id
-   *   })
-   *   return localeCodes.filter(code => tenant.allowedLocales.includes(code))
-   * }
-   */
-  filterLocalesToSync?: FilterLocalesToSyncFunction<ConfigTypes>
   localize?: boolean
   /**
    * We use batching when re-indexing large collections. You can control the amount of items per batch, lower numbers should help with memory.
@@ -82,6 +63,27 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    */
   reindexBatchSize?: number
   searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Determine whether to skip syncing a document for a specific locale.
+   * Useful for multi-tenant applications, conditional indexing, or any scenario where
+   * sync behavior should vary by locale, document, or other factors.
+   *
+   * @default undefined - All configured locales will be synced
+   *
+   * @example
+   * // Skip syncing based on document's tenant settings
+   * shouldSkipSync: async ({ locale, req, doc, collectionSlug }) => {
+   *   // For non-localized collections, locale will be undefined
+   *   if (!locale) return false
+   *
+   *   const tenant = await req.payload.findByID({
+   *     collection: 'tenants',
+   *     id: doc.tenant.id
+   *   })
+   *   return !tenant.allowedLocales.includes(locale)
+   * }
+   */
+  shouldSkipSync?: ShouldSkipSyncFunction<ConfigTypes>
   /**
    * Controls whether drafts are synced to the search index
    *

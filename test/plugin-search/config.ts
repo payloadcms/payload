@@ -73,13 +73,11 @@ export default buildConfigWithDefaults({
         }
       },
       collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2', 'filtered-locales'],
-      // Example: Uncomment to test locale filtering
-      // This would only index 'en' and 'es', not 'de'
-      filterLocalesToSync: ({ localeCodes, doc, collectionSlug }) => {
+      shouldSkipSync: ({ locale, doc, collectionSlug }) => {
         if (collectionSlug === 'filtered-locales' && doc.syncEnglishOnly) {
-          return localeCodes.filter((code) => code === 'en')
+          return locale !== 'en'
         }
-        return localeCodes
+        return false
       },
       defaultPriorities: {
         pages: 10,

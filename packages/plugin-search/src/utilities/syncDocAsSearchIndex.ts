@@ -1,7 +1,5 @@
 import type { DocToSync, SyncDocArgs } from '../types.js'
 
-import { getLocalesToSync } from './getLocalesToSync.js'
-
 export const syncDocAsSearchIndex = async ({
   collection,
   doc,
@@ -18,22 +16,28 @@ export const syncDocAsSearchIndex = async ({
 
   const searchSlug = searchOverrides?.slug || 'search'
 
-  // Get allowed locales for this document
-  const allowedLocales = await getLocalesToSync({
-    collection,
-    config: req.payload.config,
-    doc,
-    pluginConfig,
-    req,
-  })
-
   // Determine sync locale
   const syncLocale = locale || req.locale
 
-  // Check if this locale should be synced
-  if (syncLocale && !allowedLocales.includes(syncLocale)) {
-    // Skip sync - this locale is filtered out
-    return doc
+  // Check if this specific locale should be skipped
+  if (syncLocale && typeof pluginConfig.shouldSkipSync === 'function') {
+    try {
+      const skip = await pluginConfig.shouldSkipSync({
+        collectionSlug: collection,
+        doc,
+        locale: syncLocale,
+        req,
+      })
+
+      if (skip) {
+        return doc
+      }
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: 'Search plugin: Error executing shouldSkipSync. Proceeding with sync.',
+      })
+    }
   }
 
   let dataToSave: DocToSync = {
