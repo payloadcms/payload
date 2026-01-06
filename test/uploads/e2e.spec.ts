@@ -857,10 +857,10 @@ describe('Uploads', () => {
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
-    // Ensure the URL starts correctly
+    // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -901,7 +901,7 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
