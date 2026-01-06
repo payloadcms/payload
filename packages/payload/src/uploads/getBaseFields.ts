@@ -55,16 +55,15 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         },
       ],
       beforeChange: [
-        ({ collection, data, originalDoc, req, value }) => {
-          return generateFilePathOrURL({
+        ({ collection, data, originalDoc, req, value }) =>
+          generateFilePathOrURL({
             collectionSlug: collection?.slug as string,
             config,
             filename: data?.filename || originalDoc?.filename,
             relative: true,
             serverURL: req.payload.config.serverURL,
             urlOrPath: value,
-          })
-        },
+          }),
       ],
     },
     label: 'Thumbnail URL',
@@ -135,28 +134,26 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       ...url,
       hooks: {
         afterRead: [
-          ({ data, originalDoc, req, value }) => {
-            return generateFilePathOrURL({
+          ({ data, originalDoc, req, value }) =>
+            generateFilePathOrURL({
               collectionSlug: collection.slug,
               config,
               filename: data?.filename || originalDoc?.filename,
               relative: false,
               serverURL: req.payload.config.serverURL,
               urlOrPath: value,
-            })
-          },
+            }),
         ],
         beforeChange: [
-          ({ collection, data, originalDoc, req, value }) => {
-            return generateFilePathOrURL({
+          ({ collection, data, originalDoc, req, value }) =>
+            generateFilePathOrURL({
               collectionSlug: collection?.slug as string,
               config,
               filename: data?.filename || originalDoc?.filename,
               relative: true,
               serverURL: req.payload.config.serverURL,
               urlOrPath: value,
-            })
-          },
+            }),
         ],
       },
     },
@@ -225,8 +222,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               },
               hooks: {
                 afterRead: [
-                  ({ collection, data, originalDoc, req, value }) => {
-                    return generateFilePathOrURL({
+                  ({ collection, data, originalDoc, req, value }) =>
+                    generateFilePathOrURL({
                       collectionSlug: collection?.slug as string,
                       config,
                       filename:
@@ -235,20 +232,18 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                       relative: false,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,
-                    })
-                  },
+                    }),
                 ],
                 beforeChange: [
-                  ({ collection, data, originalDoc, req, value }) => {
-                    return generateFilePathOrURL({
+                  ({ collection, data, originalDoc, req, value }) =>
+                    generateFilePathOrURL({
                       collectionSlug: collection?.slug as string,
                       config,
                       filename: data?.filename || originalDoc?.filename,
                       relative: true,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,
-                    })
-                  },
+                    }),
                 ],
               },
             },
