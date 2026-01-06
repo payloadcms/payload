@@ -72,7 +72,9 @@ export const RootPage = async ({
 
   return (
     <DefaultTemplate
+      config={config}
       i18n={req.i18n}
+      importMap={importMap}
       locale={locale}
       params={params}
       payload={req.payload}

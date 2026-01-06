@@ -80,7 +80,9 @@ export const NotFoundPage = async ({
 
   return (
     <DefaultTemplate
+      config={config}
       i18n={req.i18n}
+      importMap={importMap}
       locale={locale}
       params={params}
       payload={payload}
@@ -88,12 +90,10 @@ export const NotFoundPage = async ({
       searchParams={searchParams}
       user={req.user}
       visibleEntities={visibleEntities}
-    >
-      <NotFoundClient />
-    </DefaultTemplate>
+    />
   )
 }
 
 export function NotFoundView(props: AdminViewServerProps) {
-  return <NotFoundClient marginTop="large" />
+  return <div> Not Found </div>
 }
