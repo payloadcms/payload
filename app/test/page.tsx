@@ -1,5 +1,5 @@
-import { DefaultNav } from '@payloadcms/next/rsc'
 import React from 'react'
+import { DefaultNav } from './components'
 
 const Page = async () => {
   await new Promise((resolve) => setTimeout(resolve, 400))
