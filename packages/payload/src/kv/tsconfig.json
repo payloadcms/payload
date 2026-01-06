@@ -1,7 +1,0 @@
-// Use strict: true for new features. This overrides options only for this directory.
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "strict": true
-  }
-}

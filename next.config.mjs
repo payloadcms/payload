@@ -1,6 +1,5 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import { withSentryConfig } from '@sentry/nextjs'
-import { withPayload } from './packages/next/src/withPayload/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -12,59 +11,56 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const config = withBundleAnalyzer(
-  withPayload(
-    {
-      basePath: process.env?.NEXT_BASE_PATH || undefined,
-      typescript: {
-        ignoreBuildErrors: true,
-      },
-      experimental: {
-        fullySpecified: true,
-        serverActions: {
-          bodySizeLimit: '5mb',
-        },
-      },
-      env: {
-        PAYLOAD_CORE_DEV: 'true',
-        ROOT_DIR: path.resolve(dirname),
-        // @todo remove in 4.0 - will behave like this by default in 4.0
-        PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY: 'true',
-      },
-      async redirects() {
-        return [
-          {
-            destination: '/admin',
-            permanent: false,
-            source: '/',
-          },
-        ]
-      },
-      images: {
-        remotePatterns: [
-          {
-            hostname: 'localhost',
-          },
-        ],
-      },
-      webpack: (webpackConfig) => {
-        webpackConfig.resolve.extensionAlias = {
-          '.cjs': ['.cts', '.cjs'],
-          '.js': ['.ts', '.tsx', '.js', '.jsx'],
-          '.mjs': ['.mts', '.mjs'],
-        }
-
-        // Ignore sentry warnings when not wrapped with withSentryConfig
-        webpackConfig.ignoreWarnings = [
-          ...(webpackConfig.ignoreWarnings ?? []),
-          { file: /esm\/platform\/node\/instrumentation.js/ },
-          { module: /esm\/platform\/node\/instrumentation.js/ },
-        ]
-
-        return webpackConfig
+  {
+    basePath: process.env?.NEXT_BASE_PATH || undefined,
+    typescript: {
+      ignoreBuildErrors: true,
+    },
+    experimental: {
+      serverActions: {
+        bodySizeLimit: '5mb',
       },
     },
-    { devBundleServerPackages: false },
-  ),
+    env: {
+      PAYLOAD_CORE_DEV: 'true',
+      ROOT_DIR: path.resolve(dirname),
+      // @todo remove in 4.0 - will behave like this by default in 4.0
+      PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY: 'true',
+    },
+    async redirects() {
+      return [
+        {
+          destination: '/admin',
+          permanent: false,
+          source: '/',
+        },
+      ]
+    },
+    images: {
+      remotePatterns: [
+        {
+          hostname: 'localhost',
+        },
+      ],
+    },
+    webpack: (webpackConfig) => {
+      webpackConfig.resolve.extensionAlias = {
+        '.cjs': ['.cts', '.cjs'],
+        '.js': ['.ts', '.tsx', '.js', '.jsx'],
+        '.mjs': ['.mts', '.mjs'],
+      }
+
+      // Ignore sentry warnings when not wrapped with withSentryConfig
+      webpackConfig.ignoreWarnings = [
+        ...(webpackConfig.ignoreWarnings ?? []),
+        { file: /esm\/platform\/node\/instrumentation.js/ },
+        { module: /esm\/platform\/node\/instrumentation.js/ },
+      ]
+
+      return webpackConfig
+    },
+  },
+  { devBundleServerPackages: false },
 )
 
 export default process.env.NEXT_PUBLIC_SENTRY_DSN
