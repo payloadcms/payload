@@ -184,22 +184,24 @@ export const syncDocAsSearchIndex = async ({
                 msg: `Error deleting ${searchSlug} document for trashed doc.`,
               })
             }
-          } else if (doSync) {
-            // update the doc normally
-            try {
-              await payload.update({
-                id: searchDocID,
-                collection: searchSlug,
-                data: {
-                  ...dataToSave,
-                  priority: foundDoc.priority || defaultPriority,
-                },
-                depth: 0,
-                locale: syncLocale,
-                req,
-              })
-            } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
+          } else {
+            if (doSync) {
+              // update the doc normally
+              try {
+                await payload.update({
+                  id: searchDocID,
+                  collection: searchSlug,
+                  data: {
+                    ...dataToSave,
+                    priority: foundDoc.priority || defaultPriority,
+                  },
+                  depth: 0,
+                  locale: syncLocale,
+                  req,
+                })
+              } catch (err: unknown) {
+                payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
+              }
             }
 
             if (deleteDrafts && status === 'draft') {
