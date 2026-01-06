@@ -1,10 +1,10 @@
-version: "3"
+version: '3'
 
 services:
   payload:
     image: node:20-alpine
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
@@ -23,7 +23,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: your-database-name # THIS MUST MATCH YOUR DB NAME IN .env

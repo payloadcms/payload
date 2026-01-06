@@ -5,6 +5,7 @@ import type { URL } from 'url'
 
 import type {
   DataFromCollectionSlug,
+  QueryDraftDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
@@ -257,6 +258,13 @@ export type TransformCollectionWithSelect<
 > = TSelect extends SelectType
   ? TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>
   : DataFromCollectionSlug<TSlug>
+
+export type DraftTransformCollectionWithSelect<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+> = TSelect extends SelectType
+  ? TransformDataWithSelect<QueryDraftDataFromCollectionSlug<TSlug>, TSelect>
+  : QueryDraftDataFromCollectionSlug<TSlug>
 
 export type TransformGlobalWithSelect<
   TSlug extends GlobalSlug,

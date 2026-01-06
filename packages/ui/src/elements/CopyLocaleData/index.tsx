@@ -30,7 +30,6 @@ export const CopyLocaleData: React.FC = () => {
     config: {
       localization,
       routes: { admin },
-      serverURL,
     },
   } = useConfig()
   const { code } = useLocale()
@@ -86,7 +85,6 @@ export const CopyLocaleData: React.FC = () => {
             formatAdminURL({
               adminRoute: admin,
               path: `/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}`,
-              serverURL,
             }) + `?locale=${to}`,
           ),
         )
@@ -104,7 +102,6 @@ export const CopyLocaleData: React.FC = () => {
       overwriteExisting,
       toggleModal,
       router,
-      serverURL,
       admin,
       startRouteTransition,
     ],
