@@ -21,7 +21,9 @@ import { describe, it, expect } from 'vitest'
 
 describe('sanitizeFields', () => {
   const config = {} as Config
-  const collectionConfig = {} as CollectionConfig
+  const collectionConfig = {
+    slug: 'example-collection',
+  } as CollectionConfig
 
   it('should throw on missing type field', async () => {
     const fields: Field[] = [
@@ -75,14 +77,21 @@ describe('sanitizeFields', () => {
       },
     ]
 
-    await expect(async () => {
+    let error: Error | null = null
+    try {
       await sanitizeFields({
         config,
         collectionConfig,
         fields,
         validRelationships: [],
       })
-    }).rejects.toThrow(DuplicateFieldName)
+    } catch (e) {
+      error = e
+    }
+    expect(error).toBeInstanceOf(DuplicateFieldName)
+    expect(error?.message).toBe(
+      "A field with the name 'someField' was found multiple times on the same level in collection 'example-collection'. Field names must be unique.",
+    )
   })
 
   it('should throw on duplicate block slug', async () => {
@@ -113,14 +122,21 @@ describe('sanitizeFields', () => {
       },
     ]
 
-    await expect(async () => {
+    let error: Error | null = null
+    try {
       await sanitizeFields({
         config,
         collectionConfig,
         fields,
         validRelationships: [],
       })
-    }).rejects.toThrow(DuplicateFieldName)
+    } catch (e) {
+      error = e
+    }
+    expect(error).toBeInstanceOf(DuplicateFieldName)
+    expect(error?.message).toBe(
+      "A field with the name 'block' was found multiple times on the same level in collection 'example-collection' in field 'blocks'. Field names must be unique.",
+    )
   })
 
   describe('auto-labeling', () => {
