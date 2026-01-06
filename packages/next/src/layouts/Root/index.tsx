@@ -1,18 +1,9 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
-import { rtlLanguages } from '@payloadcms/translations'
-import { ProgressBar, RootProvider } from '@payloadcms/ui'
-import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { cookies as nextCookies } from 'next/headers.js'
-import { applyLocaleFiltering } from 'payload/shared'
+import { NavProvider, WindowInfoProvider } from '@payloadcms/ui'
 import React from 'react'
 
-import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
-import { checkDependencies } from './checkDependencies.js'
-import { NestProviders } from './NestProviders.js'
 
 import '@payloadcms/ui/scss/app.scss'
 
@@ -34,44 +25,9 @@ export const RootLayout = async ({
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
-  checkDependencies()
+  const { languageCode } = await initReq({ configPromise, importMap, key: 'RootLayout' })
 
-  const {
-    cookies,
-    headers,
-    languageCode,
-    permissions,
-    req,
-    req: {
-      payload: { config },
-    },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
-
-  const theme = getRequestTheme({
-    config,
-    cookies,
-    headers,
-  })
-
-  const languageOptions: LanguageOptions = Object.entries(
-    config.i18n.supportedLanguages || {},
-  ).reduce((acc, [language, languageConfig]) => {
-    if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
-      acc.push({
-        label: languageConfig.translations.general.thisLanguage,
-        value: language,
-      })
-    }
-
-    return acc
-  }, [])
-
-  const clientConfig = getClientConfig({
-    config,
-    i18n: req.i18n,
-    importMap,
-    user: req.user,
-  })
+  const theme = 'dark'
 
   return (
     <html data-theme={theme} dir={'LTR'} lang={languageCode} {...htmlProps}>
@@ -79,22 +35,16 @@ export const RootLayout = async ({
         <style>{`@layer payload-default, payload;`}</style>
       </head>
       <body>
-        <RootProvider
-          config={clientConfig}
-          dateFNSKey={req.i18n.dateFNSKey}
-          fallbackLang={config.i18n.fallbackLanguage}
-          isNavOpen={true}
-          languageCode={languageCode}
-          languageOptions={languageOptions}
-          locale={req.locale}
-          permissions={req.user ? permissions : null}
-          serverFunction={serverFunction}
-          theme={theme}
-          translations={req.i18n.translations}
-          user={req.user}
+        <WindowInfoProvider
+          breakpoints={{
+            l: '(max-width: 1440px)',
+            m: '(max-width: 1024px)',
+            s: '(max-width: 768px)',
+            xs: '(max-width: 400px)',
+          }}
         >
-          {children}
-        </RootProvider>
+          <NavProvider initialIsOpen={true}>{children}</NavProvider>
+        </WindowInfoProvider>
         <div id="portal" />
       </body>
     </html>

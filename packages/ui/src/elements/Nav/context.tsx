@@ -27,7 +27,11 @@ export const NavContext = React.createContext<NavContextType>({
 export const useNav = () => React.use(NavContext)
 
 const getNavPreference = async (getPreference): Promise<boolean> => {
-  const navPrefs = await getPreference('nav')
+  // Wait for 1 second
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  const navPrefs = {
+    open: true,
+  }
   const preferredState = navPrefs?.open
   if (typeof preferredState === 'boolean') {
     return preferredState

@@ -75,74 +75,15 @@ export const RootProvider: React.FC<Props> = ({
   const dndContextID = React.useId()
 
   return (
-    <ClickOutsideProvider>
-      <ServerFunctionsProvider serverFunction={serverFunction}>
-        <RouteTransitionProvider>
-          <RouteCache
-            cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
-          >
-            <ConfigProvider config={config}>
-              <ClientFunctionProvider>
-                <TranslationProvider
-                  dateFNSKey={dateFNSKey}
-                  fallbackLang={fallbackLang}
-                  language={languageCode}
-                  languageOptions={languageOptions}
-                  switchLanguageServerAction={switchLanguageServerAction}
-                  translations={translations}
-                >
-                  <WindowInfoProvider
-                    breakpoints={{
-                      l: '(max-width: 1440px)',
-                      m: '(max-width: 1024px)',
-                      s: '(max-width: 768px)',
-                      xs: '(max-width: 400px)',
-                    }}
-                  >
-                    <ScrollInfoProvider>
-                      <SearchParamsProvider>
-                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <CloseModalOnRouteChange />
-                          <AuthProvider permissions={permissions} user={user}>
-                            <PreferencesProvider>
-                              <ThemeProvider theme={theme}>
-                                <ParamsProvider>
-                                  <LocaleProvider locale={locale}>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            <UploadHandlersProvider>
-                                              <DndContext
-                                                collisionDetection={pointerWithin}
-                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                id={dndContextID}
-                                              >
-                                                {children}
-                                              </DndContext>
-                                            </UploadHandlersProvider>
-                                          </NavProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
-                            </PreferencesProvider>
-                            <ModalContainer />
-                            <StayLoggedInModal />
-                          </AuthProvider>
-                        </ModalProvider>
-                      </SearchParamsProvider>
-                    </ScrollInfoProvider>
-                  </WindowInfoProvider>
-                </TranslationProvider>
-              </ClientFunctionProvider>
-            </ConfigProvider>
-          </RouteCache>
-        </RouteTransitionProvider>
-      </ServerFunctionsProvider>
-      <ToastContainer config={config} />
-    </ClickOutsideProvider>
+    <WindowInfoProvider
+      breakpoints={{
+        l: '(max-width: 1440px)',
+        m: '(max-width: 1024px)',
+        s: '(max-width: 768px)',
+        xs: '(max-width: 400px)',
+      }}
+    >
+      <NavProvider initialIsOpen={isNavOpen}>{children}</NavProvider>
+    </WindowInfoProvider>
   )
 }

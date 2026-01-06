@@ -13,12 +13,6 @@ const baseClass = 'after-nav-links'
 export const AfterNavLinks: PayloadClientReactComponent<
   SanitizedConfig['admin']['components']['afterNavLinks'][0]
 > = () => {
-  const {
-    config: {
-      routes: { admin: adminRoute },
-    },
-  } = useConfig()
-
   return (
     <div
       className={baseClass}
@@ -32,12 +26,12 @@ export const AfterNavLinks: PayloadClientReactComponent<
         Custom Routes
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <Link href={`${adminRoute}/custom-default-view`} style={{ textDecoration: 'none' }}>
+        <Link href={`/custom-default-view`} style={{ textDecoration: 'none' }}>
           Default Template
         </Link>
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <Link href={`${adminRoute}/custom-minimal-view`} style={{ textDecoration: 'none' }}>
+        <Link href={`/custom-minimal-view`} style={{ textDecoration: 'none' }}>
           Minimal Template
         </Link>
       </h4>

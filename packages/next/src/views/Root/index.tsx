@@ -51,7 +51,7 @@ export const RootPage = async ({
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
-  const { locale, permissions, req } = await initReq({
+  await initReq({
     configPromise: config,
     importMap,
     key: 'initPage',

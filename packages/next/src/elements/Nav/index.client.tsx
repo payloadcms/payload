@@ -3,11 +3,8 @@
 import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType } from '@payloadcms/ui/shared'
+import { Link, NavGroup } from '@payloadcms/ui'
 import { usePathname } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
@@ -21,28 +18,8 @@ export const DefaultNavClient: React.FC<{
 }> = ({ groups, navPreferences }) => {
   const pathname = usePathname()
 
-  const {
-    config: {
-      admin: {
-        routes: { browseByFolder: foldersRoute },
-      },
-      folders,
-      routes: { admin: adminRoute },
-    },
-  } = useConfig()
-
-  const { i18n } = useTranslation()
-
-  const folderURL = formatAdminURL({
-    adminRoute,
-    path: foldersRoute,
-  })
-
-  const viewingRootFolderView = pathname.startsWith(folderURL)
-
   return (
     <Fragment>
-      {folders && folders.browseByFolder && <BrowseByFolderButton active={viewingRootFolderView} />}
       {groups.map(({ entities, label }, key) => {
         return (
           <NavGroup isOpen={navPreferences?.groups?.[label]?.open} key={key} label={label}>
@@ -50,25 +27,10 @@ export const DefaultNavClient: React.FC<{
               let href: string
               let id: string
 
-              if (type === EntityType.collection) {
-                href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
-                id = `nav-${slug}`
-              }
-
-              if (type === EntityType.global) {
-                href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
-                id = `nav-global-${slug}`
-              }
-
               const isActive =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
-              const Label = (
-                <>
-                  {isActive && <div className={`${baseClass}__link-indicator`} />}
-                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
-                </>
-              )
+              const Label = <>{isActive && <div className={`${baseClass}__link-indicator`} />}</>
 
               // If the URL matches the link exactly
               if (pathname === href) {
