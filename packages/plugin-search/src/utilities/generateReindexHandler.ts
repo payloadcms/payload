@@ -154,9 +154,9 @@ export const generateReindexHandler =
           for (const localeToSync of allLocales) {
             // Check if we should skip this locale for this document
             let shouldSkip = false
-            if (typeof pluginConfig.shouldSkipSync === 'function') {
+            if (typeof pluginConfig.skipSync === 'function') {
               try {
-                shouldSkip = await pluginConfig.shouldSkipSync({
+                shouldSkip = await pluginConfig.skipSync({
                   collectionSlug: collection,
                   doc,
                   locale: localeToSync,
@@ -165,7 +165,7 @@ export const generateReindexHandler =
               } catch (err) {
                 req.payload.logger.error({
                   err,
-                  msg: 'Search plugin: Error executing shouldSkipSync. Proceeding with sync.',
+                  msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
                 })
               }
             }

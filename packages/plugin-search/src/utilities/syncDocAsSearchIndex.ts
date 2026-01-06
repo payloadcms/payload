@@ -19,9 +19,9 @@ export const syncDocAsSearchIndex = async ({
   // Determine sync locale
   const syncLocale = locale || req.locale || undefined
 
-  if (typeof pluginConfig.shouldSkipSync === 'function') {
+  if (typeof pluginConfig.skipSync === 'function') {
     try {
-      const skipSync = await pluginConfig.shouldSkipSync({
+      const skipSync = await pluginConfig.skipSync({
         collectionSlug: collection,
         doc,
         locale: syncLocale,
@@ -34,7 +34,7 @@ export const syncDocAsSearchIndex = async ({
     } catch (err) {
       req.payload.logger.error({
         err,
-        msg: 'Search plugin: Error executing shouldSkipSync. Proceeding with sync.',
+        msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
       })
     }
   }

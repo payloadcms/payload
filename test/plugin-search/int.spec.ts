@@ -735,7 +735,7 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   describe('locale filtering', () => {
-    it('should filter locales when shouldSkipSync excludes them', async () => {
+    it('should filter locales when skipSync excludes them', async () => {
       // Test config has 3 locales: ['en', 'es', 'de']
       // For 'filtered-locales' collection with syncEnglishOnly: true, only 'en' should be indexed
 
@@ -791,9 +791,9 @@ describe('@payloadcms/plugin-search', () => {
       })
     })
 
-    it('should index all locales when shouldSkipSync allows all locales', async () => {
+    it('should index all locales when skipSync allows all locales', async () => {
       // Test config has 3 locales: ['en', 'es', 'de']
-      // For 'posts' collection, shouldSkipSync returns false for all locales
+      // For 'posts' collection, skipSync returns false for all locales
 
       // Create a post
       const post = await payload.create({

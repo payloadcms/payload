@@ -161,9 +161,9 @@ When `syncDrafts` is true, draft documents will be synced to search. This is fal
 
 If true, will delete documents from search whose status changes to draft. This is true by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
 
-#### `shouldSkipSync`
+#### `skipSync`
 
-The `shouldSkipSync` function allows you to conditionally skip syncing specific documents to the search index based on locale, document properties, or any other criteria. This is particularly useful for multi-tenant applications where different tenants use different languages, or when you need fine-grained control over what gets indexed.
+The `skipSync` function allows you to conditionally skip syncing specific documents to the search index based on locale, document properties, or any other criteria. This is particularly useful for multi-tenant applications where different tenants use different languages, or when you need fine-grained control over what gets indexed.
 
 This function is called once per locale per document and should return `true` to skip syncing or `false` to proceed.
 
@@ -172,7 +172,7 @@ This function is called once per locale per document and should return `true` to
 {
   // ...
   searchPlugin({
-    shouldSkipSync: async ({ locale, doc, collectionSlug, req }) => {
+    skipSync: async ({ locale, doc, collectionSlug, req }) => {
       // Skip syncing for non-localized collections
       if (!locale) return false
 

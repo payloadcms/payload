@@ -72,7 +72,7 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    *
    * @example
    * // Skip syncing based on document's tenant settings
-   * shouldSkipSync: async ({ locale, req, doc, collectionSlug }) => {
+   * skipSync: async ({ locale, req, doc, collectionSlug }) => {
    *   // For non-localized collections, locale will be undefined
    *   if (!locale) return false
    *
@@ -83,7 +83,7 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    *   return !tenant.allowedLocales.includes(locale)
    * }
    */
-  shouldSkipSync?: ShouldSkipSyncFunction<ConfigTypes>
+  skipSync?: ShouldSkipSyncFunction<ConfigTypes>
   /**
    * Controls whether drafts are synced to the search index
    *

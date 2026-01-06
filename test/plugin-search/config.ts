@@ -73,7 +73,7 @@ export default buildConfigWithDefaults({
         }
       },
       collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2', 'filtered-locales'],
-      shouldSkipSync: ({ locale, doc, collectionSlug }) => {
+      skipSync: ({ locale, doc, collectionSlug }) => {
         if (collectionSlug === 'filtered-locales' && doc.syncEnglishOnly) {
           return locale !== 'en'
         }
