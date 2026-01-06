@@ -25,7 +25,7 @@ type FieldPaths = {
   schemaPath: string
 }
 
-export function getFieldPathsModified({
+export function getFieldPaths({
   field,
   index,
   parentIndexPath,

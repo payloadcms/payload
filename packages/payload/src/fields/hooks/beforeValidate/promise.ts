@@ -278,7 +278,7 @@ export const promise = async <T>({
       executed: false,
       value: undefined,
     }
-    if (typeof siblingData[field.name] === 'undefined') {
+    if (typeof siblingData[field.name!] === 'undefined') {
       fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
       fallbackResult.executed = true
     }
@@ -303,7 +303,7 @@ export const promise = async <T>({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
+          siblingFields: siblingFields!,
           value:
             typeof siblingData[field.name] === 'undefined'
               ? fallbackResult.value
@@ -330,12 +330,12 @@ export const promise = async <T>({
           })
 
       if (!result) {
-        delete siblingData[field.name]
+        delete siblingData[field.name!]
       }
     }
 
-    if (typeof siblingData[field.name] === 'undefined') {
-      siblingData[field.name] = !fallbackResult.executed
+    if (typeof siblingData[field.name!] === 'undefined') {
+      siblingData[field.name!] = !fallbackResult.executed
         ? await getFallbackValue({ field, req, siblingDoc })
         : fallbackResult.value
     }
