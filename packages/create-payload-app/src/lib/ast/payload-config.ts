@@ -182,7 +182,7 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
 
 export function addDatabaseAdapter({
   adapter,
-  envVarName = 'DATABASE_URI',
+  envVarName = 'DATABASE_URL',
   sourceFile,
 }: {
   adapter: DatabaseAdapter

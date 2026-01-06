@@ -544,7 +544,6 @@ describe('Date', () => {
       )
 
       await expect(dateFieldRequiredOnlyTz).toBeVisible()
-      // eslint-disable-next-line jest-dom/prefer-required
       await expect(dateFieldRequiredOnlyTz).not.toHaveAttribute('required')
 
       const timezoneClearButtonOnlyTz = page.locator(

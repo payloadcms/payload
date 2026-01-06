@@ -3,6 +3,7 @@ import { existsSync, readFileSync, rmSync } from 'fs'
 import path from 'path'
 import { type BlocksField, getPayload, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 

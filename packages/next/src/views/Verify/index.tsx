@@ -24,6 +24,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
 
   const {
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   let textToRender

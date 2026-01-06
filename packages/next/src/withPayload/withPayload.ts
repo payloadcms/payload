@@ -81,6 +81,7 @@ export const withPayload = (
       ]
     },
     serverExternalPackages: [
+      ...(nextConfig.serverExternalPackages || []),
       // WHY: without externalizing graphql, a graphql version error will be thrown
       // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
       'graphql',
