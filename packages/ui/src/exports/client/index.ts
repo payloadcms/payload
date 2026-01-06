@@ -342,7 +342,6 @@ export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
 export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
-export { RootProvider } from '../../providers/Root/index.js'
 export {
   RouteCache as RouteCacheProvider,
   useRouteCache,

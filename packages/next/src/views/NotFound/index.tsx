@@ -72,7 +72,3 @@ export const NotFoundPage = async ({
     </Wrapper>
   )
 }
-
-export function NotFoundView(props: AdminViewServerProps) {
-  return <div> Not Found </div>
-}

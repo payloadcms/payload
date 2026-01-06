@@ -29,7 +29,6 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -306,10 +305,6 @@ export const renderDocument = async ({
       globalConfig,
       routeSegments: segments,
     }))
-  }
-
-  if (!View) {
-    View = NotFoundView
   }
 
   /**
