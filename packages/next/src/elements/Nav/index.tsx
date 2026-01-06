@@ -120,41 +120,28 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: beforeNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
         <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: afterNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
+        {Array.from({ length: 500 }).map((_, index) => (
+          <div key={index}>
+            {RenderServerComponent({
+              clientProps: {
+                documentSubViewType,
+                viewType,
+              },
+              Component: afterNavLinks,
+              importMap: payload.importMap,
+              serverProps: {
+                i18n,
+                locale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+              },
+            })}
+          </div>
+        ))}
         <div className={`${baseClass}__controls`}>
           <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
           {LogoutComponent}
