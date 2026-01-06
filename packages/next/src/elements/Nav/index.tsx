@@ -33,7 +33,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
         <DefaultNavClient groups={[]} navPreferences={{ groups: {}, open: true }} />
-        {Array.from({ length: 600 }).map((_, index) => (
+        {Array.from({ length: 1000 }).map((_, index) => (
           <div key={index}>
             {RenderServerComponent({
               clientProps: {},

@@ -9,35 +9,7 @@ import type {
   TypedUser,
 } from 'payload'
 
-import { DndContext, pointerWithin } from '@dnd-kit/core'
-import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
-import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
-import React from 'react'
-
-import type { Theme } from '../Theme/index.js'
-
-import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
-import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
-import { NavProvider } from '../../elements/Nav/context.js'
-import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
-import { StepNavProvider } from '../../elements/StepNav/index.js'
-import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
-import { AuthProvider } from '../Auth/index.js'
-import { ClientFunctionProvider } from '../ClientFunction/index.js'
-import { ConfigProvider } from '../Config/index.js'
-import { DocumentEventsProvider } from '../DocumentEvents/index.js'
-import { LocaleProvider } from '../Locale/index.js'
-import { ParamsProvider } from '../Params/index.js'
-import { PreferencesProvider } from '../Preferences/index.js'
-import { RouteCache } from '../RouteCache/index.js'
-import { RouteTransitionProvider } from '../RouteTransition/index.js'
-import { SearchParamsProvider } from '../SearchParams/index.js'
-import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
-import { ThemeProvider } from '../Theme/index.js'
-import { ToastContainer } from '../ToastContainer/index.js'
-import { TranslationProvider } from '../Translation/index.js'
-import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
   readonly children: React.ReactNode
@@ -56,24 +28,7 @@ type Props = {
   readonly user: null | TypedUser
 }
 
-export const RootProvider: React.FC<Props> = ({
-  children,
-  config,
-  dateFNSKey,
-  fallbackLang,
-  isNavOpen,
-  languageCode,
-  languageOptions,
-  locale,
-  permissions,
-  serverFunction,
-  switchLanguageServerAction,
-  theme,
-  translations,
-  user,
-}) => {
-  const dndContextID = React.useId()
-
+export const RootProvider: React.FC<Props> = ({ children, isNavOpen }) => {
   return (
     <WindowInfoProvider
       breakpoints={{
