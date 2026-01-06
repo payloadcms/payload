@@ -124,8 +124,7 @@ export const mergeServerFormState = ({
     }
 
     // If `valid` is `undefined`, mark it as `true`
-    // But preserve existing `valid: false` state from server validation errors
-    if (incomingField.valid !== false && newState[path].valid !== false) {
+    if (incomingField.valid !== false) {
       newState[path].valid = true
     }
 

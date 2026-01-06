@@ -850,14 +850,18 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      if (
+        (isFirstRenderRef.current || !dequal(formState, prevFormState.current)) &&
+        modified &&
+        isValid !== false // Don't trigger onChange when there are validation errors
+      ) {
         executeOnChange(submitted)
       }
 
       prevFormState.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, formState],
+    [modified, submitted, formState, isValid],
     250,
   )
 
