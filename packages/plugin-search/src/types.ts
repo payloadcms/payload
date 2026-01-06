@@ -29,7 +29,7 @@ export type BeforeSync = (args: {
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
-export type ShouldSkipSyncFunction<ConfigTypes = unknown> = (args: {
+export type SkipSyncFunction<ConfigTypes = unknown> = (args: {
   collectionSlug: string
   doc: any
   locale: ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'] : string | undefined
@@ -83,7 +83,7 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    *   return !tenant.allowedLocales.includes(locale)
    * }
    */
-  skipSync?: ShouldSkipSyncFunction<ConfigTypes>
+  skipSync?: SkipSyncFunction<ConfigTypes>
   /**
    * Controls whether drafts are synced to the search index
    *
