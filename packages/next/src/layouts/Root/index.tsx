@@ -53,10 +53,6 @@ export const RootLayout = async ({
     headers,
   })
 
-  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
-    ? 'RTL'
-    : 'LTR'
-
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
   ).reduce((acc, [language, languageConfig]) => {
@@ -70,18 +66,6 @@ export const RootLayout = async ({
     return acc
   }, [])
 
-  async function switchLanguageServerAction(lang: string): Promise<void> {
-    'use server'
-    const cookies = await nextCookies()
-    cookies.set({
-      name: `${config.cookiePrefix || 'payload'}-lng`,
-      path: '/',
-      value: lang,
-    })
-  }
-
-  const navPrefs = await getNavPrefs(req)
-
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
@@ -89,16 +73,8 @@ export const RootLayout = async ({
     user: req.user,
   })
 
-  await applyLocaleFiltering({ clientConfig, config, req })
-
   return (
-    <html
-      data-theme={theme}
-      dir={dir}
-      lang={languageCode}
-      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
-      {...htmlProps}
-    >
+    <html data-theme={theme} dir={'LTR'} lang={languageCode} {...htmlProps}>
       <head>
         <style>{`@layer payload-default, payload;`}</style>
       </head>
@@ -107,35 +83,17 @@ export const RootLayout = async ({
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
-          isNavOpen={navPrefs?.open ?? true}
+          isNavOpen={true}
           languageCode={languageCode}
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
           serverFunction={serverFunction}
-          switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={req.i18n.translations}
           user={req.user}
         >
-          <ProgressBar />
-          {Array.isArray(config.admin?.components?.providers) &&
-          config.admin?.components?.providers.length > 0 ? (
-            <NestProviders
-              importMap={req.payload.importMap}
-              providers={config.admin?.components?.providers}
-              serverProps={{
-                i18n: req.i18n,
-                payload: req.payload,
-                permissions,
-                user: req.user,
-              }}
-            >
-              {children}
-            </NestProviders>
-          ) : (
-            children
-          )}
+          {children}
         </RootProvider>
         <div id="portal" />
       </body>

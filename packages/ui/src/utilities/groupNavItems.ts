@@ -37,8 +37,8 @@ export type NavGroupType = {
 
 export function groupNavItems(
   entities: EntityToGroup[],
-  permissions: SanitizedPermissions,
-  i18n: I18nClient,
+  permissions?: SanitizedPermissions,
+  i18n?: I18nClient,
 ): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
@@ -94,11 +94,11 @@ export function groupNavItems(
     [
       {
         entities: [],
-        label: i18n.t('general:collections'),
+        label: 'C',
       },
       {
         entities: [],
-        label: i18n.t('general:globals'),
+        label: 'G',
       },
     ],
   )

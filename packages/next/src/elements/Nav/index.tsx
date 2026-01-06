@@ -1,14 +1,12 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
-import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -21,19 +19,7 @@ export type NavProps = {
 } & ServerProps
 
 export const DefaultNav: React.FC<NavProps> = async (props) => {
-  const {
-    documentSubViewType,
-    i18n,
-    locale,
-    params,
-    payload,
-    permissions,
-    req,
-    searchParams,
-    user,
-    viewType,
-    visibleEntities,
-  } = props
+  const { i18n, payload, permissions, req, visibleEntities } = props
 
   if (!payload?.config) {
     return null
@@ -41,81 +27,34 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const {
     admin: {
-      components: { afterNavLinks, beforeNavLinks, logout, settingsMenu },
+      components: { afterNavLinks },
     },
     collections,
     globals,
   } = payload.config
 
-  const groups = groupNavItems(
-    [
-      ...collections
-        .filter(({ slug }) => visibleEntities.collections.includes(slug))
-        .map(
-          (collection) =>
-            ({
-              type: EntityType.collection,
-              entity: collection,
-            }) satisfies EntityToGroup,
-        ),
-      ...globals
-        .filter(({ slug }) => visibleEntities.globals.includes(slug))
-        .map(
-          (global) =>
-            ({
-              type: EntityType.global,
-              entity: global,
-            }) satisfies EntityToGroup,
-        ),
-    ],
-    permissions,
-    i18n,
-  )
+  const groups = groupNavItems([
+    ...collections
+      .filter(({ slug }) => visibleEntities.collections.includes(slug))
+      .map(
+        (collection) =>
+          ({
+            type: EntityType.collection,
+            entity: collection,
+          }) satisfies EntityToGroup,
+      ),
+    ...globals
+      .filter(({ slug }) => visibleEntities.globals.includes(slug))
+      .map(
+        (global) =>
+          ({
+            type: EntityType.global,
+            entity: global,
+          }) satisfies EntityToGroup,
+      ),
+  ])
 
   const navPreferences = await getNavPrefs(req)
-
-  const LogoutComponent = RenderServerComponent({
-    clientProps: {
-      documentSubViewType,
-      viewType,
-    },
-    Component: logout?.Button,
-    Fallback: Logout,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const renderedSettingsMenu =
-    settingsMenu && Array.isArray(settingsMenu)
-      ? settingsMenu.map((item, index) =>
-          RenderServerComponent({
-            clientProps: {
-              documentSubViewType,
-              viewType,
-            },
-            Component: item,
-            importMap: payload.importMap,
-            key: `settings-menu-item-${index}`,
-            serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            },
-          }),
-        )
-      : []
 
   return (
     <NavWrapper baseClass={baseClass}>
@@ -124,28 +63,13 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         {Array.from({ length: 500 }).map((_, index) => (
           <div key={index}>
             {RenderServerComponent({
-              clientProps: {
-                documentSubViewType,
-                viewType,
-              },
+              clientProps: {},
               Component: afterNavLinks,
               importMap: payload.importMap,
-              serverProps: {
-                i18n,
-                locale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
-              },
+              serverProps: {},
             })}
           </div>
         ))}
-        <div className={`${baseClass}__controls`}>
-          <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
-          {LogoutComponent}
-        </div>
       </nav>
       <div className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-content`}>

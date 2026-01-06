@@ -7,7 +7,6 @@ import { generateBrowseByFolderMetadata } from '../BrowseByFolder/metadata.js'
 import { generateCollectionFolderMetadata } from '../CollectionFolders/metadata.js'
 import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
 import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
-import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
 import { generateForgotPasswordViewMetadata } from '../ForgotPassword/metadata.js'
 import { generateListViewMetadata } from '../List/metadata.js'
@@ -78,7 +77,7 @@ export const generatePageMetadata = async ({
 
   switch (segments.length) {
     case 0: {
-      meta = await generateDashboardViewMetadata({ config, i18n })
+      meta = {}
       break
     }
     case 1: {
