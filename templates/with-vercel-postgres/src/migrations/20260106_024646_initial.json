@@ -934,10 +934,6 @@
     "tables": {},
     "columns": {}
   },
-<<<<<<<< HEAD:templates/with-postgres/src/migrations/20251218_211115_initial.json
-  "id": "37f57f30-1249-4788-8c86-bfea5915f918",
-========
-  "id": "80c5ff21-e670-49dd-8c0a-1a2460fb4fce",
->>>>>>>> origin/main:templates/with-postgres/src/migrations/20260105_201519_initial.json
+  "id": "b5740df8-b1fb-4d18-ace3-be42151711b2",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
