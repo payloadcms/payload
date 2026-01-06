@@ -300,6 +300,14 @@ describe('Field Error States', () => {
       await expect(passwordError).toBeVisible()
       await expect(passwordError).toContainText('Password must be at least 8 characters long')
 
+      // Wait for the debounced onChange to run (250ms debounce + some buffer)
+      // Without the fix, onChange would clear the error during this time
+      await wait(500)
+
+      // Verify error tooltip is still visible after onChange would have run
+      await expect(passwordError).toBeVisible()
+      await expect(passwordError).toContainText('Password must be at least 8 characters long')
+
       await expect(passwordField).toBeVisible()
       await expect(confirmPasswordField).toBeVisible()
       await expect(page.locator('#cancel-change-password')).toBeVisible()
