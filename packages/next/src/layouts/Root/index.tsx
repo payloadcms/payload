@@ -9,23 +9,9 @@ export const metadata = {
   title: 'Next.js',
 }
 
-export const RootLayout = async ({
-  children,
-  htmlProps = {},
-}: {
-  readonly children: React.ReactNode
-  readonly config: Promise<SanitizedConfig>
-  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
-  readonly importMap: ImportMap
-  readonly serverFunction: ServerFunctionClient
-}) => {
-  const theme = 'dark'
-
+export const RootLayout = async ({ children }: { readonly children: React.ReactNode }) => {
   return (
-    <html data-theme={theme} dir={'LTR'} lang={'en'} {...htmlProps}>
-      <head>
-        <style>{`@layer payload-default, payload;`}</style>
-      </head>
+    <html>
       <body>
         <WindowInfoProvider
           breakpoints={{
@@ -37,7 +23,6 @@ export const RootLayout = async ({
         >
           <NavProvider initialIsOpen={true}>{children}</NavProvider>
         </WindowInfoProvider>
-        <div id="portal" />
       </body>
     </html>
   )
