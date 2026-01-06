@@ -17,19 +17,18 @@ export const syncDocAsSearchIndex = async ({
   const searchSlug = searchOverrides?.slug || 'search'
 
   // Determine sync locale
-  const syncLocale = locale || req.locale
+  const syncLocale = locale || req.locale || undefined
 
-  // Check if this specific locale should be skipped
-  if (syncLocale && typeof pluginConfig.shouldSkipSync === 'function') {
+  if (typeof pluginConfig.shouldSkipSync === 'function') {
     try {
-      const skip = await pluginConfig.shouldSkipSync({
+      const skipSync = await pluginConfig.shouldSkipSync({
         collectionSlug: collection,
         doc,
         locale: syncLocale,
         req,
       })
 
-      if (skip) {
+      if (skipSync) {
         return doc
       }
     } catch (err) {
@@ -168,25 +167,6 @@ export const syncDocAsSearchIndex = async ({
         if (foundDoc) {
           const { id: searchDocID } = foundDoc
 
-          if (doSync) {
-            // update the doc normally
-            try {
-              await payload.update({
-                id: searchDocID,
-                collection: searchSlug,
-                data: {
-                  ...dataToSave,
-                  priority: foundDoc.priority || defaultPriority,
-                },
-                depth: 0,
-                locale: syncLocale,
-                req,
-              })
-            } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
-            }
-          }
-
           // Check if document is trashed and delete from search
           const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
 
@@ -204,48 +184,65 @@ export const syncDocAsSearchIndex = async ({
                 msg: `Error deleting ${searchSlug} document for trashed doc.`,
               })
             }
-          }
+          } else if (doSync) {
+            // update the doc normally
+            try {
+              await payload.update({
+                id: searchDocID,
+                collection: searchSlug,
+                data: {
+                  ...dataToSave,
+                  priority: foundDoc.priority || defaultPriority,
+                },
+                depth: 0,
+                locale: syncLocale,
+                req,
+              })
+            } catch (err: unknown) {
+              payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
+            }
 
-          if (deleteDrafts && status === 'draft') {
-            // Check to see if there's a published version of the doc
-            // We don't want to remove the search doc if there is a published version but a new draft has been created
-            const {
-              docs: [docWithPublish],
-            } = await payload.find({
-              collection,
-              depth: 0,
-              draft: false,
-              limit: 1,
-              locale: syncLocale,
-              pagination: false,
-              req,
-              where: {
-                and: [
-                  {
-                    _status: {
-                      equals: 'published',
+            if (deleteDrafts && status === 'draft') {
+              // Check to see if there's a published version of the doc
+              // We don't want to remove the search doc if there is a published version but a new draft has been created
+              const {
+                docs: [docWithPublish],
+              } = await payload.find({
+                collection,
+                depth: 0,
+                draft: false,
+                limit: 1,
+                locale: syncLocale,
+                pagination: false,
+                req,
+                where: {
+                  and: [
+                    {
+                      _status: {
+                        equals: 'published',
+                      },
                     },
-                  },
-                  {
-                    id: {
-                      equals: id,
+                    {
+                      id: {
+                        equals: id,
+                      },
                     },
-                  },
-                ],
-              },
-            })
+                  ],
+                },
+              })
 
-            if (!docWithPublish && !isTrashDocument) {
-              // do not include draft docs in search results, so delete the record
-              try {
-                await payload.delete({
-                  id: searchDocID,
-                  collection: searchSlug,
-                  depth: 0,
-                  req,
-                })
-              } catch (err: unknown) {
-                payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+              if (!docWithPublish) {
+                // do not include draft docs in search results, so delete the record
+                try {
+                  await payload.delete({
+                    id: searchDocID,
+                    collection: searchSlug,
+                    depth: 0,
+                    req,
+                  })
+                } catch (err: unknown) {
+                  payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+                }
               }
             }
           }
