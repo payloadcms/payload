@@ -9,6 +9,7 @@ import type {
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig } from '../../globals/config/types.js'
 import type { Field } from './types.js'
+import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 import {
   DuplicateFieldName,
@@ -21,7 +22,6 @@ import {
 import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
-import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
@@ -36,12 +36,6 @@ import {
   reservedVerifyFieldNames,
 } from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import {
-  fieldAffectsData as _fieldAffectsData,
-  fieldIsLocalized,
-  fieldIsVirtual,
-  tabHasName,
-} from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
@@ -59,6 +53,10 @@ type Args = {
    */
   joins?: SanitizedJoins
   parentIsLocalized: boolean
+  /**
+   *  Keep track of the path to this field so we can log the full field path on errors
+   */
+  pathToField: string[]
   polymorphicJoins?: SanitizedJoin[]
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -88,6 +86,11 @@ export const sanitizeFields = async ({
   joinPath = '',
   joins,
   parentIsLocalized,
+  pathToField: incomingPathToField = globalConfig?.slug
+    ? [globalConfig.slug]
+    : collectionConfig?.slug
+      ? [collectionConfig.slug]
+      : [],
   polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
@@ -114,10 +117,15 @@ export const sanitizeFields = async ({
 
     const fieldAffectsData = _fieldAffectsData(field)
 
+    const pathToField = fieldAffectsData
+      ? [...incomingPathToField, field.name]
+      : incomingPathToField
+    const pathToFieldString = pathToField.join(' > ')
+
     if (isTopLevelField && fieldAffectsData && field.name) {
       if (collectionConfig && collectionConfig.upload) {
         if (reservedBaseUploadFieldNames.includes(field.name)) {
-          throw new ReservedFieldName(field, field.name)
+          throw new ReservedFieldName(pathToFieldString, field.name)
         }
       }
 
@@ -128,18 +136,18 @@ export const sanitizeFields = async ({
         !collectionConfig.auth.disableLocalStrategy
       ) {
         if (reservedBaseAuthFieldNames.includes(field.name)) {
-          throw new ReservedFieldName(field, field.name)
+          throw new ReservedFieldName(pathToFieldString, field.name)
         }
 
         if (collectionConfig.auth.verify) {
           // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           if (reservedAPIKeyFieldNames.includes(field.name)) {
-            throw new ReservedFieldName(field, field.name)
+            throw new ReservedFieldName(pathToFieldString, field.name)
           }
 
           // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           if (reservedVerifyFieldNames.includes(field.name)) {
-            throw new ReservedFieldName(field, field.name)
+            throw new ReservedFieldName(pathToFieldString, field.name)
           }
         }
       }
@@ -147,7 +155,7 @@ export const sanitizeFields = async ({
 
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData && field.name.includes('.')) {
-      throw new InvalidFieldName(field, field.name)
+      throw new InvalidFieldName(pathToFieldString, field.name)
     }
 
     // Auto-label
@@ -171,6 +179,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
+      // TODO - come back to this
       sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized, polymorphicJoins })
     }
 
@@ -189,21 +198,21 @@ export const sanitizeFields = async ({
 
         relationships.forEach((relationship: string) => {
           if (!validRelationships.includes(relationship)) {
-            throw new InvalidFieldRelationship(field, relationship)
+            throw new InvalidFieldRelationship(pathToFieldString, relationship)
           }
         })
       }
 
       if (field.min && !field.minRows) {
         console.warn(
-          `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
+          `(payload): The "min" property is deprecated for the Relationship field "${pathToFieldString}" and will be removed in a future version. Please use "minRows" instead.`,
         )
         field.minRows = field.min
       }
 
       if (field.max && !field.maxRows) {
         console.warn(
-          `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
+          `(payload): The "max" property is deprecated for the Relationship field "${pathToFieldString}" and will be removed in a future version. Please use "maxRows" instead.`,
         )
         field.maxRows = field.max
       }
@@ -231,7 +240,7 @@ export const sanitizeFields = async ({
 
     if (fieldAffectsData) {
       if (existingFieldNames.has(field.name)) {
-        throw new DuplicateFieldName(field.name, collectionConfig?.slug)
+        throw new DuplicateFieldName(pathToFieldString)
       } else if (!['blockName', 'id'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
@@ -286,7 +295,7 @@ export const sanitizeFields = async ({
             // config.editor should be sanitized at this point
             field.editor = _config.editor
           } else {
-            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+            throw new MissingEditorProp(pathToFieldString) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
           }
         }
 
@@ -311,16 +320,19 @@ export const sanitizeFields = async ({
 
     if (field.type === 'blocks' && field.blocks) {
       if (field.blockReferences && field.blocks?.length) {
-        throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
+        throw new Error(
+          `Invalid blocks field ${pathToFieldString}. You cannot have both blockReferences and blocks in the same blocks field.`,
+        )
       }
 
       const blockSlugs: string[] = []
 
       for (const block of field.blockReferences ?? field.blocks) {
         const blockSlug = typeof block === 'string' ? block : block.slug
+        const pathToBlock = [...pathToField, blockSlug]
 
         if (blockSlugs.includes(blockSlug)) {
-          throw new DuplicateFieldName(blockSlug, collectionConfig?.slug, field.name)
+          throw new DuplicateFieldName(pathToBlock.join(' > '))
         }
 
         blockSlugs.push(blockSlug)
@@ -343,6 +355,7 @@ export const sanitizeFields = async ({
           fields: block.fields,
           isTopLevelField: false,
           parentIsLocalized: (parentIsLocalized || field.localized)!,
+          pathToField: pathToBlock,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -360,6 +373,7 @@ export const sanitizeFields = async ({
         joinPath: fieldAffectsData ? `${joinPath ? joinPath + '.' : ''}${field.name}` : joinPath,
         joins,
         parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
+        pathToField,
         polymorphicJoins,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
@@ -396,6 +410,7 @@ export const sanitizeFields = async ({
           joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
           parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized)!,
+          pathToField,
           polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
@@ -477,6 +492,9 @@ export const sanitizeFields = async ({
 
         for (const [i, segment] of paths.entries()) {
           const field = flattenFields.find((e) => e.name === segment)
+
+          const pathToVirtualField = field?.name ? [...pathToField, field.name] : pathToField
+
           if (!field) {
             break
           }
@@ -496,7 +514,7 @@ export const sanitizeFields = async ({
             ) {
               if (isHasMany) {
                 throw new InvalidConfiguration(
-                  `Virtual field ${virtualField.name} in ${globalConfig ? `global ${globalConfig.slug}` : `collection ${collectionConfig?.slug}`} references 2 or more hasMany relationships on the path ${virtualField.virtual} which is not allowed.`,
+                  `Virtual field ${pathToVirtualField.join(' > ')} references 2 or more hasMany relationships on the path ${virtualField.virtual} which is not allowed.`,
                 )
               }
 
