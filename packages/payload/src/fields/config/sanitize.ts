@@ -179,8 +179,15 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      // TODO - come back to this
-      sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized, polymorphicJoins })
+      sanitizeJoinField({
+        config,
+        field,
+        joinPath,
+        joins,
+        parentIsLocalized,
+        pathToField,
+        polymorphicJoins,
+      })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
