@@ -1,5 +1,5 @@
 'use client'
-import { Hamburger, useNav } from '@payloadcms/ui'
+import { useNav } from '@payloadcms/ui'
 import React from 'react'
 
 /**
@@ -19,7 +19,7 @@ export const NavHamburger: React.FC<{
       tabIndex={!navOpen ? -1 : undefined}
       type="button"
     >
-      <Hamburger isActive />
+      <span>hamburger</span>
     </button>
   )
 }

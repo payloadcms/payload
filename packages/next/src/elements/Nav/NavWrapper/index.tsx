@@ -2,8 +2,6 @@
 import { useNav } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
-
 /**
  * @internal
  */

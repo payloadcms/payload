@@ -2,10 +2,6 @@
 
 import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
-import LinkImport from 'next/link.js'
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
-import { useConfig } from '@payloadcms/ui'
 import React from 'react'
 
 const baseClass = 'after-nav-links'
@@ -26,14 +22,10 @@ export const AfterNavLinks: PayloadClientReactComponent<
         Custom Routes
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <Link href={`/custom-default-view`} style={{ textDecoration: 'none' }}>
-          Default Template
-        </Link>
+        fwef
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <Link href={`/custom-minimal-view`} style={{ textDecoration: 'none' }}>
-          Minimal Template
-        </Link>
+        fewf
       </h4>
       <div id="custom-css" />
     </div>
