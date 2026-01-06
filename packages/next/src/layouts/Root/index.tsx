@@ -1,5 +1,3 @@
-import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
-
 import { NavProvider, WindowInfoProvider } from '@payloadcms/ui'
 import React from 'react'
 import '@payloadcms/ui/scss/app.scss'
@@ -9,9 +7,9 @@ export const metadata = {
   title: 'Next.js',
 }
 
-export const RootLayout = async ({ children }: { readonly children: React.ReactNode }) => {
+export const RootLayout = ({ children }: { readonly children: React.ReactNode }) => {
   return (
-    <html>
+    <html lang="en">
       <body>
         <WindowInfoProvider
           breakpoints={{

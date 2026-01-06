@@ -1,6 +1,3 @@
-import type { ImportMap, Payload, SanitizedConfig } from 'payload'
-
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'
@@ -10,37 +7,18 @@ import './index.scss'
 const baseClass = 'nav'
 
 import { DefaultNavClient } from './index.client.js'
+import { AfterNavLinks } from './Test/index.js'
 
-export type NavProps = {
-  config: SanitizedConfig
-  importMap: ImportMap
-}
+export type NavProps = {}
 
-export const DefaultNav: React.FC<NavProps> = async (props) => {
-  const { config, importMap } = props
-
-  if (!config) {
-    return null
-  }
-
-  const {
-    admin: {
-      components: { afterNavLinks },
-    },
-  } = config
-
+export const DefaultNav: React.FC<NavProps> = (props) => {
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
         <DefaultNavClient groups={[]} navPreferences={{ groups: {}, open: true }} />
-        {Array.from({ length: 1000 }).map((_, index) => (
+        {Array.from({ length: 3000 }).map((_, index) => (
           <div key={index}>
-            {RenderServerComponent({
-              clientProps: {},
-              Component: afterNavLinks,
-              importMap,
-              serverProps: {},
-            })}
+            <AfterNavLinks />
           </div>
         ))}
       </nav>
