@@ -2,12 +2,12 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { DefaultTemplate } from '../../templates/Default/index.js'
+import { DefaultNav } from '../../elements/Nav/index.js'
+import { Wrapper } from '../../templates/Default/Wrapper/index.js'
 import { initReq } from '../../utilities/initReq.js'
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -68,26 +68,11 @@ export const RootPage = async ({
     },
   })
 
-  const visibleEntities = getVisibleEntities({ req })
-
   return (
-    <DefaultTemplate
-      config={config}
-      i18n={req.i18n}
-      importMap={importMap}
-      locale={locale}
-      params={params}
-      payload={req.payload}
-      permissions={permissions}
-      req={req}
-      searchParams={searchParams}
-      user={req.user}
-      visibleEntities={{
-        // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-        // which this caused as soon as initPageResult.visibleEntities is passed in
-        collections: visibleEntities?.collections,
-        globals: visibleEntities?.globals,
-      }}
-    ></DefaultTemplate>
+    <div style={{ position: 'relative' }}>
+      <Wrapper baseClass={'test'} className={'dewf'}>
+        <DefaultNav config={config} importMap={importMap} />
+      </Wrapper>
+    </div>
   )
 }
