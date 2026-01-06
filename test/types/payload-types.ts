@@ -164,7 +164,6 @@ export interface Post {
     [k: string]: unknown;
   };
   title?: string | null;
-  emptyRelationTo?: null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;
   namedGroup?: {
@@ -335,7 +334,6 @@ export interface PostsSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
   title?: T;
-  emptyRelationTo?: T;
   selectField?: T;
   insideUnnamedGroup?: T;
   namedGroup?:
@@ -471,6 +469,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
