@@ -1,11 +1,8 @@
 import React from 'react'
 
-import { NavHamburger } from './NavHamburger/index.js'
-import { NavWrapper } from './NavWrapper/index.js'
-
 const baseClass = 'nav'
 
-import { AfterNavLinks } from './Test/index.js'
+import { AfterNavLinks, NavHamburger, NavWrapper } from './components.js'
 
 export const DefaultNav: React.FC = () => {
   return (
