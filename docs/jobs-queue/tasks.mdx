@@ -337,6 +337,10 @@ For controlled failures based on business logic, you can return a failed state i
 | `throw new Error()`          | Unexpected errors and exceptions       | Network failures, database errors, invalid API responses, missing dependencies       |
 | `return { state: 'failed' }` | Business logic and validation failures | Validation errors, conditional checks, business rule violations, expected edge cases |
 
+<Banner type="warning">
+  **Note:** The `return { state: 'failed' }` approach may be deprecated in a future major version of Payload. While it's currently supported and documented here, throwing errors is generally simpler and more powerful. For example, you can throw specialized errors like `JobCancelledError` to cancel a job from within a task handler, which isn't possible with the return syntax.
+</Banner>
+
 #### Accessing Failure Information
 
 After a task fails, you can inspect the job to understand what went wrong:
@@ -358,13 +362,17 @@ const completedJob = await payload.findByID({
 
 // Check if job failed
 if (completedJob.hasError) {
-  // Access the error from the log
-  const failedLog = completedJob.log?.find((entry) => entry.state === 'failed')
-
-  console.log(failedLog?.error?.message)
+  // Access the latest error that caused the job to fail
+  console.log(completedJob.error)
   // If errorMessage was provided: "Amount mismatch: expected 150, received 100"
   // If no errorMessage: "Task handler returned a failed state"
   // If error was thrown: The thrown error message
+
+  // You can also check the job log to find specific tasks that errored
+  // Note: If the job was retried multiple times, there will be multiple erroring tasks in the log
+  const failedTasks = completedJob.log?.filter(
+    (entry) => entry.state === 'failed',
+  )
 }
 ```
 
