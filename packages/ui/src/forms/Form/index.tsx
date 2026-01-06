@@ -54,6 +54,7 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { isOnlyErrorStateChange } from './isOnlyErrorStateChange.js'
 
 const baseClass = 'form'
 
@@ -165,6 +166,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
+  const serverErrorsJustAddedRef = useRef(false)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -508,6 +510,9 @@ export const Form: React.FC<FormProps> = (props) => {
               errors: fieldErrors,
             })
 
+            // Prevent the immediate onChange from clearing these server errors
+            serverErrorsJustAddedRef.current = true
+
             nonFieldErrors.forEach((err) => {
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
@@ -850,18 +855,30 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if (
-        (isFirstRenderRef.current || !dequal(formState, prevFormState.current)) &&
-        modified &&
-        isValid !== false // Don't trigger onChange when there are validation errors
-      ) {
+      const formStateChanged = isFirstRenderRef.current || !dequal(formState, prevFormState.current)
+
+      // Skip onChange immediately after server errors are added to prevent clearing them
+      // But if the form state has changed due to user edits (not just error state), allow onChange to proceed
+      if (serverErrorsJustAddedRef.current && formStateChanged) {
+        if (isOnlyErrorStateChange(prevFormState.current, formState)) {
+          // Only error state changed, skip this onChange
+          serverErrorsJustAddedRef.current = false
+          prevFormState.current = formState
+          return
+        } else {
+          // User made actual changes, clear the flag and allow onChange
+          serverErrorsJustAddedRef.current = false
+        }
+      }
+
+      if (formStateChanged && modified) {
         executeOnChange(submitted)
       }
 
       prevFormState.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, formState, isValid],
+    [modified, submitted, formState],
     250,
   )
 
