@@ -69,7 +69,6 @@ describe('Field Paths', () => {
               nestedArray: [
                 {
                   fieldWithinNestedArray: 'Test',
-                  fieldWithinNestedRow: 'Test',
                 },
               ],
             },
@@ -158,18 +157,18 @@ describe('Field Paths', () => {
         'array.nestedArray.fieldWithinNestedArray',
         'array.nestedArray.id',
         'array._index-2',
-        'array._index-2.fieldWithinRowWithinArray', // THIS ONE IS WRONG!
+        'array._index-2.fieldWithinRowWithinArray',
         'array.id',
         '_index-2',
-        '_index-2.fieldWithinRow', // THIS ONE IS WRONG!
+        '_index-2.fieldWithinRow',
         '_index-3',
         '_index-3-0',
-        '_index-3-0.fieldWithinUnnamedTab', // THIS ONE IS WRONG!
+        '_index-3-0.fieldWithinUnnamedTab',
         '_index-3-0-1',
         '_index-3-0-1-0',
-        '_index-3-0-1-0.fieldWithinNestedUnnamedTab', // THIS ONE IS WRONG
-        '_index-3.namedTab', // THIS ONE IS WRONG!
-        '_index-3.namedTab.fieldWithinNamedTab', // THIS ONE IS WRONG!
+        '_index-3-0-1-0.fieldWithinNestedUnnamedTab',
+        '_index-3.namedTab',
+        '_index-3.namedTab.fieldWithinNamedTab',
         'updatedAt',
         'createdAt',
       ])
