@@ -70,7 +70,7 @@ jobs:
         run: pnpm lint -- --quiet
 
       - name: Lint SCSS
-        run: pnpm run lint:scss
+        run: pnpm run lint:styles
 
   build:
     needs: changes
