@@ -1,13 +1,14 @@
 import type { Payload, SanitizedConfig } from 'payload'
 
+import { initI18n } from '@payloadcms/translations'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
-
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { fieldPathsSlug } from './shared.js'
-import { initI18n } from '@payloadcms/translations'
 
 let payload: Payload
 let config: SanitizedConfig
@@ -133,7 +134,7 @@ describe('Field Paths', () => {
         language: 'en',
       })
 
-      const { fieldSchemaMap } = await buildFieldSchemaMap({
+      const { fieldSchemaMap } = buildFieldSchemaMap({
         collectionSlug: fieldPathsSlug,
         config,
         i18n,

@@ -5,6 +5,7 @@ const dirname = path.dirname(filename)
 import type { SanitizedConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 import { FieldPaths } from './collections/FieldPaths/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
@@ -14,6 +15,15 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   },
   collections: [FieldPaths],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

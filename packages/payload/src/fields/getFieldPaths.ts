@@ -55,6 +55,8 @@ export function getFieldPaths({
   return {
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
     path: `${parentPathToUse ? parentPathToUse + '.' : ''}${indexSuffix}`,
-    schemaPath: `${!parentIsUnnamed && parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
+    schemaPath: parentIsUnnamed
+      ? `${parentSchemaPath}-${index}`
+      : `${parentSchemaPath}.${indexSuffix}`,
   }
 }

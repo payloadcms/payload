@@ -124,8 +124,6 @@ export const buildFormState = async (
     i18n,
   })
 
-  console.log('schemaMap', schemaMap)
-
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
     config: getClientConfig({
