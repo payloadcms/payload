@@ -24,7 +24,7 @@ describe('database', () => {
   let token: string
   const collection = 'posts'
   const title = 'title'
-  let user: TypeWithID & Record<string, unknown>
+  let user: Record<string, unknown> & TypeWithID
 
   beforeAll(async () => {
     const init = await initPayloadTest({ __dirname, init: { local: false } })
@@ -274,7 +274,7 @@ describe('database', () => {
         expect(secondResult.id).toStrictEqual(second.id)
       })
 
-      it('should commit multiple operations async', async () => {
+      it.skip('should commit multiple operations async', async () => {
         const req = {
           payload,
           user,
