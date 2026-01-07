@@ -128,6 +128,13 @@ jobs:
       - name: Start LocalStack
         run: pnpm docker:start
 
+      - name: Start MongODB
+        id: mongodb
+        if: matrix.database == 'mongodb'
+        run: |
+          docker compose -f test/helpers/db/mongodb/docker-compose.yml up -d --wait
+          echo "PAYLOAD_TEST_MONGO_URL=mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
+
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
