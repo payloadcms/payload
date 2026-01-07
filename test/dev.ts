@@ -33,6 +33,7 @@ if (!fs.existsSync(configPath)) {
   process.exit(1)
 }
 
+// empty
 process.env.PAYLOAD_CONFIG_PATH = configPath
 
 // Default to true unless explicitly set to false
