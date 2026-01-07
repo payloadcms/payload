@@ -26,12 +26,7 @@ describe('collections-rest', () => {
     // Wait for indexes to be created,
     // as we need them to query by point
     if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db.collections[pointSlug].ensureIndexes(function (err) {
-          if (err) reject(err)
-          resolve(true)
-        })
-      })
+      await payload.db.collections[pointSlug].ensureIndexes()
     }
   })
 
