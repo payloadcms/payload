@@ -19,6 +19,7 @@ export const CustomIDNested: CollectionConfig = {
               admin: {
                 description: 'Custom numeric ID nested in an unnamed tab',
               },
+              defaultValue: () => Math.floor(Math.random() * 1000000),
             },
             {
               name: 'title',
