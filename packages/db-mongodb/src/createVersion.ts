@@ -1,6 +1,8 @@
 import type { CreateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
+import { Types } from 'mongoose'
+
 import type { MongooseAdapter } from '.'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
@@ -36,6 +38,25 @@ export const createVersion: CreateVersion = async function createVersion(
     req,
   )
 
+  const parentQuery = {
+    $or: [
+      {
+        parent: {
+          $eq: parent,
+        },
+      },
+    ],
+  }
+
+  // @ts-expect-error
+  if (parent instanceof Types.ObjectId) {
+    parentQuery.$or.push({
+      parent: {
+        $eq: parent.toString(),
+      },
+    })
+  }
+
   await VersionModel.updateMany(
     {
       $and: [
@@ -44,11 +65,7 @@ export const createVersion: CreateVersion = async function createVersion(
             $ne: doc._id,
           },
         },
-        {
-          parent: {
-            $eq: parent,
-          },
-        },
+        parentQuery,
         {
           latest: {
             $eq: true,
