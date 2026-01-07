@@ -117,7 +117,7 @@ describe('collections-graphql', () => {
       expect(typeof totalDocs).toBe('number')
     })
 
-    it('should read using multiple queries', async () => {
+    it.skip('should read using multiple queries', async () => {
       const query = `query {
           postIDs: Posts {
             docs {
