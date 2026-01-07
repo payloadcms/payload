@@ -28,7 +28,6 @@ export const DefaultNavClient: React.FC<{
       },
       folders,
       routes: { admin: adminRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -37,7 +36,6 @@ export const DefaultNavClient: React.FC<{
   const folderURL = formatAdminURL({
     adminRoute,
     path: foldersRoute,
-    serverURL,
   })
 
   const viewingRootFolderView = pathname.startsWith(folderURL)
@@ -53,12 +51,12 @@ export const DefaultNavClient: React.FC<{
               let id: string
 
               if (type === EntityType.collection) {
-                href = formatAdminURL({ adminRoute, path: `/collections/${slug}`, serverURL })
+                href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
                 id = `nav-${slug}`
               }
 
               if (type === EntityType.global) {
-                href = formatAdminURL({ adminRoute, path: `/globals/${slug}`, serverURL })
+                href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
                 id = `nav-global-${slug}`
               }
 

@@ -15,15 +15,13 @@ export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: s
   await breakpointSelector.first().click()
 
   await page
-    .locator(`.live-preview-toolbar-controls__breakpoint button.popup-button-list__button`)
+    .locator('.popup__content .popup-button-list__button')
     .filter({ hasText: breakpointLabel })
     .click()
 
   await expect(breakpointSelector).toContainText(breakpointLabel)
 
-  const option = page.locator(
-    '.live-preview-toolbar-controls__breakpoint button.popup-button-list__button--selected',
-  )
+  const option = page.locator('.live-preview-toolbar-controls__breakpoint button.popup-button')
 
   await expect(option).toHaveText(breakpointLabel)
 }

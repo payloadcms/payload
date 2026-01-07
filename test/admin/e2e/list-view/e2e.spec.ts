@@ -15,7 +15,7 @@ import {
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { customAdminRoutes } from '../../shared.js'
+import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
   customViews1CollectionSlug,
@@ -27,6 +27,7 @@ import {
   virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -256,9 +257,12 @@ describe('List View', () => {
       await kebabMenu.click()
 
       await expect(
-        page.locator('.popup-button-list').locator('div', {
-          hasText: 'listMenuItems',
-        }),
+        page
+          .locator('.popup-button-list')
+          .locator('div', {
+            hasText: 'listMenuItems',
+          })
+          .first(),
       ).toBeVisible()
     })
 
@@ -1525,8 +1529,7 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await page.locator('.per-page .popup-button').click()
-      await page.locator('.per-page .popup-button').click()
-      const options = page.locator('.per-page button.per-page__button')
+      const options = page.locator('.popup__content button.per-page__button')
       await expect(options).toHaveCount(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
@@ -1567,7 +1570,7 @@ describe('List View', () => {
       await page.locator('.per-page .popup-button').click()
 
       await page
-        .locator('.per-page button.per-page__button', {
+        .locator('.popup__content button.per-page__button', {
           hasText: '15',
         })
         .click()

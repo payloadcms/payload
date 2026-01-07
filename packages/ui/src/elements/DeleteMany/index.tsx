@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { mergeListSearchAndWhere } from 'payload/shared'
+import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -226,20 +226,23 @@ export function DeleteMany_v4({
           }
         }
 
-        const url = `${serverURL}${api}/${relationTo}${qs.stringify(
-          {
-            limit: 0,
-            locale,
-            select: {},
-            where: mergeListSearchAndWhere({
-              collectionConfig,
-              search,
-              where: whereConstraint,
-            }),
-            ...(viewType === 'trash' ? { trash: true } : {}),
-          },
-          { addQueryPrefix: true },
-        )}`
+        const url = formatAdminURL({
+          apiRoute: api,
+          path: `/${relationTo}${qs.stringify(
+            {
+              limit: 0,
+              locale,
+              select: {},
+              where: mergeListSearchAndWhere({
+                collectionConfig,
+                search,
+                where: whereConstraint,
+              }),
+              ...(viewType === 'trash' ? { trash: true } : {}),
+            },
+            { addQueryPrefix: true },
+          )}`,
+        })
 
         const deleteManyResponse =
           viewType === 'trash' || deletePermanently || !collectionConfig.trash

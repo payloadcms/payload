@@ -8,6 +8,7 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { sanitizeSortParams } from '../../utilities/sanitizeSortParams.js'
 import { findVersionsOperation } from '../operations/findVersions.js'
 
 export const findVersionsHandler: PayloadHandler = async (req) => {
@@ -19,7 +20,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     pagination?: string
     populate?: Record<string, unknown>
     select?: Record<string, unknown>
-    sort?: string
+    sort?: string | string[]
     where?: Where
   }
 
@@ -32,7 +33,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(populate),
     req,
     select: sanitizeSelectParam(select),
-    sort: typeof sort === 'string' ? sort.split(',') : undefined,
+    sort: sanitizeSortParams(sort),
     where,
   })
 

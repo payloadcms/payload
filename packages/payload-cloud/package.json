@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload-cloud",
-  "version": "3.68.4",
+  "version": "3.70.0",
   "description": "The official Payload Cloud plugin",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -48,10 +48,9 @@
     "@aws-sdk/lib-storage": "^3.614.0",
     "@payloadcms/email-nodemailer": "workspace:*",
     "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "7.0.9"
+    "nodemailer": "7.0.12"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
     "@types/nodemailer": "7.0.2",
     "payload": "workspace:*"
   },
