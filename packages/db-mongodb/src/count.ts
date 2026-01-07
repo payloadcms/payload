@@ -6,14 +6,12 @@ import { flattenWhereToOperators } from 'payload/database'
 
 import type { MongooseAdapter } from '.'
 
-import { withSession } from './withSession'
-
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, locale, where },
 ) {
   const Model = this.collections[collection]
-  const options: CountOptions = await withSession(this, req)
+  const options: CountOptions = {}
 
   let hasNearConstraint = false
 
