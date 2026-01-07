@@ -133,6 +133,7 @@ jobs:
         run: |
           docker compose -f test/helpers/db/mongodb/docker-compose.yml up -d --wait
           echo "PAYLOAD_TEST_MONGO_URL=mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_ENV
+        if: matrix.database == 'mongoose'
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2

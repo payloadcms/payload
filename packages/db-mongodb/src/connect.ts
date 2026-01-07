@@ -27,11 +27,9 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
   if (process.env.NODE_ENV === 'test') {
     if (process.env.PAYLOAD_TEST_MONGO_URL) {
       urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL
-      console.log(`Using to ${urlToConnect}`)
     } else {
       connectionOptions.dbName = 'payloadmemory'
       const { MongoMemoryReplSet } = require('mongodb-memory-server')
-      console.log(`Using in memory db`)
 
       this.mongoMemoryServer = await MongoMemoryReplSet.create({
         replSet: {
