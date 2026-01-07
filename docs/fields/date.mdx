@@ -266,3 +266,43 @@ You can customise the available list of timezones in the [global admin config](.
 Dates without a specific time are normalised to 12:00 in the selected timezone.
 
 </Banner>
+
+### Manual Offsets
+
+In addition to IANA timezone names (like `America/New_York`), you can also use fixed UTC offsets in the `±HH:mm` format:
+
+```ts
+{
+  name: 'eventTime',
+  type: 'date',
+  timezone: {
+    supportedTimezones: [
+      { label: 'UTC+5:30 (India)', value: '+05:30' },
+      { label: 'UTC-8 (Pacific)', value: '-08:00' },
+      { label: 'UTC+0', value: '+00:00' },
+    ],
+  },
+}
+```
+
+You can also mix IANA timezones with manual offsets:
+
+```ts
+{
+  name: 'scheduledAt',
+  type: 'date',
+  timezone: {
+    supportedTimezones: [
+      { label: 'New York', value: 'America/New_York' },
+      { label: 'UTC+5:30', value: '+05:30' },
+      { label: 'UTC', value: 'UTC' },
+    ],
+  },
+}
+```
+
+<Banner type="warning">
+  Manual UTC offsets are fixed and do not account for daylight saving time (DST)
+  adjustments. If you need automatic DST handling, use IANA timezone names
+  instead (e.g., `America/New_York` rather than `-05:00`).
+</Banner>

@@ -14,9 +14,40 @@ type ValidateTimezonesArgs = {
 }
 
 /**
+ * Validates a UTC offset string.
+ * Only supports the ±HH:mm format (e.g., +05:30, -08:00).
+ *
+ * Valid ranges: hours -12 to +14, minutes 0-59
+ *
+ * @returns true if the offset is valid
+ */
+const isValidUtcOffset = (value: string): boolean => {
+  // Strict format check: only ±HH:mm
+  const match = value.match(/^([+-])(\d{2}):(\d{2})$/)
+  if (!match) {
+    return false
+  }
+
+  const sign = match[1] === '+' ? 1 : -1
+  const hours = parseInt(match[2]!, 10)
+  const minutes = parseInt(match[3]!, 10)
+
+  // Minutes must be 0-59
+  if (minutes > 59) {
+    return false
+  }
+
+  // Valid range: -12:00 (-720 min) to +14:00 (+840 min)
+  const totalMinutes = sign * (hours * 60 + minutes)
+  return totalMinutes >= -720 && totalMinutes <= 840
+}
+
+/**
  * Checks if a timezone is supported by the current runtime.
- * Uses Intl.DateTimeFormat as the primary check since it tests actual usability,
- * with Intl.supportedValuesOf as a secondary check for environments that support it.
+ * Supports both IANA timezone names and UTC offset formats.
+ *
+ * For IANA names: Uses Intl.DateTimeFormat and Intl.supportedValuesOf
+ * For UTC offsets: Uses native Date API to validate (±HH:mm format only)
  */
 const isTimezoneSupported = (timezoneValue: string): boolean => {
   // UTC is always supported
@@ -24,8 +55,12 @@ const isTimezoneSupported = (timezoneValue: string): boolean => {
     return true
   }
 
-  // Primary check: attempt to create a DateTimeFormat with the timezone
-  // This is the most reliable check as it tests actual usability
+  // Check if it's a UTC offset format (starts with + or -)
+  if (timezoneValue.startsWith('+') || timezoneValue.startsWith('-')) {
+    return isValidUtcOffset(timezoneValue)
+  }
+
+  // For IANA timezone names, use Intl.DateTimeFormat as primary check
   try {
     new Intl.DateTimeFormat('en-US', { timeZone: timezoneValue })
     return true
