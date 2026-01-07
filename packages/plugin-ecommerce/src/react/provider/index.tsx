@@ -36,6 +36,8 @@ const defaultContext: EcommerceContextType = {
         decimals: 2,
         label: 'US Dollar',
         symbol: '$',
+        symbolPosition: 'before',
+        symbolSeparator: '',
       },
     ],
   },
@@ -44,6 +46,8 @@ const defaultContext: EcommerceContextType = {
     decimals: 2,
     label: 'US Dollar',
     symbol: '$',
+    symbolPosition: 'before',
+    symbolSeparator: '',
   },
   decrementItem: async () => {},
   incrementItem: async () => {},
@@ -74,6 +78,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         decimals: 2,
         label: 'US Dollar',
         symbol: '$',
+        symbolPosition: 'before',
+        symbolSeparator: '',
       },
     ],
   },
@@ -931,15 +937,22 @@ export const useCurrency = () => {
         return value.toString()
       }
 
-      if (value === 0) {
-        return `${currencyToUse.symbol}0.${'0'.repeat(currencyToUse.decimals)}`
-      }
+      const { decimals, symbol, symbolPosition = 'before', symbolSeparator = '' } = currencyToUse
 
       // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-      const decimalValue = value / Math.pow(10, currencyToUse.decimals)
+      const formattedNumber =
+        value === 0
+          ? `0.${'0'.repeat(decimals)}`
+          : (value / Math.pow(10, decimals)).toFixed(decimals)
+
+      if (!symbol) {
+        return formattedNumber
+      }
 
       // Format with the correct number of decimal places
-      return `${currencyToUse.symbol}${decimalValue.toFixed(currencyToUse.decimals)}`
+      return symbolPosition === 'before'
+        ? `${symbol}${symbolSeparator}${formattedNumber}`
+        : `${formattedNumber}${symbolSeparator}${symbol}`
     },
     [currency],
   )
