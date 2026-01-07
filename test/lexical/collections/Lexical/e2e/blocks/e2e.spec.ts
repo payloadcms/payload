@@ -103,11 +103,7 @@ describe('lexicalBlocks', () => {
 
     const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(editDrawer).toBeVisible()
-    await expect(async () => {
-      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-    }).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     await editDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
