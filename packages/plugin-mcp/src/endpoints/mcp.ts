@@ -30,16 +30,10 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
         .update(apiKey || '')
         .digest('hex')
 
-      const apiKeyConstraints = [
-        {
-          apiKeyIndex: {
-            equals: sha256APIKeyIndex,
-          },
-        },
-      ]
-
       const where: Where = {
-        or: apiKeyConstraints,
+        apiKeyIndex: {
+          equals: sha256APIKeyIndex,
+        },
       }
 
       const { docs } = await payload.find({
