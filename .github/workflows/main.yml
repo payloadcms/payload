@@ -216,6 +216,12 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Start MongODB
+        id: mongodb
+        run: |
+          docker compose -f test/helpers/db/mongodb/docker-compose.yml up -d --wait
+          echo "PAYLOAD_TEST_MONGO_URL=mongodb://payload:payload@localhost:27017/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_ENV
+
       - name: Store Playwright's Version
         run: |
           # Extract the version number using a more targeted regex pattern with awk
