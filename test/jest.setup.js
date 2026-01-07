@@ -9,6 +9,21 @@ import nodemailer from 'nodemailer'
 
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
 
+// Mock ESM-only packages that @payloadcms/figma imports but aren't needed for database adapter tests
+// These are CLI/browser-specific dependencies that cause Jest transformation issues
+jest.mock('open', () => ({
+  default: jest.fn(),
+}))
+
+jest.mock('conf', () => ({
+  default: jest.fn().mockImplementation(() => ({
+    get: jest.fn(),
+    set: jest.fn(),
+    has: jest.fn(),
+    delete: jest.fn(),
+  })),
+}))
+
 process.env.PAYLOAD_DATABASE = 'content-api'
 
 // Content API authentication configuration
