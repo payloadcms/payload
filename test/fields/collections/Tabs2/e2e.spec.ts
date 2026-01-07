@@ -68,15 +68,15 @@ describe('Tabs', () => {
   test('should correctly save nested unnamed and named tabs', async () => {
     await page.goto(url.create)
 
-    await addArrayRow(page, { fieldName: 'tabsInArray' })
-    await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
+    await addArrayRow(page, { fieldName: 'arrayWithTabs' })
+    await page.locator('#field-arrayWithTabs__0__text').fill('tab 1 text')
     await page.locator('.tabs-field__tabs button:nth-child(2)').click()
-    await page.locator('#field-tabsInArray__0__tab2__text2').fill('tab 2 text')
+    await page.locator('#field-arrayWithTabs__0__tab2__text2').fill('tab 2 text')
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
+    await expect(page.locator('#field-arrayWithTabs__0__text')).toHaveValue('tab 1 text')
     await page.locator('.tabs-field__tabs button:nth-child(2)').click()
-    await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
+    await expect(page.locator('#field-arrayWithTabs__0__tab2__text2')).toHaveValue('tab 2 text')
   })
 })

@@ -1548,7 +1548,7 @@ export interface SlugField {
  */
 export interface TabsFields2 {
   id: string;
-  tabsInArray?:
+  arrayWithTabs?:
     | {
         text?: string | null;
         tab2?: {
@@ -3251,7 +3251,7 @@ export interface SlugFieldsSelect<T extends boolean = true> {
  * via the `definition` "tabs-fields-2_select".
  */
 export interface TabsFields2Select<T extends boolean = true> {
-  tabsInArray?:
+  arrayWithTabs?:
     | T
     | {
         text?: T;

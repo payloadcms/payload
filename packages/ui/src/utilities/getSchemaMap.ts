@@ -20,9 +20,9 @@ export const getSchemaMap = cache(
   }): FieldSchemaMap => {
     const { collectionSlug, config, globalSlug, i18n } = args
 
-    // if (!cachedSchemaMap || global._payload_doNotCacheSchemaMap) {
-    cachedSchemaMap = new Map()
-    // }
+    if (!cachedSchemaMap || global._payload_doNotCacheSchemaMap) {
+      cachedSchemaMap = new Map()
+    }
 
     let cachedEntityFieldMap = cachedSchemaMap.get(collectionSlug || globalSlug)
 

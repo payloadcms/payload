@@ -42,18 +42,22 @@ describe('Field Paths', () => {
         },
       ) => ({
         [`${fieldIdentifier}_beforeValidate_FieldPaths`]: {
+          indexPath: [],
           path,
           schemaPath,
         },
         [`${fieldIdentifier}_beforeChange_FieldPaths`]: {
+          indexPath: [],
           path,
           schemaPath,
         },
         [`${fieldIdentifier}_afterRead_FieldPaths`]: {
+          indexPath: [],
           path,
           schemaPath,
         },
         [`${fieldIdentifier}_beforeDuplicate_FieldPaths`]: {
+          indexPath: [],
           path,
           schemaPath,
         },
@@ -88,7 +92,16 @@ describe('Field Paths', () => {
         collection: fieldPathsSlug,
       })
 
-      expect(doc).toMatchObject({
+      expect(doc).toEqual({
+        updatedAt: doc.updatedAt,
+        createdAt: doc.createdAt,
+        id: doc.id,
+        topLevelNamedField: doc.topLevelNamedField,
+        fieldWithinRow: doc.fieldWithinRow,
+        namedTab: doc.namedTab,
+        fieldWithinUnnamedTab: doc.fieldWithinUnnamedTab,
+        fieldWithinNestedUnnamedTab: doc.fieldWithinNestedUnnamedTab,
+        array: expect.any(Array),
         ...formatExpectedFieldPaths('topLevelNamedField', {
           path: ['topLevelNamedField'],
           schemaPath: ['topLevelNamedField'],

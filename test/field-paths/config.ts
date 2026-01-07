@@ -7,6 +7,7 @@ import type { SanitizedConfig } from 'payload'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { FieldPaths } from './collections/FieldPaths/index.js'
+import { Test } from './collections/Test/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   admin: {
@@ -14,7 +15,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [FieldPaths],
+  collections: [FieldPaths, Test],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
