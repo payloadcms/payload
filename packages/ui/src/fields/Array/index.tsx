@@ -145,7 +145,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   })
 
   const componentId = useId()
-  const rowIdPrefix = useMemo(() => `${componentId}-${path}`, [componentId, path])
+  const scrollIdPrefix = useMemo(() => `scroll-${componentId}`, [componentId])
 
   const addRow = useCallback(
     (rowIndex: number) => {
@@ -156,10 +156,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       })
 
       setTimeout(() => {
-        scrollToID(`${rowIdPrefix}-row-${rowIndex}`)
+        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, rowIdPrefix, schemaPath],
+    [addFieldRow, path, schemaPath, scrollIdPrefix],
   )
 
   const duplicateRow = useCallback(
@@ -169,10 +169,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       setModified(true)
 
       setTimeout(() => {
-        scrollToID(`${rowIdPrefix}-row-${rowIndex}`)
+        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
       }, 0)
     },
-    [dispatchFields, path, rowIdPrefix, setModified],
+    [dispatchFields, path, scrollIdPrefix, setModified],
   )
 
   const removeRow = useCallback(
@@ -440,9 +440,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     removeRow={removeRow}
                     row={rowData}
                     rowCount={rows?.length}
-                    rowIdPrefix={rowIdPrefix}
                     rowIndex={i}
                     schemaPath={schemaPath}
+                    scrollIdPrefix={scrollIdPrefix}
                     setCollapse={setCollapse}
                   />
                 )}

@@ -26,9 +26,8 @@ export async function copyPasteField({
   let popupBtn: Locator
 
   if (rowAction) {
-    const formattedRowID = fieldName.replace(/__/g, '.')
-    const rowSuffix = `${formattedRowID}-row-${rowIndex}`
-    const row = field.locator(`:is([id$="-${rowSuffix}"], [id$="${rowSuffix}"])`).first()
+    const formattedRowID = fieldName.replace(/__/g, '-')
+    const row = field.locator(`#${formattedRowID}-row-${rowIndex}`).first()
     popupBtn = row.locator('.collapsible__actions button.array-actions__button').first()
   } else {
     popupBtn = field.locator('header .clipboard-action__popup button.popup-button').first()

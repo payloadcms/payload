@@ -19,10 +19,10 @@ export const openArrayRowActions = async (
   popupContentLocator: Locator
   rowActionsButtonLocator: Locator
 }> => {
-  const formattedRowID = fieldName.toString().replace(/__/g, '.')
-  const rowSuffix = `${formattedRowID}-row-${rowIndex}`
+  // replace double underscores with single hyphens for the row ID
+  const formattedRowID = fieldName.toString().replace(/__/g, '-')
   const rowActions = page
-    .locator(`#field-${fieldName} :is([id$="-${rowSuffix}"], [id$="${rowSuffix}"]) .array-actions`)
+    .locator(`#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions`)
     .first()
 
   const popupContentLocator = page.locator('.popup__content')

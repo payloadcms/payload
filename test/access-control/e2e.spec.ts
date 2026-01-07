@@ -282,20 +282,20 @@ describe('Access Control', () => {
       ).not.toBeAttached()
 
       await expect(
-        page.locator('#field-array [id$="-array-row-0"] .rich-text-lexical .ContentEditable__root'),
+        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
       ).toBeVisible()
       await expect(
-        page.locator('#field-array [id$="-array-row-0"] .rich-text-lexical--read-only'),
+        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
       ).not.toBeAttached()
 
       await expect(
         page.locator(
-          '#field-arrayWithAccessFalse [id$="-arrayWithAccessFalse-row-0"] .rich-text-lexical .ContentEditable__root',
+          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical .ContentEditable__root',
         ),
       ).toBeVisible()
       await expect(
         page.locator(
-          '#field-arrayWithAccessFalse [id$="-arrayWithAccessFalse-row-0"] .rich-text-lexical--read-only',
+          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical--read-only',
         ),
       ).toBeVisible()
 
@@ -341,10 +341,10 @@ describe('Access Control', () => {
       await expect(page.locator('#field-group #field-group__text')).toBeEnabled()
 
       await expect(
-        page.locator('#field-array [id$="-array-row-0"] .rich-text-lexical .ContentEditable__root'),
+        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
       ).toBeVisible()
       await expect(
-        page.locator('#field-array [id$="-array-row-0"] .rich-text-lexical--read-only'),
+        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
       ).toBeVisible() // => is read-only
     }
 
