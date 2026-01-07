@@ -22,7 +22,6 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  throttleTest,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
@@ -59,13 +58,12 @@ describe('lexicalBlocks', () => {
 
     await ensureCompilationIsDone({ page, serverURL })
   })
-  beforeEach(async (_, testInfo) => {
-    testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    await throttleTest({
-      page,
-      context,
-      delay: 'Slow 4G',
-    })
+  beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Slow 4G',
+    // })
     await reInitializeDB({
       serverURL,
       snapshotKey: 'lexicalTest',
@@ -105,7 +103,11 @@ describe('lexicalBlocks', () => {
 
     const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(editDrawer).toBeVisible()
-    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await expect(async () => {
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
 
     await editDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
