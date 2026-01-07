@@ -22,5 +22,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   doc = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc
 
-  return sanitizeInternalFields(doc)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return sanitizeInternalFields(doc as any)
 }
