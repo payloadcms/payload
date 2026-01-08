@@ -650,7 +650,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         depth: 0,
         select: {
           id: true,
-          carts: true,
+          cart: true,
         },
       })
 
