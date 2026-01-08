@@ -60,7 +60,11 @@ test.describe('Form State', () => {
   })
 
   test.beforeEach(async () => {
-    // await throttleTest({ page, context, delay: 'Fast 3G' })
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Slow 4G',
+    // })
   })
 
   test('should disable fields during initialization', async () => {
@@ -237,6 +241,7 @@ test.describe('Form State', () => {
     await page.route(postsUrl.create, async (route) => {
       if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
         await route.abort()
+        return
       }
 
       await route.continue()
