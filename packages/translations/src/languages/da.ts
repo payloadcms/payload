@@ -78,6 +78,11 @@ export const daTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har anmodet om dette, skal du blot ignorere denne e-mail, og din adgangskode vil forblive uændret',
   },
+  dashboard: {
+    addWidget: 'Tilføj Widget',
+    deleteWidget: 'Slet widget {{id}}',
+    searchWidgets: 'Søg widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',
     autosaving: 'Der opstod et problem under autosaving af dette dokument.',
@@ -336,6 +341,7 @@ export const daTranslations: DefaultTranslationsObject = {
     loading: 'Loader',
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
+    lock: 'Lås',
     menu: 'Menu',
     moreOptions: 'Flere muligheder',
     move: 'Flyt',
@@ -427,6 +433,7 @@ export const daTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til papirkurven.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
+    unlock: 'Oplås',
     unsavedChanges: 'Du har ikke gemte ændringer. Gem eller kassér før fortsættelse.',
     unsavedChangesDuplicate: 'Du har ikke-gemte ændringer. Vil du fortsætte med at duplikere?',
     untitled: 'Uden titel',

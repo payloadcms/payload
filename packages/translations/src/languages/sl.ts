@@ -79,6 +79,11 @@ export const slTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
+  dashboard: {
+    addWidget: 'Dodaj pripomoček',
+    deleteWidget: 'Izbriši pripomoček {{id}}',
+    searchWidgets: 'Išči gradnike...',
+  },
   error: {
     accountAlreadyActivated: 'Ta račun je že aktiviran.',
     autosaving: 'Pri samodejnem shranjevanju tega dokumenta je prišlo do težave.',
@@ -337,6 +342,7 @@ export const slTranslations: DefaultTranslationsObject = {
     loading: 'Nalaganje',
     locale: 'Jezik',
     locales: 'Jeziki',
+    lock: 'Zakleni',
     menu: 'Meni',
     moreOptions: 'Več možnosti',
     move: 'Premakni',
@@ -427,6 +433,7 @@ export const slTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} premaknjeno v smeti.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
+    unlock: 'Odkleni',
     unsavedChanges: 'Neshranjene spremembe',
     unsavedChangesDuplicate: 'Imate neshranjene spremembe. Želite nadaljevati s podvajanjem?',
     untitled: 'Brez naslova',

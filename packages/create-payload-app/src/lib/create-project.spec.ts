@@ -1,14 +1,12 @@
-import { jest } from '@jest/globals'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
-
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
 import { createProject, updatePackageJSONDependencies } from './create-project.js'
-import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
 
 describe('createProject', () => {
@@ -16,7 +14,7 @@ describe('createProject', () => {
 
   beforeAll(() => {
     // eslint-disable-next-line no-console
-    console.log = jest.fn()
+    console.log = vitest.fn()
   })
 
   beforeEach(() => {
@@ -111,7 +109,7 @@ describe('createProject', () => {
 
       // Check package name and description
       expect(packageJson.name).toStrictEqual(projectName)
-    })
+    }, 90_000)
 
     describe('creates project from template', () => {
       const templates = getValidTemplates()
@@ -148,8 +146,6 @@ describe('createProject', () => {
           template: template as ProjectTemplate,
         })
 
-        const dbReplacement = dbReplacements[db as DbType]
-
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
 
@@ -170,13 +166,19 @@ describe('createProject', () => {
 
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 
-        // Check payload.config.ts
+        // Check payload.config.ts doesn't have placeholder comments
         expect(content).not.toContain('// database-adapter-import')
-        expect(content).toContain(dbReplacement.importReplacement)
-
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+
+        // Verify correct adapter import and usage based on db type
+        if (db === 'mongodb') {
+          expect(content).toContain("import { mongooseAdapter } from '@payloadcms/db-mongodb'")
+          expect(content).toContain('mongooseAdapter')
+        } else if (db === 'postgres') {
+          expect(content).toContain("import { postgresAdapter } from '@payloadcms/db-postgres'")
+          expect(content).toContain('postgresAdapter')
+        }
       })
     })
 

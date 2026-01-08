@@ -23,7 +23,7 @@ export default buildConfig({
   db: mongooseAdapter({
     // Mongoose-specific arguments go here.
     // URL is required.
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
   }),
 })
 ```
@@ -67,7 +67,7 @@ import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
     // For example, if you're using firestore:
     ...compatibilityOptions.firestore,
   }),
@@ -78,3 +78,38 @@ We export compatibility options for [DocumentDB](https://aws.amazon.com/document
 
 - Azure Cosmos DB does not support transactions that update two or more documents in different collections, which is a common case when using Payload (via hooks).
 - Azure Cosmos DB requires the root config property `indexSortableFields` to be set to `true`.
+
+## Using collation
+
+There are situations where you may want to use language-specific string comparison, for example when sorting strings with accents or in different languages. MongoDB supports this via [collation](https://www.mongodb.com/docs/manual/reference/collation/).
+
+We thread your locale automatically through to the MongoDB queries when collation is enabled in the adapter, so that when you sort by a field, it uses the correct language rules for that locale.
+
+To enable collation, set the `collation` option in the adapter configuration:
+
+```ts
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the Mongoose adapter here
+  db: mongooseAdapter({
+    // Mongoose-specific arguments go here.
+    // URL is required.
+    url: process.env.DATABASE_URL,
+    collation: {
+      // Set any MongoDB collation options here.
+      // The locale will be set automatically based on the request locale.
+      strength: 1, // Example option
+    },
+  }),
+})
+```
+
+<Banner type="warning">
+  Collation will affect things like sort based on the locale being used. Please
+  test thoroughly before using in production as it can affect your queries.
+</Banner>

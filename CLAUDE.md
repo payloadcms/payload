@@ -52,12 +52,26 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ## Development
 
+### Coding Patterns and Best Practices
+
+- Prefer single object parameters (improves backwards-compatibility)
+- Prefer types over interfaces (except when extending external types)
+- Prefer functions over classes (classes only for errors/adapters)
+- Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
+- Organize functions top-down: exports before helpers
+- Use JSDoc for complex functions; add tags only when justified beyond type signature
+- Use `import type` for types, regular `import` for values, separate statements even from same module
+- Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- Commenting Guidelines
+  - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
+  - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
+  - Type definitions: Property/interface documentation is always acceptable.
+
 ### Running Dev Server
 
 - `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
-- `pnpm run dev:memorydb` - Run dev server with in-memory MongoDB
 
 ### Development Environment
 
@@ -82,7 +96,7 @@ Each test directory in `test/` follows this pattern:
 ```
 test/<feature-name>/
 ├── config.ts        # Lightweight Payload config for testing
-├── int.spec.ts      # Integration tests (Jest)
+├── int.spec.ts      # Integration tests (Vitest)
 ├── e2e.spec.ts      # End-to-end tests (Playwright)
 └── payload-types.ts # Generated types
 ```

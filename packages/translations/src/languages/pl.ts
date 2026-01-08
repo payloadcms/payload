@@ -79,6 +79,11 @@ export const plTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
+  dashboard: {
+    addWidget: 'Dodaj Widżet',
+    deleteWidget: 'Usuń widget {{id}}',
+    searchWidgets: 'Szukaj widgetów...',
+  },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',
     autosaving: 'Wystąpił problem podczas automatycznego zapisywania tego dokumentu.',
@@ -337,6 +342,7 @@ export const plTranslations: DefaultTranslationsObject = {
     loading: 'Ładowanie',
     locale: 'Ustawienia regionalne',
     locales: 'Ustawienia regionalne',
+    lock: 'Zamek',
     menu: 'Menu',
     moreOptions: 'Więcej opcji',
     move: 'Przesuń',
@@ -426,6 +432,7 @@ export const plTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} przeniesiono do kosza.',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
+    unlock: 'Odblokuj',
     unsavedChanges: 'Masz niezapisane zmiany. Zapisz lub odrzuć, zanim kontynuujesz.',
     unsavedChangesDuplicate: 'Masz niezapisane zmiany. Czy chcesz kontynuować duplikowanie?',
     untitled: 'Bez nazwy',

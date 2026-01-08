@@ -79,6 +79,11 @@ export const caTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
+  dashboard: {
+    addWidget: 'Afegeix Widget',
+    deleteWidget: 'Esborra el widget {{id}}',
+    searchWidgets: 'Cerca de ginys...',
+  },
   error: {
     accountAlreadyActivated: 'Aquest compte ja ha estat activat.',
     autosaving: "Hi ha hagut un problema mentre s'estava desant automàticament aquest document.",
@@ -339,6 +344,7 @@ export const caTranslations: DefaultTranslationsObject = {
     loading: 'Carregant',
     locale: 'Idioma',
     locales: 'Idiomes',
+    lock: 'Bloqueig',
     menu: 'Menu',
     moreOptions: 'Més opcions',
     move: 'Mou-te',
@@ -430,6 +436,7 @@ export const caTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: "{{count}} {{label}} s'ha mogut a la paperera.",
     true: 'Veritat',
     unauthorized: 'No autoritzat',
+    unlock: 'Desbloqueja',
     unsavedChanges: 'Tens canvis no desats. Vols continuar sense desar?',
     unsavedChangesDuplicate: 'Tens canvis no desats. Vols duplicar sense desar?',
     untitled: 'Sense titol',

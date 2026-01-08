@@ -81,6 +81,11 @@ export const roTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată.',
   },
+  dashboard: {
+    addWidget: 'Adaugați widget',
+    deleteWidget: 'Ștergeți widget-ul {{id}}',
+    searchWidgets: 'Caută widgeturi...',
+  },
   error: {
     accountAlreadyActivated: 'Acest cont a fost deja activat.',
     autosaving: 'A existat o problemă în timpul salvării automate a acestui document.',
@@ -343,6 +348,7 @@ export const roTranslations: DefaultTranslationsObject = {
     loading: 'Încărcare',
     locale: 'Localitate',
     locales: 'Localuri',
+    lock: 'Încuietoare',
     menu: 'Meniu',
     moreOptions: 'Mai multe opțiuni',
     move: 'Mutați',
@@ -433,6 +439,7 @@ export const roTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} mutate la coșul de gunoi.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
+    unlock: 'Deblocare',
     unsavedChanges: 'Aveți modificări nesalvate. Salvați sau renunțați înainte de a continua.',
     unsavedChangesDuplicate: 'Aveți modificări nesalvate. Doriți să continuați să duplicați?',
     untitled: 'Fără titlu',

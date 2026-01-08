@@ -79,6 +79,11 @@ export const bnInTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  dashboard: {
+    addWidget: 'উইজেট যোগ করুন',
+    deleteWidget: 'উইজেট মুছুন {{id}}',
+    searchWidgets: 'উইজেট অনুসন্ধান করুন...',
+  },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',
     autosaving: 'এই ডকুমেন্টটি স্বয়ংক্রিয়ভাবে সংরক্ষণ করার সময় একটি সমস্যা হয়েছে।',
@@ -341,6 +346,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     loading: 'লোড হচ্ছে',
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
+    lock: 'লক',
     menu: 'মেনু',
     moreOptions: 'আরও বিকল্পগুলি',
     move: 'স্থানান্তর করুন',
@@ -432,6 +438,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে সরানো হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
     unsavedChangesDuplicate:

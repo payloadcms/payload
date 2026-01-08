@@ -76,6 +76,11 @@ export const zhTwTranslations: DefaultTranslationsObject = {
       '您會收到這封郵件是因為您（或其他人）請求重設此帳戶的密碼。請點選以下連結，或將該連結貼至瀏覽器以完成操作：',
     youDidNotRequestPassword: '如果這不是您本人操作，請忽略這封郵件，您的密碼將不會改變。',
   },
+  dashboard: {
+    addWidget: '添加小工具',
+    deleteWidget: '刪除小工具 {{id}}',
+    searchWidgets: '搜索小工具...',
+  },
   error: {
     accountAlreadyActivated: '此帳戶已啟用。',
     autosaving: '自動儲存文件時發生問題。',
@@ -321,6 +326,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     loading: '載入中',
     locale: '語言地區',
     locales: '語言地區',
+    lock: '鎖定',
     menu: '選單',
     moreOptions: '更多選項',
     move: '移動',
@@ -408,6 +414,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} 個 {{label}} 已移至垃圾桶。',
     true: '是',
     unauthorized: '未經授權',
+    unlock: '解鎖',
     unsavedChanges: '您有尚未儲存的變更。請先儲存或捨棄後再繼續。',
     unsavedChangesDuplicate: '您有尚未儲存的變更。是否仍要繼續複製？',
     untitled: '未命名',

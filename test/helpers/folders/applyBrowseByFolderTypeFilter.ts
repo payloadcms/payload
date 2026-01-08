@@ -16,14 +16,14 @@ export const applyBrowseByFolderTypeFilter = async ({
   let typePill = page.locator('.search-bar__actions .checkbox-popup.popup--active', {
     hasText: 'Type',
   })
-  const isActive = (await typePill.count()) > 0
+  const isActive = (await page.locator('.popup__content').count()) > 0
 
   if (!isActive) {
     typePill = page.locator('.search-bar__actions .checkbox-popup', { hasText: 'Type' })
     await typePill.locator('.popup-button', { hasText: 'Type' }).click()
   }
 
-  await typePill.locator('.field-label', { hasText: type.label }).click()
+  await page.locator('.popup__content .field-label', { hasText: type.label }).click()
 
   await page.waitForURL((urlStr) => {
     try {

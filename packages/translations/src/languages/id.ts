@@ -80,6 +80,11 @@ export const idTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
+  dashboard: {
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Hapus widget {{id}}',
+    searchWidgets: 'Cari widget...',
+  },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
     autosaving: 'Terjadi masalah saat menyimpan otomatis dokumen ini.',
@@ -339,6 +344,7 @@ export const idTranslations: DefaultTranslationsObject = {
     loading: 'Memuat',
     locale: 'Lokal',
     locales: 'Lokal',
+    lock: 'Kunci',
     menu: 'Menu',
     moreOptions: 'Opsi lainnya',
     move: 'Pindah',
@@ -429,6 +435,7 @@ export const idTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} dipindahkan ke tempat sampah.',
     true: 'Benar',
     unauthorized: 'Tidak Sah',
+    unlock: 'Buka Kunci',
     unsavedChanges:
       'Anda memiliki perubahan yang belum disimpan. Simpan atau buang sebelum melanjutkan.',
     unsavedChangesDuplicate:

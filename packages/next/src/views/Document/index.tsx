@@ -22,7 +22,7 @@ import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
 import { isolateObjectProperty, logError } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -129,7 +129,6 @@ export const renderDocument = async ({
       const redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
-        serverURL,
       })
       redirect(redirectURL)
     } else {
@@ -264,7 +263,7 @@ export const renderDocument = async ({
 
   const formattedParams = new URLSearchParams()
 
-  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+  if (hasDraftsEnabled(collectionConfig || globalConfig)) {
     formattedParams.append('draft', 'true')
   }
 
@@ -274,11 +273,14 @@ export const renderDocument = async ({
 
   const apiQueryParams = `?${formattedParams.toString()}`
 
-  const apiURL = collectionSlug
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
-    : globalSlug
-      ? `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
-      : ''
+  const apiURL = formatAdminURL({
+    apiRoute,
+    path: collectionSlug
+      ? `/${collectionSlug}/${idFromArgs}${apiQueryParams}`
+      : globalSlug
+        ? `/${globalSlug}${apiQueryParams}`
+        : '',
+  })
 
   let View: ViewToRender = null
 
@@ -314,10 +316,7 @@ export const renderDocument = async ({
    * Handle case where autoSave is enabled and the document is being created
    * => create document and redirect
    */
-  const shouldAutosave =
-    hasSavePermission &&
-    ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+  const shouldAutosave = hasSavePermission && hasAutosaveEnabled(collectionConfig || globalConfig)
 
   const validateDraftData =
     collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
@@ -344,7 +343,6 @@ export const renderDocument = async ({
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
-          serverURL,
         })
 
         redirect(redirectURL)

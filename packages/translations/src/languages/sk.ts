@@ -80,6 +80,11 @@ export const skTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
+  dashboard: {
+    addWidget: 'Pridať Widget',
+    deleteWidget: 'Odstrániť widget {{id}}',
+    searchWidgets: 'Hľadať doplnky...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet už bol aktivovaný.',
     autosaving: 'Pri automatickom ukladaní tohto dokumentu došlo k chybe.',
@@ -339,6 +344,7 @@ export const skTranslations: DefaultTranslationsObject = {
     loading: 'Načítavanie',
     locale: 'Jazyk',
     locales: 'Jazyky',
+    lock: 'Zámok',
     menu: 'Menu',
     moreOptions: 'Viac možností',
     move: 'Presuňte sa',
@@ -427,6 +433,7 @@ export const skTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} presunuté do koša.',
     true: 'Pravda',
     unauthorized: 'Neoprávnený prístup',
+    unlock: 'Odomknúť',
     unsavedChanges: 'Máte neuložené zmeny. Uložte alebo zahoďte pred pokračovaním.',
     unsavedChangesDuplicate: 'Máte neuložené zmeny. Chceli by ste pokračovať v duplikovaní?',
     untitled: 'Bez názvu',

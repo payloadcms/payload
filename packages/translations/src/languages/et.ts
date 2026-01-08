@@ -78,6 +78,11 @@ export const etTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
+  dashboard: {
+    addWidget: 'Lisa vidin',
+    deleteWidget: 'Kustuta vidin {{id}}',
+    searchWidgets: 'Otsi vidinaid...',
+  },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',
     autosaving: 'Dokumendi automaatsel salvestamisel tekkis probleem.',
@@ -335,6 +340,7 @@ export const etTranslations: DefaultTranslationsObject = {
     loading: 'Laadimine',
     locale: 'Keel',
     locales: 'Keeled',
+    lock: 'Lukk',
     menu: 'Menüü',
     moreOptions: 'Rohkem valikuid',
     move: 'Liiguta',
@@ -423,6 +429,7 @@ export const etTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} kanti prügikasti.',
     true: 'Tõene',
     unauthorized: 'Volitamata',
+    unlock: 'Avage lukk',
     unsavedChanges: 'Teil on salvestamata muudatusi. Salvestage või tühistage enne jätkamist.',
     unsavedChangesDuplicate: 'Teil on salvestamata muudatusi. Kas soovite jätkata dubleerimisega?',
     untitled: 'Pealkirjata',

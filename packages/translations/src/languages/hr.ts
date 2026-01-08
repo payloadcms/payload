@@ -80,6 +80,11 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  dashboard: {
+    addWidget: 'Dodaj widget',
+    deleteWidget: 'Izbriši widget {{id}}',
+    searchWidgets: 'Pretraži widgete...',
+  },
   error: {
     accountAlreadyActivated: 'Ovaj račun je već aktiviran.',
     autosaving: 'Nastao je problem pri automatskom spremanju ovog dokumenta.',
@@ -338,6 +343,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     loading: 'Učitavanje',
     locale: 'Jezik',
     locales: 'Prijevodi',
+    lock: 'Brava',
     menu: 'Izbornik',
     moreOptions: 'Više opcija',
     move: 'Pomakni',
@@ -428,6 +434,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} premješteno u smeće.',
     true: 'Istinito',
     unauthorized: 'Neovlašteno',
+    unlock: 'Otključaj',
     unsavedChanges: 'Imate nespremljene promjene. Spremite ili odbacite prije nastavka.',
     unsavedChangesDuplicate: 'Imate nespremljene promjene. Želite li nastaviti s dupliciranjem?',
     untitled: 'Bez naslova',

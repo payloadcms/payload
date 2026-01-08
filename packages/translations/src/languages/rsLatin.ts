@@ -80,6 +80,11 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
+  dashboard: {
+    addWidget: 'Dodaj widget',
+    deleteWidget: 'Obriši widget {{id}}',
+    searchWidgets: 'Pretraži dodatke...',
+  },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',
     autosaving: 'Nastao je problem pri automatskom čuvanju ovog dokumenta.',
@@ -339,6 +344,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     loading: 'Učitavanje',
     locale: 'Jezik',
     locales: 'Prevodi',
+    lock: 'Zaključaj',
     menu: 'Meni',
     moreOptions: 'Više opcija',
     move: 'Pomeri',
@@ -429,6 +435,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} premešteno u kantu za smeće.',
     true: 'Istinito',
     unauthorized: 'Niste autorizovani',
+    unlock: 'Otključaj',
     unsavedChanges: 'Imate nesačuvane promene. Sačuvajte ili odbacite pre nego što nastavite.',
     unsavedChangesDuplicate: 'Imate nesačuvane promene. Da li želite nastaviti sa dupliciranjem?',
     untitled: 'Bez naslova',

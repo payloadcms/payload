@@ -80,6 +80,11 @@ export const jaTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
+  dashboard: {
+    addWidget: 'ウィジェットを追加する',
+    deleteWidget: 'ウィジェット{{id}}を削除します',
+    searchWidgets: 'ウィジェットを検索...',
+  },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',
     autosaving: 'このデータを自動保存する際に問題が発生しました。',
@@ -340,6 +345,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     loading: 'ローディング中',
     locale: 'ロケール',
     locales: 'ロケール',
+    lock: 'ロック',
     menu: 'メニュー',
     moreOptions: 'より多くのオプション',
     move: '移動します',
@@ -430,6 +436,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}}がゴミ箱に移動しました。',
     true: '真実',
     unauthorized: '未認証',
+    unlock: 'アンロック',
     unsavedChanges: '保存されていない変更があります。続行する前に保存または破棄してください。',
     unsavedChangesDuplicate: '未保存の変更があります。複製を続けますか？',
     untitled: 'Untitled',

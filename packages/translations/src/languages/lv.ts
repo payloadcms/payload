@@ -79,6 +79,11 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  dashboard: {
+    addWidget: 'Pievienot logrīku',
+    deleteWidget: 'Dzēst logrīku {{id}}',
+    searchWidgets: 'Meklēt logrīkus...',
+  },
   error: {
     accountAlreadyActivated: 'Šis konts jau ir aktivizēts.',
     autosaving: 'Radās problēma, automātiski saglabājot šo dokumentu.',
@@ -339,6 +344,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     loading: 'Ielādē...',
     locale: 'Lokalizācija',
     locales: 'Lokalizācijas',
+    lock: 'Slēdzene',
     menu: 'Izvēlne',
     moreOptions: 'Vairāk opciju',
     move: 'Pārvietoties',
@@ -428,6 +434,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} pārvietoti uz miskasti.',
     true: 'Patiesi',
     unauthorized: 'Neautorizēts',
+    unlock: 'Atslēgt',
     unsavedChanges: 'Jums ir nesaglabātas izmaiņas. Saglabājiet vai atceliet pirms turpināšanas.',
     unsavedChangesDuplicate: 'Jums ir nesaglabātas izmaiņas. Vai vēlaties turpināt dublēšanu?',
     untitled: 'Bez nosaukuma',

@@ -78,6 +78,11 @@ export const taTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
+  dashboard: {
+    addWidget: 'விக்கெட் சேர்',
+    deleteWidget: '{{id}} விட்ஜெடை நீக்கு',
+    searchWidgets: 'தேடல் கருவிகள்...',
+  },
   error: {
     accountAlreadyActivated: 'இந்த கணக்கு ஏற்கனவே செயல்படுத்தப்பட்டுள்ளது.',
     autosaving: 'இந்த ஆவணத்தை தானாகச் சேமிக்கும் போது ஒரு பிரச்சனை ஏற்பட்டது.',
@@ -336,6 +341,7 @@ export const taTranslations: DefaultTranslationsObject = {
     loading: 'ஏற்றுகிறது',
     locale: 'மொழி அமைவு',
     locales: 'மொழி அமைவுகள்',
+    lock: 'பூட்டு',
     menu: 'மெனு',
     moreOptions: 'மேலும் விருப்பங்கள்',
     move: 'நகர்த்து',
@@ -426,6 +432,7 @@ export const taTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} குப்பைக்குச் செலுத்தப்பட்டது.',
     true: 'உண்மை',
     unauthorized: 'அனுமதி இல்லை',
+    unlock: 'திறக்க',
     unsavedChanges:
       'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. தொடருவதற்கு முன் சேமிக்கவும் அல்லது நிராகரிக்கவும்.',
     unsavedChangesDuplicate: 'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. நகலெடுக்கத் தொடர விரும்புகிறீர்களா?',

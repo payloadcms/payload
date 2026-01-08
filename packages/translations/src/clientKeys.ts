@@ -62,6 +62,10 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:verifyUser',
   'authentication:youAreInactive',
 
+  'dashboard:addWidget',
+  'dashboard:deleteWidget',
+  'dashboard:searchWidgets',
+
   'error:autosaving',
   'error:correctInvalidFields',
   'error:deletingTitle',
@@ -261,6 +265,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:leaveWithoutSaving',
   'general:light',
   'general:livePreview',
+  'general:lock',
   'general:exitLivePreview',
   'general:loading',
   'general:locale',
@@ -357,6 +362,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:user',
   'general:username',
   'general:unauthorized',
+  'general:unlock',
   'general:unsavedChanges',
   'general:unsavedChangesDuplicate',
   'general:untitled',

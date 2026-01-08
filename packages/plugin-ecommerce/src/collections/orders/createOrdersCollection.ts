@@ -5,13 +5,10 @@ import type { AccessConfig, CurrenciesConfig } from '../../types/index.js'
 import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'
 import { currencyField } from '../../fields/currencyField.js'
+import { accessOR } from '../../utilities/accessComposition.js'
 
 type Props = {
-  access: {
-    adminOnly: NonNullable<AccessConfig['adminOnly']>
-    adminOnlyFieldAccess: NonNullable<AccessConfig['adminOnlyFieldAccess']>
-    adminOrCustomerOwner: NonNullable<AccessConfig['adminOrCustomerOwner']>
-  }
+  access: Pick<AccessConfig, 'adminOnlyFieldAccess' | 'isAdmin' | 'isDocumentOwner'>
   /**
    * Array of fields used for capturing the shipping address data.
    */
@@ -38,7 +35,7 @@ type Props = {
 
 export const createOrdersCollection: (props: Props) => CollectionConfig = (props) => {
   const {
-    access: { adminOnly, adminOnlyFieldAccess, adminOrCustomerOwner },
+    access,
     addressFields,
     currenciesConfig,
     customersSlug = 'users',
@@ -124,9 +121,9 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
       name: 'transactions',
       type: 'relationship',
       access: {
-        create: adminOnlyFieldAccess,
-        read: adminOnlyFieldAccess,
-        update: adminOnlyFieldAccess,
+        create: access.adminOnlyFieldAccess,
+        read: access.adminOnlyFieldAccess,
+        update: access.adminOnlyFieldAccess,
       },
       admin: {
         position: 'sidebar',
@@ -195,10 +192,10 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
   const baseConfig: CollectionConfig = {
     slug: 'orders',
     access: {
-      create: adminOnly,
-      delete: adminOnly,
-      read: adminOrCustomerOwner,
-      update: adminOnly,
+      create: access.isAdmin,
+      delete: access.isAdmin,
+      read: accessOR(access.isAdmin, access.isDocumentOwner),
+      update: access.isAdmin,
     },
     admin: {
       description: ({ t }) =>

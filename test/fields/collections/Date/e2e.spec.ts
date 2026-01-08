@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { TZDateMini } from '@date-fns/tz/date/mini'
 import { expect, test } from '@playwright/test'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -543,7 +544,6 @@ describe('Date', () => {
       )
 
       await expect(dateFieldRequiredOnlyTz).toBeVisible()
-      // eslint-disable-next-line jest-dom/prefer-required
       await expect(dateFieldRequiredOnlyTz).not.toHaveAttribute('required')
 
       const timezoneClearButtonOnlyTz = page.locator(
@@ -594,6 +594,22 @@ describe('Date', () => {
 
       // eslint-disable-next-line payload/no-flaky-assertions
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+  })
+
+  describe('A11y', () => {
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-default').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
     })
   })
 })

@@ -5,7 +5,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -91,11 +91,14 @@ export const DuplicateDocument: React.FC<Props> = ({
 
       try {
         const res = await requests.post(
-          `${serverURL}${apiRoute}/${slug}/${id}/duplicate${qs.stringify(queryParams, {
-            addQueryPrefix: true,
-          })}`,
+          formatAdminURL({
+            apiRoute,
+            path: `/${slug}/${id}/duplicate${qs.stringify(queryParams, {
+              addQueryPrefix: true,
+            })}`,
+          }),
           {
-            body: JSON.stringify(collectionConfig.versions?.drafts ? { _status: 'draft' } : {}),
+            body: JSON.stringify(hasDraftsEnabled(collectionConfig) ? { _status: 'draft' } : {}),
             headers,
           },
         )

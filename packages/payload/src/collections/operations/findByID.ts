@@ -24,11 +24,13 @@ import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/inde
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type FindByIDArgs = {
   collection: Collection
@@ -66,18 +68,11 @@ export const findByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'read',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'read',
+    })
 
     const {
       id,
@@ -85,7 +80,7 @@ export const findByIDOperation = async <
       currentDepth,
       depth,
       disableErrors,
-      draft: draftEnabled = false,
+      draft: replaceWithVersion = false,
       flattenLocales,
       includeLockStatus,
       joins,
@@ -141,29 +136,6 @@ export const findByIDOperation = async <
       req,
     })
 
-    let dbSelect = select
-
-    if (
-      collectionConfig.versions?.drafts &&
-      draftEnabled &&
-      select &&
-      getSelectMode(select) === 'include'
-    ) {
-      dbSelect = { ...select, createdAt: true, updatedAt: true }
-    }
-
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      draftsEnabled: draftEnabled,
-      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-      locale: locale!,
-      req: {
-        transactionID: req.transactionID,
-      } as PayloadRequest,
-      select: dbSelect,
-      where: fullWhere,
-    }
-
     // execute only if there's a custom ID and potentially overwriten access on id
     if (req.payload.collections[collectionConfig.slug]!.customIDType) {
       await validateQueryPaths({
@@ -177,6 +149,29 @@ export const findByIDOperation = async <
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
+
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      replaceWithVersion &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
+    const findOneArgs: FindOneArgs = {
+      collection: collectionConfig.slug,
+      draftsEnabled: replaceWithVersion,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
+      locale: locale!,
+      req: {
+        transactionID: req.transactionID,
+      } as PayloadRequest,
+      select: dbSelect,
+      where: fullWhere,
+    }
 
     if (!findOneArgs.where?.and?.[0]?.id) {
       throw new NotFound(t)
@@ -253,7 +248,7 @@ export const findByIDOperation = async <
     // Replace document with draft if available
     // /////////////////////////////////////
 
-    if (collectionConfig.versions?.drafts && draftEnabled) {
+    if (replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
       result = await replaceWithDraftIfAvailable({
         accessResult,
         doc: result,
@@ -292,7 +287,7 @@ export const findByIDOperation = async <
       currentDepth,
       depth: depth!,
       doc: result,
-      draft: draftEnabled,
+      draft: replaceWithVersion,
       fallbackLocale: fallbackLocale!,
       flattenLocales,
       global: null,

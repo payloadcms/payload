@@ -79,6 +79,11 @@ export const csTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno.',
   },
+  dashboard: {
+    addWidget: 'Přidat widget',
+    deleteWidget: 'Odstranit widget {{id}}',
+    searchWidgets: 'Hledat widgety...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet již byl aktivován.',
     autosaving: 'Při automatickém ukládání tohoto dokumentu došlo k chybě.',
@@ -336,6 +341,7 @@ export const csTranslations: DefaultTranslationsObject = {
     loading: 'Načítání',
     locale: 'Místní verze',
     locales: 'Lokality',
+    lock: 'Zámek',
     menu: 'Jídelní lístek',
     moreOptions: 'Více možností',
     move: 'Pohnout',
@@ -426,6 +432,7 @@ export const csTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} přesunuto do koše.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',
+    unlock: 'Odemknout',
     unsavedChanges: 'Máte neuložené změny. Uložte nebo zahoďte před pokračováním.',
     unsavedChangesDuplicate: 'Máte neuložené změny. Chtěli byste pokračovat v duplikování?',
     untitled: 'Bez názvu',

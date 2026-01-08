@@ -79,6 +79,11 @@ export const myTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
+  dashboard: {
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Padam widget {{id}}',
+    searchWidgets: 'Cari widget...',
+  },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
     autosaving: 'ဖိုင်ကို အလိုအလျောက်သိမ်းဆည်းရာတွင် ပြဿနာတစ်ခုရှိနေသည်။',
@@ -340,6 +345,7 @@ export const myTranslations: DefaultTranslationsObject = {
     loading: 'ဖွင့်နေသည်',
     locale: 'ဒေသ',
     locales: 'Locales',
+    lock: 'Kunci',
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
     move: 'ရွှေ့ပြောင်းပါ',
@@ -432,6 +438,7 @@ export const myTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unlock: 'ဖွင့်',
     unsavedChanges:
       'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
     unsavedChangesDuplicate:

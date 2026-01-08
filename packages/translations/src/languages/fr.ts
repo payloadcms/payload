@@ -81,6 +81,11 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  dashboard: {
+    addWidget: 'Ajouter un Widget',
+    deleteWidget: 'Supprimer le widget {{id}}',
+    searchWidgets: 'Rechercher des widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',
     autosaving: 'Un problème est survenu lors de l’enregistrement automatique de ce document.',
@@ -348,6 +353,7 @@ export const frTranslations: DefaultTranslationsObject = {
     loading: 'Chargement en cours',
     locale: 'Paramètres régionaux',
     locales: 'Paramètres régionaux',
+    lock: 'Verrou',
     menu: 'Menu',
     moreOptions: "Plus d'options",
     move: 'Déplacez-vous',
@@ -438,6 +444,7 @@ export const frTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} déplacé à la corbeille.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unlock: 'Déverrouiller',
     unsavedChanges:
       'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
     unsavedChangesDuplicate:
