@@ -1,5 +1,7 @@
 import type { Page, TestInfo } from '@playwright/test'
 
+import { expect } from '@playwright/test'
+
 export interface HorizontalOverflowResult {
   /** Whether horizontal overflow/scrolling was detected */
   hasHorizontalOverflow: boolean
@@ -164,4 +166,25 @@ export async function checkHorizontalOverflow(
   }
 
   return result
+}
+
+/**
+ * Assertion helper to verify no horizontal overflow with built-in polling.
+ * Retries the check until the result stabilizes and meets expectations.
+ *
+ * @param page - Playwright page object
+ * @param testInfo - Optional TestInfo for attaching results
+ *
+ * @example
+ * ```typescript
+ * await page.setViewportSize({ width: 320, height: 568 })
+ * await assertNoHorizontalOverflow(page, testInfo)
+ * ```
+ */
+export async function assertNoHorizontalOverflow(page: Page, testInfo?: TestInfo): Promise<void> {
+  await expect(async () => {
+    const result = await checkHorizontalOverflow(page, testInfo)
+    expect(result.hasHorizontalOverflow).toBe(false)
+    expect(result.overflowingElements.length).toBe(0)
+  }).toPass()
 }
