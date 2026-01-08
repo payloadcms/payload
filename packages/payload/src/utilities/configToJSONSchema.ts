@@ -12,6 +12,7 @@ import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { formatNames } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
+import { optionsAreEqual } from './optionsAreEqual.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -662,8 +663,15 @@ export function fieldsToJSONSchema(
             const isTimezoneField =
               previousField?.type === 'date' && previousField.timezone && field.name.includes('_tz')
 
+            // Check if the timezone field's options match the global config's supported timezones
+            const hasMatchingGlobalTimezones =
+              isTimezoneField &&
+              config &&
+              optionsAreEqual(field.options, config.admin?.timezones?.supportedTimezones)
+
             // Timezone selects should reference the supportedTimezones definition
-            if (isTimezoneField) {
+            // only if the field's options match the global config
+            if (isTimezoneField && hasMatchingGlobalTimezones) {
               fieldSchema = {
                 $ref: `#/definitions/supportedTimezones`,
               }
