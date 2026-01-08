@@ -220,6 +220,85 @@ Sometimes you want to fail a task based on business logic:
 
 ```
 
+### Handling Task Failures
+
+Tasks fail by throwing errors. When a task encounters any type of failure—whether it's an unexpected error, a validation issue, or a business logic violation—you should throw an error with a descriptive message.
+
+```ts
+handler: async ({ input, req }) => {
+  const order = await req.payload.findByID({
+    collection: 'orders',
+    id: input.orderId,
+  })
+
+  // Validation failure
+  if (input.amount !== order.total) {
+    throw new Error(
+      `Amount mismatch: expected ${order.total}, received ${input.amount}`,
+    )
+  }
+
+  // Business rule failure
+  if (order.status === 'cancelled') {
+    throw new Error('Cannot process payment for cancelled order')
+  }
+
+  // Conditional check
+  if (order.status === 'paid') {
+    throw new Error('Order already processed')
+  }
+
+  // Continue processing...
+}
+```
+
+#### Preventing Job Retries
+
+From within a task or workflow handler, you can prevent the entire job from being retried by throwing a `JobCancelledError`:
+
+```ts
+throw new JobCancelledError('Job was cancelled')
+```
+
+#### Accessing Failure Information
+
+After a task fails, you can inspect the job to understand what went wrong:
+
+```ts
+const job = await payload.jobs.queue({
+  task: 'processPayment',
+  input: { orderId: '123', amount: 100 },
+})
+
+// Run the job
+await payload.jobs.run()
+
+// Check the job status
+const completedJob = await payload.findByID({
+  collection: 'payload-jobs',
+  id: job.id,
+})
+
+// Check if job failed
+if (completedJob.hasError) {
+  // Access the latest error that caused the job to fail
+  console.log(completedJob.error)
+  // This will contain the error message from the thrown error
+
+  // You can also check the job log to find specific tasks that errored
+  // Note: If the job was retried multiple times, there will be multiple erroring tasks in the log
+  const failedTasks = completedJob.log?.filter(
+    (entry) => entry.state === 'failed',
+  )
+}
+```
+
+<Banner type="info">
+  Always throw errors with descriptive messages for better debugging and
+  observability. The error message will be stored in the job's error field and
+  visible in the admin UI.
+</Banner>
+
 ### Understanding Task Execution
 
 #### When a task runs
