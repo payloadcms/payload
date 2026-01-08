@@ -26,7 +26,16 @@ type Args<T extends JsonObject = JsonObject> = {
   snapshot?: any
 }
 
-export const saveVersion = async <TData extends JsonObject = JsonObject>({
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: { returning: false } & Args<TData>,
+): Promise<null>
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: { returning: true } & Args<TData>,
+): Promise<JsonObject>
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: Omit<Args<TData>, 'returning'>,
+): Promise<JsonObject>
+export async function saveVersion<TData extends JsonObject = JsonObject>({
   id,
   autosave,
   collection,
@@ -40,7 +49,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   returning,
   select,
   snapshot,
-}: Args<TData>): Promise<JsonObject> => {
+}: Args<TData>): Promise<JsonObject | null> {
   let result: JsonObject | undefined
   let createNewVersion = true
   const now = new Date().toISOString()
@@ -194,7 +203,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
     })
   }
   if (returning === false) {
-    return {}
+    return null
   }
 
   let createdVersion = (result as any).version
