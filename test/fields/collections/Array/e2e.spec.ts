@@ -110,7 +110,7 @@ describe('Array', () => {
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
     const customRowLabel = page.locator(
-      '#field-rowLabelAsComponent #rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
+      '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
     await expect(customRowLabel).toBeVisible()
 
@@ -427,7 +427,7 @@ describe('Array', () => {
 
     await addArrayRow(page, { fieldName: 'collapsedArray' })
 
-    const row = page.locator(`#collapsedArray #collapsedArray-row-0`)
+    const row = page.locator(`#collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
@@ -439,7 +439,7 @@ describe('Array', () => {
 
     await addArrayRow(page, { fieldName: 'collapsedArray' })
 
-    const row = page.locator(`#collapsedArray #collapsedArray-row-0`)
+    const row = page.locator(`#collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)

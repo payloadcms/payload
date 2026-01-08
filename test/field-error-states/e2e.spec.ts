@@ -65,17 +65,17 @@ describe('Field Error States', () => {
     await addArrayRow(page, { fieldName: 'parentArray' })
 
     // add first child array
-    await page.locator('#field-parentArray #parentArray-row-0 .collapsible__content .array-field__add-row').click()
+    await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
     await page.locator('#field-parentArray__0__childArray__0__childArrayText').focus()
     await page.keyboard.type('T1')
 
     // add second child array
-    await page.locator('#field-parentArray #parentArray-row-0 .collapsible__content .array-field__add-row').click()
+    await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
     await page.locator('#field-parentArray__0__childArray__1__childArrayText').focus()
     await page.keyboard.type('T2')
 
     // add third child array
-    await page.locator('#field-parentArray #parentArray-row-0 .collapsible__content .array-field__add-row').click()
+    await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
 
     await removeArrayRow(page, {
       fieldName: 'parentArray__0__childArray',
