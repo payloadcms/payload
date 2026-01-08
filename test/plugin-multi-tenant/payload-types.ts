@@ -158,6 +158,7 @@ export interface User {
   tenants?:
     | {
         tenant: string | Tenant;
+        tenantRole?: ('admin' | 'member') | null;
         id?: string | null;
       }[]
     | null;
@@ -393,6 +394,7 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         tenant?: T;
+        tenantRole?: T;
         id?: T;
       };
   updatedAt?: T;
