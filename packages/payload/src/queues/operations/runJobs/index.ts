@@ -364,6 +364,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
               completedAt: null,
               error: {
                 cancelled: true,
+                message: error.message,
               },
               hasError: true,
               processing: false,

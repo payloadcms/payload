@@ -44,12 +44,7 @@ export class WorkflowError extends Error {
  * Unlike failing a job (e.g. by throwing any other error), a cancelled job will not be retried.
  */
 export class JobCancelledError extends Error {
-  args: {
-    job: Job<any>
-  }
-
-  constructor(args: { job: Job<any> }) {
-    super(`Job ${args.job.id} was cancelled`)
-    this.args = args
+  constructor(message: string) {
+    super(message)
   }
 }
