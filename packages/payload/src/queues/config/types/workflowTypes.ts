@@ -9,6 +9,7 @@ import type {
 import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
 import type { ScheduleConfig } from './index.js'
 import type {
+  MaybePromise,
   RetryConfig,
   RunInlineTaskFunction,
   RunTaskFunctions,
@@ -105,7 +106,7 @@ export type WorkflowHandler<
   job: Job<TWorkflowSlugOrInput>
   req: PayloadRequest
   tasks: RunTaskFunctions
-}) => Promise<void>
+}) => MaybePromise<void>
 
 export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean

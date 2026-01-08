@@ -99,7 +99,7 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
-type MaybePromise<T> = Promise<T> | T
+export type MaybePromise<T> = Promise<T> | T
 
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,

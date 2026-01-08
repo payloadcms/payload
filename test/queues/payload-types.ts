@@ -116,6 +116,7 @@ export interface Config {
       };
     };
     workflows: {
+      selfCancel: WorkflowSelfCancel;
       updatePost: MyUpdatePostWorkflowType;
       updatePostJSONWorkflow: WorkflowUpdatePostJSONWorkflow;
       retriesTest: WorkflowRetriesTest;
@@ -334,6 +335,7 @@ export interface PayloadJob {
     | null;
   workflowSlug?:
     | (
+        | 'selfCancel'
         | 'updatePost'
         | 'updatePostJSONWorkflow'
         | 'retriesTest'
@@ -677,6 +679,15 @@ export interface TaskDoNothingTask {
     message: string;
   };
   output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSelfCancel".
+ */
+export interface WorkflowSelfCancel {
+  input: {
+    shouldCancel?: boolean | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

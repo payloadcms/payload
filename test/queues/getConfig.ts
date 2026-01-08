@@ -30,6 +30,7 @@ import { retriesBackoffTestWorkflow } from './workflows/retriesBackoffTest.js'
 import { retriesRollbackTestWorkflow } from './workflows/retriesRollbackTest.js'
 import { retriesTestWorkflow } from './workflows/retriesTest.js'
 import { retriesWorkflowLevelTestWorkflow } from './workflows/retriesWorkflowLevelTest.js'
+import { selfCancelWorkflow } from './workflows/selfCancel.js'
 import { subTaskWorkflow } from './workflows/subTask.js'
 import { subTaskFailsWorkflow } from './workflows/subTaskFails.js'
 import { updatePostWorkflow } from './workflows/updatePost.js'
@@ -146,6 +147,7 @@ export const getConfig: () => Partial<Config> = () => ({
       DoNothingTask,
     ],
     workflows: [
+      selfCancelWorkflow,
       updatePostWorkflow,
       updatePostJSONWorkflow,
       retriesTestWorkflow,
