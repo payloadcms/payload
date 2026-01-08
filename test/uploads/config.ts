@@ -1239,7 +1239,7 @@ export default buildConfigWithDefaults({
       })
     }
   },
-  serverURL: 'http://localhost:3000',
+  serverURL: undefined,
   upload: {
     // debug: true,
     abortOnLimit: true,
