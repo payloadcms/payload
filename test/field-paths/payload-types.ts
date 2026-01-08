@@ -142,6 +142,10 @@ export interface FieldPath {
   namedTab?: {
     fieldWithinNamedTab?: string | null;
   };
+  fieldWithinUnnamedTabWithinCollapsible?: string | null;
+  namedTabWithinCollapsible?: {
+    fieldWithinNamedTabWithinCollapsible?: string | null;
+  };
   topLevelNamedField_beforeValidate_FieldPaths?:
     | {
         [k: string]: unknown;
@@ -430,6 +434,78 @@ export interface FieldPath {
     | number
     | boolean
     | null;
+  fieldWithinUnnamedTabWithinCollapsible_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTabWithinCollapsible_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTabWithinCollapsible_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTabWithinCollapsible_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTabWithinCollapsible_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTabWithinCollapsible_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTabWithinCollapsible_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTabWithinCollapsible_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -558,6 +634,12 @@ export interface FieldPathsSelect<T extends boolean = true> {
     | {
         fieldWithinNamedTab?: T;
       };
+  fieldWithinUnnamedTabWithinCollapsible?: T;
+  namedTabWithinCollapsible?:
+    | T
+    | {
+        fieldWithinNamedTabWithinCollapsible?: T;
+      };
   topLevelNamedField_beforeValidate_FieldPaths?: T;
   topLevelNamedField_beforeChange_FieldPaths?: T;
   topLevelNamedField_afterRead_FieldPaths?: T;
@@ -590,6 +672,14 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNamedTab_beforeChange_FieldPaths?: T;
   fieldWithinNamedTab_afterRead_FieldPaths?: T;
   fieldWithinNamedTab_beforeDuplicate_FieldPaths?: T;
+  fieldWithinUnnamedTabWithinCollapsible_beforeValidate_FieldPaths?: T;
+  fieldWithinUnnamedTabWithinCollapsible_beforeChange_FieldPaths?: T;
+  fieldWithinUnnamedTabWithinCollapsible_afterRead_FieldPaths?: T;
+  fieldWithinUnnamedTabWithinCollapsible_beforeDuplicate_FieldPaths?: T;
+  fieldWithinNamedTabWithinCollapsible_beforeValidate_FieldPaths?: T;
+  fieldWithinNamedTabWithinCollapsible_beforeChange_FieldPaths?: T;
+  fieldWithinNamedTabWithinCollapsible_afterRead_FieldPaths?: T;
+  fieldWithinNamedTabWithinCollapsible_beforeDuplicate_FieldPaths?: T;
   updatedAt?: T;
   createdAt?: T;
 }

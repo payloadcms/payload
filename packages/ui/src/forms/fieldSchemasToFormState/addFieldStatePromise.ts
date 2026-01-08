@@ -987,6 +987,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
+    console.log(fieldSchemaMap)
+
     if (!fieldConfig && !mockRSCs) {
       if (schemaPath.endsWith('.blockType')) {
         return

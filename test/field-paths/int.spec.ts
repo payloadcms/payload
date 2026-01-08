@@ -182,6 +182,12 @@ describe('Field Paths', () => {
         '_index-3-0-1-0.fieldWithinNestedUnnamedTab',
         '_index-3.namedTab',
         '_index-3.namedTab.fieldWithinNamedTab',
+        '_index-4',
+        '_index-4-0',
+        '_index-4-0-0',
+        '_index-4-0-0.fieldWithinUnnamedTabWithinCollapsible',
+        '_index-4-0.namedTabWithinCollapsible',
+        '_index-4-0.namedTabWithinCollapsible.fieldWithinNamedTabWithinCollapsible',
         'updatedAt',
         'createdAt',
       ])

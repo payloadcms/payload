@@ -34,8 +34,10 @@ export function getFieldPaths({
   parentSchemaPath,
 }: Args): FieldPaths {
   const parentPathSegments = parentPath.split('.')
+  const parentSchemaPathSegments = parentSchemaPath.split('.')
 
-  const parentIsUnnamed = parentPathSegments?.[parentPathSegments.length - 1]?.startsWith('_index-')
+  const parentIsUnnamed =
+    parentSchemaPathSegments?.[parentSchemaPathSegments.length - 1]?.startsWith('_index-')
 
   const parentWithoutIndex = parentIsUnnamed
     ? parentPathSegments.slice(0, -1).join('.')
