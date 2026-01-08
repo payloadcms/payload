@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.69.0",
+  "version": "3.70.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -103,6 +103,7 @@
     "lint": "turbo run lint --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "lint-staged": "lint-staged",
     "lint:fix": "turbo run lint:fix --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
+    "lint:scss": "stylelint \"packages/ui/src/**/*.scss\"",
     "obliterate-playwright-cache-macos": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "prepare": "husky",
     "prepare-run-test-against-prod": "pnpm bf && rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd ..",
@@ -193,6 +194,8 @@
     "pg": "8.16.3",
     "playwright": "1.56.1",
     "playwright-core": "1.56.1",
+    "postcss": "^8.4.49",
+    "postcss-scss": "^4.0.9",
     "prettier": "3.5.3",
     "react": "19.2.1",
     "react-dom": "19.2.1",
@@ -201,6 +204,7 @@
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "sort-package-json": "^2.10.0",
+    "stylelint": "^16.12.0",
     "swc-plugin-transform-remove-imports": "8.3.0",
     "tempy": "1.0.1",
     "tstyche": "3.5.0",
