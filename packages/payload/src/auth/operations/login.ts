@@ -15,7 +15,7 @@ import {
   ValidationError,
 } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { Forbidden } from '../../index.js'
+import { commitTransaction, Forbidden, initTransaction } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -76,6 +76,8 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
   if (args.collection.config.auth.disableLocalStrategy) {
     throw new Forbidden(args.req.t)
   }
+
+  const shouldCommit = await initTransaction(args.req)
 
   try {
     // /////////////////////////////////////
@@ -391,6 +393,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       operation: 'login',
       result,
     })
+
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     // /////////////////////////////////////
     // Return results
