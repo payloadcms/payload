@@ -37,6 +37,10 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   depth?: number
   /**
+   * When set to `true`, errors will not be thrown.
+   */
+  disableErrors?: boolean
+  /**
    * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
    */
   draft?: boolean
@@ -97,6 +101,7 @@ export async function findOneGlobalLocal<
     slug: globalSlug,
     data,
     depth,
+    disableErrors,
     draft = false,
     flattenLocales,
     includeLockStatus,
@@ -116,6 +121,7 @@ export async function findOneGlobalLocal<
     slug: globalSlug as string,
     data,
     depth,
+    disableErrors,
     draft,
     flattenLocales,
     globalConfig,
