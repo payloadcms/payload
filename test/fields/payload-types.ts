@@ -1001,7 +1001,7 @@ export interface DateField {
   dayAndTimeWithTimezone: string;
   dayAndTimeWithTimezone_tz: SupportedTimezones;
   dayAndTimeWithTimezoneFixed?: string | null;
-  dayAndTimeWithTimezoneFixed_tz?: SupportedTimezones;
+  dayAndTimeWithTimezoneFixed_tz?: 'Europe/London' | null;
   dayAndTimeWithTimezoneRequired?: string | null;
   dayAndTimeWithTimezoneRequired_tz: SupportedTimezones;
   dayAndTimeWithTimezoneReadOnly?: string | null;
@@ -1032,6 +1032,12 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  dateWithOffsetTimezone?: string | null;
+  dateWithOffsetTimezone_tz?: ('+05:30' | '-08:00' | '+00:00') | null;
+  dateWithMixedTimezones?: string | null;
+  dateWithMixedTimezones_tz?: ('America/New_York' | '+05:30' | 'UTC') | null;
+  dateWithTimezoneWithDisabledColumns?: string | null;
+  dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
 }
@@ -2826,6 +2832,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
         date?: T;
         id?: T;
       };
+  dateWithOffsetTimezone?: T;
+  dateWithOffsetTimezone_tz?: T;
+  dateWithMixedTimezones?: T;
+  dateWithMixedTimezones_tz?: T;
+  dateWithTimezoneWithDisabledColumns?: T;
+  dateWithTimezoneWithDisabledColumns_tz?: T;
   updatedAt?: T;
   createdAt?: T;
 }
