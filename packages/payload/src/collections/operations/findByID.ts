@@ -165,9 +165,9 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    const docFromDB = await req.payload.db.findOne(findOneArgs)
+    const docWithLocales = await req.payload.db.findOne(findOneArgs)
 
-    if (!docFromDB && !args.data) {
+    if (!docWithLocales && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
@@ -175,7 +175,7 @@ export const findByIDOperation = async <
     }
 
     let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
+      (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -298,6 +298,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            docWithLocales,
             query: findOneArgs.where,
             req,
           })) || result
