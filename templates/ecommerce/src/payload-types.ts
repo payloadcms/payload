@@ -127,6 +127,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
@@ -946,6 +947,7 @@ export interface Cart {
         id?: string | null;
       }[]
     | null;
+  secret?: string | null;
   customer?: (string | null) | User;
   purchasedAt?: string | null;
   status?: ('active' | 'purchased' | 'abandoned') | null;
@@ -1649,6 +1651,7 @@ export interface CartsSelect<T extends boolean = true> {
         quantity?: T;
         id?: T;
       };
+  secret?: T;
   customer?: T;
   purchasedAt?: T;
   status?: T;

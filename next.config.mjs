@@ -1,6 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import { withSentryConfig } from '@sentry/nextjs'
-import { withPayload } from './packages/next/src/withPayload.js'
+import { withPayload } from './packages/next/src/withPayload/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -14,6 +14,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
+      basePath: process.env?.NEXT_BASE_PATH || undefined,
       eslint: {
         ignoreDuringBuilds: true,
       },

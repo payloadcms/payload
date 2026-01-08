@@ -1,4 +1,10 @@
-import { deepMerge, type Field, type FieldState, type ServerFunction } from 'payload'
+import {
+  deepMerge,
+  type Field,
+  type FieldState,
+  type ServerFunction,
+  UnauthorizedError,
+} from 'payload'
 
 import { getClientConfig } from '../../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../../utilities/getClientSchemaMap.js'
@@ -44,7 +50,7 @@ export const _internal_renderFieldHandler: ServerFunction<
   // eslint-disable-next-line @typescript-eslint/require-await
 > = async ({ field: fieldArg, initialValue, path, req, schemaPath }) => {
   if (!req.user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
   const [entityType, entitySlug, ...fieldPath] = schemaPath.split('.')

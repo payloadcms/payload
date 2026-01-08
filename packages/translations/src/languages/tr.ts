@@ -80,6 +80,11 @@ export const trTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
+  dashboard: {
+    addWidget: 'Widget Ekle',
+    deleteWidget: "Widget'i sil {{id}}",
+    searchWidgets: "Arama widget'ları...",
+  },
   error: {
     accountAlreadyActivated: 'Hesap zaten etkinleştirildi.',
     autosaving: 'Otomatik kaydetme başarısız oldu',

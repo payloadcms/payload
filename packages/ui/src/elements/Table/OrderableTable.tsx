@@ -124,7 +124,7 @@ export const OrderableTable: React.FC<Props> = ({
 
       const response = await fetch(
         formatAdminURL({
-          adminRoute: config.routes.api,
+          apiRoute: config.routes.api,
           path: `/reorder?locale=${localeCode}`,
         }),
         {

@@ -10,6 +10,7 @@ import {
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type {
@@ -22,7 +23,6 @@ export const ExportSaveButton: React.FC = () => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -51,16 +51,22 @@ export const ExportSaveButton: React.FC = () => {
         toastID = toast.success('Your export is being processed...')
       }, 200)
 
-      const response = await fetch(`${serverURL}${api}/exports/download`, {
-        body: JSON.stringify({
-          data,
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: '/exports/download',
         }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+        {
+          body: JSON.stringify({
+            data,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      })
+      )
 
       // Clear the timeout if fetch completes quickly
       if (timeoutID) {

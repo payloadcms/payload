@@ -2,7 +2,11 @@ import type { QueryPreset, SanitizedCollectionPermission } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
+import {
+  formatAdminURL,
+  transformColumnsToPreferences,
+  transformColumnsToSearchParams,
+} from 'payload/shared'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -38,6 +42,7 @@ export const QueryPresetBar: React.FC<{
   const {
     config: {
       routes: { api: apiRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -83,6 +88,7 @@ export const QueryPresetBar: React.FC<{
       await refineListData(
         {
           columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
+          groupBy: preset.groupBy || '',
           preset: preset.id,
           where: preset.where,
         },
@@ -96,6 +102,7 @@ export const QueryPresetBar: React.FC<{
     await refineListData(
       {
         columns: [],
+        groupBy: '',
         preset: '',
         where: {},
       },
@@ -105,9 +112,15 @@ export const QueryPresetBar: React.FC<{
 
   const handleDeletePreset = useCallback(async () => {
     try {
-      await fetch(`${apiRoute}/${queryPresetsSlug}/${activePreset.id}`, {
-        method: 'DELETE',
-      }).then(async (res) => {
+      await fetch(
+        formatAdminURL({
+          apiRoute,
+          path: `/${queryPresetsSlug}/${activePreset.id}`,
+        }),
+        {
+          method: 'DELETE',
+        },
+      ).then(async (res) => {
         try {
           const json = await res.json()
 
@@ -138,17 +151,24 @@ export const QueryPresetBar: React.FC<{
 
   const saveCurrentChanges = useCallback(async () => {
     try {
-      await fetch(`${apiRoute}/payload-query-presets/${activePreset.id}`, {
-        body: JSON.stringify({
-          columns: transformColumnsToPreferences(query.columns),
-          where: query.where,
+      await fetch(
+        formatAdminURL({
+          apiRoute,
+          path: `/${queryPresetsSlug}/${activePreset.id}`,
         }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+        {
+          body: JSON.stringify({
+            columns: transformColumnsToPreferences(query.columns),
+            groupBy: query.groupBy,
+            where: query.where,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'PATCH',
         },
-        method: 'PATCH',
-      }).then(async (res) => {
+      ).then(async (res) => {
         try {
           const json = await res.json()
 
@@ -178,6 +198,7 @@ export const QueryPresetBar: React.FC<{
     apiRoute,
     activePreset?.id,
     query.columns,
+    query.groupBy,
     query.where,
     t,
     presetConfig?.labels?.singular,
@@ -216,6 +237,7 @@ export const QueryPresetBar: React.FC<{
                 await refineListData(
                   {
                     columns: transformColumnsToSearchParams(activePreset.columns),
+                    groupBy: activePreset.groupBy || '',
                     where: activePreset.where,
                   },
                   false,
@@ -263,6 +285,7 @@ export const QueryPresetBar: React.FC<{
       <CreateNewPresetDrawer
         initialData={{
           columns: transformColumnsToPreferences(query.columns),
+          groupBy: query.groupBy,
           relatedCollection: collectionSlug,
           where: query.where,
         }}

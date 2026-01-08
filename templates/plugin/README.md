@@ -71,7 +71,7 @@ In the root folder, you will see various files that relate to the configuration 
 
 In the dev folder, you’ll find a basic payload project, created with `npx create-payload-app` and the blank template.
 
-**IMPORTANT**: Make a copy of the `.env.example` file and rename it to `.env`. Update the `DATABASE_URI` to match the database you are using and your plugin name. Update `PAYLOAD_SECRET` to a unique string.
+**IMPORTANT**: Make a copy of the `.env.example` file and rename it to `.env`. Update the `DATABASE_URL` to match the database you are using and your plugin name. Update `PAYLOAD_SECRET` to a unique string.
 **You will not be able to run `pnpm/yarn dev` until you have created this `.env` file.**
 
 `myPlugin` has already been added to the `payload.config()` file in this project.
