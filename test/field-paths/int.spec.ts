@@ -103,6 +103,7 @@ describe('Field Paths', () => {
         fieldWithinNestedUnnamedTab: doc.fieldWithinNestedUnnamedTab,
         array: doc.array,
         namedTabWithinCollapsible: doc.namedTabWithinCollapsible,
+        fieldWithinUnnamedTabWithinCollapsible: doc.fieldWithinUnnamedTabWithinCollapsible,
         ...formatExpectedFieldPaths('topLevelNamedField', {
           path: ['topLevelNamedField'],
           schemaPath: ['topLevelNamedField'],
