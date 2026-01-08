@@ -45,6 +45,7 @@ import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
   ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
   JsonObject,
   SelectType,
   TransformCollectionWithSelect,
@@ -119,6 +120,7 @@ import {
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
 export type * from './admin/types.js'
+export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -139,6 +141,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -455,10 +458,22 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: FindOptions<TSlug, TSelect>,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
-    return findLocal<TSlug, TSelect>(this, options)
+  find = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDraft extends boolean = false,
+  >(
+    options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  ): Promise<
+    PaginatedDocs<
+      TDraft extends true
+        ? GeneratedTypes extends { strictDraftTypes: true }
+          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+          : TransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>
+    >
+  > => {
+    return findLocal<TSlug, TSelect, TDraft>(this, options)
   }
 
   /**
@@ -546,9 +561,19 @@ export class BasePayload {
     return forgotPasswordLocal<TSlug>(this, options)
   }
 
-  getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
+  getAdminURL = (): string =>
+    formatAdminURL({
+      adminRoute: this.config.routes.admin,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
+  getAPIURL = (): string =>
+    formatAdminURL({
+      apiRoute: this.config.routes.api,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
   globals!: Globals
 
@@ -1694,6 +1719,7 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { JobCancelledError } from './queues/errors/index.js'
 
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'

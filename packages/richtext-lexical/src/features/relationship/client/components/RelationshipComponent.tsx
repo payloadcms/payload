@@ -6,12 +6,13 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
-import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import './index.scss'
+import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 
 const initialParams = {
@@ -55,7 +56,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 

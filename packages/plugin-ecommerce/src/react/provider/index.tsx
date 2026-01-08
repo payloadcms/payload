@@ -1,7 +1,7 @@
 'use client'
 import type { DefaultDocumentIDType, TypedUser } from 'payload'
 
-import { deepMergeSimple } from 'payload/shared'
+import { deepMergeSimple, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, {
   createContext,
@@ -91,8 +91,11 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         }
       : defaultLocalStorage
 
-  const { apiRoute = '/api', cartsFetchQuery = {}, serverURL = '' } = api || {}
-  const baseAPIURL = `${serverURL}${apiRoute}`
+  const { apiRoute = '/api', cartsFetchQuery = {} } = api || {}
+  const baseAPIURL = formatAdminURL({
+    apiRoute,
+    path: '',
+  })
 
   const [isLoading, startTransition] = useTransition()
 

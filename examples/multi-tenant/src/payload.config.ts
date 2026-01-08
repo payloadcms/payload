@@ -24,7 +24,7 @@ export default buildConfig({
   },
   collections: [Pages, Users, Tenants],
   // db: mongooseAdapter({
-  //   url: process.env.DATABASE_URI as string,
+  //   url: process.env.DATABASE_URL as string,
   // }),
   db: postgresAdapter({
     pool: {

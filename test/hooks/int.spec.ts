@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -367,6 +368,111 @@ describe('Hooks', () => {
       })
 
       expect(updatedDoc).toBeDefined()
+    })
+
+    it('should populate previousValue in Lexical nested afterChange hooks', async () => {
+      const relationID = await payload.create({
+        collection: 'relations',
+        data: {
+          title: 'Relation for nested afterChange',
+        },
+      })
+
+      // this collection will throw an error if previousValue is not defined in nested afterChange hook
+      const nestedAfterChangeDoc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'initial',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'initial',
+              },
+            ],
+          },
+          lexical: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      children: [
+                        {
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'link',
+                          type: 'text',
+                          version: 1,
+                        },
+                      ],
+                      direction: null,
+                      format: '',
+                      indent: 0,
+                      type: 'link',
+                      version: 3,
+                      fields: {
+                        linkBlocks: [
+                          {
+                            id: '693ade72068ea07ba13edcab',
+                            blockType: 'nestedLinkBlock',
+                            nestedRelationship: relationID.id,
+                          },
+                        ],
+                      },
+                      id: '693ade70068ea07ba13edca9',
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693adf3c068ea07ba13edcae',
+                    blockName: '',
+                    nestedAfterChange: 'test',
+                    blockType: 'nestedBlock',
+                  },
+                },
+                {
+                  children: [],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'nested-after-change-hooks',
+          id: nestedAfterChangeDoc.id,
+          data: {
+            text: 'updated',
+          },
+        }),
+      ).resolves.not.toThrow()
     })
   })
 

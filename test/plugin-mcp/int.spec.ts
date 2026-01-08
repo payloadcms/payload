@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -49,15 +50,23 @@ async function parseStreamResponse(response: Response): Promise<any> {
   }
 }
 
-const getApiKey = async (enableUpdate = false, enableDelete = false): Promise<string> => {
+const getApiKey = async (
+  enableUpdate: boolean = false,
+  enableDelete: boolean = false,
+  globalFind: boolean = false,
+  globalUpdate: boolean = false,
+): Promise<string> => {
   const doc = await payload.create({
     collection: 'payload-mcp-api-keys',
     data: {
       enableAPIKey: true,
       label: 'Test API Key',
-      // @ts-expect-error - update is not a valid property
+      // @ts-expect-error - update is a valid property
       posts: { find: true, create: true, update: enableUpdate, delete: enableDelete },
       products: { find: true },
+      ...(globalFind || globalUpdate
+        ? { siteSettings: { find: globalFind, update: globalUpdate } }
+        : {}),
       apiKey: randomUUID(),
       user: userId,
     },
@@ -760,6 +769,67 @@ describe('@payloadcms/plugin-mcp', () => {
     )
   })
 
+  it('should find site-settings global', async () => {
+    const apiKey = await getApiKey(false, false, true)
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'findSiteSettings',
+          arguments: {},
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toBeDefined()
+    expect(json.result.content[0].type).toBe('text')
+    expect(json.result.content[0].text).toContain('Global "site-settings"')
+    expect(json.result.content[0].text).toContain('```json')
+  })
+
+  it('should update site-settings global', async () => {
+    const apiKey = await getApiKey(false, false, true, true)
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'updateSiteSettings',
+          arguments: {
+            siteName: 'MCP Test Site',
+            siteDescription: 'A test site for MCP global operations',
+            maintenanceMode: false,
+          },
+        },
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toBeDefined()
+    expect(json.result.content[0].type).toBe('text')
+    expect(json.result.content[0].text).toContain('Global "site-settings" updated successfully')
+  })
+
   describe('Localization', () => {
     it('should include locale parameters in tool schemas', async () => {
       const apiKey = await getApiKey(true, true)
@@ -1043,5 +1113,36 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(json.result.content[0].text).toContain('"content": "Hello World."')
     })
+  })
+
+  it('should include globals in tools list', async () => {
+    const apiKey = await getApiKey(false, false, true, true)
+    const response = await restClient.POST('/mcp', {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/list',
+        params: {},
+      }),
+    })
+
+    const json = await parseStreamResponse(response)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.tools).toBeDefined()
+
+    const findGlobalTool = json.result.tools.find((t: any) => t.name === 'findSiteSettings')
+    expect(findGlobalTool).toBeDefined()
+    expect(findGlobalTool.description).toContain('Payload global')
+
+    const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
+    expect(updateGlobalTool).toBeDefined()
+    expect(updateGlobalTool.description).toContain('Payload global')
   })
 })

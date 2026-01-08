@@ -1549,6 +1549,34 @@ describe('Uploads', () => {
       const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
       await expect(resizeOptionMedia).toContainText('200x200')
     })
+
+    test('should allow incrementing crop dimensions back to original maximum size', async () => {
+      await page.goto(mediaURL.create)
+
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+
+      await page.locator('.file-field__edit').click()
+
+      const widthInput = page.locator('.edit-upload__input input[name="Width (px)"]')
+      const heightInput = page.locator('.edit-upload__input input[name="Height (px)"]')
+
+      await expect(widthInput).toHaveValue('800')
+      await expect(heightInput).toHaveValue('800')
+
+      await widthInput.fill('799')
+      await expect(widthInput).toHaveValue('799')
+
+      // Increment back to original using arrow up
+      await widthInput.press('ArrowUp')
+      await expect(widthInput).toHaveValue('800')
+
+      await heightInput.fill('799')
+      await expect(heightInput).toHaveValue('799')
+
+      // Increment back to original using arrow up
+      await heightInput.press('ArrowUp')
+      await expect(heightInput).toHaveValue('800')
+    })
   })
 
   test('should see upload previews in relation list if allowed in config', async () => {

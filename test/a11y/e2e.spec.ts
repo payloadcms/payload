@@ -1,4 +1,4 @@
-import type { Page, TestInfo } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openNav } from 'helpers/e2e/toggleNav.js'
@@ -7,8 +7,11 @@ import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { checkFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
-import { checkHorizontalOverflow } from '../helpers/e2e/checkHorizontalOverflow.js'
+import { assertAllElementsHaveFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
+import {
+  assertNoHorizontalOverflow,
+  checkHorizontalOverflow,
+} from '../helpers/e2e/checkHorizontalOverflow.js'
 import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -46,7 +49,7 @@ test.describe('A11y', () => {
   test('Dashboard', async ({}, testInfo) => {
     await page.goto(postsUrl.admin)
 
-    await page.locator('.dashboard').waitFor()
+    await expect(page.locator('.dashboard')).toBeVisible()
 
     const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
@@ -68,7 +71,7 @@ test.describe('A11y', () => {
   test.fixme('Account page', async ({}, testInfo) => {
     await page.goto(postsUrl.account)
 
-    await page.locator('.auth-fields').waitFor()
+    await expect(page.locator('.auth-fields')).toBeVisible()
 
     const accessibilityScanResults = await runAxeScan({
       page,
@@ -83,7 +86,7 @@ test.describe('A11y', () => {
     test.fixme('list view', async ({}, testInfo) => {
       await page.goto(postsUrl.list)
 
-      await page.locator('.list-controls').waitFor()
+      await expect(page.locator('.list-controls')).toBeVisible()
 
       const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
@@ -93,7 +96,7 @@ test.describe('A11y', () => {
     test.fixme('create view', async ({}, testInfo) => {
       await page.goto(postsUrl.create)
 
-      await page.locator('#field-title').waitFor()
+      await expect(page.locator('#field-title')).toBeVisible()
 
       const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
@@ -104,7 +107,7 @@ test.describe('A11y', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('.table a').first().click()
-      await page.locator('#field-title').waitFor()
+      await expect(page.locator('#field-title')).toBeVisible()
 
       const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
@@ -116,7 +119,7 @@ test.describe('A11y', () => {
     test('list view', async ({}, testInfo) => {
       await page.goto(mediaUrl.list)
 
-      await page.locator('.list-controls').waitFor()
+      await expect(page.locator('.list-controls')).toBeVisible()
 
       const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
@@ -126,7 +129,7 @@ test.describe('A11y', () => {
     test.fixme('create view', async ({}, testInfo) => {
       await page.goto(mediaUrl.create)
 
-      await page.locator('.file-field').first().waitFor()
+      await expect(page.locator('.file-field').first()).toBeVisible()
 
       const accessibilityScanResults = await runAxeScan({ page, testInfo })
 
@@ -138,85 +141,64 @@ test.describe('A11y', () => {
     test('Dashboard - should have visible focus indicators', async ({}, testInfo) => {
       await page.goto(postsUrl.admin)
 
-      await page.locator('.dashboard').waitFor()
+      await expect(page.locator('.dashboard')).toBeVisible()
 
-      const result = await checkFocusIndicators({
+      await assertAllElementsHaveFocusIndicators({
         page,
         testInfo,
         verbose: false,
         selector: '.dashboard',
       })
-
-      expect.soft(result.totalFocusableElements).toBeGreaterThan(0)
-      expect.soft(result.elementsWithoutIndicators).toBe(0)
     })
 
     test('Posts create view - fields should have visible focus indicators', async ({}, testInfo) => {
       await page.goto(postsUrl.create)
 
-      await page.locator('#field-title').waitFor()
+      await expect(page.locator('#field-title')).toBeVisible()
 
-      const result = await checkFocusIndicators({
+      await assertAllElementsHaveFocusIndicators({
         page,
         selector: 'main.collection-edit',
         testInfo,
       })
-
-      expect.soft(result.totalFocusableElements).toBeGreaterThan(0)
-      expect.soft(result.elementsWithoutIndicators).toBe(0)
     })
 
-    test.fixme(
-      'Posts create view - breadcrumbs should have visible focus indicators',
-      async ({}, testInfo) => {
-        await page.goto(postsUrl.create)
+    test.fixme('Posts create view - breadcrumbs should have visible focus indicators', async ({}, testInfo) => {
+      await page.goto(postsUrl.create)
 
-        await page.locator('#field-title').waitFor()
+      await expect(page.locator('#field-title')).toBeVisible()
 
-        const result = await checkFocusIndicators({
-          page,
-          selector: '.app-header__controls-wrapper',
-          testInfo,
-        })
+      await assertAllElementsHaveFocusIndicators({
+        page,
+        selector: '.app-header__controls-wrapper',
+        testInfo,
+      })
+    })
 
-        expect.soft(result.totalFocusableElements).toBeGreaterThan(0)
-        expect.soft(result.elementsWithoutIndicators).toBe(0)
-      },
-    )
+    test.fixme('Navigation sidebar - should have visible focus indicators', async ({}, testInfo) => {
+      await page.goto(postsUrl.admin)
 
-    test.fixme(
-      'Navigation sidebar - should have visible focus indicators',
-      async ({}, testInfo) => {
-        await page.goto(postsUrl.admin)
+      await expect(page.locator('.nav')).toBeVisible()
 
-        await page.locator('.nav').waitFor()
+      await openNav(page)
 
-        await openNav(page)
-
-        const result = await checkFocusIndicators({
-          page,
-          selector: '.nav',
-          testInfo,
-        })
-
-        expect.soft(result.totalFocusableElements).toBeGreaterThan(0)
-        expect.soft(result.elementsWithoutIndicators).toBe(0)
-      },
-    )
+      await assertAllElementsHaveFocusIndicators({
+        page,
+        selector: '.nav',
+        testInfo,
+      })
+    })
 
     test.fixme('Account page - should have visible focus indicators', async ({}, testInfo) => {
       await page.goto(postsUrl.account)
 
-      await page.locator('.auth-fields').waitFor()
+      await expect(page.locator('.auth-fields')).toBeVisible()
 
-      const result = await checkFocusIndicators({
+      await assertAllElementsHaveFocusIndicators({
         page,
         testInfo,
         verbose: false,
       })
-
-      expect.soft(result.totalFocusableElements).toBeGreaterThan(0)
-      expect.soft(result.elementsWithoutIndicators).toBe(0)
     })
   })
 
@@ -224,90 +206,66 @@ test.describe('A11y', () => {
     test('Dashboard - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(postsUrl.admin)
-      await page.locator('.dashboard').waitFor()
+      await expect(page.locator('.dashboard')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Account page - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(postsUrl.account)
-      await page.locator('.auth-fields').waitFor()
+      await expect(page.locator('.auth-fields')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Posts list view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(postsUrl.list)
-      await page.locator('.collection-list').waitFor()
+      await expect(page.locator('.collection-list')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Posts create view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(postsUrl.create)
-      await page.locator('#field-title').waitFor()
+      await expect(page.locator('#field-title')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Posts edit view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(postsUrl.list)
       await page.locator('.table a').first().click()
-      await page.locator('#field-title').waitFor()
+      await expect(page.locator('#field-title')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Media list view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(mediaUrl.list)
-      await page.locator('.list-controls').waitFor()
+      await expect(page.locator('.list-controls')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Media create view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(mediaUrl.create)
-      await page.locator('.file-field').first().waitFor()
+      await expect(page.locator('.file-field').first()).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
 
     test('Navigation sidebar - should not have horizontal overflow at 320px', async ({}, testInfo) => {
       await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(postsUrl.admin)
-      await page.locator('.nav').waitFor()
+      await expect(page.locator('.nav')).toBeVisible()
 
-      const result = await checkHorizontalOverflow(page, testInfo)
-
-      expect(result.hasHorizontalOverflow).toBe(false)
-      expect(result.overflowingElements.length).toBe(0)
+      await assertNoHorizontalOverflow(page, testInfo)
     })
   })
 
@@ -323,7 +281,7 @@ test.describe('A11y', () => {
       for (const { level, scale } of zoomLevels) {
         test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
           await page.goto(postsUrl.admin)
-          await page.locator('.dashboard').waitFor()
+          await expect(page.locator('.dashboard')).toBeVisible()
 
           // Simulate zoom by setting device scale factor
           await page.evaluate((zoomScale) => {
@@ -335,6 +293,7 @@ test.describe('A11y', () => {
 
           // At high zoom levels, some horizontal overflow might be acceptable
           // but we should at least verify the page is still functional
+          // eslint-disable-next-line playwright/no-conditional-in-test
           if (level <= 200) {
             // At 200% or less, should not have overflow
             expect(overflowResult.hasHorizontalOverflow).toBe(false)
@@ -351,7 +310,7 @@ test.describe('A11y', () => {
       for (const { level, scale } of zoomLevels) {
         test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
           await page.goto(postsUrl.create)
-          await page.locator('#field-title').waitFor()
+          await expect(page.locator('#field-title')).toBeVisible()
 
           await page.evaluate((zoomScale) => {
             document.body.style.zoom = String(zoomScale)
@@ -378,7 +337,7 @@ test.describe('A11y', () => {
       for (const { level, scale } of zoomLevels) {
         test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
           await page.goto(postsUrl.list)
-          await page.locator('.list-controls').waitFor()
+          await expect(page.locator('.list-controls')).toBeVisible()
 
           await page.evaluate((zoomScale) => {
             document.body.style.zoom = String(zoomScale)
@@ -405,7 +364,7 @@ test.describe('A11y', () => {
       for (const { level, scale } of zoomLevels) {
         test.fixme(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
           await page.goto(postsUrl.account)
-          await page.locator('.auth-fields').waitFor()
+          await expect(page.locator('.auth-fields')).toBeVisible()
 
           await page.evaluate((zoomScale) => {
             document.body.style.zoom = String(zoomScale)
@@ -427,7 +386,7 @@ test.describe('A11y', () => {
       for (const { level, scale } of zoomLevels) {
         test(`Media list view should be usable at ${level}% zoom`, async ({}, testInfo) => {
           await page.goto(mediaUrl.list)
-          await page.locator('.collection-list').waitFor()
+          await expect(page.locator('.collection-list')).toBeVisible()
 
           await page.evaluate((zoomScale) => {
             document.body.style.zoom = String(zoomScale)
@@ -449,7 +408,7 @@ test.describe('A11y', () => {
       for (const { level, scale } of zoomLevels) {
         test(`should be usable at ${level}% zoom`, async ({}, testInfo) => {
           await page.goto(postsUrl.admin)
-          await page.locator('.nav').waitFor()
+          await expect(page.locator('.nav')).toBeVisible()
 
           await page.evaluate((zoomScale) => {
             document.body.style.zoom = String(zoomScale)
