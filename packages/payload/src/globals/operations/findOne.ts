@@ -100,7 +100,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
     if (
       globalConfig.versions?.drafts &&
-      draftEnabled &&
+      replaceWithVersion &&
       select &&
       getSelectMode(select) === 'include'
     ) {
