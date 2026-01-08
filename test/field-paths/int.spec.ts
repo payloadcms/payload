@@ -101,7 +101,8 @@ describe('Field Paths', () => {
         namedTab: doc.namedTab,
         fieldWithinUnnamedTab: doc.fieldWithinUnnamedTab,
         fieldWithinNestedUnnamedTab: doc.fieldWithinNestedUnnamedTab,
-        array: expect.any(Array),
+        array: doc.array,
+        namedTabWithinCollapsible: doc.namedTabWithinCollapsible,
         ...formatExpectedFieldPaths('topLevelNamedField', {
           path: ['topLevelNamedField'],
           schemaPath: ['topLevelNamedField'],
@@ -133,6 +134,18 @@ describe('Field Paths', () => {
         ...formatExpectedFieldPaths('fieldWithinNamedTab', {
           path: ['namedTab', 'fieldWithinNamedTab'],
           schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinUnnamedTabWithinCollapsible', {
+          path: ['fieldWithinUnnamedTabWithinCollapsible'],
+          schemaPath: ['_index-4-0-0', 'fieldWithinUnnamedTabWithinCollapsible'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNamedTabWithinCollapsible', {
+          path: ['namedTabWithinCollapsible', 'fieldWithinNamedTabWithinCollapsible'],
+          schemaPath: [
+            '_index-4-0',
+            'namedTabWithinCollapsible',
+            'fieldWithinNamedTabWithinCollapsible',
+          ],
         }),
       })
     })
