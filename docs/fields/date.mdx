@@ -306,3 +306,33 @@ You can also mix IANA timezones with manual offsets:
   adjustments. If you need automatic DST handling, use IANA timezone names
   instead (e.g., `America/New_York` rather than `-05:00`).
 </Banner>
+
+#### GraphQL Enum Names
+
+When using offset timezones with GraphQL, the offset values are transformed to valid GraphQL enum names using the `_TZOFFSET_` prefix:
+
+| Offset Value | GraphQL Enum Name       |
+| ------------ | ----------------------- |
+| `+05:30`     | `_TZOFFSET_PLUS_05_30`  |
+| `-08:00`     | `_TZOFFSET_MINUS_08_00` |
+| `+00:00`     | `_TZOFFSET_PLUS_00_00`  |
+
+Similarly, IANA timezone names are also transformed (e.g., `America/New_York` becomes `America_New_York`).
+
+```graphql
+# Query returns the enum name
+query {
+  Event {
+    scheduledAt_tz # Returns "_TZOFFSET_PLUS_05_30"
+  }
+}
+
+# Mutations use the enum name
+mutation {
+  createEvent(data: { scheduledAt_tz: _TZOFFSET_PLUS_05_30 }) {
+    scheduledAt_tz
+  }
+}
+```
+
+The actual value (`+05:30`) is stored in the database and returned by the REST API.
