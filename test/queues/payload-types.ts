@@ -110,6 +110,7 @@ export interface Config {
       ReturnError: TaskReturnError;
       ReturnCustomError: TaskReturnCustomError;
       DoNothingTask: TaskDoNothingTask;
+      SelfCancel: TaskSelfCancel;
       inline: {
         input: unknown;
         output: unknown;
@@ -300,7 +301,8 @@ export interface PayloadJob {
           | 'ThrowError'
           | 'ReturnError'
           | 'ReturnCustomError'
-          | 'DoNothingTask';
+          | 'DoNothingTask'
+          | 'SelfCancel';
         taskID: string;
         input?:
           | {
@@ -372,6 +374,7 @@ export interface PayloadJob {
         | 'ReturnError'
         | 'ReturnCustomError'
         | 'DoNothingTask'
+        | 'SelfCancel'
       )
     | null;
   queue?: string | null;
@@ -677,6 +680,16 @@ export interface TaskReturnCustomError {
 export interface TaskDoNothingTask {
   input: {
     message: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSelfCancel".
+ */
+export interface TaskSelfCancel {
+  input: {
+    shouldCancel?: boolean | null;
   };
   output?: unknown;
 }
