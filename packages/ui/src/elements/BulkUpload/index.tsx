@@ -8,6 +8,10 @@ import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import {
+  BulkUploadControlsProvider,
+  useBulkUploadControls,
+} from '../../providers/BulkUploadControls/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -25,10 +29,21 @@ function DrawerContent() {
   const { collectionSlug, drawerSlug } = useBulkUpload()
   const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
+  const { bulkUploadControlFiles, setBulkUploadControlFiles } = useBulkUploadControls()
 
   const uploadCollection = getEntityConfig({ collectionSlug })
   const uploadConfig = uploadCollection?.upload
   const uploadMimeTypes = uploadConfig?.mimeTypes
+
+  useEffect(() => {
+    if (bulkUploadControlFiles.length > 0) {
+      const dataTransfer = new DataTransfer()
+      bulkUploadControlFiles.forEach((file) => dataTransfer.items.add(file))
+
+      void addFiles(dataTransfer.files)
+      setBulkUploadControlFiles([])
+    }
+  }, [bulkUploadControlFiles, addFiles, setBulkUploadControlFiles])
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
@@ -127,11 +142,13 @@ export function BulkUploadDrawer() {
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
-        <UploadControlsProvider>
-          <EditDepthProvider>
-            <DrawerContent />
-          </EditDepthProvider>
-        </UploadControlsProvider>
+        <BulkUploadControlsProvider>
+          <UploadControlsProvider>
+            <EditDepthProvider>
+              <DrawerContent />
+            </EditDepthProvider>
+          </UploadControlsProvider>
+        </BulkUploadControlsProvider>
       </FormsManagerProvider>
     </Drawer>
   )

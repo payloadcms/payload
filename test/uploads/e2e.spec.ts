@@ -25,6 +25,7 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
+  adminBulkUploadControlSlug,
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
   adminThumbnailWithSearchQueries,
@@ -67,6 +68,7 @@ let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminUploadControlURL: AdminUrlUtil
+let adminBulkUploadControlURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
@@ -109,6 +111,7 @@ describe('Uploads', () => {
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminUploadControlURL = new AdminUrlUtil(serverURL, adminUploadControlSlug)
+    adminBulkUploadControlURL = new AdminUrlUtil(serverURL, adminBulkUploadControlSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
     adminThumbnailWithSearchQueriesURL = new AdminUrlUtil(
@@ -623,6 +626,26 @@ describe('Uploads', () => {
     await expect
       .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
       .toContain('universal-truth')
+  })
+
+  test('should render adminBulkUploadControls', async () => {
+    await page.goto(adminBulkUploadControlURL.list)
+    await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+    const bulkLoadFromFileButton = page.locator('#bulk-load-from-file-upload-button')
+    await expect(bulkLoadFromFileButton).toBeVisible()
+  })
+
+  test('should save multiple files using file references from custom bulk controls', async () => {
+    await page.goto(adminBulkUploadControlURL.list)
+    await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+    const bulkLoadFromFileButton = page.locator('#bulk-load-from-file-upload-button')
+    await bulkLoadFromFileButton.click()
+    await wait(1000)
+
+    await page.locator('.bulk-upload--actions-bar__saveButtons button', { hasText: 'Save' }).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
   })
 
   test('should render adminThumbnail when using a function', async () => {

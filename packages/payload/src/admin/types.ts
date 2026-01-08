@@ -560,6 +560,7 @@ export type FieldRow = {
 
 export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
+  BulkUploadControls?: React.ReactNode
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
   LivePreview?: React.ReactNode
