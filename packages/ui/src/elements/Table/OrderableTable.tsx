@@ -5,6 +5,7 @@ import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payl
 import './index.scss'
 
 import { DragOverlay } from '@dnd-kit/core'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -122,7 +123,10 @@ export const OrderableTable: React.FC<Props> = ({
       }
 
       const response = await fetch(
-        `${config.serverURL}${config.routes.api}/reorder?locale=${localeCode}`,
+        formatAdminURL({
+          adminRoute: config.routes.api,
+          path: `/reorder?locale=${localeCode}`,
+        }),
         {
           body: JSON.stringify(jsonBody),
           credentials: 'include',
