@@ -437,14 +437,25 @@ export const sanitizeFields = async ({
         defaultTimezone = options[0].value
       }
 
+      // Generate label for timezone field
+      // Use parent field's label + ' Tz' if it's a simple string, otherwise fallback to name
+      const timezoneLabel = typeof field.label === 'string' ? `${field.label} Tz` : toWords(name)
+
       // Need to set the options here manually so that any database enums are generated correctly
       // The UI component will import the options from the config
-      const timezoneField = baseTimezoneField({
+      const baseField = baseTimezoneField({
         name,
         defaultValue: defaultTimezone,
+        label: timezoneLabel,
         options,
         required,
       })
+
+      // Apply override if provided
+      const timezoneField =
+        typeof field.timezone === 'object' && typeof field.timezone.override === 'function'
+          ? field.timezone.override({ baseField })
+          : baseField
 
       fields.splice(++i, 0, timezoneField)
     }

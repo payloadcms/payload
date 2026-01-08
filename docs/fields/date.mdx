@@ -238,11 +238,12 @@ This will add a dropdown to the date picker that allows users to select a timezo
 
 You can customise the available list of timezones in the [global admin config](../admin/overview#timezones) or on the field config itself which accepts the following config as well:
 
-| Property             | Description                                                               |
-| -------------------- | ------------------------------------------------------------------------- |
-| `defaultTimezone`    | A value for the default timezone to be set.                               |
-| `supportedTimezones` | An array of supported timezones with label and value object.              |
-| `required`           | If true, the timezone selection will be required even if the date is not. |
+| Property             | Description                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| `defaultTimezone`    | A value for the default timezone to be set.                                              |
+| `supportedTimezones` | An array of supported timezones with label and value object.                             |
+| `required`           | If true, the timezone selection will be required even if the date is not.                |
+| `override`           | A function to customize the generated timezone field. [More details](#timezone-override) |
 
 ```ts
 {
@@ -265,6 +266,42 @@ You can customise the available list of timezones in the [global admin config](.
 
 Dates without a specific time are normalised to 12:00 in the selected timezone.
 
+</Banner>
+
+### Timezone Override
+
+The `override` function allows you to customize the auto-generated timezone select field at a granular level. This is useful when you need to modify admin options like visibility, descriptions, or other field properties.
+
+```ts
+{
+  name: 'publishedAt',
+  type: 'date',
+  label: 'Published At',
+  timezone: {
+    override: ({ baseField }) => ({
+      ...baseField,
+      admin: {
+        ...baseField.admin,
+        disableListColumn: true, // Hide from list view columns
+      },
+    }),
+  },
+}
+```
+
+The `override` function receives an object with `baseField` (the default timezone select field) and must return a valid field configuration. The base field includes:
+
+- `name`: The timezone field name (e.g., `publishedAt_tz`)
+- `type`: Always `'select'`
+- `options`: The available timezone options
+- `defaultValue`: The default timezone value
+- `required`: Whether the timezone is required
+- `label`: Auto-generated from the parent field's label (e.g., "Published At Tz")
+- `admin.hidden`: `true` by default
+
+<Banner type="info">
+  We recommend changing the available options only via the supportedTimezones
+  config so that the right validations are run against your timezones.
 </Banner>
 
 ### Manual Offsets
