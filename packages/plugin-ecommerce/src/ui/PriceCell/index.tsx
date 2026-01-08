@@ -41,9 +41,16 @@ export const PriceCell: React.FC<Props> = (args) => {
   }
 
   return (
-    <span>
-      {currency.symbol}
-      {convertFromBaseValue({ baseValue: cellData, currency })}
-    </span>
+    <div className="priceCell">
+      {currency.symbolPosition === 'before'
+        ? `<span className="currencySymbol">${currency.symbol}</span>`
+        : ''}
+      {currency.symbolPosition === 'before' && currency.symbolSeparator}
+      <span className="priceValue">{convertFromBaseValue({ baseValue: cellData, currency })}</span>
+      {currency.symbolPosition === 'after' && currency.symbolSeparator}
+      {currency.symbolPosition === 'after'
+        ? `<span className="currencySymbol">${currency.symbol}</span>`
+        : ''}
+    </div>
   )
 }
