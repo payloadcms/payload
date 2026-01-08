@@ -11,6 +11,10 @@ export const credentials = {
     email: 'owner@anchorAndBlueDog.com',
     password: 'test',
   },
+  steelCat: {
+    email: 'huel@steel-cat.com',
+    password: 'test',
+  },
   memberUser: {
     email: 'member@test.com',
     password: 'test',

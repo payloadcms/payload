@@ -143,7 +143,6 @@ export const buildBrowseByFolderView = async (
       formatAdminURL({
         adminRoute,
         path: config.admin.routes.browseByFolder,
-        serverURL: config.serverURL,
       }),
     )
   }

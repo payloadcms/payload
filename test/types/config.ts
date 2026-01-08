@@ -119,6 +119,24 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'draft-posts',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          required: true,
+        },
+        {
+          type: 'text',
+          name: 'description',
+          required: true,
+        },
+      ],
+    },
   ],
   admin: {
     importMap: {
@@ -140,5 +158,6 @@ export default buildConfigWithDefaults({
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    strictDraftTypes: true,
   },
 })
