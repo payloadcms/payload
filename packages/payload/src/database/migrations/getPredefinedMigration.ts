@@ -1,12 +1,19 @@
 import fs from 'fs'
 import path from 'path'
-import { pathToFileURL } from 'url'
 
 import type { Payload } from '../../index.js'
 import type { MigrationTemplateArgs } from '../types.js'
 
+import { dynamicImport } from '../../utilities/dynamicImport.js'
+
 /**
- * Get predefined migration 'up', 'down' and 'imports'
+ * Get predefined migration 'up', 'down' and 'imports'.
+ *
+ * Supports two import methods:
+ * 1. @payloadcms/db-* packages: Loads from adapter's predefinedMigrations folder directly (no package.json export needed)
+ *    Example: `--file @payloadcms/db-mongodb/relationships-v2-v3`
+ * 2. Any other package/path: Uses dynamic import via package.json exports or absolute file paths
+ *    Example: `--file @payloadcms/plugin-seo/someMigration` or `--file /absolute/path/to/migration.ts`
  */
 export const getPredefinedMigration = async ({
   dirname,
@@ -19,18 +26,20 @@ export const getPredefinedMigration = async ({
   migrationName?: string
   payload: Payload
 }): Promise<MigrationTemplateArgs> => {
-  // Check for predefined migration.
-  // Either passed in via --file or prefixed with '@payloadcms/db-mongodb/' for example
   const importPath = file ?? migrationNameArg
 
+  // Path 1: @payloadcms/db-* adapters - load directly from predefinedMigrations folder
+  // These don't need package.json exports; files are resolved relative to adapter's dirname
   if (importPath?.startsWith('@payloadcms/db-')) {
-    // removes the package name from the migrationName.
     const migrationName = importPath.split('/').slice(2).join('/')
     let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}`)
     if (fs.existsSync(`${cleanPath}.mjs`)) {
       cleanPath = `${cleanPath}.mjs`
     } else if (fs.existsSync(`${cleanPath}.js`)) {
       cleanPath = `${cleanPath}.js`
+    } else if (fs.existsSync(`${cleanPath}.ts`)) {
+      // Support .ts in development when running from source
+      cleanPath = `${cleanPath}.ts`
     } else {
       payload.logger.error({
         msg: `Canned migration ${migrationName} not found.`,
@@ -38,9 +47,8 @@ export const getPredefinedMigration = async ({
       process.exit(1)
     }
     cleanPath = cleanPath.replaceAll('\\', '/')
-    const moduleURL = pathToFileURL(cleanPath)
     try {
-      const { downSQL, imports, upSQL } = await eval(`import('${moduleURL.href}')`)
+      const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(cleanPath)
       return {
         downSQL,
         imports,
@@ -54,8 +62,10 @@ export const getPredefinedMigration = async ({
       process.exit(1)
     }
   } else if (importPath) {
+    // Path 2: Any other package or file path - use dynamic import
+    // Supports: package.json exports (e.g. @payloadcms/plugin-seo/migration) or absolute file paths
     try {
-      const { downSQL, imports, upSQL } = await eval(`import('${importPath}')`)
+      const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(importPath)
       return {
         downSQL,
         imports,

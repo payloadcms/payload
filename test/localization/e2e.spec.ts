@@ -12,6 +12,7 @@ import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -634,7 +635,11 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()
-      const apiURL = `${serverURL}/api/${arrayWithFallbackCollectionSlug}/${id}`
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${arrayWithFallbackCollectionSlug}/${id}`,
+        serverURL,
+      })
       await page.goto(apiURL)
       const data = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')

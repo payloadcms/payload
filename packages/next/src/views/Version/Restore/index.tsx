@@ -66,7 +66,10 @@ export const Restore: React.FC<Props> = ({
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   const handleRestore = useCallback(async () => {
-    let fetchURL = `${serverURL}${apiRoute}`
+    let fetchURL = formatAdminURL({
+      apiRoute,
+      path: '',
+    })
     let redirectURL: string
 
     if (collectionConfig) {
@@ -74,7 +77,6 @@ export const Restore: React.FC<Props> = ({
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionConfig.slug}/${originalDocID}`,
-        serverURL,
       })
     }
 
@@ -83,7 +85,6 @@ export const Restore: React.FC<Props> = ({
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/globals/${globalConfig.slug}`,
-        serverURL,
       })
     }
 
@@ -101,7 +102,6 @@ export const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [
-    serverURL,
     apiRoute,
     collectionConfig,
     globalConfig,

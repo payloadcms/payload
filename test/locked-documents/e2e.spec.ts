@@ -1502,7 +1502,7 @@ describe('Locked Documents', () => {
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-menu .locked svg')).toBeVisible()
     })
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
@@ -1516,7 +1516,7 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
@@ -1529,13 +1529,13 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if lock expired', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1543,7 +1543,7 @@ describe('Locked Documents', () => {
 
       await page.reload()
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await payload.delete({
         collection: lockedDocumentCollection,
@@ -1566,7 +1566,7 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1574,7 +1574,7 @@ describe('Locked Documents', () => {
 
       await page.reload()
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await page.locator('.card-admin a').click()
 

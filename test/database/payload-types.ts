@@ -126,6 +126,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
     header: Header;
     global: Global;

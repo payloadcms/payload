@@ -40,7 +40,7 @@ export default buildConfig({
   },
   collections: [Users, Pages, Categories, Media],
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URL || '',
   }),
   editor: lexicalEditor({
     features: () => {
