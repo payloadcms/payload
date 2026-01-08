@@ -3702,7 +3702,7 @@ describe('Fields', () => {
 
         const query = `
           query {
-            DateField(id: "${doc.id}") {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
               dateWithOffsetTimezone
               dateWithOffsetTimezone_tz
             }
@@ -3734,7 +3734,7 @@ describe('Fields', () => {
 
         const query = `
           query {
-            DateField(id: "${doc.id}") {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
               dateWithOffsetTimezone_tz
             }
           }
@@ -3760,7 +3760,7 @@ describe('Fields', () => {
 
         const query = `
           query {
-            DateField(id: "${doc.id}") {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
               dateWithMixedTimezones
               dateWithMixedTimezones_tz
             }
@@ -3856,7 +3856,7 @@ describe('Fields', () => {
         const mutation = `
           mutation {
             updateDateField(
-              id: "${doc.id}",
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
               data: {
                 dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
               }
@@ -3890,7 +3890,7 @@ describe('Fields', () => {
         const mutation = `
           mutation {
             updateDateField(
-              id: "${doc.id}",
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
               data: {
                 dateWithMixedTimezones_tz: _TZOFFSET_PLUS_05_30
               }
@@ -3925,7 +3925,7 @@ describe('Fields', () => {
         const mutation = `
           mutation {
             updateDateField(
-              id: "${doc.id}",
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
               data: {
                 dateWithMixedTimezones_tz: America_New_York
               }
