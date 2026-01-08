@@ -5,6 +5,8 @@ export const EUR: Currency = {
   decimals: 2,
   label: 'Euro',
   symbol: '€',
+  symbolPosition: 'before',
+  symbolSeparator: '',
 }
 
 export const USD: Currency = {
@@ -12,6 +14,8 @@ export const USD: Currency = {
   decimals: 2,
   label: 'US Dollar',
   symbol: '$',
+  symbolPosition: 'before',
+  symbolSeparator: '',
 }
 
 export const GBP: Currency = {
@@ -19,4 +23,6 @@ export const GBP: Currency = {
   decimals: 2,
   label: 'British Pound',
   symbol: '£',
+  symbolPosition: 'before',
+  symbolSeparator: '',
 }
