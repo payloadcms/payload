@@ -3605,7 +3605,7 @@ describe('Fields', () => {
       })
 
       const updated = await payload.update({
-        collection: 'custom-id-nested',
+        collection: customIDNestedSlug,
         id: customID,
         data: {
           title: 'Updated Title',
