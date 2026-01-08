@@ -4,7 +4,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import path from 'path'
 import { type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
@@ -33,6 +33,7 @@ import {
   blockFieldsSlug,
   checkboxFieldsSlug,
   collapsibleFieldsSlug,
+  customIDNestedSlug,
   dateFieldsSlug,
   groupFieldsSlug,
   numberFieldsSlug,
@@ -3537,6 +3538,82 @@ describe('Fields', () => {
       })
 
       expect(result.docs).toHaveLength(1)
+    })
+  })
+
+  describe('Custom ID Nested', () => {
+    const createdIDs: number[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          collection: customIDNestedSlug,
+          id,
+        })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should create document with numeric custom ID nested in tabs', async () => {
+      const customID = 12345
+      createdIDs.push(customID)
+
+      const doc = await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Test Document',
+          description: 'Testing nested custom ID field',
+        },
+      })
+
+      expect(doc.id).toBe(customID)
+      expect(doc.title).toBe('Test Document')
+    })
+
+    it('should retrieve document by numeric custom ID', async () => {
+      const customID = 67890
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Another Test',
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: customIDNestedSlug,
+        id: customID,
+      })
+
+      expect(retrieved.id).toBe(customID)
+      expect(retrieved.title).toBe('Another Test')
+    })
+
+    it('should update document with numeric custom ID', async () => {
+      const customID = 99999
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Original Title',
+        },
+      })
+
+      const updated = await payload.update({
+        collection: customIDNestedSlug,
+        id: customID,
+        data: {
+          title: 'Updated Title',
+        },
+      })
+
+      expect(updated.id).toBe(customID)
+      expect(updated.title).toBe('Updated Title')
     })
   })
 

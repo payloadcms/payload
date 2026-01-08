@@ -82,6 +82,7 @@ export interface Config {
     'collapsible-fields': CollapsibleField;
     'conditional-logic': ConditionalLogic;
     'custom-id': CustomId;
+    'custom-id-nested': CustomIdNested;
     'custom-tab-id': CustomTabId;
     'custom-row-id': CustomRowId;
     'date-fields': DateField;
@@ -124,6 +125,7 @@ export interface Config {
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'conditional-logic': ConditionalLogicSelect<false> | ConditionalLogicSelect<true>;
     'custom-id': CustomIdSelect<false> | CustomIdSelect<true>;
+    'custom-id-nested': CustomIdNestedSelect<false> | CustomIdNestedSelect<true>;
     'custom-tab-id': CustomTabIdSelect<false> | CustomTabIdSelect<true>;
     'custom-row-id': CustomRowIdSelect<false> | CustomRowIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
@@ -959,6 +961,20 @@ export interface ConditionalLogic {
  */
 export interface CustomId {
   id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-nested".
+ */
+export interface CustomIdNested {
+  /**
+   * Custom numeric ID nested in an unnamed tab
+   */
+  id: number;
+  title: string;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1895,6 +1911,10 @@ export interface PayloadLockedDocument {
         value: string | CustomId;
       } | null)
     | ({
+        relationTo: 'custom-id-nested';
+        value: string | CustomIdNested;
+      } | null)
+    | ({
         relationTo: 'custom-tab-id';
         value: string | CustomTabId;
       } | null)
@@ -2758,6 +2778,17 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
  */
 export interface CustomIdSelect<T extends boolean = true> {
   id?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-nested_select".
+ */
+export interface CustomIdNestedSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
