@@ -1,4 +1,11 @@
-import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type {
+  Field,
+  Job,
+  MaybePromise,
+  PayloadRequest,
+  StringKeyOf,
+  TypedJobs,
+} from '../../../index.js'
 import type { ScheduleConfig } from './index.js'
 import type { SingleTaskStatus } from './workflowTypes.js'
 
@@ -99,8 +106,6 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
-type MaybePromise<T> = Promise<T> | T
-
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,
   taskArgs: {
@@ -151,7 +156,7 @@ export type TaskCallbackArgs = {
 
 export type ShouldRestoreFn = (
   args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
-) => boolean | Promise<boolean>
+) => MaybePromise<boolean>
 export type TaskCallbackFn = (args: TaskCallbackArgs) => MaybePromise<void>
 
 export type RetryConfig = {

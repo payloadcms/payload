@@ -1,6 +1,7 @@
 import type { Field } from '../../../fields/config/types.js'
 import type {
   Job,
+  MaybePromise,
   PayloadRequest,
   StringKeyOf,
   TypedCollection,
@@ -105,7 +106,7 @@ export type WorkflowHandler<
   job: Job<TWorkflowSlugOrInput>
   req: PayloadRequest
   tasks: RunTaskFunctions
-}) => Promise<void>
+}) => MaybePromise<void>
 
 export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
