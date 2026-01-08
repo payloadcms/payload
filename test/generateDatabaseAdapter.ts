@@ -95,6 +95,16 @@ export const allDatabaseAdapters = {
     },
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
+        `,
+  'content-api': `
+import { contentAPIAdapter } from '@payloadcms/figma'
+export const databaseAdapter = contentAPIAdapter({
+  auth: {
+    mode: 'devJwt',
+  },
+  url: process.env.CONTENT_API_URL || 'http://localhost:8080',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+})
   `,
   'vercel-postgres-read-replica': `
   import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
