@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { formatAdminURL, wait } from 'payload/shared'
+import { formatAdminURL, wait  } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'

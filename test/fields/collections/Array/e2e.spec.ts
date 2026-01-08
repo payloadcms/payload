@@ -126,7 +126,7 @@ describe('Array', () => {
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
     const customRowLabel = page.locator(
-      '#field-rowLabelAsComponent #rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
+      '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
     )
 
     await expect(customRowLabel).toBeVisible()
@@ -134,18 +134,16 @@ describe('Array', () => {
 
     await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
-    await expect(
-      page.locator('#field-rowLabelAsComponent #rowLabelAsComponent-row-1'),
-    ).toBeVisible()
+    await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
     await expect(
       page.locator(
-        '#field-rowLabelAsComponent #rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
+        '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
       ),
     ).toBeVisible()
 
     await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
     const duplicatedRowLabel = page.locator(
-      '#field-rowLabelAsComponent #rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
+      '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
     )
 
     await expect(duplicatedRowLabel).toBeVisible()
@@ -168,11 +166,9 @@ describe('Array', () => {
     await addArrayRow(page, { fieldName: 'arrayWithMinRows' })
 
     // Ensure new array row is visible and fields are rendered
-    await expect(page.locator('#field-arrayWithMinRows #arrayWithMinRows-row-0')).toBeVisible()
+    await expect(page.locator('#arrayWithMinRows-row-0')).toBeVisible()
     await expect(
-      page.locator(
-        '#field-arrayWithMinRows #arrayWithMinRows-row-0 #field-arrayWithMinRows__0__text',
-      ),
+      page.locator('#arrayWithMinRows-row-0 #field-arrayWithMinRows__0__text'),
     ).toBeVisible()
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
@@ -431,7 +427,7 @@ describe('Array', () => {
 
     await addArrayRow(page, { fieldName: 'collapsedArray' })
 
-    const row = page.locator('#field-collapsedArray #collapsedArray-row-0')
+    const row = page.locator(`#collapsedArray #collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
@@ -443,7 +439,7 @@ describe('Array', () => {
 
     await addArrayRow(page, { fieldName: 'collapsedArray' })
 
-    const row = page.locator('#field-collapsedArray #collapsedArray-row-0')
+    const row = page.locator(`#collapsedArray #collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
 
     await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)

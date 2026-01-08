@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
@@ -23,15 +23,10 @@ export async function copyPasteField({
     await wait(1000)
   }
 
-  let popupBtn: Locator
-
-  if (rowAction) {
-    const formattedRowID = fieldName.replace(/__/g, '-')
-    const row = field.locator(`#${formattedRowID}-row-${rowIndex}`).first()
-    popupBtn = row.locator('.collapsible__actions button.array-actions__button').first()
-  } else {
-    popupBtn = field.locator('header .clipboard-action__popup button.popup-button').first()
-  }
+  const popupBtnSelector = rowAction
+    ? `#${fieldName}-row-${rowIndex} .collapsible__actions button.array-actions__button`
+    : 'header .clipboard-action__popup button.popup-button'
+  const popupBtn = field.locator(popupBtnSelector).first()
   await expect(popupBtn).toBeVisible()
   await popupBtn.click()
 
