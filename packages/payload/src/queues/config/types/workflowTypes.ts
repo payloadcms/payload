@@ -1,6 +1,7 @@
 import type { Field } from '../../../fields/config/types.js'
 import type {
   Job,
+  MaybePromise,
   PayloadRequest,
   StringKeyOf,
   TypedCollection,
@@ -9,7 +10,6 @@ import type {
 import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
 import type { ScheduleConfig } from './index.js'
 import type {
-  MaybePromise,
   RetryConfig,
   RunInlineTaskFunction,
   RunTaskFunctions,

@@ -626,9 +626,8 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(0)
   })
 
-  /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
-  it('ensure failed tasks are rolled back via transactions', async () => {
+  it.skip('ensure failed tasks are rolled back via transactions', async () => {
     const job = await payload.jobs.queue({
       workflow: 'retriesRollbackTest',
       input: {
@@ -639,7 +638,7 @@ describe('Queues - Payload', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({silent: true})
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -660,7 +659,7 @@ describe('Queues - Payload', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(4)
-  })*/
+  })
 
   it('ensure backoff strategy of task is respected', async () => {
     payload.config.jobs.deleteJobOnComplete = false
@@ -965,9 +964,8 @@ describe('Queues - Payload', () => {
     payload.config.jobs.workflows = workflowsRef
   })
 
-  /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
-  it('transaction test against payload-jobs collection', async () => {
+  it.skip('transaction test against payload-jobs collection', async () => {
     // This kinds of emulates what happens when multiple jobs are queued and then run in parallel.
     const runWorkflowFN = async (i: number) => {
       const { id } = await payload.create({
@@ -1002,7 +1000,7 @@ describe('Queues - Payload', () => {
       /**
        * T1 start
        */
-  /*
+
       const t2Req = isolateObjectProperty(t1Req, 'transactionID')
       delete t2Req.transactionID
       //
@@ -1047,7 +1045,7 @@ describe('Queues - Payload', () => {
       /**
        * T1 end
        */
-  /*
+
       await payload.update({
         collection: 'payload-jobs',
         id,
@@ -1075,7 +1073,7 @@ describe('Queues - Payload', () => {
     })
 
     expect(allSimples.totalDocs).toBe(30)
-  })*/
+  })
 
   it('can queue single tasks 8 times', async () => {
     for (let i = 0; i < 8; i++) {
