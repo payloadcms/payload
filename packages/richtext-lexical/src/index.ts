@@ -859,7 +859,9 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
 
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
+                // Use the current node data as siblingDoc, since beforeValidate hooks may need
+                // to access current field values (e.g., for tabs fields that have been edited)
+                const nodeSiblingDoc = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
