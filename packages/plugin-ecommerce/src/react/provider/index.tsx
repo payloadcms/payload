@@ -929,33 +929,22 @@ export const useCurrency = () => {
   const { currenciesConfig, currency, setCurrency } = useEcommerce()
 
   const formatCurrency = useCallback(
-    (value?: null | number, options?: { currency?: Currency }): string => {
-      if (value === undefined || value === null) {
-        return ''
-      }
+    (value?: null | number, options?: { currency?: Currency; locale?: string }): string => {
+      if (value === undefined || value === null) {return ''}
 
       const currencyToUse = options?.currency || currency
+      if (!currencyToUse) {return value.toString()}
 
-      if (!currencyToUse) {
-        return value.toString()
-      }
+      const { code, decimals } = currencyToUse
 
-      const { decimals, symbol, symbolPosition = 'before', symbolSeparator = '' } = currencyToUse
+      const locale = options?.locale || 'en'
 
-      // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-      const formattedNumber =
-        value === 0
-          ? `0.${'0'.repeat(decimals)}`
-          : (value / Math.pow(10, decimals)).toFixed(decimals)
-
-      if (!symbol) {
-        return formattedNumber
-      }
-
-      // Format with the correct number of decimal places
-      return symbolPosition === 'before'
-        ? `${symbol}${symbolSeparator}${formattedNumber}`
-        : `${formattedNumber}${symbolSeparator}${symbol}`
+      return new Intl.NumberFormat(locale, {
+        currency: code,
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+        style: 'currency',
+      }).format(value / Math.pow(10, decimals))
     },
     [currency],
   )
