@@ -41,7 +41,7 @@
     "@payloadcms/email-resend": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
-    "@payloadcms/figma": "file:/Users/gjablonski/Documents/GitHub/enterprise-plugins/packages/figma-cli",
+    "@payloadcms/figma": "file:/Users/gjablonski/Documents/GitHub/enterprise-plugins/packages/figma",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/kv-redis": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",
