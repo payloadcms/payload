@@ -1,3 +1,5 @@
+import * as qs from 'qs-esm'
+import { describe, it, expect } from 'vitest'
 import { parseParams, booleanParams, numberParams } from './index.js'
 
 describe('parseParams', () => {
@@ -104,9 +106,26 @@ describe('parseParams', () => {
       expect(result.sort).toEqual(['name', ' createdAt ', ' -updatedAt'])
     })
 
+    it('should parse array of strings', () => {
+      const result = parseParams({ sort: ['name', '-createdAt'] })
+      expect(result.sort).toEqual(['name', '-createdAt'])
+    })
+
     it('should return undefined for non-string sort values', () => {
       const result = parseParams({ sort: 123 as any })
       expect(result.sort).toBeUndefined()
+    })
+
+    it('should return undefined for array with non-string sort values', () => {
+      const result = parseParams({ sort: ['name', 123] as any })
+      expect(result.sort).toBeUndefined()
+    })
+
+    it('should handle qs-esm array sort parsing', () => {
+      const query = qs.stringify({ sort: ['title', '-createdAt'] })
+      const parsed = qs.parse(query)
+      const result = parseParams(parsed)
+      expect(result.sort).toEqual(['title', '-createdAt'])
     })
 
     it('should return undefined for null sort values', () => {

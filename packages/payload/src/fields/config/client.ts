@@ -11,6 +11,7 @@ import type {
   BlocksFieldClient,
   ClientBlock,
   ClientField,
+  DateFieldClient,
   Field,
   FieldBase,
   JoinFieldClient,
@@ -325,6 +326,21 @@ export const createClientField = ({
           i18n,
           importMap,
         }) as ClientBlock[]
+      }
+
+      break
+    }
+
+    case 'date': {
+      // Strip the `override` function from timezone config as it cannot be serialized
+      if (
+        incomingField.timezone &&
+        typeof incomingField.timezone === 'object' &&
+        'override' in incomingField.timezone
+      ) {
+        const field = clientField as DateFieldClient
+        const { override: _, ...timezoneConfigWithoutOverride } = incomingField.timezone
+        field.timezone = timezoneConfigWithoutOverride
       }
 
       break

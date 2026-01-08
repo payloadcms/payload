@@ -8,7 +8,7 @@ import playwright from 'eslint-plugin-playwright'
 export const testEslintConfig = [
   ...rootEslintConfig,
   {
-    ignores: [...defaultESLintIgnores, '**/payload-types.ts', 'jest.setup.js'],
+    ignores: [...defaultESLintIgnores, '**/payload-types.ts'],
   },
   {
     rules: {
@@ -36,9 +36,15 @@ export const testEslintConfig = [
   },
   {
     files: ['**/*.int.spec.ts', '**/int.spec.ts'],
+    settings: {
+      vitest: {
+        // See https://github.com/vitest-dev/eslint-plugin-vitest?tab=readme-ov-file#custom-fixtures
+        // This ensures that the eslint plugin recognizes the `it` wrapper function in our helpers/vitest.ts file.
+        vitestImports: [/helpers\/vitest/],
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      'jest/prefer-strict-equal': 'off',
     },
   },
   {
@@ -51,12 +57,6 @@ export const testEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
-      'jest/consistent-test-it': 'off',
-      'jest/expect-expect': 'off',
-      'jest/no-test-callback': 'off',
-      'jest/prefer-strict-equal': 'off',
-      'jest/require-top-level-describe': 'off',
-      'jest-dom/prefer-to-have-attribute': 'off',
       'playwright/prefer-web-first-assertions': 'error',
       'payload/no-flaky-assertions': 'warn',
       'payload/no-wait-function': 'warn',
@@ -77,6 +77,8 @@ export const testEslintConfig = [
             'assertURLParams',
             'uploadImage',
             'getRowByCellValueAndAssert',
+            'assertAllElementsHaveFocusIndicators',
+            'assertNoHorizontalOverflow',
           ],
         },
       ],
@@ -88,7 +90,6 @@ export const testEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
-      'jest/expect-expect': 'off',
     },
   },
 ]

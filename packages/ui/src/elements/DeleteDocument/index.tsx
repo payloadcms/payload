@@ -49,7 +49,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const {
     config: {
       routes: { admin: adminRoute, api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -75,15 +74,19 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     setModified(false)
 
     try {
+      const url = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}/${id}`,
+      })
       const res =
         deletePermanently || !collectionConfig.trash
-          ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
+          ? await requests.delete(url, {
               headers: {
                 'Accept-Language': i18n.language,
                 'Content-Type': 'application/json',
               },
             })
-          : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
+          : await requests.patch(url, {
               body: JSON.stringify({
                 deletedAt: new Date().toISOString(),
               }),
@@ -110,9 +113,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
         if (redirectAfterDelete) {
           return startRouteTransition(() =>
-            router.push(
-              formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}`, serverURL }),
-            ),
+            router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
           )
         }
 
@@ -136,7 +137,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   }, [
     deletePermanently,
     setModified,
-    serverURL,
+
     api,
     collectionSlug,
     id,

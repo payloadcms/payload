@@ -1,6 +1,6 @@
 import type { Config, Payload } from 'payload'
+import { describe, beforeAll, beforeEach, it, expect, test, vitest, Mock } from 'vitest'
 
-import { jest } from '@jest/globals'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
@@ -13,20 +13,20 @@ import { defaults } from 'payload'
 // }))
 
 const mockedPayload: Payload = {
-  updateGlobal: jest.fn(),
-  findGlobal: jest.fn().mockReturnValue('instance'),
+  updateGlobal: vitest.fn(),
+  findGlobal: vitest.fn().mockReturnValue('instance'),
 } as unknown as Payload
 
 import { payloadCloudPlugin } from './plugin.js'
 
 describe('plugin', () => {
-  let createTransportSpy: jest.Spied<any>
+  let createTransportSpy: Mock<any>
 
   const skipVerify = true
 
   beforeAll(() => {
     // Mock createTestAccount to prevent calling external services
-    jest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
+    vitest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
       return Promise.resolve({
         imap: { host: 'imap.test.com', port: 993, secure: true },
         pass: 'testpass',
@@ -39,12 +39,12 @@ describe('plugin', () => {
   })
 
   beforeEach(() => {
-    createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
+    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
       return {
         transporter: {
           name: 'Nodemailer - SMTP',
         },
-        verify: jest.fn(),
+        verify: vitest.fn(),
       } as unknown as ReturnType<typeof nodemailer.createTransport>
     })
   })
@@ -114,7 +114,7 @@ describe('plugin', () => {
       })
 
       it('should not modify existing email transport', async () => {
-        const logSpy = jest.spyOn(console, 'log')
+        const logSpy = vitest.spyOn(console, 'log')
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
