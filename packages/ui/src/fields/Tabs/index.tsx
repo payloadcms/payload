@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getFieldPaths, tabHasName, toKebabCase } from 'payload/shared'
+import { getFieldPaths, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
@@ -231,8 +231,6 @@ function TabContent({
   if (Field) {
     return Field
   }
-
-  const isNamedTab = tabHasName(field)
 
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,

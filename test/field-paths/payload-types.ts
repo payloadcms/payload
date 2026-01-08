@@ -68,7 +68,6 @@ export interface Config {
   blocks: {};
   collections: {
     'field-paths': FieldPath;
-    test: Test;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -78,7 +77,6 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
-    test: TestSelect<false> | TestSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -437,19 +435,6 @@ export interface FieldPath {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "test".
- */
-export interface Test {
-  id: string;
-  fieldWithinUnnamedTab?: string | null;
-  namedTab?: {
-    fieldWithinNamedTab?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -499,10 +484,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'field-paths';
         value: string | FieldPath;
-      } | null)
-    | ({
-        relationTo: 'test';
-        value: string | Test;
       } | null)
     | ({
         relationTo: 'users';
@@ -609,20 +590,6 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNamedTab_beforeChange_FieldPaths?: T;
   fieldWithinNamedTab_afterRead_FieldPaths?: T;
   fieldWithinNamedTab_beforeDuplicate_FieldPaths?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "test_select".
- */
-export interface TestSelect<T extends boolean = true> {
-  fieldWithinUnnamedTab?: T;
-  namedTab?:
-    | T
-    | {
-        fieldWithinNamedTab?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -184,7 +184,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
+  if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field) && field.type !== 'tab') {
     fieldPermissions =
       parentPermissions === true
         ? parentPermissions
