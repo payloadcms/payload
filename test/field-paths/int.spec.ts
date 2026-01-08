@@ -92,7 +92,7 @@ describe('Field Paths', () => {
         collection: fieldPathsSlug,
       })
 
-      expect(doc).toEqual({
+      const expectedDoc = {
         updatedAt: doc.updatedAt,
         createdAt: doc.createdAt,
         id: doc.id,
@@ -147,12 +147,14 @@ describe('Field Paths', () => {
             'fieldWithinNamedTabWithinCollapsible',
           ],
         }),
-      })
+      }
+
+      expect(doc).toEqual(expectedDoc)
     })
   })
 
   describe('field schema map', () => {
-    it('should build a field schema map with correct field paths', async () => {
+    it('should build a field schema map with correct field schema paths', async () => {
       const i18n = await initI18n({
         config: config.i18n,
         context: 'client',

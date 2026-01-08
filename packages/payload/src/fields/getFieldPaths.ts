@@ -34,16 +34,15 @@ export function getFieldPaths({
   parentSchemaPath,
 }: Args): FieldPaths {
   const parentPathSegments = parentPath.split('.')
-  const parentSchemaPathSegments = parentSchemaPath.split('.')
 
-  const parentIsUnnamed =
-    parentSchemaPathSegments?.[parentSchemaPathSegments.length - 1]?.startsWith('_index-')
+  const parentPathIsUnnamed =
+    parentPathSegments?.[parentPathSegments.length - 1]?.startsWith('_index-')
 
-  const parentWithoutIndex = parentIsUnnamed
+  const parentWithoutIndex = parentPathIsUnnamed
     ? parentPathSegments.slice(0, -1).join('.')
     : parentPath
 
-  const parentPathToUse = parentIsUnnamed ? parentWithoutIndex : parentPath
+  const parentPathToUse = parentPathIsUnnamed ? parentWithoutIndex : parentPath
 
   if ('name' in field) {
     return {
@@ -55,10 +54,15 @@ export function getFieldPaths({
 
   const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
 
+  const parentSchemaPathSegments = parentSchemaPath.split('.')
+
+  const parentSchemaPathIsUnnamed =
+    parentSchemaPathSegments?.[parentSchemaPathSegments.length - 1]?.startsWith('_index-')
+
   return {
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
     path: `${parentPathToUse ? parentPathToUse + '.' : ''}${indexSuffix}`,
-    schemaPath: parentIsUnnamed
+    schemaPath: parentSchemaPathIsUnnamed
       ? `${parentSchemaPath}-${index}`
       : `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
   }

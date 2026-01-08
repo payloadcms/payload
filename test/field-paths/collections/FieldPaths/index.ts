@@ -103,7 +103,7 @@ export const FieldPaths: CollectionConfig = {
         {
           // path: 'array.[n]._index-2'
           // schemaPath: 'array._index-2'
-          // indexPath: ''
+          // indexPath: '2'
           type: 'row',
           fields: [
             {
