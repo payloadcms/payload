@@ -11,7 +11,13 @@ type Props = {
 
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({ data, ordersSlug = 'orders', req, transactionsSlug = 'transactions' }) => {
+  async ({
+    cartsSlug = 'carts',
+    data,
+    ordersSlug = 'orders',
+    req,
+    transactionsSlug = 'transactions',
+  }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
@@ -104,7 +110,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       await payload.update({
         id: cartID,
-        collection: 'carts',
+        collection: cartsSlug,
         data: {
           purchasedAt: timestamp,
         },

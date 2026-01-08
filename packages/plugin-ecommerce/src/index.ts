@@ -92,6 +92,7 @@ export const ecommercePlugin =
           inventory: sanitizedPluginConfig.inventory,
           productsSlug: collectionSlugMap.products,
           variantOptionsSlug: collectionSlugMap.variantOptions,
+          variantTypesSlug: collectionSlugMap.variantTypes,
         })
 
         const variants =

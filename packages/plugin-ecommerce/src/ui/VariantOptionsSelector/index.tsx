@@ -5,15 +5,20 @@ import { FieldLabel } from '@payloadcms/ui'
 import { ErrorBox } from './ErrorBox.js'
 import './index.css'
 import { OptionsSelect } from './OptionsSelect.js'
+
 type Props = {} & SelectFieldServerProps
 
 export const VariantOptionsSelector: React.FC<Props> = async (props) => {
-  const { clientField, data, path, req, user } = props
+  const { clientField, data, field, path, req, user } = props
   const { label } = clientField
+
+  // Get collection slugs from field custom prop, with defaults for backwards compatibility
+  const productsSlug = (field.custom?.productsSlug as string) || 'products'
+  const variantTypesSlug = (field.custom?.variantTypesSlug as string) || 'variantTypes'
 
   const product = await req.payload.findByID({
     id: data.product,
-    collection: 'products',
+    collection: productsSlug,
     depth: 0,
     draft: true,
     select: {
@@ -37,7 +42,7 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
     for (const variantTypeID of variantTypeIDs) {
       const variantType = await req.payload.findByID({
         id: variantTypeID,
-        collection: 'variantTypes',
+        collection: variantTypesSlug,
         depth: 1,
         joins: {
           options: {
