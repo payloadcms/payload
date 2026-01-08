@@ -195,6 +195,40 @@ const DateFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'dateWithOffsetTimezone',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        defaultTimezone: '+05:30',
+        supportedTimezones: [
+          { label: 'UTC+5:30 (India)', value: '+05:30' },
+          { label: 'UTC-8 (PST)', value: '-08:00' },
+          { label: 'UTC+0', value: '+00:00' },
+        ],
+      },
+    },
+    {
+      name: 'dateWithMixedTimezones',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        defaultTimezone: 'America/New_York',
+        supportedTimezones: [
+          { label: 'New York', value: 'America/New_York' },
+          { label: 'UTC+5:30', value: '+05:30' },
+          { label: 'UTC', value: 'UTC' },
+        ],
+      },
+    },
   ],
 }
 
