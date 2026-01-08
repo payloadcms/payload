@@ -1,4 +1,4 @@
-import type { AcceptedLanguages, Language } from '@payloadcms/translations'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
@@ -11,6 +11,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  WidgetInstance,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -33,6 +34,7 @@ import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/c
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
+import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { setupOrderable } from './orderable/index.js'
@@ -53,6 +55,17 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
+    slug: 'collections',
+    ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -77,9 +90,9 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
 
   if (sanitizedConfig?.admin?.timezones) {
-    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+    if (typeof configToSanitize?.admin?.timezones?.supportedTimezones === 'function') {
       sanitizedConfig.admin.timezones.supportedTimezones =
-        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+        configToSanitize.admin.timezones.supportedTimezones({ defaultTimezones })
     }
 
     if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
@@ -90,16 +103,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       supportedTimezones: defaultTimezones,
     }
   }
-  // Timezones supported by the Intl API
-  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
 
-  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
-  ;(sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (timezone.value !== 'UTC' && !_internalSupportedTimezones.includes(timezone.value)) {
-      throw new InvalidConfiguration(
-        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
-      )
-    }
+  validateTimezones({
+    source: 'admin.timezones.supportedTimezones',
+    timezones: sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[],
   })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>

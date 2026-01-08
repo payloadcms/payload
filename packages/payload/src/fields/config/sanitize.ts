@@ -22,6 +22,7 @@ import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
+import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
@@ -427,18 +428,34 @@ export const sanitizeFields = async ({
           ? supportedTimezones({ defaultTimezones })
           : supportedTimezones
 
+      validateTimezones({
+        source: `field "${field.name}" timezone.supportedTimezones`,
+        timezones: options,
+      })
+
       if (options && options.length === 1 && options[0]?.value) {
         defaultTimezone = options[0].value
       }
 
+      // Generate label for timezone field
+      // Use parent field's label + ' Tz' if it's a simple string, otherwise fallback to name
+      const timezoneLabel = typeof field.label === 'string' ? `${field.label} Tz` : toWords(name)
+
       // Need to set the options here manually so that any database enums are generated correctly
       // The UI component will import the options from the config
-      const timezoneField = baseTimezoneField({
+      const baseField = baseTimezoneField({
         name,
         defaultValue: defaultTimezone,
+        label: timezoneLabel,
         options,
         required,
       })
+
+      // Apply override if provided
+      const timezoneField =
+        typeof field.timezone === 'object' && typeof field.timezone.override === 'function'
+          ? field.timezone.override({ baseField })
+          : baseField
 
       fields.splice(++i, 0, timezoneField)
     }

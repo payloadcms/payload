@@ -16,6 +16,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customEditLabel,
   customNestedTabViewPath,
@@ -42,6 +43,7 @@ import {
   postsCollectionSlug,
   reorderTabsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -766,7 +768,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
+      const customEditMenuItem = page.locator('.popup__content .popup-button-list__button', {
         hasText: 'Custom Edit Menu Item',
       })
 
@@ -782,7 +784,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {
@@ -801,7 +803,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {

@@ -72,7 +72,6 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
-- `pnpm run dev:memorydb` - Run dev server with in-memory MongoDB
 
 ### Development Environment
 
@@ -82,6 +81,47 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
 
 ## Testing
+
+### Writing Tests - Required Practices
+
+**Tests MUST be self-contained and clean up after themselves:**
+
+- If you create a database record in a test, you MUST delete it before the test completes
+- For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
+- Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+
+**Example pattern:**
+
+```typescript
+describe('My Feature', () => {
+  const createdIDs: number[] = []
+
+  afterEach(async () => {
+    for (const id of createdIDs) {
+      await payload.delete({ collection: 'my-collection', id })
+    }
+    createdIDs.length = 0
+  })
+
+  it('should create a record', async () => {
+    const id = 123
+    createdIDs.push(id)
+
+    await payload.create({ collection: 'my-collection', data: { id, title: 'Test' } })
+    // assertions...
+  })
+})
+```
+
+**Additional test guidelines:**
+
+- Use descriptive test names starting with "should" (e.g., "should create document with custom ID")
+- Add blank lines after variable declarations to improve readability
+- Collection and global slugs should be kept in a shared file and re-used i.e. on relationship fields `relationTo: collectionSlug`
+- One test should verify one behavior - keep tests focused
+- When adding a new collection for testing, add it to both `collections/` directory and the config file import statements
+
+### How to run tests
 
 - `pnpm run test` - Run all tests (integration + components + e2e)
 - `pnpm run test:int` - Integration tests (MongoDB, recommended)
@@ -97,7 +137,7 @@ Each test directory in `test/` follows this pattern:
 ```
 test/<feature-name>/
 ├── config.ts        # Lightweight Payload config for testing
-├── int.spec.ts      # Integration tests (Jest)
+├── int.spec.ts      # Integration tests (Vitest)
 ├── e2e.spec.ts      # End-to-end tests (Playwright)
 └── payload-types.ts # Generated types
 ```

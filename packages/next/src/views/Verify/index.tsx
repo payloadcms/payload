@@ -46,7 +46,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
     return (
       <ToastAndRedirect
         message={req.t('authentication:emailVerified')}
-        redirectTo={formatAdminURL({ adminRoute, path: '/login', serverURL })}
+        redirectTo={formatAdminURL({ adminRoute, path: '/login' })}
       />
     )
   }

@@ -17,7 +17,7 @@ function getEnvVarName(dbType: DbType, customEnvName?: string): string {
   if (dbType === 'vercel-postgres') {
     return 'POSTGRES_URL'
   }
-  return 'DATABASE_URI'
+  return 'DATABASE_URL'
 }
 
 /** Update payload config with necessary imports and adapters */

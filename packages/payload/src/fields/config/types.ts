@@ -725,13 +725,39 @@ export type CheckboxFieldClient = {
 } & FieldBaseClient &
   Pick<CheckboxField, 'type'>
 
-type DateFieldTimezoneConfig = {
+type DateFieldTimezoneConfigBase = {
   /**
    * Make only the timezone required in the admin interface. This means a timezone is always required to be selected.
    */
   required?: boolean
   supportedTimezones?: Timezone[]
 } & Pick<TimezonesConfig, 'defaultTimezone'>
+
+type DateFieldTimezoneConfig = {
+  /**
+   * A function used to override the timezone field at a granular level.
+   * Passes the base select field to you to manipulate beyond the exposed options.
+   * @example
+   * ```ts
+   * {
+   *   type: 'date',
+   *   name: 'publishedAt',
+   *   timezone: {
+   *     override: ({ baseField }) => ({
+   *       ...baseField,
+   *       admin: {
+   *         ...baseField.admin,
+   *         hidden: false,
+   *       },
+   *     }),
+   *   },
+   * }
+   * ```
+   */
+  override?: (args: { baseField: SelectField }) => Field
+} & DateFieldTimezoneConfigBase
+
+type DateFieldTimezoneConfigClient = DateFieldTimezoneConfigBase
 
 export type DateField = {
   admin?: {
@@ -755,8 +781,13 @@ export type DateField = {
 export type DateFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
+  /**
+   * Enable timezone selection in the admin interface.
+   * Note: The `override` function is stripped on the client.
+   */
+  timezone?: DateFieldTimezoneConfigClient | true
 } & FieldBaseClient &
-  Pick<DateField, 'timezone' | 'type'>
+  Pick<DateField, 'type'>
 
 export type GroupBase = {
   admin?: {

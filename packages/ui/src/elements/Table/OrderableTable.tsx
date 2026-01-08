@@ -5,6 +5,7 @@ import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payl
 import './index.scss'
 
 import { DragOverlay } from '@dnd-kit/core'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -119,14 +120,20 @@ export const OrderableTable: React.FC<Props> = ({
         target,
       }
 
-      const response = await fetch(`${config.serverURL}${config.routes.api}/reorder`, {
-        body: JSON.stringify(jsonBody),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: config.routes.api,
+          path: '/reorder',
+        }),
+        {
+          body: JSON.stringify(jsonBody),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      })
+      )
 
       if (response.status === 403) {
         throw new Error('You do not have permission to reorder these rows')
