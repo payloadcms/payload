@@ -214,12 +214,25 @@
     "vitest": "4.0.15",
     "wrangler": "~4.42.0"
   },
-  "packageManager": "pnpm@9.7.1",
+  "packageManager": "pnpm@10.27.0",
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9.7.0"
+    "pnpm": "^10.27.0"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "@swc/core",
+      "@vercel/git-hooks",
+      "better-sqlite3",
+      "bufferutil",
+      "esbuild",
+      "mongodb-memory-server",
+      "sharp",
+      "unrs-resolver",
+      "utf-8-validate",
+      "workerd"
+    ],
     "overrides": {
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
