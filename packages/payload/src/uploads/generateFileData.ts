@@ -120,7 +120,7 @@ export const generateFileData = async <T>({
       throw new Forbidden(req.t)
     }
 
-    if (url?.startsWith(serverURL) || url?.startsWith('/')) {
+    if ((serverURL && url?.startsWith(serverURL)) || url?.startsWith('/')) {
       isLocalFile = true
     }
 
