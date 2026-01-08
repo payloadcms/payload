@@ -4022,5 +4022,48 @@ describe('Fields', () => {
         )
       })
     })
+
+    it('should apply timezone override function to customize the field', async () => {
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // We can verify this by checking the collection config has the modified field
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
+      expect(timezoneField).toBeDefined()
+      expect(timezoneField?.type).toEqual('select')
+      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect(timezoneField?.admin?.description).toEqual(
+        'This timezone field was customized via override',
+      )
+
+      // Also verify it still works for creating/storing data
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
+          dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
+    })
+
+    it('should generate timezone field label from parent date field label', () => {
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      // Field with no explicit label - should use toWords(name) for timezone label
+      const defaultTzField = fields.find((f) => f.name === 'defaultWithTimezone_tz')
+      expect(defaultTzField?.label).toEqual('Default With Timezone Tz')
+
+      // Field with disableListColumn override - label should still be generated
+      const disabledColumnsTzField = fields.find(
+        (f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz',
+      )
+      expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
+    })
   })
 })

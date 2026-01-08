@@ -790,6 +790,31 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 
+    test('date field with hidden timezone column should display date correctly in list view', async () => {
+      await page.goto(url.list)
+
+      // The date field value should still be displayed correctly
+      const dateTimeLocator = page.locator('.cell-dateWithTimezoneWithDisabledColumns').first()
+
+      await expect(async () => {
+        // The date is 2027-08-12T14:00:00.000Z with America/New_York timezone
+        // In New York (UTC-4 in summer), this should display as 10:00 AM
+        await expect(dateTimeLocator).toHaveText('August 12th 2027, 10:00 AM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      // The timezone column should NOT be visible (hidden via disableListColumn override)
+      const timezoneColumnCell = page.locator('.cell-dateWithTimezoneWithDisabledColumns_tz')
+      await expect(timezoneColumnCell).toHaveCount(0)
+
+      await page.locator('.list-controls__toggle-columns').click()
+
+      const dateColumnOption = page.locator('#dateWithTimezoneWithDisabledColumns')
+      await expect(dateColumnOption).toBeVisible()
+
+      const timezoneColumnOption = page.locator('#dateWithTimezoneWithDisabledColumns_tz')
+      await expect(timezoneColumnOption).toBeHidden()
+    })
+
     test('creates the expected UTC value when the selected timezone is UTC', async () => {
       const expectedDateInput = 'Jan 1, 2025 6:00 PM'
       const expectedUTCValue = '2025-01-01T18:00:00.000Z'

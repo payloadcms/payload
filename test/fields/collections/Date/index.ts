@@ -14,6 +14,7 @@ const DateFields: CollectionConfig = {
       'dayAndTimeWithTimezone',
       'timezoneGroup.dayAndTime',
       'dayAndTimeWithTimezoneFixed',
+      'dateWithTimezoneWithDisabledColumns',
     ],
   },
   fields: [
@@ -227,6 +228,25 @@ const DateFields: CollectionConfig = {
           { label: 'UTC+5:30', value: '+05:30' },
           { label: 'UTC', value: 'UTC' },
         ],
+      },
+    },
+    {
+      name: 'dateWithTimezoneWithDisabledColumns',
+      type: 'date',
+      timezone: {
+        override: ({ baseField }) => ({
+          ...baseField,
+          admin: {
+            ...baseField.admin,
+            disableListColumn: true,
+            description: 'This timezone field was customized via override',
+          },
+        }),
+      },
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
       },
     },
   ],
