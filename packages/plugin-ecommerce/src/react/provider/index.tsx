@@ -254,7 +254,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   )
 
   const refreshCart = useCallback<EcommerceContextType['refreshCart']>(async () => {
-    if (!cartID) {return}
+    if (!cartID) {
+      return
+    }
     const updatedCart = await getCart(cartID)
     setCart(updatedCart)
   }, [cartID, getCart])
@@ -968,7 +970,16 @@ export const useCurrency = () => {
 }
 
 export function useCart<T extends CartsCollection>() {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, refreshCart, isLoading, removeItem } = useEcommerce()
+  const {
+    addItem,
+    cart,
+    clearCart,
+    decrementItem,
+    incrementItem,
+    isLoading,
+    refreshCart,
+    removeItem,
+  } = useEcommerce()
 
   if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
@@ -980,8 +991,8 @@ export function useCart<T extends CartsCollection>() {
     clearCart,
     decrementItem,
     incrementItem,
-    refreshCart,
     isLoading,
+    refreshCart,
     removeItem,
   }
 }
