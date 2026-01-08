@@ -102,7 +102,7 @@ export const traverseFields = ({
             i18n,
             parentIndexPath: indexPath,
             parentPath,
-            parentSchemaPath,
+            parentSchemaPath: schemaPath,
             schemaMap,
           })
         }

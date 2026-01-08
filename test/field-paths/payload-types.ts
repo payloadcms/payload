@@ -146,6 +146,7 @@ export interface FieldPath {
   namedTabWithinCollapsible?: {
     fieldWithinNamedTabWithinCollapsible?: string | null;
   };
+  textFieldInUnnamedGroup?: string | null;
   topLevelNamedField_beforeValidate_FieldPaths?:
     | {
         [k: string]: unknown;
@@ -506,6 +507,42 @@ export interface FieldPath {
     | number
     | boolean
     | null;
+  textFieldInUnnamedGroup_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  textFieldInUnnamedGroup_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  textFieldInUnnamedGroup_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  textFieldInUnnamedGroup_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -640,6 +677,7 @@ export interface FieldPathsSelect<T extends boolean = true> {
     | {
         fieldWithinNamedTabWithinCollapsible?: T;
       };
+  textFieldInUnnamedGroup?: T;
   topLevelNamedField_beforeValidate_FieldPaths?: T;
   topLevelNamedField_beforeChange_FieldPaths?: T;
   topLevelNamedField_afterRead_FieldPaths?: T;
@@ -680,6 +718,10 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNamedTabWithinCollapsible_beforeChange_FieldPaths?: T;
   fieldWithinNamedTabWithinCollapsible_afterRead_FieldPaths?: T;
   fieldWithinNamedTabWithinCollapsible_beforeDuplicate_FieldPaths?: T;
+  textFieldInUnnamedGroup_beforeValidate_FieldPaths?: T;
+  textFieldInUnnamedGroup_beforeChange_FieldPaths?: T;
+  textFieldInUnnamedGroup_afterRead_FieldPaths?: T;
+  textFieldInUnnamedGroup_beforeDuplicate_FieldPaths?: T;
   updatedAt?: T;
   createdAt?: T;
 }

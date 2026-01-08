@@ -249,6 +249,23 @@ export const FieldPaths: CollectionConfig = {
         },
       ],
     },
+    {
+      // path: '_index-5'
+      // schemaPath: '_index-5'
+      // indexPath: '5'
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          // path: 'textFieldInUnnamedGroup'
+          // schemaPath: '_index-5.textFieldInUnnamedGroup'
+          // indexPath: ''
+          name: 'textFieldInUnnamedGroup',
+          type: 'text',
+          hooks: attachHooks('textFieldInUnnamedGroup'),
+        },
+      ],
+    },
     // create fields for the hooks to save data to
     ...createFields([
       'topLevelNamedField',
@@ -261,6 +278,7 @@ export const FieldPaths: CollectionConfig = {
       'fieldWithinNamedTab',
       'fieldWithinUnnamedTabWithinCollapsible',
       'fieldWithinNamedTabWithinCollapsible',
+      'textFieldInUnnamedGroup',
     ]),
   ],
 }

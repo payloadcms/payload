@@ -83,6 +83,8 @@ describe('Field Paths', () => {
             fieldWithinNamedTab: 'Test',
           },
           fieldWithinNestedUnnamedTab: 'Test',
+          fieldWithinUnnamedTabWithinCollapsible: 'Test',
+          textFieldInUnnamedGroup: 'Test',
         },
       })
 
@@ -104,6 +106,7 @@ describe('Field Paths', () => {
         array: doc.array,
         namedTabWithinCollapsible: doc.namedTabWithinCollapsible,
         fieldWithinUnnamedTabWithinCollapsible: doc.fieldWithinUnnamedTabWithinCollapsible,
+        textFieldInUnnamedGroup: doc.textFieldInUnnamedGroup,
         ...formatExpectedFieldPaths('topLevelNamedField', {
           path: ['topLevelNamedField'],
           schemaPath: ['topLevelNamedField'],
@@ -147,6 +150,10 @@ describe('Field Paths', () => {
             'namedTabWithinCollapsible',
             'fieldWithinNamedTabWithinCollapsible',
           ],
+        }),
+        ...formatExpectedFieldPaths('textFieldInUnnamedGroup', {
+          path: ['textFieldInUnnamedGroup'],
+          schemaPath: ['_index-5', 'textFieldInUnnamedGroup'],
         }),
       }
 
@@ -204,6 +211,8 @@ describe('Field Paths', () => {
         '_index-4-0-0.fieldWithinUnnamedTabWithinCollapsible',
         '_index-4-0.namedTabWithinCollapsible',
         '_index-4-0.namedTabWithinCollapsible.fieldWithinNamedTabWithinCollapsible',
+        '_index-5',
+        '_index-5.textFieldInUnnamedGroup',
         'updatedAt',
         'createdAt',
       ])
