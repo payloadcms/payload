@@ -122,6 +122,7 @@
     "script:license-check": "pnpm --filter scripts license-check",
     "script:list-published": "pnpm --filter releaser list-published",
     "script:pack": "pnpm --filter scripts pack-all-to-dest",
+    "script:setup-figma": "./scripts/setup-figma-dev.sh",
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:e2e": "pnpm runts ./test/runE2E.ts",
