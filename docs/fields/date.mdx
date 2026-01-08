@@ -304,7 +304,7 @@ The `override` function receives an object with `baseField` (the default timezon
   config so that the right validations are run against your timezones.
 </Banner>
 
-### Manual Offsets
+### Custom UTC Offsets
 
 In addition to IANA timezone names (like `America/New_York`), you can also use fixed UTC offsets in the `±HH:mm` format:
 
@@ -322,7 +322,7 @@ In addition to IANA timezone names (like `America/New_York`), you can also use f
 }
 ```
 
-You can also mix IANA timezones with manual offsets:
+You can also mix IANA timezones with custom UTC offsets:
 
 ```ts
 {
@@ -338,8 +338,8 @@ You can also mix IANA timezones with manual offsets:
 }
 ```
 
-<Banner type="warning">
-  Manual UTC offsets are fixed and do not account for daylight saving time (DST)
+<Banner type="info">
+  Custom UTC offsets are fixed and do not account for daylight saving time (DST)
   adjustments. If you need automatic DST handling, use IANA timezone names
   instead (e.g., `America/New_York` rather than `-05:00`).
 </Banner>
