@@ -25,8 +25,10 @@ type Action =
     }
   | {
       errorCount: number
+      exceedsLimit?: boolean
       formState: FormState
       index: number
+      missingFile?: boolean
       type: 'UPDATE_FORM'
       updatedFields?: Record<string, unknown>
       uploadEdits?: UploadEdits
@@ -122,6 +124,14 @@ export function formsManagementReducer(state: State, action: Action): State {
       const updatedForms = [...state.forms]
       updatedForms[action.index].errorCount = action.errorCount
 
+      // Update file error flags if provided, otherwise preserve existing values
+      if (action.exceedsLimit !== undefined) {
+        updatedForms[action.index].exceedsLimit = action.exceedsLimit
+      }
+      if (action.missingFile !== undefined) {
+        updatedForms[action.index].missingFile = action.missingFile
+      }
+
       // Merge the existing formState with the new formState
       updatedForms[action.index] = {
         ...updatedForms[action.index],
@@ -138,7 +148,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms: updatedForms,
-        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+        totalErrorCount: updatedForms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }
     default: {
