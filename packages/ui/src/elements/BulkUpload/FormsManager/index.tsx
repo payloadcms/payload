@@ -350,6 +350,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             currentForms[i] = {
               ...currentForms[i],
               errorCount: 1,
+              exceedsLimit: false,
+              missingFile: true,
             }
             continue
           }
@@ -424,17 +426,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }),
           }
 
-          // file too large
-          if (req.status === 413) {
+          if (
+            req.status === 413 || // file too large
+            (req.status === 400 && !currentForms[i].formState.file?.value) // missing file
+          ) {
             currentForms[i].errorCount = currentForms[i].errorCount + 1
             toast.error(nonFieldErrors[0]?.message)
           }
 
-          // missing file
-          if (req.status === 400 && !currentForms[i].formState.file?.value) {
-            currentForms[i].errorCount = currentForms[i].errorCount + 1
-            toast.error(nonFieldErrors[0]?.message)
-          }
+          console.log('currentForms[i]', currentForms[i], currentForms[i].formState)
         } catch (_) {
           // swallow
         }
