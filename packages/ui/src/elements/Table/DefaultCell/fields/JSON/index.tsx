@@ -6,11 +6,12 @@ import React from 'react'
 import './index.scss'
 
 export const JSONCell: React.FC<DefaultCellComponentProps<JSONFieldClient>> = ({ cellData }) => {
-  const textToShow = cellData?.length > 100 ? `${cellData.substring(0, 100)}\u2026` : cellData
+  const stringData = cellData ? JSON.stringify(cellData) : cellData
+  const textToShow = stringData?.length > 100 ? `${stringData.substring(0, 100)}\u2026` : stringData
 
   return (
     <code className="json-cell">
-      <span>{JSON.stringify(textToShow)}</span>
+      <span>{textToShow}</span>
     </code>
   )
 }
