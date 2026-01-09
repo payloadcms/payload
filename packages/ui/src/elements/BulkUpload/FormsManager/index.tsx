@@ -444,8 +444,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
             toast.error(nonFieldErrors[0]?.message)
           }
-
-          console.log('currentForms[i]', currentForms[i], currentForms[i].formState)
         } catch (_) {
           // swallow
         }
