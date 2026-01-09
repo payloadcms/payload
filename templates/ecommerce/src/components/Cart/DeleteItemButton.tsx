@@ -27,7 +27,7 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         }}
         type="button"
       >
-        <XIcon className="hover:text-accent-3 mx-[1px] h-4 w-4 text-white dark:text-black" />
+        <XIcon className="hover:text-accent-3 mx-px h-4 w-4 text-white dark:text-black" />
       </button>
     </form>
   )

@@ -802,6 +802,80 @@ test.describe('Multi Tenant', () => {
         })
         .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'Public Tenant', 'House Rules'].sort())
     })
+
+    test('should allow clearing tenant filter from dashboard view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: tenantsURL,
+      })
+
+      // Navigate to dashboard view
+      await page.goto(`${serverURL}/admin`)
+
+      // Clear the tenant filter from the dashboard
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
+
+    test('should allow clearing tenant filter from list view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        urlUtil: menuItemsURL,
+      })
+
+      // Verify tenant is set
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBe('Steel Cat')
+
+      // Clear the tenant filter from the list view
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
   })
 })
 

@@ -31,7 +31,7 @@ describePostgres('queues - postgres logs', () => {
   })
 
   afterAll(async () => {
-    await payload.destroy()
+    await payload?.destroy()
   })
 
   it('ensure running jobs uses minimal db calls', async () => {

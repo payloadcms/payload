@@ -77,6 +77,8 @@ export const testEslintConfig = [
             'assertURLParams',
             'uploadImage',
             'getRowByCellValueAndAssert',
+            'assertAllElementsHaveFocusIndicators',
+            'assertNoHorizontalOverflow',
           ],
         },
       ],
