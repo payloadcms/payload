@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { CountOptions } from 'mongodb'
 import type { Count } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -6,14 +6,12 @@ import { flattenWhereToOperators } from 'payload/database'
 
 import type { MongooseAdapter } from '.'
 
-import { withSession } from './withSession'
-
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, locale, where },
 ) {
   const Model = this.collections[collection]
-  const options: QueryOptions = await withSession(this, req)
+  const options: CountOptions = {}
 
   let hasNearConstraint = false
 
@@ -38,6 +36,14 @@ export const count: Count = async function count(
     // the correct indexed field
     options.hint = {
       _id: 1,
+    }
+  }
+
+  if (useEstimatedCount) {
+    const estimatedCount = await Model.estimatedDocumentCount({ session: options.session })
+
+    return {
+      totalDocs: estimatedCount,
     }
   }
 

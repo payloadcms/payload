@@ -74,7 +74,10 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 }
               } else if (typeof searchParam?.value === 'object') {
-                result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge })
+                result = deepmerge(result, searchParam.value, {
+                  arrayMerge: combineMerge,
+                  clone: false,
+                })
               }
             }
           }
