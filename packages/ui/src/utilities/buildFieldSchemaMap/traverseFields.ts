@@ -26,11 +26,6 @@ export const traverseFields = ({
       field,
       index,
       parentIndexPath,
-      /**
-       * No need for parent path here as we're not working with data.
-       * We only need to build schema paths, and data paths are not needed for this.
-       */
-      parentPath: '',
       parentSchemaPath,
     })
 

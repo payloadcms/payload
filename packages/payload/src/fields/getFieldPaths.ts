@@ -5,7 +5,10 @@ type Args = {
   field: ClientField | ClientTab | Field | Tab | TabAsFieldClient
   index: number
   parentIndexPath: string
-  parentPath: string
+  /**
+   * Needed to generate data paths. Omit if you only need schema paths, e.g. within field schema maps.
+   */
+  parentPath?: string
   parentSchemaPath: string
 }
 
@@ -30,7 +33,7 @@ export function getFieldPaths({
   field,
   index,
   parentIndexPath,
-  parentPath,
+  parentPath = '',
   parentSchemaPath,
 }: Args): FieldPaths {
   const parentPathSegments = parentPath.split('.')
