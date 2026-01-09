@@ -44,8 +44,10 @@ import {
   mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
+  noFilesRequiredSlug,
   relationPreviewSlug,
   relationSlug,
+  relationToNoFilesRequiredSlug,
   svgOnlySlug,
   threeDimensionalSlug,
   withMetadataSlug,
@@ -95,6 +97,8 @@ let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
 let mediaWithImageSizeAdminPropsURL: AdminUrlUtil
+let noFilesRequiredURL: AdminUrlUtil
+let relationToNoFilesRequiredURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -137,6 +141,8 @@ describe('Uploads', () => {
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
     mediaWithImageSizeAdminPropsURL = new AdminUrlUtil(serverURL, mediaWithImageSizeAdminPropsSlug)
+    noFilesRequiredURL = new AdminUrlUtil(serverURL, noFilesRequiredSlug)
+    relationToNoFilesRequiredURL = new AdminUrlUtil(serverURL, relationToNoFilesRequiredSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -1894,5 +1900,35 @@ describe('Uploads', () => {
 
     const titleField = page.locator('#field-title')
     await expect(titleField).toHaveValue('updated title')
+  })
+
+  test('should show data in drawer when editing relationship to upload collection with filesRequiredOnCreate: false', async () => {
+    const uploadDoc = await payload.create({
+      collection: noFilesRequiredSlug,
+      data: {
+        title: 'Upload without file',
+      },
+    })
+
+    const relationDoc = await payload.create({
+      collection: relationToNoFilesRequiredSlug,
+      data: {
+        title: 'Relation document',
+        uploadField: uploadDoc.id,
+      },
+    })
+
+    await page.goto(relationToNoFilesRequiredURL.edit(relationDoc.id))
+
+    await expect(page.locator('#field-uploadField')).toBeVisible()
+
+    await page.locator('#field-uploadField .upload-relationship-details__edit').click()
+
+    const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
+    await expect(drawer).toBeVisible()
+
+    const titleField = drawer.locator('#field-title')
+
+    await expect(titleField).toHaveValue('Upload without file')
   })
 })

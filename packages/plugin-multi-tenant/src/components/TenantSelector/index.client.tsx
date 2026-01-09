@@ -73,7 +73,7 @@ export const TenantSelectorClient = ({
   return (
     <div className="tenant-selector">
       <SelectInput
-        isClearable={viewType === 'list'}
+        isClearable={['dashboard', 'list'].includes(viewType ?? '')}
         label={
           label ? getTranslation(label, i18n) : t('plugin-multi-tenant:nav-tenantSelector-label')
         }
