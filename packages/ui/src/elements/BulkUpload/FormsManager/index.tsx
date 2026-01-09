@@ -570,8 +570,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       dispatch({
         type: 'UPDATE_FORM',
         errorCount: forms[activeIndex].errorCount,
+        exceedsLimit: forms[activeIndex].exceedsLimit,
         formState: forms[activeIndex].formState,
         index: activeIndex,
+        missingFile: forms[activeIndex].missingFile,
         uploadEdits,
       })
     },
