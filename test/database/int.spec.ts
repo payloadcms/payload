@@ -3905,6 +3905,36 @@ describe('database', () => {
     }
   })
 
+  it('should throw unique constraint errors in optimized update path', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-2',
+      },
+    })
+
+    // This update goes through the optimized path (shouldUseOptimizedUpsertRow) in db-drizzle
+    // because it's a simple field update with an existing ID
+    try {
+      await payload.update({
+        collection: 'unique-fields',
+        id: doc2.id,
+        data: {
+          slugField: 'optimized-unique-1', // Try to set to doc1's unique value
+        },
+      })
+    } catch (e) {
+      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+    }
+  })
+
   it('should use optimized updateOne', async () => {
     const post = await payload.create({
       collection: 'posts',
