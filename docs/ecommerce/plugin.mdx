@@ -368,15 +368,39 @@ POST /api/carts/:cartID/clear
 
 ### Cart Item Matcher
 
-The `cartItemMatcher` option allows you to customize how the plugin determines if two cart items should be considered the same. When items match, their quantities are combined instead of creating separate entries.
+The `cartItemMatcher` option allows you to customize how the plugin determines if two cart items should be considered the same. When items match, their quantities are combined instead of creating separate entries. When items don't match, they appear as separate line items in the cart.
 
-By default, items are matched by `product` and `variant` IDs only. You can override this to add custom uniqueness criteria:
+By default, items are matched by `product` and `variant` IDs only. This means if a customer adds the same product twice, the quantity is incremented rather than creating a duplicate entry.
+
+However, many ecommerce scenarios require distinguishing the same product based on additional criteria:
+
+- **Fulfillment options**: Same product for shipping vs. in-store pickup
+- **Gift wrapping**: Same item with or without gift wrapping
+- **Personalization**: Same product with different engraving text
+- **Subscription intervals**: Same product with weekly vs. monthly delivery
+
+The `cartItemMatcher` function receives both the existing cart item and the new item being added, and returns `true` if they should be combined or `false` if they should remain separate.
+
+#### Example: Fulfillment Options
+
+This example shows how to allow the same product to appear as separate cart items when different fulfillment options (shipping vs. pickup) are selected.
+
+First, add a `fulfillment` field to cart items using `cartsCollectionOverride`:
 
 ```ts
+import type { CollectionConfig } from 'payload'
 import type { CartItemMatcher } from '@payloadcms/plugin-ecommerce'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
 
-const customCartItemMatcher: CartItemMatcher = ({ existingItem, newItem }) => {
-  // Match by product, variant, AND custom delivery option
+/**
+ * Custom cart item matcher that includes fulfillment option.
+ * This ensures the same product with different fulfillment options
+ * are listed as separate items in the cart.
+ */
+const fulfillmentCartItemMatcher: CartItemMatcher = ({
+  existingItem,
+  newItem,
+}) => {
   const existingProductID =
     typeof existingItem.product === 'object'
       ? existingItem.product.id
@@ -388,23 +412,69 @@ const customCartItemMatcher: CartItemMatcher = ({ existingItem, newItem }) => {
       : existingItem.variant
 
   const productMatches = existingProductID === newItem.product
+
+  // Variant matching: both must have same variant or both must have no variant
   const variantMatches = newItem.variant
     ? existingVariantID === newItem.variant
     : !existingVariantID
-  const deliveryMatches = existingItem.deliveryOption === newItem.deliveryOption
 
-  return productMatches && variantMatches && deliveryMatches
+  // Fulfillment matching: items with different fulfillment options are separate
+  const existingFulfillment = existingItem.fulfillment as string | undefined
+  const newFulfillment = newItem.fulfillment as string | undefined
+  const fulfillmentMatches = existingFulfillment === newFulfillment
+
+  return productMatches && variantMatches && fulfillmentMatches
 }
 
-// Use in plugin config
-ecommercePlugin({
-  carts: {
-    cartItemMatcher: customCartItemMatcher,
-  },
+export default buildConfig({
+  // ... other config
+  plugins: [
+    ecommercePlugin({
+      carts: {
+        cartItemMatcher: fulfillmentCartItemMatcher,
+        cartsCollectionOverride: ({ defaultCollection }): CollectionConfig => ({
+          ...defaultCollection,
+          fields: defaultCollection.fields.map((f) => {
+            if ('name' in f && f.name === 'items' && f.type === 'array') {
+              return {
+                ...f,
+                fields: [
+                  ...f.fields,
+                  {
+                    name: 'fulfillment',
+                    type: 'select',
+                    defaultValue: 'shipping',
+                    options: [
+                      { label: 'Shipping', value: 'shipping' },
+                      { label: 'Pickup', value: 'pickup' },
+                    ],
+                  },
+                ],
+              }
+            }
+            return f
+          }),
+        }),
+      },
+      // ... other options
+    }),
+  ],
 })
 ```
 
-You can also import the default matcher and types for reference:
+Then, when adding items to the cart from the frontend, include the `fulfillment` field:
+
+```ts
+const { addItem } = useCart()
+
+// These will be separate line items in the cart
+await addItem({ product: 'product-123', fulfillment: 'shipping' })
+await addItem({ product: 'product-123', fulfillment: 'pickup' })
+```
+
+#### Default Matcher
+
+You can import and extend the default matcher for simpler customizations:
 
 ```ts
 import {
@@ -412,6 +482,14 @@ import {
   type CartItemMatcher,
   type CartItemMatcherArgs,
 } from '@payloadcms/plugin-ecommerce'
+
+const customMatcher: CartItemMatcher = (args) => {
+  // First check the default criteria (product + variant)
+  const defaultMatch = defaultCartItemMatcher(args)
+
+  // Then add your custom criteria
+  return defaultMatch && args.existingItem.giftWrap === args.newItem.giftWrap
+}
 ```
 
 ### Cart Operations (Server-side)
