@@ -198,7 +198,6 @@ export const sanitizeQueryValue = ({
 
     if (operator === 'exists') {
       formattedValue = val === 'true' ? true : val === 'false' ? false : Boolean(val)
-
       return buildExistsQuery(formattedValue, path)
     }
   }
