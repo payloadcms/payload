@@ -59,6 +59,9 @@ const createFields = (fieldIdentifiers: string[]): Field[] =>
 
 export const FieldPaths: CollectionConfig = {
   slug: fieldPathsSlug,
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       // path: 'topLevelNamedField'
@@ -103,7 +106,7 @@ export const FieldPaths: CollectionConfig = {
         {
           // path: 'array.[n]._index-2'
           // schemaPath: 'array._index-2'
-          // indexPath: ''
+          // indexPath: '2'
           type: 'row',
           fields: [
             {
@@ -199,6 +202,116 @@ export const FieldPaths: CollectionConfig = {
         },
       ],
     },
+    {
+      // path: '_index-4'
+      // schemaPath: '_index-4'
+      // indexPath: '4'
+      type: 'collapsible',
+      label: 'Collapsible with Tabs',
+      fields: [
+        {
+          // path: '_index-4-0'
+          // schemaPath: '_index-4-0'
+          // indexPath: '4-0'
+          type: 'tabs',
+          tabs: [
+            {
+              // path: '_index-4-0-0'
+              // schemaPath: '_index-4-0-0'
+              // indexPath: '4-0-0'
+              label: 'Unnamed Tab Within Collapsible',
+              fields: [
+                // path: 'fieldWithinUnnamedTabWithinCollapsible'
+                // schemaPath: '_index-4-0-0.fieldWithinUnnamedTabWithinCollapsible'
+                // indexPath: ''
+                {
+                  name: 'fieldWithinUnnamedTabWithinCollapsible',
+                  type: 'text',
+                  hooks: attachHooks('fieldWithinUnnamedTabWithinCollapsible'),
+                },
+              ],
+            },
+            {
+              // path: 'namedTabWithinCollapsible'
+              // schemaPath: '_index-4-0.namedTabWithinCollapsible'
+              // indexPath: ''
+              label: 'Named Tab Within Collapsible',
+              name: 'namedTabWithinCollapsible',
+              fields: [
+                // path: 'namedTabWithinCollapsible.fieldWithinNamedTabWithinCollapsible'
+                // schemaPath: '_index-4-0.namedTabWithinCollapsible.fieldWithinNamedTabWithinCollapsible'
+                // indexPath: ''
+                {
+                  name: 'fieldWithinNamedTabWithinCollapsible',
+                  type: 'text',
+                  hooks: attachHooks('fieldWithinNamedTabWithinCollapsible'),
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      // path: '_index-5'
+      // schemaPath: '_index-5'
+      // indexPath: '5'
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          // path: 'textFieldInUnnamedGroup'
+          // schemaPath: '_index-5.textFieldInUnnamedGroup'
+          // indexPath: ''
+          name: 'textFieldInUnnamedGroup',
+          type: 'text',
+          hooks: attachHooks('textFieldInUnnamedGroup'),
+        },
+      ],
+    },
+    // path: 'blocks'
+    // schemaPath: 'blocks'
+    // indexPath: ''
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          // path: 'blocks.[n]'
+          // schemaPath: 'blocks.CollapsibleBlock'
+          // indexPath: ''
+          slug: 'CollapsibleBlock',
+          fields: [
+            {
+              // path: 'blocks.[n]._index-0'
+              // schemaPath: 'blocks.CollapsibleBlock._index-0'
+              // indexPath: '0-0'
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  // path: 'blocks.[n]._index-0-0'
+                  // schemaPath: 'blocks.CollapsibleBlock._index-0-0'
+                  // indexPath: '0-0-0'
+                  type: 'collapsible',
+                  label: 'Nested Collapsible',
+                  fields: [
+                    {
+                      // path: 'blocks.[n].textInCollapsibleInCollapsibleBlock'
+                      // schemaPath: 'blocks.CollapsibleBlock._index-0-0.textInCollapsibleInCollapsibleBlock'
+                      // indexPath: ''
+                      name: 'textInCollapsibleInCollapsibleBlock',
+                      type: 'text',
+                      hooks: attachHooks('textInCollapsibleInCollapsibleBlock'),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     // create fields for the hooks to save data to
     ...createFields([
       'topLevelNamedField',
@@ -209,6 +322,10 @@ export const FieldPaths: CollectionConfig = {
       'fieldWithinUnnamedTab',
       'fieldWithinNestedUnnamedTab',
       'fieldWithinNamedTab',
+      'fieldWithinUnnamedTabWithinCollapsible',
+      'fieldWithinNamedTabWithinCollapsible',
+      'textFieldInUnnamedGroup',
+      'textInCollapsibleInCollapsibleBlock',
     ]),
   ],
 }
