@@ -1111,7 +1111,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
-      await expect(errorCount).toHaveText('3')
+      await expect(errorCount).toHaveText('2')
 
       await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
