@@ -416,7 +416,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           )
 
           currentForms[i] = {
-            errorCount: fieldErrors.length,
+            errorCount: fieldErrors.length + (req.status === 413 ? 1 : 0),
             formID: currentForms[i].formID,
             formState: fieldReducer(currentForms[i].formState, {
               type: 'ADD_SERVER_ERRORS',
@@ -424,13 +424,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }),
           }
 
-          if (req.status === 413 || req.status === 400) {
-            // file too large
-            currentForms[i] = {
-              ...currentForms[i],
-              errorCount: currentForms[i].errorCount + 1,
-            }
-
+          // file was larger than max allowed size
+          if (req.status === 413 && nonFieldErrors.length > 0) {
             toast.error(nonFieldErrors[0]?.message)
           }
         } catch (_) {

@@ -1359,6 +1359,115 @@ describe('Uploads', () => {
 
       await saveDocAndAssert(page)
     })
+
+    test('should show correct error count when bulk uploading files with validation errors', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files - omit required field to trigger validation error
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+          path.resolve(dirname, './small.png'),
+        ])
+
+      // Do not fill in the required 'prefix' field for any of the uploads
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show error message for all failed files
+      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 3 files')
+
+      // Check that each file has exactly 1 error (the missing required field)
+      const errorCounts = await bulkUploadModal
+        .locator('.file-selections .file-selections__fileRow .error-pill__count')
+        .allTextContents()
+
+      // All 3 files should have error count of 1
+      expect(errorCounts).toEqual(['1', '1', '1'])
+    })
+
+    test('should show correct error count when bulk uploading files that exceed size limit', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files including one that exceeds the 2MB limit
+      await bulkUploadModal.locator('.dropzone input[type="file"]').setInputFiles([
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './2mb.jpg'), // This file exceeds the 2MB limit
+        path.resolve(dirname, './small.png'),
+      ])
+
+      // Fill in the required prefix field for all uploads
+      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+
+      // Navigate to second file
+      const nextButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextButton.click()
+      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+
+      // Navigate to third file
+      await nextButton.click()
+      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show mixed success/failure messages
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 2 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+      ).toBeVisible()
+
+      // The file that exceeded the size limit should have exactly 1 error
+      // Navigate back to check the second file (2mb.jpg)
+      const prevButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
+      )
+      await prevButton.click()
+
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
+      await expect(errorCount).toHaveText('1')
+
+      // Verify the error message indicates file size limit
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
+      ).toBeVisible()
+    })
   })
 
   describe('remote url fetching', () => {
