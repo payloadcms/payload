@@ -733,7 +733,7 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     it('should call findPosts', async () => {
-      await payload.create({
+      const post = await payload.create({
         collection: 'posts',
         data: {
           title: 'Test Post for Finding',
@@ -764,6 +764,12 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const json = await parseStreamResponse(response)
+
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
@@ -809,6 +815,12 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const json = await parseStreamResponse(response)
+
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
@@ -870,7 +882,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
   describe('payloadAPI context', () => {
     it('should call operations with the payloadAPI context as MCP', async () => {
-      await payload.create({
+      const post = await payload.create({
         collection: 'posts',
         data: {
           title: 'Test Post for Finding',
@@ -901,6 +913,12 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const json = await parseStreamResponse(response)
+
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
@@ -1007,6 +1025,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
+
       expect(json.result).toBeDefined()
       const responseText = json.result.content[0].text
 
@@ -1050,6 +1074,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
+
       expect(json.result).toBeDefined()
       const responseText = json.result.content[0].text
 
@@ -1074,7 +1104,7 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPosts',
             arguments: {
-              title: 'New Post with Author',
+              title: 'New Post with Author DELETE ME',
               content: 'Testing depth on create.',
               author: userId,
               depth: 1,
@@ -1093,18 +1123,26 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('"author":')
       expect(responseText).toContain('"email":')
       expect(responseText).toContain('dev@payloadcms.com')
+
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        where: {
+          title: { contains: 'New Post with Author DELETE ME' },
+        },
+      })
     })
 
     it('should find multiple posts with depth parameter', async () => {
       // Create posts with author
-      await payload.create({
+      const post1 = await payload.create({
         collection: 'posts',
         data: {
           title: 'Bulk Post 1 for Depth Test',
           author: userId,
         },
       })
-      await payload.create({
+      const post2 = await payload.create({
         collection: 'posts',
         data: {
           title: 'Bulk Post 2 for Depth Test',
@@ -1135,11 +1173,27 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
-      expect(json.result).toBeDefined()
-      const responseText = json.result.content[0].text
+      // Delete posts
+      await payload.delete({
+        collection: 'posts',
+        id: post1.id,
+      })
+      await payload.delete({
+        collection: 'posts',
+        id: post2.id,
+      })
 
-      // Both posts should have populated authors
-      expect(responseText).toContain('dev@payloadcms.com')
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content).toBeDefined()
+      expect(json.result.content[0].type).toBe('text')
+      expect(json.result.content[0].text).toContain('Collection: "posts"')
+      expect(json.result.content[0].text).toContain('Total: 2 documents')
+      expect(json.result.content[0].text).toContain('Page: 1 of 1')
+      expect(json.result.content[0].text).toContain('```json')
+      expect(json.result.content[0].text).toContain('"author":')
+      expect(json.result.content[0].text).toContain('"email":')
+      expect(json.result.content[0].text).toContain('dev@payloadcms.com')
     })
   })
 
@@ -1344,7 +1398,6 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Publicación Española',
           content: 'Contenido Español',
         },
-        // @ts-expect-error - locale is a valid property
         locale: 'es',
       })
 
@@ -1396,7 +1449,6 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Título Español',
           content: 'Contenido Español',
         },
-        // @ts-expect-error - locale is a valid property
         locale: 'es',
       })
 
@@ -1407,7 +1459,6 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Titre Français',
           content: 'Contenu Français',
         },
-        // @ts-expect-error - locale is a valid property
         locale: 'fr',
       })
 
@@ -1435,6 +1486,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
+
       expect(json.result).toBeDefined()
       const responseText = json.result.content[0].text
 
@@ -1454,7 +1511,6 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           title: 'English Only Title',
         },
-        // @ts-expect-error - locale is a valid property
         locale: 'en',
       })
 
@@ -1482,7 +1538,16 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
+      // Delete post
+      await payload.delete({
+        collection: 'posts',
+        id: post.id,
+      })
+
+      expect(json).toBeDefined()
       expect(json.result).toBeDefined()
+      expect(json.result.content).toBeDefined()
+      expect(json.result.content[0].type).toBe('text')
       // Should fallback to English (with default value for content)
       expect(json.result.content[0].text).toContain(
         '"title": "English Only Title (MCP Hook Override)"',
