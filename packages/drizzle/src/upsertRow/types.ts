@@ -5,10 +5,16 @@ import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types
 
 type BaseArgs = {
   adapter: DrizzleAdapter
+  /**
+   * Collection slug for error reporting
+   */
   collectionSlug?: string
   data: Record<string, unknown>
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   fields: FlattenedField[]
+  /**
+   * Collection slug for error reporting
+   */
   globalSlug?: string
   /**
    * When true, skips reading the data back from the database and returns the input data
