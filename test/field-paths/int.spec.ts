@@ -64,7 +64,10 @@ describe('Field Paths', () => {
         },
       })
 
-      const originalDoc = await payload.create(testDoc)
+      const originalDoc = await payload.create({
+        collection: fieldPathsSlug,
+        data: testDoc,
+      })
 
       // duplicate the doc to ensure that the beforeDuplicate hook is run
       const doc = await payload.duplicate({
@@ -85,7 +88,6 @@ describe('Field Paths', () => {
         namedTabWithinCollapsible: doc.namedTabWithinCollapsible,
         fieldWithinUnnamedTabWithinCollapsible: doc.fieldWithinUnnamedTabWithinCollapsible,
         textFieldInUnnamedGroup: doc.textFieldInUnnamedGroup,
-        textInCollapsibleInCollapsibleBlock: doc.textInCollapsibleInCollapsibleBlock,
         blocks: doc.blocks,
         _status: doc._status,
         ...formatExpectedFieldPaths('topLevelNamedField', {

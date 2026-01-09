@@ -1,24 +1,17 @@
-import type { BrowserContext, Locator, Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { navigateToDiffVersionView } from 'helpers/e2e/navigateToDiffVersionView.js'
-import { selectInput } from 'helpers/e2e/selectInput.js'
-import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { Config, FieldPath, Post } from './payload-types.js'
+import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  exactText,
-  findTableCell,
   initPageConsoleErrorCatch,
-  selectTableRow,
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -53,17 +46,26 @@ test.describe('Field Paths', () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
   })
 
-  test('can load versions diff view', async () => {
-    const { id: postID } = await payload.create({
-      slug: fieldPathsSlug,
+  test('can load document view', async () => {
+    const { id: docID } = await payload.create({
+      collection: fieldPathsSlug,
       data: testDoc,
     })
 
-    await wait(2000)
+    await page.goto(fieldPathsUrl.edit(docID))
+
+    await expect(page.locator('.render-fields').first()).toBeVisible()
+  })
+
+  test('can load versions diff view', async () => {
+    const { id: docID } = await payload.create({
+      collection: fieldPathsSlug,
+      data: testDoc,
+    })
 
     await navigateToDiffVersionView({
       page,
-      docID: postID,
+      docID,
       collectionSlug: fieldPathsSlug,
       serverURL,
     })
