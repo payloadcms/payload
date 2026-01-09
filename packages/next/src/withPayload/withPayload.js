@@ -1,3 +1,9 @@
+/**
+ * These files must remain as plain JavaScript (.js) rather than TypeScript (.ts) because they are
+ * imported directly in next.config.mjs files. Since next.config files run before the build process,
+ * TypeScript compilation is not available. This ensures compatibility with all templates and
+ * user projects regardless of their TypeScript setup.
+ */
 import {
   getNextjsVersion,
   supportsTurbopackExternalizeTransitiveDependencies,
@@ -28,6 +34,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  /** @type {import('next').NextConfig} */
   const baseConfig = {
     ...nextConfig,
     env,
