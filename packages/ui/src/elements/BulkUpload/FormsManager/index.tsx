@@ -419,11 +419,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           currentForms[i] = {
             errorCount: fieldErrors.length,
+            exceedsLimit: false,
             formID: currentForms[i].formID,
             formState: fieldReducer(currentForms[i].formState, {
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
             }),
+            missingFile: false,
           }
 
           if (
