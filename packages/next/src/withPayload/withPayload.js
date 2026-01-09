@@ -1,7 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-restricted-exports */
-import type { NextConfig } from 'next'
-
 import {
   getNextjsVersion,
   supportsTurbopackExternalizeTransitiveDependencies,
@@ -18,10 +14,7 @@ const poweredByHeader = {
  * @param {Object} [options] - Optional configuration options
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
-export const withPayload = (
-  nextConfig: NextConfig = {},
-  options: { devBundleServerPackages?: boolean } = {},
-): NextConfig => {
+export const withPayload = (nextConfig = {}, options = {}) => {
   const nextjsVersion = getNextjsVersion()
 
   const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
@@ -35,7 +28,7 @@ export const withPayload = (
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
-  const baseConfig: NextConfig = {
+  const baseConfig = {
     ...nextConfig,
     env,
     outputFileTracingExcludes: {
