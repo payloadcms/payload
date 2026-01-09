@@ -56,6 +56,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: buildVersionCollectionFields(this.payload.config, collection, true),

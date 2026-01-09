@@ -35,9 +35,11 @@ import { shouldUseOptimizedUpsertRow } from './shouldUseOptimizedUpsertRow.js'
 export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>({
   id,
   adapter,
+  collectionSlug,
   data,
   db,
   fields,
+  globalSlug,
   ignoreResult,
   // TODO:
   // When we support joins for write operations (create/update) - pass collectionSlug to the buildFindManyArgs
@@ -180,7 +182,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         tableName,
       })
     } catch (error) {
-      handleUpsertError({ id, adapter, error, req, tableName })
+      handleUpsertError({ id, adapter, collectionSlug, error, globalSlug, req, tableName })
     }
   }
   // Split out the incoming data into the corresponding:
@@ -722,7 +724,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
   } catch (error) {
-    handleUpsertError({ id, adapter, error, req, tableName })
+    handleUpsertError({ id, adapter, collectionSlug, error, globalSlug, req, tableName })
   }
 
   if (ignoreResult === 'idOnly') {
