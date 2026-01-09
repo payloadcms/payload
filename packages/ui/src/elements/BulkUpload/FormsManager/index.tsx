@@ -416,7 +416,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           )
 
           currentForms[i] = {
-            errorCount: fieldErrors.length + (req.status === 413 ? 1 : 0),
+            errorCount: fieldErrors.length,
             formID: currentForms[i].formID,
             formState: fieldReducer(currentForms[i].formState, {
               type: 'ADD_SERVER_ERRORS',
@@ -424,8 +424,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }),
           }
 
-          // file was larger than max allowed size
-          if (req.status === 413 && nonFieldErrors.length > 0) {
+          // file too large
+          if (req.status === 413) {
+            currentForms[i].errorCount = currentForms[i].errorCount + 1
+            toast.error(nonFieldErrors[0]?.message)
+          }
+
+          // missing file
+          if (req.status === 400 && !currentForms[i].formState.file?.value) {
+            currentForms[i].errorCount = currentForms[i].errorCount + 1
             toast.error(nonFieldErrors[0]?.message)
           }
         } catch (_) {
