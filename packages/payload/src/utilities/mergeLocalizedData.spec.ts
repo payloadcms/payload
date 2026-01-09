@@ -1,5 +1,7 @@
 import type { Field } from '../fields/config/types.js'
 
+import { describe, expect, it } from 'vitest'
+
 import { mergeLocalizedData } from './mergeLocalizedData.js'
 
 describe('mergeLocalizedData', () => {
