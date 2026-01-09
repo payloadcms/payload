@@ -524,8 +524,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             dispatch({
               type: 'UPDATE_FORM',
               errorCount: forms[i].errorCount,
+              exceedsLimit: forms[i].exceedsLimit,
               formState: forms[i].formState,
               index: i,
+              missingFile: forms[i].missingFile,
             })
           }
         })
@@ -552,8 +554,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           dispatch({
             type: 'UPDATE_FORM',
             errorCount: newFormErrorCount,
+            exceedsLimit: forms[i].exceedsLimit,
             formState: state,
             index: i,
+            missingFile: forms[i].missingFile,
           })
         }
       }
