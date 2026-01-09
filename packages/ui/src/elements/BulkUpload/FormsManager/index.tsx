@@ -423,31 +423,21 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             [[], []],
           )
 
+          const exceedsLimit = req.status === 413
+          const missingFile = req.status === 400 && !fileValue
+
           currentForms[i] = {
-            errorCount: fieldErrors.length,
-            exceedsLimit: false,
+            errorCount: fieldErrors.length + (missingFile || exceedsLimit ? 1 : 0),
+            exceedsLimit,
             formID: currentForms[i].formID,
             formState: fieldReducer(currentForms[i].formState, {
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
             }),
-            missingFile: false,
+            missingFile,
           }
 
-          // Handle file-specific errors
-          const isMissingFile = req.status === 400 && !currentForms[i].formState.file?.value
-          const isFileTooLarge = req.status === 413
-
-          if (isMissingFile || isFileTooLarge) {
-            const fileErrorCount = (isMissingFile ? 1 : 0) + (isFileTooLarge ? 1 : 0)
-
-            currentForms[i] = {
-              ...currentForms[i],
-              errorCount: fieldErrors.length + fileErrorCount,
-              exceedsLimit: isFileTooLarge,
-              missingFile: isMissingFile,
-            }
-
+          if (currentForms[i].missingFile || currentForms[i].exceedsLimit) {
             toast.error(nonFieldErrors[0]?.message)
           }
         } catch (_) {

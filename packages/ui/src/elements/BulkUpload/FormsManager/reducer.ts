@@ -114,9 +114,10 @@ export function formsManagementReducer(state: State, action: Action): State {
       const forms = [...state.forms]
       const form = forms[action.index]
 
-      // Clear missingFile flag if the form now has a file
+      // Update missingFile flag based on current file state
+      // If file exists, clear the flag. If no file exists, set the flag.
       const hasFile = form.formState?.file?.value
-      const missingFile = hasFile ? false : form.missingFile
+      const missingFile = !hasFile
 
       const fileErrorCount = (missingFile ? 1 : 0) + (form.exceedsLimit ? 1 : 0)
 
