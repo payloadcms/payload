@@ -126,6 +126,7 @@ describe('Auth', () => {
       const testUser = await payload.create({
         collection: slug,
         data: {
+          roles: ['user'],
           email: testEmail,
           password: testPassword,
           loginMetadata: originalArrayData,
@@ -176,8 +177,13 @@ describe('Auth', () => {
       expect(userAfter.loginMetadata).toHaveLength(2)
       expect(userAfter.loginMetadata).toMatchObject(originalArrayData)
 
-      const sessionCountAfter = userAfter.sessions?.length || 0
-      expect(sessionCountAfter).toBe(sessionCountBefore)
+      // session should NOT have been added when using transactions
+      // skip CosmosDB and Firestore since they do not support transactions
+      if (!['cosmosdb', 'firestore'].includes(process.env.PAYLOAD_DATABASE!)) {
+        const sessionCountAfter = userAfter.sessions?.length || 0
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(sessionCountAfter).toBe(sessionCountBefore)
+      }
 
       // Clean up
       await payload.delete({
