@@ -54,6 +54,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     data: versionData,
     db,
     fields,
+    globalSlug: global,
     ignoreResult: returning === false,
     operation: 'update',
     req,

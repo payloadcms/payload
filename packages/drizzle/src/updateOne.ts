@@ -78,6 +78,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const result = await upsertRow({
     id: idToUpdate,
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: collection.flattenedFields,
