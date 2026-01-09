@@ -87,6 +87,7 @@ describe('Field Paths', () => {
         textFieldInUnnamedGroup: doc.textFieldInUnnamedGroup,
         textInCollapsibleInCollapsibleBlock: doc.textInCollapsibleInCollapsibleBlock,
         blocks: doc.blocks,
+        _status: doc._status,
         ...formatExpectedFieldPaths('topLevelNamedField', {
           path: ['topLevelNamedField'],
           schemaPath: ['topLevelNamedField'],
@@ -211,6 +212,7 @@ describe('Field Paths', () => {
         'blocks.CollapsibleBlock.blockName',
         'updatedAt',
         'createdAt',
+        '_status',
       ])
     })
   })
