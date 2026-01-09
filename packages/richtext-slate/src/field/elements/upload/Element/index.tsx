@@ -136,6 +136,8 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
   const customFieldsMap = fieldProps.componentMap[relatedFieldSchemaPath]
 
+  const alt = (data as { alt?: string })?.alt || data?.filename || ''
+
   return (
     <div
       className={[baseClass, selected && focused && `${baseClass}--selected`]
@@ -148,7 +150,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
         <div className={`${baseClass}__topRow`}>
           {/* TODO: migrate to use Thumbnail component */}
           <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <File />}
+            {thumbnailSRC ? <img alt={alt} src={thumbnailSRC} /> : <File />}
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>

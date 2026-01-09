@@ -16,7 +16,7 @@ services:
     container_name: mongodb-atlas-payload-test
     hostname: mongodb-atlas-local # Sets a fixed replica set name (used in connection string replicaSet param)
     ports:
-      - '27018:27017'
+      - '27019:27017'
     volumes:
       - mongodb_atlas_data:/data/db
     environment:

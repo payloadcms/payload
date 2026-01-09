@@ -31,4 +31,13 @@ export const dateDoc: Partial<DateField> = {
   dayAndTimeWithTimezoneReadOnly: '2027-08-12T01:00:00.000+00:00',
   dayAndTimeWithTimezoneReadOnly_tz: 'Asia/Tokyo',
   dayAndTimeWithTimezoneFixed: '2025-10-29T20:00:00.000+00:00',
+  // UTC offset timezone tests - 2027-08-12 10:00 AM in UTC+5:30 (India) = 04:30 UTC
+  dateWithOffsetTimezone: '2027-08-12T04:30:00.000+00:00',
+  dateWithOffsetTimezone_tz: '+05:30',
+  // Mixed IANA + offset timezones - 2027-08-12 10:00 AM in America/New_York (UTC-4 in summer) = 14:00 UTC
+  dateWithMixedTimezones: '2027-08-12T14:00:00.000+00:00',
+  dateWithMixedTimezones_tz: 'America/New_York',
+  // Date with timezone where timezone column is hidden via override
+  dateWithTimezoneWithDisabledColumns: '2027-08-12T14:00:00.000+00:00',
+  dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
 }

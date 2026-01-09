@@ -66,8 +66,11 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
-      - name: Lint
+      - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
@@ -287,6 +290,7 @@ jobs:
           - plugin-nested-docs
           - plugin-redirects
           - plugin-seo
+          - queues
           - sort
           - server-url
           - trash
@@ -439,6 +443,7 @@ jobs:
           - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
+          - queues
           - sort
           - trash
           - versions

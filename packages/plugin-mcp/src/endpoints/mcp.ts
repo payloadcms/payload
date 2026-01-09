@@ -44,6 +44,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
 
       const { docs } = await payload.find({
         collection: 'payload-mcp-api-keys',
+        depth: 1,
         limit: 1,
         pagination: false,
         where,
