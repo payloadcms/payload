@@ -1,6 +1,7 @@
 import type {
   Access,
   CollectionConfig,
+  CollectionSlug,
   DefaultDocumentIDType,
   Endpoint,
   Field,
@@ -629,12 +630,12 @@ export type CollectionSlugMap = {
  *  access: {
  *    isAdmin: ({ req }) => checkRole(['admin'], req.user),
  *    isAuthenticated: ({ req }) => !!req.user,
+ *    isCustomer: ({ req }) => req.user && !checkRole(['admin'], req.user),
  *    isDocumentOwner: ({ req }) => {
  *      if (!req.user) return false
  *      return { customer: { equals: req.user.id } }
  *    },
  *    adminOnlyFieldAccess: ({ req }) => checkRole(['admin'], req.user),
- *    customerOnlyFieldAccess: ({ req }) => !!req.user,
  *    adminOrPublishedStatus: ({ req }) => {
  *      if (checkRole(['admin'], req.user)) return true
  *      return { _status: { equals: 'published' } }
@@ -652,9 +653,10 @@ export type AccessConfig = {
    */
   adminOrPublishedStatus: Access
   /**
+   * @deprecated Will be removed in v4. Use `isCustomer` instead.
    * Limited to customers only, specifically for Field level access control.
    */
-  customerOnlyFieldAccess: FieldAccess
+  customerOnlyFieldAccess?: FieldAccess
   /**
    * Checks if the user is an admin.
    * @returns true if admin, false otherwise
@@ -665,6 +667,15 @@ export type AccessConfig = {
    * @returns true if authenticated, false otherwise
    */
   isAuthenticated?: Access
+  /**
+   * Checks if the user is a customer (authenticated but not an admin).
+   * Used internally to auto-assign customer ID when creating addresses.
+   * @returns true if user is a non-admin customer, false otherwise
+   *
+   * @example
+   * isCustomer: ({ req }) => req.user && !checkRole(['admin'], req.user)
+   */
+  isCustomer?: FieldAccess
   /**
    * Checks if the user owns the document being accessed.
    * Typically returns a Where query to filter by customer field.
@@ -753,8 +764,13 @@ export type EcommercePluginConfig = {
   transactions?: boolean | TransactionsConfig
 }
 
+export type SanitizedAccessConfig = Pick<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'> &
+  Required<
+  Omit<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'>
+>
+
 export type SanitizedEcommercePluginConfig = {
-  access: Required<AccessConfig>
+  access: SanitizedAccessConfig
   addresses: { addressFields: Field[] } & Omit<AddressesConfig, 'addressFields'>
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
@@ -800,20 +816,48 @@ type APIProps = {
   serverURL?: string
 }
 
+/**
+ * Memoized configuration object exposed via the useEcommerce hook.
+ * Contains collection slugs and API settings for building URLs and queries.
+ */
+export type EcommerceConfig = {
+  /**
+   * The slug for the addresses collection.
+   */
+  addressesSlug: CollectionSlug
+  /**
+   * API configuration including the base route.
+   */
+  api: {
+    /**
+     * The base API route, e.g. '/api'.
+     */
+    apiRoute: string
+  }
+  /**
+   * The slug for the carts collection.
+   */
+  cartsSlug: CollectionSlug
+  /**
+   * The slug for the customers collection.
+   */
+  customersSlug: CollectionSlug
+}
+
 export type ContextProps = {
   /**
    * The slug for the addresses collection.
    *
    * Defaults to 'addresses'.
    */
-  addressesSlug?: string
+  addressesSlug?: CollectionSlug
   api?: APIProps
   /**
    * The slug for the carts collection.
    *
    * Defaults to 'carts'.
    */
-  cartsSlug?: string
+  cartsSlug?: CollectionSlug
   children?: React.ReactNode
   /**
    * The configuration for currencies used in the ecommerce context.
@@ -825,7 +869,7 @@ export type ContextProps = {
    *
    * Defaults to 'users'.
    */
-  customersSlug?: string
+  customersSlug?: CollectionSlug
   /**
    * Enable debug mode for the ecommerce context. This will log additional information to the console.
    * Defaults to false.
@@ -884,6 +928,11 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Clear the cart, removing all items.
    */
   clearCart: () => Promise<void>
+  /**
+   * Memoized configuration object containing collection slugs and API settings.
+   * Use this to build URLs and queries with the correct collection slugs.
+   */
+  config: EcommerceConfig
   /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.

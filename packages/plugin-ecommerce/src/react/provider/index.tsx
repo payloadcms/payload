@@ -10,12 +10,21 @@ import type {
   CartsCollection,
   ContextProps,
   Currency,
+  EcommerceConfig,
   EcommerceContextType,
 } from '../../types/index.js'
 
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
   clearCart: async () => {},
+  config: {
+    addressesSlug: 'addresses',
+    api: {
+      apiRoute: '/api',
+    },
+    cartsSlug: 'carts',
+    customersSlug: 'users',
+  },
   confirmOrder: async () => {},
   createAddress: async () => {},
   currenciesConfig: {
@@ -86,6 +95,18 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     apiRoute,
     path: '',
   })
+
+  const config = useMemo<EcommerceConfig>(
+    () => ({
+      addressesSlug,
+      api: {
+        apiRoute,
+      },
+      cartsSlug,
+      customersSlug,
+    }),
+    [addressesSlug, apiRoute, cartsSlug, customersSlug],
+  )
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -876,6 +897,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         addresses,
         cart,
         clearCart,
+        config,
         confirmOrder,
         createAddress,
         currenciesConfig,
@@ -905,6 +927,12 @@ export const useEcommerce = () => {
   }
 
   return context
+}
+
+export const useEcommerceConfig = () => {
+  const { config } = useEcommerce()
+
+  return config
 }
 
 export const useCurrency = () => {
