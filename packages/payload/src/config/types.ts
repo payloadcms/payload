@@ -699,16 +699,7 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-export type ErrorResult = {
-  data?: any
-  errors: {
-    data?: Record<string, unknown>
-    field?: string
-    message?: string
-    name?: string
-  }[]
-  stack?: string
-}
+export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
 
 export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError

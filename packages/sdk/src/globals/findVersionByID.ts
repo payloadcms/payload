@@ -67,13 +67,17 @@ export async function findGlobalVersionByID<
       path: `/globals/${options.slug}/versions/${options.id}`,
     })
 
-    return response.json()
-  } catch (err) {
+    if (response.ok) {
+      return response.json()
+    } else {
+      throw new Error()
+    }
+  } catch {
     if (options.disableErrors) {
       // @ts-expect-error generic nullable
       return null
     }
 
-    throw err
+    throw new Error(`Error retrieving the version document ${options.slug}/${options.id}`)
   }
 }

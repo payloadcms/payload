@@ -78,13 +78,17 @@ export async function findByID<
       path: `/${options.collection}/${options.id}`,
     })
 
-    return response.json()
-  } catch (err) {
+    if (response.ok) {
+      return response.json()
+    } else {
+      throw new Error()
+    }
+  } catch {
     if (options.disableErrors) {
       // @ts-expect-error generic nullable
       return null
     }
 
-    throw err
+    throw new Error(`Error retrieving the document ${options.collection}/${options.id}`)
   }
 }
