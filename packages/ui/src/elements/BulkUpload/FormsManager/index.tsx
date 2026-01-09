@@ -44,6 +44,7 @@ type FormsManagerContext = {
   readonly documentSlots: DocumentSlots
   readonly forms: State['forms']
   getFormDataRef: React.RefObject<() => Data>
+  getFormFileRef: React.RefObject<() => unknown>
   readonly hasPublishPermission: boolean
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
@@ -72,6 +73,7 @@ const Context = React.createContext<FormsManagerContext>({
   documentSlots: {},
   forms: [],
   getFormDataRef: { current: () => ({}) },
+  getFormFileRef: { current: () => null },
   hasPublishPermission: false,
   hasSavePermission: false,
   hasSubmitted: false,
@@ -144,6 +146,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
+  const getFormFileRef = React.useRef<() => unknown>(() => null)
 
   const baseAPIPath = formatAdminURL({
     apiRoute: api,
@@ -639,6 +642,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         documentSlots,
         forms,
         getFormDataRef,
+        getFormFileRef,
         hasPublishPermission,
         hasSavePermission,
         hasSubmitted,

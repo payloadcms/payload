@@ -167,31 +167,45 @@ export function EditForm({
 }
 
 function GetFieldProxy() {
-  const { getFields } = useForm()
-  const { getFormDataRef } = useFormsManager()
+  const { getField, getFields } = useForm()
+  const { getFormDataRef, getFormFileRef } = useFormsManager()
 
   useEffect(() => {
     // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
-  }, [getFields, getFormDataRef])
+    getFormFileRef.current = () => getField('file')?.value
+  }, [getFields, getField, getFormDataRef, getFormFileRef])
 
   return null
 }
 
 function ReportAllErrors() {
   const { docConfig } = useDocumentInfo()
-  const { activeIndex, setFormTotalErrorCount } = useFormsManager()
+  const { activeIndex, getFormFileRef, setFormTotalErrorCount } = useFormsManager()
   const errorCountRef = React.useRef(0)
+  const prevActiveIndexRef = React.useRef(activeIndex)
 
   const reportFormErrorCount = React.useCallback(
     (errorCount) => {
-      if (errorCount === errorCountRef.current) {
+      // Reset error count ref when active form changes
+      if (prevActiveIndexRef.current !== activeIndex) {
+        errorCountRef.current = 0
+        prevActiveIndexRef.current = activeIndex
+      }
+
+      // Get current file state from the live form via ref
+      const fileValue = getFormFileRef.current?.()
+      const hasFile = Boolean(fileValue)
+      const totalErrorCount = errorCount + (hasFile ? 0 : 1)
+
+      if (totalErrorCount === errorCountRef.current) {
         return
       }
-      setFormTotalErrorCount({ errorCount, index: activeIndex })
-      errorCountRef.current = errorCount
+
+      setFormTotalErrorCount({ errorCount: totalErrorCount, index: activeIndex })
+      errorCountRef.current = totalErrorCount
     },
-    [activeIndex, setFormTotalErrorCount],
+    [activeIndex, setFormTotalErrorCount, getFormFileRef],
   )
 
   if (!docConfig) {
