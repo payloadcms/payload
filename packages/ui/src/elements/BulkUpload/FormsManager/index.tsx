@@ -238,8 +238,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             if (i === activeIndex) {
               return {
                 errorCount: form.errorCount,
+                exceedsLimit: form.exceedsLimit,
                 formID: form.formID,
                 formState: currentFormsData,
+                missingFile: form.missingFile,
                 uploadEdits: form.uploadEdits,
               }
             }
