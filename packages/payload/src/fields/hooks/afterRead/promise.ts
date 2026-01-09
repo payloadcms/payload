@@ -35,6 +35,14 @@ type Args = {
   draft: boolean
   fallbackLocale: TypedFallbackLocale
   field: Field | TabAsField
+  /**
+   * The depth of the current field being processed.
+   * Fields without names (i.e. rows, collapsibles, unnamed groups)
+   * simply pass this value through
+   *
+   * @default 0
+   */
+  fieldDepth: number
   fieldIndex: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
@@ -81,6 +89,7 @@ export const promise = async ({
   draft,
   fallbackLocale,
   field,
+  fieldDepth,
   fieldIndex,
   fieldPromises,
   findMany,
@@ -117,11 +126,14 @@ export const promise = async ({
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
   let removedFieldValue = false
 
+  const isTopLevelIDField = fieldAffectsDataResult && field.name === 'id' && fieldDepth === 0
+
   if (
     fieldAffectsDataResult &&
     field.hidden &&
     typeof siblingDoc[field.name!] !== 'undefined' &&
-    !showHiddenFields
+    !showHiddenFields &&
+    !isTopLevelIDField
   ) {
     removedFieldValue = true
     delete siblingDoc[field.name!]
@@ -438,6 +450,7 @@ export const promise = async ({
             doc,
             draft,
             fallbackLocale,
+            fieldDepth: fieldDepth + 1,
             fieldPromises,
             fields: field.fields,
             findMany,
@@ -473,6 +486,7 @@ export const promise = async ({
                 doc,
                 draft,
                 fallbackLocale,
+                fieldDepth: fieldDepth + 1,
                 fieldPromises,
                 fields: field.fields,
                 findMany,
@@ -534,6 +548,7 @@ export const promise = async ({
               doc,
               draft,
               fallbackLocale,
+              fieldDepth: fieldDepth + 1,
               fieldPromises,
               fields: block.fields,
               findMany,
@@ -579,6 +594,7 @@ export const promise = async ({
                   doc,
                   draft,
                   fallbackLocale,
+                  fieldDepth: fieldDepth + 1,
                   fieldPromises,
                   fields: block.fields,
                   findMany,
@@ -622,6 +638,7 @@ export const promise = async ({
         doc,
         draft,
         fallbackLocale,
+        fieldDepth,
         fieldPromises,
         fields: field.fields,
         findMany,
@@ -665,6 +682,7 @@ export const promise = async ({
               doc,
               draft,
               fallbackLocale,
+              fieldDepth: fieldDepth + 1,
               fieldPromises,
               fields: field.fields,
               findMany,
@@ -697,6 +715,7 @@ export const promise = async ({
             doc,
             draft,
             fallbackLocale,
+            fieldDepth: fieldDepth + 1,
             fieldPromises,
             fields: field.fields,
             findMany,
@@ -729,6 +748,7 @@ export const promise = async ({
           doc,
           draft,
           fallbackLocale,
+          fieldDepth,
           fieldPromises,
           fields: field.fields,
           findMany,
@@ -871,6 +891,7 @@ export const promise = async ({
               doc,
               draft,
               fallbackLocale,
+              fieldDepth: fieldDepth + 1,
               fieldPromises,
               fields: field.fields,
               findMany,
@@ -903,6 +924,7 @@ export const promise = async ({
             doc,
             draft,
             fallbackLocale,
+            fieldDepth: fieldDepth + 1,
             fieldPromises,
             fields: field.fields,
             findMany,
@@ -935,6 +957,7 @@ export const promise = async ({
           doc,
           draft,
           fallbackLocale,
+          fieldDepth,
           fieldPromises,
           fields: field.fields,
           findMany,
@@ -971,6 +994,7 @@ export const promise = async ({
         doc,
         draft,
         fallbackLocale,
+        fieldDepth,
         fieldPromises,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         findMany,
