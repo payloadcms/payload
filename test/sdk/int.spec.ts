@@ -1,15 +1,17 @@
 import type { Payload } from 'payload'
 
+import { PayloadSDKError } from '@payloadcms/sdk'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { TypedPayloadSDK } from '../helpers/getSDK.js'
-import type { Post } from './payload-types.js'
+import type { Email, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
+import { emailsSlug } from './collections/Emails.js'
 
 let payload: Payload
 let post: Post
@@ -316,5 +318,175 @@ describe('@payloadcms/sdk', () => {
     })
 
     expect(email).toBe(user.email)
+  })
+
+  describe('Error Handling', () => {
+    const createdEmailIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      await payload.delete({ collection: 'emails', where: { id: { exists: true } } })
+    })
+
+    it('should throw PayloadSDKError on validation error (duplicate unique field)', async () => {
+      const testEmail = 'unique-test@example.com'
+
+      const firstDoc = await payload.create({
+        collection: emailsSlug,
+        data: { email: testEmail },
+      })
+
+      createdEmailIDs.push(firstDoc.id)
+
+      let thrownError: null | PayloadSDKError = null
+
+      try {
+        await sdk.create({
+          collection: emailsSlug,
+          data: { email: testEmail },
+        })
+      } catch (err) {
+        thrownError = err as PayloadSDKError
+      }
+
+      expect(thrownError).toBeInstanceOf(PayloadSDKError)
+      expect(thrownError!.status).toBe(400)
+      expect(thrownError!.errors).toBeDefined()
+      expect(thrownError!.errors.length).toBeGreaterThan(0)
+      // @ts-expect-error
+      expect(thrownError!.errors[0].name).toBe('ValidationError')
+      expect(thrownError!.message).toBeTruthy()
+    })
+
+    it('should throw PayloadSDKError on not found (findByID with invalid id)', async () => {
+      const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
+
+      let thrownError: null | PayloadSDKError = null
+
+      try {
+        await sdk.findByID({
+          collection: 'posts',
+          id: invalidId,
+        })
+      } catch (err) {
+        thrownError = err as PayloadSDKError
+      }
+
+      expect(thrownError).toBeInstanceOf(PayloadSDKError)
+      expect(thrownError!.status).toBe(404)
+      expect(thrownError!.errors).toBeDefined()
+      expect(thrownError!.message).toBeTruthy()
+    })
+
+    it('should return null with disableErrors: true on findByID not found', async () => {
+      const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
+
+      const result = await sdk.findByID({
+        disableErrors: true,
+        collection: 'posts',
+        id: invalidId,
+      })
+
+      expect(result).toBeNull()
+    })
+
+    it('should throw PayloadSDKError on update with invalid data', async () => {
+      let thrownError: null | PayloadSDKError = null
+      const testEmail = 'update-error-test@example.com'
+      const testEmail2 = 'update-error-test2@example.com'
+
+      const doc1 = await payload.create({
+        collection: emailsSlug,
+        data: { email: testEmail },
+      })
+
+      createdEmailIDs.push(doc1.id)
+
+      const doc2 = await payload.create({
+        collection: emailsSlug,
+        data: { email: testEmail2 },
+      })
+
+      createdEmailIDs.push(doc2.id)
+
+      try {
+        await sdk.update({
+          collection: emailsSlug,
+          id: doc2.id,
+          data: { email: testEmail },
+        })
+      } catch (err) {
+        thrownError = err as PayloadSDKError
+      }
+
+      expect(thrownError).toBeInstanceOf(PayloadSDKError)
+      expect(thrownError!.status).toBe(400)
+      expect(thrownError!.errors).toBeDefined()
+    })
+
+    it('should throw PayloadSDKError on delete with invalid id', async () => {
+      const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
+
+      let thrownError: null | PayloadSDKError = null
+
+      try {
+        await sdk.delete({
+          collection: 'posts',
+          id: invalidId,
+        })
+      } catch (err) {
+        thrownError = err as PayloadSDKError
+      }
+
+      expect(thrownError).toBeInstanceOf(PayloadSDKError)
+      expect(thrownError!.status).toBe(404)
+    })
+
+    it('should include response object in PayloadSDKError', async () => {
+      const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
+
+      let thrownError: null | PayloadSDKError = null
+
+      try {
+        await sdk.findByID({
+          collection: 'posts',
+          id: invalidId,
+        })
+      } catch (err) {
+        thrownError = err as PayloadSDKError
+      }
+
+      expect(thrownError).toBeInstanceOf(PayloadSDKError)
+      expect(thrownError!.response).toBeDefined()
+      expect(thrownError!.response.status).toBe(404)
+    })
+
+    it('should have error data for ValidationError', async () => {
+      const testEmail = 'validation-data-test@example.com'
+
+      const doc = await payload.create({
+        collection: emailsSlug,
+        data: { email: testEmail },
+      })
+
+      createdEmailIDs.push(doc.id)
+
+      let thrownError: null | PayloadSDKError = null
+
+      try {
+        await sdk.create({
+          collection: emailsSlug,
+          data: { email: testEmail },
+        })
+      } catch (err) {
+        thrownError = err as PayloadSDKError
+      }
+
+      expect(thrownError).toBeInstanceOf(PayloadSDKError)
+      const firstError = thrownError!.errors[0]!
+      expect(firstError.data).toBeDefined()
+      expect(firstError.data!.collection).toBe(emailsSlug)
+      expect(firstError.data!.errors).toBeDefined()
+      expect(Array.isArray(firstError.data!.errors)).toBe(true)
+    })
   })
 })
