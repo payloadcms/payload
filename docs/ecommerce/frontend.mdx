@@ -10,14 +10,15 @@ The package provides a set of React utilities to help you manage your ecommerce 
 
 The following hooks and components are available:
 
-| Hook / Component    | Description                                                                    |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `EcommerceProvider` | A context provider to wrap your application and provide the ecommerce context. |
-| `useCart`           | A hook to manage the cart state and actions.                                   |
-| `useAddresses`      | A hook to fetch and manage addresses.                                          |
-| `usePayments`       | A hook to manage the checkout process.                                         |
-| `useCurrency`       | A hook to format prices based on the selected currency.                        |
-| `useEcommerce`      | A hook that encompasses all of the above in one.                               |
+| Hook / Component     | Description                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `EcommerceProvider`  | A context provider to wrap your application and provide the ecommerce context. |
+| `useCart`            | A hook to manage the cart state and actions.                                   |
+| `useAddresses`       | A hook to fetch and manage addresses.                                          |
+| `usePayments`        | A hook to manage the checkout process.                                         |
+| `useCurrency`        | A hook to format prices based on the selected currency.                        |
+| `useEcommerceConfig` | A hook to access the ecommerce configuration (collection slugs, API settings). |
+| `useEcommerce`       | A hook that encompasses all of the above in one.                               |
 
 ### EcommerceProvider
 
@@ -267,9 +268,35 @@ const PriceComponent = ({ amount }) => {
 }
 ```
 
+### useEcommerceConfig
+
+The `useEcommerceConfig` hook provides access to the ecommerce configuration. This is useful when you need to build custom API calls or queries using the correct collection slugs and API settings.
+
+| Property        | Type     | Description                            |
+| --------------- | -------- | -------------------------------------- |
+| `addressesSlug` | `string` | The slug for the addresses collection. |
+| `cartsSlug`     | `string` | The slug for the carts collection.     |
+| `customersSlug` | `string` | The slug for the customers collection. |
+| `api.apiRoute`  | `string` | The base API route (e.g., `/api`).     |
+
+Example usage:
+
+```tsx
+import { useEcommerceConfig } from '@payloadcms/plugin-ecommerce/client/react'
+
+const CustomComponent = () => {
+  const { cartsSlug, customersSlug, api } = useEcommerceConfig()
+
+  // Build custom API URLs
+  const cartsEndpoint = `${api.apiRoute}/${cartsSlug}`
+
+  // Your component logic here
+}
+```
+
 ### useEcommerce
 
-The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks, along with a unified `isLoading` state that tracks any async operations across all these features.
+The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks, along with a unified `isLoading` state that tracks any async operations across all these features. It also includes the `config` property for accessing collection slugs and API settings.
 
 Example usage:
 
@@ -277,9 +304,11 @@ Example usage:
 import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
 
 const EcommerceComponent = () => {
-  const { cart, addresses, isLoading, selectedPaymentMethod } = useEcommerce()
+  const { cart, addresses, config, isLoading, selectedPaymentMethod } =
+    useEcommerce()
 
   // Your component logic here
   // isLoading tracks loading states for cart, addresses, and payment operations
+  // config provides access to collection slugs and API settings
 }
 ```
