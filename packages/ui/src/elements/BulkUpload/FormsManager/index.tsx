@@ -324,8 +324,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       const currentForms = [...forms]
       currentForms[activeIndex] = {
         errorCount: currentForms[activeIndex].errorCount,
+        exceedsLimit: currentForms[activeIndex].exceedsLimit,
         formID: currentForms[activeIndex].formID,
         formState: currentFormsData,
+        missingFile: currentForms[activeIndex].missingFile,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
       const newDocs: Array<{
