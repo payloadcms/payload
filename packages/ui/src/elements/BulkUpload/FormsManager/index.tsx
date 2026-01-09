@@ -428,11 +428,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             missingFile: false,
           }
 
-          if (
-            req.status === 413 || // file too large
-            (req.status === 400 && !currentForms[i].formState.file?.value) // missing file
-          ) {
-            currentForms[i].errorCount = currentForms[i].errorCount + 1
+          // Handle file-specific errors
+          const isMissingFile = req.status === 400 && !currentForms[i].formState.file?.value
+          const isFileTooLarge = req.status === 413
+
+          if (isMissingFile || isFileTooLarge) {
+            const fileErrorCount = (isMissingFile ? 1 : 0) + (isFileTooLarge ? 1 : 0)
+
+            currentForms[i] = {
+              ...currentForms[i],
+              errorCount: fieldErrors.length + fileErrorCount,
+              exceedsLimit: isFileTooLarge,
+              missingFile: isMissingFile,
+            }
+
             toast.error(nonFieldErrors[0]?.message)
           }
 
