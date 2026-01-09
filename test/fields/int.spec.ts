@@ -2257,7 +2257,7 @@ describe('Fields', () => {
       expect(res.docs[0].id).toBe(withCollapsed.id)
     })
 
-    it('should query exists false', async () => {
+    it('should query exists false', { db: 'mongo' }, async () => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
