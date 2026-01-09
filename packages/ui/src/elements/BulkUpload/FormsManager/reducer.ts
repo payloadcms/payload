@@ -55,6 +55,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       for (let i = 0; i < action.forms.length; i++) {
         newForms[i] = {
           errorCount: 0,
+          exceedsLimit: false,
           formID: action.forms[i].formID ?? (crypto.randomUUID ? crypto.randomUUID() : uuidv4()),
           formState: {
             ...(action.forms[i].initialState || {}),
@@ -64,6 +65,7 @@ export function formsManagementReducer(state: State, action: Action): State {
               value: action.forms[i].file,
             },
           },
+          missingFile: false,
           uploadEdits: {},
         }
       }
