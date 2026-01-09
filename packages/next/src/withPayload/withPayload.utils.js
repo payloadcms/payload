@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 /**
  * This was taken and modified from https://github.com/getsentry/sentry-javascript/blob/15256034ee8150a5b7dcb97d23eca1a5486f0cae/packages/nextjs/src/config/util.ts
  *
@@ -28,24 +28,24 @@
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 
-function _parseInt(input: string | undefined): number {
+/**
+ * @param {string | undefined} input
+ * @returns {number}
+ */
+function _parseInt(input) {
   return parseInt(input || '', 10)
 }
 
 /**
  * Represents Semantic Versioning object
+ * @typedef {Object} SemVer
+ * @property {string} [buildmetadata]
+ * @property {number} [canaryVersion] - undefined if not a canary version
+ * @property {number} [major]
+ * @property {number} [minor]
+ * @property {number} [patch]
+ * @property {string} [prerelease]
  */
-type SemVer = {
-  buildmetadata?: string
-  /**
-   * undefined if not a canary version
-   */
-  canaryVersion?: number
-  major?: number
-  minor?: number
-  patch?: number
-  prerelease?: string
-}
 
 // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 const SEMVER_REGEXP =
@@ -53,9 +53,10 @@ const SEMVER_REGEXP =
 
 /**
  * Parses input into a SemVer interface
- * @param input string representation of a semver version
+ * @param {string} input - string representation of a semver version
+ * @returns {SemVer}
  */
-export function parseSemver(input: string): SemVer {
+export function parseSemver(input) {
   const match = input.match(SEMVER_REGEXP) || []
   const major = _parseInt(match[1])
   const minor = _parseInt(match[2])
@@ -78,10 +79,12 @@ export function parseSemver(input: string): SemVer {
 
 /**
  * Returns the version of Next.js installed in the project, or undefined if it cannot be determined.
+ * @returns {SemVer | undefined}
  */
-export function getNextjsVersion(): SemVer | undefined {
+export function getNextjsVersion() {
   try {
-    let pkgPath: string
+    /** @type {string} */
+    let pkgPath
 
     // Check if we're in ESM or CJS environment
     if (typeof import.meta?.resolve === 'function') {
@@ -106,10 +109,10 @@ export function getNextjsVersion(): SemVer | undefined {
 /**
  * Checks if the current Next.js version supports Turbopack externalize transitive dependencies.
  * This was introduced in Next.js v16.1.0-canary.3
+ * @param {SemVer | undefined} version
+ * @returns {boolean}
  */
-export function supportsTurbopackExternalizeTransitiveDependencies(
-  version: SemVer | undefined,
-): boolean {
+export function supportsTurbopackExternalizeTransitiveDependencies(version) {
   if (!version) {
     return false
   }
