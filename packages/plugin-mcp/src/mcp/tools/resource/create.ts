@@ -20,6 +20,7 @@ export const createResourceTool = (
 ) => {
   const tool = async (
     data: string,
+    depth: number = 0,
     draft: boolean,
     locale?: string,
     fallbackLocale?: string,
@@ -58,6 +59,7 @@ export const createResourceTool = (
       const result = await payload.create({
         collection: collectionSlug,
         data: parsedData,
+        depth,
         draft,
         overrideAccess: false,
         req,
@@ -122,6 +124,14 @@ ${JSON.stringify(result, null, 2)}
     // Create a new schema that combines the converted fields with create-specific parameters
     const createResourceSchema = z.object({
       ...convertedFields.shape,
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships in response'),
       draft: z
         .boolean()
         .optional()
@@ -144,10 +154,11 @@ ${JSON.stringify(result, null, 2)}
       `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
       createResourceSchema.shape,
       async (params: Record<string, unknown>) => {
-        const { draft, fallbackLocale, locale, ...fieldData } = params
+        const { depth, draft, fallbackLocale, locale, ...fieldData } = params
         const data = JSON.stringify(fieldData)
         return await tool(
           data,
+          depth as number,
           draft as boolean,
           locale as string | undefined,
           fallbackLocale as string | undefined,
