@@ -164,7 +164,7 @@ export function generateDatabaseAdapter(dbAdapter: keyof typeof allDatabaseAdapt
 export type DatabaseAdapterType = keyof typeof allDatabaseAdapters
 
 export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
-  const dbAdapter = process.env.DB_ADAPTER as DatabaseAdapterType | undefined
+  const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
   if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
     return dbAdapter
   }
