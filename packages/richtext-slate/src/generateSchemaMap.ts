@@ -34,7 +34,6 @@ export const getGenerateSchemaMap =
                 fields: args.admin?.link?.fields as Field[],
                 i18n,
                 parentIndexPath: '',
-                parentPath: '',
                 parentSchemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
                 schemaMap,
               })
@@ -69,7 +68,6 @@ export const getGenerateSchemaMap =
                   fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
                   parentIndexPath: '',
-                  parentPath: '',
                   parentSchemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${collection.slug}`,
                   schemaMap,
                 })
