@@ -112,12 +112,14 @@ export function formsManagementReducer(state: State, action: Action): State {
     }
     case 'UPDATE_ERROR_COUNT': {
       const forms = [...state.forms]
-      forms[action.index].errorCount = action.count
+      const fileErrorCount =
+        (forms[action.index].missingFile ? 1 : 0) + (forms[action.index].exceedsLimit ? 1 : 0)
+      forms[action.index].errorCount = action.count + fileErrorCount
 
       return {
         ...state,
         forms,
-        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+        totalErrorCount: forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }
     case 'UPDATE_FORM': {
