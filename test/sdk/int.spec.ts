@@ -321,8 +321,6 @@ describe('@payloadcms/sdk', () => {
   })
 
   describe('Error Handling', () => {
-    const createdEmailIDs: (number | string)[] = []
-
     afterEach(async () => {
       await payload.db.deleteMany({ collection: 'emails', where: { id: { exists: true } } })
     })
@@ -330,12 +328,10 @@ describe('@payloadcms/sdk', () => {
     it('should throw PayloadSDKError on validation error (duplicate unique field)', async () => {
       const testEmail = 'unique-test@example.com'
 
-      const firstDoc = await payload.create({
+      await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
       })
-
-      createdEmailIDs.push(firstDoc.id)
 
       let thrownError: null | PayloadSDKError = null
 
@@ -393,19 +389,15 @@ describe('@payloadcms/sdk', () => {
       const testEmail = 'update-error-test@example.com'
       const testEmail2 = 'update-error-test2@example.com'
 
-      const doc1 = await payload.create({
+      await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
       })
-
-      createdEmailIDs.push(doc1.id)
 
       const doc2 = await payload.create({
         collection: emailsSlug,
         data: { email: testEmail2 },
       })
-
-      createdEmailIDs.push(doc2.id)
 
       try {
         await sdk.update({
@@ -462,12 +454,10 @@ describe('@payloadcms/sdk', () => {
     it('should have error data for ValidationError', async () => {
       const testEmail = 'validation-data-test@example.com'
 
-      const doc = await payload.create({
+      await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
       })
-
-      createdEmailIDs.push(doc.id)
 
       let thrownError: null | PayloadSDKError = null
 
