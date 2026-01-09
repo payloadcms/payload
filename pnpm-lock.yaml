@@ -2375,8 +2375,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
-        specifier: '*'
-        version: 0.0.1-alpha.29(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
+        specifier: file:/Users/gjablonski/Documents/GitHub/enterprise-plugins/packages/figma
+        version: file:../enterprise-plugins/packages/figma(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -6189,8 +6189,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@payloadcms/figma@0.0.1-alpha.29':
-    resolution: {integrity: sha512-VfC/BHbOdKaLDHVmlEfQmRsNwC0oBBwHjFPCSKMLn42MWGZXv7Vv6onhCNXvDFX3gE79o8nrXeSI1jbUD3Rh9w==}
+  '@payloadcms/figma@file:../enterprise-plugins/packages/figma':
+    resolution: {directory: ../enterprise-plugins/packages/figma, type: directory}
     hasBin: true
     peerDependencies:
       '@payloadcms/richtext-lexical': ^3.0.0
@@ -19794,7 +19794,7 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@11.15.0':
     optional: true
 
-  '@payloadcms/figma@0.0.1-alpha.29(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
+  '@payloadcms/figma@file:../enterprise-plugins/packages/figma(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@figma/rest-api-spec': 0.34.0

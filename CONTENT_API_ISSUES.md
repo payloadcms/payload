@@ -5,7 +5,7 @@
 **Locations:**
 
 - Content API: `/Users/gjablonski/figma/figma/payload/content-api/`
-- DB Adapter: `/Users/gjablonski/Documents/GitHub/enterprise-plugins/packages/figma-cli/`
+- DB Adapter: `/Users/gjablonski/Documents/GitHub/enterprise-plugins/packages/figma/`
 - Tests: `/Users/gjablonski/Documents/GitHub/payload/test/`
 
 ---
