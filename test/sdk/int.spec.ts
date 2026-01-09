@@ -324,7 +324,7 @@ describe('@payloadcms/sdk', () => {
     const createdEmailIDs: (number | string)[] = []
 
     afterEach(async () => {
-      await payload.delete({ collection: 'emails', where: { id: { exists: true } } })
+      await payload.db.deleteMany({ collection: 'emails', where: { id: { exists: true } } })
     })
 
     it('should throw PayloadSDKError on validation error (duplicate unique field)', async () => {
@@ -352,8 +352,7 @@ describe('@payloadcms/sdk', () => {
       expect(thrownError!.status).toBe(400)
       expect(thrownError!.errors).toBeDefined()
       expect(thrownError!.errors.length).toBeGreaterThan(0)
-      // @ts-expect-error
-      expect(thrownError!.errors[0].name).toBe('ValidationError')
+      expect(thrownError!.errors[0]?.name).toBe('ValidationError')
       expect(thrownError!.message).toBeTruthy()
     })
 
