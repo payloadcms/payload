@@ -8,8 +8,10 @@ export type State = {
   activeIndex: number
   forms: {
     errorCount: number
+    exceedsLimit: boolean
     formID: string
     formState: FormState
+    missingFile: boolean
     uploadEdits?: UploadEdits
   }[]
   totalErrorCount: number
