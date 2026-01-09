@@ -554,6 +554,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'На път си да възстановиш промените на този документ до публикуваното му състояние. Сигурен ли си?',
     aboutToUnpublish: 'На път си да скриеш този документ. Сигурен ли си?',
+    aboutToUnpublishIn:
+      'Предстои да премахнете публикацията на този документ в {{locale}}. Сигурни ли сте?',
     aboutToUnpublishSelection: 'На път си да скриеш всички избрани {{label}}. Сигурен ли си?',
     autosave: 'Автоматично запазване',
     autosavedSuccessfully: 'Успешно автоматично запазване.',
@@ -600,6 +602,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     restoring: 'Възстановяване...',
     reverting: 'Връщане..',
     revertToPublished: 'Върни се до публикуваното',
+    revertUnsuccessful: 'Връщане неуспешно. Не е намерена предишно публикувана версия.',
     saveDraft: 'Запази чернова',
     scheduledSuccessfully: 'Успешно насрочено.',
     schedulePublish: 'Планирано публикуване',
@@ -610,6 +613,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     specificVersion: 'Специфична версия',
     status: 'Статус',
     unpublish: 'Скрий',
+    unpublished: 'Непубликувано',
+    unpublishedSuccessfully: 'Успешно не е публикувано.',
+    unpublishIn: 'Отмяна на публикуване в {{locale}}',
     unpublishing: 'Скриване...',
     version: 'Версия',
     versionAgo: 'преди {{distance}}',

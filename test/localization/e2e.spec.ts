@@ -37,6 +37,7 @@ import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArray
 import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
+  allFieldsLocalizedSlug,
   arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
@@ -70,6 +71,7 @@ let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
 let noLocalizedFieldsURL: AdminUrlUtil
 let urlBlocks: AdminUrlUtil
+let urlAllFieldsLocalized: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -98,6 +100,7 @@ describe('Localization', () => {
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
     noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
     urlBlocks = new AdminUrlUtil(serverURL, blocksCollectionSlug)
+    urlAllFieldsLocalized = new AdminUrlUtil(serverURL, allFieldsLocalizedSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -717,8 +720,6 @@ describe('Localization', () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
-      const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
-      await chevronButton.click()
       await saveDocAndAssert(page, '#publish-locale')
 
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
@@ -809,6 +810,57 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toBeEmpty()
       await changeLocale(page, 'pt')
       await expect(page.locator('#field-title')).toHaveValue('Portuguese Title')
+    })
+  })
+
+  describe('localize status', () => {
+    describe('versions list', () => {
+      test('should show currently published doc in version list', async () => {
+        await changeLocale(page, defaultLocale)
+        await page.goto(urlAllFieldsLocalized.create)
+
+        // draft en
+        await page.locator('#field-text').fill('EN Draft')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // publish en
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+
+        const firstRow = page.locator('tbody tr').first()
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
+      })
+
+      test('should only show published status when viewing the published locale', async () => {
+        await changeLocale(page, defaultLocale)
+        await page.goto(urlAllFieldsLocalized.create)
+
+        // publish en
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // draft en
+        await page.locator('#field-text').fill('EN Draft')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await changeLocale(page, spanishLocale)
+
+        // publish es
+        await page.locator('#field-text').fill('ES Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+        await changeLocale(page, defaultLocale)
+
+        const firstRow = page.locator('tbody tr').first()
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
+      })
     })
   })
 

@@ -549,6 +549,8 @@ export const viTranslations: DefaultTranslationsObject = {
       'Bạn chuẩn bị khôi phục cấu hình chung của {{label}} về phiên bản {{versionDate}}.',
     aboutToRevertToPublished: 'Bạn có muốn tái xuất bản bản nháp này không?',
     aboutToUnpublish: 'Bạn có muốn ngưng xuất bản?',
+    aboutToUnpublishIn:
+      'Bạn đang chuẩn bị hủy xuất bản tài liệu này trong {{locale}}. Bạn có chắc chắn không?',
     aboutToUnpublishSelection: 'Bạn có muốn ngưng xuất bản tất cả {{label}} không?',
     autosave: 'Tự động lưu dữ liệu',
     autosavedSuccessfully: 'Đã tự động lưu thành công.',
@@ -595,6 +597,8 @@ export const viTranslations: DefaultTranslationsObject = {
     restoring: 'Đang khôi phục...',
     reverting: 'Đang về trạng thái cũ...',
     revertToPublished: 'Quay về trạng thái đã xuất bản',
+    revertUnsuccessful:
+      'Khôi phục không thành công. Không tìm thấy phiên bản đã xuất bản trước đó.',
     saveDraft: 'Lưu bản nháp',
     scheduledSuccessfully: 'Đã lên lịch thành công.',
     schedulePublish: 'Lịch xuất bản',
@@ -605,6 +609,9 @@ export const viTranslations: DefaultTranslationsObject = {
     specificVersion: 'Phiên bản cụ thể',
     status: 'Trạng thái',
     unpublish: 'Ẩn tài liệu',
+    unpublished: 'Chưa được xuất bản',
+    unpublishedSuccessfully: 'Đã hủy xuất bản thành công.',
+    unpublishIn: 'Hủy xuất bản trong {{locale}}',
     unpublishing: 'Đang ẩn tài liệu...',
     version: 'Phiên bản',
     versionAgo: '{{distance}} trước',

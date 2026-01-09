@@ -31,6 +31,7 @@ import {
   defaultLocale,
   defaultLocale as englishLocale,
   englishTitle,
+  globalWithDraftsSlug,
   hungarianLocale,
   localizedDateFieldsSlug,
   localizedDraftsSlug,
@@ -3620,329 +3621,528 @@ describe('Localization', () => {
   })
 
   describe('localize status', () => {
-    it('should set other locales to draft upon creation', async () => {
-      const doc = await payload.create({
-        collection: allFieldsLocalizedSlug,
-        data: {
-          text: 'Localized Metadata EN',
-          _status: 'published',
-        },
-        locale: defaultLocale,
+    describe('collections', () => {
+      describe('on create', () => {
+        it('should set other locales to draft upon creation', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'Localized Metadata EN',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          const esDoc = await payload.findByID({
+            locale: spanishLocale,
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+          })
+
+          expect(esDoc._status).toContain('draft')
+        })
+
+        it('should allow publishing of all locales upon creation', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'Localized Metadata EN',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+            publishAllLocales: true,
+          })
+
+          const esDoc = await payload.findByID({
+            locale: spanishLocale,
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+          })
+
+          expect(esDoc._status).toContain('published')
+        })
       })
 
-      const esDoc = await payload.findByID({
-        locale: spanishLocale,
-        id: doc.id,
-        collection: allFieldsLocalizedSlug,
+      describe('querying', () => {
+        it('should return correct data based on draft arg', async () => {
+          // NOTE: passes in MongoDB, fails in PG
+          // -> fails to query on version._status.[localeCode] in `replaceWithDraftIfAvailable` when locale = 'all'
+
+          // create english draft 1
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'english draft 1',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+          // update english published 1
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'english published 1',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          // create spanish draft 1
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish draft 1',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: spanishLocale,
+          })
+          // update spanish published 1
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish published 1',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+          // update spanish draft 2
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish draft 2',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: spanishLocale,
+          })
+
+          const publishedDoc = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            locale: 'all',
+            draft: false,
+          })
+
+          expect(publishedDoc._status!.en).toBe('published')
+          expect(publishedDoc.text!.en).toBe('english published 1')
+          expect(publishedDoc._status!.es).toBe('published')
+          expect(publishedDoc.text!.es).toBe('spanish published 1')
+
+          const latestVersionDoc = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(latestVersionDoc._status!.en).toBe('published')
+          expect(latestVersionDoc.text!.en).toBe('english published 1')
+          expect(latestVersionDoc._status!.es).toBe('draft')
+          expect(latestVersionDoc.text!.es).toBe('spanish draft 2')
+        })
+
+        it('should allow querying metadata per locale', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'Localized Metadata EN',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'Localized Metadata ES',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: spanishLocale,
+          })
+
+          const esPublished = await payload.find({
+            locale: spanishLocale,
+            collection: allFieldsLocalizedSlug,
+            where: {
+              and: [
+                {
+                  id: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  _status: {
+                    equals: 'published',
+                  },
+                },
+              ],
+            },
+          })
+          expect(esPublished.totalDocs).toBe(0)
+
+          const esDraft = await payload.find({
+            locale: spanishLocale,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+            where: {
+              and: [
+                {
+                  id: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  _status: {
+                    equals: 'draft',
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(esDraft.totalDocs).toBe(1)
+          expect(esDraft.docs[0]!.text).toBe('Localized Metadata ES')
+
+          const enPublished = await payload.find({
+            locale: defaultLocale,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+            where: {
+              and: [
+                {
+                  id: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  _status: {
+                    equals: 'published',
+                  },
+                },
+              ],
+            },
+          })
+          expect(enPublished.totalDocs).toBe(1)
+          expect(enPublished.docs[0]!.text).toBe('Localized Metadata EN')
+        })
       })
 
-      expect(esDoc._status).toContain('draft')
+      describe('on update', () => {
+        it('should publish and unpublish single locales', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'en published',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'en draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'es published',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          const mainDocument = await payload.findByID({
+            locale: 'all',
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            draft: false,
+          })
+
+          expect(mainDocument._status!.es).toBe('published')
+          expect(mainDocument.text!.es).toBe('es published')
+          expect(mainDocument._status!.en).toBe('published')
+          expect(mainDocument.text!.en).toBe('en published')
+
+          const latestVersion = await payload.findByID({
+            locale: 'all',
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+          })
+
+          expect(latestVersion._status!.es).toBe('published')
+          expect(latestVersion.text!.es).toBe('es published')
+          expect(latestVersion._status!.en).toBe('draft')
+          expect(latestVersion.text!.en).toBe('en draft')
+        })
+
+        it('should publish and unpublish all', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'en draft',
+              _status: 'draft',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'es draft',
+              _status: 'draft',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'en published',
+              _status: 'published',
+            },
+            locale: 'en',
+            publishAllLocales: true,
+          })
+
+          const mainDocument = await payload.findByID({
+            locale: 'all',
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            draft: false,
+          })
+
+          expect(mainDocument._status!.en).toBe('published')
+          expect(mainDocument.text!.en).toBe('en published')
+          expect(mainDocument._status!.es).toBe('published')
+          expect(mainDocument.text!.es).toBe('es draft')
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            unpublishAllLocales: true,
+            data: {},
+          })
+
+          const unpublishedDocument = await payload.findByID({
+            locale: 'all',
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            draft: false,
+          })
+
+          expect(unpublishedDocument._status!.en).toBe('draft')
+          expect(unpublishedDocument._status!.es).toBe('draft')
+        })
+      })
     })
 
-    it('should allow publishing of all locales upon creation', async () => {
-      const doc = await payload.create({
-        collection: allFieldsLocalizedSlug,
-        data: {
-          text: 'Localized Metadata EN',
-          _status: 'published',
-        },
-        locale: defaultLocale,
-        publishAllLocales: true,
-      })
+    describe('globals', () => {
+      describe('querying', () => {
+        it('should return correct data based on draft arg', async () => {
+          // NOTE: passes in MongoDB, fails in PG
+          // -> fails to query on version._status.[localeCode] in `replaceWithDraftIfAvailable` when locale = 'all'
 
-      const esDoc = await payload.findByID({
-        locale: spanishLocale,
-        id: doc.id,
-        collection: allFieldsLocalizedSlug,
-      })
-
-      expect(esDoc._status).toContain('published')
-    })
-
-    it('should return correct data based on draft arg', async () => {
-      // NOTE: passes in MongoDB, fails in PG
-      // -> fails to query on version._status.[localeCode] in `replaceWithDraftIfAvailable` when locale = 'all'
-
-      // create english draft 1
-      const doc = await payload.create({
-        collection: allFieldsLocalizedSlug,
-        data: {
-          text: 'english draft 1',
-          _status: 'draft',
-        },
-        draft: true,
-        locale: defaultLocale,
-      })
-      // update english published 1
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'english published 1',
-          _status: 'published',
-        },
-        locale: defaultLocale,
-      })
-
-      // create spanish draft 1
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'spanish draft 1',
-          _status: 'draft',
-        },
-        draft: true,
-        locale: spanishLocale,
-      })
-      // update spanish published 1
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'spanish published 1',
-          _status: 'published',
-        },
-        locale: spanishLocale,
-      })
-      // update spanish draft 2
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'spanish draft 2',
-          _status: 'draft',
-        },
-        draft: true,
-        locale: spanishLocale,
-      })
-
-      const publishedDoc = await payload.findByID({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        locale: 'all',
-        draft: false,
-      })
-
-      expect(publishedDoc._status!.en).toBe('published')
-      expect(publishedDoc.text!.en).toBe('english published 1')
-      expect(publishedDoc._status!.es).toBe('published')
-      expect(publishedDoc.text!.es).toBe('spanish published 1')
-
-      const latestVersionDoc = await payload.findByID({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        draft: true,
-        locale: 'all',
-      })
-
-      expect(latestVersionDoc._status!.en).toBe('published')
-      expect(latestVersionDoc.text!.en).toBe('english published 1')
-      expect(latestVersionDoc._status!.es).toBe('draft')
-      expect(latestVersionDoc.text!.es).toBe('spanish draft 2')
-    })
-
-    it('should allow querying metadata per locale', async () => {
-      const doc = await payload.create({
-        collection: allFieldsLocalizedSlug,
-        data: {
-          text: 'Localized Metadata EN',
-          _status: 'published',
-        },
-        locale: defaultLocale,
-      })
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'Localized Metadata ES',
-          _status: 'draft',
-        },
-        draft: true,
-        locale: spanishLocale,
-      })
-
-      const esPublished = await payload.find({
-        locale: spanishLocale,
-        collection: allFieldsLocalizedSlug,
-        where: {
-          and: [
-            {
-              id: {
-                equals: doc.id,
-              },
+          // create english draft 1
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'english draft 1',
+              _status: 'draft',
             },
-            {
-              _status: {
-                equals: 'published',
-              },
+            draft: true,
+            locale: defaultLocale,
+          })
+          // update english published 1
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'english published 1',
+              _status: 'published',
             },
-          ],
-        },
-      })
-      expect(esPublished.totalDocs).toBe(0)
+            locale: defaultLocale,
+          })
 
-      const esDraft = await payload.find({
-        locale: spanishLocale,
-        collection: allFieldsLocalizedSlug,
-        draft: true,
-        where: {
-          and: [
-            {
-              id: {
-                equals: doc.id,
-              },
+          // create spanish draft 1
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'spanish draft 1',
+              _status: 'draft',
             },
-            {
-              _status: {
-                equals: 'draft',
-              },
+            draft: true,
+            locale: spanishLocale,
+          })
+          // update spanish published 1
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'spanish published 1',
+              _status: 'published',
             },
-          ],
-        },
-      })
-
-      expect(esDraft.totalDocs).toBe(1)
-      expect(esDraft.docs[0]!.text).toBe('Localized Metadata ES')
-
-      const enPublished = await payload.find({
-        locale: defaultLocale,
-        collection: allFieldsLocalizedSlug,
-        draft: true,
-        where: {
-          and: [
-            {
-              id: {
-                equals: doc.id,
-              },
+            locale: spanishLocale,
+          })
+          // update spanish draft 2
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'spanish draft 2',
+              _status: 'draft',
             },
-            {
-              _status: {
-                equals: 'published',
-              },
+            draft: true,
+            locale: spanishLocale,
+          })
+
+          const publishedDoc = await payload.findGlobal({
+            slug: globalWithDraftsSlug,
+            locale: 'all',
+            draft: false,
+          })
+
+          expect(publishedDoc._status!.en).toBe('published')
+          expect(publishedDoc.text!.en).toBe('english published 1')
+          expect(publishedDoc._status!.es).toBe('published')
+          expect(publishedDoc.text!.es).toBe('spanish published 1')
+
+          const latestVersionDoc = await payload.findGlobal({
+            slug: globalWithDraftsSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(latestVersionDoc._status!.en).toBe('published')
+          expect(latestVersionDoc.text!.en).toBe('english published 1')
+          expect(latestVersionDoc._status!.es).toBe('draft')
+          expect(latestVersionDoc.text!.es).toBe('spanish draft 2')
+        })
+      })
+
+      describe('on update', () => {
+        it('should publish and unpublish single locales', async () => {
+          const doc = await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'en published',
+              _status: 'published',
             },
-          ],
-        },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'en draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'es published',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          const mainDocument = await payload.findGlobal({
+            slug: globalWithDraftsSlug,
+            locale: 'all',
+            draft: false,
+          })
+
+          expect(mainDocument._status!.es).toBe('published')
+          expect(mainDocument.text!.es).toBe('es published')
+          expect(mainDocument._status!.en).toBe('published')
+          expect(mainDocument.text!.en).toBe('en published')
+
+          const latestVersion = await payload.findGlobal({
+            slug: globalWithDraftsSlug,
+            locale: 'all',
+            draft: true,
+          })
+
+          expect(latestVersion._status!.es).toBe('published')
+          expect(latestVersion.text!.es).toBe('es published')
+          expect(latestVersion._status!.en).toBe('draft')
+          expect(latestVersion.text!.en).toBe('en draft')
+        })
+
+        it('should publish and unpublish all', async () => {
+          const doc = await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'en draft',
+              _status: 'draft',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'es draft',
+              _status: 'draft',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            data: {
+              text: 'en published',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+            publishAllLocales: true,
+          })
+
+          const mainDocument = await payload.findGlobal({
+            slug: globalWithDraftsSlug,
+            locale: 'all',
+            draft: false,
+          })
+
+          expect(mainDocument._status!.en).toBe('published')
+          expect(mainDocument.text!.en).toBe('en published')
+          expect(mainDocument._status!.es).toBe('published')
+          expect(mainDocument.text!.es).toBe('es draft')
+
+          await payload.updateGlobal({
+            slug: globalWithDraftsSlug,
+            unpublishAllLocales: true,
+            data: {},
+          })
+
+          const unpublishedDocument = await payload.findGlobal({
+            slug: globalWithDraftsSlug,
+            locale: 'all',
+            draft: false,
+          })
+
+          expect(unpublishedDocument._status!.en).toBe('draft')
+          expect(unpublishedDocument._status!.es).toBe('draft')
+        })
       })
-      expect(enPublished.totalDocs).toBe(1)
-      expect(enPublished.docs[0]!.text).toBe('Localized Metadata EN')
-    })
-
-    it('should preserve published and draft data when publishing other locales', async () => {
-      const doc = await payload.create({
-        collection: allFieldsLocalizedSlug,
-        data: {
-          text: 'en published',
-          _status: 'published',
-        },
-        locale: defaultLocale,
-      })
-
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'en draft',
-          _status: 'draft',
-        },
-        draft: true,
-        locale: defaultLocale,
-      })
-
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'es published',
-          _status: 'published',
-        },
-        locale: spanishLocale,
-      })
-
-      const mainDocument = await payload.findByID({
-        locale: 'all',
-        id: doc.id,
-        collection: allFieldsLocalizedSlug,
-        draft: false,
-      })
-
-      expect(mainDocument._status!.es).toBe('published')
-      expect(mainDocument.text!.es).toBe('es published')
-      expect(mainDocument._status!.en).toBe('published')
-      expect(mainDocument.text!.en).toBe('en published')
-
-      const latestVersion = await payload.findByID({
-        locale: 'all',
-        id: doc.id,
-        collection: allFieldsLocalizedSlug,
-        draft: true,
-      })
-
-      expect(latestVersion._status!.es).toBe('published')
-      expect(latestVersion.text!.es).toBe('es published')
-      expect(latestVersion._status!.en).toBe('draft')
-      expect(latestVersion.text!.en).toBe('en draft')
-    })
-
-    it('should allow updating the status of all locales at once', async () => {
-      const doc = await payload.create({
-        collection: allFieldsLocalizedSlug,
-        data: {
-          text: 'en draft',
-          _status: 'draft',
-        },
-        locale: defaultLocale,
-      })
-
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'es draft',
-          _status: 'draft',
-        },
-        locale: spanishLocale,
-      })
-
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        data: {
-          text: 'en published',
-          _status: 'published',
-        },
-        locale: 'en',
-        publishAllLocales: true,
-      })
-
-      const mainDocument = await payload.findByID({
-        locale: 'all',
-        id: doc.id,
-        collection: allFieldsLocalizedSlug,
-        draft: false,
-      })
-
-      expect(mainDocument._status!.en).toBe('published')
-      expect(mainDocument.text!.en).toBe('en published')
-      expect(mainDocument._status!.es).toBe('published')
-      expect(mainDocument.text!.es).toBe('es draft')
-
-      await payload.update({
-        collection: allFieldsLocalizedSlug,
-        id: doc.id,
-        unpublishAllLocales: true,
-        data: {},
-      })
-
-      const unpublishedDocument = await payload.findByID({
-        locale: 'all',
-        id: doc.id,
-        collection: allFieldsLocalizedSlug,
-        draft: false,
-      })
-
-      expect(unpublishedDocument._status!.en).toBe('draft')
-      expect(unpublishedDocument._status!.es).toBe('draft')
     })
   })
 
