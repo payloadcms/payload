@@ -65,6 +65,11 @@
       "types": "./src/exports/i18n/*.ts",
       "default": "./src/exports/i18n/*.ts"
     },
+    "./migrations": {
+      "import": "./src/exports/migrations.ts",
+      "types": "./src/exports/migrations.ts",
+      "default": "./src/exports/migrations.ts"
+    },
     "./__testing__/predefinedMigration": {
       "import": "./src/__testing__/predefinedMigration.js",
       "default": "./src/__testing__/predefinedMigration.js"
@@ -180,6 +185,11 @@
         "import": "./dist/exports/i18n/*.js",
         "types": "./dist/exports/i18n/*.d.ts",
         "default": "./dist/exports/i18n/*.js"
+      },
+      "./migrations": {
+        "import": "./dist/exports/migrations.js",
+        "types": "./dist/exports/migrations.d.ts",
+        "default": "./dist/exports/migrations.js"
       },
       "./__testing__/predefinedMigration": {
         "import": "./dist/__testing__/predefinedMigration.js",

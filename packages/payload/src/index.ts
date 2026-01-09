@@ -1810,6 +1810,11 @@ export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
+export { localizeStatus } from './versions/migrations/localizeStatus/index.js'
+export type {
+  MongoLocalizeStatusArgs,
+  SqlLocalizeStatusArgs,
+} from './versions/migrations/localizeStatus/index.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
