@@ -18,7 +18,6 @@ type Args = {
   fields: (ClientField | TabAsFieldClient)[]
   i18n: I18n<any, any>
   parentIndexPath: string
-  parentPath: string
   parentSchemaPath: string
   payload: Payload
   schemaMap: FieldSchemaMap
@@ -30,17 +29,19 @@ export const traverseFields = ({
   fields,
   i18n,
   parentIndexPath,
-  parentPath,
   parentSchemaPath,
   payload,
   schemaMap,
 }: Args) => {
   for (const [index, field] of fields.entries()) {
-    const { indexPath, path, schemaPath } = getFieldPaths({
+    const { indexPath, schemaPath } = getFieldPaths({
       field,
       index,
       parentIndexPath,
-      parentPath,
+      /**
+       * No need for parent path here as we're not working with data at this point.
+       */
+      parentPath: '',
       parentSchemaPath,
     })
 
@@ -54,7 +55,6 @@ export const traverseFields = ({
           fields: field.fields,
           i18n,
           parentIndexPath: '',
-          parentPath: path + '.' + 0, // mock the row index
           parentSchemaPath: schemaPath,
           payload,
           schemaMap,
@@ -81,7 +81,6 @@ export const traverseFields = ({
             fields: block.fields,
             i18n,
             parentIndexPath: '',
-            parentPath: path + '.' + 0, // mock the row index
             parentSchemaPath: schemaPath + '.' + block.slug,
             payload,
             schemaMap,
@@ -98,7 +97,6 @@ export const traverseFields = ({
           fields: field.fields,
           i18n,
           parentIndexPath: indexPath,
-          parentPath,
           parentSchemaPath: schemaPath,
           payload,
           schemaMap,
@@ -114,7 +112,6 @@ export const traverseFields = ({
             fields: field.fields,
             i18n,
             parentIndexPath: '',
-            parentPath: path,
             parentSchemaPath: schemaPath,
             payload,
             schemaMap,
@@ -126,7 +123,6 @@ export const traverseFields = ({
             fields: field.fields,
             i18n,
             parentIndexPath: indexPath,
-            parentPath,
             parentSchemaPath: schemaPath,
             payload,
             schemaMap,
@@ -185,7 +181,6 @@ export const traverseFields = ({
           fields: field.fields,
           i18n,
           parentIndexPath: isNamedTab ? '' : indexPath,
-          parentPath: isNamedTab ? path : parentPath,
           parentSchemaPath: schemaPath,
           payload,
           schemaMap,
@@ -201,7 +196,6 @@ export const traverseFields = ({
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           i18n,
           parentIndexPath: indexPath,
-          parentPath: path,
           parentSchemaPath: schemaPath,
           payload,
           schemaMap,
