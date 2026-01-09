@@ -2,11 +2,18 @@ import type { SuiteFactory, TestFunction } from 'vitest'
 
 import { describe as vitestDescribe, it as vitestIt } from 'vitest'
 
+import { type DatabaseAdapterType, getCurrentDatabaseAdapter } from '../generateDatabaseAdapter.js'
 import { mongooseList } from './isMongoose.js'
 
 type ItOptions = {
-  /** Which database adapter(s) this test/suite should run on. Defaults to 'all'. */
-  db?: 'all' | 'drizzle' | 'mongo'
+  /**
+   * Specify which database(s) the test should run on.
+   * - 'all': Run on all databases (default)
+   * - 'drizzle': Run only on Drizzle (Postgres/SQLite)
+   * - 'mongo': Run only on MongoDB
+   * - function: Custom function that receives the current adapter type and returns a boolean indicating whether to run the test.
+   */
+  db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
 }
 
 const isMongo = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
@@ -34,6 +41,14 @@ const itWithOptions = (
   const testFn: TestFunction | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
 
   const db = options?.db ?? 'all'
+
+  if (typeof db === 'function') {
+    if (!db(getCurrentDatabaseAdapter())) {
+      return vitestIt.skip(name, testFn)
+    }
+
+    return vitestIt(name, testFn)
+  }
 
   if (db === 'drizzle' && isMongo) {
     return vitestIt.skip(name, testFn)
@@ -73,6 +88,13 @@ const describeWithOptions = (
   const suiteFn: SuiteFactory | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
 
   const db = options?.db ?? 'all'
+
+  if (typeof db === 'function') {
+    if (!db(getCurrentDatabaseAdapter())) {
+      return vitestDescribe.skip(name, suiteFn)
+    }
+    return vitestDescribe(name, suiteFn)
+  }
 
   if (db === 'drizzle' && isMongo) {
     return vitestDescribe.skip(name, suiteFn)
