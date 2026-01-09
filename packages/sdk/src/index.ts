@@ -1,4 +1,4 @@
-import type { ApplyDisableErrors, PaginatedDocs, SelectType, TypeWithVersion } from 'payload'
+import type { ApplyDisableErrors, PaginatedDocs, TypedCollectionSelect, TypeWithVersion } from 'payload'
 
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
@@ -151,7 +151,7 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
    * @param options
    * @returns created document
    */
-  create<TSlug extends CollectionSlug<T>, TSelect extends SelectType>(
+  create<TSlug extends CollectionSlug<T>, TSelect extends TypedCollectionSelect<T>>(
     options: CreateOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<TransformCollectionWithSelect<T, TSlug, TSelect>> {
@@ -186,7 +186,7 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
    * @param options
    * @returns documents satisfying query
    */
-  find<TSlug extends CollectionSlug<T>, TSelect extends SelectType>(
+  find<TSlug extends CollectionSlug<T>, TSelect extends TypedCollectionSelect<T>>(
     options: FindOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<PaginatedDocs<TransformCollectionWithSelect<T, TSlug, TSelect>>> {
@@ -201,7 +201,7 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   findByID<
     TSlug extends CollectionSlug<T>,
     TDisableErrors extends boolean,
-    TSelect extends SelectType,
+    TSelect extends TypedCollectionSelect<T>,
   >(
     options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
     init?: RequestInit,

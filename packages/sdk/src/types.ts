@@ -12,20 +12,39 @@ import type { MarkOptional, NonNever } from 'ts-essentials'
 export interface PayloadGeneratedTypes {
   auth: {
     [slug: string]: {
-      forgotPassword: {
-        email: string
-      }
-      login: {
-        email: string
-        password: string
-      }
-      registerFirstUser: {
-        email: string
-        password: string
-      }
-      unlock: {
-        email: string
-      }
+      forgotPassword:
+        | {
+            email: string;
+          }
+        | {
+          username: string;
+          };
+      login:
+        | {
+            email: string;
+            password: string;
+          }
+        | {
+            password: string;
+            username: string;
+          };
+      registerFirstUser:
+        | {
+            email: string;
+            password: string;
+          }
+        | {
+            password: string;
+            username: string;
+            email?: string;
+          };
+      unlock:
+        | {
+            email: string;
+          }
+        | {
+            username: string;
+          };
     }
   }
 
