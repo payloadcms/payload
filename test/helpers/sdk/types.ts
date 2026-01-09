@@ -51,6 +51,7 @@ export type CreateArgs<
     'createdAt' | 'id' | 'sizes' | 'updatedAt'
   >
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   fallbackLocale?: string
   file?: File

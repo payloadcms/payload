@@ -89,7 +89,6 @@ export const getHandler = ({
         if (useSignedURL) {
           const command = new GetObjectCommand({ Bucket: bucket, Key: key })
           const signedUrl = await getSignedUrl(
-            // @ts-expect-error mismatch versions
             getStorageClient(),
             command,
             typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
@@ -115,9 +114,9 @@ export const getHandler = ({
       // Only include Content-Length when it’s present and strictly numeric.
       // This prevents "Parse Error: Invalid character in Content-Length" when providers (e.g., MinIO)
       // return undefined or a non-numeric value.
-      const contentLength = String(object.ContentLength);
+      const contentLength = String(object.ContentLength)
       if (contentLength && !isNaN(Number(contentLength))) {
-        headers.append('Content-Length', contentLength);
+        headers.append('Content-Length', contentLength)
       }
 
       headers.append('Content-Type', String(object.ContentType))

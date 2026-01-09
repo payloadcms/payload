@@ -7,12 +7,14 @@ import type { Config } from './payload-types.js'
 const { beforeAll, beforeEach, describe } = test
 
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { openListFilters } from '../helpers/e2e/filters/index.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
@@ -75,10 +77,22 @@ describe('i18n', () => {
       }[language]
       await page.goto(serverURL + '/admin/account')
       await page.locator('.payload-settings__language .react-select').click()
-      await page.locator('.rs__option', { hasText: LanguageLabel.valueLabel }).click()
-      await expect(
-        page.locator('.payload-settings__language', { hasText: LanguageLabel.fieldLabel }),
-      ).toBeVisible()
+
+      // Wait for change language server action to complete, otherwise if we perform additional actions before it completes, we might trigger a network error.
+      await assertNetworkRequests(
+        page,
+        '/admin/account',
+        async () => {
+          await page.locator('.rs__option', { hasText: LanguageLabel.valueLabel }).click()
+          await expect(
+            page.locator('.payload-settings__language', { hasText: LanguageLabel.fieldLabel }),
+          ).toBeVisible()
+        },
+        {
+          minimumNumberOfRequests: 2,
+          allowedNumberOfRequests: 2,
+        },
+      )
     }
   }
 
