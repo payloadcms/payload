@@ -2209,7 +2209,9 @@ describe('Fields', () => {
       expect(idFields[0].admin?.disableListFilter).toBe(true)
     })
 
-    it('should query exists', async () => {
+    it('should query exists true', async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
       const withoutCollapsed = await payload.create({
         collection: 'array-fields',
         data: {
@@ -2252,7 +2254,55 @@ describe('Fields', () => {
       })
 
       expect(res.totalDocs).toBe(1)
-      expect(res[0].id).toBe(withCollapsed.id)
+      expect(res.docs[0].id).toBe(withCollapsed.id)
+    })
+
+    it('should query exists false', async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withoutCollapsed.id)
     })
   })
 
