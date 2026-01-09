@@ -551,6 +551,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         const data = {
           cartID,
           currency: selectedCurrency.code,
+          secret: cartSecret,
         }
 
         try {
@@ -589,7 +590,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
       }
     },
-    [baseAPIURL, cartID, debug, paymentMethods, selectedCurrency.code],
+    [baseAPIURL, cartID, cartSecret, debug, paymentMethods, selectedCurrency.code],
   )
 
   const confirmOrder = useCallback<EcommerceContextType['initiatePayment']>(
@@ -610,6 +611,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         const data = {
           cartID,
           currency: selectedCurrency.code,
+          secret: cartSecret,
         }
 
         const response = await fetch(fetchURL, {
@@ -640,7 +642,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support order confirmation`)
       }
     },
-    [baseAPIURL, cartID, paymentMethods, selectedCurrency.code],
+    [baseAPIURL, cartID, cartSecret, paymentMethods, selectedCurrency.code],
   )
 
   const getUser = useCallback(async () => {

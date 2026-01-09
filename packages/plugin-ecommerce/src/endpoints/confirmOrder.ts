@@ -64,6 +64,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
     let cartID: DefaultDocumentIDType = data?.cartID
     let cart = undefined
     let customerEmail: string = user?.email ?? ''
+    const cartSecret = data?.secret
 
     if (user) {
       if (user.cart?.docs && Array.isArray(user.cart.docs) && user.cart.docs.length > 0) {
@@ -95,11 +96,18 @@ export const confirmOrderHandler: ConfirmOrderHandler =
 
     if (!cart) {
       if (cartID) {
+        // Add cart secret to query for guest cart access control
+        if (cartSecret && typeof cartSecret === 'string') {
+          req.query = req.query || {}
+          req.query.secret = cartSecret
+        }
+
         cart = await payload.findByID({
           id: cartID,
           collection: cartsSlug,
           depth: 2,
           overrideAccess: false,
+          req,
           select: {
             id: true,
             currency: true,
@@ -107,7 +115,6 @@ export const confirmOrderHandler: ConfirmOrderHandler =
             items: true,
             subtotal: true,
           },
-          user,
         })
 
         if (!cart) {
