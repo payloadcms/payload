@@ -10,7 +10,6 @@ import type { Config, SanitizedConfig } from 'payload'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
-import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
@@ -400,24 +399,6 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
     collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
     stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
   }
-}
-
-export function describeIfInCIOrHasLocalstack(): jest.Describe {
-  if (process.env.CI) {
-    return describe
-  }
-
-  // Check that localstack is running
-  const { code } = shelljs.exec(`docker ps | grep localstack`)
-
-  if (code !== 0) {
-    console.warn('Localstack is not running. Skipping test suite.')
-    return describe.skip
-  }
-
-  console.log('Localstack is running. Running test suite.')
-
-  return describe
 }
 
 export function getRoutes({

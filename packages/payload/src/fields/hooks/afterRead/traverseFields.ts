@@ -25,6 +25,14 @@ type Args = {
   draft: boolean
   fallbackLocale: TypedFallbackLocale
   /**
+   * The depth of the current field being processed.
+   * Fields without names (i.e. rows, collapsibles, unnamed groups)
+   * simply pass this value through
+   *
+   * @default 0
+   */
+  fieldDepth?: number
+  /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
   fieldPromises: Promise<void>[]
@@ -61,6 +69,7 @@ export const traverseFields = ({
   doc,
   draft,
   fallbackLocale,
+  fieldDepth = 0,
   fieldPromises,
   fields,
   findMany,
@@ -94,6 +103,7 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
+        fieldDepth,
         fieldIndex,
         fieldPromises,
         findMany,

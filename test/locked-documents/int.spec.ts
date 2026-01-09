@@ -1,4 +1,5 @@
 import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import { describe, beforeAll, afterAll, afterEach, it, expect } from 'vitest'
 
 import path from 'path'
 import { Locked, NotFound } from 'payload'

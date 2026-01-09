@@ -52,17 +52,3 @@ jobs:
           color: '16777215'
           username: 'Payload Releases'
           avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
-
-  notify-website-repo:
-    name: Notify website repo
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Dispatch event
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
-          repository: payloadcms/website
-          event-type: ${{ env.PAYLOAD_RELEASE_EVENT }}
-          client-payload: '{"event": {"message": "New Payload Release"}}'

@@ -1,3 +1,4 @@
+import { describe, it, expect, vitest } from 'vitest'
 import type { EcommercePluginConfig } from '../types/index.js'
 
 import { EUR, USD } from '../currencies/index.js'
@@ -5,12 +6,12 @@ import { sanitizePluginConfig } from './sanitizePluginConfig'
 
 describe('sanitizePluginConfig', () => {
   const mockAccessConfig = {
-    adminOnlyFieldAccess: jest.fn(),
-    adminOrPublishedStatus: jest.fn(),
-    customerOnlyFieldAccess: jest.fn(),
-    isAdmin: jest.fn(),
-    isAuthenticated: jest.fn(),
-    isDocumentOwner: jest.fn(),
+    adminOnlyFieldAccess: vitest.fn(),
+    adminOrPublishedStatus: vitest.fn(),
+    customerOnlyFieldAccess: vitest.fn(),
+    isAdmin: vitest.fn(),
+    isAuthenticated: vitest.fn(),
+    isDocumentOwner: vitest.fn(),
   }
 
   const minimalConfig: EcommercePluginConfig = {
@@ -255,7 +256,7 @@ describe('sanitizePluginConfig', () => {
         ...minimalConfig,
         carts: {
           allowGuestCarts: false,
-          cartsCollectionOverride: jest.fn() as any,
+          cartsCollectionOverride: vitest.fn() as any,
         },
       }
 
@@ -411,8 +412,8 @@ describe('sanitizePluginConfig', () => {
     })
 
     it('should allow user-provided access functions to override defaults', () => {
-      const customIsAuthenticated = jest.fn()
-      const customPublicAccess = jest.fn()
+      const customIsAuthenticated = vitest.fn()
+      const customPublicAccess = vitest.fn()
 
       const config: EcommercePluginConfig = {
         ...minimalConfig,
