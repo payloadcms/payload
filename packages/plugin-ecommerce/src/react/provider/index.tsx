@@ -3,20 +3,10 @@ import type { DefaultDocumentIDType, TypedUser } from 'payload'
 
 import { deepMergeSimple, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
   AddressesCollection,
-  CartItem,
   CartsCollection,
   ContextProps,
   Currency,
@@ -97,7 +87,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     path: '',
   })
 
-  const [isLoading, startTransition] = useTransition()
+  const [isLoading, setIsLoading] = useState(false)
 
   const [user, setUser] = useState<null | TypedUser>(null)
 
@@ -223,36 +213,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [baseAPIURL, cartQuery, cartsSlug],
   )
 
-  const updateCart = useCallback(
-    async (cartID: DefaultDocumentIDType, data: Partial<CartsCollection>) => {
-      // Build query params with secret if provided
-      const queryParams = {
-        ...cartQuery,
-        ...(cartSecret ? { secret: cartSecret } : {}),
-      }
-      const query = qs.stringify(queryParams)
-
-      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
-        body: JSON.stringify(data),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'PATCH',
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to update cart: ${errorText}`)
-      }
-
-      const updatedCart = await response.json()
-
-      setCart(updatedCart.doc as CartsCollection)
-    },
-    [baseAPIURL, cartQuery, cartsSlug, cartSecret],
-  )
-
   const refreshCart = useCallback<EcommerceContextType['refreshCart']>(async () => {
     if (!cartID) {
       return
@@ -260,33 +220,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     const updatedCart = await getCart(cartID)
     setCart(updatedCart)
   }, [cartID, getCart])
-
-  const deleteCart = useCallback(
-    async (cartID: DefaultDocumentIDType) => {
-      // Build query params with secret if provided
-      const queryParams = cartSecret ? { secret: cartSecret } : {}
-      const query = qs.stringify(queryParams)
-      const url = `${baseAPIURL}/${cartsSlug}/${cartID}${query ? `?${query}` : ''}`
-
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to delete cart: ${errorText}`)
-      }
-
-      setCart(undefined)
-      setCartID(undefined)
-      setCartSecret(undefined)
-    },
-    [baseAPIURL, cartsSlug, cartSecret],
-  )
 
   // Persist cart ID and secret to localStorage
   useEffect(() => {
@@ -309,212 +242,257 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const addItem: EcommerceContextType['addItem'] = useCallback(
     async (item, quantity = 1) => {
-      return new Promise<void>((resolve) => {
-        startTransition(async () => {
-          if (cartID) {
-            const existingCart = await getCart(cartID, { secret: cartSecret })
+      setIsLoading(true)
+      try {
+        if (cartID) {
+          // Use server-side endpoint for adding items
+          const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/add-item`, {
+            body: JSON.stringify({
+              item,
+              quantity,
+              secret: cartSecret,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+          })
 
-            if (!existingCart) {
-              // console.error(`Cart with ID "${cartID}" not found`)
-
-              setCartID(undefined)
-              setCart(undefined)
-              return
-            }
-
-            // Check if the item already exists in the cart
-            const existingItemIndex =
-              existingCart.items?.findIndex((cartItem: CartItem) => {
-                const productID =
-                  typeof cartItem.product === 'object' ? cartItem.product.id : item.product
-                const variantID =
-                  cartItem.variant && typeof cartItem.variant === 'object'
-                    ? cartItem.variant.id
-                    : item.variant
-
-                return (
-                  productID === item.product &&
-                  (item.variant && variantID ? variantID === item.variant : true)
-                )
-              }) ?? -1
-
-            let updatedItems = existingCart.items ? [...existingCart.items] : []
-
-            if (existingItemIndex !== -1) {
-              // If the item exists, update its quantity
-              updatedItems[existingItemIndex].quantity =
-                updatedItems[existingItemIndex].quantity + quantity
-
-              // Update the cart with the new items
-              await updateCart(cartID, {
-                items: updatedItems,
-              })
-            } else {
-              // If the item does not exist, add it to the cart
-              updatedItems = [...(existingCart.items ?? []), { ...item, quantity }]
-            }
-
-            // Update the cart with the new items
-            await updateCart(cartID, {
-              items: updatedItems,
-            })
-          } else {
-            // If no cartID exists, create a new cart
-            const newCart = await createCart({ items: [{ ...item, quantity }] })
-
-            setCartID(newCart.id)
-            setCart(newCart)
+          if (!response.ok) {
+            const errorText = await response.text()
+            throw new Error(`Failed to add item: ${errorText}`)
           }
-          resolve()
-        })
-      })
+
+          const result = await response.json()
+
+          if (!result.success) {
+            // Cart not found - reset state
+            setCartID(undefined)
+            setCart(undefined)
+            setCartSecret(undefined)
+            return
+          }
+
+          // Refresh cart with proper depth/populate settings for UI
+          const refreshedCart = await getCart(cartID, { secret: cartSecret })
+          setCart(refreshedCart)
+        } else {
+          // If no cartID exists, create a new cart with the item
+          const newCart = await createCart({ items: [{ ...item, quantity }] })
+
+          setCartID(newCart.id)
+          setCart(newCart)
+        }
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error adding item to cart:', error)
+        }
+      } finally {
+        setIsLoading(false)
+      }
     },
-    [cartID, cartSecret, createCart, getCart, startTransition, updateCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, createCart, debug, getCart],
   )
 
   const removeItem: EcommerceContextType['removeItem'] = useCallback(
     async (targetID) => {
-      return new Promise<void>((resolve) => {
-        startTransition(async () => {
-          if (!cartID) {
-            resolve()
-            return
-          }
+      if (!cartID) {
+        return
+      }
 
-          const existingCart = await getCart(cartID, { secret: cartSecret })
-
-          if (!existingCart) {
-            // console.error(`Cart with ID "${cartID}" not found`)
-            setCartID(undefined)
-            setCart(undefined)
-            resolve()
-            return
-          }
-
-          // Check if the item already exists in the cart
-          const existingItemIndex =
-            existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
-
-          if (existingItemIndex !== -1) {
-            // If the item exists, remove it from the cart
-            const updatedItems = existingCart.items ? [...existingCart.items] : []
-            updatedItems.splice(existingItemIndex, 1)
-
-            // Update the cart with the new items
-            await updateCart(cartID, {
-              items: updatedItems,
-            })
-          }
-          resolve()
+      setIsLoading(true)
+      try {
+        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/remove-item`, {
+          body: JSON.stringify({
+            itemID: targetID,
+            secret: cartSecret,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         })
-      })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to remove item: ${errorText}`)
+        }
+
+        const result = await response.json()
+
+        if (!result.success) {
+          // Cart not found - reset state
+          setCartID(undefined)
+          setCart(undefined)
+          setCartSecret(undefined)
+          return
+        }
+
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(cartID, { secret: cartSecret })
+        setCart(refreshedCart)
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error removing item from cart:', error)
+        }
+      } finally {
+        setIsLoading(false)
+      }
     },
-    [cartID, cartSecret, getCart, startTransition, updateCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const incrementItem: EcommerceContextType['incrementItem'] = useCallback(
     async (targetID) => {
-      return new Promise<void>((resolve) => {
-        startTransition(async () => {
-          if (!cartID) {
-            resolve()
-            return
-          }
+      if (!cartID) {
+        return
+      }
 
-          const existingCart = await getCart(cartID, { secret: cartSecret })
-
-          if (!existingCart) {
-            // console.error(`Cart with ID "${cartID}" not found`)
-            setCartID(undefined)
-            setCart(undefined)
-            resolve()
-            return
-          }
-
-          // Check if the item already exists in the cart
-          const existingItemIndex =
-            existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
-
-          let updatedItems = existingCart.items ? [...existingCart.items] : []
-
-          if (existingItemIndex !== -1) {
-            // If the item exists, increment its quantity
-            updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity + 1 // Increment by 1
-            // Update the cart with the new items
-            await updateCart(cartID, {
-              items: updatedItems,
-            })
-          } else {
-            // If the item does not exist, add it to the cart with quantity 1
-            updatedItems = [...(existingCart.items ?? []), { product: targetID, quantity: 1 }]
-            // Update the cart with the new items
-            await updateCart(cartID, {
-              items: updatedItems,
-            })
-          }
-          resolve()
+      setIsLoading(true)
+      try {
+        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/update-item`, {
+          body: JSON.stringify({
+            itemID: targetID,
+            quantity: { $inc: 1 },
+            secret: cartSecret,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         })
-      })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to increment item: ${errorText}`)
+        }
+
+        const result = await response.json()
+
+        if (!result.success) {
+          // Cart not found - reset state
+          setCartID(undefined)
+          setCart(undefined)
+          setCartSecret(undefined)
+          return
+        }
+
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(cartID, { secret: cartSecret })
+        setCart(refreshedCart)
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error incrementing item quantity:', error)
+        }
+      } finally {
+        setIsLoading(false)
+      }
     },
-    [cartID, cartSecret, getCart, startTransition, updateCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const decrementItem: EcommerceContextType['decrementItem'] = useCallback(
     async (targetID) => {
-      return new Promise<void>((resolve) => {
-        startTransition(async () => {
-          if (!cartID) {
-            resolve()
-            return
-          }
+      if (!cartID) {
+        return
+      }
 
-          const existingCart = await getCart(cartID, { secret: cartSecret })
-
-          if (!existingCart) {
-            // console.error(`Cart with ID "${cartID}" not found`)
-            setCartID(undefined)
-            setCart(undefined)
-            resolve()
-            return
-          }
-
-          // Check if the item already exists in the cart
-          const existingItemIndex =
-            existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
-
-          const updatedItems = existingCart.items ? [...existingCart.items] : []
-
-          if (existingItemIndex !== -1) {
-            // If the item exists, decrement its quantity
-            updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity - 1 // Decrement by 1
-
-            // If the quantity reaches 0, remove the item from the cart
-            if (updatedItems[existingItemIndex].quantity <= 0) {
-              updatedItems.splice(existingItemIndex, 1)
-            }
-
-            // Update the cart with the new items
-            await updateCart(cartID, {
-              items: updatedItems,
-            })
-          }
-          resolve()
+      setIsLoading(true)
+      try {
+        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/update-item`, {
+          body: JSON.stringify({
+            itemID: targetID,
+            quantity: { $inc: -1 },
+            secret: cartSecret,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         })
-      })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to decrement item: ${errorText}`)
+        }
+
+        const result = await response.json()
+
+        if (!result.success) {
+          // Cart not found - reset state
+          setCartID(undefined)
+          setCart(undefined)
+          setCartSecret(undefined)
+          return
+        }
+
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(cartID, { secret: cartSecret })
+        setCart(refreshedCart)
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error decrementing item quantity:', error)
+        }
+      } finally {
+        setIsLoading(false)
+      }
     },
-    [cartID, cartSecret, getCart, startTransition, updateCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
-    return new Promise<void>((resolve) => {
-      startTransition(async () => {
-        if (cartID) {
-          await deleteCart(cartID)
-        }
-        resolve()
+    if (!cartID) {
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/clear`, {
+        body: JSON.stringify({
+          secret: cartSecret,
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
       })
-    })
-  }, [cartID, deleteCart, startTransition])
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to clear cart: ${errorText}`)
+      }
+
+      const result = await response.json()
+
+      if (!result.success) {
+        // Cart not found - reset state
+        setCartID(undefined)
+        setCart(undefined)
+        setCartSecret(undefined)
+        return
+      }
+
+      // Refresh cart with proper depth/populate settings for UI
+      const refreshedCart = await getCart(cartID, { secret: cartSecret })
+      setCart(refreshedCart)
+    } catch (error) {
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.error('Error clearing cart:', error)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart])
 
   const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {

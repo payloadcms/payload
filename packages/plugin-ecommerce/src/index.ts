@@ -165,6 +165,7 @@ export const ecommercePlugin =
         const defaultCartsCollection = createCartsCollection({
           access: accessConfig,
           allowGuestCarts: cartsConfig.allowGuestCarts,
+          cartItemMatcher: cartsConfig.cartItemMatcher,
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
           enableVariants: Boolean(productsConfig.variants),
@@ -345,6 +346,27 @@ export {
   createVariantTypesCollection,
 }
 
+export {
+  addItem,
+  clearCart,
+  defaultCartItemMatcher,
+  isNumericOperator,
+  removeItem,
+  updateItem,
+} from './collections/carts/operations/index.js'
+export type {
+  AddItemArgs,
+  CartItemData,
+  CartItemMatcher,
+  CartItemMatcherArgs,
+  CartOperationResult,
+  ClearCartArgs,
+  FieldWithOperator,
+  NewCartItem,
+  NumericOperator,
+  RemoveItemArgs,
+  UpdateItemArgs,
+} from './collections/carts/operations/index.js'
 export { EUR, GBP, USD } from './currencies/index.js'
 export { amountField } from './fields/amountField.js'
 export { currencyField } from './fields/currencyField.js'
