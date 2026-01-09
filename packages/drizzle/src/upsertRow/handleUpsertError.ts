@@ -20,11 +20,11 @@ type HandleUpsertErrorArgs = {
  * Re-throws non-constraint errors unchanged.
  */
 export const handleUpsertError = ({
+  id,
   adapter,
   collectionSlug,
   error: caughtError,
   globalSlug,
-  id,
   req,
   tableName,
 }: HandleUpsertErrorArgs): never => {

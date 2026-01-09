@@ -182,7 +182,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         tableName,
       })
     } catch (error) {
-      handleUpsertError({ adapter, collectionSlug, error, globalSlug, id, req, tableName })
+      handleUpsertError({ id, adapter, collectionSlug, error, globalSlug, req, tableName })
     }
   }
   // Split out the incoming data into the corresponding:
@@ -724,7 +724,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
   } catch (error) {
-    handleUpsertError({ adapter, collectionSlug, error, globalSlug, id, req, tableName })
+    handleUpsertError({ id, adapter, collectionSlug, error, globalSlug, req, tableName })
   }
 
   if (ignoreResult === 'idOnly') {
