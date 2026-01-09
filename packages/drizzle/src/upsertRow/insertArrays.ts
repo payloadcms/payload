@@ -1,3 +1,5 @@
+import type { PayloadRequest } from 'payload'
+
 import type { ArrayRowToInsert } from '../transform/write/types.js'
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
@@ -8,6 +10,7 @@ type Args = {
   }[]
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   parentRows: Record<string, unknown>[]
+  req: Partial<PayloadRequest>
   uuidMap?: Record<string, number | string>
 }
 
@@ -26,9 +29,11 @@ export const insertArrays = async ({
   arrays,
   db,
   parentRows,
+  req,
   uuidMap = {},
 }: Args): Promise<void> => {
   // Maintain a map of flattened rows by table
+  const promises: (() => Promise<void>)[] = []
   const rowsByTable: RowsByTable = {}
 
   arrays.forEach((arraysByTable, parentRowIndex) => {
@@ -76,51 +81,64 @@ export const insertArrays = async ({
   // Insert all corresponding arrays
   // (one insert per array table)
   for (const [tableName, row] of Object.entries(rowsByTable)) {
-    // the nested arrays need the ID for the parentID foreign key
-    let insertedRows: Args['parentRows']
-    if (row.rows.length > 0) {
-      insertedRows = await adapter.insert({
-        db,
-        tableName,
-        values: row.rows,
-      })
+    promises.push(async () => {
+      // the nested arrays need the ID for the parentID foreign key
+      let insertedRows: Args['parentRows']
+      if (row.rows.length > 0) {
+        insertedRows = await adapter.insert({
+          db,
+          tableName,
+          values: row.rows,
+        })
 
-      insertedRows.forEach((row) => {
-        if (
-          typeof row._uuid === 'string' &&
-          (typeof row.id === 'string' || typeof row.id === 'number')
-        ) {
-          uuidMap[row._uuid] = row.id
-        }
-      })
-    }
-
-    // Insert locale rows
-    if (adapter.tables[`${tableName}${adapter.localesSuffix}`] && row.locales.length > 0) {
-      if (!row.locales[0]._parentID) {
-        row.locales = row.locales.map((localeRow) => {
-          if (typeof localeRow._getParentID === 'function') {
-            localeRow._parentID = localeRow._getParentID(insertedRows)
-            delete localeRow._getParentID
+        insertedRows.forEach((row) => {
+          if (
+            typeof row._uuid === 'string' &&
+            (typeof row.id === 'string' || typeof row.id === 'number')
+          ) {
+            uuidMap[row._uuid] = row.id
           }
-          return localeRow
         })
       }
-      await adapter.insert({
-        db,
-        tableName: `${tableName}${adapter.localesSuffix}`,
-        values: row.locales,
-      })
-    }
 
-    // If there are sub arrays, call this function recursively
-    if (row.arrays.length > 0) {
-      await insertArrays({
-        adapter,
-        arrays: row.arrays,
-        db,
-        parentRows: insertedRows,
-      })
+      // Insert locale rows
+      if (adapter.tables[`${tableName}${adapter.localesSuffix}`] && row.locales.length > 0) {
+        if (!row.locales[0]._parentID) {
+          row.locales = row.locales.map((localeRow) => {
+            if (typeof localeRow._getParentID === 'function') {
+              localeRow._parentID = localeRow._getParentID(insertedRows)
+              delete localeRow._getParentID
+            }
+            return localeRow
+          })
+        }
+        await adapter.insert({
+          db,
+          tableName: `${tableName}${adapter.localesSuffix}`,
+          values: row.locales,
+        })
+      }
+
+      // If there are sub arrays, call this function recursively
+      if (row.arrays.length > 0) {
+        await insertArrays({
+          adapter,
+          arrays: row.arrays,
+          db,
+          parentRows: insertedRows,
+          req,
+        })
+      }
+    })
+  }
+
+  if (req?.transactionID) {
+    // Run queries in sequence
+    for (const promise of promises) {
+      await promise()
     }
+  } else {
+    // Run queries in parallel
+    await Promise.all(promises.map((promise) => promise()))
   }
 }

@@ -78,6 +78,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           arrays: [arraysToPush],
           db,
           parentRows: [insertedRow],
+          req,
           uuidMap: {},
         })
       }
@@ -246,6 +247,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const promisesToDelete: (() => Promise<void>)[] = []
     const promisesToInsert: (() => Promise<unknown>)[] = []
+    const promisesToInsertAfter: (() => Promise<unknown>)[] = []
 
     // If there are locale rows with data, add the parent and locale to each
     if (Object.keys(rowToInsert.locales).length > 0) {
@@ -350,16 +352,18 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         (rel) => !('itemToRemove' in rel),
       )
 
-      await deleteExistingRowsByPath({
-        adapter,
-        db,
-        localeColumnName: 'locale',
-        parentColumnName: 'parent',
-        parentID: insertedRow.id,
-        pathColumnName: 'path',
-        rows: [...relationsToInsert, ...generalRelationshipDeletes],
-        tableName: relationshipsTableName,
-      })
+      promisesToDelete.push(() =>
+        deleteExistingRowsByPath({
+          adapter,
+          db,
+          localeColumnName: 'locale',
+          parentColumnName: 'parent',
+          parentID: insertedRow.id,
+          pathColumnName: 'path',
+          rows: [...relationsToInsert, ...generalRelationshipDeletes],
+          tableName: relationshipsTableName,
+        }),
+      )
     }
 
     if (relationsToInsert.length > 0) {
@@ -400,104 +404,105 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
 
       if (relationshipsToInsert.length > 0) {
-        // Check for potential duplicates
-        const relationshipTable = adapter.tables[relationshipsTableName]
+        promisesToInsert.push(async () => {
+          // Check for potential duplicates
+          const relationshipTable = adapter.tables[relationshipsTableName]
 
-        if (relationshipTable) {
-          // Build conditions only if we have relationships to check
-          if (relationshipsToInsert.length === 0) {
-            return // No relationships to insert
-          }
-
-          const conditions = relationshipsToInsert.map((row: RelationshipRow) => {
-            const parts = [
-              eq(relationshipTable.parent, row.parent),
-              eq(relationshipTable.path, row.path),
-            ]
-
-            // Add locale condition
-            if (row.locale !== undefined && relationshipTable.locale) {
-              parts.push(eq(relationshipTable.locale, row.locale))
-            } else if (relationshipTable.locale) {
-              parts.push(isNull(relationshipTable.locale))
+          if (relationshipTable) {
+            // Build conditions only if we have relationships to check
+            if (relationshipsToInsert.length === 0) {
+              return // No relationships to insert
             }
 
-            // Add all relationship ID matches using schema fields
-            for (const [key, value] of Object.entries(row)) {
-              if (key.endsWith('ID') && value != null) {
-                const column = relationshipTable[key]
-                if (column && typeof column === 'object') {
-                  parts.push(eq(column, value))
-                }
-              }
-            }
+            const conditions = relationshipsToInsert.map((row: RelationshipRow) => {
+              const parts = [
+                eq(relationshipTable.parent, row.parent),
+                eq(relationshipTable.path, row.path),
+              ]
 
-            return and(...parts)
-          })
-
-          // Get both existing relationships AND max order in a single query
-          let existingRels: Record<string, unknown>[] = []
-          let maxOrder = 0
-
-          if (conditions.length > 0) {
-            // Query for existing relationships
-            existingRels = await (db as any)
-              .select()
-              .from(relationshipTable)
-              .where(or(...conditions))
-          }
-
-          // Get max order for this parent across all paths in a single query
-          const parentId = id || insertedRow.id
-          const maxOrderResult = await (db as any)
-            .select({ maxOrder: relationshipTable.order })
-            .from(relationshipTable)
-            .where(eq(relationshipTable.parent, parentId))
-            .orderBy(desc(relationshipTable.order))
-            .limit(1)
-
-          if (maxOrderResult.length > 0 && maxOrderResult[0].maxOrder) {
-            maxOrder = maxOrderResult[0].maxOrder
-          }
-
-          // Set order values for all relationships based on max order
-          relationshipsToInsert.forEach((row, index) => {
-            row.order = maxOrder + index + 1
-          })
-
-          // Filter out relationships that already exist
-          const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
-            return !existingRels.some((existingRow: Record<string, unknown>) => {
-              // Check if this relationship already exists
-              let matches = existingRow.parent === newRow.parent && existingRow.path === newRow.path
-
-              if (newRow.locale !== undefined) {
-                matches = matches && existingRow.locale === newRow.locale
+              // Add locale condition
+              if (row.locale !== undefined && relationshipTable.locale) {
+                parts.push(eq(relationshipTable.locale, row.locale))
+              } else if (relationshipTable.locale) {
+                parts.push(isNull(relationshipTable.locale))
               }
 
-              // Check relationship value matches - convert to camelCase for comparison
-              for (const key of Object.keys(newRow)) {
-                if (key.endsWith('ID')) {
-                  // Now using camelCase keys
-                  matches = matches && existingRow[key] === newRow[key]
+              // Add all relationship ID matches using schema fields
+              for (const [key, value] of Object.entries(row)) {
+                if (key.endsWith('ID') && value != null) {
+                  const column = relationshipTable[key]
+                  if (column && typeof column === 'object') {
+                    parts.push(eq(column, value))
+                  }
                 }
               }
 
-              return matches
+              return and(...parts)
             })
-          })
 
-          // Insert only non-duplicate relationships
-          if (relationshipsToActuallyInsert.length > 0) {
-            promisesToInsert.push(() =>
-              adapter.insert({
+            // Get both existing relationships AND max order in a single query
+            let existingRels: Record<string, unknown>[] = []
+            let maxOrder = 0
+
+            if (conditions.length > 0) {
+              // Query for existing relationships
+              existingRels = await (db as any)
+                .select()
+                .from(relationshipTable)
+                .where(or(...conditions))
+            }
+
+            // Get max order for this parent across all paths in a single query
+            const parentId = id || insertedRow.id
+            const maxOrderResult = await (db as any)
+              .select({ maxOrder: relationshipTable.order })
+              .from(relationshipTable)
+              .where(eq(relationshipTable.parent, parentId))
+              .orderBy(desc(relationshipTable.order))
+              .limit(1)
+
+            if (maxOrderResult.length > 0 && maxOrderResult[0].maxOrder) {
+              maxOrder = maxOrderResult[0].maxOrder
+            }
+
+            // Set order values for all relationships based on max order
+            relationshipsToInsert.forEach((row, index) => {
+              row.order = maxOrder + index + 1
+            })
+
+            // Filter out relationships that already exist
+            const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
+              return !existingRels.some((existingRow: Record<string, unknown>) => {
+                // Check if this relationship already exists
+                let matches =
+                  existingRow.parent === newRow.parent && existingRow.path === newRow.path
+
+                if (newRow.locale !== undefined) {
+                  matches = matches && existingRow.locale === newRow.locale
+                }
+
+                // Check relationship value matches - convert to camelCase for comparison
+                for (const key of Object.keys(newRow)) {
+                  if (key.endsWith('ID')) {
+                    // Now using camelCase keys
+                    matches = matches && existingRow[key] === newRow[key]
+                  }
+                }
+
+                return matches
+              })
+            })
+
+            // Insert only non-duplicate relationships
+            if (relationshipsToActuallyInsert.length > 0) {
+              await adapter.insert({
                 db,
                 tableName: relationshipsTableName,
                 values: relationshipsToActuallyInsert,
-              }),
-            )
+              })
+            }
           }
-        }
+        })
       }
     }
 
@@ -563,16 +568,18 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const textsTableName = `${tableName}_texts`
 
     if (operation === 'update') {
-      await deleteExistingRowsByPath({
-        adapter,
-        db,
-        localeColumnName: 'locale',
-        parentColumnName: 'parent',
-        parentID: insertedRow.id,
-        pathColumnName: 'path',
-        rows: [...textsToInsert, ...rowToInsert.textsToDelete],
-        tableName: textsTableName,
-      })
+      promisesToDelete.push(() =>
+        deleteExistingRowsByPath({
+          adapter,
+          db,
+          localeColumnName: 'locale',
+          parentColumnName: 'parent',
+          parentID: insertedRow.id,
+          pathColumnName: 'path',
+          rows: [...textsToInsert, ...rowToInsert.textsToDelete],
+          tableName: textsTableName,
+        }),
+      )
     }
 
     if (textsToInsert.length > 0) {
@@ -592,16 +599,18 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const numbersTableName = `${tableName}_numbers`
 
     if (operation === 'update') {
-      await deleteExistingRowsByPath({
-        adapter,
-        db,
-        localeColumnName: 'locale',
-        parentColumnName: 'parent',
-        parentID: insertedRow.id,
-        pathColumnName: 'path',
-        rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
-        tableName: numbersTableName,
-      })
+      promisesToDelete.push(() =>
+        deleteExistingRowsByPath({
+          adapter,
+          db,
+          localeColumnName: 'locale',
+          parentColumnName: 'parent',
+          parentID: insertedRow.id,
+          pathColumnName: 'path',
+          rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
+          tableName: numbersTableName,
+        }),
+      )
     }
 
     if (numbersToInsert.length > 0) {
@@ -623,11 +632,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     if (operation === 'update') {
       for (const tableName of rowToInsert.blocksToDelete) {
         const blockTable = adapter.tables[tableName]
-        await adapter.deleteWhere({
-          db,
-          tableName,
-          where: eq(blockTable._parentID, insertedRow.id),
-        })
+        promisesToDelete.push(() =>
+          adapter.deleteWhere({
+            db,
+            tableName,
+            where: eq(blockTable._parentID, insertedRow.id),
+          }),
+        )
       }
     }
 
@@ -635,53 +646,56 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const arraysBlocksUUIDMap: Record<string, number | string> = {}
 
     for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
-      insertedBlockRows[tableName] = await adapter.insert({
-        db,
-        tableName,
-        values: blockRows.map(({ row }) => row),
-      })
+      promisesToInsert.push(async () => {
+        insertedBlockRows[tableName] = await adapter.insert({
+          db,
+          tableName,
+          values: blockRows.map(({ row }) => row),
+        })
 
-      insertedBlockRows[tableName].forEach((row, i) => {
-        blockRows[i].row = row
-        if (
-          typeof row._uuid === 'string' &&
-          (typeof row.id === 'string' || typeof row.id === 'number')
-        ) {
-          arraysBlocksUUIDMap[row._uuid] = row.id
-        }
-      })
+        insertedBlockRows[tableName].forEach((row, i) => {
+          blockRows[i].row = row
+          if (
+            typeof row._uuid === 'string' &&
+            (typeof row.id === 'string' || typeof row.id === 'number')
+          ) {
+            arraysBlocksUUIDMap[row._uuid] = row.id
+          }
+        })
 
-      const blockLocaleIndexMap: number[] = []
+        const blockLocaleIndexMap: number[] = []
 
-      const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
-        if (Object.entries(blockRow.locales).length > 0) {
-          Object.entries(blockRow.locales).forEach(([blockLocale, blockLocaleData]) => {
-            if (Object.keys(blockLocaleData).length > 0) {
-              blockLocaleData._parentID = blockRow.row.id
-              blockLocaleData._locale = blockLocale
-              acc.push(blockLocaleData)
-              blockLocaleIndexMap.push(i)
-            }
+        const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
+          if (Object.entries(blockRow.locales).length > 0) {
+            Object.entries(blockRow.locales).forEach(([blockLocale, blockLocaleData]) => {
+              if (Object.keys(blockLocaleData).length > 0) {
+                blockLocaleData._parentID = blockRow.row.id
+                blockLocaleData._locale = blockLocale
+                acc.push(blockLocaleData)
+                blockLocaleIndexMap.push(i)
+              }
+            })
+          }
+
+          return acc
+        }, [])
+
+        if (blockLocaleRowsToInsert.length > 0) {
+          await adapter.insert({
+            db,
+            tableName: `${tableName}${adapter.localesSuffix}`,
+            values: blockLocaleRowsToInsert,
           })
         }
 
-        return acc
-      }, [])
-
-      if (blockLocaleRowsToInsert.length > 0) {
-        await adapter.insert({
+        await insertArrays({
+          adapter,
+          arrays: blockRows.map(({ arrays }) => arrays),
           db,
-          tableName: `${tableName}${adapter.localesSuffix}`,
-          values: blockLocaleRowsToInsert,
+          parentRows: insertedBlockRows[tableName],
+          req,
+          uuidMap: arraysBlocksUUIDMap,
         })
-      }
-
-      await insertArrays({
-        adapter,
-        arrays: blockRows.map(({ arrays }) => arrays),
-        db,
-        parentRows: insertedBlockRows[tableName],
-        uuidMap: arraysBlocksUUIDMap,
       })
     }
 
@@ -691,22 +705,27 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     if (operation === 'update') {
       for (const arrayTableName of Object.keys(rowToInsert.arrays)) {
-        await deleteExistingArrayRows({
-          adapter,
-          db,
-          parentID: insertedRow.id,
-          tableName: arrayTableName,
-        })
+        promisesToDelete.push(() =>
+          deleteExistingArrayRows({
+            adapter,
+            db,
+            parentID: insertedRow.id,
+            tableName: arrayTableName,
+          }),
+        )
       }
     }
 
-    await insertArrays({
-      adapter,
-      arrays: [rowToInsert.arrays, rowToInsert.arraysToPush],
-      db,
-      parentRows: [insertedRow, insertedRow],
-      uuidMap: arraysBlocksUUIDMap,
-    })
+    promisesToInsert.push(() =>
+      insertArrays({
+        adapter,
+        arrays: [rowToInsert.arrays, rowToInsert.arraysToPush],
+        db,
+        parentRows: [insertedRow, insertedRow],
+        req,
+        uuidMap: arraysBlocksUUIDMap,
+      }),
+    )
 
     // //////////////////////////////////
     // INSERT hasMany SELECTS
@@ -724,28 +743,36 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         )
       }
 
-      if (Object.keys(arraysBlocksUUIDMap).length > 0) {
-        tableRows.forEach((row: RelationshipRow) => {
-          if (row.parent in arraysBlocksUUIDMap) {
-            row.parent = arraysBlocksUUIDMap[row.parent]
-          }
-        })
-      }
-
       if (tableRows.length) {
-        promisesToInsert.push(() =>
-          adapter.insert({
+        promisesToInsertAfter.push(async () => {
+          if (Object.keys(arraysBlocksUUIDMap).length > 0) {
+            tableRows.forEach((row: RelationshipRow) => {
+              if (row.parent in arraysBlocksUUIDMap) {
+                row.parent = arraysBlocksUUIDMap[row.parent]
+              }
+            })
+          }
+
+          await adapter.insert({
             db,
             tableName: selectTableName,
             values: tableRows,
-          }),
-        )
+          });
+        })
       }
     }
 
-    // Run updates in parallel
-    await Promise.all(promisesToDelete.map((value) => value()))
-    await Promise.all(promisesToInsert.map((value) => value()))
+    if (req?.transactionID) {
+      // Run queries in sequence
+      for (const promise of [...promisesToDelete, ...promisesToInsert, ...promisesToInsertAfter]) {
+        await promise()
+      }
+    } else {
+      // Run queries in parallel
+      await Promise.all(promisesToDelete.map((promise) => promise()))
+      await Promise.all(promisesToInsert.map((promise) => promise()))
+      await Promise.all(promisesToInsertAfter.map((promise) => promise()))
+    }
   } catch (error) {
     handleUpsertError({ id, adapter, error, req, tableName })
   }
