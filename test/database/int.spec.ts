@@ -1720,7 +1720,6 @@ describe('database', () => {
       await payload.db.collections['relationships-migration'].deleteMany({})
       await payload.db.versions['relationships-migration'].deleteMany({})
     })
-
   })
 
   describe('schema', () => {
@@ -3868,7 +3867,41 @@ describe('database', () => {
         },
       })
     } catch (e) {
-      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
+    }
+  })
+
+  it('should throw unique constraint errors in optimized update path', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-2',
+      },
+    })
+
+    // This update goes through the optimized path (shouldUseOptimizedUpsertRow) in db-drizzle
+    // because it's a simple field update with an existing ID
+    try {
+      await payload.update({
+        collection: 'unique-fields',
+        id: doc2.id,
+        data: {
+          slugField: 'optimized-unique-1', // Try to set to doc1's unique value
+        },
+      })
+    } catch (e) {
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
     }
   })
 

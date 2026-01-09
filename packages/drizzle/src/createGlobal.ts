@@ -24,6 +24,7 @@ export async function createGlobal<T extends Record<string, unknown>>(
     data,
     db,
     fields: globalConfig.flattenedFields,
+    globalSlug: slug,
     ignoreResult: returning === false,
     operation: 'create',
     req,

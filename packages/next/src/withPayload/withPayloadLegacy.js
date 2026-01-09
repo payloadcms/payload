@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
-import type { NextConfig } from 'next'
-
 /**
  * Applies config options required to support Next.js versions before 16.1.0 and 16.1.0-canary.3.
+ * @param {import('next').NextConfig} nextConfig
+ * @returns {import('next').NextConfig}
  */
-export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
+export const withPayloadLegacy = (nextConfig = {}) => {
   if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
     // TODO: This warning is thrown because we cannot externalize the entry-point package for client-s3, so we patch the warning to not show it.
     // We can remove this once Next.js implements https://github.com/vercel/next.js/discussions/76991
@@ -52,7 +51,8 @@ export const withPayloadLegacy = (nextConfig: NextConfig = {}): NextConfig => {
     )
   }
 
-  const toReturn: NextConfig = {
+  /** @type {import('next').NextConfig} */
+  const toReturn = {
     ...nextConfig,
     serverExternalPackages: [
       // serverExternalPackages = webpack.externals, but with turbopack support and an additional check

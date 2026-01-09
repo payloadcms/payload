@@ -79,17 +79,13 @@ export async function findVersionByID<
       path: `/${options.collection}/versions/${options.id}`,
     })
 
-    if (response.ok) {
-      return response.json()
-    } else {
-      throw new Error()
-    }
-  } catch {
+    return response.json()
+  } catch (err) {
     if (options.disableErrors) {
       // @ts-expect-error generic nullable
       return null
     }
 
-    throw new Error(`Error retrieving the version document ${options.collection}/${options.id}`)
+    throw err
   }
 }

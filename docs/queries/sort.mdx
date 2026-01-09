@@ -101,3 +101,15 @@ query {
   }
 }
 ```
+
+To sort by multiple fields in GraphQL, pass a comma-separated list:
+
+```ts
+query {
+  Posts(sort: "priority,-createdAt") {
+    docs {
+      color
+    }
+  }
+}
+```
