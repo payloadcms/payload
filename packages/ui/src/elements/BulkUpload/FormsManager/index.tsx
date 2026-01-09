@@ -529,6 +529,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             schemaPath: collectionSlug,
           })
 
+          // use local file, do not overwrite with undefined from server
+          delete state.file
+
           const newFormErrorCount = Object.values(state).reduce(
             (acc, value) => (value?.valid === false ? acc + 1 : acc),
             0,

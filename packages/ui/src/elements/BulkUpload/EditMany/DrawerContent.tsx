@@ -78,6 +78,9 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         skipValidation: !submitted,
       })
 
+      // use local file, do not overwrite with undefined from server
+      delete state.file
+
       abortFormStateRef.current = null
 
       return state
@@ -113,7 +116,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
 
       setSelectedFields(selected || [])
 
-      const { state } = await getFormState({
+      const { state: selectedFieldsState } = await getFormState({
         collectionSlug: collection.slug,
         docPermissions: collectionPermissions,
         docPreferences: null,
@@ -131,7 +134,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
 
       dispatchFields({
         type: 'UPDATE_MANY',
-        formState: state,
+        formState: selectedFieldsState,
       })
 
       setIsInitializing(false)
