@@ -147,6 +147,14 @@ export interface FieldPath {
     fieldWithinNamedTabWithinCollapsible?: string | null;
   };
   textFieldInUnnamedGroup?: string | null;
+  blocks?:
+    | {
+        textInCollapsibleInCollapsibleBlock?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'CollapsibleBlock';
+      }[]
+    | null;
   topLevelNamedField_beforeValidate_FieldPaths?:
     | {
         [k: string]: unknown;
@@ -543,8 +551,45 @@ export interface FieldPath {
     | number
     | boolean
     | null;
+  textInCollapsibleInCollapsibleBlock_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  textInCollapsibleInCollapsibleBlock_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  textInCollapsibleInCollapsibleBlock_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  textInCollapsibleInCollapsibleBlock_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -678,6 +723,17 @@ export interface FieldPathsSelect<T extends boolean = true> {
         fieldWithinNamedTabWithinCollapsible?: T;
       };
   textFieldInUnnamedGroup?: T;
+  blocks?:
+    | T
+    | {
+        CollapsibleBlock?:
+          | T
+          | {
+              textInCollapsibleInCollapsibleBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   topLevelNamedField_beforeValidate_FieldPaths?: T;
   topLevelNamedField_beforeChange_FieldPaths?: T;
   topLevelNamedField_afterRead_FieldPaths?: T;
@@ -722,8 +778,13 @@ export interface FieldPathsSelect<T extends boolean = true> {
   textFieldInUnnamedGroup_beforeChange_FieldPaths?: T;
   textFieldInUnnamedGroup_afterRead_FieldPaths?: T;
   textFieldInUnnamedGroup_beforeDuplicate_FieldPaths?: T;
+  textInCollapsibleInCollapsibleBlock_beforeValidate_FieldPaths?: T;
+  textInCollapsibleInCollapsibleBlock_beforeChange_FieldPaths?: T;
+  textInCollapsibleInCollapsibleBlock_afterRead_FieldPaths?: T;
+  textInCollapsibleInCollapsibleBlock_beforeDuplicate_FieldPaths?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

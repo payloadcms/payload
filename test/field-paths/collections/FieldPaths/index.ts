@@ -59,6 +59,9 @@ const createFields = (fieldIdentifiers: string[]): Field[] =>
 
 export const FieldPaths: CollectionConfig = {
   slug: fieldPathsSlug,
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       // path: 'topLevelNamedField'
@@ -266,6 +269,49 @@ export const FieldPaths: CollectionConfig = {
         },
       ],
     },
+    // path: 'blocks'
+    // schemaPath: 'blocks'
+    // indexPath: ''
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          // path: 'blocks.[n]'
+          // schemaPath: 'blocks.CollapsibleBlock'
+          // indexPath: ''
+          slug: 'CollapsibleBlock',
+          fields: [
+            {
+              // path: 'blocks.[n]._index-0'
+              // schemaPath: 'blocks.CollapsibleBlock._index-0'
+              // indexPath: '0-0'
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  // path: 'blocks.[n]._index-0-0'
+                  // schemaPath: 'blocks.CollapsibleBlock._index-0-0'
+                  // indexPath: '0-0-0'
+                  type: 'collapsible',
+                  label: 'Nested Collapsible',
+                  fields: [
+                    {
+                      // path: 'blocks.[n].textInCollapsibleInCollapsibleBlock'
+                      // schemaPath: 'blocks.CollapsibleBlock._index-0-0.textInCollapsibleInCollapsibleBlock'
+                      // indexPath: ''
+                      name: 'textInCollapsibleInCollapsibleBlock',
+                      type: 'text',
+                      hooks: attachHooks('textInCollapsibleInCollapsibleBlock'),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     // create fields for the hooks to save data to
     ...createFields([
       'topLevelNamedField',
@@ -279,6 +325,7 @@ export const FieldPaths: CollectionConfig = {
       'fieldWithinUnnamedTabWithinCollapsible',
       'fieldWithinNamedTabWithinCollapsible',
       'textFieldInUnnamedGroup',
+      'textInCollapsibleInCollapsibleBlock',
     ]),
   ],
 }

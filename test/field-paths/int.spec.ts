@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { fieldPathsSlug } from './shared.js'
+import { testDoc } from './testDoc.js'
 
 let payload: Payload
 let config: SanitizedConfig
@@ -63,30 +64,7 @@ describe('Field Paths', () => {
         },
       })
 
-      const originalDoc = await payload.create({
-        collection: fieldPathsSlug,
-        data: {
-          topLevelNamedField: 'Test',
-          array: [
-            {
-              fieldWithinArray: 'Test',
-              nestedArray: [
-                {
-                  fieldWithinNestedArray: 'Test',
-                },
-              ],
-            },
-          ],
-          fieldWithinRow: 'Test',
-          fieldWithinUnnamedTab: 'Test',
-          namedTab: {
-            fieldWithinNamedTab: 'Test',
-          },
-          fieldWithinNestedUnnamedTab: 'Test',
-          fieldWithinUnnamedTabWithinCollapsible: 'Test',
-          textFieldInUnnamedGroup: 'Test',
-        },
-      })
+      const originalDoc = await payload.create(testDoc)
 
       // duplicate the doc to ensure that the beforeDuplicate hook is run
       const doc = await payload.duplicate({
@@ -107,6 +85,8 @@ describe('Field Paths', () => {
         namedTabWithinCollapsible: doc.namedTabWithinCollapsible,
         fieldWithinUnnamedTabWithinCollapsible: doc.fieldWithinUnnamedTabWithinCollapsible,
         textFieldInUnnamedGroup: doc.textFieldInUnnamedGroup,
+        textInCollapsibleInCollapsibleBlock: doc.textInCollapsibleInCollapsibleBlock,
+        blocks: doc.blocks,
         ...formatExpectedFieldPaths('topLevelNamedField', {
           path: ['topLevelNamedField'],
           schemaPath: ['topLevelNamedField'],
@@ -154,6 +134,15 @@ describe('Field Paths', () => {
         ...formatExpectedFieldPaths('textFieldInUnnamedGroup', {
           path: ['textFieldInUnnamedGroup'],
           schemaPath: ['_index-5', 'textFieldInUnnamedGroup'],
+        }),
+        ...formatExpectedFieldPaths('textInCollapsibleInCollapsibleBlock', {
+          path: ['blocks', '0', 'textInCollapsibleInCollapsibleBlock'],
+          schemaPath: [
+            'blocks',
+            'CollapsibleBlock',
+            '_index-0-0',
+            'textInCollapsibleInCollapsibleBlock',
+          ],
         }),
       }
 
@@ -213,6 +202,13 @@ describe('Field Paths', () => {
         '_index-4-0.namedTabWithinCollapsible.fieldWithinNamedTabWithinCollapsible',
         '_index-5',
         '_index-5.textFieldInUnnamedGroup',
+        'blocks',
+        'blocks.CollapsibleBlock',
+        'blocks.CollapsibleBlock._index-0',
+        'blocks.CollapsibleBlock._index-0-0',
+        'blocks.CollapsibleBlock._index-0-0.textInCollapsibleInCollapsibleBlock',
+        'blocks.CollapsibleBlock.id',
+        'blocks.CollapsibleBlock.blockName',
         'updatedAt',
         'createdAt',
       ])

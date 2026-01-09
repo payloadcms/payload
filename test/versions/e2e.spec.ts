@@ -48,6 +48,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
+import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
@@ -1797,13 +1798,14 @@ describe('Versions', () => {
     }
 
     async function navigateToDiffVersionView(versionID?: string) {
-      const versionURL = formatAdminURL({
+      await _navigateToDiffVersionView({
         adminRoute,
-        path: `/collections/${diffCollectionSlug}/${diffID}/versions/${versionID ?? versionDiffID}`,
         serverURL,
+        collectionSlug: diffCollectionSlug,
+        docID: diffID,
+        versionID: versionID ?? versionDiffID,
+        page,
       })
-      await page.goto(versionURL)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     test('should render diff', async () => {
