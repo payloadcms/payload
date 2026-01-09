@@ -17,7 +17,7 @@ services:
     image: mongodb/mongodb-community-server:8.2-ubi9
     container_name: mongodb-payload-test
     ports:
-      - '27017:27017'
+      - '27018:27017'
     volumes:
       - mongodb_data:/data/db
       - ./keyfile:/etc/mongodb/keyfile:ro

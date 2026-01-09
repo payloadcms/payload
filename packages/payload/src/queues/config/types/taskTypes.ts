@@ -1,4 +1,11 @@
-import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type {
+  Field,
+  Job,
+  MaybePromise,
+  PayloadRequest,
+  StringKeyOf,
+  TypedJobs,
+} from '../../../index.js'
 import type { ScheduleConfig } from './index.js'
 import type { SingleTaskStatus } from './workflowTypes.js'
 
@@ -10,7 +17,13 @@ export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
 > =
   | {
+      /**
+       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+       */
       errorMessage?: string
+      /**
+       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+       */
       state: 'failed'
     }
   | {
@@ -53,7 +66,7 @@ export type TaskHandler<
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = (
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
-) => Promise<TaskHandlerResult<TTaskSlugOrInputOutput>> | TaskHandlerResult<TTaskSlugOrInputOutput>
+) => MaybePromise<TaskHandlerResult<TTaskSlugOrInputOutput>>
 
 /**
  * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
@@ -93,8 +106,6 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
-type MaybePromise<T> = Promise<T> | T
-
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,
   taskArgs: {
@@ -116,7 +127,13 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       tasks: RunTaskFunctions
     }) => MaybePromise<
       | {
+          /**
+           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+           */
           errorMessage?: string
+          /**
+           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+           */
           state: 'failed'
         }
       | {
@@ -139,8 +156,8 @@ export type TaskCallbackArgs = {
 
 export type ShouldRestoreFn = (
   args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
-) => boolean | Promise<boolean>
-export type TaskCallbackFn = (args: TaskCallbackArgs) => Promise<void> | void
+) => MaybePromise<boolean>
+export type TaskCallbackFn = (args: TaskCallbackArgs) => MaybePromise<void>
 
 export type RetryConfig = {
   /**

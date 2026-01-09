@@ -3,12 +3,14 @@ import type { CollectionSlug, Payload } from 'payload'
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
   mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
@@ -84,6 +86,22 @@ describe('@payloadcms/storage-s3', () => {
       prefix,
     })
     expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+  })
+
+  it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
+    // This collection uses a s3Storage plugin with enabled: false but alwaysInsertFields: true
+    // The upload will use local storage, but the prefix field should still exist
+    const upload = await payload.create({
+      collection: mediaWithAlwaysInsertFieldsSlug,
+      data: {
+        prefix: 'test',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
+
+    expect(upload.id).toBeTruthy()
+    // With alwaysInsertFields: true and enabled: false, the prefix field should still exist
+    expect(upload.prefix).toBe('test')
   })
 
   it('can download with signed downloads', async () => {
@@ -180,6 +198,10 @@ describe('@payloadcms/storage-s3', () => {
       })
       await payload.delete({
         collection: mediaSlug,
+        where: {},
+      })
+      await payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
         where: {},
       })
     })

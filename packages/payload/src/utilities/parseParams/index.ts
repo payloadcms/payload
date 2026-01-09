@@ -6,6 +6,7 @@ import { parseBooleanString } from '../parseBooleanString.js'
 import { sanitizeJoinParams } from '../sanitizeJoinParams.js'
 import { sanitizePopulateParam } from '../sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../sanitizeSelectParam.js'
+import { sanitizeSortParams } from '../sanitizeSortParams.js'
 
 type RawParams = {
   [key: string]: unknown
@@ -25,7 +26,7 @@ type RawParams = {
   publishSpecificLocale?: string
   select?: unknown
   selectedLocales?: string
-  sort?: string
+  sort?: string | string[]
   trash?: string
   unpublishAllLocales?: string
   where?: Where
@@ -70,7 +71,7 @@ export const numberParams = ['depth', 'limit', 'page']
  * Examples:
  *   a. `draft` provided as a string of "true" is converted to a boolean
  *   b. `depth` provided as a string of "0" is converted to a number
- *   c. `sort` provided as a comma-separated string is converted to an array of strings
+ *   c. `sort` provided as a comma-separated string or array is converted to an array of strings
  */
 export const parseParams = (params: RawParams): ParsedParams => {
   const parsedParams = (params || {}) as ParsedParams
@@ -103,7 +104,7 @@ export const parseParams = (params: RawParams): ParsedParams => {
   }
 
   if ('sort' in params) {
-    parsedParams.sort = typeof params.sort === 'string' ? params.sort.split(',') : undefined
+    parsedParams.sort = sanitizeSortParams(params.sort)
   }
 
   if ('data' in params && typeof params.data === 'string' && params.data.length > 0) {

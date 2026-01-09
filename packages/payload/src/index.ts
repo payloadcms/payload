@@ -45,6 +45,7 @@ import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
   ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
   JsonObject,
   SelectType,
   TransformCollectionWithSelect,
@@ -457,10 +458,22 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: FindOptions<TSlug, TSelect>,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
-    return findLocal<TSlug, TSelect>(this, options)
+  find = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDraft extends boolean = false,
+  >(
+    options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  ): Promise<
+    PaginatedDocs<
+      TDraft extends true
+        ? GeneratedTypes extends { strictDraftTypes: true }
+          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+          : TransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>
+    >
+  > => {
+    return findLocal<TSlug, TSelect, TDraft>(this, options)
   }
 
   /**
@@ -1706,6 +1719,7 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { JobCancelledError } from './queues/errors/index.js'
 
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'

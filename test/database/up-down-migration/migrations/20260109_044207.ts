@@ -1,6 +1,4 @@
-import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-postgres'
-
-import { sql } from '@payloadcms/db-postgres'
+import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -23,6 +21,12 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"hash" varchar,
   	"login_attempts" numeric DEFAULT 0,
   	"lock_until" timestamp(3) with time zone
+  );
+  
+  CREATE TABLE "payload_kv" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"key" varchar NOT NULL,
+  	"data" jsonb NOT NULL
   );
   
   CREATE TABLE "payload_locked_documents" (
@@ -74,6 +78,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "users_updated_at_idx" ON "users" USING btree ("updated_at");
   CREATE INDEX "users_created_at_idx" ON "users" USING btree ("created_at");
   CREATE UNIQUE INDEX "users_email_idx" ON "users" USING btree ("email");
+  CREATE UNIQUE INDEX "payload_kv_key_idx" ON "payload_kv" USING btree ("key");
   CREATE INDEX "payload_locked_documents_global_slug_idx" ON "payload_locked_documents" USING btree ("global_slug");
   CREATE INDEX "payload_locked_documents_updated_at_idx" ON "payload_locked_documents" USING btree ("updated_at");
   CREATE INDEX "payload_locked_documents_created_at_idx" ON "payload_locked_documents" USING btree ("created_at");
@@ -96,6 +101,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   await db.execute(sql`
    DROP TABLE "users_sessions" CASCADE;
   DROP TABLE "users" CASCADE;
+  DROP TABLE "payload_kv" CASCADE;
   DROP TABLE "payload_locked_documents" CASCADE;
   DROP TABLE "payload_locked_documents_rels" CASCADE;
   DROP TABLE "payload_preferences" CASCADE;

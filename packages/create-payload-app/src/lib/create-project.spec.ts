@@ -1,10 +1,9 @@
-import { jest } from '@jest/globals'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
-
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
 import { createProject, updatePackageJSONDependencies } from './create-project.js'
@@ -15,7 +14,7 @@ describe('createProject', () => {
 
   beforeAll(() => {
     // eslint-disable-next-line no-console
-    console.log = jest.fn()
+    console.log = vitest.fn()
   })
 
   beforeEach(() => {
@@ -110,7 +109,7 @@ describe('createProject', () => {
 
       // Check package name and description
       expect(packageJson.name).toStrictEqual(projectName)
-    })
+    }, 90_000)
 
     describe('creates project from template', () => {
       const templates = getValidTemplates()
