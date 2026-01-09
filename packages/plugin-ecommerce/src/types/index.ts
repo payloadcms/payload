@@ -500,6 +500,33 @@ export type CustomersConfig = {
   slug: string
 }
 
+/**
+ * Arguments for the cart item matcher function.
+ */
+export type CartItemMatcherArgs = {
+  /** The existing cart item to compare against */
+  existingItem: {
+    [key: string]: unknown
+    id?: DefaultDocumentIDType
+    product: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+    quantity: number
+    variant?: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+  }
+  /** The new item being added */
+  newItem: {
+    [key: string]: unknown
+    product: DefaultDocumentIDType
+    quantity?: number
+    variant?: DefaultDocumentIDType
+  }
+}
+
+/**
+ * Function to determine if two cart items should be considered the same.
+ * When items match, their quantities are combined instead of creating separate entries.
+ */
+export type CartItemMatcher = (args: CartItemMatcherArgs) => boolean
+
 export type CartsConfig = {
   /**
    * Allow guest (unauthenticated) users to create carts.
@@ -507,6 +534,26 @@ export type CartsConfig = {
    * Defaults to true.
    */
   allowGuestCarts?: boolean
+  /**
+   * Custom function to determine if two cart items should be considered the same.
+   * When items match, their quantities are combined instead of creating separate entries.
+   *
+   * Use this to add custom uniqueness criteria beyond product and variant IDs.
+   *
+   * @default defaultCartItemMatcher (matches by product and variant ID only)
+   *
+   * @example
+   * ```ts
+   * cartItemMatcher: ({ existingItem, newItem }) => {
+   *   // Match by product, variant, AND custom delivery option
+   *   const productMatch = existingItem.product === newItem.product
+   *   const variantMatch = existingItem.variant === newItem.variant
+   *   const deliveryMatch = existingItem.deliveryOption === newItem.deliveryOption
+   *   return productMatch && variantMatch && deliveryMatch
+   * }
+   * ```
+   */
+  cartItemMatcher?: CartItemMatcher
   cartsCollectionOverride?: CollectionOverride
 }
 

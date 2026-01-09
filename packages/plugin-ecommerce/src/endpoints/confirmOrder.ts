@@ -150,6 +150,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
 
     try {
       const paymentResponse = await paymentMethod.confirmOrder({
+        cartsSlug,
         customersSlug,
         data: {
           ...data,
