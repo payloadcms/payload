@@ -3867,7 +3867,9 @@ describe('database', () => {
         },
       })
     } catch (e) {
-      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
     }
   })
 
@@ -3897,7 +3899,9 @@ describe('database', () => {
         },
       })
     } catch (e) {
-      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
     }
   })
 
