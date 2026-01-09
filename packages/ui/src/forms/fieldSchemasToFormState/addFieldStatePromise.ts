@@ -973,6 +973,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       renderAllFields,
       renderFieldFn,
       req,
+      select,
+      selectMode,
       skipConditionChecks,
       skipValidation,
       state,
