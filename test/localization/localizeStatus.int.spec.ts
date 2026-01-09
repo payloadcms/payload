@@ -5,7 +5,7 @@ import { Types } from 'mongoose'
 import path from 'path'
 import { localizeStatus } from 'payload/migrations'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
