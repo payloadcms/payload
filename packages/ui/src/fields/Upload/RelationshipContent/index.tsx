@@ -68,7 +68,7 @@ export function RelationshipContent(props: Props) {
       : undefined
 
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
-    id: src ? id : undefined,
+    id: id ?? undefined,
     collectionSlug,
   })
 
