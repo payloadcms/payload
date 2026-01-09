@@ -112,9 +112,19 @@ export function formsManagementReducer(state: State, action: Action): State {
     }
     case 'UPDATE_ERROR_COUNT': {
       const forms = [...state.forms]
-      const fileErrorCount =
-        (forms[action.index].missingFile ? 1 : 0) + (forms[action.index].exceedsLimit ? 1 : 0)
-      forms[action.index].errorCount = action.count + fileErrorCount
+      const form = forms[action.index]
+
+      // Clear missingFile flag if the form now has a file
+      const hasFile = form.formState?.file?.value
+      const missingFile = hasFile ? false : form.missingFile
+
+      const fileErrorCount = (missingFile ? 1 : 0) + (form.exceedsLimit ? 1 : 0)
+
+      forms[action.index] = {
+        ...form,
+        errorCount: action.count + fileErrorCount,
+        missingFile,
+      }
 
       return {
         ...state,
