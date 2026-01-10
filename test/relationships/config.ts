@@ -509,6 +509,13 @@ export default buildConfigWithDefaults({
                   relationTo: 'directors',
                   name: 'director',
                 },
+                {
+                  type: 'relationship',
+                  hasMany: true,
+                  name: 'directors',
+                  relationTo: 'directors',
+                  localized: true,
+                },
               ],
             },
           ],
