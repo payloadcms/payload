@@ -24,7 +24,7 @@ export const NavToggler: React.FC<{
   const { navOpen, setNavOpen } = useNav()
 
   const {
-    breakpoints: { l: largeBreak },
+    breakpoints: { m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
   return (
@@ -39,7 +39,7 @@ export const NavToggler: React.FC<{
 
         // only when the user explicitly toggles the nav on desktop do we want to set the preference
         // this is because the js may open or close the nav based on the window size, routing, etc
-        if (!largeBreak) {
+        if (!midBreak && !smallBreak) {
           await setPreference(
             'nav',
             {
