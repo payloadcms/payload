@@ -442,6 +442,66 @@ describe('sanitizeFields', () => {
       }).rejects.toThrow(InvalidFieldRelationship)
     })
 
+    it('should throw on empty relationTo array', async () => {
+      const validRelationships = ['some-collection']
+      const fields: Field[] = [
+        {
+          name: 'My Relationship',
+          type: 'relationship',
+          label: 'my-relationship',
+          relationTo: [],
+        },
+      ]
+
+      await expect(async () => {
+        await sanitizeFields({ config, collectionConfig, fields, validRelationships })
+      }).rejects.toThrow('has an empty relationTo array')
+    })
+
+    it('should throw on empty relationTo array for upload field', async () => {
+      const validRelationships = ['some-collection']
+      const fields: Field[] = [
+        {
+          name: 'My Upload',
+          type: 'upload',
+          label: 'my-upload',
+          relationTo: [],
+        },
+      ]
+
+      await expect(async () => {
+        await sanitizeFields({ config, collectionConfig, fields, validRelationships })
+      }).rejects.toThrow('has an empty relationTo array')
+    })
+
+    it('should throw on empty relationTo array inside blocks', async () => {
+      const validRelationships = ['some-collection']
+      const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
+        fields: [
+          {
+            name: 'My Relationship',
+            type: 'relationship',
+            label: 'my-relationship',
+            relationTo: [],
+          },
+        ],
+      }
+
+      const fields: Field[] = [
+        {
+          name: 'layout',
+          type: 'blocks',
+          blocks: [relationshipBlock],
+          label: 'Layout Blocks',
+        },
+      ]
+
+      await expect(async () => {
+        await sanitizeFields({ config, collectionConfig, fields, validRelationships })
+      }).rejects.toThrow('has an empty relationTo array')
+    })
+
     it('should defaultValue of checkbox to false if required and undefined', async () => {
       const fields: Field[] = [
         {

@@ -175,6 +175,13 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
+      // Validate that relationTo is not empty
+      if (Array.isArray(field.relationTo) && field.relationTo.length === 0) {
+        throw new Error(
+          `Field "${field.name}" of type "${field.type}" has an empty relationTo array. At least one collection must be specified.`,
+        )
+      }
+
       if (validRelationships) {
         const relationships = Array.isArray(field.relationTo)
           ? field.relationTo
