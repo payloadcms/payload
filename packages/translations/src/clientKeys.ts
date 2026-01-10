@@ -65,6 +65,14 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:addWidget',
   'dashboard:deleteWidget',
   'dashboard:searchWidgets',
+  'dashboard:editDashboard',
+  'dashboard:editingDashboard',
+  'dashboard:resetLayout',
+  'dashboard:addButton',
+  'dashboard:discardConfirmLabel',
+  'dashboard:discardMessage',
+  'dashboard:discardTitle',
+  'dashboard:noItems',
 
   'error:autosaving',
   'error:correctInvalidFields',
@@ -96,6 +104,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unPublishingDocument',
   'error:problemUploadingFile',
   'error:restoringTitle',
+  'error:failedToSaveLayout',
+  'error:failedToResetLayout',
 
   'fields:addLabel',
   'fields:addLink',
