@@ -273,6 +273,8 @@ export const AllFieldsLocalized: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      localizeStatus: true,
+    },
   },
 }

@@ -117,6 +117,7 @@ export const getTableColumnFromPath = ({
     }
   }
 
+  let localizedPathQuery = false
   if (field) {
     const pathSegments = [...incomingSegments]
 
@@ -131,6 +132,7 @@ export const getTableColumnFromPath = ({
 
       if (matchedLocale) {
         locale = matchedLocale
+        localizedPathQuery = true
         pathSegments.splice(1, 1)
       }
     }
@@ -967,7 +969,13 @@ export const getTableColumnFromPath = ({
       const parentTable = aliasTable || adapter.tables[tableName]
       newTableName = `${tableName}${adapter.localesSuffix}`
 
-      newTable = adapter.tables[newTableName]
+      // use an alias because the same query may contain constraints with different locale value
+      if (localizedPathQuery) {
+        const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
+        newTable = newAliasTable
+      } else {
+        newTable = adapter.tables[newTableName]
+      }
 
       let condition = eq(parentTable.id, newTable._parentID)
 
