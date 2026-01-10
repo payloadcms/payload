@@ -3,24 +3,8 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
-import { formatAdminURL } from '../utilities/formatAdminURL.js'
+import { generateFileURL } from './generateFileURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
-
-type GenerateURLArgs = {
-  collectionSlug: string
-  config: Config
-  filename?: string
-}
-const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
-  if (filename) {
-    return formatAdminURL({
-      apiRoute: config.routes?.api || '',
-      path: `/${collectionSlug}/file/${encodeURIComponent(filename)}`,
-      serverURL: config.serverURL,
-    })
-  }
-  return undefined
-}
 
 type Options = {
   collection: CollectionConfig
@@ -62,10 +46,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             'sizes' in originalDoc &&
             originalDoc.sizes?.[adminThumbnail]?.filename
           ) {
-            return generateURL({
+            return generateFileURL({
+              apiRoute: config.routes?.api,
               collectionSlug: collection.slug,
-              config,
               filename: originalDoc.sizes?.[adminThumbnail].filename as string,
+              serverURL: config.serverURL,
             })
           }
 
@@ -146,10 +131,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               return value
             }
 
-            return generateURL({
+            return generateFileURL({
+              apiRoute: config.routes?.api,
               collectionSlug: collection.slug,
-              config,
               filename: data?.filename,
+              serverURL: config.serverURL,
             })
           },
         ],
@@ -228,9 +214,10 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
-                      return formatAdminURL({
-                        apiRoute: config.routes?.api || '',
-                        path: `/${collection.slug}/file/${encodeURIComponent(sizeFilename)}`,
+                      return generateFileURL({
+                        apiRoute: config.routes?.api,
+                        collectionSlug: collection.slug,
+                        filename: sizeFilename,
                         serverURL: config.serverURL,
                       })
                     }
