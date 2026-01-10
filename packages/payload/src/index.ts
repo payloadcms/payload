@@ -236,16 +236,48 @@ export interface BaseGeneratedTypes {
 export interface GeneratedTypes extends BaseGeneratedTypes {}
 
 /**
- * Generic type resolver for generated types with untyped fallbacks.
+ * Returns `TType[TDesiredKey]` if it exists, otherwise `TType[TFallbackKey]`.
+ *
+ * WHY WE USE `infer`:
+ *
+ * We want TypedCollection<T> to return T['collections'] if the user defined it,
+ * or fall back to T['collectionsUntyped'] for the base case.
+ *
+ * Attempt 1 - checking if key exists (BROKEN):
+ * ```ts
+ * type TypedCollection<T> = 'collections' extends keyof T ? T['collections'] : T['collectionsUntyped']
+ * ```
+ * This works fine when T is a specific type:
+ *   TypedCollection<GeneratedTypes>  // Works: TS knows GeneratedTypes has 'collections'
+ *
+ * But breaks when T is a type parameter that hasn't been filled in yet:
+ * ```ts
+ * function getCollection<T extends BaseGeneratedTypes, S extends keyof TypedCollection<T>>() {
+ *   type Result = TypedCollection<T>[S]  // Error: S cannot index TypedCollection<T>
+ * }
+ * ```
+ * Even though T extends BaseGeneratedTypes, T could be passed as GeneratedTypes (has 'collections')
+ * or BaseGeneratedTypes (if no payload-types.ts that module augments GeneratedTypes. BaseGeneratedTypes doesn't have 'collections'). TypeScript can't pick a branch because
+ * it depends on what T will be when the function is called. So the type is unresolved and unusable.
+ *
+ * Attempt 2 - using `infer` to extract the value (WORKS):
+ * ```ts
+ * type TypedCollection<T> = T extends { collections: infer V } ? V : T['collectionsUntyped']
+ * ```
+ * The difference: `'collections' extends keyof T` asks "list all keys of T and check if 'collections' is one".
+ * But `T extends { collections: infer V }` asks "does T have a collections property?".
+ * TypeScript can answer the second question even when T is unknown - it just checks if the constraint
+ * (BaseGeneratedTypes) is compatible with having a 'collections' property, which it is (subtypes can add keys).
+ * This produces a usable type even when T hasn't been filled in yet.
+ *
+ * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts
  */
-type ResolveFallback<
-  TType,
-  TDesiredKey extends string,
-  TFallbackKey extends keyof TType,
-> = TDesiredKey extends keyof TType ? TType[TDesiredKey] : TType[TFallbackKey]
+type ResolveFallback<TType, TDesiredKey extends string, TFallbackKey extends keyof TType> =
+  TType extends Record<TDesiredKey, infer TValue> ? TValue : TType[TFallbackKey]
 
 // Applying helper types to GeneratedTypes
-export type TypedCollection = ResolveFallback<GeneratedTypes, 'collections', 'collectionsUntyped'>
+export type TypedCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'collections', 'collectionsUntyped'>
 
 export type TypedBlock = ResolveFallback<GeneratedTypes, 'blocks', 'blocksUntyped'>
 
@@ -259,11 +291,8 @@ export type TypedUploadCollection = NonNever<{
     : never
 }>
 
-export type TypedCollectionSelect = ResolveFallback<
-  GeneratedTypes,
-  'collectionsSelect',
-  'collectionsSelectUntyped'
->
+export type TypedCollectionSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'collectionsSelect', 'collectionsSelectUntyped'>
 
 export type TypedCollectionJoins = ResolveFallback<
   GeneratedTypes,
@@ -283,7 +312,8 @@ export type TypedGlobalSelect = ResolveFallback<
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug = StringKeyOf<TypedCollection>
+export type CollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  StringKeyOf<TypedCollection<TGeneratedTypes>>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 

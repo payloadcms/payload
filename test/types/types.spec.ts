@@ -1,10 +1,14 @@
 import type {
+  BaseGeneratedTypes,
   BulkOperationResult,
+  CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  GeneratedTypes,
   JoinQuery,
   PaginatedDocs,
   SelectType,
+  TypedCollectionSelect,
   TypeWithVersion,
   Where,
 } from 'payload'
@@ -163,6 +167,15 @@ describe('Types testing', () => {
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalField')
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalNumber')
     })
+  })
+
+  test('ResolveFallback allows generic indexing', () => {
+    // This type fails to compile if ResolveFallback uses `K extends keyof T` instead of `T extends Record<K, infer V>`
+    type Select<
+      T extends BaseGeneratedTypes,
+      S extends CollectionSlug<T>,
+    > = TypedCollectionSelect<T>[S]
+    expect<Select<GeneratedTypes, 'users'>>().type.not.toBeNever()
   })
 
   describe('fields', () => {
