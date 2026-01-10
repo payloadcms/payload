@@ -424,13 +424,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }),
           }
 
-          if (req.status === 413 || req.status === 400) {
-            // file too large
-            currentForms[i] = {
-              ...currentForms[i],
-              errorCount: currentForms[i].errorCount + 1,
-            }
+          // file too large
+          if (req.status === 413) {
+            currentForms[i].errorCount = currentForms[i].errorCount + 1
+            toast.error(nonFieldErrors[0]?.message)
+          }
 
+          // missing file
+          if (req.status === 400 && !currentForms[i].formState.file?.value) {
+            currentForms[i].errorCount = currentForms[i].errorCount + 1
             toast.error(nonFieldErrors[0]?.message)
           }
         } catch (_) {
