@@ -272,7 +272,6 @@ export interface GeneratedTypes extends BaseGeneratedTypes {}
 type ResolveFallback<TType, TDesiredKey extends string, TFallbackKey extends keyof TType> =
   TType extends Record<TDesiredKey, infer TValue> ? TValue : TType[TFallbackKey]
 
-// Applying helper types to GeneratedTypes
 export type TypedCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
   ResolveFallback<TGeneratedTypes, 'collections', 'collectionsUntyped'>
 
