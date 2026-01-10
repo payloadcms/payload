@@ -4,7 +4,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import path from 'path'
 import { type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
@@ -12,6 +12,7 @@ import type { BlockField, GroupField } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
+import { it } from '../helpers/vitest.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
@@ -41,7 +42,6 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
-
 let restClient: NextRESTClient
 let user: any
 let payload: Payload
@@ -2207,6 +2207,102 @@ describe('Fields', () => {
 
       expect(idFields).toHaveLength(1)
       expect(idFields[0].admin?.disableListFilter).toBe(true)
+    })
+
+    it('should query exists true', { db: 'mongo' }, async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withCollapsed.id)
+    })
+
+    it('should query exists false', { db: 'mongo' }, async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withoutCollapsed.id)
     })
   })
 

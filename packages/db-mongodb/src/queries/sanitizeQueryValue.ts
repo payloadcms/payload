@@ -198,7 +198,6 @@ export const sanitizeQueryValue = ({
 
     if (operator === 'exists') {
       formattedValue = val === 'true' ? true : val === 'false' ? false : Boolean(val)
-
       return buildExistsQuery(formattedValue, path)
     }
   }
@@ -416,12 +415,20 @@ export const sanitizeQueryValue = ({
     if (operator === 'exists') {
       formattedValue = formattedValue === 'true' || formattedValue === true
 
-      // _id can't be empty string, will error Cast to ObjectId failed for value ""
-      return buildExistsQuery(
-        formattedValue,
-        path,
-        !['checkbox', 'relationship', 'upload'].includes(field.type),
+      let treatEmptyString = !['array', 'blocks', 'checkbox', 'relationship', 'upload'].includes(
+        field.type,
       )
+
+      if (field.type === 'text' && field.hasMany) {
+        treatEmptyString = false
+      } else if (field.type === 'number' && field.hasMany) {
+        treatEmptyString = false
+      } else if (field.type === 'select' && field.hasMany) {
+        treatEmptyString = false
+      }
+
+      // _id can't be empty string, will error Cast to ObjectId failed for value ""
+      return buildExistsQuery(formattedValue, path, treatEmptyString)
     }
   }
 
