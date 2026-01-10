@@ -160,3 +160,13 @@ export function generateDatabaseAdapter(dbAdapter: keyof typeof allDatabaseAdapt
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
 }
+
+export type DatabaseAdapterType = keyof typeof allDatabaseAdapters
+
+export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
+  const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
+  if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
+    return dbAdapter
+  }
+  return 'mongodb'
+}
