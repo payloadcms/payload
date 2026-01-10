@@ -25,6 +25,7 @@ import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -149,6 +150,17 @@ export const findByIDOperation = async <
     // Find by ID
     // /////////////////////////////////////
 
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      replaceWithVersion &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       draftsEnabled: replaceWithVersion,
@@ -157,7 +169,7 @@ export const findByIDOperation = async <
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
-      select,
+      select: dbSelect,
       where: fullWhere,
     }
 
