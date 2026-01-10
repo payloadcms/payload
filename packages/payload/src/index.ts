@@ -264,11 +264,8 @@ export interface GeneratedTypes extends BaseGeneratedTypes {}
  * ```ts
  * type TypedCollection<T> = T extends { collections: infer V } ? V : T['collectionsUntyped']
  * ```
- * The difference: `'collections' extends keyof T` asks "list all keys of T and check if 'collections' is one".
- * But `T extends { collections: infer V }` asks "does T have a collections property?".
- * TypeScript can answer the second question even when T is unknown - it just checks if the constraint
- * (BaseGeneratedTypes) is compatible with having a 'collections' property, which it is (subtypes can add keys).
- * This produces a usable type even when T hasn't been filled in yet.
+ * Both patterns correctly pick the right branch when T is a concrete type.
+ * But when T is a type parameter, only the `infer` pattern produces a type you can index into.
  *
  * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts
  */
