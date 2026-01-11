@@ -1,17 +1,10 @@
-import type { SelectType } from 'payload'
+import type { BaseGeneratedTypes, GlobalSlug, SelectType, TypedLocale } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type {
-  GlobalSlug,
-  PayloadGeneratedTypes,
-  PopulateType,
-  SelectFromGlobalSlug,
-  TransformGlobalWithSelect,
-  TypedLocale,
-} from '../types.js'
+import type { PopulateType, SelectFromGlobalSlug, TransformGlobalWithSelect } from '../types.js'
 
 export type FindGlobalOptions<
-  T extends PayloadGeneratedTypes,
+  T extends BaseGeneratedTypes,
   TSlug extends GlobalSlug<T>,
   TSelect extends SelectType,
 > = {
@@ -46,7 +39,7 @@ export type FindGlobalOptions<
 }
 
 export async function findGlobal<
-  T extends PayloadGeneratedTypes,
+  T extends BaseGeneratedTypes,
   TSlug extends GlobalSlug<T>,
   TSelect extends SelectFromGlobalSlug<T, TSlug>,
 >(

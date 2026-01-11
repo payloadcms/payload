@@ -1,11 +1,13 @@
-import type { PayloadSDK } from '../index.js'
-import type { AuthCollectionSlug, DataFromCollectionSlug, PayloadGeneratedTypes } from '../types.js'
+import type { AuthCollectionSlug, BaseGeneratedTypes } from 'payload'
 
-export type RefreshOptions<T extends PayloadGeneratedTypes, TSlug extends AuthCollectionSlug<T>> = {
+import type { PayloadSDK } from '../index.js'
+import type { DataFromCollectionSlug } from '../types.js'
+
+export type RefreshOptions<T extends BaseGeneratedTypes, TSlug extends AuthCollectionSlug<T>> = {
   collection: TSlug
 }
 
-export type RefreshResult<T extends PayloadGeneratedTypes, TSlug extends AuthCollectionSlug<T>> = {
+export type RefreshResult<T extends BaseGeneratedTypes, TSlug extends AuthCollectionSlug<T>> = {
   exp: number
   refreshedToken: string
   setCookie?: boolean
@@ -15,7 +17,7 @@ export type RefreshResult<T extends PayloadGeneratedTypes, TSlug extends AuthCol
 }
 
 export async function refreshToken<
-  T extends PayloadGeneratedTypes,
+  T extends BaseGeneratedTypes,
   TSlug extends AuthCollectionSlug<T>,
 >(
   sdk: PayloadSDK<T>,

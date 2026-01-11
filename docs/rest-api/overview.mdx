@@ -820,13 +820,26 @@ Example:
 
 ```ts
 import { PayloadSDK } from '@payloadcms/sdk'
+
+const sdk = new PayloadSDK({
+  baseURL: 'https://example.com/api',
+})
+```
+
+For projects without a `payload-types.ts` file, or when working with multiple Payload configs, you can manually pass the types as a generic:
+
+```ts
+import { PayloadSDK } from '@payloadcms/sdk'
 import type { Config } from './payload-types'
 
-// Pass your config from generated types as generic
 const sdk = new PayloadSDK<Config>({
   baseURL: 'https://example.com/api',
 })
+```
 
+### Operations
+
+```ts
 // Find operation
 const posts = await sdk.find({
   collection: 'posts',
@@ -1024,8 +1037,6 @@ const sdk = new PayloadSDK<Config>({
 Example of a custom `fetch` implementation for testing the REST API without needing to spin up a next development server:
 
 ```ts
-import type { GeneratedTypes, SanitizedConfig } from 'payload'
-
 import config from '@payload-config'
 import {
   REST_DELETE,
@@ -1035,8 +1046,6 @@ import {
   REST_PUT,
 } from '@payloadcms/next/routes'
 import { PayloadSDK } from '@payloadcms/sdk'
-
-export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
 
 const api = {
   GET: REST_GET(config),
@@ -1048,7 +1057,7 @@ const api = {
 
 const awaitedConfig = await config
 
-export const sdk = new PayloadSDK<GeneratedTypes>({
+export const sdk = new PayloadSDK({
   baseURL: ``,
   fetch: (path: string, init: RequestInit) => {
     const [slugs, search] = path.slice(1).split('?')

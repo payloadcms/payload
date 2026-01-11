@@ -1,127 +1,57 @@
 import type {
+  BaseGeneratedTypes,
+  CollectionSlug,
+  GlobalSlug,
   JsonObject,
   SelectType,
   Sort,
-  StringKeyOf,
   TransformDataWithSelect,
-  TypeWithID,
+  TypedCollection,
+  TypedCollectionJoins,
+  TypedCollectionSelect,
+  TypedGlobal,
+  TypedGlobalSelect,
   Where,
 } from 'payload'
-import type { MarkOptional, NonNever } from 'ts-essentials'
+import type { MarkOptional } from 'ts-essentials'
 
-export interface PayloadGeneratedTypes {
-  auth: {
-    [slug: string]: {
-      forgotPassword: {
-        email: string
-      }
-      login: {
-        email: string
-        password: string
-      }
-      registerFirstUser: {
-        email: string
-        password: string
-      }
-      unlock: {
-        email: string
-      }
-    }
-  }
-
-  collections: {
-    [slug: string]: JsonObject & TypeWithID
-  }
-  collectionsJoins: {
-    [slug: string]: {
-      [schemaPath: string]: string
-    }
-  }
-
-  collectionsSelect: {
-    [slug: string]: any
-  }
-  db: {
-    defaultIDType: number | string
-  }
-  globals: {
-    [slug: string]: JsonObject
-  }
-
-  globalsSelect: {
-    [slug: string]: any
-  }
-
-  locale: null | string
-}
-
-export type TypedCollection<T extends PayloadGeneratedTypes> = T['collections']
-
-export type TypedGlobal<T extends PayloadGeneratedTypes> = T['globals']
-
-export type TypedCollectionSelect<T extends PayloadGeneratedTypes> = T['collectionsSelect']
-
-export type TypedCollectionJoins<T extends PayloadGeneratedTypes> = T['collectionsJoins']
-
-export type TypedGlobalSelect<T extends PayloadGeneratedTypes> = T['globalsSelect']
-
-export type TypedAuth<T extends PayloadGeneratedTypes> = T['auth']
-
-export type CollectionSlug<T extends PayloadGeneratedTypes> = StringKeyOf<TypedCollection<T>>
-
-export type GlobalSlug<T extends PayloadGeneratedTypes> = StringKeyOf<TypedGlobal<T>>
-
-export type AuthCollectionSlug<T extends PayloadGeneratedTypes> = StringKeyOf<TypedAuth<T>>
-
-export type TypedUploadCollection<T extends PayloadGeneratedTypes> = NonNever<{
-  [K in keyof TypedCollection<T>]:
-    | 'filename'
-    | 'filesize'
-    | 'mimeType'
-    | 'url' extends keyof TypedCollection<T>[K]
-    ? TypedCollection<T>[K]
-    : never
-}>
-
-export type UploadCollectionSlug<T extends PayloadGeneratedTypes> = StringKeyOf<
-  TypedUploadCollection<T>
->
-
+// TODO: Investigate reusing the types from payload
 export type DataFromCollectionSlug<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
-> = TypedCollection<T>[TSlug]
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
+> = TypedCollection<TGeneratedTypes>[TSlug]
 
+// TODO: Investigate reusing the types from payload
 export type DataFromGlobalSlug<
-  T extends PayloadGeneratedTypes,
-  TSlug extends GlobalSlug<T>,
-> = TypedGlobal<T>[TSlug]
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends GlobalSlug<TGeneratedTypes>,
+> = TypedGlobal<TGeneratedTypes>[TSlug]
 
 export type SelectFromCollectionSlug<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
-> = TypedCollectionSelect<T>[TSlug]
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
+> = TypedCollectionSelect<TGeneratedTypes>[TSlug]
 
 export type SelectFromGlobalSlug<
-  T extends PayloadGeneratedTypes,
-  TSlug extends GlobalSlug<T>,
-> = TypedGlobalSelect<T>[TSlug]
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends GlobalSlug<TGeneratedTypes>,
+> = TypedGlobalSelect<TGeneratedTypes>[TSlug]
 
 export type TransformCollectionWithSelect<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
   TSelect extends SelectType,
 > = TSelect extends SelectType
-  ? TransformDataWithSelect<DataFromCollectionSlug<T, TSlug>, TSelect>
-  : DataFromCollectionSlug<T, TSlug>
+  ? TransformDataWithSelect<DataFromCollectionSlug<TGeneratedTypes, TSlug>, TSelect>
+  : DataFromCollectionSlug<TGeneratedTypes, TSlug>
 
 export type TransformGlobalWithSelect<
-  T extends PayloadGeneratedTypes,
-  TSlug extends GlobalSlug<T>,
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends GlobalSlug<TGeneratedTypes>,
   TSelect extends SelectType,
 > = TSelect extends SelectType
-  ? TransformDataWithSelect<DataFromGlobalSlug<T, TSlug>, TSelect>
-  : DataFromGlobalSlug<T, TSlug>
+  ? TransformDataWithSelect<DataFromGlobalSlug<TGeneratedTypes, TSlug>, TSelect>
+  : DataFromGlobalSlug<TGeneratedTypes, TSlug>
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
@@ -129,18 +59,19 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
 >
 
 export type RequiredDataFromCollectionSlug<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
-> = RequiredDataFromCollection<DataFromCollectionSlug<T, TSlug>>
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
+> = RequiredDataFromCollection<DataFromCollectionSlug<TGeneratedTypes, TSlug>>
 
-export type TypedLocale<T extends PayloadGeneratedTypes> = NonNullable<T['locale']>
-
-export type JoinQuery<T extends PayloadGeneratedTypes, TSlug extends CollectionSlug<T>> =
-  TypedCollectionJoins<T>[TSlug] extends Record<string, string>
+export type JoinQuery<
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
+> =
+  TypedCollectionJoins<TGeneratedTypes>[TSlug] extends Record<string, string>
     ?
         | false
         | Partial<{
-            [K in keyof TypedCollectionJoins<T>[TSlug]]:
+            [K in keyof TypedCollectionJoins<TGeneratedTypes>[TSlug]]:
               | {
                   count?: boolean
                   limit?: number
@@ -152,21 +83,23 @@ export type JoinQuery<T extends PayloadGeneratedTypes, TSlug extends CollectionS
           }>
     : never
 
-export type PopulateType<T extends PayloadGeneratedTypes> = Partial<TypedCollectionSelect<T>>
+export type PopulateType<TGeneratedTypes extends BaseGeneratedTypes> = Partial<
+  TypedCollectionSelect<TGeneratedTypes>
+>
 
 export type IDType<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
-> = DataFromCollectionSlug<T, TSlug>['id']
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
+> = DataFromCollectionSlug<TGeneratedTypes, TSlug>['id']
 
 export type BulkOperationResult<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
+  TGeneratedTypes extends BaseGeneratedTypes,
+  TSlug extends CollectionSlug<TGeneratedTypes>,
   TSelect extends SelectType,
 > = {
-  docs: TransformCollectionWithSelect<T, TSlug, TSelect>[]
+  docs: TransformCollectionWithSelect<TGeneratedTypes, TSlug, TSelect>[]
   errors: {
-    id: DataFromCollectionSlug<T, TSlug>['id']
+    id: DataFromCollectionSlug<TGeneratedTypes, TSlug>['id']
     message: string
   }[]
 }

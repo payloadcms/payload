@@ -28,7 +28,7 @@ import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
-  Config,
+  Config as LocalConfig,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -938,11 +938,27 @@ describe('Types testing', () => {
 
   describe('sdk', () => {
     test('ensure generated types can be manually assigned to PayloadSDK generic', () => {
-      expect(new PayloadSDK<Config>({ baseURL: '' })).type.not.toRaiseError()
+      expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
+    })
+
+    test('ensure SDK without generic automatically uses GeneratedTypes', () => {
+      const _sdk = new PayloadSDK({ baseURL: '' })
+      // ensure collection property of sdk.create has posts in the union type
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
     })
 
     test('ensure SDK with explicit generic uses has correct collection types', () => {
-      const _sdk = new PayloadSDK<Config>({ baseURL: '' })
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
