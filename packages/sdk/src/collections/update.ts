@@ -1,6 +1,6 @@
 import type {
-  BaseGeneratedTypes,
   CollectionSlug,
+  GeneratedTypesShape,
   SelectType,
   TypedLocale,
   UploadCollectionSlug,
@@ -20,7 +20,7 @@ import type {
 import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
 
 export type UpdateBaseOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 > = {
@@ -70,7 +70,7 @@ export type UpdateBaseOptions<
 }
 
 export type UpdateByIDOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
@@ -80,7 +80,7 @@ export type UpdateByIDOptions<
 } & UpdateBaseOptions<T, TSlug, TSelect>
 
 export type UpdateManyOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
@@ -90,13 +90,13 @@ export type UpdateManyOptions<
 } & UpdateBaseOptions<T, TSlug, TSelect>
 
 export type UpdateOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = UpdateByIDOptions<T, TSlug, TSelect> | UpdateManyOptions<T, TSlug, TSelect>
 
 export async function update<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(

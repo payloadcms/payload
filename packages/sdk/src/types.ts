@@ -1,6 +1,6 @@
 import type {
-  BaseGeneratedTypes,
   CollectionSlug,
+  GeneratedTypesShape,
   GlobalSlug,
   JsonObject,
   SelectType,
@@ -17,28 +17,28 @@ import type { MarkOptional } from 'ts-essentials'
 
 // TODO: Investigate reusing the types from payload
 export type DataFromCollectionSlug<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
 > = TypedCollection<TGeneratedTypes>[TSlug]
 
 // TODO: Investigate reusing the types from payload
 export type DataFromGlobalSlug<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends GlobalSlug<TGeneratedTypes>,
 > = TypedGlobal<TGeneratedTypes>[TSlug]
 
 export type SelectFromCollectionSlug<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
 > = TypedCollectionSelect<TGeneratedTypes>[TSlug]
 
 export type SelectFromGlobalSlug<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends GlobalSlug<TGeneratedTypes>,
 > = TypedGlobalSelect<TGeneratedTypes>[TSlug]
 
 export type TransformCollectionWithSelect<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
   TSelect extends SelectType,
 > = TSelect extends SelectType
@@ -46,7 +46,7 @@ export type TransformCollectionWithSelect<
   : DataFromCollectionSlug<TGeneratedTypes, TSlug>
 
 export type TransformGlobalWithSelect<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends GlobalSlug<TGeneratedTypes>,
   TSelect extends SelectType,
 > = TSelect extends SelectType
@@ -59,12 +59,12 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
 >
 
 export type RequiredDataFromCollectionSlug<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
 > = RequiredDataFromCollection<DataFromCollectionSlug<TGeneratedTypes, TSlug>>
 
 export type JoinQuery<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
 > =
   TypedCollectionJoins<TGeneratedTypes>[TSlug] extends Record<string, string>
@@ -83,17 +83,17 @@ export type JoinQuery<
           }>
     : never
 
-export type PopulateType<TGeneratedTypes extends BaseGeneratedTypes> = Partial<
+export type PopulateType<TGeneratedTypes extends GeneratedTypesShape> = Partial<
   TypedCollectionSelect<TGeneratedTypes>
 >
 
 export type IDType<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
 > = DataFromCollectionSlug<TGeneratedTypes, TSlug>['id']
 
 export type BulkOperationResult<
-  TGeneratedTypes extends BaseGeneratedTypes,
+  TGeneratedTypes extends GeneratedTypesShape,
   TSlug extends CollectionSlug<TGeneratedTypes>,
   TSelect extends SelectType,
 > = {

@@ -1,6 +1,6 @@
 import type {
-  BaseGeneratedTypes,
   CollectionSlug,
+  GeneratedTypesShape,
   PaginatedDocs,
   SelectType,
   Sort,
@@ -12,7 +12,7 @@ import type { PayloadSDK } from '../index.js'
 import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'
 
 export type FindOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 > = {
@@ -87,7 +87,7 @@ export type FindOptions<
 }
 
 export async function find<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 >(

@@ -1,10 +1,10 @@
-import type { BaseGeneratedTypes, CollectionSlug, TypedLocale } from 'payload'
+import type { CollectionSlug, GeneratedTypesShape, TypedLocale } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromCollectionSlug, PopulateType } from '../types.js'
 
 export type RestoreVersionByIDOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends CollectionSlug<T>,
 > = {
   /**
@@ -37,7 +37,10 @@ export type RestoreVersionByIDOptions<
   populate?: PopulateType<T>
 }
 
-export async function restoreVersion<T extends BaseGeneratedTypes, TSlug extends CollectionSlug<T>>(
+export async function restoreVersion<
+  T extends GeneratedTypesShape,
+  TSlug extends CollectionSlug<T>,
+>(
   sdk: PayloadSDK<T>,
   options: RestoreVersionByIDOptions<T, TSlug>,
   init?: RequestInit,

@@ -1,10 +1,10 @@
 import type {
   ApplyDisableErrors,
   AuthCollectionSlug,
-  BaseGeneratedTypes,
   CollectionSlug,
   ErrorResult,
   GeneratedTypes,
+  GeneratedTypesShape,
   GlobalSlug,
   PaginatedDocs,
   SelectType,
@@ -132,7 +132,7 @@ type Args = {
 /**
  * @experimental
  */
-export class PayloadSDK<T extends BaseGeneratedTypes = GeneratedTypes> {
+export class PayloadSDK<T extends GeneratedTypesShape = GeneratedTypes> {
   baseInit: RequestInit
 
   baseURL: string

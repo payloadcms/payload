@@ -1,14 +1,14 @@
-import type { AuthCollectionSlug, BaseGeneratedTypes, TypedAuthOperations } from 'payload'
+import type { AuthCollectionSlug, GeneratedTypesShape, TypedAuthOperations } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromCollectionSlug } from '../types.js'
 
-export type LoginOptions<T extends BaseGeneratedTypes, TSlug extends AuthCollectionSlug<T>> = {
+export type LoginOptions<T extends GeneratedTypesShape, TSlug extends AuthCollectionSlug<T>> = {
   collection: TSlug
   data: TypedAuthOperations<T>[TSlug]['login']
 }
 
-export type LoginResult<T extends BaseGeneratedTypes, TSlug extends AuthCollectionSlug<T>> = {
+export type LoginResult<T extends GeneratedTypesShape, TSlug extends AuthCollectionSlug<T>> = {
   exp?: number
   message: string
   token?: string
@@ -16,7 +16,7 @@ export type LoginResult<T extends BaseGeneratedTypes, TSlug extends AuthCollecti
   user: DataFromCollectionSlug<T, TSlug>
 }
 
-export async function login<T extends BaseGeneratedTypes, TSlug extends AuthCollectionSlug<T>>(
+export async function login<T extends GeneratedTypesShape, TSlug extends AuthCollectionSlug<T>>(
   sdk: PayloadSDK<T>,
   options: LoginOptions<T, TSlug>,
   init?: RequestInit,

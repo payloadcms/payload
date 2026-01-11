@@ -1,9 +1,9 @@
-import type { AuthCollectionSlug, BaseGeneratedTypes, TypedAuthOperations } from 'payload'
+import type { AuthCollectionSlug, GeneratedTypesShape, TypedAuthOperations } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 
 export type ForgotPasswordOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends AuthCollectionSlug<T>,
 > = {
   collection: TSlug
@@ -14,7 +14,7 @@ export type ForgotPasswordOptions<
 }
 
 export async function forgotPassword<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends AuthCollectionSlug<T>,
 >(
   sdk: PayloadSDK<T>,

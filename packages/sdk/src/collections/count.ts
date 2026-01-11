@@ -1,8 +1,8 @@
-import type { BaseGeneratedTypes, CollectionSlug, TypedLocale, Where } from 'payload'
+import type { CollectionSlug, GeneratedTypesShape, TypedLocale, Where } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 
-export type CountOptions<T extends BaseGeneratedTypes, TSlug extends CollectionSlug<T>> = {
+export type CountOptions<T extends GeneratedTypesShape, TSlug extends CollectionSlug<T>> = {
   /**
    * the Collection slug to operate against.
    */
@@ -17,7 +17,7 @@ export type CountOptions<T extends BaseGeneratedTypes, TSlug extends CollectionS
   where?: Where
 }
 
-export async function count<T extends BaseGeneratedTypes, TSlug extends CollectionSlug<T>>(
+export async function count<T extends GeneratedTypesShape, TSlug extends CollectionSlug<T>>(
   sdk: PayloadSDK<T>,
   options: CountOptions<T, TSlug>,
   init?: RequestInit,

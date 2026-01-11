@@ -1,4 +1,4 @@
-import type { BaseGeneratedTypes, GlobalSlug, SelectType, TypedLocale } from 'payload'
+import type { GeneratedTypesShape, GlobalSlug, SelectType, TypedLocale } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { PayloadSDK } from '../index.js'
@@ -10,7 +10,7 @@ import type {
 } from '../types.js'
 
 export type UpdateGlobalOptions<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends GlobalSlug<T>,
   TSelect extends SelectType,
 > = {
@@ -53,7 +53,7 @@ export type UpdateGlobalOptions<
 }
 
 export async function updateGlobal<
-  T extends BaseGeneratedTypes,
+  T extends GeneratedTypesShape,
   TSlug extends GlobalSlug<T>,
   TSelect extends SelectFromGlobalSlug<T, TSlug>,
 >(

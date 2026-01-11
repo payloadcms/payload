@@ -125,8 +125,6 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 import { Cron } from 'croner'
 
 import type { ClientConfig } from './config/client.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { ResolveFallback } from './exports/internal.js'
 import type { KVAdapter } from './kv/index.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
@@ -168,10 +166,19 @@ export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
- * Untyped, base GeneratedTypes interface.
+ * Loose constraint for GeneratedTypes - just an object.
+ * Used in generic constraints to allow both:
+ * 1. GeneratedTypes (module-augmented) to satisfy it
+ * 2. Config (from payload-types.ts with typed properties) to satisfy it
  */
-export interface BaseGeneratedTypes {
-  authUntyped: {
+export type GeneratedTypesShape = object
+
+/**
+ * Untyped fallback types. Uses the SAME property names as generated types.
+ * GeneratedTypes merges AugmentedGeneratedTypes with these fallbacks.
+ */
+export interface UntypedGeneratedTypes {
+  auth: {
     [slug: string]: {
       forgotPassword: {
         email: string
@@ -189,33 +196,31 @@ export interface BaseGeneratedTypes {
       }
     }
   }
-
-  blocksUntyped: {
+  blocks: {
     [slug: string]: JsonObject
   }
-  collectionsJoinsUntyped: {
-    [slug: string]: {
-      [schemaPath: string]: CollectionSlug
-    }
-  }
-  collectionsSelectUntyped: {
-    [slug: string]: SelectType
-  }
-
-  collectionsUntyped: {
+  collections: {
     [slug: string]: JsonObject & TypeWithID
   }
-  dbUntyped: {
-    defaultIDType: number | string
+  collectionsJoins: {
+    [slug: string]: {
+      [schemaPath: string]: string
+    }
   }
-  fallbackLocaleUntyped: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
-  globalsSelectUntyped: {
+  collectionsSelect: {
     [slug: string]: SelectType
   }
-  globalsUntyped: {
+  db: {
+    defaultIDType: number | string
+  }
+  fallbackLocale: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
+  globals: {
     [slug: string]: JsonObject
   }
-  jobsUntyped: {
+  globalsSelect: {
+    [slug: string]: SelectType
+  }
+  jobs: {
     tasks: {
       [slug: string]: {
         input?: JsonObject
@@ -228,21 +233,38 @@ export interface BaseGeneratedTypes {
       }
     }
   }
-  localeUntyped: null | string
-  userUntyped: UntypedUser
+  locale: null | string
+  user: UntypedUser
 }
 
 /**
- * Typed GeneratedTypes interface. This interface will be module-augmented by the `payload-types.ts` file.
+ * Interface to be module-augmented by the `payload-types.ts` file.
+ * When augmented, its properties take precedence over UntypedGeneratedTypes.
  */
-export interface GeneratedTypes extends BaseGeneratedTypes {}
+export interface AugmentedGeneratedTypes {}
 
-export type TypedCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'collections', 'collectionsUntyped'>
+/**
+ * Check if AugmentedGeneratedTypes has been augmented (has any keys).
+ */
+type IsAugmented = keyof AugmentedGeneratedTypes extends never ? false : true
 
-export type TypedBlock = ResolveFallback<GeneratedTypes, 'blocks', 'blocksUntyped'>
+/**
+ * GeneratedTypes merges AugmentedGeneratedTypes with UntypedGeneratedTypes.
+ * - When augmented: uses augmented properties, fills gaps with untyped fallbacks
+ * - When not augmented: uses UntypedGeneratedTypes entirely
+ *
+ * This pattern is similar to the Job type - it automatically resolves to the right type.
+ */
+export type GeneratedTypes = IsAugmented extends true
+  ? AugmentedGeneratedTypes & Omit<UntypedGeneratedTypes, keyof AugmentedGeneratedTypes>
+  : UntypedGeneratedTypes
 
-export type TypedUploadCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+export type TypedCollection<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { collections: infer C } ? C : UntypedGeneratedTypes['collections']
+
+export type TypedBlock = GeneratedTypes['blocks']
+
+export type TypedUploadCollection<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
   NonNever<{
     [TCollectionSlug in keyof TypedCollection<TGeneratedTypes>]:
       | 'filename'
@@ -253,67 +275,60 @@ export type TypedUploadCollection<TGeneratedTypes extends BaseGeneratedTypes = G
       : never
   }>
 
-export type TypedCollectionSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'collectionsSelect', 'collectionsSelectUntyped'>
+export type TypedCollectionSelect<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { collectionsSelect: infer C }
+    ? C
+    : UntypedGeneratedTypes['collectionsSelect']
 
-export type TypedCollectionJoins<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'collectionsJoins', 'collectionsJoinsUntyped'>
+export type TypedCollectionJoins<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { collectionsJoins: infer C }
+    ? C
+    : UntypedGeneratedTypes['collectionsJoins']
 
-export type TypedGlobal<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'globals', 'globalsUntyped'>
+export type TypedGlobal<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { globals: infer G } ? G : UntypedGeneratedTypes['globals']
 
-export type TypedGlobalSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'globalsSelect', 'globalsSelectUntyped'>
+export type TypedGlobalSelect<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { globalsSelect: infer G } ? G : UntypedGeneratedTypes['globalsSelect']
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+export type CollectionSlug<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
   StringKeyOf<TypedCollection<TGeneratedTypes>>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+export type UploadCollectionSlug<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
   StringKeyOf<TypedUploadCollection<TGeneratedTypes>>
 
-export type DefaultDocumentIDType = ResolveFallback<
-  GeneratedTypes,
-  'db',
-  'dbUntyped'
->['defaultIDType']
-export type GlobalSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> = StringKeyOf<
+export type DefaultDocumentIDType = GeneratedTypes['db']['defaultIDType']
+
+export type GlobalSlug<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> = StringKeyOf<
   TypedGlobal<TGeneratedTypes>
 >
 
-export type TypedLocale<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'locale', 'localeUntyped'>
+export type TypedLocale<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { locale: infer L } ? L : UntypedGeneratedTypes['locale']
 
-export type TypedFallbackLocale = ResolveFallback<
-  GeneratedTypes,
-  'fallbackLocale',
-  'fallbackLocaleUntyped'
->
+export type TypedFallbackLocale = GeneratedTypes['fallbackLocale']
 
 /**
  * @todo rename to `User` in 4.0
  */
-export type TypedUser = ResolveFallback<GeneratedTypes, 'user', 'userUntyped'>
+export type TypedUser = GeneratedTypes['user']
 
-export type TypedAuthOperations<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'auth', 'authUntyped'>
+export type TypedAuthOperations<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+  TGeneratedTypes extends { auth: infer A } ? A : UntypedGeneratedTypes['auth']
 
-export type AuthCollectionSlug<TGeneratedTypes extends BaseGeneratedTypes> = StringKeyOf<
+export type AuthCollectionSlug<TGeneratedTypes extends GeneratedTypesShape> = StringKeyOf<
   TypedAuthOperations<TGeneratedTypes>
 >
 
-export type TypedJobs = ResolveFallback<GeneratedTypes, 'jobs', 'jobsUntyped'>
+export type TypedJobs = GeneratedTypes['jobs']
 
-type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
-  ? 'payload-jobs' extends keyof TypedCollection
-    ? true
-    : false
-  : false
+type HasPayloadJobsType = 'payload-jobs' extends keyof GeneratedTypes['collections'] ? true : false
 
 /**
  * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).

@@ -1,5 +1,5 @@
 import type {
-  BaseGeneratedTypes,
+  GeneratedTypesShape,
   GlobalSlug,
   PaginatedDocs,
   SelectType,
@@ -12,7 +12,10 @@ import type {
 import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'
 
-export type FindGlobalVersionsOptions<T extends BaseGeneratedTypes, TSlug extends GlobalSlug<T>> = {
+export type FindGlobalVersionsOptions<
+  T extends GeneratedTypesShape,
+  TSlug extends GlobalSlug<T>,
+> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -66,7 +69,10 @@ export type FindGlobalVersionsOptions<T extends BaseGeneratedTypes, TSlug extend
   where?: Where
 }
 
-export async function findGlobalVersions<T extends BaseGeneratedTypes, TSlug extends GlobalSlug<T>>(
+export async function findGlobalVersions<
+  T extends GeneratedTypesShape,
+  TSlug extends GlobalSlug<T>,
+>(
   sdk: PayloadSDK<T>,
   options: FindGlobalVersionsOptions<T, TSlug>,
   init?: RequestInit,
