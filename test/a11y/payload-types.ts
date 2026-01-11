@@ -435,6 +435,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
-  export interface AugmentedGeneratedTypes extends Config {}
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

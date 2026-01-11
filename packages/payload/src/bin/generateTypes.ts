@@ -31,8 +31,8 @@ export async function generateTypes(
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
 
-  const declare = `declare module 'payload' {\n  export interface AugmentedGeneratedTypes extends Config {}\n}`
-  const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface AugmentedGeneratedTypes extends Config {}\n}`
+  const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
+  const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
 
   let compiled = await compile(jsonSchema, 'Config', {
     bannerComment:
