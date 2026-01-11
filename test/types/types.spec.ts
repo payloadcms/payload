@@ -2,6 +2,7 @@ import type {
   BaseGeneratedTypes,
   BulkOperationResult,
   CollectionSlug,
+  Config,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
@@ -23,10 +24,12 @@ import {
   type SerializedTextNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
+import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  Config as LocalConfig,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -931,6 +934,44 @@ describe('Types testing', () => {
         })
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
+    })
+  })
+
+  describe('sdk', () => {
+    test('ensure generated types can be manually assigned to PayloadSDK generic', () => {
+      expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
+    })
+
+    test('ensure SDK without generic automatically uses GeneratedTypes', () => {
+      const _sdk = new PayloadSDK({ baseURL: '' })
+      // ensure collection property of sdk.create has posts in the union type
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct collection types', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      // ensure collection property of sdk.create has posts in the union type
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
     })
   })
 
