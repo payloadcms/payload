@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     posts: Post;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -77,6 +78,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -84,6 +86,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ar') | ('en' | 'ar')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'ar';
@@ -128,6 +131,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -144,7 +154,7 @@ export interface Post {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -157,6 +167,23 @@ export interface Post {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -229,6 +256,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -240,6 +274,14 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -284,5 +326,5 @@ export interface Auth {
 
 declare module 'payload' {
   // @ts-ignore 
-  export interface GeneratedTypes extends Config {}
+  export interface AugmentedGeneratedTypes extends Config {}
 }

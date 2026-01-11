@@ -108,6 +108,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     header: Header;
     footer: Footer;
@@ -1128,10 +1129,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1957,5 +1954,5 @@ export interface Auth {
 
 declare module 'payload' {
   // @ts-ignore 
-  export interface GeneratedTypes extends Config {}
+  export interface AugmentedGeneratedTypes extends Config {}
 }

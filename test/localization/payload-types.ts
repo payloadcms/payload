@@ -959,10 +959,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1776,6 +1772,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
-  export interface GeneratedTypes extends Config {}
+  // @ts-ignore 
+  export interface AugmentedGeneratedTypes extends Config {}
 }

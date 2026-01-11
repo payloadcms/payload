@@ -70,6 +70,7 @@ export interface Config {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
     users: User;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -79,13 +80,15 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
@@ -120,7 +123,7 @@ export interface UserAuthOperations {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -157,7 +160,7 @@ export interface Media {
  * via the `definition` "media-with-prefix".
  */
 export interface MediaWithPrefix {
-  id: number;
+  id: string;
   prefix?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -176,7 +179,7 @@ export interface MediaWithPrefix {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -197,27 +200,44 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'media-with-prefix';
-        value: number | MediaWithPrefix;
+        value: string | MediaWithPrefix;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -227,10 +247,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -250,7 +270,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -340,6 +360,14 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -381,5 +409,5 @@ export interface Auth {
 
 declare module 'payload' {
   // @ts-ignore 
-  export interface GeneratedTypes extends Config {}
+  export interface AugmentedGeneratedTypes extends Config {}
 }
