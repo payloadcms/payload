@@ -238,36 +238,8 @@ export interface GeneratedTypes extends BaseGeneratedTypes {}
 /**
  * Returns `TType[TDesiredKey]` if it exists, otherwise `TType[TFallbackKey]`.
  *
- * WHY WE USE `infer`:
- *
- * We want TypedCollection<T> to return T['collections'] if the user defined it,
- * or fall back to T['collectionsUntyped'] for the base case.
- *
- * Attempt 1 - checking if key exists (BROKEN):
- * ```ts
- * type TypedCollection<T> = 'collections' extends keyof T ? T['collections'] : T['collectionsUntyped']
- * ```
- * This works fine when T is a specific type:
- *   TypedCollection<GeneratedTypes>  // Works: TS knows GeneratedTypes has 'collections'
- *
- * But breaks when T is a type parameter that hasn't been filled in yet:
- * ```ts
- * function getCollection<T extends BaseGeneratedTypes, S extends keyof TypedCollection<T>>() {
- *   type Result = TypedCollection<T>[S]  // Error: S cannot index TypedCollection<T>
- * }
- * ```
- * Even though T extends BaseGeneratedTypes, T could be passed as GeneratedTypes (has 'collections')
- * or BaseGeneratedTypes (if no payload-types.ts that module augments GeneratedTypes. BaseGeneratedTypes doesn't have 'collections'). TypeScript can't pick a branch because
- * it depends on what T will be when the function is called. So the type is unresolved and unusable.
- *
- * Attempt 2 - using `infer` to extract the value (WORKS):
- * ```ts
- * type TypedCollection<T> = T extends { collections: infer V } ? V : T['collectionsUntyped']
- * ```
- * Both patterns correctly pick the right branch when T is a concrete type.
- * But when T is a type parameter, only the `infer` pattern produces a type you can index into.
- *
- * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts
+ * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts.
+ * Read the comment in this test before modifying this type. We *have* to use `infer` here, not `extends keyof`.
  */
 type ResolveFallback<TType, TDesiredKey extends string, TFallbackKey extends keyof TType> =
   TType extends Record<TDesiredKey, infer TValue> ? TValue : TType[TFallbackKey]

@@ -171,6 +171,38 @@ describe('Types testing', () => {
 
   test('ResolveFallback allows generic indexing', () => {
     // This type fails to compile if ResolveFallback uses `K extends keyof T` instead of `T extends Record<K, infer V>`
+
+    /**
+     * WHY WE USE `infer`:
+     *
+     * We want TypedCollection<T> to return T['collections'] if the user defined it,
+     * or fall back to T['collectionsUntyped'] for the base case.
+     *
+     * Attempt 1 - checking if key exists (BROKEN):
+     * ```ts
+     * type TypedCollection<T> = 'collections' extends keyof T ? T['collections'] : T['collectionsUntyped']
+     * ```
+     * This works fine when T is a specific type:
+     *   TypedCollection<GeneratedTypes>  // Works: TS knows GeneratedTypes has 'collections'
+     *
+     * But breaks when T is a type parameter that hasn't been filled in yet:
+     * ```ts
+     * function getCollection<T extends BaseGeneratedTypes, S extends keyof TypedCollection<T>>() {
+     *   type Result = TypedCollection<T>[S]  // Error: S cannot index TypedCollection<T>
+     * }
+     * ```
+     * Even though T extends BaseGeneratedTypes, T could be passed as GeneratedTypes (has 'collections')
+     * or BaseGeneratedTypes (if no payload-types.ts that module augments GeneratedTypes. BaseGeneratedTypes doesn't have 'collections'). TypeScript can't pick a branch because
+     * it depends on what T will be when the function is called. So the type is unresolved and unusable.
+     *
+     * Attempt 2 - using `infer` to extract the value (WORKS):
+     * ```ts
+     * type TypedCollection<T> = T extends { collections: infer V } ? V : T['collectionsUntyped']
+     * ```
+     * Both patterns correctly pick the right branch when T is a concrete type.
+     * But when T is a type parameter, only the `infer` pattern produces a type you can index into.
+     *
+     */
     type Select<
       T extends BaseGeneratedTypes,
       S extends CollectionSlug<T>,
