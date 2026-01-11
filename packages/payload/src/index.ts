@@ -125,6 +125,8 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 import { Cron } from 'croner'
 
 import type { ClientConfig } from './config/client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import type { ResolveFallback } from './exports/internal.js'
 import type { KVAdapter } from './kv/index.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
@@ -235,46 +237,33 @@ export interface BaseGeneratedTypes {
  */
 export interface GeneratedTypes extends BaseGeneratedTypes {}
 
-/**
- * Returns `TType[TDesiredKey]` if it exists, otherwise `TType[TFallbackKey]`.
- *
- * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts.
- * Read the comment in this test before modifying this type. We *have* to use `infer` here, not `extends keyof`.
- */
-type ResolveFallback<TType, TDesiredKey extends string, TFallbackKey extends keyof TType> =
-  TType extends Record<TDesiredKey, infer TValue> ? TValue : TType[TFallbackKey]
-
 export type TypedCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
   ResolveFallback<TGeneratedTypes, 'collections', 'collectionsUntyped'>
 
 export type TypedBlock = ResolveFallback<GeneratedTypes, 'blocks', 'blocksUntyped'>
 
-export type TypedUploadCollection = NonNever<{
-  [K in keyof TypedCollection]:
-    | 'filename'
-    | 'filesize'
-    | 'mimeType'
-    | 'url' extends keyof TypedCollection[K]
-    ? TypedCollection[K]
-    : never
-}>
+export type TypedUploadCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  NonNever<{
+    [TCollectionSlug in keyof TypedCollection<TGeneratedTypes>]:
+      | 'filename'
+      | 'filesize'
+      | 'mimeType'
+      | 'url' extends keyof TypedCollection<TGeneratedTypes>[TCollectionSlug]
+      ? TypedCollection<TGeneratedTypes>[TCollectionSlug]
+      : never
+  }>
 
 export type TypedCollectionSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
   ResolveFallback<TGeneratedTypes, 'collectionsSelect', 'collectionsSelectUntyped'>
 
-export type TypedCollectionJoins = ResolveFallback<
-  GeneratedTypes,
-  'collectionsJoins',
-  'collectionsJoinsUntyped'
->
+export type TypedCollectionJoins<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'collectionsJoins', 'collectionsJoinsUntyped'>
 
-export type TypedGlobal = ResolveFallback<GeneratedTypes, 'globals', 'globalsUntyped'>
+export type TypedGlobal<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'globals', 'globalsUntyped'>
 
-export type TypedGlobalSelect = ResolveFallback<
-  GeneratedTypes,
-  'globalsSelect',
-  'globalsSelectUntyped'
->
+export type TypedGlobalSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'globalsSelect', 'globalsSelectUntyped'>
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
@@ -285,16 +274,20 @@ export type CollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = Generate
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
+export type UploadCollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  StringKeyOf<TypedUploadCollection<TGeneratedTypes>>
 
 export type DefaultDocumentIDType = ResolveFallback<
   GeneratedTypes,
   'db',
   'dbUntyped'
 >['defaultIDType']
-export type GlobalSlug = StringKeyOf<TypedGlobal>
+export type GlobalSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> = StringKeyOf<
+  TypedGlobal<TGeneratedTypes>
+>
 
-export type TypedLocale = ResolveFallback<GeneratedTypes, 'locale', 'localeUntyped'>
+export type TypedLocale<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'locale', 'localeUntyped'>
 
 export type TypedFallbackLocale = ResolveFallback<
   GeneratedTypes,
@@ -307,7 +300,12 @@ export type TypedFallbackLocale = ResolveFallback<
  */
 export type TypedUser = ResolveFallback<GeneratedTypes, 'user', 'userUntyped'>
 
-export type TypedAuthOperations = ResolveFallback<GeneratedTypes, 'auth', 'authUntyped'>
+export type TypedAuthOperations<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'auth', 'authUntyped'>
+
+export type AuthCollectionSlug<TGeneratedTypes extends BaseGeneratedTypes> = StringKeyOf<
+  TypedAuthOperations<TGeneratedTypes>
+>
 
 export type TypedJobs = ResolveFallback<GeneratedTypes, 'jobs', 'jobsUntyped'>
 
