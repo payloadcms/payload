@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -165,7 +164,11 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
-export interface GeneratedTypes {
+
+/**
+ * Untyped, base GeneratedTypes interface.
+ */
+export interface BaseGeneratedTypes {
   authUntyped: {
     [slug: string]: {
       forgotPassword: {
@@ -227,41 +230,24 @@ export interface GeneratedTypes {
   userUntyped: UntypedUser
 }
 
-// Helper type to resolve the correct type using conditional types
-type ResolveCollectionType<T> = 'collections' extends keyof T
-  ? T['collections']
-  : // @ts-expect-error
-    T['collectionsUntyped']
+/**
+ * Typed GeneratedTypes interface. This interface will be module-augmented by the `payload-types.ts` file.
+ */
+export interface GeneratedTypes extends BaseGeneratedTypes {}
 
-type ResolveBlockType<T> = 'blocks' extends keyof T
-  ? T['blocks']
-  : // @ts-expect-error
-    T['blocksUntyped']
+/**
+ * Returns `TType[TDesiredKey]` if it exists, otherwise `TType[TFallbackKey]`.
+ *
+ * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts.
+ * Read the comment in this test before modifying this type. We *have* to use `infer` here, not `extends keyof`.
+ */
+type ResolveFallback<TType, TDesiredKey extends string, TFallbackKey extends keyof TType> =
+  TType extends Record<TDesiredKey, infer TValue> ? TValue : TType[TFallbackKey]
 
-type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
-  ? T['collectionsSelect']
-  : // @ts-expect-error
-    T['collectionsSelectUntyped']
+export type TypedCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'collections', 'collectionsUntyped'>
 
-type ResolveCollectionJoinsType<T> = 'collectionsJoins' extends keyof T
-  ? T['collectionsJoins']
-  : // @ts-expect-error
-    T['collectionsJoinsUntyped']
-
-type ResolveGlobalType<T> = 'globals' extends keyof T
-  ? T['globals']
-  : // @ts-expect-error
-    T['globalsUntyped']
-
-type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
-  ? T['globalsSelect']
-  : // @ts-expect-error
-    T['globalsSelectUntyped']
-
-// Applying helper types to GeneratedTypes
-export type TypedCollection = ResolveCollectionType<GeneratedTypes>
-
-export type TypedBlock = ResolveBlockType<GeneratedTypes>
+export type TypedBlock = ResolveFallback<GeneratedTypes, 'blocks', 'blocksUntyped'>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -273,59 +259,57 @@ export type TypedUploadCollection = NonNever<{
     : never
 }>
 
-export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
+export type TypedCollectionSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  ResolveFallback<TGeneratedTypes, 'collectionsSelect', 'collectionsSelectUntyped'>
 
-export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
+export type TypedCollectionJoins = ResolveFallback<
+  GeneratedTypes,
+  'collectionsJoins',
+  'collectionsJoinsUntyped'
+>
 
-export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+export type TypedGlobal = ResolveFallback<GeneratedTypes, 'globals', 'globalsUntyped'>
 
-export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>
+export type TypedGlobalSelect = ResolveFallback<
+  GeneratedTypes,
+  'globalsSelect',
+  'globalsSelectUntyped'
+>
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug = StringKeyOf<TypedCollection>
+export type CollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
+  StringKeyOf<TypedCollection<TGeneratedTypes>>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
-type ResolveDbType<T> = 'db' extends keyof T
-  ? T['db']
-  : // @ts-expect-error
-    T['dbUntyped']
-
-export type DefaultDocumentIDType = ResolveDbType<GeneratedTypes>['defaultIDType']
+export type DefaultDocumentIDType = ResolveFallback<
+  GeneratedTypes,
+  'db',
+  'dbUntyped'
+>['defaultIDType']
 export type GlobalSlug = StringKeyOf<TypedGlobal>
 
-// now for locale and user
+export type TypedLocale = ResolveFallback<GeneratedTypes, 'locale', 'localeUntyped'>
 
-// @ts-expect-error
-type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
-type ResolveFallbackLocaleType<T> = 'fallbackLocale' extends keyof T
-  ? T['fallbackLocale']
-  : // @ts-expect-error
-    T['fallbackLocaleUntyped']
-// @ts-expect-error
-type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
-
-export type TypedLocale = ResolveLocaleType<GeneratedTypes>
-
-export type TypedFallbackLocale = ResolveFallbackLocaleType<GeneratedTypes>
+export type TypedFallbackLocale = ResolveFallback<
+  GeneratedTypes,
+  'fallbackLocale',
+  'fallbackLocaleUntyped'
+>
 
 /**
  * @todo rename to `User` in 4.0
  */
-export type TypedUser = ResolveUserType<GeneratedTypes>
+export type TypedUser = ResolveFallback<GeneratedTypes, 'user', 'userUntyped'>
 
-// @ts-expect-error
-type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
-export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
+export type TypedAuthOperations = ResolveFallback<GeneratedTypes, 'auth', 'authUntyped'>
 
-// @ts-expect-error
-type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
-export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
+export type TypedJobs = ResolveFallback<GeneratedTypes, 'jobs', 'jobsUntyped'>
 
 type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
   ? 'payload-jobs' extends keyof TypedCollection
