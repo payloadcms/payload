@@ -6,6 +6,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithAlwaysInsertFields } from './collections/MediaWithAlwaysInsertFields.js'
 import { MediaWithDirectAccess } from './collections/MediaWithDirectAccess.js'
 import { MediaWithDynamicPrefix } from './collections/MediaWithDynamicPrefix.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
@@ -13,6 +14,7 @@ import { MediaWithSignedDownloads } from './collections/MediaWithSignedDownloads
 import { Users } from './collections/Users.js'
 import {
   mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
   mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
@@ -37,6 +39,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     Media,
+    MediaWithAlwaysInsertFields,
     MediaWithDirectAccess,
     MediaWithDynamicPrefix,
     MediaWithPrefix,
@@ -71,16 +74,36 @@ export default buildConfigWithDefaults({
           },
         },
       },
-      bucket: process.env.S3_BUCKET,
+      bucket: process.env.S3_BUCKET!,
       config: {
         credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
         },
         endpoint: process.env.S3_ENDPOINT,
         forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
         region: process.env.S3_REGION,
       },
+    }),
+    // Test alwaysInsertFields with enabled: false
+    s3Storage({
+      alwaysInsertFields: true,
+      collections: {
+        [mediaWithAlwaysInsertFieldsSlug]: {
+          prefix: '',
+        },
+      },
+      bucket: process.env.S3_BUCKET!,
+      config: {
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+        },
+        endpoint: process.env.S3_ENDPOINT,
+        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+        region: process.env.S3_REGION,
+      },
+      enabled: false,
     }),
   ],
   upload: uploadOptions,

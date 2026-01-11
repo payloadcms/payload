@@ -1,12 +1,12 @@
-import { formatAdminURL } from 'payload/shared'
-
 import type { CollectionPopulationRequestHandler } from './types.js'
 
-const defaultRequestHandler: CollectionPopulationRequestHandler = ({ apiPath, data, endpoint }) => {
-  const url = formatAdminURL({
-    apiRoute: apiPath,
-    path: `/${endpoint}`,
-  })
+const defaultRequestHandler: CollectionPopulationRequestHandler = ({
+  apiPath,
+  data,
+  endpoint,
+  serverURL,
+}) => {
+  const url = `${serverURL}${apiPath}/${endpoint}`
 
   return fetch(url, {
     body: JSON.stringify(data),

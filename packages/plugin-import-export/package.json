@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-import-export",
-  "version": "3.69.0",
+  "version": "3.70.0",
   "description": "Import-Export plugin for Payload",
   "keywords": [
     "payload",

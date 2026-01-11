@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview",
-  "version": "3.69.0",
+  "version": "3.70.0",
   "description": "The official live preview JavaScript SDK for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {

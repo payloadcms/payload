@@ -67,7 +67,7 @@ export const MobileContent: CollectionConfig = {
 Restrict access from specific IP addresses (requires middleware/proxy headers).
 
 ```ts
-import type: Access } from 'payload'
+import type { Access } from 'payload'
 
 export const restrictedIpAccess = (allowedIps: string[]): Access => {
   return ({ req: { headers } }) => {

@@ -4,7 +4,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import path from 'path'
 import { type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
@@ -33,6 +33,8 @@ import {
   blockFieldsSlug,
   checkboxFieldsSlug,
   collapsibleFieldsSlug,
+  customIDNestedSlug,
+  dateFieldsSlug,
   groupFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
@@ -778,8 +780,10 @@ describe('Fields', () => {
       if (res.totalDocs > 10) {
         // This is where postgres might fail! selectDistinct actually removed some rows here, because it distincts by:
         // not only ID, but also created_at, updated_at, items_date
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(res.docs).toHaveLength(10)
       } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(res.docs.length).toBeLessThanOrEqual(res.totalDocs)
       }
     })
@@ -994,6 +998,7 @@ describe('Fields', () => {
 
         expect(result).toBeFalsy()
       } catch (error) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect((error as Error).message).toBe(
           'The following field is invalid: Select with filtered options',
         )
@@ -3533,6 +3538,609 @@ describe('Fields', () => {
       })
 
       expect(result.docs).toHaveLength(1)
+    })
+  })
+
+  describe('Custom ID Nested', () => {
+    const createdIDs: number[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          collection: customIDNestedSlug,
+          id,
+        })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should create document with numeric custom ID nested in tabs', async () => {
+      const customID = 12345
+      createdIDs.push(customID)
+
+      const doc = await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Test Document',
+          description: 'Testing nested custom ID field',
+        },
+      })
+
+      expect(doc.id).toBe(customID)
+      expect(doc.title).toBe('Test Document')
+    })
+
+    it('should retrieve document by numeric custom ID', async () => {
+      const customID = 67890
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Another Test',
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: customIDNestedSlug,
+        id: customID,
+      })
+
+      expect(retrieved.id).toBe(customID)
+      expect(retrieved.title).toBe('Another Test')
+    })
+
+    it('should update document with numeric custom ID', async () => {
+      const customID = 99999
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Original Title',
+        },
+      })
+
+      const updated = await payload.update({
+        collection: customIDNestedSlug,
+        id: customID,
+        data: {
+          title: 'Updated Title',
+        },
+      })
+
+      expect(updated.id).toBe(customID)
+      expect(updated.title).toBe('Updated Title')
+    })
+  })
+
+  describe('date fields with timezones', () => {
+    it('should create document with UTC offset timezone', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
+      expect(doc.dateWithOffsetTimezone_tz).toEqual('+05:30')
+    })
+
+    it('should update timezone from IANA to offset', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+          dateWithMixedTimezones_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+
+      const updated = await payload.update({
+        id: doc.id,
+        collection: dateFieldsSlug,
+        data: {
+          dateWithMixedTimezones_tz: '+05:30',
+        },
+      })
+
+      expect(updated.dateWithMixedTimezones_tz).toEqual('+05:30')
+    })
+
+    it('should query documents by timezone field', async () => {
+      await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
+          dateWithOffsetTimezone_tz: '-08:00',
+        },
+        draft: true,
+      })
+
+      const indiaTimezoneResults = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          dateWithOffsetTimezone_tz: {
+            equals: '+05:30',
+          },
+        },
+      })
+
+      expect(indiaTimezoneResults.docs.length).toBeGreaterThanOrEqual(1)
+      expect(
+        indiaTimezoneResults.docs.every((doc) => doc.dateWithOffsetTimezone_tz === '+05:30'),
+      ).toBe(true)
+    })
+
+    it('should store mixed IANA and offset timezones correctly', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+          dateWithMixedTimezones_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+
+      // Create another doc with offset timezone
+      const doc2 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
+          dateWithMixedTimezones_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc2.dateWithMixedTimezones_tz).toEqual('+05:30')
+    })
+
+    it('should handle different offset formats consistently', async () => {
+      // Test HH:mm format
+      const doc1 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc1.dateWithOffsetTimezone_tz).toEqual('+05:30')
+
+      // Test negative offset
+      const doc2 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+          dateWithOffsetTimezone_tz: '-08:00',
+        },
+        draft: true,
+      })
+
+      expect(doc2.dateWithOffsetTimezone_tz).toEqual('-08:00')
+
+      // Test zero offset
+      const doc3 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
+          dateWithOffsetTimezone_tz: '+00:00',
+        },
+        draft: true,
+      })
+
+      expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
+    })
+
+    describe('GraphQL timezone operations', () => {
+      // Note: GraphQL enums serialize to their NAME (e.g., '_TZOFFSET_PLUS_05_30'), not their VALUE (e.g., '+05:30')
+      // This is standard GraphQL behavior. UTC offsets are transformed to GraphQL-safe names:
+      // +05:30 → _TZOFFSET_PLUS_05_30, -08:00 → _TZOFFSET_MINUS_08_00, America/New_York → America_New_York
+
+      it('should read UTC offset timezone via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithOffsetTimezone
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateField.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
+        // GraphQL returns enum NAME, not VALUE
+        expect(result.data.DateField.dateWithOffsetTimezone_tz).toEqual('_TZOFFSET_PLUS_05_30')
+      })
+
+      it('should read negative UTC offset timezone via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+            dateWithOffsetTimezone_tz: '-08:00',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateField.dateWithOffsetTimezone_tz).toEqual('_TZOFFSET_MINUS_08_00')
+      })
+
+      it('should read mixed IANA and offset timezones via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+            dateWithMixedTimezones_tz: 'America/New_York',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithMixedTimezones
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        // GraphQL returns enum NAME (America_New_York), not VALUE (America/New_York)
+        expect(result.data.DateField.dateWithMixedTimezones_tz).toEqual('America_New_York')
+      })
+
+      it('should create document with UTC offset timezone via GraphQL mutation', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T04:30:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_PLUS_05_30
+              }
+            ) {
+              id
+              dateWithOffsetTimezone
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_PLUS_05_30',
+        )
+      })
+
+      it('should create document with negative UTC offset via GraphQL mutation', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T16:00:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
+              }
+            ) {
+              id
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_MINUS_08_00',
+        )
+      })
+
+      it('should update timezone from one offset to another via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
+              }
+            ) {
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_MINUS_08_00',
+        )
+      })
+
+      it('should update mixed timezone field from IANA to offset via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+            dateWithMixedTimezones_tz: 'America/New_York',
+          },
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithMixedTimezones_tz: _TZOFFSET_PLUS_05_30
+              }
+            ) {
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithMixedTimezones_tz).toEqual(
+          '_TZOFFSET_PLUS_05_30',
+        )
+      })
+
+      it('should update mixed timezone field from offset to IANA via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
+            dateWithMixedTimezones_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithMixedTimezones_tz: America_New_York
+              }
+            ) {
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithMixedTimezones_tz).toEqual('America_New_York')
+      })
+
+      it('should query documents by offset timezone field via GraphQL', async () => {
+        // Create documents with different timezones
+        await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+            dateWithOffsetTimezone_tz: '-08:00',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateFields(where: { dateWithOffsetTimezone_tz: { equals: _TZOFFSET_PLUS_05_30 } }) {
+              docs {
+                dateWithOffsetTimezone_tz
+              }
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateFields.docs.length).toBeGreaterThanOrEqual(1)
+        expect(
+          result.data.DateFields.docs.every(
+            (doc: { dateWithOffsetTimezone_tz: string }) =>
+              doc.dateWithOffsetTimezone_tz === '_TZOFFSET_PLUS_05_30',
+          ),
+        ).toBe(true)
+      })
+
+      it('should handle UTC+00:00 offset via GraphQL', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T10:00:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_PLUS_00_00
+              }
+            ) {
+              id
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_PLUS_00_00',
+        )
+      })
+    })
+
+    it('should apply timezone override function to customize the field', async () => {
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // We can verify this by checking the collection config has the modified field
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
+      expect(timezoneField).toBeDefined()
+      expect(timezoneField?.type).toEqual('select')
+      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect(timezoneField?.admin?.description).toEqual(
+        'This timezone field was customized via override',
+      )
+
+      // Also verify it still works for creating/storing data
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
+          dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
+    })
+
+    it('should generate timezone field label from parent date field label', () => {
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      // Field with no explicit label - should use toWords(name) for timezone label
+      const defaultTzField = fields.find((f) => f.name === 'defaultWithTimezone_tz')
+      expect(defaultTzField?.label).toEqual('Default With Timezone Tz')
+
+      // Field with disableListColumn override - label should still be generated
+      const disabledColumnsTzField = fields.find(
+        (f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz',
+      )
+      expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
     })
   })
 })

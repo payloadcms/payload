@@ -626,9 +626,8 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(0)
   })
 
-  /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
-  it('ensure failed tasks are rolled back via transactions', async () => {
+  it.skip('ensure failed tasks are rolled back via transactions', async () => {
     const job = await payload.jobs.queue({
       workflow: 'retriesRollbackTest',
       input: {
@@ -639,7 +638,7 @@ describe('Queues - Payload', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({silent: true})
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -660,7 +659,7 @@ describe('Queues - Payload', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(4)
-  })*/
+  })
 
   it('ensure backoff strategy of task is respected', async () => {
     payload.config.jobs.deleteJobOnComplete = false
@@ -965,9 +964,8 @@ describe('Queues - Payload', () => {
     payload.config.jobs.workflows = workflowsRef
   })
 
-  /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
-  it('transaction test against payload-jobs collection', async () => {
+  it.skip('transaction test against payload-jobs collection', async () => {
     // This kinds of emulates what happens when multiple jobs are queued and then run in parallel.
     const runWorkflowFN = async (i: number) => {
       const { id } = await payload.create({
@@ -1002,7 +1000,7 @@ describe('Queues - Payload', () => {
       /**
        * T1 start
        */
-  /*
+
       const t2Req = isolateObjectProperty(t1Req, 'transactionID')
       delete t2Req.transactionID
       //
@@ -1047,7 +1045,7 @@ describe('Queues - Payload', () => {
       /**
        * T1 end
        */
-  /*
+
       await payload.update({
         collection: 'payload-jobs',
         id,
@@ -1075,7 +1073,7 @@ describe('Queues - Payload', () => {
     })
 
     expect(allSimples.totalDocs).toBe(30)
-  })*/
+  })
 
   it('can queue single tasks 8 times', async () => {
     for (let i = 0; i < 8; i++) {
@@ -1480,6 +1478,14 @@ describe('Queues - Payload', () => {
     void payload.jobs.run({ silent: true }).catch((_ignored) => {})
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
+    // Should be in processing - ensure job is running
+    const jobAfterRunProcessing = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+      depth: 0,
+    })
+    expect(jobAfterRunProcessing.processing).toBe(true)
+
     // Should be in processing - cancel job
     await payload.jobs.cancelByID({
       id: job.id,
@@ -1502,6 +1508,11 @@ describe('Queues - Payload', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
+
+    // Ensure job is not retried
+    const runResponse = await payload.jobs.run({ silent: true })
+    expect(runResponse.noJobsRemaining).toBe(true)
+    expect(runResponse.jobStatus).toBeUndefined()
   })
 
   it('ensure jobs can be cancelled using payload.jobs.cancel', async () => {
@@ -1540,6 +1551,202 @@ describe('Queues - Payload', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
+  })
+
+  it('ensure jobs can cancel themselves by throwing a JobCancelledError in workflow handler', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    /**
+     * First, verify that this job is retried if it simply failed
+     */
+    {
+      const job = await payload.jobs.queue({
+        workflow: 'selfCancel',
+        input: {
+          shouldCancel: false,
+        },
+      })
+      const runResponse = await payload.jobs.run({ silent: true })
+      expect(runResponse.remainingJobsFromQueried).toBe(1)
+      expect(runResponse.jobStatus?.[job.id]?.status).toBe('error')
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      // @ts-expect-error error is not typed
+      expect(jobAfterRun.error?.message).toBe('Failed, not cancelled')
+      expect(jobAfterRun.totalTried).toBe(1)
+      expect(jobAfterRun.hasError).toBe(false)
+
+      const runResponse2 = await payload.jobs.run({ silent: true })
+      expect(runResponse2.remainingJobsFromQueried).toBe(1)
+      expect(runResponse2.jobStatus?.[job.id]?.status).toBe('error')
+
+      const jobAfterRun2 = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(jobAfterRun2.totalTried).toBe(2)
+      expect(jobAfterRun2.hasError).toBe(false)
+    }
+
+    /**
+     * Cleanup
+     */
+    await payload.db.deleteMany({
+      collection: 'payload-jobs',
+      where: {
+        id: {
+          exists: true,
+        },
+      },
+    })
+
+    /**
+     * Now, verify the behavior when the job is cancelled by throwing a JobCancelledError in workflow handler
+     */
+    {
+      const job = await payload.jobs.queue({
+        workflow: 'selfCancel',
+        input: {
+          shouldCancel: true,
+        },
+      })
+
+      const runResponse = await payload.jobs.run({ silent: true })
+      expect(runResponse.remainingJobsFromQueried).toBe(0)
+      expect(runResponse.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(Boolean(jobAfterRun.completedAt)).toBe(false)
+      expect(jobAfterRun.hasError).toBe(true)
+      // @ts-expect-error error is not typed
+      expect(jobAfterRun.error?.cancelled).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+
+      // Run again to ensure the job is not retried
+      const runResponse2 = await payload.jobs.run({ silent: true })
+      expect(runResponse2.remainingJobsFromQueried).toBe(0)
+      expect(runResponse2.jobStatus).toBeUndefined()
+
+      const jobAfterRun2 = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(jobAfterRun2.totalTried).toBe(jobAfterRun.totalTried)
+      expect(jobAfterRun2.hasError).toBe(true)
+    }
+  })
+
+  it('ensure jobs can cancel themselves by throwing a JobCancelledError in task handler', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    /**
+     * First, verify that this job is retried if it simply failed
+     */
+    {
+      const job = await payload.jobs.queue({
+        task: 'SelfCancel',
+        input: {
+          shouldCancel: false,
+        },
+      })
+      const runResponse = await payload.jobs.run({ silent: true })
+      expect(runResponse.remainingJobsFromQueried).toBe(1)
+      expect(runResponse.jobStatus?.[job.id]?.status).toBe('error')
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(jobAfterRun.log?.length).toBe(1)
+      expect(jobAfterRun?.log?.[0]?.error?.message).toBe('Failed, not cancelled')
+      expect(jobAfterRun.totalTried).toBe(1)
+      expect(jobAfterRun.hasError).toBe(false)
+
+      const runResponse2 = await payload.jobs.run({ silent: true })
+      expect(runResponse2.remainingJobsFromQueried).toBe(1)
+      expect(runResponse2.jobStatus?.[job.id]?.status).toBe('error')
+
+      const jobAfterRun2 = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(jobAfterRun2.totalTried).toBe(2)
+      expect(jobAfterRun2.hasError).toBe(false)
+    }
+
+    /**
+     * Cleanup
+     */
+    await payload.db.deleteMany({
+      collection: 'payload-jobs',
+      where: {
+        id: {
+          exists: true,
+        },
+      },
+    })
+
+    /**
+     * Now, verify the behavior when the job is cancelled by throwing a JobCancelledError in task handler
+     */
+    {
+      const job = await payload.jobs.queue({
+        task: 'SelfCancel',
+        input: {
+          shouldCancel: true,
+        },
+      })
+      console.log('running job')
+
+      const runResponse = await payload.jobs.run({ silent: true })
+      console.log('runResponse', runResponse)
+      expect(runResponse.remainingJobsFromQueried).toBe(0)
+      expect(runResponse.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(Boolean(jobAfterRun.completedAt)).toBe(false)
+      expect(jobAfterRun.hasError).toBe(true)
+      // @ts-expect-error error is not typed
+      expect(jobAfterRun.error?.cancelled).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+
+      // Run again to ensure the job is not retried
+      const runResponse2 = await payload.jobs.run({ silent: true })
+      expect(runResponse2.remainingJobsFromQueried).toBe(0)
+      expect(runResponse2.jobStatus).toBeUndefined()
+
+      const jobAfterRun2 = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+        depth: 0,
+      })
+
+      expect(jobAfterRun2.totalTried).toBe(jobAfterRun.totalTried)
+      expect(jobAfterRun2.hasError).toBe(true)
+    }
   })
 
   it('can tasks throw error', async () => {
