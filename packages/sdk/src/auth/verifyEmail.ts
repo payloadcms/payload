@@ -1,8 +1,9 @@
+import type { AuthCollectionSlug, BaseGeneratedTypes } from 'payload'
+
 import type { PayloadSDK } from '../index.js'
-import type { AuthCollectionSlug, PayloadGeneratedTypes } from '../types.js'
 
 export type VerifyEmailOptions<
-  T extends PayloadGeneratedTypes,
+  T extends BaseGeneratedTypes,
   TSlug extends AuthCollectionSlug<T>,
 > = {
   collection: TSlug
@@ -10,7 +11,7 @@ export type VerifyEmailOptions<
 }
 
 export async function verifyEmail<
-  T extends PayloadGeneratedTypes,
+  T extends BaseGeneratedTypes,
   TSlug extends AuthCollectionSlug<T>,
 >(
   sdk: PayloadSDK<T>,

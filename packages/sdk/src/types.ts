@@ -62,11 +62,13 @@ export interface DefaultGeneratedTypes extends BaseGeneratedTypes {
   locale: null | string
 }
 
+// TODO: Investigate reusing the types from payload
 export type DataFromCollectionSlug<
   TGeneratedTypes extends BaseGeneratedTypes,
   TSlug extends CollectionSlug<TGeneratedTypes>,
 > = TypedCollection<TGeneratedTypes>[TSlug]
 
+// TODO: Investigate reusing the types from payload
 export type DataFromGlobalSlug<
   TGeneratedTypes extends BaseGeneratedTypes,
   TSlug extends GlobalSlug<TGeneratedTypes>,

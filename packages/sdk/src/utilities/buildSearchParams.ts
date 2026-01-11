@@ -5,10 +5,10 @@ import { stringify } from 'qs-esm'
 export type OperationArgs = {
   depth?: number
   draft?: boolean
-  fallbackLocale?: false | string
+  fallbackLocale?: false | null | string
   joins?: false | Record<string, unknown>
   limit?: number
-  locale?: string
+  locale?: null | string
   page?: number
   pagination?: boolean
   populate?: Record<string, unknown>
