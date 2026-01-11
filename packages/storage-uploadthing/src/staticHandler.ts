@@ -2,6 +2,8 @@ import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { Where } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
+import { getRangeRequestInfo } from 'payload/internal'
+
 import { getKeyFromFilename } from './utilities.js'
 
 type Args = {
@@ -74,21 +76,50 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
-      const response = await fetch(signedURL)
-
-      if (!response.ok) {
+      // Get file metadata first for range validation
+      const headResponse = await fetch(signedURL, { method: 'HEAD' })
+      if (!headResponse.ok) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
-      const blob = await response.blob()
+      const fileSize = Number(headResponse.headers.get('content-length'))
+
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
+      }
+
+      const response = await fetch(signedURL, {
+        headers:
+          rangeResult.type === 'partial'
+            ? { Range: `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}` }
+            : undefined,
+      })
+
+      if (!response.ok || !response.body) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = response.headers.get('etag')
 
       let headers = new Headers(incomingHeaders)
 
-      headers.append('Content-Length', String(blob.size))
-      headers.append('Content-Type', blob.type)
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
+      }
+
+      const contentType = response.headers.get('content-type')
+      if (contentType) {
+        headers.append('Content-Type', contentType)
+      }
 
       if (objectEtag) {
         headers.append('ETag', objectEtag)
@@ -109,9 +140,9 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
         })
       }
 
-      return new Response(blob, {
+      return new Response(response.body, {
         headers,
-        status: 200,
+        status: rangeResult.status,
       })
     } catch (err) {
       req.payload.logger.error({ err, msg: 'Unexpected error in staticHandler' })
