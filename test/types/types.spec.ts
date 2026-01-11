@@ -2,7 +2,6 @@ import type {
   BaseGeneratedTypes,
   BulkOperationResult,
   CollectionSlug,
-  Config,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
