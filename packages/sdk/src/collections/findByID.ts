@@ -1,7 +1,7 @@
 import type {
   ApplyDisableErrors,
   CollectionSlug,
-  GeneratedTypesShape,
+  PayloadTypesShape,
   SelectType,
   TypedLocale,
 } from 'payload'
@@ -10,7 +10,7 @@ import type { PayloadSDK } from '../index.js'
 import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'
 
 export type FindByIDOptions<
-  T extends GeneratedTypesShape,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
@@ -60,7 +60,7 @@ export type FindByIDOptions<
 }
 
 export async function findByID<
-  T extends GeneratedTypesShape,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
   TSelect extends SelectType,

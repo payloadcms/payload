@@ -3,10 +3,10 @@ import type {
   AuthCollectionSlug,
   CollectionSlug,
   ErrorResult,
-  GeneratedTypes,
-  GeneratedTypesShape,
   GlobalSlug,
   PaginatedDocs,
+  PayloadTypes,
+  PayloadTypesShape,
   SelectType,
   TypeWithVersion,
 } from 'payload'
@@ -132,7 +132,7 @@ type Args = {
 /**
  * @experimental
  */
-export class PayloadSDK<T extends GeneratedTypesShape = GeneratedTypes> {
+export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
   baseInit: RequestInit
 
   baseURL: string

@@ -1,10 +1,8 @@
 import type {
   BulkOperationResult,
-  CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
-  GeneratedTypesShape,
   JoinQuery,
   PaginatedDocs,
   SelectType,
@@ -171,32 +169,20 @@ describe('Types testing', () => {
     })
   })
 
-  test('ResolveFallback allows generic indexing', () => {
-    // This type fails to compile if ResolveFallback uses `K extends keyof T` instead of `T extends Record<K, infer V>`
-
+  test('TypedCollectionSelect resolves correctly with concrete types', () => {
     /**
      * WHY WE USE `infer`:
      *
      * We want TypedCollection<T> to return T['collections'] if the user defined it,
      * or fall back to UntypedGeneratedTypes['collections'] for the base case.
      *
-     * Attempt 1 - checking if key exists (BROKEN):
-     * ```ts
-     * type TypedCollection<T> = 'collections' extends keyof T ? T['collections'] : UntypedGeneratedTypes['collections']
-     * ```
-     * This works fine when T is a specific type:
-     *   TypedCollection<GeneratedTypes>  // Works: TS knows GeneratedTypes has 'collections'
-     *
-     * But would break with `extends keyof` pattern on deferred conditionals.
-     *
-     * Attempt 2 - using `infer` to extract the value (WORKS):
+     * Using the `infer` pattern:
      * ```ts
      * type TypedCollection<T> = T extends { collections: infer V } ? V : UntypedGeneratedTypes['collections']
      * ```
      * The infer pattern correctly extracts typed properties when T is a concrete type.
      *
      * NOTE: When T is a concrete type (like GeneratedTypes or Config), indexing works correctly.
-     * When testing directly with a concrete type, the conditional resolves immediately.
      */
     // Test with concrete GeneratedTypes - the type should resolve correctly
     type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']

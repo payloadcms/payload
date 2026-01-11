@@ -1,6 +1,6 @@
 import type {
   CollectionSlug,
-  GeneratedTypesShape,
+  PayloadTypesShape,
   SelectType,
   TypedLocale,
   UploadCollectionSlug,
@@ -16,7 +16,7 @@ import type {
 import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
 
 export type CreateOptions<
-  T extends GeneratedTypesShape,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 > = {
@@ -57,7 +57,7 @@ export type CreateOptions<
 }
 
 export async function create<
-  T extends GeneratedTypesShape,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 >(

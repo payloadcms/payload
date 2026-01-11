@@ -1,7 +1,7 @@
 import type {
   ApplyDisableErrors,
-  GeneratedTypesShape,
   GlobalSlug,
+  PayloadTypesShape,
   SelectType,
   TypedLocale,
   TypeWithVersion,
@@ -11,7 +11,7 @@ import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'
 
 export type FindGlobalVersionByIDOptions<
-  T extends GeneratedTypesShape,
+  T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
   TDisableErrors extends boolean,
 > = {
@@ -52,7 +52,7 @@ export type FindGlobalVersionByIDOptions<
 }
 
 export async function findGlobalVersionByID<
-  T extends GeneratedTypesShape,
+  T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
   TDisableErrors extends boolean,
 >(

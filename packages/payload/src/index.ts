@@ -166,18 +166,18 @@ export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
- * Loose constraint for GeneratedTypes - just an object.
+ * Loose constraint for PayloadTypes - just an object.
  * Used in generic constraints to allow both:
- * 1. GeneratedTypes (module-augmented) to satisfy it
+ * 1. PayloadTypes (module-augmented) to satisfy it
  * 2. Config (from payload-types.ts with typed properties) to satisfy it
  */
-export type GeneratedTypesShape = object
+export type PayloadTypesShape = object
 
 /**
  * Untyped fallback types. Uses the SAME property names as generated types.
- * GeneratedTypes merges AugmentedGeneratedTypes with these fallbacks.
+ * PayloadTypes merges GeneratedTypes with these fallbacks.
  */
-export interface UntypedGeneratedTypes {
+export interface UntypedPayloadTypes {
   auth: {
     [slug: string]: {
       forgotPassword: {
@@ -239,96 +239,100 @@ export interface UntypedGeneratedTypes {
 
 /**
  * Interface to be module-augmented by the `payload-types.ts` file.
- * When augmented, its properties take precedence over UntypedGeneratedTypes.
+ * When augmented, its properties take precedence over UntypedPayloadTypes.
  */
-export interface AugmentedGeneratedTypes {}
+export interface GeneratedTypes {}
 
 /**
- * Check if AugmentedGeneratedTypes has been augmented (has any keys).
+ * Check if GeneratedTypes has been augmented (has any keys).
  */
-type IsAugmented = keyof AugmentedGeneratedTypes extends never ? false : true
+type IsAugmented = keyof GeneratedTypes extends never ? false : true
 
 /**
- * GeneratedTypes merges AugmentedGeneratedTypes with UntypedGeneratedTypes.
+ * PayloadTypes merges GeneratedTypes with UntypedPayloadTypes.
  * - When augmented: uses augmented properties, fills gaps with untyped fallbacks
- * - When not augmented: uses UntypedGeneratedTypes entirely
+ * - When not augmented: uses UntypedPayloadTypes entirely
  *
  * This pattern is similar to the Job type - it automatically resolves to the right type.
  */
-export type GeneratedTypes = IsAugmented extends true
-  ? AugmentedGeneratedTypes & Omit<UntypedGeneratedTypes, keyof AugmentedGeneratedTypes>
-  : UntypedGeneratedTypes
+export type PayloadTypes = IsAugmented extends true
+  ? GeneratedTypes & Omit<UntypedPayloadTypes, keyof GeneratedTypes>
+  : UntypedPayloadTypes
 
-export type TypedCollection<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { collections: infer C } ? C : UntypedGeneratedTypes['collections']
+export type TypedCollection<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { collections: infer C } ? C : UntypedPayloadTypes['collections']
 
-export type TypedBlock = GeneratedTypes['blocks']
+export type TypedBlock = PayloadTypes['blocks']
 
-export type TypedUploadCollection<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
+export type TypedUploadCollection<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
   NonNever<{
-    [TCollectionSlug in keyof TypedCollection<TGeneratedTypes>]:
+    [TCollectionSlug in keyof TypedCollection<TPayloadTypes>]:
       | 'filename'
       | 'filesize'
       | 'mimeType'
-      | 'url' extends keyof TypedCollection<TGeneratedTypes>[TCollectionSlug]
-      ? TypedCollection<TGeneratedTypes>[TCollectionSlug]
+      | 'url' extends keyof TypedCollection<TPayloadTypes>[TCollectionSlug]
+      ? TypedCollection<TPayloadTypes>[TCollectionSlug]
       : never
   }>
 
-export type TypedCollectionSelect<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { collectionsSelect: infer C }
+export type TypedCollectionSelect<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { collectionsSelect: infer C }
     ? C
-    : UntypedGeneratedTypes['collectionsSelect']
+    : UntypedPayloadTypes['collectionsSelect']
 
-export type TypedCollectionJoins<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { collectionsJoins: infer C }
-    ? C
-    : UntypedGeneratedTypes['collectionsJoins']
+export type TypedCollectionJoins<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { collectionsJoins: infer C } ? C : UntypedPayloadTypes['collectionsJoins']
 
-export type TypedGlobal<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { globals: infer G } ? G : UntypedGeneratedTypes['globals']
+export type TypedGlobal<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { globals: infer G } ? G : UntypedPayloadTypes['globals']
 
-export type TypedGlobalSelect<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { globalsSelect: infer G } ? G : UntypedGeneratedTypes['globalsSelect']
+export type TypedGlobalSelect<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { globalsSelect: infer G } ? G : UntypedPayloadTypes['globalsSelect']
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  StringKeyOf<TypedCollection<TGeneratedTypes>>
+export type CollectionSlug<TPayloadTypes extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  TypedCollection<TPayloadTypes>
+>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  StringKeyOf<TypedUploadCollection<TGeneratedTypes>>
+export type UploadCollectionSlug<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  StringKeyOf<TypedUploadCollection<TPayloadTypes>>
 
-export type DefaultDocumentIDType = GeneratedTypes['db']['defaultIDType']
+export type DefaultDocumentIDType = PayloadTypes['db']['defaultIDType']
 
-export type GlobalSlug<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> = StringKeyOf<
-  TypedGlobal<TGeneratedTypes>
+export type GlobalSlug<TPayloadTypes extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  TypedGlobal<TPayloadTypes>
 >
 
-export type TypedLocale<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { locale: infer L } ? L : UntypedGeneratedTypes['locale']
+export type TypedLocale<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { locale: infer L } ? L : UntypedPayloadTypes['locale']
 
-export type TypedFallbackLocale = GeneratedTypes['fallbackLocale']
+export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
  * @todo rename to `User` in 4.0
  */
-export type TypedUser = GeneratedTypes['user']
+export type TypedUser = PayloadTypes['user']
 
-export type TypedAuthOperations<TGeneratedTypes extends GeneratedTypesShape = GeneratedTypes> =
-  TGeneratedTypes extends { auth: infer A } ? A : UntypedGeneratedTypes['auth']
+export type TypedAuthOperations<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
+  TPayloadTypes extends { auth: infer A } ? A : UntypedPayloadTypes['auth']
 
-export type AuthCollectionSlug<TGeneratedTypes extends GeneratedTypesShape> = StringKeyOf<
-  TypedAuthOperations<TGeneratedTypes>
+export type AuthCollectionSlug<TPayloadTypes extends PayloadTypesShape> = StringKeyOf<
+  TypedAuthOperations<TPayloadTypes>
 >
 
-export type TypedJobs = GeneratedTypes['jobs']
+export type TypedJobs = PayloadTypes['jobs']
 
-type HasPayloadJobsType = 'payload-jobs' extends keyof GeneratedTypes['collections'] ? true : false
+// Check if payload-jobs exists in the AUGMENTED types (not the fallback with index signature)
+type HasPayloadJobsType = GeneratedTypes extends { collections: infer C }
+  ? 'payload-jobs' extends keyof C
+    ? true
+    : false
+  : false
 
 /**
  * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).
@@ -464,7 +468,7 @@ export class BasePayload {
   ): Promise<
     PaginatedDocs<
       TDraft extends true
-        ? GeneratedTypes extends { strictDraftTypes: true }
+        ? PayloadTypes extends { strictDraftTypes: true }
           ? DraftTransformCollectionWithSelect<TSlug, TSelect>
           : TransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
