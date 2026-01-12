@@ -392,7 +392,6 @@ export const Form: React.FC<FormProps> = (props) => {
       })
 
       try {
-        console.log({ formData })
         let res
 
         if (typeof actionArg === 'string') {
