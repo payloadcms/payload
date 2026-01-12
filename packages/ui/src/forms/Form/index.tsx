@@ -386,12 +386,12 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const formData = await contextRef.current.createFormData(overrides, {
-        data,
-        mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
-      })
-
       try {
+        const formData = await contextRef.current.createFormData(overrides, {
+          data,
+          mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+        })
+
         let res
 
         if (typeof actionArg === 'string') {
