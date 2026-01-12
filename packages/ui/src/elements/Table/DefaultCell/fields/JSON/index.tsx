@@ -5,17 +5,15 @@ import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.scss'
+import { stringifyTruncated } from '../../../../../utilities/stringifyTruncated.js'
 
 export const JSONCell: React.FC<DefaultCellComponentProps<JSONFieldClient>> = ({ cellData }) => {
   const { t } = useTranslation()
   try {
-    const cellDataString = JSON.stringify(cellData)
-    const textToShow =
-      cellDataString.length > 100 ? `${cellDataString.substring(0, 100)}\u2026` : cellDataString
-
+    const cellDataString = stringifyTruncated(cellData, 100)
     return (
       <code className="json-cell">
-        <span>{textToShow}</span>
+        <span>{cellDataString}</span>
       </code>
     )
   } catch (_ignore) {
