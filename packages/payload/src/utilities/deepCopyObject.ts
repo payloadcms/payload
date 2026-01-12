@@ -152,7 +152,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
     return value
   } else if (Array.isArray(value)) {
     return value.map((e) =>
-      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e, opts),
     ) as T
   } else {
     // Handle File objects by returning them as-is (don't serialize to plain object) or exclude if excludeFiles is provided
