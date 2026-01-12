@@ -135,7 +135,12 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
   }
 }
 
-export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(value: T): T {
+export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
+  value: T,
+  opts: {
+    excludeFiles?: boolean
+  } = {},
+): T {
   if (
     typeof value === 'object' &&
     value !== null &&
@@ -150,8 +155,12 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
       typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
     ) as T
   } else {
-    // Handle File objects by returning them as-is (don't serialize to plain object)
+    // Handle File objects by returning them as-is (don't serialize to plain object) or exclude if excludeFiles is provided
     if (value instanceof File) {
+      if (opts.excludeFiles) {
+        return undefined!
+      }
+
       return value as unknown as T
     }
     if (value instanceof Date) {
@@ -163,7 +172,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
       ret[k] =
         typeof v !== 'object' || v === null
           ? v
-          : (deepCopyObjectSimpleWithoutReactComponents(v as T) as any)
+          : (deepCopyObjectSimpleWithoutReactComponents(v as T, opts) as any)
     }
     return ret as unknown as T
   }
