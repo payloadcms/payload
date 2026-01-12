@@ -6,7 +6,7 @@ import type { PopulateType, SelectFromGlobalSlug, TransformGlobalWithSelect } fr
 export type FindGlobalOptions<
   T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
-  TSelect extends SelectType,
+  TSelect = SelectFromGlobalSlug<T, TSlug>,
 > = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.

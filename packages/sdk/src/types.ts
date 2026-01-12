@@ -6,122 +6,82 @@ import type {
   SelectType,
   Sort,
   TransformDataWithSelect,
-  TypedCollection,
-  TypedCollectionJoins,
-  TypedCollectionSelect,
-  TypedGlobal,
-  TypedGlobalSelect,
   TypeWithID,
-  UntypedPayloadTypes,
   Where,
 } from 'payload'
-import type { MarkOptional } from 'ts-essentials'
 
-/**
- * SDK-specific wrappers that ensure indexability when TGeneratedTypes is a generic parameter.
- * The intersection with the untyped version ensures TypeScript knows the result is always indexable.
- */
-type IndexableCollection<TGeneratedTypes extends PayloadTypesShape> =
-  TypedCollection<TGeneratedTypes> & UntypedPayloadTypes['collections']
-
-type IndexableGlobal<TGeneratedTypes extends PayloadTypesShape> = TypedGlobal<TGeneratedTypes> &
-  UntypedPayloadTypes['globals']
-
-type IndexableCollectionSelect<TGeneratedTypes extends PayloadTypesShape> =
-  TypedCollectionSelect<TGeneratedTypes> & UntypedPayloadTypes['collectionsSelect']
-
-type IndexableGlobalSelect<TGeneratedTypes extends PayloadTypesShape> =
-  TypedGlobalSelect<TGeneratedTypes> & UntypedPayloadTypes['globalsSelect']
-
-type IndexableCollectionJoins<TGeneratedTypes extends PayloadTypesShape> =
-  TypedCollectionJoins<TGeneratedTypes> & UntypedPayloadTypes['collectionsJoins']
-
+// Simple property access - PayloadTypesShape guarantees these properties exist
 export type DataFromCollectionSlug<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
-> = IndexableCollection<TGeneratedTypes>[TSlug]
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+> = T['collections'][TSlug]
 
 export type DataFromGlobalSlug<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends GlobalSlug<TGeneratedTypes>,
-> = IndexableGlobal<TGeneratedTypes>[TSlug]
+  T extends PayloadTypesShape,
+  TSlug extends GlobalSlug<T>,
+> = T['globals'][TSlug]
 
+// Intersection with SelectType ensures TypeScript knows the result satisfies SelectType
+// while preserving the specific collection select type for inference
 export type SelectFromCollectionSlug<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
-> = IndexableCollectionSelect<TGeneratedTypes>[TSlug]
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+> = SelectType & T['collectionsSelect'][TSlug]
 
 export type SelectFromGlobalSlug<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends GlobalSlug<TGeneratedTypes>,
-> = IndexableGlobalSelect<TGeneratedTypes>[TSlug]
+  T extends PayloadTypesShape,
+  TSlug extends GlobalSlug<T>,
+> = SelectType & T['globalsSelect'][TSlug]
 
 export type TransformCollectionWithSelect<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
   TSelect,
 > = TSelect extends SelectType
-  ? TransformDataWithSelect<
-      DataFromCollectionSlug<TGeneratedTypes, TSlug> & (JsonObject & TypeWithID),
-      TSelect
-    >
-  : DataFromCollectionSlug<TGeneratedTypes, TSlug>
+  ? TransformDataWithSelect<(JsonObject & TypeWithID) & T['collections'][TSlug], TSelect>
+  : T['collections'][TSlug]
 
 export type TransformGlobalWithSelect<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends GlobalSlug<TGeneratedTypes>,
+  T extends PayloadTypesShape,
+  TSlug extends GlobalSlug<T>,
   TSelect,
 > = TSelect extends SelectType
-  ? TransformDataWithSelect<DataFromGlobalSlug<TGeneratedTypes, TSlug> & JsonObject, TSelect>
-  : DataFromGlobalSlug<TGeneratedTypes, TSlug>
+  ? TransformDataWithSelect<JsonObject & T['globals'][TSlug], TSelect>
+  : T['globals'][TSlug]
 
-export type RequiredDataFromCollection<TData> = MarkOptional<
-  JsonObject & TData,
-  'createdAt' | 'id' | 'sizes' | 'updatedAt'
->
+type SystemFields = 'createdAt' | 'id' | 'sizes' | 'updatedAt'
+
+export type RequiredDataFromCollection<TData> = Omit<TData, SystemFields> &
+  Partial<Pick<Record<SystemFields, unknown> & TData, SystemFields>>
 
 export type RequiredDataFromCollectionSlug<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
-> = RequiredDataFromCollection<DataFromCollectionSlug<TGeneratedTypes, TSlug>>
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+> = RequiredDataFromCollection<T['collections'][TSlug]>
 
-export type JoinQuery<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
-> =
-  IndexableCollectionJoins<TGeneratedTypes>[TSlug] extends Record<string, string>
+export type JoinQuery<T extends PayloadTypesShape, TSlug extends CollectionSlug<T>> =
+  T['collectionsJoins'][TSlug] extends Record<string, string>
     ?
         | false
         | Partial<{
-            [K in keyof IndexableCollectionJoins<TGeneratedTypes>[TSlug]]:
-              | {
-                  count?: boolean
-                  limit?: number
-                  page?: number
-                  sort?: Sort
-                  where?: Where
-                }
+            [K in keyof T['collectionsJoins'][TSlug]]:
+              | { count?: boolean; limit?: number; page?: number; sort?: Sort; where?: Where }
               | false
           }>
     : never
 
-export type PopulateType<TGeneratedTypes extends PayloadTypesShape> = Partial<
-  IndexableCollectionSelect<TGeneratedTypes>
->
+export type PopulateType<T extends PayloadTypesShape> = Partial<T['collectionsSelect']>
 
 export type IDType<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
-> = (DataFromCollectionSlug<TGeneratedTypes, TSlug> & TypeWithID)['id']
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+> = (T['collections'][TSlug] & TypeWithID)['id']
 
 export type BulkOperationResult<
-  TGeneratedTypes extends PayloadTypesShape,
-  TSlug extends CollectionSlug<TGeneratedTypes>,
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
   TSelect,
 > = {
-  docs: TransformCollectionWithSelect<TGeneratedTypes, TSlug, TSelect>[]
-  errors: {
-    id: IDType<TGeneratedTypes, TSlug>
-    message: string
-  }[]
+  docs: TransformCollectionWithSelect<T, TSlug, TSelect>[]
+  errors: { id: IDType<T, TSlug>; message: string }[]
 }

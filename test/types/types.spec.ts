@@ -4,9 +4,11 @@ import type {
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
+  JsonObject,
   PaginatedDocs,
   SelectType,
   TypedCollectionSelect,
+  TypeWithID,
   TypeWithVersion,
   Where,
 } from 'payload'
@@ -952,6 +954,40 @@ describe('Types testing', () => {
         | 'posts'
         | 'users'
       >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct data for collection in create', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          richText: {
+            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+          },
+          selectField: 'option-1',
+          radioField: 'option-1',
+        },
+      })
+      expect(result).type.toBe<JsonObject & LocalConfig['collections']['posts'] & TypeWithID>()
+    })
+
+    test('SDK create data should be typed and reject invalid properties', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      expect(
+        _sdk.create({
+          collection: 'posts',
+          data: {
+            title: 'Test Post',
+            richText: {
+              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            },
+            selectField: 'option-1',
+            radioField: 'option-1',
+            invalidProperty: 'should error',
+          },
+        }),
+      ).type.toRaiseError()
     })
   })
 

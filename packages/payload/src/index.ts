@@ -166,12 +166,28 @@ export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
- * Loose constraint for PayloadTypes - just an object.
- * Used in generic constraints to allow both:
+ * Shape constraint for PayloadTypes.
+ * Matches the structure of generated Config types, allowing both:
  * 1. PayloadTypes (module-augmented) to satisfy it
- * 2. Config (from payload-types.ts with typed properties) to satisfy it
+ * 2. Config (from payload-types.ts) to satisfy it
+ *
+ * By defining the actual shape, we can use simple property access (T['collections'])
+ * instead of conditional types throughout the codebase.
  */
-export type PayloadTypesShape = object
+export interface PayloadTypesShape {
+  auth: Record<string, unknown>
+  blocks: Record<string, unknown>
+  collections: Record<string, unknown>
+  collectionsJoins: Record<string, unknown>
+  collectionsSelect: Record<string, unknown>
+  db: { defaultIDType: unknown }
+  fallbackLocale: unknown
+  globals: Record<string, unknown>
+  globalsSelect: Record<string, unknown>
+  jobs: unknown
+  locale: unknown
+  user: unknown
+}
 
 /**
  * Untyped fallback types. Uses the SAME property names as generated types.
@@ -259,57 +275,48 @@ export type PayloadTypes = IsAugmented extends true
   ? GeneratedTypes & Omit<UntypedPayloadTypes, keyof GeneratedTypes>
   : UntypedPayloadTypes
 
-export type TypedCollection<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { collections: infer C } ? C : UntypedPayloadTypes['collections']
+export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
 
 export type TypedBlock = PayloadTypes['blocks']
 
-export type TypedUploadCollection<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  NonNever<{
-    [TCollectionSlug in keyof TypedCollection<TPayloadTypes>]:
-      | 'filename'
-      | 'filesize'
-      | 'mimeType'
-      | 'url' extends keyof TypedCollection<TPayloadTypes>[TCollectionSlug]
-      ? TypedCollection<TPayloadTypes>[TCollectionSlug]
-      : never
-  }>
+export type TypedUploadCollection<T extends PayloadTypesShape = PayloadTypes> = NonNever<{
+  [TSlug in keyof T['collections']]:
+    | 'filename'
+    | 'filesize'
+    | 'mimeType'
+    | 'url' extends keyof T['collections'][TSlug]
+    ? T['collections'][TSlug]
+    : never
+}>
 
-export type TypedCollectionSelect<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { collectionsSelect: infer C }
-    ? C
-    : UntypedPayloadTypes['collectionsSelect']
+export type TypedCollectionSelect<T extends PayloadTypesShape = PayloadTypes> =
+  T['collectionsSelect']
 
-export type TypedCollectionJoins<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { collectionsJoins: infer C } ? C : UntypedPayloadTypes['collectionsJoins']
+export type TypedCollectionJoins<T extends PayloadTypesShape = PayloadTypes> = T['collectionsJoins']
 
-export type TypedGlobal<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { globals: infer G } ? G : UntypedPayloadTypes['globals']
+export type TypedGlobal<T extends PayloadTypesShape = PayloadTypes> = T['globals']
 
-export type TypedGlobalSelect<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { globalsSelect: infer G } ? G : UntypedPayloadTypes['globalsSelect']
+export type TypedGlobalSelect<T extends PayloadTypesShape = PayloadTypes> = T['globalsSelect']
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug<TPayloadTypes extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
-  TypedCollection<TPayloadTypes>
+export type CollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  T['collections']
 >
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  StringKeyOf<TypedUploadCollection<TPayloadTypes>>
+export type UploadCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  TypedUploadCollection<T>
+>
 
 export type DefaultDocumentIDType = PayloadTypes['db']['defaultIDType']
 
-export type GlobalSlug<TPayloadTypes extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
-  TypedGlobal<TPayloadTypes>
->
+export type GlobalSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['globals']>
 
-export type TypedLocale<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { locale: infer L } ? L : UntypedPayloadTypes['locale']
+export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale']
 
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
@@ -318,12 +325,9 @@ export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
  */
 export type TypedUser = PayloadTypes['user']
 
-export type TypedAuthOperations<TPayloadTypes extends PayloadTypesShape = PayloadTypes> =
-  TPayloadTypes extends { auth: infer A } ? A : UntypedPayloadTypes['auth']
+export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-export type AuthCollectionSlug<TPayloadTypes extends PayloadTypesShape> = StringKeyOf<
-  TypedAuthOperations<TPayloadTypes>
->
+export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
 
 export type TypedJobs = PayloadTypes['jobs']
 

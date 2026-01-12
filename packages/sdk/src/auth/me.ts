@@ -1,4 +1,4 @@
-import type { AuthCollectionSlug, PayloadTypesShape } from 'payload'
+import type { AuthCollectionSlug, CollectionSlug, PayloadTypesShape } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromCollectionSlug } from '../types.js'
@@ -13,8 +13,7 @@ export type MeResult<T extends PayloadTypesShape, TSlug extends AuthCollectionSl
   message: string
   strategy?: string
   token?: string
-  // @ts-expect-error auth collection and user collection
-  user: DataFromCollectionSlug<T, TSlug>
+  user: DataFromCollectionSlug<T, CollectionSlug<T> & TSlug>
 }
 
 export async function me<T extends PayloadTypesShape, TSlug extends AuthCollectionSlug<T>>(
