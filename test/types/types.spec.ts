@@ -1,10 +1,14 @@
 import type {
   BulkOperationResult,
+  CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  GeneratedTypes,
   JoinQuery,
   PaginatedDocs,
+  PayloadTypesShape,
   SelectType,
+  TypedCollectionSelect,
   TypeWithVersion,
   Where,
 } from 'payload'
@@ -19,10 +23,12 @@ import {
   type SerializedTextNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
+import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  Config as LocalConfig,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -163,6 +169,23 @@ describe('Types testing', () => {
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalField')
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalNumber')
     })
+  })
+
+  test('ResolveFallback allows generic indexing', () => {
+    type Select<
+      T extends PayloadTypesShape,
+      S extends CollectionSlug<T>,
+    > = TypedCollectionSelect<T>[S]
+    expect<Select<GeneratedTypes, 'users'>>().type.not.toBeNever()
+  })
+
+  test('TypedCollectionSelect resolves correctly with concrete types', () => {
+    type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']
+    expect<SelectUsers>().type.not.toBeNever()
+
+    // Test with Config - should also work
+    type SelectPosts = TypedCollectionSelect<LocalConfig>['posts']
+    expect<SelectPosts>().type.not.toBeNever()
   })
 
   describe('fields', () => {
@@ -886,6 +909,28 @@ describe('Types testing', () => {
         })
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
+    })
+  })
+
+  describe('sdk', () => {
+    test('ensure generated types can be manually assigned to PayloadSDK generic', () => {
+      expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
+    })
+
+    test('ensure SDK with explicit generic uses has correct collection types', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      // ensure collection property of sdk.create has posts in the union type
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
     })
   })
 
