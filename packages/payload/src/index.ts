@@ -166,10 +166,33 @@ export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
- * Untyped, base GeneratedTypes interface.
+ * Shape constraint for PayloadTypes.
+ * Matches the structure of generated Config types.
+ *
+ * By defining the actual shape, we can use simple property access (T['collections'])
+ * instead of conditional types throughout the codebase.
  */
-export interface BaseGeneratedTypes {
-  authUntyped: {
+export interface PayloadTypesShape {
+  auth: Record<string, unknown>
+  blocks: Record<string, unknown>
+  collections: Record<string, unknown>
+  collectionsJoins: Record<string, unknown>
+  collectionsSelect: Record<string, unknown>
+  db: { defaultIDType: unknown }
+  fallbackLocale: unknown
+  globals: Record<string, unknown>
+  globalsSelect: Record<string, unknown>
+  jobs: unknown
+  locale: unknown
+  user: unknown
+}
+
+/**
+ * Untyped fallback types. Uses the SAME property names as generated types.
+ * PayloadTypes merges GeneratedTypes with these fallbacks.
+ */
+export interface UntypedPayloadTypes {
+  auth: {
     [slug: string]: {
       forgotPassword: {
         email: string
@@ -187,33 +210,31 @@ export interface BaseGeneratedTypes {
       }
     }
   }
-
-  blocksUntyped: {
+  blocks: {
     [slug: string]: JsonObject
   }
-  collectionsJoinsUntyped: {
-    [slug: string]: {
-      [schemaPath: string]: CollectionSlug
-    }
-  }
-  collectionsSelectUntyped: {
-    [slug: string]: SelectType
-  }
-
-  collectionsUntyped: {
+  collections: {
     [slug: string]: JsonObject & TypeWithID
   }
-  dbUntyped: {
-    defaultIDType: number | string
+  collectionsJoins: {
+    [slug: string]: {
+      [schemaPath: string]: string
+    }
   }
-  fallbackLocaleUntyped: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
-  globalsSelectUntyped: {
+  collectionsSelect: {
     [slug: string]: SelectType
   }
-  globalsUntyped: {
+  db: {
+    defaultIDType: number | string
+  }
+  fallbackLocale: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
+  globals: {
     [slug: string]: JsonObject
   }
-  jobsUntyped: {
+  globalsSelect: {
+    [slug: string]: SelectType
+  }
+  jobs: {
     tasks: {
       [slug: string]: {
         input?: JsonObject
@@ -226,93 +247,91 @@ export interface BaseGeneratedTypes {
       }
     }
   }
-  localeUntyped: null | string
-  userUntyped: UntypedUser
+  locale: null | string
+  user: UntypedUser
 }
 
 /**
- * Typed GeneratedTypes interface. This interface will be module-augmented by the `payload-types.ts` file.
+ * Interface to be module-augmented by the `payload-types.ts` file.
+ * When augmented, its properties take precedence over UntypedPayloadTypes.
  */
-export interface GeneratedTypes extends BaseGeneratedTypes {}
+export interface GeneratedTypes {}
 
 /**
- * Returns `TType[TDesiredKey]` if it exists, otherwise `TType[TFallbackKey]`.
- *
- * @see test "ResolveFallback pattern allows generic indexing" in test/types/types.spec.ts.
- * Read the comment in this test before modifying this type. We *have* to use `infer` here, not `extends keyof`.
+ * Check if GeneratedTypes has been augmented (has any keys).
  */
-type ResolveFallback<TType, TDesiredKey extends string, TFallbackKey extends keyof TType> =
-  TType extends Record<TDesiredKey, infer TValue> ? TValue : TType[TFallbackKey]
+type IsAugmented = keyof GeneratedTypes extends never ? false : true
 
-export type TypedCollection<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'collections', 'collectionsUntyped'>
+/**
+ * PayloadTypes merges GeneratedTypes with UntypedPayloadTypes.
+ * - When augmented: uses augmented properties, fills gaps with untyped fallbacks
+ * - When not augmented: uses UntypedPayloadTypes entirely
+ *
+ * This pattern is similar to the Job type - it automatically resolves to the right type.
+ */
+export type PayloadTypes = IsAugmented extends true
+  ? GeneratedTypes & Omit<UntypedPayloadTypes, keyof GeneratedTypes>
+  : UntypedPayloadTypes
 
-export type TypedBlock = ResolveFallback<GeneratedTypes, 'blocks', 'blocksUntyped'>
+export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
 
-export type TypedUploadCollection = NonNever<{
-  [K in keyof TypedCollection]:
+export type TypedBlock = PayloadTypes['blocks']
+
+export type TypedUploadCollection<T extends PayloadTypesShape = PayloadTypes> = NonNever<{
+  [TSlug in keyof T['collections']]:
     | 'filename'
     | 'filesize'
     | 'mimeType'
-    | 'url' extends keyof TypedCollection[K]
-    ? TypedCollection[K]
+    | 'url' extends keyof T['collections'][TSlug]
+    ? T['collections'][TSlug]
     : never
 }>
 
-export type TypedCollectionSelect<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  ResolveFallback<TGeneratedTypes, 'collectionsSelect', 'collectionsSelectUntyped'>
+export type TypedCollectionSelect<T extends PayloadTypesShape = PayloadTypes> =
+  T['collectionsSelect']
 
-export type TypedCollectionJoins = ResolveFallback<
-  GeneratedTypes,
-  'collectionsJoins',
-  'collectionsJoinsUntyped'
->
+export type TypedCollectionJoins<T extends PayloadTypesShape = PayloadTypes> = T['collectionsJoins']
 
-export type TypedGlobal = ResolveFallback<GeneratedTypes, 'globals', 'globalsUntyped'>
+export type TypedGlobal<T extends PayloadTypesShape = PayloadTypes> = T['globals']
 
-export type TypedGlobalSelect = ResolveFallback<
-  GeneratedTypes,
-  'globalsSelect',
-  'globalsSelectUntyped'
->
+export type TypedGlobalSelect<T extends PayloadTypesShape = PayloadTypes> = T['globalsSelect']
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug<TGeneratedTypes extends BaseGeneratedTypes = GeneratedTypes> =
-  StringKeyOf<TypedCollection<TGeneratedTypes>>
+export type CollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  T['collections']
+>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
-
-export type DefaultDocumentIDType = ResolveFallback<
-  GeneratedTypes,
-  'db',
-  'dbUntyped'
->['defaultIDType']
-export type GlobalSlug = StringKeyOf<TypedGlobal>
-
-export type TypedLocale = ResolveFallback<GeneratedTypes, 'locale', 'localeUntyped'>
-
-export type TypedFallbackLocale = ResolveFallback<
-  GeneratedTypes,
-  'fallbackLocale',
-  'fallbackLocaleUntyped'
+export type UploadCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  TypedUploadCollection<T>
 >
+
+export type DefaultDocumentIDType = PayloadTypes['db']['defaultIDType']
+
+export type GlobalSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['globals']>
+
+export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale']
+
+export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
  * @todo rename to `User` in 4.0
  */
-export type TypedUser = ResolveFallback<GeneratedTypes, 'user', 'userUntyped'>
+export type TypedUser = PayloadTypes['user']
 
-export type TypedAuthOperations = ResolveFallback<GeneratedTypes, 'auth', 'authUntyped'>
+export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-export type TypedJobs = ResolveFallback<GeneratedTypes, 'jobs', 'jobsUntyped'>
+export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
 
-type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
-  ? 'payload-jobs' extends keyof TypedCollection
+export type TypedJobs = PayloadTypes['jobs']
+
+// Check if payload-jobs exists in the AUGMENTED types (not the fallback with index signature)
+type HasPayloadJobsType = GeneratedTypes extends { collections: infer C }
+  ? 'payload-jobs' extends keyof C
     ? true
     : false
   : false
