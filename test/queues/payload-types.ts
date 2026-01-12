@@ -141,6 +141,7 @@ export interface Config {
       exclusiveConcurrency: WorkflowExclusiveConcurrency;
       noConcurrency: WorkflowNoConcurrency;
       queueSpecificConcurrency: WorkflowQueueSpecificConcurrency;
+      supersedesConcurrency: WorkflowSupersedesConcurrency;
     };
   };
 }
@@ -364,6 +365,7 @@ export interface PayloadJob {
         | 'exclusiveConcurrency'
         | 'noConcurrency'
         | 'queueSpecificConcurrency'
+        | 'supersedesConcurrency'
       )
     | null;
   taskSlug?:
@@ -916,6 +918,16 @@ export interface WorkflowNoConcurrency {
  * via the `definition` "WorkflowQueueSpecificConcurrency".
  */
 export interface WorkflowQueueSpecificConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSupersedesConcurrency".
+ */
+export interface WorkflowSupersedesConcurrency {
   input: {
     resourceId: string;
     delayMs?: number | null;

@@ -161,6 +161,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     // Compute concurrency key from workflow or task config (only if feature is enabled)
     if (payload.config.jobs?.enableConcurrencyControl) {
       let concurrencyKey: null | string = null
+      let supersedes = false
       const queueName = queue || 'default'
 
       if (args.workflow) {
@@ -171,6 +172,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
             concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
           } else {
             concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
+            supersedes = concurrencyConfig.supersedes ?? false
           }
         }
       } else if (args.task) {
@@ -181,12 +183,43 @@ export const getJobsLocalAPI = (payload: Payload) => ({
             concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
           } else {
             concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
+            supersedes = concurrencyConfig.supersedes ?? false
           }
         }
       }
 
       if (concurrencyKey) {
         data.concurrencyKey = concurrencyKey
+
+        // If supersedes is enabled, delete older pending jobs with the same key
+        if (supersedes) {
+          if (payload.config.jobs.runHooks) {
+            await payload.delete({
+              collection: jobsCollectionSlug,
+              depth: 0,
+              disableTransaction: true,
+              where: {
+                and: [
+                  { concurrencyKey: { equals: concurrencyKey } },
+                  { processing: { equals: false } },
+                  { completedAt: { exists: false } },
+                ],
+              },
+            })
+          } else {
+            await payload.db.deleteMany({
+              collection: jobsCollectionSlug,
+              req,
+              where: {
+                and: [
+                  { concurrencyKey: { equals: concurrencyKey } },
+                  { processing: { equals: false } },
+                  { completedAt: { exists: false } },
+                ],
+              },
+            })
+          }
+        }
       }
     }
 

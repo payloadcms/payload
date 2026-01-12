@@ -2391,5 +2391,251 @@ describe('Queues - Payload', () => {
       expect(results[0].completedAt).toBeDefined()
       expect(results[1].completedAt).toBeDefined()
     })
+
+    describe('supersedes', () => {
+      it('should delete older pending jobs when supersedes is enabled', async () => {
+        payload.config.jobs.deleteJobOnComplete = false
+
+        // Queue 3 jobs with same key - newer ones should supersede older pending ones
+        const jobA = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'supersedes-test', delayMs: 10 },
+        })
+
+        const jobB = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'supersedes-test', delayMs: 10 },
+        })
+
+        const jobC = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'supersedes-test', delayMs: 10 },
+        })
+
+        // Job A and B should have been deleted when C was queued
+        const jobAAfter = await payload
+          .findByID({
+            collection: 'payload-jobs',
+            id: jobA.id,
+          })
+          .catch(() => null)
+
+        const jobBAfter = await payload
+          .findByID({
+            collection: 'payload-jobs',
+            id: jobB.id,
+          })
+          .catch(() => null)
+
+        const jobCAfter = await payload.findByID({
+          collection: 'payload-jobs',
+          id: jobC.id,
+        })
+
+        // A and B should be deleted
+        expect(jobAAfter).toBeNull()
+        expect(jobBAfter).toBeNull()
+        // C should still exist
+        expect(jobCAfter).not.toBeNull()
+        expect(jobCAfter.concurrencyKey).toBe('supersedes:supersedes-test')
+      })
+
+      it('should not delete running jobs when supersedes is enabled', async () => {
+        payload.config.jobs.deleteJobOnComplete = false
+
+        // Queue and start running a job
+        const runningJob = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'supersedes-running-test', delayMs: 500 },
+        })
+
+        // Start the job running (don't await completion)
+        const runPromise = payload.jobs.run({ silent: true, limit: 1 })
+
+        // Wait for job to start processing
+        await wait(50)
+
+        // Queue another job with same key while first is running
+        const newJob = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'supersedes-running-test', delayMs: 10 },
+        })
+
+        // The running job should NOT be deleted
+        const runningJobAfter = await payload.findByID({
+          collection: 'payload-jobs',
+          id: runningJob.id,
+        })
+
+        expect(runningJobAfter).not.toBeNull()
+        expect(runningJobAfter.processing).toBe(true)
+
+        // The new job should exist
+        const newJobAfter = await payload.findByID({
+          collection: 'payload-jobs',
+          id: newJob.id,
+        })
+
+        expect(newJobAfter).not.toBeNull()
+
+        // Wait for running job to complete
+        await runPromise
+
+        // Now run the new job
+        await payload.jobs.run({ silent: true, limit: 10 })
+
+        const finalResults = await Promise.all([
+          payload.findByID({ collection: 'payload-jobs', id: runningJob.id }),
+          payload.findByID({ collection: 'payload-jobs', id: newJob.id }),
+        ])
+
+        // Both should have completed
+        expect(finalResults[0].completedAt).toBeDefined()
+        expect(finalResults[1].completedAt).toBeDefined()
+      })
+
+      it('should handle supersedes with multiple sequential queues', async () => {
+        payload.config.jobs.deleteJobOnComplete = false
+
+        // Queue jobs sequentially - each new job should delete previous pending ones
+        const job1 = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'sequential-test', delayMs: 10 },
+        })
+
+        const job2 = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'sequential-test', delayMs: 10 },
+        })
+
+        const job3 = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'sequential-test', delayMs: 10 },
+        })
+
+        const job4 = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'sequential-test', delayMs: 10 },
+        })
+
+        const job5 = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'sequential-test', delayMs: 10 },
+        })
+
+        // Count how many jobs still exist
+        const jobs = [job1, job2, job3, job4, job5]
+        let existingCount = 0
+        let lastExistingJob = null
+
+        for (const job of jobs) {
+          const result = await payload
+            .findByID({
+              collection: 'payload-jobs',
+              id: job.id,
+            })
+            .catch(() => null)
+
+          if (result) {
+            existingCount++
+            lastExistingJob = result
+          }
+        }
+
+        // Only one job should remain (the last one queued won due to supersedes)
+        expect(existingCount).toBe(1)
+        expect(lastExistingJob).not.toBeNull()
+        expect(lastExistingJob.id).toBe(job5.id) // Last job should be the survivor
+
+        // Run it to completion
+        await payload.jobs.run({ silent: true, limit: 10 })
+
+        const finalJob = await payload.findByID({
+          collection: 'payload-jobs',
+          id: lastExistingJob.id,
+        })
+
+        expect(finalJob.completedAt).toBeDefined()
+      })
+
+      it('should supersede middle job when one is running and another queued', async () => {
+        payload.config.jobs.deleteJobOnComplete = false
+
+        // Queue and start running first job
+        const runningJob = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'middle-test', delayMs: 300 },
+        })
+
+        // Start job A running (don't await)
+        const runPromise = payload.jobs.run({ silent: true, limit: 1 })
+
+        // Wait for job to start
+        await wait(50)
+
+        // Queue second job while first is running
+        const middleJob = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'middle-test', delayMs: 10 },
+        })
+
+        // Queue third job - should delete middleJob
+        const latestJob = await payload.jobs.queue({
+          workflow: 'supersedesConcurrency',
+          input: { resourceId: 'middle-test', delayMs: 10 },
+        })
+
+        // Check states immediately after queuing
+        const runningJobCheck = await payload.findByID({
+          collection: 'payload-jobs',
+          id: runningJob.id,
+        })
+
+        const middleJobCheck = await payload
+          .findByID({
+            collection: 'payload-jobs',
+            id: middleJob.id,
+          })
+          .catch(() => null)
+
+        const latestJobCheck = await payload.findByID({
+          collection: 'payload-jobs',
+          id: latestJob.id,
+        })
+
+        // Running job should still exist and be processing
+        expect(runningJobCheck.processing).toBe(true)
+        // Middle job should be deleted (superseded)
+        expect(middleJobCheck).toBeNull()
+        // Latest job should exist and be pending
+        expect(latestJobCheck).not.toBeNull()
+        expect(latestJobCheck.processing).toBe(false)
+
+        // Wait for running job to complete
+        await runPromise
+
+        // Run again to process the latest job
+        await payload.jobs.run({ silent: true, limit: 10 })
+
+        const finalResults = await Promise.all([
+          payload.findByID({ collection: 'payload-jobs', id: runningJob.id }),
+          payload.findByID({ collection: 'payload-jobs', id: latestJob.id }),
+        ])
+
+        // Both running and latest jobs should complete
+        expect(finalResults[0].completedAt).toBeDefined()
+        expect(finalResults[1].completedAt).toBeDefined()
+
+        // Verify middle job is still deleted
+        const middleJobFinal = await payload
+          .findByID({
+            collection: 'payload-jobs',
+            id: middleJob.id,
+          })
+          .catch(() => null)
+
+        expect(middleJobFinal).toBeNull()
+      })
+    })
   })
 })
