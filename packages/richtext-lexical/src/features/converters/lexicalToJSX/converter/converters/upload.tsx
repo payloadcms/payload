@@ -14,6 +14,8 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
 
     const uploadDoc = uploadNode.value as FileData & TypeWithID
 
+    const alt = (uploadNode.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || ''
+
     const url = uploadDoc.url
 
     /**
@@ -31,9 +33,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
      * If the upload is a simple image with no different sizes, return a simple img tag
      */
     if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {
-      return (
-        <img alt={uploadDoc.filename} height={uploadDoc.height} src={url} width={uploadDoc.width} />
-      )
+      return <img alt={alt} height={uploadDoc.height} src={url} width={uploadDoc.width} />
     }
 
     /**
@@ -71,13 +71,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
 
     // Add the default img tag
     pictureJSX.push(
-      <img
-        alt={uploadDoc?.filename}
-        height={uploadDoc?.height}
-        key={'image'}
-        src={url}
-        width={uploadDoc?.width}
-      />,
+      <img alt={alt} height={uploadDoc?.height} key={'image'} src={url} width={uploadDoc?.width} />,
     )
     return <picture>{pictureJSX}</picture>
   },

@@ -81,6 +81,11 @@ export const deTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail und dein Passwort bleibt unverändert.',
   },
+  dashboard: {
+    addWidget: 'Widget hinzufügen',
+    deleteWidget: 'Löschen Sie das Widget {{id}}',
+    searchWidgets: 'Suche Widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',
     autosaving: 'Es gab ein Problem bei der automatischen Speicherung für dieses Dokument',

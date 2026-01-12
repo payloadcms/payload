@@ -94,7 +94,12 @@ type RouteTransitionContextValue = {
 
 const RouteTransitionContext = React.createContext<RouteTransitionContextValue>({
   isTransitioning: false,
-  startRouteTransition: () => undefined,
+  // Default implementation: just call the callback directly (no transition animation)
+  startRouteTransition: (callback) => {
+    if (typeof callback === 'function') {
+      callback()
+    }
+  },
   transitionProgress: 0,
 })
 

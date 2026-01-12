@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    beforeOperation: BeforeOperation;
     'before-change-hooks': BeforeChangeHook;
     'before-validate': BeforeValidate;
     afterOperation: AfterOperation;
@@ -81,7 +82,6 @@ export interface Config {
     'data-hooks': DataHook;
     'before-delete-hooks': BeforeDeleteHook;
     'before-delete-2-hooks': BeforeDelete2Hook;
-    'field-paths': FieldPath;
     'value-hooks': ValueHook;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -90,6 +90,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    beforeOperation: BeforeOperationSelect<false> | BeforeOperationSelect<true>;
     'before-change-hooks': BeforeChangeHooksSelect<false> | BeforeChangeHooksSelect<true>;
     'before-validate': BeforeValidateSelect<false> | BeforeValidateSelect<true>;
     afterOperation: AfterOperationSelect<false> | AfterOperationSelect<true>;
@@ -104,7 +105,6 @@ export interface Config {
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
     'before-delete-hooks': BeforeDeleteHooksSelect<false> | BeforeDeleteHooksSelect<true>;
     'before-delete-2-hooks': BeforeDelete2HooksSelect<false> | BeforeDelete2HooksSelect<true>;
-    'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
     'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -112,8 +112,9 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     'data-hooks-global': DataHooksGlobal;
   };
@@ -149,10 +150,21 @@ export interface HooksUserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "beforeOperation".
+ */
+export interface BeforeOperation {
+  id: string;
+  category?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "before-change-hooks".
  */
 export interface BeforeChangeHook {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -162,7 +174,7 @@ export interface BeforeChangeHook {
  * via the `definition` "before-validate".
  */
 export interface BeforeValidate {
-  id: number;
+  id: string;
   title?: string | null;
   selection?: ('a' | 'b') | null;
   updatedAt: string;
@@ -173,7 +185,7 @@ export interface BeforeValidate {
  * via the `definition` "afterOperation".
  */
 export interface AfterOperation {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -183,7 +195,7 @@ export interface AfterOperation {
  * via the `definition` "context-hooks".
  */
 export interface ContextHook {
-  id: number;
+  id: string;
   value?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -193,7 +205,7 @@ export interface ContextHook {
  * via the `definition` "transforms".
  */
 export interface Transform {
-  id: number;
+  id: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -212,7 +224,7 @@ export interface Transform {
  * via the `definition` "hooks".
  */
 export interface Hook {
-  id: number;
+  id: string;
   fieldBeforeValidate?: boolean | null;
   fieldBeforeChange?: boolean | null;
   fieldAfterChange?: boolean | null;
@@ -230,20 +242,20 @@ export interface Hook {
  * via the `definition` "nested-after-read-hooks".
  */
 export interface NestedAfterReadHook {
-  id: number;
+  id: string;
   text?: string | null;
   group?: {
     array?:
       | {
           input?: string | null;
           afterRead?: string | null;
-          shouldPopulate?: (number | null) | Relation;
+          shouldPopulate?: (string | null) | Relation;
           id?: string | null;
         }[]
       | null;
     subGroup?: {
       afterRead?: string | null;
-      shouldPopulate?: (number | null) | Relation;
+      shouldPopulate?: (string | null) | Relation;
     };
   };
   updatedAt: string;
@@ -254,7 +266,7 @@ export interface NestedAfterReadHook {
  * via the `definition` "relations".
  */
 export interface Relation {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -264,7 +276,7 @@ export interface Relation {
  * via the `definition` "nested-after-change-hooks".
  */
 export interface NestedAfterChangeHook {
-  id: number;
+  id: string;
   text?: string | null;
   group?: {
     array?:
@@ -274,6 +286,21 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -282,7 +309,7 @@ export interface NestedAfterChangeHook {
  * via the `definition` "chaining-hooks".
  */
 export interface ChainingHook {
-  id: number;
+  id: string;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -292,7 +319,7 @@ export interface ChainingHook {
  * via the `definition` "hooks-users".
  */
 export interface HooksUser {
-  id: number;
+  id: string;
   roles: ('admin' | 'user')[];
   afterLoginHook?: boolean | null;
   updatedAt: string;
@@ -318,7 +345,7 @@ export interface HooksUser {
  * via the `definition` "data-hooks".
  */
 export interface DataHook {
-  id: number;
+  id: string;
   field_collectionAndField?: string | null;
   collection_beforeOperation_collection?: string | null;
   collection_beforeChange_collection?: string | null;
@@ -334,7 +361,7 @@ export interface DataHook {
  * via the `definition` "before-delete-hooks".
  */
 export interface BeforeDeleteHook {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -344,325 +371,8 @@ export interface BeforeDeleteHook {
  * via the `definition` "before-delete-2-hooks".
  */
 export interface BeforeDelete2Hook {
-  id: number;
+  id: string;
   title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "field-paths".
- */
-export interface FieldPath {
-  id: number;
-  topLevelNamedField?: string | null;
-  array?:
-    | {
-        fieldWithinArray?: string | null;
-        nestedArray?:
-          | {
-              fieldWithinNestedArray?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        fieldWithinRowWithinArray?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  fieldWithinRow?: string | null;
-  fieldWithinUnnamedTab?: string | null;
-  fieldWithinNestedUnnamedTab?: string | null;
-  namedTab?: {
-    fieldWithinNamedTab?: string | null;
-  };
-  topLevelNamedField_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  topLevelNamedField_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  topLevelNamedField_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  topLevelNamedField_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinArray_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinArray_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinArray_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinArray_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedArray_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedArray_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedArray_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedArray_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRowWithinArray_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRowWithinArray_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRowWithinArray_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRow_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRow_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRow_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinRow_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinUnnamedTab_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinUnnamedTab_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinUnnamedTab_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinUnnamedTab_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedUnnamedTab_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedUnnamedTab_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedUnnamedTab_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNestedUnnamedTab_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNamedTab_beforeValidate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNamedTab_beforeChange_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNamedTab_afterRead_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  fieldWithinNamedTab_beforeDuplicate_FieldPaths?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -671,7 +381,7 @@ export interface FieldPath {
  * via the `definition` "value-hooks".
  */
 export interface ValueHook {
-  id: number;
+  id: string;
   slug?: string | null;
   beforeValidate_value?: string | null;
   beforeChange_value?: string | null;
@@ -683,7 +393,7 @@ export interface ValueHook {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -700,76 +410,76 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
+        relationTo: 'beforeOperation';
+        value: string | BeforeOperation;
+      } | null)
+    | ({
         relationTo: 'before-change-hooks';
-        value: number | BeforeChangeHook;
+        value: string | BeforeChangeHook;
       } | null)
     | ({
         relationTo: 'before-validate';
-        value: number | BeforeValidate;
+        value: string | BeforeValidate;
       } | null)
     | ({
         relationTo: 'afterOperation';
-        value: number | AfterOperation;
+        value: string | AfterOperation;
       } | null)
     | ({
         relationTo: 'context-hooks';
-        value: number | ContextHook;
+        value: string | ContextHook;
       } | null)
     | ({
         relationTo: 'transforms';
-        value: number | Transform;
+        value: string | Transform;
       } | null)
     | ({
         relationTo: 'hooks';
-        value: number | Hook;
+        value: string | Hook;
       } | null)
     | ({
         relationTo: 'nested-after-read-hooks';
-        value: number | NestedAfterReadHook;
+        value: string | NestedAfterReadHook;
       } | null)
     | ({
         relationTo: 'nested-after-change-hooks';
-        value: number | NestedAfterChangeHook;
+        value: string | NestedAfterChangeHook;
       } | null)
     | ({
         relationTo: 'chaining-hooks';
-        value: number | ChainingHook;
+        value: string | ChainingHook;
       } | null)
     | ({
         relationTo: 'relations';
-        value: number | Relation;
+        value: string | Relation;
       } | null)
     | ({
         relationTo: 'hooks-users';
-        value: number | HooksUser;
+        value: string | HooksUser;
       } | null)
     | ({
         relationTo: 'data-hooks';
-        value: number | DataHook;
+        value: string | DataHook;
       } | null)
     | ({
         relationTo: 'before-delete-hooks';
-        value: number | BeforeDeleteHook;
+        value: string | BeforeDeleteHook;
       } | null)
     | ({
         relationTo: 'before-delete-2-hooks';
-        value: number | BeforeDelete2Hook;
-      } | null)
-    | ({
-        relationTo: 'field-paths';
-        value: number | FieldPath;
+        value: string | BeforeDelete2Hook;
       } | null)
     | ({
         relationTo: 'value-hooks';
-        value: number | ValueHook;
+        value: string | ValueHook;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'hooks-users';
-    value: number | HooksUser;
+    value: string | HooksUser;
   };
   updatedAt: string;
   createdAt: string;
@@ -779,10 +489,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'hooks-users';
-    value: number | HooksUser;
+    value: string | HooksUser;
   };
   key?: string | null;
   value?:
@@ -802,11 +512,21 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "beforeOperation_select".
+ */
+export interface BeforeOperationSelect<T extends boolean = true> {
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -915,6 +635,7 @@ export interface NestedAfterChangeHooksSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  lexical?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -995,68 +716,6 @@ export interface BeforeDelete2HooksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "field-paths_select".
- */
-export interface FieldPathsSelect<T extends boolean = true> {
-  topLevelNamedField?: T;
-  array?:
-    | T
-    | {
-        fieldWithinArray?: T;
-        nestedArray?:
-          | T
-          | {
-              fieldWithinNestedArray?: T;
-              id?: T;
-            };
-        fieldWithinRowWithinArray?: T;
-        id?: T;
-      };
-  fieldWithinRow?: T;
-  fieldWithinUnnamedTab?: T;
-  fieldWithinNestedUnnamedTab?: T;
-  namedTab?:
-    | T
-    | {
-        fieldWithinNamedTab?: T;
-      };
-  topLevelNamedField_beforeValidate_FieldPaths?: T;
-  topLevelNamedField_beforeChange_FieldPaths?: T;
-  topLevelNamedField_afterRead_FieldPaths?: T;
-  topLevelNamedField_beforeDuplicate_FieldPaths?: T;
-  fieldWithinArray_beforeValidate_FieldPaths?: T;
-  fieldWithinArray_beforeChange_FieldPaths?: T;
-  fieldWithinArray_afterRead_FieldPaths?: T;
-  fieldWithinArray_beforeDuplicate_FieldPaths?: T;
-  fieldWithinNestedArray_beforeValidate_FieldPaths?: T;
-  fieldWithinNestedArray_beforeChange_FieldPaths?: T;
-  fieldWithinNestedArray_afterRead_FieldPaths?: T;
-  fieldWithinNestedArray_beforeDuplicate_FieldPaths?: T;
-  fieldWithinRowWithinArray_beforeValidate_FieldPaths?: T;
-  fieldWithinRowWithinArray_beforeChange_FieldPaths?: T;
-  fieldWithinRowWithinArray_afterRead_FieldPaths?: T;
-  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?: T;
-  fieldWithinRow_beforeValidate_FieldPaths?: T;
-  fieldWithinRow_beforeChange_FieldPaths?: T;
-  fieldWithinRow_afterRead_FieldPaths?: T;
-  fieldWithinRow_beforeDuplicate_FieldPaths?: T;
-  fieldWithinUnnamedTab_beforeValidate_FieldPaths?: T;
-  fieldWithinUnnamedTab_beforeChange_FieldPaths?: T;
-  fieldWithinUnnamedTab_afterRead_FieldPaths?: T;
-  fieldWithinUnnamedTab_beforeDuplicate_FieldPaths?: T;
-  fieldWithinNestedUnnamedTab_beforeValidate_FieldPaths?: T;
-  fieldWithinNestedUnnamedTab_beforeChange_FieldPaths?: T;
-  fieldWithinNestedUnnamedTab_afterRead_FieldPaths?: T;
-  fieldWithinNestedUnnamedTab_beforeDuplicate_FieldPaths?: T;
-  fieldWithinNamedTab_beforeValidate_FieldPaths?: T;
-  fieldWithinNamedTab_beforeChange_FieldPaths?: T;
-  fieldWithinNamedTab_afterRead_FieldPaths?: T;
-  fieldWithinNamedTab_beforeDuplicate_FieldPaths?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "value-hooks_select".
  */
 export interface ValueHooksSelect<T extends boolean = true> {
@@ -1111,7 +770,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "data-hooks-global".
  */
 export interface DataHooksGlobal {
-  id: number;
+  id: string;
   field_globalAndField?: string | null;
   global_beforeChange_global?: string | null;
   global_afterChange_global?: string | null;

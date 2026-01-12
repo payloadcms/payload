@@ -3,7 +3,13 @@ import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'pay
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
-import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import {
+  canAccessAdmin,
+  getAccessResults,
+  isEntityHidden,
+  parseCookies,
+  UnauthorizedError,
+} from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderListView } from './index.js'
@@ -32,6 +38,10 @@ export const renderListHandler: ServerFunction<
       user,
     },
   } = args
+
+  if (!req.user) {
+    throw new UnauthorizedError()
+  }
 
   const headers = await getHeaders()
 

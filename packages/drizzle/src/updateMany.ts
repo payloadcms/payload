@@ -89,6 +89,7 @@ export const updateMany: UpdateMany = async function updateMany(
     const result = await upsertRow({
       id: idToUpdate,
       adapter: this,
+      collectionSlug,
       data,
       db,
       fields: collection.flattenedFields,

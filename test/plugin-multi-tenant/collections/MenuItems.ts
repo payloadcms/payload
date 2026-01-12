@@ -1,8 +1,9 @@
 import type { Access, CollectionConfig, Where } from 'payload'
 
 import { getUserTenantIDs } from '@payloadcms/plugin-multi-tenant/utilities'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { menuItemsSlug } from '../shared.js'
+import { menuItemsSlug, notTenantedSlug, relationshipsSlug } from '../shared.js'
 
 const collectionTenantReadAccess: Access = ({ req }) => {
   // admins can access all tenants
@@ -96,6 +97,33 @@ export const MenuItems: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                slug: 'block-with-relationship',
+                fields: [
+                  {
+                    name: 'relationship',
+                    type: 'relationship',
+                    relationTo: 'food-menu',
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
+    },
+    {
+      name: 'polymorphicRelationship',
+      type: 'relationship',
+      relationTo: [relationshipsSlug, menuItemsSlug, notTenantedSlug],
+      admin: {
+        appearance: 'drawer',
+      },
     },
   ],
 }

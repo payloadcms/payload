@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "3.66.0",
+  "version": "3.70.0",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -53,12 +53,12 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""
   },
   "dependencies": {

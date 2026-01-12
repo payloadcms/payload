@@ -78,6 +78,11 @@ export const daTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har anmodet om dette, skal du blot ignorere denne e-mail, og din adgangskode vil forblive uændret',
   },
+  dashboard: {
+    addWidget: 'Tilføj Widget',
+    deleteWidget: 'Slet widget {{id}}',
+    searchWidgets: 'Søg widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',
     autosaving: 'Der opstod et problem under autosaving af dette dokument.',

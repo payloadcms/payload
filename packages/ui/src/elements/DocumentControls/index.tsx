@@ -126,6 +126,7 @@ export const DocumentControls: React.FC<{
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client

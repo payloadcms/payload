@@ -84,6 +84,8 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       args: Parameters<OperationMap<TOperationGeneric>['find']>[0]
       /**
        * @deprecated Use 'find' or 'findByID' operation instead
+       *
+       * TODO: v4 - remove this union option
        */
       operation: 'read'
       result: Awaited<ReturnType<OperationMap<TOperationGeneric>['find']>>
@@ -179,6 +181,8 @@ export const operationToHookOperation = {
   findVersions: 'read',
   forgotPassword: 'forgotPassword',
   login: 'login',
+  read: 'read',
+  readDistinct: 'readDistinct',
   refresh: 'refresh',
   resetPassword: 'resetPassword',
   restoreVersion: 'restoreVersion',
@@ -199,6 +203,8 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
         | Parameters<OperationMap<TOperationGeneric>['findByID']>[0]
       /**
        * @deprecated Use 'find' or 'findByID' operation instead
+       *
+       * TODO: v4 - remove this union option
        */
       operation: 'read'
     }
@@ -232,11 +238,16 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
     }
   | {
       args: Parameters<OperationMap<TOperationGeneric>['findDistinct']>[0]
-      operation: 'findDistinct'
+      /**
+       * @deprecated Use 'findDistinct' operation instead
+       *
+       * TODO: v4 - remove this union option
+       */
+      operation: 'readDistinct'
     }
   | {
       args: Parameters<OperationMap<TOperationGeneric>['findDistinct']>[0]
-      operation: 'readDistinct'
+      operation: 'findDistinct'
     }
   | {
       args: Parameters<OperationMap<TOperationGeneric>['findVersionByID']>[0]

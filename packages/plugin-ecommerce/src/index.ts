@@ -53,11 +53,7 @@ export const ecommercePlugin =
       const supportedCountries = sanitizedPluginConfig.addresses.supportedCountries
 
       const defaultAddressesCollection = createAddressesCollection({
-        access: {
-          adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
-          authenticatedOnly: accessConfig.authenticatedOnly,
-          customerOnlyFieldAccess: accessConfig.customerOnlyFieldAccess,
-        },
+        access: accessConfig,
         addressFields,
         customersSlug: collectionSlugMap.customers,
         supportedCountries,
@@ -91,10 +87,7 @@ export const ecommercePlugin =
           typeof productsConfig.variants === 'boolean' ? undefined : productsConfig.variants
 
         const defaultVariantsCollection = createVariantsCollection({
-          access: {
-            adminOnly: accessConfig.adminOnly,
-            adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
-          },
+          access: accessConfig,
           currenciesConfig,
           inventory: sanitizedPluginConfig.inventory,
           productsSlug: collectionSlugMap.products,
@@ -112,10 +105,7 @@ export const ecommercePlugin =
             : defaultVariantsCollection
 
         const defaultVariantTypesCollection = createVariantTypesCollection({
-          access: {
-            adminOnly: accessConfig.adminOnly,
-            publicAccess: accessConfig.publicAccess,
-          },
+          access: accessConfig,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
@@ -130,10 +120,7 @@ export const ecommercePlugin =
             : defaultVariantTypesCollection
 
         const defaultVariantOptionsCollection = createVariantOptionsCollection({
-          access: {
-            adminOnly: accessConfig.adminOnly,
-            publicAccess: accessConfig.publicAccess,
-          },
+          access: accessConfig,
           variantTypesSlug: collectionSlugMap.variantTypes,
         })
 
@@ -151,10 +138,7 @@ export const ecommercePlugin =
       }
 
       const defaultProductsCollection = createProductsCollection({
-        access: {
-          adminOnly: accessConfig.adminOnly,
-          adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
-        },
+        access: accessConfig,
         currenciesConfig,
         enableVariants,
         inventory: sanitizedPluginConfig.inventory,
@@ -174,11 +158,12 @@ export const ecommercePlugin =
       incomingConfig.collections.push(productsCollection)
 
       if (sanitizedPluginConfig.carts) {
+        const cartsConfig =
+          typeof sanitizedPluginConfig.carts === 'object' ? sanitizedPluginConfig.carts : {}
+
         const defaultCartsCollection = createCartsCollection({
-          access: {
-            adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
-            publicAccess: accessConfig.publicAccess,
-          },
+          access: accessConfig,
+          allowGuestCarts: cartsConfig.allowGuestCarts,
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
           enableVariants: Boolean(productsConfig.variants),
@@ -202,11 +187,7 @@ export const ecommercePlugin =
 
     if (sanitizedPluginConfig.orders) {
       const defaultOrdersCollection = createOrdersCollection({
-        access: {
-          adminOnly: accessConfig.adminOnly,
-          adminOnlyFieldAccess: accessConfig.adminOnlyFieldAccess,
-          adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
-        },
+        access: accessConfig,
         addressFields,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
@@ -295,9 +276,7 @@ export const ecommercePlugin =
 
     if (sanitizedPluginConfig.transactions) {
       const defaultTransactionsCollection = createTransactionsCollection({
-        access: {
-          adminOnly: accessConfig.adminOnly,
-        },
+        access: accessConfig,
         addressFields,
         cartsSlug: collectionSlugMap.carts,
         currenciesConfig,

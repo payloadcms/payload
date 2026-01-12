@@ -252,7 +252,7 @@ export interface SanitizedGlobalConfig
    */
   flattenedFields: FlattenedField[]
   slug: GlobalSlug
-  versions: false | SanitizedGlobalVersions | undefined
+  versions?: SanitizedGlobalVersions
 }
 
 export type Globals = {

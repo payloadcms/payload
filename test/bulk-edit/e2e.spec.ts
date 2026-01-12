@@ -75,7 +75,6 @@ test.describe('Bulk Edit', () => {
     // Deselect the first row
     await page.locator('.row-1 input').click()
 
-    // eslint-disable-next-line jest-dom/prefer-checked
     await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
   })
 
@@ -682,6 +681,39 @@ test.describe('Bulk Edit', () => {
     await expect
       .poll(() => updatedDoc?.tabTab?.tabTabArray?.[0]?.tabTabArrayText)
       .toEqual('nestedText')
+  })
+
+  test('should preserve beforeInput components when selecting multiple fields', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    // Select multiple fields with beforeInput components
+    await selectInput({
+      selectLocator: modal.locator('.field-select'),
+      options: [
+        'Field With Before Input A1',
+        'Field With Before Input A2',
+        'Field With Before Input B',
+      ],
+      multiSelect: true,
+    })
+
+    // All fields should be visible
+    await expect(modal.locator('#field-fieldWithBeforeInputA1')).toBeVisible()
+    await expect(modal.locator('#field-fieldWithBeforeInputA2')).toBeVisible()
+    await expect(modal.locator('#field-fieldWithBeforeInputB')).toBeVisible()
+
+    // All beforeInput components should be visible (2 of type A, 1 of type B)
+    const beforeInputsA = modal.locator('[data-testid="before-input-a"]')
+    await expect(beforeInputsA).toHaveCount(2)
+
+    const beforeInputB = modal.locator('[data-testid="before-input-b"]')
+    await expect(beforeInputB).toHaveCount(1)
+    await expect(beforeInputB).toBeVisible()
   })
 })
 

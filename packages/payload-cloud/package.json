@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload-cloud",
-  "version": "3.66.0",
+  "version": "3.70.0",
   "description": "The official Payload Cloud plugin",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -33,12 +33,12 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "jest"
   },
   "dependencies": {
@@ -48,10 +48,9 @@
     "@aws-sdk/lib-storage": "^3.614.0",
     "@payloadcms/email-nodemailer": "workspace:*",
     "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "7.0.9"
+    "nodemailer": "7.0.12"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
     "@types/nodemailer": "7.0.2",
     "payload": "workspace:*"
   },

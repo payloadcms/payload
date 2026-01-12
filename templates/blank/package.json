@@ -25,7 +25,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
-    "next": "15.4.8",
+    "next": "15.4.10",
     "payload": "workspace:*",
     "react": "19.2.1",
     "react-dom": "19.2.1",

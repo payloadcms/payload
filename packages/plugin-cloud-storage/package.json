@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
-  "version": "3.66.0",
+  "version": "3.70.0",
   "description": "The official cloud storage plugin for Payload CMS",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -50,12 +50,12 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc ",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""
   },
   "dependencies": {

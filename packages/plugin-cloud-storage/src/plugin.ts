@@ -3,8 +3,8 @@ import type { Config } from 'payload'
 import type { AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
+import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
-import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -18,11 +18,46 @@ import { getBeforeChangeHook } from './hooks/beforeChange.js'
 export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    const { collections: allCollectionOptions, enabled } = pluginOptions
+    const { alwaysInsertFields, collections: allCollectionOptions, enabled } = pluginOptions
     const config = { ...incomingConfig }
 
-    // Return early if disabled. Only webpack config mods are applied.
+    // If disabled but alwaysInsertFields is true, only insert fields without full plugin functionality
     if (enabled === false) {
+      if (alwaysInsertFields) {
+        return {
+          ...config,
+          collections: (config.collections || []).map((existingCollection) => {
+            const options = allCollectionOptions[existingCollection.slug]
+
+            if (options) {
+              // If adapter is provided, use it to get fields
+              const adapter = options.adapter
+                ? options.adapter({
+                    collection: existingCollection,
+                    prefix: options.prefix,
+                  })
+                : undefined
+
+              const fields = getFields({
+                adapter,
+                alwaysInsertFields: true,
+                collection: existingCollection,
+                disablePayloadAccessControl: options.disablePayloadAccessControl,
+                generateFileURL: options.generateFileURL,
+                prefix: options.prefix,
+              })
+
+              return {
+                ...existingCollection,
+                fields,
+              }
+            }
+
+            return existingCollection
+          }),
+        }
+      }
+
       return config
     }
 
@@ -116,13 +151,13 @@ export const cloudStoragePlugin =
             fields,
             hooks: {
               ...(existingCollection.hooks || {}),
+              afterChange: [
+                ...(existingCollection.hooks?.afterChange || []),
+                getAfterChangeHook({ adapter, collection: existingCollection }),
+              ],
               afterDelete: [
                 ...(existingCollection.hooks?.afterDelete || []),
                 getAfterDeleteHook({ adapter, collection: existingCollection }),
-              ],
-              beforeChange: [
-                ...(existingCollection.hooks?.beforeChange || []),
-                getBeforeChangeHook({ adapter, collection: existingCollection }),
               ],
             },
             upload: {

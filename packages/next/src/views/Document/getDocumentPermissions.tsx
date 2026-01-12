@@ -46,7 +46,7 @@ export const getDocumentPermissions = async (args: {
         req,
       })
 
-      if (collectionConfig.versions?.drafts) {
+      if (hasDraftsEnabled(collectionConfig)) {
         hasPublishPermission = (
           await docAccessOperation({
             id,
