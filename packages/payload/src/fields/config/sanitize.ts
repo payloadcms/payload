@@ -9,7 +9,6 @@ import type {
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig } from '../../globals/config/types.js'
 import type { Field } from './types.js'
-import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 import {
   DuplicateFieldName,
@@ -36,6 +35,7 @@ import {
   reservedVerifyFieldNames,
 } from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
+import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
