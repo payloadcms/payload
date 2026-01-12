@@ -146,6 +146,37 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       data.meta = args.meta
     }
 
+    // Compute concurrency key from workflow or task config (only if feature is enabled)
+    if (payload.config.jobs?.enableConcurrencyControl) {
+      let concurrencyKey: null | string = null
+
+      if (args.workflow) {
+        const workflow = payload.config.jobs?.workflows?.find(({ slug }) => slug === args.workflow)
+        if (workflow?.concurrency) {
+          const concurrencyConfig = workflow.concurrency
+          if (typeof concurrencyConfig === 'function') {
+            concurrencyKey = concurrencyConfig({ input: args.input })
+          } else {
+            concurrencyKey = concurrencyConfig.key({ input: args.input })
+          }
+        }
+      } else if (args.task) {
+        const task = payload.config.jobs?.tasks?.find(({ slug }) => slug === args.task)
+        if (task?.concurrency) {
+          const concurrencyConfig = task.concurrency
+          if (typeof concurrencyConfig === 'function') {
+            concurrencyKey = concurrencyConfig({ input: args.input })
+          } else {
+            concurrencyKey = concurrencyConfig.key({ input: args.input })
+          }
+        }
+      }
+
+      if (concurrencyKey) {
+        data.concurrencyKey = concurrencyKey
+      }
+    }
+
     type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here

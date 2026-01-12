@@ -1904,4 +1904,455 @@ describe('Queues - Payload', () => {
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
+
+  describe('concurrency controls', () => {
+    it('should store concurrencyKey when queuing jobs with concurrency config', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: {
+          resourceId: 'resource-1',
+        },
+      })
+
+      expect(job.concurrencyKey).toBe('exclusive:resource-1')
+    })
+
+    it('should not store concurrencyKey for workflows without concurrency config', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        workflow: 'noConcurrency',
+        input: {
+          resourceId: 'resource-1',
+        },
+      })
+
+      expect(job.concurrencyKey).toBeFalsy()
+    })
+
+    it('should run jobs with different concurrencyKeys in parallel', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue two jobs with different resourceIds (different concurrency keys)
+      const job1 = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: {
+          resourceId: 'resource-A',
+          delayMs: 200,
+        },
+      })
+
+      const job2 = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: {
+          resourceId: 'resource-B',
+          delayMs: 200,
+        },
+      })
+
+      // Run jobs - they should run in parallel since they have different keys
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      // Both jobs should be completed
+      const job1After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job1.id,
+      })
+      const job2After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job2.id,
+      })
+
+      expect(job1After.completedAt).toBeDefined()
+      expect(job2After.completedAt).toBeDefined()
+    })
+
+    it('should run jobs with same concurrencyKey exclusively (one at a time)', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue two jobs with the SAME resourceId (same concurrency key)
+      const job1 = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: {
+          resourceId: 'same-resource',
+          delayMs: 100,
+        },
+      })
+
+      const job2 = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: {
+          resourceId: 'same-resource',
+          delayMs: 100,
+        },
+      })
+
+      // Both jobs should have the same concurrency key
+      expect(job1.concurrencyKey).toBe('exclusive:same-resource')
+      expect(job2.concurrencyKey).toBe('exclusive:same-resource')
+
+      // Run jobs with limit 10 - due to exclusive concurrency, only one should run
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      // Check job states - one should be complete, the other still pending
+      const job1After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job1.id,
+      })
+      const job2After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job2.id,
+      })
+
+      // First job should be completed
+      expect(job1After.completedAt).toBeDefined()
+      // Second job should still be pending (not yet run due to exclusive lock)
+      expect(job2After.completedAt).toBeFalsy()
+      expect(job2After.processing).toBe(false)
+
+      // Run jobs again - now the second job should complete
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      const job2Final = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job2.id,
+      })
+
+      expect(job2Final.completedAt).toBeDefined()
+    })
+
+    it('should verify exclusive concurrency prevents race conditions', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue 3 jobs with the same concurrency key
+      const jobs = await Promise.all([
+        payload.jobs.queue({
+          workflow: 'exclusiveConcurrency',
+          input: { resourceId: 'race-test', delayMs: 50 },
+        }),
+        payload.jobs.queue({
+          workflow: 'exclusiveConcurrency',
+          input: { resourceId: 'race-test', delayMs: 50 },
+        }),
+        payload.jobs.queue({
+          workflow: 'exclusiveConcurrency',
+          input: { resourceId: 'race-test', delayMs: 50 },
+        }),
+      ])
+
+      // Run with high limit - exclusive concurrency should still only run one at a time
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      // Count completed jobs - should be exactly 1
+      const jobsAfterFirstRun = await Promise.all(
+        jobs.map((job) =>
+          payload.findByID({
+            collection: 'payload-jobs',
+            id: job.id,
+          }),
+        ),
+      )
+
+      const completedCount = jobsAfterFirstRun.filter((j) => j.completedAt).length
+      expect(completedCount).toBe(1)
+
+      // Run again - should complete another one
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      const jobsAfterSecondRun = await Promise.all(
+        jobs.map((job) =>
+          payload.findByID({
+            collection: 'payload-jobs',
+            id: job.id,
+          }),
+        ),
+      )
+
+      const completedCount2 = jobsAfterSecondRun.filter((j) => j.completedAt).length
+      expect(completedCount2).toBe(2)
+
+      // Run once more - all should be complete
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      const jobsAfterThirdRun = await Promise.all(
+        jobs.map((job) =>
+          payload.findByID({
+            collection: 'payload-jobs',
+            id: job.id,
+          }),
+        ),
+      )
+
+      const completedCount3 = jobsAfterThirdRun.filter((j) => j.completedAt).length
+      expect(completedCount3).toBe(3)
+    })
+
+    it('should allow parallel execution for jobs without concurrency config', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue two jobs with the same resourceId but NO concurrency config
+      const job1 = await payload.jobs.queue({
+        workflow: 'noConcurrency',
+        input: {
+          resourceId: 'same-resource',
+          delayMs: 100,
+        },
+      })
+
+      const job2 = await payload.jobs.queue({
+        workflow: 'noConcurrency',
+        input: {
+          resourceId: 'same-resource',
+          delayMs: 100,
+        },
+      })
+
+      // Neither should have a concurrency key
+      expect(job1.concurrencyKey).toBeFalsy()
+      expect(job2.concurrencyKey).toBeFalsy()
+
+      // Run jobs - both should run in parallel since there's no concurrency control
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      // Both jobs should be completed
+      const job1After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job1.id,
+      })
+      const job2After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job2.id,
+      })
+
+      expect(job1After.completedAt).toBeDefined()
+      expect(job2After.completedAt).toBeDefined()
+    })
+
+    it('should handle mixed scenario: concurrent and non-concurrent jobs together', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue jobs: 2 with same concurrency key, 1 with different key, 1 without concurrency
+      const concurrentJob1 = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'shared-key', delayMs: 50 },
+      })
+
+      const concurrentJob2 = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'shared-key', delayMs: 50 },
+      })
+
+      const differentKeyJob = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'different-key', delayMs: 50 },
+      })
+
+      const noConcurrencyJob = await payload.jobs.queue({
+        workflow: 'noConcurrency',
+        input: { resourceId: 'any', delayMs: 50 },
+      })
+
+      // Run all jobs
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      const results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: concurrentJob1.id }),
+        payload.findByID({ collection: 'payload-jobs', id: concurrentJob2.id }),
+        payload.findByID({ collection: 'payload-jobs', id: differentKeyJob.id }),
+        payload.findByID({ collection: 'payload-jobs', id: noConcurrencyJob.id }),
+      ])
+
+      // concurrentJob1 should complete (first with shared-key)
+      expect(results[0].completedAt).toBeDefined()
+      // concurrentJob2 should NOT complete (blocked by concurrentJob1)
+      expect(results[1].completedAt).toBeFalsy()
+      // differentKeyJob should complete (different concurrency key)
+      expect(results[2].completedAt).toBeDefined()
+      // noConcurrencyJob should complete (no concurrency restrictions)
+      expect(results[3].completedAt).toBeDefined()
+
+      // Run again to complete the blocked job
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      const concurrentJob2After = await payload.findByID({
+        collection: 'payload-jobs',
+        id: concurrentJob2.id,
+      })
+      expect(concurrentJob2After.completedAt).toBeDefined()
+    })
+
+    it('should preserve FIFO order for jobs with same concurrencyKey', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue 3 jobs with same key in specific order
+      const jobA = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'fifo-test', delayMs: 10 },
+      })
+      await wait(10) // Small delay to ensure different createdAt
+
+      const jobB = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'fifo-test', delayMs: 10 },
+      })
+      await wait(10)
+
+      const jobC = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'fifo-test', delayMs: 10 },
+      })
+
+      // Run first cycle - jobA should complete
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      let results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+      ])
+
+      expect(results[0].completedAt).toBeDefined() // A completed
+      expect(results[1].completedAt).toBeFalsy() // B waiting
+      expect(results[2].completedAt).toBeFalsy() // C waiting
+
+      // Run second cycle - jobB should complete (not C)
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+      ])
+
+      expect(results[0].completedAt).toBeDefined() // A completed
+      expect(results[1].completedAt).toBeDefined() // B completed
+      expect(results[2].completedAt).toBeFalsy() // C still waiting
+
+      // Run third cycle - jobC should complete
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+      ])
+
+      expect(results[0].completedAt).toBeDefined() // A completed
+      expect(results[1].completedAt).toBeDefined() // B completed
+      expect(results[2].completedAt).toBeDefined() // C completed
+    })
+
+    it('should preserve LIFO order when processingOrder is set to -createdAt', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue 3 jobs with same key in specific order
+      const jobA = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'lifo-test', delayMs: 10 },
+        queue: 'lifo',
+      })
+      await wait(10) // Small delay to ensure different createdAt
+
+      const jobB = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'lifo-test', delayMs: 10 },
+        queue: 'lifo',
+      })
+      await wait(10)
+
+      const jobC = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'lifo-test', delayMs: 10 },
+        queue: 'lifo',
+      })
+
+      // Run first cycle with LIFO order - jobC (newest) should complete
+      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
+
+      let results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+      ])
+
+      expect(results[0].completedAt).toBeFalsy() // A waiting
+      expect(results[1].completedAt).toBeFalsy() // B waiting
+      expect(results[2].completedAt).toBeDefined() // C completed (newest)
+
+      // Run second cycle - jobB should complete (not A)
+      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
+
+      results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+      ])
+
+      expect(results[0].completedAt).toBeFalsy() // A still waiting
+      expect(results[1].completedAt).toBeDefined() // B completed
+      expect(results[2].completedAt).toBeDefined() // C completed
+
+      // Run third cycle - jobA should complete
+      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
+
+      results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+      ])
+
+      expect(results[0].completedAt).toBeDefined() // A completed
+      expect(results[1].completedAt).toBeDefined() // B completed
+      expect(results[2].completedAt).toBeDefined() // C completed
+    })
+
+    it('should block new pending jobs when a job with same key is already running', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue and start running a long job
+      await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'running-test', delayMs: 500 },
+      })
+
+      // Start the job running (don't await completion)
+      const runPromise = payload.jobs.run({ silent: true, limit: 1 })
+
+      // Wait a bit for the job to start processing
+      await wait(50)
+
+      // Queue another job with the same key while first is running
+      const pendingJob = await payload.jobs.queue({
+        workflow: 'exclusiveConcurrency',
+        input: { resourceId: 'running-test', delayMs: 50 },
+      })
+
+      // Try to run the pending job - should be blocked
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      // Check that pendingJob didn't complete (runningJob still processing)
+      const pendingJobStatus = await payload.findByID({
+        collection: 'payload-jobs',
+        id: pendingJob.id,
+      })
+
+      expect(pendingJobStatus.completedAt).toBeFalsy()
+      expect(pendingJobStatus.processing).toBe(false)
+
+      // Wait for original job to complete
+      await runPromise
+
+      // Now run again - pendingJob should complete
+      await payload.jobs.run({ silent: true, limit: 10 })
+
+      const pendingJobFinal = await payload.findByID({
+        collection: 'payload-jobs',
+        id: pendingJob.id,
+      })
+
+      expect(pendingJobFinal.completedAt).toBeDefined()
+    })
+  })
 })

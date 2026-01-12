@@ -18,12 +18,14 @@ import { SelfCancelTask } from './tasks/SelfCancelTask.js'
 import { ThrowErrorTask } from './tasks/ThrowErrorTask.js'
 import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
 import { UpdatePostTask } from './tasks/UpdatePostTask.js'
+import { exclusiveConcurrencyWorkflow } from './workflows/exclusiveConcurrency.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { failsImmediatelyWorkflow } from './workflows/failsImmediately.js'
 import { fastParallelTaskWorkflow } from './workflows/fastParallelTaskWorkflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
 import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
 import { longRunningWorkflow } from './workflows/longRunning.js'
+import { noConcurrencyWorkflow } from './workflows/noConcurrency.js'
 import { noRetriesSetWorkflow } from './workflows/noRetriesSet.js'
 import { parallelTaskWorkflow } from './workflows/parallelTaskWorkflow.js'
 import { retries0Workflow } from './workflows/retries0.js'
@@ -109,6 +111,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   },
   jobs: {
+    enableConcurrencyControl: true,
     autoRun: [
       {
         silent: true,
@@ -170,6 +173,8 @@ export const getConfig: () => Partial<Config> = () => ({
       subTaskFailsWorkflow,
       longRunningWorkflow,
       parallelTaskWorkflow,
+      exclusiveConcurrencyWorkflow,
+      noConcurrencyWorkflow,
     ],
   },
   editor: lexicalEditor(),
