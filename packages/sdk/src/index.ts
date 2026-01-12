@@ -1,4 +1,12 @@
-import type { ApplyDisableErrors, PaginatedDocs, SelectType, TypeWithVersion } from 'payload'
+import type {
+  ApplyDisableErrors,
+  ErrorResult,
+  PaginatedDocs,
+  SelectType,
+  TypeWithVersion,
+} from 'payload'
+
+export { PayloadSDKError } from './errors/PayloadSDKError.js'
 
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
@@ -51,6 +59,7 @@ import {
   type UpdateManyOptions,
   type UpdateOptions,
 } from './collections/update.js'
+import { PayloadSDKError } from './errors/PayloadSDKError.js'
 import { findGlobal, type FindGlobalOptions } from './globals/findOne.js'
 import { findGlobalVersionByID } from './globals/findVersionByID.js'
 import { findGlobalVersions } from './globals/findVersions.js'
@@ -309,6 +318,31 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     }
 
     const response = await this.fetch(`${this.baseURL}${path}${buildSearchParams(args)}`, init)
+
+    if (!response.ok) {
+      let errorData: {
+        message?: string
+      } & Partial<ErrorResult> = {}
+
+      try {
+        errorData = await response.json()
+      } catch {
+        // Response body may not be JSON
+      }
+
+      const errors: ErrorResult['errors'] = errorData.errors ?? [
+        { message: errorData.message ?? response.statusText },
+      ]
+
+      const message = errors[0]?.message ?? response.statusText
+
+      throw new PayloadSDKError({
+        errors,
+        message,
+        response,
+        status: response.status,
+      })
+    }
 
     return response
   }

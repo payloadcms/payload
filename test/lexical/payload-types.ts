@@ -142,6 +142,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'he') | ('en' | 'es' | 'he')[];
   globals: {
     tabsWithRichText: TabsWithRichText;
   };

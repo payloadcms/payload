@@ -47,6 +47,10 @@ type TemplateVariation = {
    * @default false
    */
   skipReadme?: boolean
+  /**
+   * @default false
+   */
+  skipAgents?: boolean
   storage: StorageAdapterType
   vercelDeployButtonLink?: string
   /**
@@ -77,12 +81,13 @@ async function main() {
       db: 'vercel-postgres',
       dirname: 'with-vercel-postgres',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: false,
       skipDockerCompose: true,
       skipReadme: true,
+      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -101,12 +106,13 @@ async function main() {
       db: 'vercel-postgres',
       dirname: 'with-vercel-website',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: true,
       skipDockerCompose: true,
       skipReadme: true,
+      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -125,6 +131,7 @@ async function main() {
       dirname: 'with-postgres',
       sharp: true,
       skipDockerCompose: true,
+      skipAgents: false,
       storage: 'localDisk',
     },
     {
@@ -132,11 +139,12 @@ async function main() {
       db: 'mongodb',
       dirname: 'with-vercel-mongodb',
       envNames: {
-        dbUri: 'MONGODB_URI',
+        dbUri: 'MONGODB_URL',
       },
       sharp: false,
       storage: 'vercelBlobStorage',
       skipReadme: true,
+      skipAgents: false,
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
@@ -157,6 +165,7 @@ async function main() {
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipReadme: true, // Do not copy the README.md file from the base template
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -171,6 +180,7 @@ async function main() {
       generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -187,6 +197,7 @@ async function main() {
       generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -203,6 +214,7 @@ async function main() {
       generateLockfile: false,
       sharp: false,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipAgents: false,
       storage: 'r2Storage',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -237,6 +249,7 @@ async function main() {
       skipConfig = false,
       skipDockerCompose = false,
       skipReadme = false,
+      skipAgents = false,
       storage,
       vercelDeployButtonLink,
       targetDeployment = 'default',
@@ -260,6 +273,11 @@ async function main() {
 
     log(`Copied to ${destDir}`)
 
+    // Copy _agents files
+    if (!skipAgents) {
+      await copyAgentsFiles({ destDir })
+    }
+
     if (configureConfig !== false) {
       log('Configuring payload.config.ts')
       const configureArgs = {
@@ -274,7 +292,7 @@ async function main() {
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
-      // Replace DATABASE_URI with the correct env name if set
+      // Replace DATABASE_URL with the correct env name if set
       await writeEnvExample({
         dbType: db,
         destDir,
@@ -343,7 +361,7 @@ async function main() {
         env: {
           ...process.env,
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
+          DATABASE_URL: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
         },
       })
@@ -417,6 +435,34 @@ ${description}
   log('Generated README.md')
 }
 
+async function copyAgentsFiles({ destDir }: { destDir: string }) {
+  const agentsSourceDir = path.join(TEMPLATES_DIR, '_agents')
+
+  if (!(await fs.stat(agentsSourceDir).catch(() => null))) {
+    log(`Skipping agents copy: ${agentsSourceDir} does not exist`)
+    return
+  }
+
+  log('Copying agents files')
+
+  // Copy AGENTS.md
+  const agentsMdSource = path.join(agentsSourceDir, 'AGENTS.md')
+  const agentsMdDest = path.join(destDir, 'AGENTS.md')
+  if (await fs.stat(agentsMdSource).catch(() => null)) {
+    await fs.copyFile(agentsMdSource, agentsMdDest)
+    log('Copied AGENTS.md')
+  }
+
+  // Copy .cursor directory
+  const cursorSourceDir = path.join(agentsSourceDir, 'rules')
+  const cursorDestDir = path.join(destDir, '.cursor', 'rules')
+  if (await fs.stat(cursorSourceDir).catch(() => null)) {
+    await fs.mkdir(path.dirname(cursorDestDir), { recursive: true })
+    await fs.cp(cursorSourceDir, cursorDestDir, { recursive: true })
+    log('Copied .cursor/rules/')
+  }
+}
+
 async function handleDeploymentTarget({
   targetDeployment,
   destDir,
@@ -460,25 +506,25 @@ async function writeEnvExample({
       if (
         dbType === 'vercel-postgres' &&
         (l.startsWith('# Or use a PG connection string') ||
-          l.startsWith('#DATABASE_URI=postgresql://'))
+          l.startsWith('#DATABASE_URL=postgresql://'))
       ) {
         return false // Skip this line
       }
       return true // Keep other lines
     })
     .map((l) => {
-      if (l.startsWith('DATABASE_URI')) {
+      if (l.startsWith('DATABASE_URL')) {
         if (dbType === 'mongodb') {
-          l = 'MONGODB_URI=mongodb://127.0.0.1/your-database-name'
+          l = 'MONGODB_URL=mongodb://127.0.0.1/your-database-name'
         }
         // Use db-appropriate connection string
         if (dbType.includes('postgres')) {
-          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/your-database-name'
+          l = 'DATABASE_URL=postgresql://127.0.0.1:5432/your-database-name'
         }
 
-        // Replace DATABASE_URI with the correct env name if set
+        // Replace DATABASE_URL with the correct env name if set
         if (envNames?.dbUri) {
-          l = l.replace('DATABASE_URI', envNames.dbUri)
+          l = l.replace('DATABASE_URL', envNames.dbUri)
         }
       }
       return l

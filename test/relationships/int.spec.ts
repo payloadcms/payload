@@ -3,6 +3,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
@@ -649,7 +650,6 @@ describe('Relationships', () => {
             },
           })
 
-          // eslint-disable-next-line jest/no-standalone-expect
           expect(query1.totalDocs).toStrictEqual(1)
         })
 
@@ -1658,7 +1658,6 @@ describe('Relationships', () => {
         })
         .then((res) => res.json())
 
-      // eslint-disable-next-line jest/no-standalone-expect
       expect(queryOne.docs).toHaveLength(1)
     })
 

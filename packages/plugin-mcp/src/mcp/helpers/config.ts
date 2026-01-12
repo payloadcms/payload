@@ -161,7 +161,7 @@ export function updateDatabaseConfig(content: string, databaseConfig: DatabaseCo
       )
     }
 
-    const dbConfig = `db: mongooseAdapter({\n    url: process.env.DATABASE_URI || '${databaseConfig.url || ''}',\n  })`
+    const dbConfig = `db: mongooseAdapter({\n    url: process.env.DATABASE_URL || '${databaseConfig.url || ''}',\n  })`
     content = content.replace(dbRegex, `${dbConfig},`)
   }
 

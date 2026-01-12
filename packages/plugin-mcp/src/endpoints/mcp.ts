@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { type PayloadHandler, UnauthorizedError, type Where } from 'payload'
+import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
@@ -44,6 +44,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
 
       const { docs } = await payload.find({
         collection: 'payload-mcp-api-keys',
+        depth: 1,
         limit: 1,
         pagination: false,
         where,
@@ -56,6 +57,14 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       if (useVerboseLogs) {
         payload.logger.info('[payload-mcp] API Key is valid')
       }
+
+      const user = docs[0]?.user as TypedUser
+      const customUserCollection =
+        typeof pluginOptions.userCollection === 'string'
+          ? pluginOptions.userCollection
+          : pluginOptions.userCollection?.slug
+      user.collection = customUserCollection ?? 'users'
+      user._strategy = 'mcp-api-key' as const
 
       return docs[0] as unknown as MCPAccessSettings
     }

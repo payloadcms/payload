@@ -888,4 +888,41 @@ describe('Types testing', () => {
       })
     })
   })
+
+  describe('strictDraftTypes flag', () => {
+    test('draft find query returns optional required fields when flag is enabled', async () => {
+      const result = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+      })
+
+      const doc = result.docs[0]!
+
+      // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
+      expect(doc.description).type.toBe<string | undefined>()
+      expect(doc.title).type.toBe<string | undefined>()
+
+      // Only id is required in draft queries - other system fields are also optional
+      expect(doc.id).type.not.toBe<undefined>()
+      expect(doc.createdAt).type.toBe<string | undefined>()
+      expect(doc.updatedAt).type.toBe<string | undefined>()
+    })
+
+    test('non-draft find query returns required fields as required', async () => {
+      const result = await payload.find({
+        collection: 'draft-posts',
+      })
+
+      const doc = result.docs[0]!
+
+      // Without draft mode, required fields should remain required
+      expect(doc.description).type.toBe<string>()
+      expect(doc.title).type.toBe<string>()
+
+      // System fields should also be present and required (not undefined)
+      expect(doc.id).type.not.toBe<undefined>()
+      expect(doc.createdAt).type.toBe<string>()
+      expect(doc.updatedAt).type.toBe<string>()
+    })
+  })
 })

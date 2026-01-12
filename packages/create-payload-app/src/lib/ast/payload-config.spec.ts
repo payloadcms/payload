@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Project } from 'ts-morph'
 import {
   addDatabaseAdapter,
@@ -141,7 +142,7 @@ export default buildConfig({
     const result = addDatabaseAdapter({
       sourceFile,
       adapter,
-      envVarName: 'DATABASE_URI',
+      envVarName: 'DATABASE_URL',
     })
 
     expect(result.success).toBe(true)
@@ -153,7 +154,7 @@ export default buildConfig({
       new RegExp(`import.*${adapterName}.*from.*${packageName.replace('/', '\\/')}`),
     )
     expect(text).toContain(`db: ${adapterName}`)
-    expect(text).toContain('process.env.DATABASE_URI')
+    expect(text).toContain('process.env.DATABASE_URL')
   })
 
   it('replaces existing db adapter', () => {
@@ -172,7 +173,7 @@ export default buildConfig({
     const result = addDatabaseAdapter({
       sourceFile,
       adapter: 'postgres',
-      envVarName: 'DATABASE_URI',
+      envVarName: 'DATABASE_URL',
     })
 
     expect(result.success).toBe(true)
@@ -410,7 +411,7 @@ export default buildConfig({
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
-  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
+  db: mongooseAdapter({ url: process.env.DATABASE_URL || '' }),
   collections: []
 })`,
     )

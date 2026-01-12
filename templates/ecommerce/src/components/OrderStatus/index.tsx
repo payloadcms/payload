@@ -10,7 +10,7 @@ export const OrderStatus: React.FC<Props> = ({ status, className }) => {
   return (
     <div
       className={cn(
-        'text-xs tracking-[0.1em] font-mono uppercase py-0 px-2 rounded w-fit',
+        'text-xs tracking-widest font-mono uppercase py-0 px-2 rounded w-fit',
         className,
         {
           'bg-primary/10': status === 'processing',

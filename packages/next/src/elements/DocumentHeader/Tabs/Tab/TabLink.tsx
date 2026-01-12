@@ -1,7 +1,7 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { Button, useConfig } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui'
 import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
@@ -25,7 +25,6 @@ export const DocumentTabLink: React.FC<{
 }) => {
   const pathname = usePathname()
   const params = useParams()
-  const { config } = useConfig()
 
   const searchParams = useSearchParams()
 
@@ -37,7 +36,6 @@ export const DocumentTabLink: React.FC<{
   let docPath = formatAdminURL({
     adminRoute,
     path: `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
-    serverURL: config.serverURL,
   })
 
   if (isCollection) {

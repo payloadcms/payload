@@ -3,6 +3,7 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
+import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 
 type GenerateURLArgs = {
@@ -12,7 +13,11 @@ type GenerateURLArgs = {
 }
 const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
   if (filename) {
-    return `${config.serverURL || ''}${config.routes?.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
+    return formatAdminURL({
+      apiRoute: config.routes?.api || '',
+      path: `/${collectionSlug}/file/${encodeURIComponent(filename)}`,
+      serverURL: config.serverURL,
+    })
   }
   return undefined
 }
@@ -223,7 +228,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
-                      return `${config.serverURL}${config.routes?.api}/${collection.slug}/file/${encodeURIComponent(sizeFilename)}`
+                      return formatAdminURL({
+                        apiRoute: config.routes?.api || '',
+                        path: `/${collection.slug}/file/${encodeURIComponent(sizeFilename)}`,
+                        serverURL: config.serverURL,
+                      })
                     }
 
                     return null

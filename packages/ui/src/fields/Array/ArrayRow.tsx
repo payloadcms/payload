@@ -6,7 +6,6 @@ import type {
   Row,
   SanitizedFieldPermissions,
 } from 'payload'
-import type { CSSProperties } from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -27,74 +26,62 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  readonly addRow?: (rowIndex: number) => Promise<void> | void
-  readonly copyRow?: (rowIndex: number) => void
+  readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly copyRow: (rowIndex: number) => void
   readonly CustomRowLabel?: React.ReactNode
-  readonly duplicateRow?: (rowIndex: number) => void
+  readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
   readonly fields: ClientField[]
   readonly hasMaxRows?: boolean
   readonly isLoading?: boolean
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
-  readonly moveRow?: (fromIndex: number, toIndex: number) => void
+  readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly parentPath: string
-  readonly pasteRow?: (rowIndex: number) => void
+  readonly pasteRow: (rowIndex: number) => void
   readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly?: boolean
-  readonly ref?: React.Ref<HTMLDivElement>
-  readonly removeRow?: (rowIndex: number) => void
+  readonly removeRow: (rowIndex: number) => void
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
   readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
-  readonly showActions?: boolean
-  readonly style?: CSSProperties
-} & (
-  | {
-      readonly dragHandleAttributes?: React.HTMLAttributes<HTMLElement>
-      readonly dragHandleListeners?: UseDraggableSortableReturn['listeners']
-      readonly isDragging?: UseDraggableSortableReturn['isDragging']
-      readonly isSortable: true
-    }
-  | {
-      readonly isSortable?: false
-    }
-) &
-  Pick<ClientComponentProps, 'forceRender'>
+} & Pick<ClientComponentProps, 'forceRender'> &
+  UseDraggableSortableReturn
 
-export const ArrayRow: React.FC<ArrayRowProps> = (props) => {
-  const {
-    addRow,
-    copyRow,
-    CustomRowLabel,
-    duplicateRow,
-    errorCount,
-    fields,
-    forceRender = false,
-    hasMaxRows,
-    isLoading: isLoadingFromProps,
-    isSortable,
-    labels,
-    moveRow,
-    parentPath,
-    pasteRow,
-    path,
-    permissions,
-    readOnly,
-    ref,
-    removeRow,
-    row,
-    rowCount,
-    rowIndex,
-    schemaPath,
-    setCollapse,
-    showActions,
-    style,
-  } = props
-
+export const ArrayRow: React.FC<ArrayRowProps> = ({
+  addRow,
+  attributes,
+  copyRow,
+  CustomRowLabel,
+  duplicateRow,
+  errorCount,
+  fields,
+  forceRender = false,
+  hasMaxRows,
+  isDragging,
+  isLoading: isLoadingFromProps,
+  isSortable,
+  labels,
+  listeners,
+  moveRow,
+  parentPath,
+  pasteRow,
+  path,
+  permissions,
+  readOnly,
+  removeRow,
+  row,
+  rowCount,
+  rowIndex,
+  schemaPath,
+  setCollapse,
+  setNodeRef,
+  transform,
+  transition,
+}) => {
   const isLoading = useThrottledValue(isLoadingFromProps, 500)
 
   const { i18n } = useTranslation()
@@ -118,15 +105,16 @@ export const ArrayRow: React.FC<ArrayRowProps> = (props) => {
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${row.id}`}
-      ref={ref}
+      ref={setNodeRef}
       style={{
-        ...(style || {}),
-        zIndex: isSortable && props?.isDragging ? 1 : undefined,
+        transform,
+        transition,
+        zIndex: isDragging ? 1 : undefined,
       }}
     >
       <Collapsible
         actions={
-          !readOnly && showActions !== false ? (
+          !readOnly ? (
             <ArrayAction
               addRow={addRow}
               copyRow={copyRow}
@@ -147,8 +135,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = (props) => {
           isSortable
             ? {
                 id: row.id,
-                attributes: props?.dragHandleAttributes,
-                listeners: props?.dragHandleListeners,
+                attributes,
+                listeners,
               }
             : undefined
         }

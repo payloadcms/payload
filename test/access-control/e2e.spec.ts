@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait  } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -621,7 +621,7 @@ describe('Access Control', () => {
       })
 
       test('should restrict access based on user settings', async () => {
-        const url = `${serverURL}/admin/globals/settings`
+        const url = formatAdminURL({ adminRoute: '/admin', path: '/globals/settings', serverURL })
         await page.goto(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()

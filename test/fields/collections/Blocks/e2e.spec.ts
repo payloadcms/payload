@@ -502,7 +502,7 @@ describe('Block fields', () => {
       )
       await popupBtn.click()
       const disabledCopyBtn = page.locator(
-        '#field-i18nBlocks .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Copy Field")',
+        '.popup__content div.popup-button-list__disabled:has-text("Copy Field")',
       )
       await expect(disabledCopyBtn).toBeVisible()
     })
@@ -519,7 +519,7 @@ describe('Block fields', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '#field-readOnly .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })

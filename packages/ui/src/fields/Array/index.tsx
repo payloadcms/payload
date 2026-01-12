@@ -414,19 +414,17 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 id={rowID}
                 key={rowID}
               >
-                {(dragProps) => (
+                {(draggableSortableItemProps) => (
                   <ArrayRow
+                    {...draggableSortableItemProps}
                     addRow={addRow}
                     copyRow={copyRow}
                     CustomRowLabel={rows?.[i]?.customComponents?.RowLabel}
-                    dragHandleAttributes={dragProps?.attributes}
-                    dragHandleListeners={dragProps?.listeners}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
-                    isDragging={dragProps?.isDragging}
                     isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}
@@ -436,17 +434,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     path={rowPath}
                     permissions={permissions}
                     readOnly={readOnly || disabled}
-                    ref={dragProps?.setNodeRef}
                     removeRow={removeRow}
                     row={rowData}
                     rowCount={rows?.length}
                     rowIndex={i}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
-                    style={{
-                      transform: dragProps?.transform,
-                      transition: dragProps?.transition,
-                    }}
                   />
                 )}
               </DraggableSortableItem>

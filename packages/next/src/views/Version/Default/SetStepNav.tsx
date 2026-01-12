@@ -50,7 +50,6 @@ export const SetStepNav: React.FC<{
           url: formatAdminURL({
             adminRoute,
             path: `/collections/${collectionSlug}`,
-            serverURL,
           }),
         },
       ]
@@ -61,7 +60,6 @@ export const SetStepNav: React.FC<{
           url: formatAdminURL({
             adminRoute,
             path: `/collections/${collectionSlug}/trash`,
-            serverURL,
           }),
         })
       }
@@ -72,7 +70,6 @@ export const SetStepNav: React.FC<{
           url: formatAdminURL({
             adminRoute,
             path: docBasePath,
-            serverURL,
           }),
         },
         {
@@ -80,7 +77,6 @@ export const SetStepNav: React.FC<{
           url: formatAdminURL({
             adminRoute,
             path: `${docBasePath}/versions`,
-            serverURL,
           }),
         },
         {
@@ -102,7 +98,6 @@ export const SetStepNav: React.FC<{
           url: formatAdminURL({
             adminRoute,
             path: `/globals/${globalSlug}`,
-            serverURL,
           }),
         },
         {
@@ -110,7 +105,6 @@ export const SetStepNav: React.FC<{
           url: formatAdminURL({
             adminRoute,
             path: `/globals/${globalSlug}/versions`,
-            serverURL,
           }),
         },
         {

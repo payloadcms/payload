@@ -590,6 +590,8 @@ export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
+export { type WidgetServerProps } from './views/dashboard.js'
+
 export type {
   BeforeDocumentControlsClientProps,
   BeforeDocumentControlsServerProps,

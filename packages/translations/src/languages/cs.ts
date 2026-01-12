@@ -79,6 +79,11 @@ export const csTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno.',
   },
+  dashboard: {
+    addWidget: 'Přidat widget',
+    deleteWidget: 'Odstranit widget {{id}}',
+    searchWidgets: 'Hledat widgety...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet již byl aktivován.',
     autosaving: 'Při automatickém ukládání tohoto dokumentu došlo k chybě.',

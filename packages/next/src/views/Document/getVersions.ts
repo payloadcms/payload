@@ -60,7 +60,8 @@ export const getVersions = async ({
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
-    const hasPublishedDoc = Boolean((collectionConfig && id) || globalConfig)
+    // Without readVersions permission, determine published status from the _status field
+    const hasPublishedDoc = doc?._status !== 'draft'
 
     return {
       hasPublishedDoc,

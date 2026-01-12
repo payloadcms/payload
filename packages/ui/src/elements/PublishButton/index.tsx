@@ -4,7 +4,7 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -105,14 +105,20 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     let method = 'POST'
 
     if (collectionSlug) {
-      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}${id ? `/${id}` : ''}${search}`,
+      })
       if (id) {
         method = 'PATCH'
       }
     }
 
     if (globalSlug) {
-      action = `${serverURL}${api}/globals/${globalSlug}${search}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${globalSlug}${search}`,
+      })
     }
 
     await submit({
@@ -169,9 +175,13 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         publishSpecificLocale: locale,
       })
 
-      const action = `${serverURL}${api}${
-        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
-      }${params ? '?' + params : ''}`
+      const pathSegment = globalSlug
+        ? `/globals/${globalSlug}`
+        : `/${collectionSlug}${id ? `/${id}` : ''}`
+      const action = formatAdminURL({
+        apiRoute: api,
+        path: `${pathSegment}${params ? '?' + params : ''}` as `/${string}`,
+      })
 
       const result = await submit({
         action,
