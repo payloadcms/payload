@@ -265,7 +265,7 @@ type IsAugmented = keyof GeneratedTypes extends never ? false : true
 /**
  * PayloadTypes merges GeneratedTypes with UntypedPayloadTypes.
  * - When augmented: uses augmented properties, fills gaps with untyped fallbacks
- * - When not augmented: uses UntypedPayloadTypes entirely
+ * - When not augmented: uses only UntypedPayloadTypes
  */
 export type PayloadTypes = IsAugmented extends true
   ? GeneratedTypes & Omit<UntypedPayloadTypes, keyof GeneratedTypes>
