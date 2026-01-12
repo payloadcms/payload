@@ -81,9 +81,9 @@ export type {
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
 
-export type { Column } from './elements/Table.js'
-
 export type { CustomStatus } from './elements/Status.js'
+
+export type { Column } from './elements/Table.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
