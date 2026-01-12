@@ -1,9 +1,17 @@
 /**
- * Stringify a value and truncate it to a maximum length.
+ * Safely stringify a value and truncate it to a maximum length.
  *
- * @param value - The value to stringify and truncate.
- * @param maxLength - The maximum length of the stringified value.
- * @returns The stringified and truncated value.
+ * Converts any value to a JSON string representation with efficient early termination
+ * when the maximum length is reached. Handles circular references by replacing them
+ * with `"[Circular]"` to prevent infinite loops.
+ *
+ * The function walks the object tree depth-first, building the JSON string incrementally
+ * and stopping as soon as the maximum length is reached, avoiding unnecessary computation.
+ * If truncation occurs, an ellipsis (…) is appended to indicate incomplete output.
+ *
+ * @param value - The value to stringify (can be any type including objects, arrays, primitives)
+ * @param maxLength - The maximum character length of the output string
+ * @returns A JSON string representation, truncated with "…" if it exceeds maxLength
  */
 export function stringifyTruncated(value: unknown, maxLength: number): string {
   let result = ''
