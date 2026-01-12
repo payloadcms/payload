@@ -1,7 +1,7 @@
-import type { AuthCollectionSlug, CollectionSlug, PayloadTypesShape } from 'payload'
+import type { AuthCollectionSlug, PayloadTypesShape } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type { DataFromCollectionSlug } from '../types.js'
+import type { DataFromAuthSlug } from '../types.js'
 
 export type LoginOptions<T extends PayloadTypesShape, TSlug extends AuthCollectionSlug<T>> = {
   collection: TSlug
@@ -15,7 +15,7 @@ export type LoginResult<T extends PayloadTypesShape, TSlug extends AuthCollectio
   exp?: number
   message: string
   token?: string
-  user: DataFromCollectionSlug<T, CollectionSlug<T> & TSlug>
+  user: DataFromAuthSlug<T, TSlug>
 }
 
 export async function login<T extends PayloadTypesShape, TSlug extends AuthCollectionSlug<T>>(

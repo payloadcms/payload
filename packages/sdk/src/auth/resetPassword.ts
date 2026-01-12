@@ -1,7 +1,7 @@
-import type { AuthCollectionSlug, CollectionSlug, PayloadTypesShape } from 'payload'
+import type { AuthCollectionSlug, PayloadTypesShape } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type { DataFromCollectionSlug } from '../types.js'
+import type { DataFromAuthSlug } from '../types.js'
 
 export type ResetPasswordOptions<
   T extends PayloadTypesShape,
@@ -19,7 +19,7 @@ export type ResetPasswordResult<
   TSlug extends AuthCollectionSlug<T>,
 > = {
   token?: string
-  user: DataFromCollectionSlug<T, CollectionSlug<T> & TSlug>
+  user: DataFromAuthSlug<T, TSlug>
 }
 
 export async function resetPassword<

@@ -1,4 +1,5 @@
 import type {
+  AuthCollectionSlug,
   CollectionSlug,
   GlobalSlug,
   JsonObject,
@@ -15,6 +16,12 @@ export type DataFromCollectionSlug<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
 > = T['collections'][TSlug]
+
+// Helper for auth endpoints where TSlug is AuthCollectionSlug but we need collection data
+export type DataFromAuthSlug<
+  T extends PayloadTypesShape,
+  TSlug extends AuthCollectionSlug<T>,
+> = T['collections'][CollectionSlug<T> & TSlug]
 
 export type DataFromGlobalSlug<
   T extends PayloadTypesShape,
