@@ -159,7 +159,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     // Jobs with the same concurrencyKey should not run in parallel
     const runningJobsWithConcurrency = await payload.db.find({
       collection: jobsCollectionSlug,
-      limit: 1000,
+      limit: 0,
       pagination: false,
       req: { transactionID: undefined },
       select: {
@@ -169,6 +169,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         and: [{ processing: { equals: true } }, { concurrencyKey: { exists: true } }],
       },
     })
+
     const runningConcurrencyKeys = new Set<string>()
     if (runningJobsWithConcurrency?.docs) {
       for (const doc of runningJobsWithConcurrency.docs) {
