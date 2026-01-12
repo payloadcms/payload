@@ -126,6 +126,9 @@ export interface Post {
   id: string;
   title?: string | null;
   description?: string | null;
+  fieldWithBeforeInputA1?: string | null;
+  fieldWithBeforeInputA2?: string | null;
+  fieldWithBeforeInputB?: string | null;
   defaultValueField?: string | null;
   group?: {
     defaultValueField?: string | null;
@@ -286,6 +289,9 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  fieldWithBeforeInputA1?: T;
+  fieldWithBeforeInputA2?: T;
+  fieldWithBeforeInputB?: T;
   defaultValueField?: T;
   group?:
     | T
