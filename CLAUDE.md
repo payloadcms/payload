@@ -189,3 +189,243 @@ Examples:
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
 - pnpm version: ^10.27.0
+
+### Admin UI
+
+**Location:** All UI components and styles live in `packages/ui/`
+
+**Core principles:**
+
+- Never use Tailwind classes
+- Always use Payload's built-in CSS variables
+- All styles use `@layer payload-default` for proper cascading
+- Components automatically adapt to dark mode via CSS variables
+
+#### CSS Variables
+
+All CSS variable definitions are in `packages/ui/src/scss/`:
+
+- `colors.scss` - Color system
+- `app.scss` - Spacing, layout, typography
+- `vars.scss` - SCSS mixins and baseline grid
+- `type.scss` - Typography scale
+
+##### Color System
+
+Colors use a **0-1000 scale in 50-unit increments**. The scale **reverses in dark mode**:
+
+**Elevation (Grayscale):**
+
+- `--theme-elevation-0` through `--theme-elevation-1000`
+- Light mode: 0 = white → 1000 = black
+- Dark mode: 0 = dark gray → 1000 = white
+- Common usage: backgrounds (50, 100, 150), borders (150, 200, 250), text (600, 700, 800)
+
+**Success (Blue):**
+
+- `--theme-success-0` through `--theme-success-950`
+- Reverses in dark mode
+
+**Warning (Orange):**
+
+- `--theme-warning-0` through `--theme-warning-950`
+- Reverses in dark mode
+
+**Error (Red):**
+
+- `--theme-error-0` through `--theme-error-950`
+- Reverses in dark mode
+
+**Semantic color variables:**
+
+- `--theme-bg: var(--theme-elevation-0)` - Main background
+- `--theme-input-bg: var(--theme-elevation-0)` - Input backgrounds (elevation-50 in dark mode)
+- `--theme-text: var(--theme-elevation-800)` - Main text (elevation-1000 in dark mode)
+- `--theme-border-color: var(--theme-elevation-150)` - Default borders
+
+##### Spacing System
+
+**Base unit:** `--base` = 24px (calculated as `calc((20 / 13) * 1rem)`)
+
+Always use `var(--base)` with `calc()` for spacing:
+
+```scss
+padding: calc(var(--base) * 0.5); // 12px
+margin: calc(var(--base) * 1); // 24px
+gap: calc(var(--base) * 0.25); // 6px
+```
+
+**Layout spacing:**
+
+- `--gutter-h: 60px` - Horizontal gutter (responsive: 40px medium, 16px small)
+- `--app-header-height: calc(var(--base) * 2.8)` - ~67px (responsive: 2.4 medium)
+- `--doc-controls-height: calc(var(--base) * 2.8)` - ~67px
+- `--nav-width: 275px` - Side navigation (100vw on small screens)
+
+##### Typography
+
+**Font families:**
+
+- `--font-body` - System font stack (San Francisco, Segoe UI, Roboto, etc.)
+- `--font-serif` - Georgia, Bitstream Charter
+- `--font-mono` - SF Mono, Menlo, Consolas
+
+**Preferred patterns:**
+
+- Use semantic HTML elements (`<h1>` through `<h6>`) - they are globally styled with appropriate sizes
+- Body text inherits base styles (13px/20px) from parent
+- For small text (labels, pills, metadata), use `@extend %small` (12px/20px) in SCSS files
+- Only add explicit font-size when you need non-standard sizing
+- For custom sizes, use `calc(var(--base) * X)` to maintain consistency
+
+**Available SCSS placeholders:**
+
+- `%small` - Small text (12px/20px) for labels, pills, and metadata
+- `%large-body` - Larger body text with responsive sizing
+- `%code` - Code text styling
+
+##### Border Radius
+
+- `--style-radius-s: 3px` - Small radius
+- `--style-radius-m: 4px` - Medium radius (most common)
+- `--style-radius-l: 8px` - Large radius
+
+##### Shadows (SCSS Mixins)
+
+```scss
+@include shadow-sm; // Subtle shadow
+@include shadow-m; // Medium shadow
+@include shadow-lg; // Large shadow (bottom)
+@include shadow-lg-top; // Large shadow (top)
+@include soft-shadow-bottom; // Soft bottom shadow
+```
+
+##### Z-Index
+
+- `--z-popup: 60` - Highest layer
+- `--z-status: 40` - Status indicators
+- `--z-modal: 30` - Modal overlays
+- `--z-nav: 20` - Navigation
+
+##### Transitions
+
+Standard transition pattern:
+
+```scss
+transition-property: border, color, box-shadow, background;
+transition-duration: 100ms;
+transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+```
+
+##### Breakpoints
+
+- `--breakpoint-xs-width: 400px`
+- `--breakpoint-s-width: 768px`
+- `--breakpoint-m-width: 1024px`
+- `--breakpoint-l-width: 1440px`
+
+**Responsive design mixins** (`packages/ui/src/scss/queries.scss`):
+
+```scss
+@include extra-small-break {
+} // max-width: 400px
+@include small-break {
+} // max-width: 768px
+@include mid-break {
+} // max-width: 1024px
+@include large-break {
+} // max-width: 1440px
+```
+
+##### Additional SCSS Mixins
+
+**Backdrop blur effects:**
+
+```scss
+@include blur-bg; // Default blur with theme background
+@include blur-bg($color, $opacity); // Custom color and opacity
+@include blur-bg-light; // Light blur variant
+```
+
+**Form input mixins:**
+
+```scss
+@include formInput; // Standard input styling
+@include inputShadow; // Input focus shadow effect
+@include lightInputError; // Light mode error state
+@include darkInputError; // Dark mode error state
+@include readOnly; // Read-only styling
+```
+
+#### Component Styling Patterns
+
+**Button example** (`packages/ui/src/elements/Button/`):
+
+- Use component-scoped CSS variables for theming
+- Example: `--btn-bg: var(--theme-elevation-100)`, `--btn-hover-bg: var(--theme-elevation-150)`
+- Spacing: `padding: calc(var(--base) * 0.5) calc(var(--base) * 1);`
+
+**Card example** (`packages/ui/src/elements/Card/`):
+
+- Background: `var(--theme-elevation-50)`
+- Border: `1px solid var(--theme-border-color)`
+- Padding: `calc(var(--base) * 0.8)`
+- Border radius: `var(--style-radius-m)`
+
+**Form inputs** (via SCSS mixins):
+
+```scss
+@include formInput; // Standard input styling
+@include lightInputError; // Light mode error state
+@include darkInputError; // Dark mode error state
+@include readOnly; // Read-only styling
+```
+
+#### Icons
+
+**Location:** `packages/ui/src/icons/`
+
+All icons are React components that export as named exports. Import icons directly from their paths:
+
+```tsx
+import { CheckIcon } from '@payloadcms/ui/icons/Check'
+import { XIcon } from '@payloadcms/ui/icons/X'
+import { EditIcon } from '@payloadcms/ui/icons/Edit'
+```
+
+**Available icons include:**
+Calendar, Check, Chevron, CloseMenu, CodeBlock, Copy, Document, Dots, DragHandle, Edit, ExternalLink, Eye, Folder, Gear, GridView, Line, Link, ListView, Lock, LogOut, Menu, MinimizeMaximize, More, MoveFolder, People, Plus, Search, Sort, Swap, ThreeDots, Trash, X
+
+**Usage patterns:**
+
+- Icons are SVG components with the `icon` class (e.g., `icon--check`)
+- Size is controlled by parent container or CSS (default: `$baseline` = 20px)
+- Color customization via `.stroke` and `.fill` classes:
+  - `.stroke` - Uses `stroke: currentColor` by default, inherits text color
+  - `.fill` - Uses `fill: currentColor` or specific theme colors
+
+**Customizing icon colors:**
+
+```scss
+.my-button {
+  // Change icon stroke color on hover
+  &:hover .icon .stroke {
+    stroke: var(--theme-success-500);
+  }
+
+  // Change icon fill color when disabled
+  &:disabled .icon .fill {
+    fill: var(--theme-elevation-400);
+  }
+}
+
+#### Best Practices
+
+1. **Choose semantic elevation values** - Use based on purpose (background, border, text), not absolute lightness
+2. **Use theme variables, not color primitives** - `--theme-elevation-X`, not `--color-base-X`
+3. **Spacing with --base** - Always use multiples of `--base` for consistency
+4. **Component-scoped variables** - Define local CSS variables for component-specific theming
+5. **Standard transitions** - Use the cubic-bezier timing pattern
+6. **Layer system** - Wrap styles in `@layer payload-default`
+7. **Dark mode awareness** - Variables automatically adapt; test both themes
+```
