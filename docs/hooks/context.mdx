@@ -80,6 +80,7 @@ const Customer: CollectionConfig = {
           data: {
             ...(await fetchCustomerData(data.customerID)),
           },
+          req,
         })
       },
     ],
@@ -112,6 +113,7 @@ const MyCollection: CollectionConfig = {
           data: {
             ...(await fetchCustomerData(data.customerID)),
           },
+          req,
           context: {
             // set a flag to prevent from running again
             triggerAfterChange: false,
