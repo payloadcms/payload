@@ -135,7 +135,7 @@ export type JobTaskStatus = {
  * Controls how jobs with the same concurrency key are handled.
  */
 export type ConcurrencyConfig<TInput = object> =
-  | ((args: { input: TInput }) => string)
+  | ((args: { input: TInput; queue: string }) => string)
   // Shorthand: key function only, exclusive defaults to true
   | {
       /**
@@ -147,8 +147,9 @@ export type ConcurrencyConfig<TInput = object> =
       /**
        * Function that returns a key to group related jobs.
        * Jobs with the same key are subject to concurrency rules.
+       * The queue name is provided to allow for queue-specific concurrency keys if needed.
        */
-      key: (args: { input: TInput }) => string
+      key: (args: { input: TInput; queue: string }) => string
     }
 
 export type WorkflowConfig<

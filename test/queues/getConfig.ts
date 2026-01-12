@@ -28,6 +28,7 @@ import { longRunningWorkflow } from './workflows/longRunning.js'
 import { noConcurrencyWorkflow } from './workflows/noConcurrency.js'
 import { noRetriesSetWorkflow } from './workflows/noRetriesSet.js'
 import { parallelTaskWorkflow } from './workflows/parallelTaskWorkflow.js'
+import { queueSpecificConcurrencyWorkflow } from './workflows/queueSpecificConcurrency.js'
 import { retries0Workflow } from './workflows/retries0.js'
 import { retriesBackoffTestWorkflow } from './workflows/retriesBackoffTest.js'
 import { retriesRollbackTestWorkflow } from './workflows/retriesRollbackTest.js'
@@ -175,6 +176,7 @@ export const getConfig: () => Partial<Config> = () => ({
       parallelTaskWorkflow,
       exclusiveConcurrencyWorkflow,
       noConcurrencyWorkflow,
+      queueSpecificConcurrencyWorkflow,
     ],
   },
   editor: lexicalEditor(),

@@ -435,7 +435,8 @@ concurrency: ({ input }) => `my-key:${input.resourceId}`
 ```ts
 concurrency: {
   // Function that returns a key to group related jobs
-  key: ({ input }) => `my-key:${input.resourceId}`,
+  // The queue name is provided to allow for queue-specific keys if needed
+  key: ({ input, queue }) => `my-key:${input.resourceId}`,
 
   // Only one job with this key can run at a time
   // @default true
@@ -469,9 +470,19 @@ concurrency: ({ input }) => `api:${input.resourceId}`
 
 Prevents parallel API calls for the same resource, useful when external services don't handle concurrent updates well.
 
+**4. Queue-specific concurrency:**
+
+```ts
+concurrency: ({ input, queue }) => `${queue}:process:${input.documentId}`
+```
+
+Include the queue name in the key to allow the same resource to be processed concurrently in different queues (e.g., `emails` queue vs `default` queue).
+
 #### Important Considerations
 
 - **Key uniqueness:** The concurrency key should uniquely identify the resource being operated on. Include all relevant identifiers (collection slug, document ID, locale, etc.).
+
+- **Global by default:** By default, concurrency is global across all queues. A job with key `sync:doc1` in the `default` queue will block a job with the same key in the `emails` queue. Include the queue name in your key if you want queue-specific concurrency.
 
 - **No concurrency key = no restrictions:** Jobs without a concurrency configuration run in parallel as before.
 

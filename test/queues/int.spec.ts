@@ -2354,5 +2354,42 @@ describe('Queues - Payload', () => {
 
       expect(pendingJobFinal.completedAt).toBeDefined()
     })
+
+    it('should pass queue name to concurrency key function for queue-specific concurrency', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      // Queue jobs to different queues with same resource ID
+      // Using queueSpecificConcurrency workflow which includes queue in the key
+      const defaultQueueJob = await payload.jobs.queue({
+        workflow: 'queueSpecificConcurrency',
+        input: { resourceId: 'queue-test', delayMs: 100 },
+        // default queue
+      })
+
+      const lifoQueueJob = await payload.jobs.queue({
+        workflow: 'queueSpecificConcurrency',
+        input: { resourceId: 'queue-test', delayMs: 100 },
+        queue: 'lifo',
+      })
+
+      // Jobs should have different concurrency keys because they include the queue name
+      expect(defaultQueueJob.concurrencyKey).toBe('default:exclusive:queue-test')
+      expect(lifoQueueJob.concurrencyKey).toBe('lifo:exclusive:queue-test')
+
+      // Both should run in parallel since they have different keys
+      await Promise.all([
+        payload.jobs.run({ silent: true, limit: 10, queue: 'default' }),
+        payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' }),
+      ])
+
+      const results = await Promise.all([
+        payload.findByID({ collection: 'payload-jobs', id: defaultQueueJob.id }),
+        payload.findByID({ collection: 'payload-jobs', id: lifoQueueJob.id }),
+      ])
+
+      // Both should complete because they have different concurrency keys
+      expect(results[0].completedAt).toBeDefined()
+      expect(results[1].completedAt).toBeDefined()
+    })
   })
 })
