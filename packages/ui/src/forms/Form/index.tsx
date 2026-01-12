@@ -578,7 +578,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
       if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
         delete data.file
-        console.log('DELETED', data)
 
         const handler = getUploadHandler({ collectionSlug })
 
