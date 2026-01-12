@@ -1,11 +1,13 @@
 import type {
   BulkOperationResult,
+  CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
   JsonObject,
   PaginatedDocs,
+  PayloadTypesShape,
   SelectType,
   TypedCollectionSelect,
   TypeWithID,
@@ -187,6 +189,23 @@ describe('Types testing', () => {
      * NOTE: When T is a concrete type (like GeneratedTypes or Config), indexing works correctly.
      */
     // Test with concrete GeneratedTypes - the type should resolve correctly
+    type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']
+    expect<SelectUsers>().type.not.toBeNever()
+
+    // Test with Config - should also work
+    type SelectPosts = TypedCollectionSelect<LocalConfig>['posts']
+    expect<SelectPosts>().type.not.toBeNever()
+  })
+
+  test('ResolveFallback allows generic indexing', () => {
+    type Select<
+      T extends PayloadTypesShape,
+      S extends CollectionSlug<T>,
+    > = TypedCollectionSelect<T>[S]
+    expect<Select<GeneratedTypes, 'users'>>().type.not.toBeNever()
+  })
+
+  test('TypedCollectionSelect resolves correctly with concrete types', () => {
     type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']
     expect<SelectUsers>().type.not.toBeNever()
 
@@ -926,7 +945,6 @@ describe('Types testing', () => {
 
     test('ensure SDK without generic automatically uses GeneratedTypes', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
-      // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
         | 'pages'
@@ -942,7 +960,6 @@ describe('Types testing', () => {
 
     test('ensure SDK with explicit generic uses has correct collection types', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
-      // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
         | 'pages'

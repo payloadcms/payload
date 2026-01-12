@@ -167,9 +167,7 @@ export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
  * Shape constraint for PayloadTypes.
- * Matches the structure of generated Config types, allowing both:
- * 1. PayloadTypes (module-augmented) to satisfy it
- * 2. Config (from payload-types.ts) to satisfy it
+ * Matches the structure of generated Config types.
  *
  * By defining the actual shape, we can use simple property access (T['collections'])
  * instead of conditional types throughout the codebase.
