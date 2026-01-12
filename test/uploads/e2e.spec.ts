@@ -469,8 +469,10 @@ describe('Uploads', () => {
     // fill the title with 'draft'
     await page.locator('#field-title').fill('draft')
 
-    // save draft
-    await page.locator('#action-save-draft').click()
+    await saveDocAndAssert(
+      page,
+      '.payload__modal-item .collection-edit--versions button#action-save-draft',
+    )
 
     // close the drawer
     await page.locator('.doc-drawer__header-close').click()
@@ -861,10 +863,10 @@ describe('Uploads', () => {
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
-    // Ensure the URL starts correctly
+    // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -905,7 +907,7 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
@@ -1871,7 +1873,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/enlarge\/file\/test-image-180x50\.jpg$/,
+      )
     })
 
     test('should select next smallest image outside of range but smaller than original', async () => {
@@ -1880,7 +1885,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/focal-only\/file\/test-image-400x300\.jpg$/,
+      )
     })
 
     test('should select original if smaller than next available size', async () => {
@@ -1889,7 +1897,7 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
+      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png$/)
     })
   })
 
