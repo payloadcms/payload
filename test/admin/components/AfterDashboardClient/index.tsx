@@ -9,10 +9,10 @@ export const AfterDashboardClient: PayloadServerReactComponent<CustomComponent> 
   return (
     <Banner>
       <p>Admin Dependency test component:</p>
-      <RenderServerComponent
-        Component={payload.config.admin.dependencies?.myTestComponent}
-        importMap={payload.importMap}
-      />
+      {RenderServerComponent({
+        Component: payload.config.admin.dependencies?.myTestComponent,
+        importMap: payload.importMap,
+      })}
     </Banner>
   )
 }

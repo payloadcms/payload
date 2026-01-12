@@ -3,7 +3,7 @@ export const addSelectGenericsToGeneratedTypes = ({
 }: {
   compiledGeneratedTypes: string
 }) => {
-  const modifiedLines = []
+  const modifiedLines: string[] = []
 
   let isCollectionsSelectToken = false
   let isSelectTypeToken = false
@@ -35,8 +35,14 @@ export const addSelectGenericsToGeneratedTypes = ({
         // add generic to the interface
         newLine = line.replace(/(export interface\s+\w+)(\s*\{)/g, '$1<T extends boolean = true>$2')
       } else {
-        // replace booleans with T on the line
-        newLine = line.replace(/(?<!\?)\bboolean\b/g, 'T')
+        newLine = line
+          // replace booleans with T on the line
+          .replace(/(?<!\?)\bboolean\b/g, 'T')
+          // replace interface names like CtaBlock to CtaBlock<T>
+          .replace(
+            /\b(\w+)\s*\|\s*(\w+)\b/g,
+            (_match, left, right) => `${left} | ${right}<${left}>`,
+          )
 
         if (line === '}') {
           isSelectTypeToken = false

@@ -1,42 +1,62 @@
-import type { CollectionConfig } from 'payload'
+import type { Data, Document, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
-import type { NestedDocsPluginConfig } from '../types.js'
+import type { GenerateLabel, GenerateURL } from '../types.js'
 
 import { formatBreadcrumb } from './formatBreadcrumb.js'
-import { getParents } from './getParents.js'
+import { getParents as getAllParentDocuments } from './getParents.js'
 
-export const populateBreadcrumbs = async (
-  req: any,
-  pluginConfig: NestedDocsPluginConfig,
-  collection: CollectionConfig,
-  data: any,
-  originalDoc?: any,
-): Promise<any> => {
+type Args = {
+  breadcrumbsFieldName?: string
+  collection: SanitizedCollectionConfig
+  data: Data
+  generateLabel?: GenerateLabel
+  generateURL?: GenerateURL
+  originalDoc?: Document
+  parentFieldName?: string
+  req: PayloadRequest
+}
+export const populateBreadcrumbs = async ({
+  breadcrumbsFieldName = 'breadcrumbs',
+  collection,
+  data,
+  generateLabel,
+  generateURL,
+  originalDoc,
+  parentFieldName,
+  req,
+}: Args): Promise<Data> => {
   const newData = data
-  const breadcrumbDocs = [
-    ...(await getParents(req, pluginConfig, collection, {
-      ...originalDoc,
-      ...data,
-    })),
-  ]
 
-  const currentDocBreadcrumb = {
+  const currentDocument = {
     ...originalDoc,
     ...data,
+    id: originalDoc?.id ?? data?.id,
   }
 
-  if (originalDoc?.id) {
-    currentDocBreadcrumb.id = originalDoc?.id
-  }
-
-  breadcrumbDocs.push(currentDocBreadcrumb)
-
-  const breadcrumbs = breadcrumbDocs.map((_, i) =>
-    formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
+  const allParentDocuments: Document[] = await getAllParentDocuments(
+    req,
+    {
+      generateLabel,
+      generateURL,
+      parentFieldSlug: parentFieldName,
+    },
+    collection,
+    currentDocument,
   )
 
-  return {
-    ...newData,
-    [pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs']: breadcrumbs,
-  }
+  allParentDocuments.push(currentDocument)
+
+  const breadcrumbs = allParentDocuments.map((_, i) =>
+    formatBreadcrumb({
+      breadcrumb: currentDocument[breadcrumbsFieldName]?.[i],
+      collection,
+      docs: allParentDocuments.slice(0, i + 1),
+      generateLabel,
+      generateURL,
+    }),
+  )
+
+  newData[breadcrumbsFieldName] = breadcrumbs
+
+  return newData
 }

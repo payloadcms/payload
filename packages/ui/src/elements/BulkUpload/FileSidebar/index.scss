@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     width: 300px;
-    overflow: auto;
+    overflow: visible;
     max-height: 100%;
 
     &__header {
@@ -25,6 +25,19 @@
 
       p {
         margin: 0;
+      }
+    }
+
+    &__collectionSelect {
+      width: 100%;
+
+      .react-select {
+        width: 100%;
+      }
+      .field-type__wrap {
+        width: 100%;
+        padding-block: var(--base);
+        padding-inline: var(--file-gutter-h);
       }
     }
 
@@ -83,12 +96,13 @@
         background-color: var(--theme-elevation-100);
       }
 
-      .thumbnail {
-        width: base(1.2);
-        height: base(1.2);
+      .file-selections__thumbnail,
+      .file-selections__thumbnail-shimmer {
+        width: calc(var(--base) * 1.2);
+        height: calc(var(--base) * 1.2);
+        border-radius: var(--style-radius-s);
         flex-shrink: 0;
         object-fit: cover;
-        border-radius: var(--style-radius-s);
       }
 
       p {
@@ -185,7 +199,12 @@
 
     &__header__actions {
       display: flex;
+      align-items: center;
       gap: var(--base);
+    }
+
+    &__header__addFile {
+      height: fit-content;
     }
 
     &__toggler {

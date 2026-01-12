@@ -3,13 +3,15 @@ import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../.
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   depth?: number
@@ -37,15 +39,15 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     page,
     pagination = true,
     populate,
-    req: { fallbackLocale, locale, payload },
-    req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
     sort,
     where,
   } = args
+  const req = args.req!
+  const { fallbackLocale, locale, payload } = req
 
-  const versionFields = buildVersionGlobalFields(payload.config, globalConfig)
+  const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
 
   try {
     // /////////////////////////////////////
@@ -58,23 +60,34 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
     await validateQueryPaths({
       globalConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       versionFields,
-      where,
+      where: where!,
     })
 
-    const fullWhere = combineQueries(where, accessResults)
+    const fullWhere = combineQueries(where!, accessResults)
+
+    const select = sanitizeSelect({
+      fields: buildVersionGlobalFields(payload.config, globalConfig, true),
+      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      select: incomingSelect,
+      versions: true,
+    })
 
     // /////////////////////////////////////
     // Find
     // /////////////////////////////////////
 
+    const usePagination = pagination && limit !== 0
+    const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
+    const sanitizedPage = page || 1
+
     const paginatedDocs = await payload.db.findGlobalVersions<T>({
       global: globalConfig.slug,
-      limit: limit ?? 10,
-      locale,
-      page: page || 1,
+      limit: sanitizedLimit,
+      locale: locale!,
+      page: sanitizedPage,
       pagination,
       req,
       select,
@@ -90,27 +103,31 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       ...paginatedDocs,
       docs: await Promise.all(
         paginatedDocs.docs.map(async (data) => {
+          if (!data.version) {
+            // Fallback if not selected
+            ;(data as any).version = {}
+          }
           return {
             ...data,
             version: await afterRead<T>({
               collection: null,
               context: req.context,
-              depth,
+              depth: depth!,
               doc: {
                 ...data.version,
                 // Patch globalType onto version doc
                 globalType: globalConfig.slug,
               },
-              draft: undefined,
-              fallbackLocale,
+              draft: undefined!,
+              fallbackLocale: fallbackLocale!,
               findMany: true,
               global: globalConfig,
-              locale,
-              overrideAccess,
+              locale: locale!,
+              overrideAccess: overrideAccess!,
               populate,
               req,
               select,
-              showHiddenFields,
+              showHiddenFields: showHiddenFields!,
             }),
           }
         }),
@@ -121,15 +138,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // afterRead - Global
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (globalConfig.hooks?.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           const docRef = doc
 
-          await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of globalConfig.hooks.afterRead) {
             docRef.version =
               (await hook({
                 context: req.context,
@@ -139,11 +153,11 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
                 query: fullWhere,
                 req,
               })) || doc.version
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////

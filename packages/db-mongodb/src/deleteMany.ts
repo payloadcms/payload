@@ -1,23 +1,29 @@
-import type { DeleteMany, PayloadRequest } from 'payload'
+import type { DeleteOptions } from 'mongodb'
+
+import { type DeleteMany } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection: collectionSlug, req, where },
 ) {
-  const Model = this.collections[collection]
-  const options = {
-    ...(await withSession(this, req)),
-    lean: true,
-  }
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     where,
   })
+
+  const options: DeleteOptions = {
+    session: await getSession(this, req),
+  }
 
   await Model.deleteMany(query, options)
 }

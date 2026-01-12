@@ -1,32 +1,30 @@
-import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { slateEditor } from '@payloadcms/richtext-slate'
-import dotenv from 'dotenv'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { buildConfig } from 'payload'
+import { fileURLToPath } from 'url'
 
-dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
-})
+import { Users } from './collections/Users'
+import { Media } from './collections/Media'
 
-import { buildConfig } from 'payload/config'
-
-import { Pages } from './collections/Pages'
-import BeforeLogin from './components/BeforeLogin'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfig({
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
-  collections: [Pages],
   admin: {
-    bundler: webpackBundler(),
-    components: {
-      beforeLogin: [BeforeLogin],
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
   },
-  editor: slateEditor({}),
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
-  }),
+  collections: [Users, Media],
+  editor: lexicalEditor(),
+  secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL || '',
+  }),
+  plugins: [],
 })

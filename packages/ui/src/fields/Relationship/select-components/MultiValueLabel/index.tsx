@@ -25,16 +25,16 @@ export const MultiValueLabel: React.FC<
 > = (props) => {
   const {
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { draggableProps, onDocumentDrawerOpen } = {} } = {},
+    selectProps: { customProps: { draggableProps, onDocumentOpen } = {} } = {},
   } = props
 
   const { permissions } = useAuth()
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
-  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
+  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
 
   return (
-    <div className={baseClass}>
+    <div className={baseClass} title={label || ''}>
       <div className={`${baseClass}__content`}>
         <components.MultiValueLabel
           {...props}
@@ -49,12 +49,13 @@ export const MultiValueLabel: React.FC<
           <button
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
-            onClick={() => {
+            onClick={(event) => {
               setShowTooltip(false)
-              onDocumentDrawerOpen({
+              onDocumentOpen({
                 id: value,
                 collectionSlug: relationTo,
                 hasReadPermission,
+                openInNewTab: event.metaKey || event.ctrlKey,
               })
             }}
             onKeyDown={(e) => {

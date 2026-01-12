@@ -1,25 +1,35 @@
-import type { Field, TabAsField } from 'payload'
+import type {
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  Operator,
+  Payload,
+  RelationshipField,
+} from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
-  field: Field | TabAsField
+  field: FlattenedField
   hasCustomID: boolean
-  operator: string
+  locale?: string
+  operator: Operator
+  parentIsLocalized: boolean
   path: string
+  payload: Payload
   val: any
 }
 
-const buildExistsQuery = (formattedValue, path) => {
+const buildExistsQuery = (formattedValue: unknown, path: string, treatEmptyString = true) => {
   if (formattedValue) {
     return {
       rawQuery: {
         $and: [
           { [path]: { $exists: true } },
           { [path]: { $ne: null } },
-          { [path]: { $ne: '' } }, // Exclude null and empty string
+          ...(treatEmptyString ? [{ [path]: { $ne: '' } }] : []), // Treat empty string as null / undefined
         ],
       },
     }
@@ -29,44 +39,99 @@ const buildExistsQuery = (formattedValue, path) => {
         $or: [
           { [path]: { $exists: false } },
           { [path]: { $eq: null } },
-          { [path]: { $eq: '' } }, // Treat empty string as null / undefined
+          ...(treatEmptyString ? [{ [path]: { $eq: '' } }] : []), // Treat empty string as null / undefined
         ],
       },
     }
   }
 }
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+// returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
+const getFieldFromSegments = ({
+  field,
+  payload,
+  segments,
+}: {
+  field: FlattenedBlock | FlattenedField
+  payload: Payload
+  segments: string[]
+}): FlattenedField | undefined => {
+  if ('blocks' in field || 'blockReferences' in field) {
+    const _field: FlattenedBlocksField = field as FlattenedBlocksField
+    for (const _block of _field.blockReferences ?? _field.blocks) {
+      const block: FlattenedBlock | undefined =
+        typeof _block === 'string' ? payload.blocks[_block] : _block
+      if (block) {
+        const field = getFieldFromSegments({ field: block, payload, segments })
+        if (field) {
+          return field
+        }
+      }
+    }
+  }
+
+  if ('fields' in field) {
+    for (let i = 0; i < segments.length; i++) {
+      const foundField = field.flattenedFields.find((each) => each.name === segments[i])
+
+      if (!foundField) {
+        break
+      }
+
+      if (foundField && segments.length - 1 === i) {
+        return foundField
+      }
+
+      segments.shift()
+      return getFieldFromSegments({ field: foundField, payload, segments })
+    }
+  }
+}
+
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
+  locale,
   operator,
+  parentIsLocalized,
   path,
+  payload,
   val,
-}: SanitizeQueryValueArgs): {
-  operator?: string
-  rawQuery?: unknown
-  val?: unknown
-} => {
+}: SanitizeQueryValueArgs):
+  | {
+      operator?: string
+      rawQuery?: unknown
+      val?: unknown
+    }
+  | undefined => {
   let formattedValue = val
   let formattedOperator = operator
+
+  if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
+    const segments = path.split('.')
+    segments.shift()
+    const foundField = getFieldFromSegments({ field, payload, segments })
+
+    if (foundField) {
+      field = foundField
+    }
+  }
 
   // Disregard invalid _ids
   if (path === '_id') {
     if (typeof val === 'string' && val.split(',').length === 1) {
       if (!hasCustomID) {
-        const isValid = mongoose.Types.ObjectId.isValid(val)
+        const isValid = Types.ObjectId.isValid(val)
 
         if (!isValid) {
           return { operator: formattedOperator, val: undefined }
         } else {
           if (['in', 'not_in'].includes(operator)) {
-            formattedValue = createArrayFromCommaDelineated(formattedValue).map((id) =>
-              ObjectId(id),
+            formattedValue = createArrayFromCommaDelineated(formattedValue).map(
+              (id) => new Types.ObjectId(id),
             )
           } else {
-            formattedValue = ObjectId(val)
+            formattedValue = new Types.ObjectId(val)
           }
         }
       }
@@ -83,23 +148,28 @@ export const sanitizeQueryValue = ({
         formattedValue = createArrayFromCommaDelineated(val)
       }
 
-      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal]
-        if (!hasCustomID) {
-          if (mongoose.Types.ObjectId.isValid(inVal)) {
-            newValues.push(ObjectId(inVal))
-          }
-        }
+      if (Array.isArray(formattedValue)) {
+        formattedValue = formattedValue.reduce<unknown[]>((formattedValues, inVal) => {
+          if (!hasCustomID) {
+            if (Types.ObjectId.isValid(inVal)) {
+              formattedValues.push(new Types.ObjectId(inVal))
 
-        if (field.type === 'number') {
-          const parsedNumber = parseFloat(inVal)
-          if (!Number.isNaN(parsedNumber)) {
-            newValues.push(parsedNumber)
+              return formattedValues
+            }
           }
-        }
 
-        return [...formattedValues, ...newValues]
-      }, [])
+          if (field.type === 'number') {
+            const parsedNumber = parseFloat(inVal)
+            if (!Number.isNaN(parsedNumber)) {
+              formattedValues.push(parsedNumber)
+            }
+          } else {
+            formattedValues.push(inVal)
+          }
+
+          return formattedValues
+        }, [])
+      }
     }
   }
 
@@ -116,7 +186,7 @@ export const sanitizeQueryValue = ({
   if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue)
 
-    if (field.type === 'number') {
+    if (field.type === 'number' && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
     }
   }
@@ -154,42 +224,145 @@ export const sanitizeQueryValue = ({
       formattedValue.relationTo
     ) {
       const { value } = formattedValue
-      const isValid = mongoose.Types.ObjectId.isValid(value)
+      const isValid = Types.ObjectId.isValid(value)
 
       if (isValid) {
-        formattedValue.value = ObjectId(value)
+        formattedValue.value = new Types.ObjectId(value)
+      }
+
+      let localizedPath = path
+
+      if (
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        payload.config.localization &&
+        locale
+      ) {
+        localizedPath = `${path}.${locale}`
       }
 
       return {
         rawQuery: {
-          $and: [
-            { [`${path}.value`]: { $eq: formattedValue.value } },
-            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          $or: [
+            {
+              [localizedPath]: {
+                $eq: {
+                  // disable auto sort
+                  /* eslint-disable */
+                  value: formattedValue.value,
+                  relationTo: formattedValue.relationTo,
+                  /* eslint-enable */
+                },
+              },
+            },
+            {
+              [localizedPath]: {
+                $eq: {
+                  relationTo: formattedValue.relationTo,
+                  value: formattedValue.value,
+                },
+              },
+            },
           ],
         },
       }
     }
 
+    const relationTo = (field as RelationshipField).relationTo
+
     if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal]
-        if (mongoose.Types.ObjectId.isValid(inVal)) {
-          newValues.push(ObjectId(inVal))
+        if (!inVal) {
+          return formattedValues
         }
 
-        const parsedNumber = parseFloat(inVal)
-        if (!Number.isNaN(parsedNumber)) {
-          newValues.push(parsedNumber)
+        if (typeof relationTo === 'string' && payload.collections[relationTo]?.customIDType) {
+          if (payload.collections[relationTo].customIDType === 'number') {
+            const parsedNumber = parseFloat(inVal)
+            if (!Number.isNaN(parsedNumber)) {
+              formattedValues.push(parsedNumber)
+              return formattedValues
+            }
+          }
+
+          formattedValues.push(inVal)
+          return formattedValues
         }
 
-        return [...formattedValues, ...newValues]
+        if (
+          Array.isArray(relationTo) &&
+          relationTo.some((relationTo) => !!payload.collections[relationTo]?.customIDType)
+        ) {
+          if (Types.ObjectId.isValid(inVal.toString())) {
+            formattedValues.push(new Types.ObjectId(inVal))
+          } else {
+            formattedValues.push(inVal)
+          }
+          return formattedValues
+        }
+
+        if (Types.ObjectId.isValid(inVal.toString())) {
+          formattedValues.push(new Types.ObjectId(inVal))
+        }
+
+        return formattedValues
       }, [])
     }
 
-    if (operator === 'contains' && typeof formattedValue === 'string') {
-      if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-        formattedValue = ObjectId(formattedValue)
+    if (
+      ['contains', 'equals', 'like', 'not_equals'].includes(operator) &&
+      (!Array.isArray(relationTo) || !path.endsWith('.relationTo'))
+    ) {
+      if (typeof relationTo === 'string') {
+        const customIDType = payload.collections[relationTo]?.customIDType
+
+        if (customIDType) {
+          if (customIDType === 'number') {
+            formattedValue = parseFloat(val)
+
+            if (Number.isNaN(formattedValue)) {
+              return { operator: formattedOperator, val: undefined }
+            }
+          }
+        } else {
+          if (!Types.ObjectId.isValid(formattedValue)) {
+            return { operator: formattedOperator, val: undefined }
+          }
+          formattedValue = new Types.ObjectId(formattedValue)
+        }
+      } else {
+        const hasCustomIDType = relationTo.some(
+          (relationTo) => !!payload.collections[relationTo]?.customIDType,
+        )
+
+        if (hasCustomIDType) {
+          if (typeof val === 'string') {
+            const formattedNumber = Number(val)
+            formattedValue = [Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val]
+            formattedOperator = operator === 'not_equals' ? 'not_in' : 'in'
+            if (!Number.isNaN(formattedNumber)) {
+              formattedValue.push(formattedNumber)
+            }
+          }
+        } else {
+          if (!Types.ObjectId.isValid(formattedValue)) {
+            return { operator: formattedOperator, val: undefined }
+          }
+          formattedValue = new Types.ObjectId(formattedValue)
+        }
       }
+    }
+
+    if (
+      operator === 'all' &&
+      Array.isArray(relationTo) &&
+      path.endsWith('.value') &&
+      Array.isArray(formattedValue)
+    ) {
+      formattedValue.forEach((v, i) => {
+        if (Types.ObjectId.isValid(v)) {
+          formattedValue[i] = new Types.ObjectId(v)
+        }
+      })
     }
   }
 
@@ -216,10 +389,11 @@ export const sanitizeQueryValue = ({
         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
-      if (maxDistance) {
+      if (maxDistance && !Number.isNaN(Number(maxDistance))) {
         formattedValue.$maxDistance = parseFloat(maxDistance)
       }
-      if (minDistance) {
+
+      if (minDistance && !Number.isNaN(Number(minDistance))) {
         formattedValue.$minDistance = parseFloat(minDistance)
       }
     }
@@ -232,7 +406,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
-    if (operator === 'contains' && !mongoose.Types.ObjectId.isValid(formattedValue)) {
+    if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
       formattedValue = {
         $options: 'i',
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
@@ -242,7 +416,12 @@ export const sanitizeQueryValue = ({
     if (operator === 'exists') {
       formattedValue = formattedValue === 'true' || formattedValue === true
 
-      return buildExistsQuery(formattedValue, path)
+      // _id can't be empty string, will error Cast to ObjectId failed for value ""
+      return buildExistsQuery(
+        formattedValue,
+        path,
+        !['checkbox', 'relationship', 'upload'].includes(field.type),
+      )
     }
   }
 

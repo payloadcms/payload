@@ -8,7 +8,7 @@ keywords: query, documents, pagination, documentation, Content Management System
 
 Documents in Payload can have relationships to other Documents. This is true for both [Collections](../configuration/collections) as well as [Globals](../configuration/globals). When you query a Document, you can specify the depth at which to populate any of its related Documents either as full objects, or only their IDs.
 
-Depth will optimize the performance of your application by limiting the amount of processing made in the database and significantly reducing the amount of data returned. Since Documents can be infinitely nested or recursively related, it's important to be able to control how deep your API populates.
+Since Documents can be infinitely nested or recursively related, it's important to be able to control how deep your API populates. Depth can impact the performance of your queries by affecting the load on the database and the size of the response.
 
 For example, when you specify a `depth` of `0`, the API response might look like this:
 
@@ -34,8 +34,8 @@ But with a `depth` of `1`, the response might look like this:
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  Depth has no effect in the [GraphQL API](../graphql/overview), because there, depth is based on the shape of your queries.
+  **Important:** Depth has no effect in the [GraphQL API](../graphql/overview),
+  because there, depth is based on the shape of your queries.
 </Banner>
 
 ## Local API
@@ -43,10 +43,14 @@ But with a `depth` of `1`, the response might look like this:
 To specify depth in the [Local API](../local-api/overview), you can use the `depth` option in your query:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
-    depth: 2, // highlight-line
+    // highlight-start
+    depth: 2,
+    // highlight-end
   })
 
   return posts
@@ -54,8 +58,8 @@ const getPosts = async () => {
 ```
 
 <Banner type="info">
-  <strong>Reminder:</strong>
-  This is the same for [Globals](../configuration/globals) using the `findGlobal` operation.
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `findGlobal` operation.
 </Banner>
 
 ## REST API
@@ -63,15 +67,35 @@ const getPosts = async () => {
 To specify depth in the [REST API](../rest-api/overview), you can use the `depth` parameter in your query:
 
 ```ts
-fetch('https://localhost:3000/api/posts?depth=2') // highlight-line
+// highlight-start
+fetch('https://localhost:3000/api/posts?depth=2')
+  // highlight-end
   .then((res) => res.json())
   .then((data) => console.log(data))
 ```
 
 <Banner type="info">
-  <strong>Reminder:</strong>
-  This is the same for [Globals](../configuration/globals) using the `/api/globals` endpoint.
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `/api/globals` endpoint.
 </Banner>
+
+## Default Depth
+
+If no depth is specified in the request, Payload will use its default depth for all requests. By default, this is set to `2`.
+
+To change the default depth on the application level, you can use the `defaultDepth` option in your root Payload config:
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  defaultDepth: 1,
+  // highlight-end
+  // ...
+})
+```
 
 ## Max Depth
 
@@ -87,7 +111,9 @@ To set a max depth for a field, use the `maxDepth` property in your field config
       name: 'author',
       type: 'relationship',
       relationTo: 'users',
-      maxDepth: 2, // highlight-line
+      // highlight-start
+      maxDepth: 2,
+      // highlight-end
     }
   ]
 }

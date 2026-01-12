@@ -1,5 +1,5 @@
 {
-  "name": "payload-example-whitelabel-cms",
+  "name": "payload-example-whitelabel",
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/server.js",
@@ -7,28 +7,37 @@
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:schema": "payload-graphql generate:schema",
     "generate:types": "payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "beta",
-    "@payloadcms/next": "beta",
-    "@payloadcms/richtext-lexical": "beta",
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/richtext-lexical": "latest",
     "cross-env": "^7.0.3",
-    "next": "^14.3.0-canary.68",
-    "payload": "beta",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "graphql": "^16.9.0",
+    "next": "^15.4.10",
+    "payload": "latest",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "sharp": "0.32.6"
   },
   "devDependencies": {
+    "@payloadcms/graphql": "latest",
     "@types/node": "^20.11.25",
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "dotenv": "^16.4.5",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.2"
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.0.0",
+    "tsx": "^4.16.2",
+    "typescript": "5.5.2"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
   }
 }

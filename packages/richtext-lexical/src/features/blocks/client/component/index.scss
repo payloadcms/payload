@@ -1,24 +1,29 @@
-@import '../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .ContentEditable__root > div:has(.lexical-block) {
+  .LexicalEditorTheme__block {
+    @extend %body;
+    margin-block: base(0.4);
     // Fixes a bug where, if the block field has a Select field, the Select field's dropdown menu would be hidden behind the lexical editor.
     z-index: 1;
-  }
+    color: var(--theme-text);
 
-  .lexical-block {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--base) / 2);
-    @extend %body;
+    &[data-lexical-decorator='true'] {
+      // Increase specifity
+      width: auto;
+    }
+
+    &__container {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 2);
+    }
 
     &__row {
       .collapsible__toggle-wrap {
         padding-inline-start: base(0.4);
       }
     }
-
-    margin-block: base(0.4);
 
     &__header {
       h3 {
@@ -87,6 +92,15 @@
       }
     }
 
+    &__editButton.btn {
+      margin: 0;
+      width: 24px;
+
+      &:hover {
+        background-color: var(--theme-elevation-200);
+      }
+    }
+
     &__block-header {
       pointer-events: none;
     }
@@ -96,7 +110,7 @@
     }
 
     &__block-header,
-    &__block-header > div {
+    &__block-header > div:first-child {
       display: flex;
       max-width: 100%;
       width: 100%;
@@ -108,6 +122,11 @@
       & > * {
         pointer-events: all;
       }
+    }
+
+    &__block-header > div:nth-child(2) {
+      display: flex;
+      justify-content: flex-end;
     }
 
     &__block-number {
@@ -141,6 +160,11 @@
           color: var(--theme-elevation-800);
         }
       }
+    }
+
+    &-not-found {
+      color: var(--theme-error-500);
+      font-size: 1.1rem;
     }
   }
 

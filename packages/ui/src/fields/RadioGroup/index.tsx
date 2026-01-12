@@ -2,7 +2,7 @@
 import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -11,8 +11,9 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
@@ -20,13 +21,12 @@ const baseClass = 'radio-group'
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     disableModifyingForm: disableModifyingFormFromProps,
+    field,
     field: {
       admin: {
         className,
         description,
         layout = 'horizontal',
-        style,
-        width,
       } = {} as RadioFieldClientProps['field']['admin'],
       label,
       localized,
@@ -34,7 +34,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       required,
     } = {} as RadioFieldClientProps['field'],
     onChange: onChangeFromProps,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
     value: valueFromProps,
@@ -52,16 +52,20 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
   const value = valueFromContext || valueFromProps
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -71,14 +75,11 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        readOnly && `${baseClass}--read-only`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Error}
@@ -91,6 +92,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
+        {BeforeInput}
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''
@@ -115,19 +117,20 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                       onChangeFromProps(optionValue)
                     }
 
-                    if (!readOnly) {
+                    if (!(readOnly || disabled)) {
                       setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
-                  readOnly={readOnly}
+                  readOnly={readOnly || disabled}
                   uuid={uuid}
                 />
               </li>
             )
           })}
         </ul>
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
@@ -137,4 +140,4 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   )
 }
 
-export const RadioGroupField = withCondition(RadioGroupFieldComponent)
+export const RadioGroupField: any = withCondition(RadioGroupFieldComponent)

@@ -18,7 +18,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     docs: [doc],
   } = await findMany({
     adapter: this,
-    fields: globalConfig.fields,
+    fields: globalConfig.flattenedFields,
     limit: 1,
     locale,
     pagination: false,

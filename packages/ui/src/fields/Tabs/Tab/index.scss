@@ -6,7 +6,8 @@
     @extend %h4;
     display: flex;
     padding-bottom: base(1);
-    margin: 0 $baseline 0 0;
+    margin: 0;
+    margin-inline-end: $baseline;
     cursor: pointer;
     opacity: 0.5;
     position: relative;
@@ -35,6 +36,10 @@
       &:after {
         opacity: 0.2;
       }
+    }
+
+    &--hidden {
+      display: none;
     }
 
     &--active {

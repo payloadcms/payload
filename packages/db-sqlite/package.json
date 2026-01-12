@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "3.0.0-beta.130",
+  "version": "3.70.0",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -25,38 +26,57 @@
       "types": "./src/index.ts"
     },
     "./types": {
-      "import": "./src/types.ts",
-      "require": "./src/types.ts",
-      "types": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "require": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts"
     },
     "./migration-utils": {
       "import": "./src/exports/migration-utils.ts",
       "require": "./src/exports/migration-utils.ts",
       "types": "./src/exports/migration-utils.ts"
+    },
+    "./drizzle": {
+      "import": "./src/drizzle-proxy/index.ts",
+      "types": "./src/drizzle-proxy/index.ts",
+      "default": "./src/drizzle-proxy/index.ts"
+    },
+    "./drizzle/sqlite-core": {
+      "import": "./src/drizzle-proxy/sqlite-core.ts",
+      "types": "./src/drizzle-proxy/sqlite-core.ts",
+      "default": "./src/drizzle-proxy/sqlite-core.ts"
+    },
+    "./drizzle/libsql": {
+      "import": "./src/drizzle-proxy/libsql.ts",
+      "types": "./src/drizzle-proxy/libsql.ts",
+      "default": "./src/drizzle-proxy/libsql.ts"
+    },
+    "./drizzle/relations": {
+      "import": "./src/drizzle-proxy/relations.ts",
+      "types": "./src/drizzle-proxy/relations.ts",
+      "default": "./src/drizzle-proxy/relations.ts"
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@libsql/client": "0.14.0",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.28.0",
-    "drizzle-orm": "0.36.1",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"
@@ -65,6 +85,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
+    "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -78,14 +99,34 @@
         "types": "./dist/index.d.ts"
       },
       "./types": {
-        "import": "./dist/types.js",
-        "require": "./dist/types.js",
-        "types": "./dist/types.d.ts"
+        "import": "./dist/exports/types-deprecated.js",
+        "require": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts"
       },
       "./migration-utils": {
         "import": "./dist/exports/migration-utils.js",
         "require": "./dist/exports/migration-utils.js",
         "types": "./dist/exports/migration-utils.d.ts"
+      },
+      "./drizzle": {
+        "import": "./dist/drizzle-proxy/index.js",
+        "types": "./dist/drizzle-proxy/index.d.ts",
+        "default": "./dist/drizzle-proxy/index.js"
+      },
+      "./drizzle/sqlite-core": {
+        "import": "./dist/drizzle-proxy/sqlite-core.js",
+        "types": "./dist/drizzle-proxy/sqlite-core.d.ts",
+        "default": "./dist/drizzle-proxy/sqlite-core.js"
+      },
+      "./drizzle/libsql": {
+        "import": "./dist/drizzle-proxy/libsql.js",
+        "types": "./dist/drizzle-proxy/libsql.d.ts",
+        "default": "./dist/drizzle-proxy/libsql.js"
+      },
+      "./drizzle/relations": {
+        "import": "./dist/drizzle-proxy/relations.js",
+        "types": "./dist/drizzle-proxy/relations.d.ts",
+        "default": "./dist/drizzle-proxy/relations.js"
       }
     },
     "main": "./dist/index.js",

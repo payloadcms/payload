@@ -6,14 +6,16 @@ desc: Manage your data and customize the Payload Admin Panel by swapping in your
 keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) Admin Panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
+Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) Admin Panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), [preview drafts](./preview), [diff versions](../versions/overview), and so much more.
 
-The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
+The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](../custom-components/overview)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
 
-The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components), enabling the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production).
+The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components), enabling the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production/deployment).
 
 <Banner type="success">
-  The Payload Admin Panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](./components).
+  The Payload Admin Panel is designed to be as minimal and straightforward as
+  possible to allow easy customization and control. [Learn
+  more](../custom-components/overview).
 </Banner>
 
 <LightDarkImage
@@ -30,34 +32,38 @@ The Admin Panel serves as the entire HTTP layer for Payload, providing a full CR
 Once you [install Payload](../getting-started/installation), the following files and directories will be created in your app:
 
 ```plaintext
-app/
-├─ (payload)/
-├── admin/
-├─── [[...segments]]/
+app
+├─ (payload)
+├── admin
+├─── [[...segments]]
 ├──── page.tsx
 ├──── not-found.tsx
-├── api/
-├─── [...slug]/
+├── api
+├─── [...slug]
 ├──── route.ts
-├── graphql/
+├── graphql
 ├──── route.ts
-├── graphql-playground/
+├── graphql-playground
 ├──── route.ts
 ├── custom.scss
 ├── layout.tsx
 ```
 
 <Banner type="info">
-  If you are not familiar with Next.js project structure, you can [learn more about it here](https://nextjs.org/docs/getting-started/project-structure).
+  If you are not familiar with Next.js project structure, you can [learn more
+  about it here](https://nextjs.org/docs/getting-started/project-structure).
 </Banner>
 
 As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper [`lang`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang) and [`dir`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir) attributes, etc.
 
-The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contain all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  If you don't use the [REST API](../rest/overview) or [GraphQL API](../graphql/overview), you can delete the [Next.js files corresponding to those routes](../admin/overview#project-structure), however, the overhead of this API is completely constrained to these endpoints, and will not slow down or affect Payload outside of the endpoints.
+  **Note:** If you don't intend to use the Admin Panel, [REST
+  API](../rest-api/overview), or [GraphQL API](../graphql/overview), you can
+  opt-out by simply deleting their corresponding directories within your Next.js
+  app. The overhead, however, is completely constrained to these routes, and
+  will not slow down or affect Payload outside when not in use.
 </Banner>
 
 Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
@@ -71,39 +77,46 @@ All auto-generated files will contain the following comments at the top of each 
 
 ## Admin Options
 
-All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
+All root-level options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
 
 ```ts
 import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
+  // highlight-start
+  admin: {
     // ...
   },
+  // highlight-end
 })
 ```
 
 The following options are available:
 
-| Option        | Description                                                                                                                                                           |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`avatar`**      | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
-| **`autoLogin`**   | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
-| **`buildPath`**   | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
-| **`components`**  | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
-| **`custom`**      | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
-| **`dateFormat`**  | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
-| **`disable`**     | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
-| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
-| **`meta`**        | Base metadata to use for the Admin Panel. [More details](./metadata). |
-| **`routes`**      | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
-| **`theme`**       | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.
-| **`user`**        | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
+| Option                     | Description                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `avatar`                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                        |
+| `autoLogin`                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                      |
+| `autoRefresh`              | Used to automatically refresh user tokens for users logged into the dashboard. [More details](../authentication/overview).                      |
+| `components`               | Component overrides that affect the entirety of the Admin Panel. [More details](../custom-components/overview).                                 |
+| `custom`                   | Any custom properties you wish to pass to the Admin Panel.                                                                                      |
+| `dateFormat`               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used. |
+| `livePreview`              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                   |
+| `meta`                     | Base metadata to use for the Admin Panel. [More details](./metadata).                                                                           |
+| `routes`                   | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                           |
+| `suppressHydrationWarning` | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.              |
+| `theme`                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                |
+| `timezones`                | Configure the timezone settings for the admin panel. [More details](#timezones)                                                                 |
+| `toast`                    | Customize the handling of toast messages within the Admin Panel. [More details](#toasts)                                                        |
+| `user`                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                    |
 
 <Banner type="success">
-  <strong>Reminder:</strong>
-  These are the _root-level_ options for the Admin Panel. You can also customize [Collection Admin Options](./collections) and [Global Admin Options](./globals) through their respective `admin` keys.
+  **Reminder:** These are the _root-level_ options for the Admin Panel. You can
+  also customize [Collection Admin
+  Options](../configuration/collections#admin-options) and [Global Admin
+  Options](../configuration/globals#admin-options) through their respective
+  `admin` keys.
 </Banner>
 
 ### The Admin User Collection
@@ -122,9 +135,10 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  The Admin Panel can only be used by a single auth-enabled Collection. To enable authentication for a Collection, simply set `auth: true` in the Collection's configuration. See [Authentication](../authentication/overview) for more information.
+  **Important:**
+
+The Admin Panel can only be used by a single auth-enabled Collection. To enable authentication for a Collection, simply set `auth: true` in the Collection's configuration. See [Authentication](../authentication/overview) for more information.
+
 </Banner>
 
 By default, if you have not specified a Collection, Payload will automatically provide a `User` Collection with access to the Admin Panel. You can customize or override the fields and settings of the default `User` Collection by adding your own Collection with `slug: 'users'`. Doing this will force Payload to use your provided `User` Collection instead of its default version.
@@ -134,7 +148,7 @@ You can use whatever Collection you'd like to access the Admin Panel as long as 
 - `admins` - meant to have a higher level of permissions to manage your data and access the Admin Panel
 - `customers` - meant for end users of your app that should not be allowed to log into the Admin Panel
 
-To do this, specify `admin: { user: 'admins' }` in your config. This will provide access to the Admin Panel to only `admins`. Any users authenticated as `customers` will be prevented from accessing the Admin Panel.  See [Access Control](/docs/access-control/overview) for full details.
+To do this, specify `admin: { user: 'admins' }` in your config. This will provide access to the Admin Panel to only `admins`. Any users authenticated as `customers` will be prevented from accessing the Admin Panel. See [Access Control](/docs/access-control/overview) for full details.
 
 ### Role-based Access Control
 
@@ -143,7 +157,7 @@ It is also possible to allow multiple user types into the Admin Panel with limit
 - `super-admin` - full access to the Admin Panel to perform any action
 - `editor` - limited access to the Admin Panel to only manage content
 
-To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
+To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth).
 
 ## Customizing Routes
 
@@ -161,41 +175,65 @@ import { buildConfig } from 'payload'
 const config = buildConfig({
   // ...
   routes: {
-    admin: '/custom-admin-route' // highlight-line
-  }
+    admin: '/custom-admin-route', // highlight-line
+  },
 })
 ```
 
 The following options are available:
 
 | Option              | Default route         | Description                                       |
-|---------------------|-----------------------|---------------------------------------------------|
+| ------------------- | --------------------- | ------------------------------------------------- |
 | `admin`             | `/admin`              | The Admin Panel itself.                           |
 | `api`               | `/api`                | The [REST API](../rest-api/overview) base path.   |
 | `graphQL`           | `/graphql`            | The [GraphQL API](../graphql/overview) base path. |
 | `graphQLPlayground` | `/graphql-playground` | The GraphQL Playground.                           |
 
+<Banner type="warning">
+  **Important:** Changing Root-level Routes also requires a change to [Project
+  Structure](#project-structure) to match the new route. [More
+  details](#customizing-root-level-routes).
+</Banner>
+
 <Banner type="success">
-  <strong>Tip:</strong>
-   You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
+  **Tip:** You can easily add _new_ routes to the Admin Panel through [Custom
+  Endpoints](../rest-api/overview#custom-endpoints) and [Custom
+  Views](../custom-components/custom-views).
 </Banner>
 
 #### Customizing Root-level Routes
 
 You can change the Root-level Routes as needed, such as to mount the Admin Panel at the root of your application.
 
-Changing Root-level Routes also requires a change to [Project Structure](#project-structure) to match the new route. For example, if you set `routes.admin` to `/`, you would need to completely remove the `admin` directory from the project structure:
+This change, however, also requires a change to your [Project Structure](#project-structure) to match the new route.
+
+For example, if you set `routes.admin` to `/`:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  routes: {
+    admin: '/', // highlight-line
+  },
+})
+```
+
+Then you would need to completely remove the `admin` directory from the project structure:
 
 ```plaintext
-app/
-├─ (payload)/
-├── [[...segments]]/
+app
+├─ (payload)
+├── [[...segments]]
 ├──── ...
+├── layout.tsx
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  If you set Root-level Routes _before_ auto-generating the Admin Panel via `create-payload-app`, your [Project Structure](#project-structure) will already be set up correctly.
+  **Note:** If you set Root-level Routes _before_ auto-generating the Admin
+  Panel via `create-payload-app`, your [Project Structure](#project-structure)
+  will already be set up correctly.
 </Banner>
 
 ### Admin-level Routes
@@ -211,34 +249,160 @@ const config = buildConfig({
   // ...
   admin: {
     routes: {
-      account: '/my-account' // highlight-line
-    }
+      account: '/my-account', // highlight-line
+    },
   },
 })
 ```
 
 The following options are available:
 
-| Option            | Default route           | Description                                     |
-| ----------------- | ----------------------- | ----------------------------------------------- |
-| `account`         | `/account`              | The user's account page.                        |
-| `createFirstUser` | `/create-first-user`    | The page to create the first user.              |
-| `forgot`          | `/forgot`               | The password reset page.                        |
-| `inactivity`      | `/logout-inactivity`    | The page to redirect to after inactivity.       |
-| `login`           | `/login`                | The login page.                                 |
-| `logout`          | `/logout`               | The logout page.                                |
-| `reset`           | `/reset`                | The password reset page.                        |
-| `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
+| Option            | Default route        | Description                               |
+| ----------------- | -------------------- | ----------------------------------------- |
+| `account`         | `/account`           | The user's account page.                  |
+| `createFirstUser` | `/create-first-user` | The page to create the first user.        |
+| `forgot`          | `/forgot`            | The password reset page.                  |
+| `inactivity`      | `/logout-inactivity` | The page to redirect to after inactivity. |
+| `login`           | `/login`             | The login page.                           |
+| `logout`          | `/logout`            | The logout page.                          |
+| `reset`           | `/reset`             | The password reset page.                  |
+| `unauthorized`    | `/unauthorized`      | The unauthorized page.                    |
 
 <Banner type="success">
-  <strong>Note:</strong>
-  You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](./views) for more information.
+  **Note:** You can also swap out entire _views_ out for your own, using the
+  `admin.views` property of the Payload Config. See [Custom
+  Views](../custom-components/custom-views) for more information.
 </Banner>
 
 ## I18n
 
-The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
+The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/main/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
 
 ## Light and Dark Modes
 
 Users in the Admin Panel have the ability to choose between light mode and dark mode for their editing experience. Users can select their preferred theme from their account page. Once selected, it is saved to their user's preferences and persisted across sessions and devices. If no theme was selected, the Admin Panel will automatically detect the operation system's theme and use that as the default.
+
+## Timezones
+
+The `admin.timezones` configuration allows you to configure timezone settings for the Admin Panel. You can customise the available list of timezones and in the future configure the default timezone for the Admin Panel and for all users.
+
+Dates in Payload are always stored in UTC in the database. The timezone settings in the Admin Panel affect only how dates are displayed to editors to help ensure consistency for multi-region editorial teams.
+
+The following options are available:
+
+| Option               | Description                                                                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit`. Also supports a function that is given the defaultTimezones list. |
+| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                                                                                            |
+
+We validate the supported timezones array by checking the value against the list of IANA timezones supported via the Intl API, specifically `Intl.supportedValuesOf('timeZone')`.
+
+<Banner type="info">
+  **Important** You must enable timezones on each individual date field via
+  `timezone: true`. See [Date Fields](../fields/overview#date) for more
+  information.
+</Banner>
+
+For example:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
+        },
+        {
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
+        },
+        {
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
+        },
+      ],
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Extending supported timezones
+
+For `supportedTimezones` we also support using a function that is given the defaultTimezones list. This allows you to easily extend the default list of timezones rather than replacing it completely.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones, // list provided by Payload
+        {
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
+        },
+        {
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
+        },
+        {
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
+        },
+      ],
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Using a UTC timezone
+
+In some situations you may want the displayed date and time to match exactly what's being stored in the database where we always store values in UTC. You can do this by adding UTC as a valid timezone option.
+Using a UTC timezone means that an editor inputing for example '1pm' will always see '1pm' and the stored value will be '13:00:00Z'.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'UTC',
+          value: 'UTC',
+        },
+        // ...other timezones
+      ],
+      defaultTimezone: 'UTC',
+    },
+  },
+})
+```
+
+## Toast
+
+The `admin.toast` configuration allows you to customize the handling of toast messages within the Admin Panel, such as increasing the duration they are displayed and limiting the number of visible toasts at once.
+
+<Banner type="info">
+  **Note:** The Admin Panel currently uses the
+  [Sonner](https://sonner.emilkowal.ski) library for toast notifications.
+</Banner>
+
+The following options are available for the `admin.toast` configuration:
+
+| Option     | Description                                                                                                      | Default        |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | -------------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`         |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false`        |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`            |
+| `position` | The position of the toast on the screen.                                                                         | `bottom-right` |

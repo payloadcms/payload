@@ -1,6 +1,5 @@
-import type { ServerProps } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { ClientFieldWithOptionalType } from './Field.js'
+import type { ClientFieldWithOptionalType, ServerComponentProps } from './Field.js'
 
 export type GenericErrorProps = {
   readonly alignCaret?: 'center' | 'left' | 'right'
@@ -22,7 +21,7 @@ export type FieldErrorServerProps<
   clientField: TFieldClient
   readonly field: TFieldServer
 } & GenericErrorProps &
-  Partial<ServerProps>
+  ServerComponentProps
 
 export type FieldErrorClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

@@ -1,4 +1,4 @@
-@import '../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .slash-menu-popup {
@@ -54,7 +54,6 @@
 
       .icon {
         color: var(--theme-elevation-500);
-        min-width: fit-content;
       }
     }
   }

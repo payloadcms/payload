@@ -7,6 +7,10 @@ const dirname = path.dirname(filename)
 import { sassPlugin } from 'esbuild-sass-plugin'
 import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
+const directoryArg = process.argv[2] || 'dist'
+
+const shouldSplit = process.argv.includes('--no-split') ? false : true
+
 const removeCSSImports = {
   name: 'remove-css-imports',
   setup(build) {
@@ -36,8 +40,11 @@ const useClientPlugin = {
 
         result.outputFiles.forEach((file) => {
           let contents = file.text
-          contents = contents.replace(directiveRegex, '') // Remove existing use client directives
-          contents = directive + '\n' + contents // Prepend our use client directive
+
+          if (!file.path.endsWith('.map')) {
+            contents = contents.replace(directiveRegex, '') // Remove existing use client directives
+            contents = directive + '\n' + contents // Prepend our use client directive
+          }
 
           if (originalWrite) {
             const filePath = path.join(build.initialOptions.outdir, path.basename(file.path))
@@ -59,6 +66,11 @@ const useClientPlugin = {
 }
 
 async function build() {
+  // Create directoryArg if it doesn't exist
+  if (!fs.existsSync(directoryArg)) {
+    await fs.promises.mkdir(directoryArg, { recursive: true })
+  }
+
   // Bundle only the .scss files into a single css file
   await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
@@ -70,7 +82,7 @@ async function build() {
   })
 
   try {
-    fs.renameSync('dist-styles/index.css', 'dist/styles.css')
+    fs.renameSync('dist-styles/index.css', `${directoryArg}/styles.css`)
     fs.rmdirSync('dist-styles', { recursive: true })
   } catch (err) {
     console.error(`Error while renaming index.css and dist-styles: ${err}`)
@@ -84,10 +96,10 @@ async function build() {
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outdir: 'dist/exports/client_optimized',
+    outdir: `${directoryArg}/exports/client_optimized`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: true,
+    splitting: shouldSplit,
     write: true, // required for useClientPlugin
     banner: {
       js: `// Workaround for react-datepicker and other cjs dependencies potentially inserting require("react") statements
@@ -119,7 +131,6 @@ function require(m) {
       'react',
       'react-dom',
       'next',
-      'react-animate-height',
       'crypto',
     ],
     //packages: 'external',
@@ -140,11 +151,11 @@ function require(m) {
   console.log('client.ts bundled successfully')
 
   const resultShared = await esbuild.build({
-    entryPoints: ['src/exports/shared/index.ts'],
+    entryPoints: ['dist/exports/shared/index.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: 'dist/exports/shared',
+    outdir: `${directoryArg}/exports/shared_optimized`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: false,
@@ -162,7 +173,6 @@ function require(m) {
       'react',
       'react-dom',
       'next',
-      'react-animate-height',
       'crypto',
       '@floating-ui/react',
       'date-fns',

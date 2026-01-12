@@ -41,7 +41,7 @@ export const UploadDrawer: React.FC<{
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
   const { closeModal } = useModal()
-  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -75,7 +75,9 @@ export const UploadDrawer: React.FC<{
         id,
         collectionSlug,
         data,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',
@@ -99,7 +101,6 @@ export const UploadDrawer: React.FC<{
     getFormState,
     globalSlug,
     getDocPreferences,
-    docPermissions,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
@@ -107,7 +108,9 @@ export const UploadDrawer: React.FC<{
       const { state } = await getFormState({
         id,
         collectionSlug,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -122,7 +125,6 @@ export const UploadDrawer: React.FC<{
       getFormState,
       id,
       collectionSlug,
-      docPermissions,
       getDocPreferences,
       globalSlug,
       schemaPath,
@@ -150,7 +152,7 @@ export const UploadDrawer: React.FC<{
             parentIndexPath=""
             parentPath=""
             parentSchemaPath=""
-            permissions={{}}
+            permissions={true}
             readOnly={false}
           />
           <FormSubmit>{t('fields:saveChanges')}</FormSubmit>

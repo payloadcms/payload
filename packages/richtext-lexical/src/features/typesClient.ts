@@ -1,15 +1,18 @@
-import type { Transformer } from '@lexical/markdown'
 import type {
   Klass,
   LexicalEditor,
   LexicalNode,
   LexicalNodeReplacement,
-  SerializedEditorState,
+  TextFormatType,
 } from 'lexical'
+import type { ClientConfig, RichTextFieldClient } from 'payload'
 import type React from 'react'
+import type { JSX } from 'react'
 
 import type { ClientEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import type { Transformer } from '../packages/@lexical/markdown/index.js'
+import type { FeatureClientSchemaMap } from '../types.js'
 import type { ToolbarGroup } from './toolbars/types.js'
 
 export type FeatureProviderProviderClient<
@@ -30,10 +33,15 @@ export type FeatureProviderClient<
   clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
+        config: ClientConfig
+        featureClientImportMap: Record<string, any>
+        featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
+        field?: RichTextFieldClient
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedClientFeatureMap
+        schemaPath: string
         // unSanitized EditorConfig,
         unSanitizedEditorConfig: ClientEditorConfig
       }) => ClientFeature<ClientFeatureProps>)
@@ -48,20 +56,64 @@ export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
   clientProps: ClientFeatureProps
 }>
 
+/**
+ * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+ */
+export type SanitizedPlugin =
+  | {
+      clientProps: any
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: PluginComponent
+      key: string
+      position: 'bottom' // Determines at which position the Component will be added.
+    }
+  | {
+      clientProps: any
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: PluginComponent
+      key: string
+      position: 'normal' // Determines at which position the Component will be added.
+    }
+  | {
+      clientProps: any
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: PluginComponent
+      key: string
+      position: 'top' // Determines at which position the Component will be added.
+    }
+  | {
+      clientProps: any
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: PluginComponentWithAnchor
+      desktopOnly?: boolean
+      key: string
+      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+    }
+  | {
+      clientProps: any
+      Component: PluginComponent
+      key: string
+      position: 'aboveContainer'
+    }
+  | {
+      clientProps: any
+      Component: PluginComponent
+      key: string
+      position: 'belowContainer'
+    }
+
 export type ClientFeature<ClientFeatureProps> = {
-  hooks?: {
-    load?: ({
-      incomingEditorState,
-    }: {
-      incomingEditorState: SerializedEditorState
-    }) => SerializedEditorState
-    save?: ({
-      incomingEditorState,
-    }: {
-      incomingEditorState: SerializedEditorState
-    }) => SerializedEditorState
-  }
-  markdownTransformers?: Transformer[]
+  /**
+   * The text formats which are enabled by this feature.
+   */
+  enableFormats?: TextFormatType[]
+  markdownTransformers?: (
+    | ((props: {
+        allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+        allTransformers: Transformer[]
+      }) => Transformer)
+    | Transformer
+  )[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -100,7 +152,7 @@ export type ClientFeature<ClientFeatureProps> = {
   /**
    * Client Features can register their own providers, which will be nested below the EditorConfigProvider
    */
-  providers?: Array<React.FC>
+  providers?: Array<React.FC<{ children: JSX.Element }>>
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
@@ -161,71 +213,12 @@ export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<any>>
 
 export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, any>>
 
-/**
- * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
- */
-export type SanitizedPlugin =
-  | {
-      clientProps: any
-      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: PluginComponent
-      key: string
-      position: 'bottom' // Determines at which position the Component will be added.
-    }
-  | {
-      clientProps: any
-      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: PluginComponent
-      key: string
-      position: 'normal' // Determines at which position the Component will be added.
-    }
-  | {
-      clientProps: any
-      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: PluginComponent
-      key: string
-      position: 'top' // Determines at which position the Component will be added.
-    }
-  | {
-      clientProps: any
-      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: PluginComponentWithAnchor
-      desktopOnly?: boolean
-      key: string
-      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-    }
-  | {
-      clientProps: any
-      Component: PluginComponent
-      key: string
-      position: 'aboveContainer'
-    }
-  | {
-      clientProps: any
-      Component: PluginComponent
-      key: string
-      position: 'belowContainer'
-    }
-
 export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  hooks: {
-    load: Array<
-      ({
-        incomingEditorState,
-      }: {
-        incomingEditorState: SerializedEditorState
-      }) => SerializedEditorState
-    >
-    save: Array<
-      ({
-        incomingEditorState,
-      }: {
-        incomingEditorState: SerializedEditorState
-      }) => SerializedEditorState
-    >
-  }
+  enabledFormats: TextFormatType[]
+  markdownTransformers: Transformer[]
+
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */
@@ -247,8 +240,5 @@ export type SanitizedClientFeatures = {
     groups: SlashMenuGroup[]
   }
 } & Required<
-  Pick<
-    ResolvedClientFeature<unknown>,
-    'markdownTransformers' | 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'
-  >
+  Pick<ResolvedClientFeature<unknown>, 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'>
 >

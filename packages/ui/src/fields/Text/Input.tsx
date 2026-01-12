@@ -4,6 +4,7 @@ import type { ChangeEvent } from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
@@ -24,6 +25,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     description,
     Error,
     hasMany,
+    htmlAttributes,
     inputRef,
     Label,
     label,
@@ -32,7 +34,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     onChange,
     onKeyDown,
     path,
-    placeholder,
+    placeholder: placeholderFromProps,
     readOnly,
     required,
     rtl,
@@ -40,10 +42,56 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     style,
     value,
     valueToRender,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
+
+  const editableProps: ReactSelectAdapterProps['customProps']['editableProps'] = (
+    data,
+    className,
+    selectProps,
+  ) => {
+    const editableClassName = `${className}--editable`
+
+    return {
+      onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+        event.currentTarget.contentEditable = 'false'
+      },
+      onClick: (event: React.MouseEvent<HTMLDivElement>) => {
+        event.currentTarget.contentEditable = 'true'
+        event.currentTarget.classList.add(editableClassName)
+        event.currentTarget.focus()
+      },
+      onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter' || event.key === 'Tab' || event.key === 'Escape') {
+          event.currentTarget.contentEditable = 'false'
+          event.currentTarget.classList.remove(editableClassName)
+          data.value.value = event.currentTarget.innerText
+          data.label = event.currentTarget.innerText
+
+          if (data.value.value.replaceAll('\n', '')) {
+            selectProps.onChange(selectProps.value, {
+              action: 'create-option',
+              option: data,
+            })
+          } else {
+            if (Array.isArray(selectProps.value)) {
+              const newValues = selectProps.value.filter((v) => v.id !== data.id)
+              selectProps.onChange(newValues, {
+                action: 'pop-value',
+                removedValue: data,
+              })
+            }
+          }
+
+          event.preventDefault()
+        }
+        event.stopPropagation()
+      },
+    }
+  }
+
+  const placeholder = getTranslation(placeholderFromProps, i18n)
 
   return (
     <div
@@ -57,10 +105,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}
@@ -77,15 +122,20 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
+            components={{ DropdownIndicator: null }}
+            customProps={{
+              editableProps,
+            }}
             disabled={readOnly}
             // prevent adding additional options if maxRows is reached
             filterOption={() =>
               !maxRows ? true : !(Array.isArray(value) && maxRows && value.length >= maxRows)
             }
-            isClearable
+            isClearable={false}
             isCreatable
             isMulti
             isSortable
+            menuIsOpen={false}
             noOptionsMessage={() => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               if (isOverHasMany) {
@@ -95,7 +145,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             }}
             onChange={onChange}
             options={[]}
-            placeholder={t('general:enterAValue')}
+            placeholder={placeholder}
             showError={showError}
             value={valueToRender}
           />
@@ -107,10 +157,11 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             name={path}
             onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
             onKeyDown={onKeyDown}
-            placeholder={getTranslation(placeholder, i18n)}
+            placeholder={placeholder}
             ref={inputRef}
             type="text"
             value={value || ''}
+            {...(htmlAttributes ?? {})}
           />
         )}
         {AfterInput}

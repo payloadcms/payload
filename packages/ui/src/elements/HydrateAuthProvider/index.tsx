@@ -1,6 +1,6 @@
 'use client'
 
-import type { Permissions } from 'payload'
+import type { SanitizedPermissions } from 'payload'
 
 import { useEffect } from 'react'
 
@@ -14,8 +14,9 @@ import { useAuth } from '../../providers/Auth/index.js'
  */
 
 type Props = {
-  permissions: Permissions
+  permissions: SanitizedPermissions
 }
+
 export function HydrateAuthProvider({ permissions }: Props) {
   const { setPermissions } = useAuth()
 

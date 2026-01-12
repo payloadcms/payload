@@ -9,9 +9,10 @@ keywords: local api, config, configuration, documentation, Content Management Sy
 The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and can interact directly with your database.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  The Local API is incredibly powerful when used in React Server Components and other similar server-side contexts. With other headless CMS, you need to request your data from third-party servers via an HTTP layer, which can add significant loading time to your server-rendered pages. With Payload, you don't have to leave your server to gather the data you need. It can be incredibly fast and is definitely a game changer.
+  **Tip:**
+
+The Local API is incredibly powerful when used in React Server Components and other similar server-side contexts. With other headless CMS, you need to request your data from third-party servers via an HTTP layer, which can add significant loading time to your server-rendered pages. With Payload, you don't have to leave your server to gather the data you need. It can be incredibly fast and is definitely a game changer.
+
 </Banner>
 
 Here are some common examples of how you can use the Local API:
@@ -19,7 +20,7 @@ Here are some common examples of how you can use the Local API:
 - Fetching Payload data within React Server Components
 - Seeding data via Node seed scripts that you write and maintain
 - Opening custom Next.js route handlers which feature additional functionality but still rely on Payload
-- Within [Access Control](../access-control) and [Hooks](../hooks/overview)
+- Within [Access Control](../access-control/overview) and [Hooks](../hooks/overview)
 
 ## Accessing Payload
 
@@ -27,12 +28,14 @@ You can gain access to the currently running `payload` object via two ways:
 
 #### Accessing from args or `req`
 
-In most places within Payload itself, you can access `payload` directly from the arguments of [Hooks](../hooks/overview), [Access Control](../access-control/overview), [Validation](../fields/overview#validations) functions, and similar. This is the simplest way to access Payload in most cases. Most config functions take the `req` (Request) object, which has Payload bound to it (`req.payload`).
+In most places within Payload itself, you can access `payload` directly from the arguments of [Hooks](../hooks/overview), [Access Control](../access-control/overview), [Validation](../fields/overview#validation) functions, and similar. This is the simplest way to access Payload in most cases. Most config functions take the `req` (Request) object, which has Payload bound to it (`req.payload`).
 
 Example:
 
 ```ts
-const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) => {
+const afterChangeHook: CollectionAfterChangeHook = async ({
+  req: { payload },
+}) => {
   const posts = await payload.find({
     collection: 'posts',
   })
@@ -43,27 +46,6 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) 
 
 If you want to import Payload in places where you don't have the option to access it from function arguments or `req`, you can import it and initialize it.
 
-There are two places to import Payload:
-
-**Option 1 - using HMR, within Next.js**
-
-```ts
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import config from '@payload-config'
-
-const payload = await getPayloadHMR({ config })
-```
-
-You should import Payload using the first option (`getPayloadHMR`) if you are using Payload inside of Next.js (like route handlers, server components, and similar.)
-
-This way, in Next.js development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayloadHMR` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
-
-If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
-
-**Option 2 - outside of Next.js**
-
-If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality. Instead of using `getPayloadHMR`, you can use `getPayload`.
-
 ```ts
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -71,7 +53,11 @@ import config from '@payload-config'
 const payload = await getPayload({ config })
 ```
 
-Both options function in exactly the same way outside of one having HMR support and the other not. For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
+If you're working in Next.js' development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayload` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
+
+If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
+
+For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
 
 ## Local options available
 
@@ -85,7 +71,7 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `locale`             | Specify [locale](/docs/configuration/localization) for any returned documents.                                                                                                                                                                                                                                                                                        |
 | `select`             | Specify [select](../queries/select) to control which fields to include to the result.                                                                                                                                                                                                                                                                                 |
 | `populate`           | Specify [populate](../queries/select#populate) to control which fields to include to the result from populated documents.                                                                                                                                                                                                                                             |
-| `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                                                                                                                                                                                                                                                                      |
+| `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. This can be a single locale or array of locales.                                                                                                                                                                                                                     |
 | `overrideAccess`     | Skip access control. By default, this property is set to true within all Local API operations.                                                                                                                                                                                                                                                                        |
 | `overrideLock`       | By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](../admin/locked-documents).                                                                                                                                                                         |
 | `user`               | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.                                                                                                                                                                                                                                                                 |
@@ -109,17 +95,18 @@ const post = await payload.find({
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  By default, all access control checks are disabled in the Local API, but you can re-enable them if
-  you'd like, as well as pass a specific user to run the operation with.
+  **Note:**
+
+By default, all access control checks are disabled in the Local API, but you can re-enable them if
+you'd like, as well as pass a specific user to run the operation with.
+
 </Banner>
 
 ## Collections
 
 The following Collection operations are available through the Local API:
 
-### Create
+### Create#collection-create
 
 ```js
 // The created Post document is returned
@@ -148,10 +135,13 @@ const post = await payload.create({
   // Alternatively, you can directly pass a File,
   // if file is provided, filePath will be omitted
   file: uploadedFile,
+
+  // If you want to create a document that is a duplicate of another document
+  duplicateFromID: 'document-id-to-duplicate',
 })
 ```
 
-### Find
+### Find#collection-find
 
 ```js
 // Result will be a paginated set of Posts.
@@ -172,7 +162,12 @@ const result = await payload.find({
 })
 ```
 
-### Find by ID
+<Banner type="info">
+  `pagination`, `page`, and `limit` are three related properties [documented
+  here](/docs/queries/pagination).
+</Banner>
+
+### Find by ID#collection-find-by-id
 
 ```js
 // Result will be a Post document.
@@ -188,7 +183,7 @@ const result = await payload.findByID({
 })
 ```
 
-### Count
+### Count#collection-count
 
 ```js
 // Result will be an object with:
@@ -204,7 +199,28 @@ const result = await payload.count({
 })
 ```
 
-### Update by ID
+### FindDistinct#collection-find-distinct
+
+```js
+// Result will be an object with:
+// {
+//   values: ['value-1', 'value-2'], // array of distinct values,
+//   field: 'title', // the field
+//   totalDocs: 10, // count of the distinct values satisfies query,
+//   perPage: 10, // count of distinct values per page (based on provided limit)
+// }
+const result = await payload.findDistinct({
+  collection: 'posts', // required
+  locale: 'en',
+  where: {}, // pass a `where` query here
+  user: dummyUser,
+  overrideAccess: false,
+  field: 'title',
+  sort: 'title',
+})
+```
+
+### Update by ID#collection-update-by-id
 
 ```js
 // Result will be the updated Post document.
@@ -236,7 +252,7 @@ const result = await payload.update({
 })
 ```
 
-### Update Many
+### Update Many#collection-update-many
 
 ```js
 // Result will be an object with:
@@ -275,7 +291,7 @@ const result = await payload.update({
 })
 ```
 
-### Delete
+### Delete#collection-delete
 
 ```js
 // Result will be the now-deleted Post document.
@@ -292,7 +308,7 @@ const result = await payload.delete({
 })
 ```
 
-### Delete Many
+### Delete Many#collection-delete-many
 
 ```js
 // Result will be an object with:
@@ -321,6 +337,27 @@ const result = await payload.delete({
 If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be
 available:
 
+### Auth
+
+```js
+// If you're using Next.js, you'll have to import headers from next/headers, like so:
+// import { headers as nextHeaders } from 'next/headers'
+
+// you'll also have to await headers inside your function, or component, like so:
+// const headers = await nextHeaders()
+
+// If you're using Payload outside of Next.js, you'll have to provide headers accordingly.
+
+// result will be formatted as follows:
+// {
+//    permissions: { ... }, // object containing current user's permissions
+//    user: { ... }, // currently logged in user's document
+//    responseHeaders: { ... } // returned headers from the response
+// }
+
+const result = await payload.auth({ headers, canSetHeaders: false })
+```
+
 ### Login
 
 ```js
@@ -338,8 +375,7 @@ const result = await payload.login({
     email: 'dev@payloadcms.com',
     password: 'rip',
   },
-  req: req, // pass a Request object to be provided to all hooks
-  res: res, // used to automatically set an HTTP-only auth cookie
+  req: req, // optional, pass a Request object to be provided to all hooks
   depth: 2,
   locale: 'en',
   fallbackLocale: false,
@@ -377,8 +413,7 @@ const result = await payload.resetPassword({
     password: req.body.password, // the new password to set
     token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
   },
-  req: req, // pass a Request object to be provided to all hooks
-  res: res, // used to automatically set an HTTP-only auth cookie
+  req: req, // optional, pass a Request object to be provided to all hooks
 })
 ```
 
@@ -392,7 +427,7 @@ const result = await payload.unlock({
     // required
     email: 'dev@payloadcms.com',
   },
-  req: req, // pass a Request object to be provided to all hooks
+  req: req, // optional, pass a Request object to be provided to all hooks
   overrideAccess: true,
 })
 ```
@@ -411,7 +446,7 @@ const result = await payload.verifyEmail({
 
 The following Global operations are available through the Local API:
 
-### Find
+### Find#global-find
 
 ```js
 // Result will be the Header Global.
@@ -426,7 +461,7 @@ const result = await payload.findGlobal({
 })
 ```
 
-### Update
+### Update#global-update
 
 ```js
 // Result will be the updated Header Global.

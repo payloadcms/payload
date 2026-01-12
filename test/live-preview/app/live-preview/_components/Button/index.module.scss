@@ -62,11 +62,9 @@
   padding: 0;
   color: var(--theme-text);
 
-  &:local() {
-    .label {
-      text-transform: none;
-      line-height: inherit;
-      font-size: inherit;
-    }
+  .label {
+    text-transform: none;
+    line-height: inherit;
+    font-size: inherit;
   }
 }

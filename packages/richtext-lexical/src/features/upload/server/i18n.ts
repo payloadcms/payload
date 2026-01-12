@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Nahrát',
   },
+  da: {
+    label: 'Upload',
+  },
   de: {
     label: 'Datei',
   },
@@ -21,6 +24,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     label: 'Subir',
+  },
+  et: {
+    label: 'Lae üles',
   },
   fa: {
     label: 'بارگذاری',
@@ -36,6 +42,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   hu: {
     label: 'Feltöltés',
+  },
+  is: {
+    label: 'Hlaða upp',
   },
   it: {
     label: 'Carica',
@@ -65,7 +74,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Încarcă',
   },
   rs: {
-    label: 'Otpremi',
+    label: 'Отпреми',
   },
   'rs-latin': {
     label: 'Otpremi',
@@ -76,8 +85,14 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Nahrať',
   },
+  sl: {
+    label: 'Naloži',
+  },
   sv: {
     label: 'Ladda upp',
+  },
+  ta: {
+    label: 'பதிவேற்றம்',
   },
   th: {
     label: 'อัปโหลด',

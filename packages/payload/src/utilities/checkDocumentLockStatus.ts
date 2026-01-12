@@ -3,6 +3,7 @@ import type { PaginatedDocs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
+import { lockedDocumentsCollectionSlug } from '../locked-documents/config.js'
 
 type CheckDocumentLockStatusArgs = {
   collectionSlug?: string
@@ -27,7 +28,7 @@ export const checkDocumentLockStatus = async ({
 
   // Retrieve the lockDocuments property for either collection or global
   const lockDocumentsProp = collectionSlug
-    ? payload.config?.collections?.find((c) => c.slug === collectionSlug)?.lockDocuments
+    ? payload.collections?.[collectionSlug]?.config?.lockDocuments
     : payload.config?.globals?.find((g) => g.slug === globalSlug)?.lockDocuments
 
   const isLockingEnabled = lockDocumentsProp !== false
@@ -60,10 +61,9 @@ export const checkDocumentLockStatus = async ({
     const finalLockErrorMessage = lockErrorMessage || defaultLockErrorMessage
 
     const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.db.find({
-      collection: 'payload-locked-documents',
+      collection: lockedDocumentsCollectionSlug,
       limit: 1,
       pagination: false,
-      req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
@@ -92,8 +92,9 @@ export const checkDocumentLockStatus = async ({
 
   // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
-    collection: 'payload-locked-documents',
-    req,
+    collection: lockedDocumentsCollectionSlug,
+    // Not passing req fails on postgres
+    req: payload.db.name === 'mongoose' ? undefined : req,
     where: lockedDocumentQuery,
   })
 }

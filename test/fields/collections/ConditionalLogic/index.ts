@@ -18,9 +18,76 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'fieldToToggle',
+      name: 'fieldWithDocIDCondition',
       type: 'text',
-      required: true,
+      admin: {
+        condition: ({ id }) => !id,
+      },
+    },
+    {
+      name: 'fieldWithCondition',
+      type: 'text',
+      admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'fieldWithOperationCondition',
+      type: 'text',
+      admin: {
+        condition: (data, siblingData, { operation }) => {
+          if (operation === 'create') {
+            return true
+          }
+
+          return false
+        },
+      },
+    },
+    {
+      name: 'customFieldWithField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithField.js',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithHOC',
+      label: 'Custom Field With HOC (legacy)',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithHOC.js',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customClientFieldWithCondition',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomClientField.js',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customServerFieldWithCondition',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomServerField.js',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'conditionalRichText',
+      type: 'richText',
       admin: {
         condition: ({ toggleField }) => Boolean(toggleField),
       },
@@ -91,6 +158,106 @@ const ConditionalLogic: CollectionConfig = {
       admin: {
         condition: ({ groupSelection }) => groupSelection === 'group2',
       },
+    },
+    {
+      name: 'enableConditionalFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'arrayWithConditionalField',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'textWithCondition',
+          type: 'text',
+          admin: {
+            condition: (data) => data.enableConditionalFields,
+          },
+        },
+      ],
+    },
+    {
+      name: 'blocksWithConditionalField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithConditionalField',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'textWithCondition',
+              type: 'text',
+              admin: {
+                condition: (data) => data.enableConditionalFields,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'arrayOne',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'arrayTwo',
+          type: 'array',
+          fields: [
+            {
+              name: 'selectOptions',
+              type: 'select',
+              defaultValue: 'optionOne',
+              options: [
+                {
+                  label: 'Option One',
+                  value: 'optionOne',
+                },
+                {
+                  label: 'Option Two',
+                  value: 'optionTwo',
+                },
+              ],
+            },
+            {
+              name: 'arrayThree',
+              type: 'array',
+              fields: [
+                {
+                  name: 'numberField',
+                  type: 'number',
+                  admin: {
+                    condition: (data, siblingData, { path }) => {
+                      // Ensure path has enough depth
+                      if (path.length < 5) {
+                        return false
+                      }
+
+                      const arrayOneIndex = parseInt(String(path[1]), 10)
+                      const arrayTwoIndex = parseInt(String(path[3]), 10)
+
+                      const arrayOneItem = data.arrayOne?.[arrayOneIndex]
+                      const arrayTwoItem = arrayOneItem?.arrayTwo?.[arrayTwoIndex]
+
+                      return arrayTwoItem?.selectOptions === 'optionTwo'
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   ],
 }

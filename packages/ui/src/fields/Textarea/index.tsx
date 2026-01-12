@@ -2,7 +2,7 @@
 import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
@@ -11,24 +11,25 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isFieldRTL } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
-      admin: { className, description, placeholder, rows, rtl, style, width } = {},
+      admin: { className, description, placeholder, rows, rtl } = {},
       label,
       localized,
       maxLength,
       minLength,
       required,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -59,13 +60,17 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <TextareaInput
@@ -83,14 +88,13 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       required={required}
       rows={rows}
       rtl={isRTL}
       showError={showError}
-      style={style}
+      style={styles}
       value={value}
-      width={width}
     />
   )
 }

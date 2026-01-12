@@ -4,7 +4,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -12,22 +12,30 @@ import { useEffect, useState } from 'react'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
+import { EditorPlugin } from './EditorPlugin.js'
+import { ClipboardPlugin } from './plugins/ClipboardPlugin/index.js'
+import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
+import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
+import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
+import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
+    isSmallWidthViewport: boolean
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, onChange } = props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -78,24 +86,6 @@ export const LexicalEditor: React.FC<
     }
   }, [editor, editorConfigContext])
 
-  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
-
-  useEffect(() => {
-    const updateViewPortWidth = () => {
-      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
-
-      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
-        setIsSmallWidthViewport(isNextSmallWidthViewport)
-      }
-    }
-    updateViewPortWidth()
-    window.addEventListener('resize', updateViewPortWidth)
-
-    return () => {
-      window.removeEventListener('resize', updateViewPortWidth)
-    }
-  }, [isSmallWidthViewport])
-
   return (
     <React.Fragment>
       {editorConfig.features.plugins?.map((plugin) => {
@@ -115,32 +105,44 @@ export const LexicalEditor: React.FC<
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef}>
-                <LexicalContentEditable />
+                <LexicalContentEditable editorConfig={editorConfig} />
               </div>
             </div>
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <OnChangePlugin
-          // Selection changes can be ignored here, reducing the
-          // frequency that the FieldComponent and Payload receive updates.
-          // Selection changes are only needed if you are saving selection state
-          ignoreSelectionChange
-          onChange={(editorState, editor, tags) => {
-            // Ignore any onChange event triggered by focus only
-            if (!tags.has('focus') || tags.size > 1) {
-              if (onChange != null) {
-                onChange(editorState, editor, tags)
+        <NormalizeSelectionPlugin />
+        {isEditable && <InsertParagraphAtEndPlugin />}
+        <DecoratorPlugin />
+        <ClipboardPlugin />
+        <TextPlugin features={editorConfig.features} />
+        <SelectAllPlugin />
+        {isEditable && (
+          <OnChangePlugin
+            // Selection changes can be ignored here, reducing the
+            // frequency that the FieldComponent and Payload receive updates.
+            // Selection changes are only needed if you are saving selection state
+            ignoreSelectionChange
+            onChange={(editorState, editor, tags) => {
+              // Ignore any onChange event triggered by focus only
+              if (!tags.has('focus') || tags.size > 1) {
+                if (onChange != null) {
+                  onChange(editorState, editor, tags)
+                }
               }
-            }
-          }}
-        />
+            }}
+          />
+        )}
         {floatingAnchorElem && (
           <React.Fragment>
-            {!isSmallWidthViewport && editor.isEditable() && (
+            {!isSmallWidthViewport && isEditable && (
               <React.Fragment>
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-                <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+                {editorConfig.admin?.hideDraggableBlockElement ? null : (
+                  <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                )}
+                {editorConfig.admin?.hideAddBlockButton ? null : (
+                  <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+                )}
               </React.Fragment>
             )}
             {editorConfig.features.plugins?.map((plugin) => {
@@ -158,21 +160,19 @@ export const LexicalEditor: React.FC<
                 )
               }
             })}
-            {editor.isEditable() && (
+            {isEditable && (
               <React.Fragment>
                 <SlashMenuPlugin anchorElem={floatingAnchorElem} />
               </React.Fragment>
             )}
           </React.Fragment>
         )}
-        {editor.isEditable() && (
+        {isEditable && (
           <React.Fragment>
             <HistoryPlugin />
             {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
           </React.Fragment>
         )}
-
-        <TabIndentationPlugin />
         {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'normal') {
             return (

@@ -6,31 +6,34 @@ This example demonstrates how to integrate email functionality into Payload.
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
-2. `cd` into this directory and run `yarn` or `npm install`
-3. `cp .env.example .env` to copy the example environment variables
-4. `yarn dev` or `npm run dev` to start the server and seed the database
-5. `open http://localhost:8000/admin` to access the admin panel
-6. Create your first user
+1. Run the following command to create a project from the example:
+
+- `npx create-payload-app --example email`
+
+2. `cp .env.example .env` to copy the example environment variables
+3. `pnpm install && pnpm dev` to install dependencies and start the dev server
+4. open `http://localhost:3000/admin` to access the admin panel
+5. Create your first user
 
 ## How it works
 
-Payload utilizes [NodeMailer](https://nodemailer.com/about/) for email functionality. Once you add your email configuration to `payload.init()`, you send email from anywhere in your application just by calling `payload.sendEmail({})`.
+Email functionality in Payload is configured using adapters. The recommended adapter for most use cases is the [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) package.
 
-1. Navigate to `src/server.ts` - this is where your email config gets passed to Payload
-2. Open `src/email/transport.ts` - here we are defining the email config. You can use an env variable to switch between the mock email transport and live email service.
+To enable email, pass your adapter configuration to the `email` property in the Payload Config. This allows Payload to send auth-related emails for password resets, new user verifications, and other email needs.
+
+1. In the Payload Config file, add your email adapter to the `email` property. For example, the `@payloadcms/email-nodemailer` adapter can be configured for SMTP, SendGrid, or other supported transports. During development, if no configuration is provided, Payload will use a mock service via [ethereal.email](ethereal.email).
 
 Now we can start sending email!
 
-3. Go to `src/collections/Newsletter.ts` - with an `afterChange` hook, we are sending an email when a new user signs up for the newsletter
+2. Go to `src/collections/Newsletter.ts` - with an `afterChange` hook, we are sending an email when a new user signs up for the newsletter
 
 Let's not forget our authentication emails...
 
-4. Auth-enabled collections have built-in options to verify the user and reset the user password. Open `src/collections/Users.ts` and see how we customize these emails.
+3. Auth-enabled collections have built-in options to verify the user and reset the user password. Open `src/collections/Users.ts` and see how we customize these emails.
 
 Speaking of customization...
 
-5. Take a look at `src/email/generateEmailHTML` and how it compiles a custom template when sending email. You change this to any HTML template of your choosing.
+4. Take a look at `src/email/generateEmailHTML` and how it compiles a custom template when sending email. You change this to any HTML template of your choosing.
 
 That's all you need, now you can go ahead and test out this repo by creating a new `user` or `newsletter-signup` and see the email integration in action.
 
@@ -40,10 +43,10 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ## Production
 
-To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
+To run Payload in production, you need to build and start the Admin panel. To do so, follow these steps:
 
-1. First invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
-1. Then run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
+1. Invoke the `next build` script by running `pnpm build` or `npm run build` in your project root. This creates a `.next` directory with a production-ready admin bundle.
+1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
 
 ### Deployment
 

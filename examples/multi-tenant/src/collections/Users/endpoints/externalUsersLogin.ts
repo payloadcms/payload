@@ -16,7 +16,7 @@ export const externalUsersLogin: Endpoint = {
     } catch (error) {
       // swallow error, data is already empty object
     }
-    const { password, tenantSlug, username } = data
+    const { password, tenantSlug, tenantDomain, username } = data
 
     if (!username || !password) {
       throw new APIError('Username and Password are required for login.', 400, null, true)
@@ -25,11 +25,17 @@ export const externalUsersLogin: Endpoint = {
     const fullTenant = (
       await req.payload.find({
         collection: 'tenants',
-        where: {
-          slug: {
-            equals: tenantSlug,
-          },
-        },
+        where: tenantDomain
+          ? {
+              domain: {
+                equals: tenantDomain,
+              },
+            }
+          : {
+              slug: {
+                equals: tenantSlug,
+              },
+            },
       })
     ).docs[0]
 
@@ -81,10 +87,12 @@ export const externalUsersLogin: Endpoint = {
         })
 
         if (loginAttempt?.token) {
-          const collection: Collection = req.payload.collections['users']
+          const collection: Collection = (req.payload.collections as { [key: string]: Collection })[
+            'users'
+          ]
           const cookie = generatePayloadCookie({
-            collectionConfig: collection.config,
-            payload: req.payload,
+            collectionAuthConfig: collection.config.auth,
+            cookiePrefix: req.payload.config.cookiePrefix,
             token: loginAttempt.token,
           })
 

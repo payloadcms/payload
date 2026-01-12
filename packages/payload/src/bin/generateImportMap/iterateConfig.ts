@@ -1,8 +1,8 @@
-import type { AdminViewConfig } from '../../admin/views/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 import { iterateCollections } from './iterateCollections.js'
+import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
 
 export function iterateConfig({
@@ -36,6 +36,20 @@ export function iterateConfig({
     imports,
   })
 
+  if (config?.blocks) {
+    const blocks = Object.values(config.blocks)
+    if (blocks?.length) {
+      genImportMapIterateFields({
+        addToImportMap,
+        baseDir,
+        config,
+        fields: blocks,
+        importMap,
+        imports,
+      })
+    }
+  }
+
   if (typeof config.admin?.avatar === 'object') {
     addToImportMap(config.admin?.avatar?.Component)
   }
@@ -43,6 +57,7 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.Nav)
   addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
+  addToImportMap(config.admin?.components?.settingsMenu)
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)
 
@@ -59,9 +74,15 @@ export function iterateConfig({
   if (config.admin?.components?.views) {
     if (Object.keys(config.admin?.components?.views)?.length) {
       for (const key in config.admin?.components?.views) {
-        const adminViewConfig: AdminViewConfig = config.admin?.components?.views[key]
+        const adminViewConfig = config.admin?.components?.views[key]
         addToImportMap(adminViewConfig?.Component)
       }
+    }
+  }
+
+  if (config.admin?.dashboard?.widgets?.length) {
+    for (const dashboardWidget of config.admin.dashboard.widgets) {
+      addToImportMap(dashboardWidget.ComponentPath)
     }
   }
 
@@ -78,8 +99,7 @@ export function iterateConfig({
   }
 
   if (config?.admin?.dependencies) {
-    for (const key in config.admin.dependencies) {
-      const dependency = config.admin.dependencies[key]
+    for (const dependency of Object.values(config.admin.dependencies)) {
       addToImportMap(dependency.path)
     }
   }

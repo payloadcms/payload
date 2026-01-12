@@ -1,25 +1,39 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
-import { CustomIdRow } from './collections/CustomIdRow.js'
-import { CustomIdTab } from './collections/CustomIdTab.js'
+import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
+import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
+import { EditMenuItems } from './collections/editMenuItems.js'
+import { FormatDocURL } from './collections/FormatDocURL/index.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
 import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
+import { ListDrawer } from './collections/ListDrawer.js'
+import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
+import { Localized } from './collections/Localized.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { NoTimestampsCollection } from './collections/NoTimestamps.js'
+import { CollectionNotInView } from './collections/NotInView.js'
+import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
+import { ReorderTabs } from './collections/ReorderTabs.js'
 import { UploadCollection } from './collections/Upload.js'
+import { UploadTwoCollection } from './collections/UploadTwo.js'
+import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { Virtuals } from './collections/Virtuals.js'
+import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -27,9 +41,11 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
+import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customNestedViewPath,
   customParamViewPath,
@@ -38,14 +54,22 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
+    livePreview: {
+      collections: [reorderTabsSlug, editMenuItemsSlug],
+      url: 'http://localhost:3000',
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
-      actions: ['/components/AdminButton/index.js#AdminButton'],
+      actions: ['/components/actions/AdminButton/index.js#AdminButton'],
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',
@@ -60,13 +84,21 @@ export default buildConfigWithDefaults({
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
+      settingsMenu: [
+        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
+        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
+      ],
       providers: [
-        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        collections: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          path: '/collections',
+        },
         CustomDefaultView: {
           Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
@@ -140,25 +172,41 @@ export default buildConfigWithDefaults({
   },
   collections: [
     UploadCollection,
+    UploadTwoCollection,
     Posts,
     Users,
     CollectionHidden,
+    CollectionNotInView,
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    ReorderTabs,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
-    CustomIdTab,
-    CustomIdRow,
+    Array,
     DisableDuplicate,
+    DisableCopyToLocale,
+    EditMenuItems,
+    FormatDocURL,
     BaseListFilter,
+    with300Documents,
+    ListDrawer,
+    Placeholder,
+    UseAsTitleGroupField,
+    DisableBulkEdit,
+    CustomListDrawer,
+    ListViewSelectAPI,
+    Virtuals,
+    NoTimestampsCollection,
+    Localized,
   ],
   globals: [
     GlobalHidden,
+    GlobalNotInView,
     GlobalNoApiView,
     Global,
     CustomGlobalViews1,
@@ -177,6 +225,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
     locales: [
       {

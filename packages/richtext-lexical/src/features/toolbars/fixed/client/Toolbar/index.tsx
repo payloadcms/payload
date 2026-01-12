@@ -2,20 +2,21 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { useScrollInfo, useThrottledEffect, useTranslation } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 
 import type { EditorConfigContextType } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../../lexical/config/types.js'
-import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
+import type { PluginComponent } from '../../../../typesClient.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../../types.js'
 import type { FixedToolbarFeatureProps } from '../../server/index.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
-import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import './index.scss'
+import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 
 function ButtonGroupItem({
   anchorElem,
@@ -40,7 +41,7 @@ function ButtonGroupItem({
 
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {<item.ChildComponent />}
+      <item.ChildComponent />
     </ToolbarButton>
   )
 }
@@ -58,10 +59,11 @@ function ToolbarGroupComponent({
   group: ToolbarGroup
   index: number
 }): React.ReactNode {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
+
   const [dropdownLabel, setDropdownLabel] = React.useState<string | undefined>(undefined)
   const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>(undefined)
 
@@ -85,7 +87,7 @@ function ToolbarGroupComponent({
         }
         return
       }
-      const item = activeItems[0]
+      const item = activeItems[0]!
 
       let label = item.key
       if (item.label) {
@@ -98,17 +100,31 @@ function ToolbarGroupComponent({
       if (label.length > 25) {
         label = label.substring(0, 25) + '...'
       }
-      setDropdownLabel(label)
-      setDropdownIcon(() => item.ChildComponent)
+      if (activeItems.length === 1) {
+        setDropdownLabel(label)
+        setDropdownIcon(() => item.ChildComponent)
+      } else {
+        setDropdownLabel(
+          i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length }),
+        )
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent!)
+        } else {
+          setDropdownIcon(undefined)
+        }
+      }
     },
     [group, i18n, featureClientSchemaMap, schemaPath],
   )
 
   return (
-    <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>
-      {group.type === 'dropdown' &&
-        group.items.length &&
-        (DropdownIcon ? (
+    <div
+      className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`}
+      data-toolbar-group-key={group.key}
+      key={group.key}
+    >
+      {group.type === 'dropdown' && group.items.length ? (
+        DropdownIcon ? (
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
@@ -116,7 +132,7 @@ function ToolbarGroupComponent({
             Icon={DropdownIcon}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
         ) : (
@@ -126,17 +142,18 @@ function ToolbarGroupComponent({
             group={group}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
-        ))}
-      {group.type === 'buttons' &&
-        group.items.length &&
-        group.items.map((item) => {
-          return (
-            <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
-          )
-        })}
+        )
+      ) : null}
+      {group.type === 'buttons' && group.items.length
+        ? group.items.map((item) => {
+            return (
+              <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
+            )
+          })
+        : null}
       {index < editorConfig.features.toolbarFixed?.groups.length - 1 && <div className="divider" />}
     </div>
   )
@@ -156,6 +173,7 @@ function FixedToolbar({
   parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
+  const isEditable = useLexicalEditable()
 
   const { y } = useScrollInfo()
 
@@ -196,14 +214,18 @@ function FixedToolbar({
       )
 
       if (overlapping) {
-        currentToolbarElem.className = 'fixed-toolbar fixed-toolbar--overlapping'
-        parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
+        currentToolbarElem.classList.remove('fixed-toolbar')
+        currentToolbarElem.classList.add('fixed-toolbar', 'fixed-toolbar--overlapping')
+        parentToolbarElem.classList.remove('fixed-toolbar')
+        parentToolbarElem.classList.add('fixed-toolbar', 'fixed-toolbar--hide')
       } else {
         if (!currentToolbarElem.classList.contains('fixed-toolbar--overlapping')) {
           return
         }
-        currentToolbarElem.className = 'fixed-toolbar'
-        parentToolbarElem.className = 'fixed-toolbar'
+        currentToolbarElem.classList.remove('fixed-toolbar--overlapping')
+        currentToolbarElem.classList.add('fixed-toolbar')
+        parentToolbarElem.classList.remove('fixed-toolbar--hide')
+        parentToolbarElem.classList.add('fixed-toolbar')
       }
     },
     50,
@@ -220,7 +242,7 @@ function FixedToolbar({
       }}
       ref={currentToolbarRef}
     >
-      {editor.isEditable() && (
+      {isEditable && (
         <React.Fragment>
           {editorConfig?.features &&
             editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
@@ -256,12 +278,13 @@ const getParentEditorWithFixedToolbar = (
   return false
 }
 
-export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeatureProps> = ({
-  anchorElem,
-  clientProps,
-}) => {
+export const FixedToolbarPlugin: PluginComponent<FixedToolbarFeatureProps> = ({ clientProps }) => {
   const [currentEditor] = useLexicalComposerContext()
   const editorConfigContext = useEditorConfigContext()
+  const isEditable = useLexicalEditable()
+  if (!isEditable) {
+    return null
+  }
 
   const { editorConfig: currentEditorConfig } = editorConfigContext
 
@@ -287,7 +310,7 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
 
   return (
     <FixedToolbar
-      anchorElem={anchorElem}
+      anchorElem={document.body}
       editor={editor}
       editorConfig={editorConfig}
       parentWithFixedToolbar={parentWithFixedToolbar}

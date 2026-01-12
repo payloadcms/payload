@@ -20,7 +20,7 @@ body:
   - type: textarea
     attributes:
       label: Environment Info
-      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
+      description: Paste output from `pnpm payload info` _or_ Payload, Node.js, and Next.js versions. Please avoid using "latest"—specific version numbers help us accurately diagnose and resolve issues.
       render: text
       placeholder: |
         Payload:

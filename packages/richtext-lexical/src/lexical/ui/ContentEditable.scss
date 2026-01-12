@@ -1,4 +1,4 @@
-@import '../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 $lexical-contenteditable-top-padding: 8px;
 $lexical-contenteditable-bottom-padding: 8px;
@@ -6,14 +6,14 @@ $lexical-contenteditable-bottom-padding: 8px;
 @layer payload-default {
   .ContentEditable__root {
     border: 0;
-    font-size: 15px;
     display: block;
     position: relative;
     tab-size: 1;
     outline: 0;
     padding-top: $lexical-contenteditable-top-padding;
     padding-bottom: $lexical-contenteditable-bottom-padding;
-    //min-height: base(10);
+    padding-left: 0;
+    padding-right: 0;
 
     &:focus-visible {
       outline: none !important;
@@ -25,32 +25,23 @@ $lexical-contenteditable-bottom-padding: 8px;
     }
   }
 
-  @media (max-width: 768px) {
-    .ContentEditable__root {
-      padding-left: 0;
-      padding-right: 0;
+  .rich-text-lexical--show-gutter
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor {
+    > .ContentEditable__root {
+      padding-left: 3rem;
     }
-  }
-
-  @media (min-width: 769px) {
-    .rich-text-lexical--show-gutter
-      > .rich-text-lexical__wrap
-      > .editor-container
-      > .editor-scroller
-      > .editor {
-      > .ContentEditable__root {
-        padding-left: 3rem;
-      }
-      > .ContentEditable__root::before {
-        content: ' ';
-        position: absolute;
-        top: $lexical-contenteditable-top-padding;
-        left: 0;
-        height: calc(
-          100% - #{$lexical-contenteditable-top-padding} - #{$lexical-contenteditable-bottom-padding}
-        );
-        border-left: 1px solid var(--theme-elevation-100);
-      }
+    > .ContentEditable__root::before {
+      content: ' ';
+      position: absolute;
+      top: $lexical-contenteditable-top-padding;
+      left: 0;
+      height: calc(
+        100% - #{$lexical-contenteditable-top-padding} - #{$lexical-contenteditable-bottom-padding}
+      );
+      border-left: 1px solid var(--theme-elevation-100);
     }
   }
 
@@ -76,6 +67,16 @@ $lexical-contenteditable-bottom-padding: 8px;
         }
       }
     }
+
+    @include small-break {
+      .rich-text-lexical {
+        &.error {
+          > .rich-text-lexical__wrap {
+            @include lightInputError;
+          }
+        }
+      }
+    }
   }
 
   html[data-theme='dark'] {
@@ -87,6 +88,16 @@ $lexical-contenteditable-bottom-padding: 8px;
           > .editor
           > .ContentEditable__root::before {
           border-left: 2px solid var(--theme-error-500);
+        }
+      }
+    }
+
+    @include small-break {
+      .rich-text-lexical {
+        &.error {
+          > .rich-text-lexical__wrap {
+            @include darkInputError;
+          }
         }
       }
     }

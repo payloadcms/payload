@@ -1,4 +1,9 @@
-import type { Collection, CollectionPermission, GlobalPermission, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  PayloadRequest,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
+} from 'payload'
 
 import { docAccessOperation, isolateObjectProperty } from 'payload'
 
@@ -12,7 +17,7 @@ export type Resolver = (
   context: {
     req: PayloadRequest
   },
-) => Promise<CollectionPermission | GlobalPermission>
+) => Promise<SanitizedCollectionPermission | SanitizedGlobalPermission>
 
 export function docAccessResolver(collection: Collection): Resolver {
   async function resolver(_, args, context: Context) {

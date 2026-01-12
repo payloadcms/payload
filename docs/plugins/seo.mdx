@@ -1,24 +1,25 @@
 ---
-title: SEO Plugin
-label: SEO
-order: 30
-desc: Manage SEO metadata from your Payload admin
+description: Manage SEO metadata from your Payload admin
 keywords: plugins, seo, meta, search, engine, ranking, google
+label: SEO
+order: 100
+title: SEO Plugin
 ---
 
-[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
+![https://www.npmjs.com/package/@payloadcms/plugin-seo](https://img.shields.io/npm/v/@payloadcms/plugin-seo)
 
 This plugin allows you to easily manage SEO metadata for your application from within your [Admin Panel](../admin/overview). When enabled on your [Collections](../configuration/collections) and [Globals](../configuration/globals), it adds a new `meta` field group containing `title`, `description`, and `image` by default. Your front-end application can then use this data to render meta tags however your application requires. For example, you would inject a `title` tag into the `<head>` of your page using `meta.title` as its content.
 
 As users are editing documents within the Admin Panel, they have the option to "auto-generate" these fields. When clicked, this plugin will execute your own custom functions that re-generate the title, description, and image. This way you can build your own SEO writing assistance directly into your application. For example, you could append your site name onto the page title, or use the document's excerpt field as the description, or even integrate with some third-party API to generate the image using AI.
 
-To help you visualize what your page might look like in a search engine, a preview is rendered on page just beneath the meta fields. This preview is updated in real-time as you edit your metadata. There are also visual indicators to help you write effective meta, such as a character counter for the title and description fields. You can even inject your own custom fields into the `meta` field group as your application requires, like `og:title` or `json-ld`. If you've ever used something like Yoast SEO, this plugin might feel very familiar.
+To help you visualize what your page might look like in a search engine, a preview is rendered on the page just beneath the meta fields. This preview is updated in real-time as you edit your metadata. There are also visual indicators to help you write effective meta, such as a character counter for the title and description fields. You can even inject your own custom fields into the `meta` field group as your application requires, like `og:title` or `json-ld`. If you've ever used something like Yoast SEO, this plugin might feel very familiar.
 
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo). If you need help,
-  check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a
-  bug, please [open a new
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo). If
+  you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A)
   with as much detail as possible.
 </Banner>
@@ -27,22 +28,22 @@ To help you visualize what your page might look like in a search engine, a previ
 
 - Adds a `meta` field group to every SEO-enabled collection or global
 - Allows you to define custom functions to auto-generate metadata
-- Displays hints and indicators to help content editor write effective meta
+- Displays hints and indicators to help content editors write effective meta
 - Renders a snippet of what a search engine might display
 - Extendable so you can define custom fields like `og:title` or `json-ld`
 - Soon will support dynamic variable injection
 
 ## Installation
 
-Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
 
 ```bash
-  pnpm add @payloadcms/plugin-seo@beta
+  pnpm add @payloadcms/plugin-seo
 ```
 
 ## Basic Usage
 
-In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+In the `plugins` array of your [Payload Config](../configuration/overview), call the plugin with [options](#options):
 
 ```ts
 import { buildConfig } from 'payload';
@@ -101,8 +102,8 @@ A function that takes in the default fields via an object and expects an array o
       {
         name: 'customField',
         type: 'text',
-      }
-    ]
+      },
+    ],
   })
 }
 ```
@@ -113,17 +114,19 @@ Set the `uploadsCollection` to your application's upload-enabled collection slug
 
 ##### `tabbedUI`
 
-When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
+When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](../fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
+Note that the order of plugins or fields in your config may affect whether or not the plugin can smartly merge tabs with your existing fields. If you have a complex structure we recommend you [make use of the fields directly](#direct-use-of-fields) instead of relying on this config option.
 
 <Banner type="info">
-  If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you must not let the
-  default `Content` tab get created for you (see the note above). Instead, you must define the first
-  field of your config with type `tabs` and place all other fields adjacent to this one.
+  If you wish to continue to use top-level or sidebar fields with `tabbedUI`,
+  you must not let the default `Content` tab get created for you (see the note
+  above). Instead, you must define the first field of your config with type
+  `tabs` and place all other fields adjacent to this one.
 </Banner>
 
 ##### `generateTitle`
 
-A function that allows you to return any meta title, including from document's content.
+A function that allows you to return any meta title, including from the document's content.
 
 ```ts
 // payload.config.ts
@@ -137,29 +140,29 @@ A function that allows you to return any meta title, including from document's c
 
 All "generate" functions receive the following arguments:
 
-| Argument | Description |
-| --- | --- |
-| **`collectionConfig`** | The configuration of the collection. |
-| **`collectionSlug`** | The slug of the collection. |
-| **`doc`** | The data of the current document. |
-| **`docPermissions`** | The permissions of the document. |
-| **`globalConfig`** | The configuration of the global. |
-| **`globalSlug`** | The slug of the global. |
-| **`hasPublishPermission`** | Whether the user has permission to publish the document. |
-| **`hasSavePermission`** | Whether the user has permission to save the document. |
-| **`id`** | The ID of the document. |
-| **`initialData`** | The initial data of the document. |
-| **`initialState`** | The initial state of the document. |
-| **`locale`** | The locale of the document. |
-| **`preferencesKey`**  | The preferences key of the document. |
-| **`publishedDoc`** | The published document. |
-| **`req`** | The Payload request object containing `user`, `payload`, `i18n`, etc. |
-| **`title`** | The title of the document. |
-| **`versionsCount`** | The number of versions of the document. |
+| Argument                   | Description                                                           |
+| -------------------------- | --------------------------------------------------------------------- |
+| **`collectionConfig`**     | The configuration of the collection.                                  |
+| **`collectionSlug`**       | The slug of the collection.                                           |
+| **`doc`**                  | The data of the current document.                                     |
+| **`docPermissions`**       | The permissions of the document.                                      |
+| **`globalConfig`**         | The configuration of the global.                                      |
+| **`globalSlug`**           | The slug of the global.                                               |
+| **`hasPublishPermission`** | Whether the user has permission to publish the document.              |
+| **`hasSavePermission`**    | Whether the user has permission to save the document.                 |
+| **`id`**                   | The ID of the document.                                               |
+| **`initialData`**          | The initial data of the document.                                     |
+| **`initialState`**         | The initial state of the document.                                    |
+| **`locale`**               | The locale of the document.                                           |
+| **`preferencesKey`**       | The preferences key of the document.                                  |
+| **`publishedDoc`**         | The published document.                                               |
+| **`req`**                  | The Payload request object containing `user`, `payload`, `i18n`, etc. |
+| **`title`**                | The title of the document.                                            |
+| **`versionsCount`**        | The number of versions of the document.                               |
 
 ##### `generateDescription`
 
-A function that allows you to return any meta description, including from document's content.
+A function that allows you to return any meta description, including from the document's content.
 
 ```ts
 // payload.config.ts
@@ -171,11 +174,11 @@ A function that allows you to return any meta description, including from docume
 }
 ```
 
-For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
+For a full list of arguments, see the [`generateTitle`](#generatetitle) function.
 
 ##### `generateImage`
 
-A function that allows you to return any meta image, including from document's content.
+A function that allows you to return any meta image, including from the document's content.
 
 ```ts
 // payload.config.ts
@@ -187,7 +190,7 @@ A function that allows you to return any meta image, including from document's c
 }
 ```
 
-For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
+For a full list of arguments, see the [`generateTitle`](#generatetitle) function.
 
 ##### `generateURL`
 
@@ -204,7 +207,7 @@ A function called by the search preview component to display the actual URL of y
 }
 ```
 
-For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
+For a full list of arguments, see the [`generateTitle`](#generatetitle) function.
 
 #### `interfaceName`
 
@@ -225,12 +228,20 @@ Rename the meta group interface name that is generated for TypeScript and GraphQ
 There is the option to directly import any of the fields from the plugin so that you can include them anywhere as needed.
 
 <Banner type="info">
-  You will still need to configure the plugin in the Payload Config in order to configure the generation functions.
-  Since these fields are imported and used directly, they don't have access to the plugin config so they may need additional arguments to work the same way.
+  You will still need to configure the plugin in the Payload Config in order to
+  configure the generation functions. Since these fields are imported and used
+  directly, they don't have access to the plugin config so they may need
+  additional arguments to work the same way.
 </Banner>
 
 ```ts
-import { MetaDescriptionField, MetaImageField, MetaTitleField, OverviewField, PreviewField } from '@payloadcms/plugin-seo/fields'
+import {
+  MetaDescriptionField,
+  MetaImageField,
+  MetaTitleField,
+  OverviewField,
+  PreviewField,
+} from '@payloadcms/plugin-seo/fields'
 
 // Used as fields
 MetaImageField({
@@ -269,7 +280,9 @@ OverviewField({
 ```
 
 <Banner type="info">
-Tip: You can override the length rules by changing the minLength and maxLength props on the fields. In the case of the OverviewField you can use `titleOverrides` and `descriptionOverrides` to override the length rules.
+  Tip: You can override the length rules by changing the minLength and maxLength
+  props on the fields. In the case of the OverviewField you can use
+  `titleOverrides` and `descriptionOverrides` to override the length rules.
 </Banner>
 
 ## TypeScript
@@ -277,7 +290,7 @@ Tip: You can override the length rules by changing the minLength and maxLength p
 All types can be directly imported:
 
 ```ts
-import {
+import type {
   PluginConfig,
   GenerateTitle,
   GenerateDescription
@@ -288,9 +301,9 @@ import {
 You can then pass the collections from your generated Payload types into the generation types, for example:
 
 ```ts
-import { Page } from './payload-types.ts';
+import type { Page } from './payload-types.ts'
 
-import { GenerateTitle } from '@payloadcms/plugin-seo/types';
+import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 
 const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
   return `Website.com — ${doc?.title}`

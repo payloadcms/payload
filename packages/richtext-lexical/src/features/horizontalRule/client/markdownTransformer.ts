@@ -1,4 +1,4 @@
-import type { ElementTransformer } from '@lexical/markdown'
+import type { ElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 import {
   $createHorizontalRuleNode,

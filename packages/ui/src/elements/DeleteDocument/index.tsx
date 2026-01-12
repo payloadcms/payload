@@ -1,23 +1,23 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useEffect, useState } from 'react'
+import { formatAdminURL } from 'payload/shared'
+import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
+import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
 import './index.scss'
@@ -49,175 +49,156 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const {
     config: {
       routes: { admin: adminRoute, api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { setModified } = useForm()
-  const [deleting, setDeleting] = useState(false)
-  const { closeModal, toggleModal } = useModal()
   const router = useRouter()
   const { i18n, t } = useTranslation()
-  const { title } = useDocumentInfo()
-  const editDepth = useEditDepth()
-
-  const titleToRender = titleFromProps || title || id
+  const { title } = useDocumentTitle()
+  const { startRouteTransition } = useRouteTransition()
+  const { openModal } = useModal()
 
   const modalSlug = `delete-${id}`
 
+  const [deletePermanently, setDeletePermanently] = useState(false)
+
   const addDefaultError = useCallback(() => {
-    setDeleting(false)
     toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
 
-  useEffect(() => {
-    return () => {
-      closeModal(modalSlug)
-    }
-  }, [closeModal, modalSlug])
-
   const handleDelete = useCallback(async () => {
-    setDeleting(true)
     setModified(false)
 
     try {
-      await requests
-        .delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(async (res) => {
-          try {
-            const json = await res.json()
+      const url = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}/${id}`,
+      })
+      const res =
+        deletePermanently || !collectionConfig.trash
+          ? await requests.delete(url, {
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            })
+          : await requests.patch(url, {
+              body: JSON.stringify({
+                deletedAt: new Date().toISOString(),
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            })
 
-            if (res.status < 400) {
-              setDeleting(false)
-              toggleModal(modalSlug)
+      const json = await res.json()
 
-              toast.success(
-                t('general:titleDeleted', { label: getTranslation(singularLabel, i18n), title }) ||
-                  json.message,
-              )
+      if (res.status < 400) {
+        toast.success(
+          t(
+            deletePermanently || !collectionConfig.trash
+              ? 'general:titleDeleted'
+              : 'general:titleTrashed',
+            {
+              label: getTranslation(singularLabel, i18n),
+              title,
+            },
+          ) || json.message,
+        )
 
-              if (redirectAfterDelete) {
-                return router.push(
-                  formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${collectionSlug}`,
-                  }),
-                )
-              }
+        if (redirectAfterDelete) {
+          return startRouteTransition(() =>
+            router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
+          )
+        }
 
-              if (typeof onDelete === 'function') {
-                await onDelete({ id, collectionConfig })
-              }
+        if (typeof onDelete === 'function') {
+          await onDelete({ id, collectionConfig })
+        }
 
-              toggleModal(modalSlug)
+        return
+      }
 
-              return
-            }
+      if (json.errors) {
+        json.errors.forEach((error) => toast.error(error.message))
+      } else {
+        addDefaultError()
+      }
 
-            toggleModal(modalSlug)
-
-            if (json.errors) {
-              json.errors.forEach((error) => toast.error(error.message))
-            } else {
-              addDefaultError()
-            }
-            return false
-          } catch (e) {
-            return addDefaultError()
-          }
-        })
-    } catch (e) {
-      addDefaultError()
+      return
+    } catch (_err) {
+      return addDefaultError()
     }
   }, [
+    deletePermanently,
     setModified,
-    serverURL,
+
     api,
     collectionSlug,
     id,
-    toggleModal,
-    modalSlug,
     t,
     singularLabel,
+    addDefaultError,
     i18n,
     title,
     router,
     adminRoute,
-    addDefaultError,
     redirectAfterDelete,
     onDelete,
     collectionConfig,
+    startRouteTransition,
   ])
 
   if (id) {
     return (
-      <React.Fragment>
+      <Fragment>
         <PopupList.Button
           id={buttonId}
           onClick={() => {
-            setDeleting(false)
-            toggleModal(modalSlug)
+            openModal(modalSlug)
           }}
         >
           {t('general:delete')}
         </PopupList.Button>
-        <Modal
-          className={baseClass}
-          slug={modalSlug}
-          style={{
-            zIndex: drawerZBase + editDepth,
-          }}
-        >
-          <div className={`${baseClass}__wrapper`}>
-            <div className={`${baseClass}__content`}>
-              <h1>{t('general:confirmDeletion')}</h1>
-              <p>
-                <Translation
-                  elements={{
-                    '1': ({ children }) => <strong>{children}</strong>,
-                  }}
-                  i18nKey="general:aboutToDelete"
-                  t={t}
-                  variables={{
-                    label: getTranslation(singularLabel, i18n),
-                    title: titleToRender,
-                  }}
-                />
-              </p>
-            </div>
-            <div className={`${baseClass}__controls`}>
-              <Button
-                buttonStyle="secondary"
-                id="confirm-cancel"
-                onClick={deleting ? undefined : () => toggleModal(modalSlug)}
-                size="large"
-                type="button"
-              >
-                {t('general:cancel')}
-              </Button>
-              <Button
-                id="confirm-delete"
-                onClick={() => {
-                  if (!deleting) {
-                    void handleDelete()
-                  }
+        <ConfirmationModal
+          body={
+            <Fragment>
+              <Translation
+                elements={{
+                  '1': ({ children }) => <strong>{children}</strong>,
                 }}
-                size="large"
-              >
-                {deleting ? t('general:deleting') : t('general:confirm')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      </React.Fragment>
+                i18nKey={collectionConfig.trash ? 'general:aboutToTrash' : 'general:aboutToDelete'}
+                t={t}
+                variables={{
+                  label: getTranslation(singularLabel, i18n),
+                  title: titleFromProps || title || id,
+                }}
+              />
+              {collectionConfig.trash && (
+                <div className={`${baseClass}__checkbox`}>
+                  <CheckboxInput
+                    checked={deletePermanently}
+                    id="delete-forever"
+                    label={t('general:deletePermanently')}
+                    name="delete-forever"
+                    onToggle={(e) => setDeletePermanently(e.target.checked)}
+                  />
+                </div>
+              )}
+            </Fragment>
+          }
+          className={baseClass}
+          confirmingLabel={t('general:deleting')}
+          heading={t('general:confirmDeletion')}
+          modalSlug={modalSlug}
+          onConfirm={handleDelete}
+        />
+      </Fragment>
     )
   }
 

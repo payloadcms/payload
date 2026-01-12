@@ -15,17 +15,30 @@ export function sanitizeUrl(url: string): string {
   return 'https://'
 }
 
-// Source: https://stackoverflow.com/a/8234912/2013580
-const absoluteRegExp =
-  /(?:[A-Za-z]{3,9}:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)(?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?\w*/
+/**
+ * This regex checks for absolute URLs in a string. Tested for the following use cases:
+ * - http://example.com
+ * - https://example.com
+ * - ftp://files.example.com
+ * - http://example.com/resource
+ * - https://example.com/resource?key=value
+ * - http://example.com/resource#anchor
+ * - http://www.example.com
+ * - https://sub.example.com/path/file
+ * - mailto:
+ */
+export const absoluteRegExp =
+  /^(?:[a-zA-Z][a-zA-Z\d+.-]*:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d]+(?:\.[A-Za-z\d]+)+|www\.[A-Za-z\d]+(?:\.[A-Za-z\d]+)+|(?:tel|mailto):[\w+.-]+)(?:\/[+~%/\w-]*)?(?:\?[-;&=%\w]*)?(?:#\w+)?$/
 
 /**
  * This regex checks for relative URLs starting with / or anchor links starting with # in a string. Tested for the following use cases:
  * - /privacy-policy
  * - /privacy-policy#primary-terms
  * - #primary-terms
+ * - /page?id=123
+ * - /page?id=123#section
  *  */
-const relativeOrAnchorRegExp = /^[\w\-./]*(?:#\w[\w-]*)?$/
+export const relativeOrAnchorRegExp = /^(?:\/[\w\-./]*(?:\?[-;&=%\w]*)?(?:#[\w-]+)?|#[\w\-]+)$/
 
 /**
  * Prevents unreasonable URLs from being inserted into the editor.
@@ -44,8 +57,17 @@ export function validateUrlMinimal(url: string): boolean {
 export function validateUrl(url: string): boolean {
   // TODO Fix UI for link insertion; it should never default to an invalid URL such as https://.
   // Maybe show a dialog where they user can type the URL before inserting it.
-
   if (!url) {
+    return false
+  }
+
+  // Reject URLs with spaces
+  if (url.includes(' ')) {
+    return false
+  }
+
+  // Reject malformed protocol URLs (e.g., http:/example.com instead of http://example.com)
+  if (/^[a-z][a-z\d+.-]*:\/[^/]/i.test(url)) {
     return false
   }
 
@@ -65,7 +87,13 @@ export function validateUrl(url: string): boolean {
 
   // While this doesn't allow URLs starting with www (which is why we use the regex above), it does properly handle tel: URLs
   try {
-    new URL(url)
+    const urlObj = new URL(url)
+    // For http/https/ftp protocols, require a proper domain with at least one dot (for TLD)
+    if (['ftp:', 'http:', 'https:'].includes(urlObj.protocol)) {
+      if (!urlObj.hostname.includes('.')) {
+        return false
+      }
+    }
     return true
   } catch {
     /* empty */

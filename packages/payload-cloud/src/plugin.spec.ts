@@ -1,26 +1,50 @@
 import type { Config, Payload } from 'payload'
+import { describe, beforeAll, beforeEach, it, expect, test, vitest, Mock } from 'vitest'
 
-import { jest } from '@jest/globals'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
+// TO-DO: this would be needed for the TO-DO tests below.
+// maybe we have to use jest.unstable_mockModule? (already tried)
+// jest.mock('./plugin.ts', () => ({
+//   // generateRandomString: jest.fn<() => string>().mockReturnValue('instance'),
+//   generateRandomString: jest.fn().mockReturnValue('instance'),
+// }))
+
+const mockedPayload: Payload = {
+  updateGlobal: vitest.fn(),
+  findGlobal: vitest.fn().mockReturnValue('instance'),
+} as unknown as Payload
+
 import { payloadCloudPlugin } from './plugin.js'
 
-const mockedPayload: Payload = jest.fn() as unknown as Payload
-
 describe('plugin', () => {
-  let createTransportSpy: jest.Spied<any>
+  let createTransportSpy: Mock<any>
 
   const skipVerify = true
 
+  beforeAll(() => {
+    // Mock createTestAccount to prevent calling external services
+    vitest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
+      return Promise.resolve({
+        imap: { host: 'imap.test.com', port: 993, secure: true },
+        pass: 'testpass',
+        pop3: { host: 'pop3.test.com', port: 995, secure: true },
+        smtp: { host: 'smtp.test.com', port: 587, secure: false },
+        user: 'testuser',
+        web: 'https://webmail.test.com',
+      })
+    })
+  })
+
   beforeEach(() => {
-    createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
+    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
       return {
         transporter: {
           name: 'Nodemailer - SMTP',
         },
-        verify: jest.fn(),
+        verify: vitest.fn(),
       } as unknown as ReturnType<typeof nodemailer.createTransport>
     })
   })
@@ -90,10 +114,12 @@ describe('plugin', () => {
       })
 
       it('should not modify existing email transport', async () => {
-        const logSpy = jest.spyOn(console, 'log')
+        const logSpy = vitest.spyOn(console, 'log')
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
+          // eslint-disable-next-line @typescript-eslint/require-await
+          verify: async (): Promise<true> => true,
           // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises
           send: async (mail) => {
             // eslint-disable-next-line no-console
@@ -147,6 +173,78 @@ describe('plugin', () => {
           }),
         )
       })
+    })
+  })
+
+  describe('autoRun and cronJobs', () => {
+    beforeEach(() => {
+      process.env.PAYLOAD_CLOUD = 'true'
+      process.env.PAYLOAD_CLOUD_EMAIL_API_KEY = 'test-key'
+      process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN = 'test-domain.com'
+    })
+
+    test('should always set global instance identifier', async () => {
+      const plugin = payloadCloudPlugin()
+      const config = await plugin(createConfig())
+
+      const globalInstance = config.globals?.find(
+        (global) => global.slug === 'payload-cloud-instance',
+      )
+
+      expect(globalInstance).toBeDefined()
+      expect(globalInstance?.fields).toStrictEqual([
+        {
+          name: 'instance',
+          type: 'text',
+          required: true,
+        },
+      ]),
+        expect(globalInstance?.admin?.hidden).toStrictEqual(true)
+    })
+    // TO-DO: I managed to mock findGlobal, but not generateRandomString
+    test.skip('if autoRun is not set, should return default cron job', async () => {
+      const plugin = payloadCloudPlugin()
+      const config = await plugin(createConfig())
+      const DEFAULT_CRON_JOB = {
+        cron: '* * * * *',
+        limit: 10,
+        queue: 'default (every minute)',
+      }
+      if (typeof config.jobs?.autoRun !== 'function') {
+        throw new Error('autoRun should be a function')
+      }
+      const cronConfig = await config.jobs!.autoRun!(mockedPayload)
+      expect(cronConfig).toStrictEqual([DEFAULT_CRON_JOB])
+    })
+    // TO-DO: I managed to mock findGlobal, but not generateRandomString
+    // Either way when mocking the plugin part this test has little if any importance
+    test.skip('if autoRun is a function, should return the result of the function', async () => {
+      const plugin = payloadCloudPlugin()
+      const config = await plugin(
+        createConfig({
+          jobs: {
+            tasks: [],
+            autoRun: async () => {
+              return [
+                {
+                  cron: '1 2 3 4 5',
+                  limit: 5,
+                  queue: 'test-queue',
+                },
+                {},
+              ]
+            },
+          },
+        }),
+      )
+      expect(config.jobs?.autoRun).toStrictEqual([
+        {
+          cron: '1 2 3 4 5',
+          limit: 5,
+          queue: 'test-queue',
+        },
+        {},
+      ])
     })
   })
 })

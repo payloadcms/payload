@@ -3,7 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
-import type { Block } from 'payload'
+import type { Block, Field } from 'payload'
 
 //import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
@@ -54,16 +54,17 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
       },
     })
 
     await seed(payload)
   },
-  //email: nodemailerAdapter(),
+  // email: nodemailerAdapter(),
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
-      //defaultToEmail: 'devs@payloadcms.com',
+      // defaultToEmail: 'devs@payloadcms.com',
       fields: {
         colorField,
         payment: true,
@@ -73,6 +74,26 @@ export default buildConfigWithDefaults({
             plural: 'Custom Text Fields',
             singular: 'Custom Text Field',
           },
+        },
+        date: {
+          ...formFields.date,
+          fields: [
+            ...(formFields.date && 'fields' in formFields.date
+              ? formFields.date.fields.map((field) => {
+                  if ('name' in field && field.name === 'defaultValue') {
+                    return {
+                      ...field,
+                      timezone: true,
+                      admin: {
+                        ...field.admin,
+                        description: 'This is a date field',
+                      },
+                    } as Field
+                  }
+                  return field
+                })
+              : []),
+          ],
         },
         // payment: {
         //     paymentProcessor: {
@@ -103,9 +124,29 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
+        access: {
+          update: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+        },
         fields: ({ defaultFields }) => {
+          const modifiedFields: Field[] = defaultFields.map((field) => {
+            if ('name' in field && field.type === 'group' && field.name === 'payment') {
+              return {
+                ...field,
+                fields: [
+                  ...field.fields, // comment this out to override payments group entirely
+                  {
+                    name: 'stripeCheckoutSession',
+                    type: 'text',
+                  },
+                ],
+              }
+            }
+
+            return field
+          })
+
           return [
-            ...defaultFields,
+            ...modifiedFields,
             {
               name: 'custom',
               type: 'text',

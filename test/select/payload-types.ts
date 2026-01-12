@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     'localized-posts': LocalizedPost;
@@ -17,6 +73,11 @@ export interface Config {
     'deep-posts': DeepPost;
     pages: Page;
     points: Point;
+    'force-select': ForceSelect;
+    upload: Upload;
+    rels: Rel;
+    'relationships-blocks': RelationshipsBlock;
+    'custom-ids': CustomId;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -30,6 +91,11 @@ export interface Config {
     'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     points: PointsSelect<false> | PointsSelect<true>;
+    'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
+    upload: UploadSelect<false> | UploadSelect<true>;
+    rels: RelsSelect<false> | RelsSelect<true>;
+    'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
+    'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -40,17 +106,19 @@ export interface Config {
   };
   globals: {
     'global-post': GlobalPost;
+    'force-select-global': ForceSelectGlobal;
   };
   globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
+    'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
   };
   locale: 'en' | 'de';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -79,6 +147,8 @@ export interface Post {
   id: string;
   text?: string | null;
   number?: number | null;
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -114,8 +184,49 @@ export interface Post {
   };
   unnamedTabText?: string | null;
   unnamedTabNumber?: number | null;
+  hasOne?: (string | null) | Rel;
+  hasMany?: (string | Rel)[] | null;
+  hasManyUpload?: (string | Upload)[] | null;
+  hasOnePoly?: {
+    relationTo: 'rels';
+    value: string | Rel;
+  } | null;
+  hasManyPoly?:
+    | {
+        relationTo: 'rels';
+        value: string | Rel;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels".
+ */
+export interface Rel {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload".
+ */
+export interface Upload {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -125,6 +236,8 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   number?: number | null;
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -260,6 +373,7 @@ export interface DeepPost {
  */
 export interface Page {
   id: string;
+  relatedPage?: (string | null) | Page;
   content?:
     | {
         title: string;
@@ -282,7 +396,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -305,6 +419,22 @@ export interface Page {
     | null;
   slug: string;
   additional?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        other?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        title?: string | null;
+        other?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -325,10 +455,57 @@ export interface Point {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select".
+ */
+export interface ForceSelect {
+  id: string;
+  text?: string | null;
+  forceSelected?: string | null;
+  array?:
+    | {
+        forceSelected?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks".
+ */
+export interface RelationshipsBlock {
+  id: string;
+  blocks?:
+    | {
+        hasMany?: (string | Rel)[] | null;
+        hasOne?: (string | null) | Rel;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids".
+ */
+export interface CustomId {
+  id: number;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  name?: string | null;
+  number?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -338,6 +515,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -370,6 +554,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'points';
         value: string | Point;
+      } | null)
+    | ({
+        relationTo: 'force-select';
+        value: string | ForceSelect;
+      } | null)
+    | ({
+        relationTo: 'upload';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'rels';
+        value: string | Rel;
+      } | null)
+    | ({
+        relationTo: 'relationships-blocks';
+        value: string | RelationshipsBlock;
+      } | null)
+    | ({
+        relationTo: 'custom-ids';
+        value: number | CustomId;
       } | null)
     | ({
         relationTo: 'users';
@@ -424,6 +628,8 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  select?: T;
+  selectMany?: T;
   group?:
     | T
     | {
@@ -465,6 +671,11 @@ export interface PostsSelect<T extends boolean = true> {
       };
   unnamedTabText?: T;
   unnamedTabNumber?: T;
+  hasOne?: T;
+  hasMany?: T;
+  hasManyUpload?: T;
+  hasOnePoly?: T;
+  hasManyPoly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -475,6 +686,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface LocalizedPostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  select?: T;
+  selectMany?: T;
   group?:
     | T
     | {
@@ -625,6 +838,7 @@ export interface DeepPostsSelect<T extends boolean = true> {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
+  relatedPage?: T;
   content?:
     | T
     | {
@@ -649,6 +863,25 @@ export interface PagesSelect<T extends boolean = true> {
       };
   slug?: T;
   additional?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        other?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              title?: T;
+              other?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -664,9 +897,83 @@ export interface PointsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select_select".
+ */
+export interface ForceSelectSelect<T extends boolean = true> {
+  text?: T;
+  forceSelected?: T;
+  array?:
+    | T
+    | {
+        forceSelected?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload_select".
+ */
+export interface UploadSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels_select".
+ */
+export interface RelsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks_select".
+ */
+export interface RelationshipsBlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              hasMany?: T;
+              hasOne?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids_select".
+ */
+export interface CustomIdsSelect<T extends boolean = true> {
+  id?: T;
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  number?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -676,6 +983,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -722,11 +1036,45 @@ export interface GlobalPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-global".
+ */
+export interface ForceSelectGlobal {
+  id: string;
+  text?: string | null;
+  forceSelected?: string | null;
+  array?:
+    | {
+        forceSelected?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-post_select".
  */
 export interface GlobalPostSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-global_select".
+ */
+export interface ForceSelectGlobalSelect<T extends boolean = true> {
+  text?: T;
+  forceSelected?: T;
+  array?:
+    | T
+    | {
+        forceSelected?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

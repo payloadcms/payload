@@ -1,13 +1,21 @@
 import type {
+  BuildFormStateArgs,
+  ClientFieldSchemaMap,
   Data,
-  DocumentPermissions,
   DocumentPreferences,
-  Field as FieldSchema,
+  Field,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
+  TabAsField,
 } from 'payload'
+
+import { stripUnselectedFields } from 'payload'
+import { getFieldPaths } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 import type { RenderFieldMethod } from './types.js'
@@ -20,9 +28,14 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
-  fields: FieldSchema[]
+  fields: (Field | TabAsField)[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -35,6 +48,7 @@ type Args = {
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -47,12 +61,15 @@ type Args = {
   parentPassesCondition?: boolean
   parentPath: string
   parentSchemaPath: string
-  permissions: DocumentPermissions['fields']
+  permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
+  readOnly?: boolean
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -71,6 +88,8 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  blockData,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   fields,
@@ -79,6 +98,7 @@ export const iterateFields = async ({
   forceFullValue = false,
   fullData,
   includeSchema = false,
+  mockRSCs,
   omitParents = false,
   operation,
   parentIndexPath,
@@ -88,9 +108,12 @@ export const iterateFields = async ({
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn: renderFieldFn,
   req,
+  select,
+  selectMode,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -99,12 +122,52 @@ export const iterateFields = async ({
 
   fields.forEach((field, fieldIndex) => {
     let passesCondition = true
+
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
+    if (path !== 'id') {
+      const shouldContinue = stripUnselectedFields({
+        field,
+        select,
+        selectMode,
+        siblingDoc: data,
+      })
+
+      if (!shouldContinue) {
+        return
+      }
+    }
+
+    const pathSegments = path ? path.split('.') : []
+
     if (!skipConditionChecks) {
-      passesCondition = Boolean(
-        (field?.admin?.condition
-          ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
-          : true) && parentPassesCondition,
-      )
+      try {
+        passesCondition = Boolean(
+          (field?.admin?.condition
+            ? Boolean(
+                field.admin.condition(fullData || {}, data || {}, {
+                  blockData,
+                  operation,
+                  path: pathSegments,
+                  user: req.user,
+                }),
+              )
+            : true) && parentPassesCondition,
+        )
+      } catch (err) {
+        passesCondition = false
+
+        req.payload.logger.error({
+          err,
+          msg: `Error evaluating field condition at path: ${path}`,
+        })
+      }
     }
 
     promises.push(
@@ -112,6 +175,8 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        blockData,
+        clientFieldSchemaMap,
         collectionSlug,
         data,
         field,
@@ -121,18 +186,25 @@ export const iterateFields = async ({
         forceFullValue,
         fullData,
         includeSchema,
+        indexPath,
+        mockRSCs,
         omitParents,
         operation,
         parentIndexPath,
         parentPath,
+        parentPermissions: permissions,
         parentSchemaPath,
         passesCondition,
-        permissions,
+        path,
         preferences,
         previousFormState,
+        readOnly,
         renderAllFields,
         renderFieldFn,
         req,
+        schemaPath,
+        select,
+        selectMode,
         skipConditionChecks,
         skipValidation,
         state,

@@ -1,20 +1,21 @@
-import type { Field, SanitizedConfig } from 'payload'
+import type { FlattenedField, SanitizedConfig } from 'payload'
 
-import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
-  fields: Field[]
-  locale: string
+  fields: FlattenedField[]
+  locale?: string
+  parentIsLocalized: boolean
   result?: string
   segments: string[]
 }
 
 export const getLocalizedSortProperty = ({
   config,
-  fields: incomingFields,
+  fields,
   locale,
+  parentIsLocalized,
   result: incomingResult,
   segments: incomingSegments,
 }: Args): string => {
@@ -23,9 +24,6 @@ export const getLocalizedSortProperty = ({
   if (!config.localization) {
     return incomingSegments.join('.')
   }
-
-  // Flatten incoming fields (row, etc)
-  const fields = flattenTopLevelFields(incomingFields)
 
   const segments = [...incomingSegments]
 
@@ -38,13 +36,16 @@ export const getLocalizedSortProperty = ({
   )
 
   if (matchedField && !fieldIsPresentationalOnly(matchedField)) {
-    let nextFields: Field[]
+    let nextFields: FlattenedField[] | null = null
+    let nextParentIsLocalized = parentIsLocalized
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 
-    if (matchedField.localized) {
+    if (
+      fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: parentIsLocalized ?? false })
+    ) {
       // Check to see if next segment is a locale
-      if (segments.length > 0) {
+      if (segments.length > 0 && remainingSegments[0]) {
         const nextSegmentIsLocale = config.localization.localeCodes.includes(remainingSegments[0])
 
         // If next segment is locale, remove it from remaining segments
@@ -65,31 +66,46 @@ export const getLocalizedSortProperty = ({
       matchedField.type === 'group' ||
       matchedField.type === 'array'
     ) {
-      nextFields = matchedField.fields
+      nextFields = matchedField.flattenedFields
+      if (!nextParentIsLocalized) {
+        nextParentIsLocalized = matchedField.localized ?? false
+      }
     }
 
     if (matchedField.type === 'blocks') {
-      nextFields = matchedField.blocks.reduce((flattenedBlockFields, block) => {
-        return [
-          ...flattenedBlockFields,
-          ...block.fields.filter(
-            (blockField) =>
-              (fieldAffectsData(blockField) &&
-                blockField.name !== 'blockType' &&
-                blockField.name !== 'blockName') ||
-              !fieldAffectsData(blockField),
-          ),
-        ]
-      }, [])
+      nextFields = (matchedField.blockReferences ?? matchedField.blocks).reduce<FlattenedField[]>(
+        (flattenedBlockFields, _block) => {
+          // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+          const block =
+            typeof _block === 'string' ? config.blocks?.find((b) => b.slug === _block) : _block
+
+          if (!block) {
+            return [...flattenedBlockFields]
+          }
+
+          return [
+            ...flattenedBlockFields,
+            ...block.flattenedFields.filter(
+              (blockField) =>
+                (fieldAffectsData(blockField) &&
+                  blockField.name !== 'blockType' &&
+                  blockField.name !== 'blockName') ||
+                !fieldAffectsData(blockField),
+            ),
+          ]
+        },
+        [],
+      )
     }
 
     const result = incomingResult ? `${incomingResult}.${localizedSegment}` : localizedSegment
 
-    if (nextFields) {
+    if (nextFields !== null) {
       return getLocalizedSortProperty({
         config,
         fields: nextFields,
         locale,
+        parentIsLocalized: nextParentIsLocalized,
         result,
         segments: remainingSegments,
       })

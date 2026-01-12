@@ -6,7 +6,7 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. You can define as many Globals as your application needs. Each Global Document is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates a [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) used to manage your Documents.
+Globals are in many ways similar to [Collections](./collections), except that they correspond to only a single Document. You can define as many Globals as your application needs. Each Global Document is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates a [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) used to manage your Documents.
 
 Globals are the primary way to structure singletons in Payload, such as a header navigation, site-wide banner alerts, or app-wide localized strings. Each Global can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
 
@@ -17,15 +17,16 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  globals: [ // highlight-line
+  globals: [
+    // highlight-line
     // Your Globals go here
   ],
 })
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  If you have more than one Global that share the same structure, consider using a [Collection](../configuration/collections) instead.
+  **Tip:** If you have more than one Global that share the same structure,
+  consider using a [Collection](./collections) instead.
 </Banner>
 
 ## Config Options
@@ -59,28 +60,31 @@ export const Nav: GlobalConfig = {
 ```
 
 <Banner type="success">
-  <strong>Reminder:</strong>
-  For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub, or the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
+  **Reminder:** For more complex examples, see the
+  [Templates](https://github.com/payloadcms/payload/tree/main/templates) and
+  [Examples](https://github.com/payloadcms/payload/tree/main/examples)
+  directories in the Payload repository.
 </Banner>
 
 The following options are available:
 
-| Option              | Description                                                                                                                                                                                    |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`access`**        | Provide Access Control functions to define exactly who should be able to do what with this Global. [More details](../access-control/globals).                                                  |
-| **`admin`**         | The configuration options for the Admin Panel. [More details](../admin/globals).                                                                                                               |
-| **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                      |
-| **`dbName`**        | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined.                                                                    |
-| **`description`**   | Text or React component to display below the Global header to give editors more information.                                                                                                   |
-| **`endpoints`**     | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                      |
-| **`fields`** \*     | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview).                                            |
-| **`graphQL.name`**  | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                       |
-| **`hooks`**         | Entry point for Hooks. [More details](../hooks/overview#global-hooks).                                                                                                                         |
-| **`label`**         | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                        |
-| **`lockDocuments`** | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents). |
-| **`slug`** \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
-| **`typescript`**    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
-| **`versions`**      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#globals-config).                                                               |
+| Option          | Description                                                                                                                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `access`        | Provide Access Control functions to define exactly who should be able to do what with this Global. [More details](../access-control/globals).                                                  |
+| `admin`         | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                 |
+| `custom`        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                      |
+| `dbName`        | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined.                                                                    |
+| `description`   | Text or React component to display below the Global header to give editors more information.                                                                                                   |
+| `endpoints`     | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                      |
+| `fields` \*     | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview).                                            |
+| `graphQL`       | Manage GraphQL-related properties related to this global. [More details](#graphql)                                                                                                             |
+| `hooks`         | Entry point for Hooks. [More details](../hooks/overview#global-hooks).                                                                                                                         |
+| `label`         | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                        |
+| `lockDocuments` | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents). |
+| `slug` \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
+| `typescript`    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
+| `versions`      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#global-config).                                                                |
+| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).      |
 
 _\* An asterisk denotes that a property is required._
 
@@ -96,13 +100,114 @@ Fields define the schema of the Global. To learn more, go to the [Fields](../fie
 
 [Global Hooks](../hooks/globals) allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
-### Admin Options
+## Admin Options
 
-You can customize the way that the [Admin Panel](../admin/overview) behaves on a Global-by-Global basis. To learn more, go to the [Global Admin Options](../admin/globals) documentation.
+The behavior of Globals within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](../custom-components/overview), setting page metadata, and more.
+
+To configure Admin Options for Globals, use the `admin` property in your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+export const MyGlobal: GlobalConfig = {
+  // ...
+  admin: {
+    // highlight-line
+    // ...
+  },
+}
+```
+
+The following options are available:
+
+| Option        | Description                                                                                                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `group`       | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible. |
+| `hidden`      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing.                                                       |
+| `components`  | Swap in your own React components to be used within this Global. [More details](#custom-components).                                                                                    |
+| `preview`     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](../admin/preview).                                                 |
+| `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                           |
+| `hideAPIURL`  | Hides the "API URL" meta field while editing documents within this collection.                                                                                                          |
+| `meta`        | Page metadata overrides to apply to this Global within the Admin Panel. [More details](../admin/metadata).                                                                              |
+
+### Custom Components
+
+Globals can set their own [Custom Components](../custom-components/overview) which only apply to Global-specific UI within the [Admin Panel](../admin/overview). This includes elements such as the Save Button, or entire layouts such as the Edit View.
+
+To override Global Components, use the `admin.components` property in your Global Config:
+
+```ts
+import type { SanitizedGlobalConfig } from 'payload'
+
+export const MyGlobal: SanitizedGlobalConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-line
+      // ...
+    },
+  },
+}
+```
+
+The following options are available:
+
+#### General
+
+| Option     | Description                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------- |
+| `elements` | Override or create new elements within the Edit View. [More details](#edit-view-options).               |
+| `views`    | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views). |
+
+#### Edit View Options
+
+```ts
+import type { SanitizedGlobalConfig } from 'payload'
+
+export const MyGlobal: SanitizedGlobalConfig = {
+  // ...
+  admin: {
+    components: {
+      elements: {
+        // highlight-line
+        // ...
+      },
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Option                   | Description                                                                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save button. [More details](../custom-components/edit-view#beforedocumentcontrols).                                                                                    |
+| `Description`            | A component to render below the Global label in the Edit View. [More details](../custom-components/edit-view#description).                                                                                 |
+| `SaveButton`             | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
+| `SaveDraftButton`        | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
+| `PublishButton`          | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
+| `PreviewButton`          | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
+
+<Banner type="success">
+  **Note:** For details on how to build Custom Components, see [Building Custom
+  Components](../custom-components/overview#building-custom-components).
+</Banner>
+
+## GraphQL
+
+You can completely disable GraphQL for this global by passing `graphQL: false` to your global config. This will completely disable all queries, mutations, and types from appearing in your GraphQL schema.
+
+You can also pass an object to the global's `graphQL` property, which allows you to define the following properties:
+
+| Option             | Description                                                                     |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `name`             | Override the name that will be used in GraphQL schema generation.               |
+| `disableQueries`   | Disable all GraphQL queries that correspond to this global by passing `true`.   |
+| `disableMutations` | Disable all GraphQL mutations that correspond to this global by passing `true`. |
 
 ## TypeScript
 
-You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizeGlobalConfig`.
+You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizedGlobalConfig`.
 
 The `GlobalConfig` type represents a raw Global Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedGlobalConfig` type represents a Global Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 

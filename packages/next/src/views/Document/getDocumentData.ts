@@ -1,4 +1,12 @@
-import type { Locale, Payload, TypedUser, TypeWithID } from 'payload'
+import { sanitizeID } from '@payloadcms/ui/shared'
+import {
+  type Locale,
+  logError,
+  type Payload,
+  type PayloadRequest,
+  type TypedUser,
+  type TypeWithID,
+} from 'payload'
 
 type Args = {
   collectionSlug?: string
@@ -6,18 +14,26 @@ type Args = {
   id?: number | string
   locale?: Locale
   payload: Payload
+  req?: PayloadRequest
+  segments?: string[]
   user?: TypedUser
 }
 
 export const getDocumentData = async ({
-  id,
+  id: idArg,
   collectionSlug,
   globalSlug,
   locale,
   payload,
+  req,
+  segments,
   user,
 }: Args): Promise<null | Record<string, unknown> | TypeWithID> => {
+  const id = sanitizeID(idArg)
   let resolvedData: Record<string, unknown> | TypeWithID = null
+  const { transactionID, ...rest } = req
+
+  const isTrashedDoc = segments?.[2] === 'trash' && typeof segments?.[3] === 'string' // id exists at segment 3
 
   try {
     if (collectionSlug && id) {
@@ -29,6 +45,10 @@ export const getDocumentData = async ({
         fallbackLocale: false,
         locale: locale?.code,
         overrideAccess: false,
+        req: {
+          ...rest,
+        },
+        trash: isTrashedDoc ? true : false,
         user,
       })
     }
@@ -41,11 +61,14 @@ export const getDocumentData = async ({
         fallbackLocale: false,
         locale: locale?.code,
         overrideAccess: false,
+        req: {
+          ...rest,
+        },
         user,
       })
     }
-  } catch (_err) {
-    payload.logger.error(_err)
+  } catch (err) {
+    logError({ err, payload })
   }
 
   return resolvedData

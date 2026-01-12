@@ -40,6 +40,7 @@ export const BoldFeatureClient = createClientFeature(({ featureProviderMap }) =>
   }
 
   return {
+    enableFormats: ['bold'],
     markdownTransformers,
     toolbarFixed: {
       groups: toolbarGroups,

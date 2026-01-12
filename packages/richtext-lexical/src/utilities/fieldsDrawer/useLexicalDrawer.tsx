@@ -16,12 +16,7 @@ export const useLexicalDrawer = (slug: string, restoreLate?: boolean) => {
   const [selectionState, setSelectionState] = useState<BaseSelection | null>(null)
   const [wasOpen, setWasOpen] = useState<boolean>(false)
 
-  const {
-    closeModal: closeBaseModal,
-    isModalOpen: isBaseModalOpen,
-    modalState,
-    toggleModal: toggleBaseModal,
-  } = useModal()
+  const { closeModal: closeBaseModal, modalState, toggleModal: toggleBaseModal } = useModal()
 
   const storeSelection = useCallback(() => {
     editor.read(() => {
@@ -41,20 +36,21 @@ export const useLexicalDrawer = (slug: string, restoreLate?: boolean) => {
     }
   }, [editor, selectionState])
 
-  const closeDrawer = () => {
+  const closeDrawer = useCallback(() => {
     //restoreSelection() // Should already be stored by the useEffect below
     closeBaseModal(slug)
-  }
+  }, [closeBaseModal, slug])
+  const isModalOpen = modalState?.[slug]?.isOpen
 
-  const toggleDrawer = () => {
-    if (!isBaseModalOpen(slug)) {
+  const toggleDrawer = useCallback(() => {
+    if (!isModalOpen) {
       storeSelection()
     } else {
       restoreSelection()
     }
     setWasOpen(true)
     toggleBaseModal(slug)
-  }
+  }, [slug, storeSelection, toggleBaseModal, restoreSelection, isModalOpen])
 
   // We need to handle drawer closing via a useEffect, as toggleDrawer / closeDrawer will not be triggered if the drawer
   // is closed by clicking outside of the drawer. This useEffect will handle everything.

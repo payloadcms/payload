@@ -1,32 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    // Make sure typescript knows that this module depends on their references
-    "composite": true,
-    /* Do not emit outputs. */
-    "noEmit": false,
-    "emitDeclarationOnly": true,
-    /* Specify an output folder for all emitted files. */
-    "outDir": "./dist",
-    /* Specify the root folder within your source files. */
-    "rootDir": "./src"
-  },
-  "exclude": [
-    "dist",
-    "build",
-    "tests",
-    "test",
-    "node_modules",
-    "eslint.config.js",
-    "src/**/*.spec.js",
-    "src/**/*.spec.jsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx"
-  ],
-  "include": [
-    "src",
-    "src/**/*.ts",
-  ],
+  "extends": "../../tsconfig.base.json",
   "references": [
     {
       "path": "../payload"
@@ -37,5 +10,9 @@
     {
       "path": "../drizzle"
     }
-  ]
+  ],
+  "compilerOptions": {
+    // Do not include DOM and DOM.Iterable as this is a server-only package.
+    "lib": ["ES2022"],
+  }
 }

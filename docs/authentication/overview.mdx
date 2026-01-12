@@ -11,7 +11,7 @@ keywords: authentication, config, configuration, overview, documentation, Conten
   title="Simplified Authentication for Headless CMS: Unlocking Reusability in One Line"
 />
 
-Authentication is a critical part of any application. Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the [Admin Panel](../admin/overview), all well as your own external applications, completely eliminating the need for paid, third-party platforms and services.
+Authentication is a critical part of any application. Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the [Admin Panel](../admin/overview), as well as your own external applications, completely eliminating the need for paid, third-party platforms and services.
 
 Here are some common use cases of Authentication in your own applications:
 
@@ -22,7 +22,7 @@ Here are some common use cases of Authentication in your own applications:
 
 When Authentication is enabled on a [Collection](../configuration/collections), Payload injects all necessary functionality to support the entire user flow. This includes all [auth-related operations](./operations) like account creation, logging in and out, and resetting passwords, all [auth-related emails](./email) like email verification and password reset, as well as any necessary UI to manage users from the Admin Panel.
 
-To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collection#auth):
+To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collections#config-options):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -33,7 +33,7 @@ export const Users: CollectionConfig = {
 }
 ```
 
-![Authentication Admin Panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
+![Authentication Admin Panel functionality](https://payloadcms.com/images/docs/auth-overview.jpg)
 _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 
 ## Config Options
@@ -41,8 +41,9 @@ _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 Any [Collection](../configuration/collections) can opt-in to supporting Authentication. Once enabled, each Document that is created within the Collection can be thought of as a "user". This enables a complete authentication workflow on your Collection, such as logging in and out, resetting their password, and more.
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  By default, Payload provides an auth-enabled `User` Collection which is used to access the Admin Panel. [More details](../admin/overview#the-admin-user-collection).
+  **Note:** By default, Payload provides an auth-enabled `User` Collection which
+  is used to access the Admin Panel. [More
+  details](../admin/overview#the-admin-user-collection).
 </Banner>
 
 To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collections):
@@ -65,31 +66,33 @@ export const Admins: CollectionConfig = {
 ```
 
 <Banner type="info">
-  <strong>Tip:</strong>
-  For default auth behavior, set `auth: true`. This is a good starting point for most applications.
+  **Tip:** For default auth behavior, set `auth: true`. This is a good starting
+  point for most applications.
 </Banner>
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  Auth-enabled Collections with be automatically injected with the `hash`, `salt`, and `email` fields. [More details](../fields/overview#field-names).
+  **Note:** Auth-enabled Collections will be automatically injected with the
+  `hash`, `salt`, and `email` fields. [More
+  details](../fields/overview#field-names).
 </Banner>
 
 The following options are available:
 
-| Option                     | Description                                                                                                                                                                                                                         |
-|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`cookies`**              | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
-| **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
-| **`disableLocalStrategy`** | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                                     |
-| **`forgotPassword`**       | Customize the way that the `forgotPassword` operation functions. [More details](./email#forgot-password).                                                                                                             |
-| **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                          |
-| **`loginWithUsername`**    | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                                     |
-| **`maxLoginAttempts`**     | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
-| **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                                                                            |
-| **`strategies`**           | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                         |
-| **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
-| **`useAPIKey`**            | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                       |
-| **`verify`**               | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                  |
+| Option                         | Description                                                                                                                                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`cookies`**                  | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                       |
+| **`depth`**                    | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
+| **`disableLocalStrategy`**     | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                             |
+| **`forgotPassword`**           | Customize the way that the `forgotPassword` operation functions. [More details](./email#forgot-password).                                                                                                                   |
+| **`lockTime`**                 | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                  |
+| **`loginWithUsername`**        | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                           |
+| **`maxLoginAttempts`**         | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                               |
+| **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                        |
+| **`strategies`**               | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                               |
+| **`tokenExpiration`**          | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                             |
+| **`useAPIKey`**                | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                                |
+| **`useSessions`**              | True by default. Set to `false` to use stateless JWTs for authentication instead of sessions.                                                                                                                               |
+| **`verify`**                   | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                     |
 
 ### Login With Username
 
@@ -132,7 +135,7 @@ If set to `true`, an email address is required when creating a new user. If set 
 
 For testing and demo purposes you may want to skip forcing the user to login in order to access your application. Typically, all users should be required to login, however, you can speed up local development time by enabling auto-login.
 
-To enable auto-login, set the `autoLogin` property in the [Admin Config](../configuration/admin):
+To enable auto-login, set the `autoLogin` property in the [Payload Config](../admin/overview#admin-options):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -140,31 +143,54 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   // highlight-start
-  autoLogin:
-    process.env.NEXT_PUBLIC_ENABLE_AUTOLOGIN === 'true'
-      ? {
-          email: 'test@example.com',
-          password: 'test',
-          prefillOnly: true,
-        }
-      : false,
+  admin: {
+    autoLogin:
+      process.env.NODE_ENV === 'development'
+        ? {
+            email: 'test@example.com',
+            password: 'test',
+            prefillOnly: true,
+          }
+        : false,
+  },
+
   // highlight-end
 })
 ```
 
 <Banner type="warning">
-  <strong>Warning:</strong>
-  The recommended way to use this feature is behind an [Environment Variable](../configuration/environment-vars). This will ensure it is _disabled_ in production.
+  **Warning:** The recommended way to use this feature is behind an [Environment
+  Variable](../configuration/environment-vars). This will ensure it is
+  _disabled_ in production.
 </Banner>
 
 The following options are available:
 
 | Option            | Description                                                                                                     |
-|-------------------|-----------------------------------------------------------------------------------------------------------------|
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
 | **`username`**    | The username of the user to login as                                                                            |
 | **`email`**       | The email address of the user to login as                                                                       |
 | **`password`**    | The password of the user to login as. This is only needed if `prefillOnly` is set to true                       |
 | **`prefillOnly`** | If set to true, the login credentials will be prefilled but the user will still need to click the login button. |
+
+## Auto-Refresh
+
+Turning this property on will allow users to stay logged in indefinitely while their browser is open and on the admin panel, by automatically refreshing their authentication token before it expires.
+
+To enable auto-refresh for user tokens, set `autoRefresh: true` in the [Payload Config](../admin/overview#admin-options) to:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  admin: {
+    autoRefresh: true,
+  },
+  // highlight-end
+})
+```
 
 ## Operations
 
@@ -172,7 +198,7 @@ All auth-related operations are available via Payload's REST, Local, and GraphQL
 
 ## Strategies
 
-Out of the box Payload ships with a three powerful Authentication strategies:
+Out of the box Payload ships with three powerful Authentication strategies:
 
 - [HTTP-Only Cookies](./cookies)
 - [JSON Web Tokens (JWT)](./jwt)
@@ -182,7 +208,7 @@ Each of these strategies can work together or independently. You can also create
 
 ### HTTP-Only Cookies
 
-[HTTP-only cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and <strong>cannot be read by JavaScript in the browser</strong>, unlike JWT's. [More details](./cookies).
+[HTTP-only cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and **cannot be read by JavaScript in the browser**, unlike JWT's. [More details](./cookies).
 
 ### JSON Web Tokens
 
@@ -195,3 +221,43 @@ API Keys can be enabled on auth collections. These are particularly useful when 
 ### Custom Strategies
 
 There are cases where these may not be enough for your application. Payload is extendable by design so you can wire up your own strategy when you need to. [More details](./custom-strategies).
+
+### Access Control
+
+Default auth fields including `email`, `username`, and `password` can be overridden by defining a custom field with the same name in your collection config. This allows you to customize the field — including access control — while preserving the underlying auth functionality. For example, you might want to restrict the `email` field from being updated once it is created, or only allow it to be read by certain user roles. You can achieve this by redefining the field and setting access rules accordingly.
+
+Here's an example of how to restrict access to default auth fields:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Auth: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  fields: [
+    {
+      name: 'email', // or 'username'
+      type: 'text',
+      access: {
+        create: () => true,
+        read: () => false,
+        update: () => false,
+      },
+    },
+    {
+      name: 'password', // this will be applied to all password-related fields including new password, confirm password.
+      type: 'text',
+      hidden: true, // needed only for the password field to prevent duplication in the Admin panel
+      access: {
+        update: () => false,
+      },
+    },
+  ],
+}
+```
+
+**Note:**
+
+- Access functions will apply across the application — I.e. if `read` access is disabled on `email`, it will not appear in the Admin panel UI or API.
+- Restricting `read` on the `email` or `username` disables the **Unlock** action in the Admin panel as this function requires access to a user-identifying field.
+- When overriding the `password` field, you may need to include `hidden: true` to prevent duplicate fields being displayed in the Admin panel.

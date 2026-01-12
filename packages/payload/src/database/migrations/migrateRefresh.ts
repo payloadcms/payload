@@ -1,7 +1,7 @@
-import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -18,7 +18,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     payload,
   })
 
-  const req = { payload } as PayloadRequest
+  const req = await createLocalReq({}, payload)
 
   if (existingMigrations?.length) {
     payload.logger.info({
@@ -37,7 +37,8 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         payload.logger.info({ msg: `Migrating down: ${migration.name}` })
         const start = Date.now()
         await initTransaction(req)
-        await migrationFile.down({ payload, req })
+        const session = payload.db.sessions?.[await req.transactionID!]
+        await migrationFile.down({ payload, req, session })
         payload.logger.info({
           msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
         })

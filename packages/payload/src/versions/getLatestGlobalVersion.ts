@@ -1,7 +1,8 @@
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { TypeWithVersion } from './types.js'
 
-import { docHasTimestamps } from '../types/index.js'
+import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 
 type Args = {
   config: SanitizedGlobalConfig
@@ -22,21 +23,21 @@ export const getLatestGlobalVersion = async ({
   req,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
-  let latestVersion
+  let latestVersion: TypeWithVersion<Document> | undefined
 
   const whereQuery = published
     ? { 'version._status': { equals: 'published' } }
     : { latest: { equals: true } }
 
-  if (config.versions?.drafts) {
+  if (hasDraftsEnabled(config)) {
     latestVersion = (
       await payload.db.findGlobalVersions({
         global: slug,
         limit: 1,
-        locale,
+        locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: whereQuery,
+        where: whereQuery as unknown as Where,
       })
     ).docs[0]
   }

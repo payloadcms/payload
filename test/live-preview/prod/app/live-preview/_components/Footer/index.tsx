@@ -6,7 +6,7 @@ import { Gutter } from '../Gutter/index.js'
 import { CMSLink } from '../Link/index.js'
 import classes from './index.module.scss'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const Link = 'default' in LinkWithDefault ? LinkWithDefault.default : LinkWithDefault
 
 export async function Footer() {
   const footer = await getFooter()
@@ -21,7 +21,7 @@ export async function Footer() {
             <img
               alt="Payload Logo"
               className={classes.logo}
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
             />
           </picture>
         </Link>
@@ -30,7 +30,7 @@ export async function Footer() {
             return <CMSLink key={i} {...link} />
           })}
           <Link href="/admin">Admin</Link>
-          <Link href="https://github.com/payloadcms/payload/tree/main/templates/ecommerce">
+          <Link href="https://github.com/payloadcms/payload/tree/main/test/live-preview">
             Source Code
           </Link>
           <Link href="https://github.com/payloadcms/payload">Payload</Link>

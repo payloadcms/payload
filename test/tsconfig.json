@@ -1,10 +1,13 @@
 {
   "compilerOptions": {
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
     "noEmit": true,
     "rootDir": ".",
-    "declaration": true,
-    "declarationMap": true,
-    "target": "esnext",
+    "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
@@ -12,12 +15,10 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": false,
-    "types": ["jest", "node", "@types/jest"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -27,7 +28,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./fields/config.ts"]
+      "@payload-config": ["./_community/config.ts"]
     }
   },
   "exclude": [

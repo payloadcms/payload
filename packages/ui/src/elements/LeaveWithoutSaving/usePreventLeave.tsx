@@ -6,9 +6,11 @@
 import { useRouter } from 'next/navigation.js'
 import { useCallback, useEffect, useRef } from 'react'
 
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+
 function on<T extends Document | EventTarget | HTMLElement | Window>(
   obj: null | T,
-  ...args: [string, Function | null, ...any] | Parameters<T['addEventListener']>
+  ...args: [string, (() => void) | null, ...any] | Parameters<T['addEventListener']>
 ): void {
   if (obj && obj.addEventListener) {
     obj.addEventListener(...(args as Parameters<HTMLElement['addEventListener']>))
@@ -17,7 +19,7 @@ function on<T extends Document | EventTarget | HTMLElement | Window>(
 
 function off<T extends Document | EventTarget | HTMLElement | Window>(
   obj: null | T,
-  ...args: [string, Function | null, ...any] | Parameters<T['removeEventListener']>
+  ...args: [string, (() => void) | null, ...any] | Parameters<T['removeEventListener']>
 ): void {
   if (obj && obj.removeEventListener) {
     obj.removeEventListener(...(args as Parameters<HTMLElement['removeEventListener']>))
@@ -72,6 +74,7 @@ export const usePreventLeave = ({
 }) => {
   // check when page is about to be reloaded
   useBeforeUnload(prevent, message)
+  const { startRouteTransition } = useRouteTransition()
 
   const router = useRouter()
   const cancelledURL = useRef<string>('')
@@ -79,21 +82,25 @@ export const usePreventLeave = ({
   // check when page is about to be changed
   useEffect(() => {
     function isAnchorOfCurrentUrl(currentUrl: string, newUrl: string) {
-      const currentUrlObj = new URL(currentUrl)
-      const newUrlObj = new URL(newUrl)
-      // Compare hostname, pathname, and search parameters
-      if (
-        currentUrlObj.hostname === newUrlObj.hostname &&
-        currentUrlObj.pathname === newUrlObj.pathname &&
-        currentUrlObj.search === newUrlObj.search
-      ) {
-        // Check if the new URL is just an anchor of the current URL page
-        const currentHash = currentUrlObj.hash
-        const newHash = newUrlObj.hash
-        return (
-          currentHash !== newHash &&
-          currentUrlObj.href.replace(currentHash, '') === newUrlObj.href.replace(newHash, '')
-        )
+      try {
+        const currentUrlObj = new URL(currentUrl)
+        const newUrlObj = new URL(newUrl)
+        // Compare hostname, pathname, and search parameters
+        if (
+          currentUrlObj.hostname === newUrlObj.hostname &&
+          currentUrlObj.pathname === newUrlObj.pathname &&
+          currentUrlObj.search === newUrlObj.search
+        ) {
+          // Check if the new URL is just an anchor of the current URL page
+          const currentHash = currentUrlObj.hash
+          const newHash = newUrlObj.hash
+          return (
+            currentHash !== newHash &&
+            currentUrlObj.href.replace(currentHash, '') === newUrlObj.href.replace(newHash, '')
+          )
+        }
+      } catch (err) {
+        console.log('Unexpected exception thrown in LeaveWithoutSaving:isAnchorOfCurrentUrl', err)
       }
       return false
     }
@@ -104,6 +111,7 @@ export const usePreventLeave = ({
       }
       return element as HTMLAnchorElement
     }
+
     function handleClick(event: MouseEvent) {
       try {
         const target = event.target as HTMLElement
@@ -113,8 +121,9 @@ export const usePreventLeave = ({
           const newUrl = anchor.href
           const isAnchor = isAnchorOfCurrentUrl(currentUrl, newUrl)
           const isDownloadLink = anchor.download !== ''
+          const isNewTab = anchor.target === '_blank' || event.metaKey || event.ctrlKey
 
-          const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink)
+          const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink || isNewTab)
 
           if (isPageLeaving && prevent && (!onPrevent ? !window.confirm(message) : true)) {
             // Keep a reference of the href
@@ -130,12 +139,14 @@ export const usePreventLeave = ({
           }
         }
       } catch (err) {
-        alert(err)
+        console.log('Unexpected exception thrown in LeaveWithoutSaving:usePreventLeave', err)
       }
     }
 
-    // Add the global click event listener
-    document.addEventListener('click', handleClick, true)
+    if (prevent) {
+      // Add the global click event listener
+      document.addEventListener('click', handleClick, true)
+    }
 
     // Clean up the global click event listener when the component is unmounted
     return () => {
@@ -148,7 +159,8 @@ export const usePreventLeave = ({
       if (onAccept) {
         onAccept()
       }
-      router.push(cancelledURL.current)
+
+      startRouteTransition(() => router.push(cancelledURL.current))
     }
-  }, [hasAccepted, onAccept, router])
+  }, [hasAccepted, onAccept, router, startRouteTransition])
 }

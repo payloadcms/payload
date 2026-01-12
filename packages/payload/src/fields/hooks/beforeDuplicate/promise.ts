@@ -1,14 +1,17 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
+import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
-import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
@@ -16,117 +19,118 @@ type Args<T> = {
   fieldIndex: number
   id?: number | string
   overrideAccess: boolean
-  parentPath: (number | string)[]
-  parentSchemaPath: string[]
+  parentIndexPath: string
+  parentIsLocalized: boolean
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 export const promise = async <T>({
   id,
+  blockData,
   collection,
   context,
   doc,
   field,
   fieldIndex,
   overrideAccess,
+  parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
   siblingDoc,
+  siblingFields,
 }: Args<T>): Promise<void> => {
-  const { localization } = req.payload.config
-
-  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
+  const { indexPath, path, schemaPath } = getFieldPaths({
     field,
     index: fieldIndex,
-    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
-    parentPath: parentPath.join('.'),
-    parentSchemaPath: parentSchemaPath.join('.'),
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
   })
-  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
-  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
-  // Handle unnamed tabs
-  if (field.type === 'tab' && !tabHasName(field)) {
-    await traverseFields({
-      id,
-      collection,
-      context,
-      doc,
-      fields: field.fields,
-      overrideAccess,
-      path: fieldPath,
-      req,
-      schemaPath: fieldSchemaPath,
-      siblingDoc,
-    })
+  const { localization } = req.payload.config
 
-    return
-  }
+  const pathSegments = path ? path.split('.') : []
+  const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (fieldAffectsData(field)) {
-    let fieldData = siblingDoc?.[field.name]
-    const fieldIsLocalized = field.localized && localization
+    let fieldData = siblingDoc?.[field.name!]
+    const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
-    // Run field beforeDuplicate hooks
-    if (Array.isArray(field.hooks?.beforeDuplicate)) {
+    // Run field beforeDuplicate hooks.
+    // These hooks are responsible for resetting the `id` field values of array and block rows. See `baseIDField`.
+    if (Array.isArray('hooks' in field && field.hooks?.beforeDuplicate)) {
       if (fieldIsLocalized) {
-        const localeData = await localization.localeCodes.reduce(
-          async (localizedValuesPromise: Promise<JsonObject>, locale) => {
-            const localizedValues = await localizedValuesPromise
+        const localeData: JsonObject = {}
 
-            const beforeDuplicateArgs: FieldHookArgs = {
-              collection,
-              context,
-              data: doc,
-              field,
-              global: undefined,
-              path: fieldPath,
-              previousSiblingDoc: siblingDoc,
-              previousValue: siblingDoc[field.name]?.[locale],
-              req,
-              schemaPath: parentSchemaPath,
-              siblingData: siblingDoc,
-              siblingDocWithLocales: siblingDoc,
-              value: siblingDoc[field.name]?.[locale],
+        for (const locale of localization.localeCodes) {
+          const beforeDuplicateArgs: FieldHookArgs = {
+            blockData,
+            collection,
+            context,
+            data: doc as Partial<T>,
+            field,
+            global: undefined!,
+            indexPath: indexPathSegments,
+            path: pathSegments,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingDoc[field.name!]?.[locale],
+            req,
+            schemaPath: schemaPathSegments,
+            siblingData: siblingDoc,
+            siblingDocWithLocales: siblingDoc,
+            siblingFields: siblingFields!,
+            value: siblingDoc[field.name!]?.[locale],
+          }
+
+          let hookResult
+          if ('hooks' in field && field.hooks?.beforeDuplicate) {
+            for (const hook of field.hooks.beforeDuplicate) {
+              hookResult = await hook(beforeDuplicateArgs)
             }
+          }
 
-            const hookResult = await runBeforeDuplicateHooks(beforeDuplicateArgs)
-
-            if (typeof hookResult !== 'undefined') {
-              return {
-                ...localizedValues,
-                [locale]: hookResult,
-              }
-            }
-
-            return localizedValuesPromise
-          },
-          Promise.resolve({}),
-        )
-
-        siblingDoc[field.name] = localeData
-      } else {
-        const beforeDuplicateArgs: FieldHookArgs = {
-          collection,
-          context,
-          data: doc,
-          field,
-          global: undefined,
-          path: fieldPath,
-          previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name],
-          req,
-          schemaPath: parentSchemaPath,
-          siblingData: siblingDoc,
-          siblingDocWithLocales: siblingDoc,
-          value: siblingDoc[field.name],
+          if (typeof hookResult !== 'undefined') {
+            localeData[locale] = hookResult
+          }
         }
 
-        const hookResult = await runBeforeDuplicateHooks(beforeDuplicateArgs)
+        siblingDoc[field.name!] = localeData
+      } else {
+        const beforeDuplicateArgs: FieldHookArgs = {
+          blockData,
+          collection,
+          context,
+          data: doc as Partial<T>,
+          field,
+          global: undefined!,
+          indexPath: indexPathSegments,
+          path: pathSegments,
+          previousSiblingDoc: siblingDoc,
+          previousValue: siblingDoc[field.name!]!,
+          req,
+          schemaPath: schemaPathSegments,
+          siblingData: siblingDoc,
+          siblingDocWithLocales: siblingDoc,
+          siblingFields: siblingFields!,
+          value: siblingDoc[field.name!]!,
+        }
+
+        let hookResult
+        if ('hooks' in field && field.hooks?.beforeDuplicate) {
+          for (const hook of field.hooks.beforeDuplicate) {
+            hookResult = await hook(beforeDuplicateArgs)
+          }
+        }
+
         if (typeof hookResult !== 'undefined') {
-          siblingDoc[field.name] = hookResult
+          siblingDoc[field.name!] = hookResult
         }
       }
     }
@@ -136,11 +140,11 @@ export const promise = async <T>({
     // There are only a few different fields where this is possible.
     if (fieldIsLocalized) {
       if (typeof fieldData !== 'object' || fieldData === null) {
-        siblingDoc[field.name] = {}
-        fieldData = siblingDoc[field.name]
+        siblingDoc[field.name!] = {}
+        fieldData = siblingDoc[field.name!]
       }
 
-      const promises = []
+      const promises: Promise<void>[] = []
 
       localization.localeCodes.forEach((locale) => {
         if (fieldData[locale]) {
@@ -149,49 +153,62 @@ export const promise = async <T>({
               const rows = fieldData[locale]
 
               if (Array.isArray(rows)) {
-                const promises = []
-                rows.forEach((row, i) => {
+                const promises: Promise<void>[] = []
+
+                rows.forEach((row, rowIndex) => {
                   promises.push(
                     traverseFields({
                       id,
+                      blockData,
                       collection,
                       context,
                       doc,
                       fields: field.fields,
                       overrideAccess,
-                      path: [...fieldPath, i],
+                      parentIndexPath: '',
+                      parentIsLocalized: parentIsLocalized || field.localized!,
+                      parentPath: path + '.' + rowIndex,
+                      parentSchemaPath: schemaPath,
                       req,
-                      schemaPath: fieldSchemaPath,
                       siblingDoc: row,
                     }),
                   )
                 })
               }
+
               break
             }
+
             case 'blocks': {
               const rows = fieldData[locale]
 
               if (Array.isArray(rows)) {
-                const promises = []
-                rows.forEach((row, i) => {
+                const promises: Promise<void>[] = []
+
+                rows.forEach((row, rowIndex) => {
                   const blockTypeToMatch = row.blockType
 
-                  const block = field.blocks.find(
-                    (blockType) => blockType.slug === blockTypeToMatch,
-                  )
+                  const block: Block | undefined =
+                    req.payload.blocks[blockTypeToMatch] ??
+                    ((field.blockReferences ?? field.blocks).find(
+                      (curBlock) =>
+                        typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+                    ) as Block | undefined)
 
                   promises.push(
                     traverseFields({
                       id,
+                      blockData: row,
                       collection,
                       context,
                       doc,
-                      fields: block.fields,
+                      fields: block!.fields,
                       overrideAccess,
-                      path: [...fieldPath, i],
+                      parentIndexPath: '',
+                      parentIsLocalized: parentIsLocalized || field.localized!,
+                      parentPath: path + '.' + rowIndex,
+                      parentSchemaPath: schemaPath + '.' + block!.slug,
                       req,
-                      schemaPath: fieldSchemaPath,
                       siblingDoc: row,
                     }),
                   )
@@ -201,19 +218,21 @@ export const promise = async <T>({
             }
 
             case 'group':
-
             case 'tab': {
               promises.push(
                 traverseFields({
                   id,
+                  blockData,
                   collection,
                   context,
                   doc,
                   fields: field.fields,
                   overrideAccess,
-                  path: fieldSchemaPath,
+                  parentIndexPath: '',
+                  parentIsLocalized: parentIsLocalized || field.localized!,
+                  parentPath: path,
+                  parentSchemaPath: schemaPath,
                   req,
-                  schemaPath: fieldSchemaPath,
                   siblingDoc: fieldData[locale],
                 }),
               )
@@ -234,35 +253,48 @@ export const promise = async <T>({
           const rows = siblingDoc[field.name]
 
           if (Array.isArray(rows)) {
-            const promises = []
-            rows.forEach((row, i) => {
+            const promises: Promise<void>[] = []
+
+            rows.forEach((row, rowIndex) => {
               promises.push(
                 traverseFields({
                   id,
+                  blockData,
                   collection,
                   context,
                   doc,
                   fields: field.fields,
                   overrideAccess,
-                  path: [...fieldPath, i],
+                  parentIndexPath: '',
+                  parentIsLocalized: parentIsLocalized || field.localized!,
+                  parentPath: path + '.' + rowIndex,
+                  parentSchemaPath: schemaPath,
                   req,
-                  schemaPath: fieldSchemaPath,
                   siblingDoc: row,
                 }),
               )
             })
+
             await Promise.all(promises)
           }
+
           break
         }
+
         case 'blocks': {
           const rows = siblingDoc[field.name]
 
           if (Array.isArray(rows)) {
-            const promises = []
-            rows.forEach((row, i) => {
+            const promises: Promise<void>[] = []
+
+            rows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
-              const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+              const block: Block | undefined =
+                req.payload.blocks[blockTypeToMatch] ??
+                ((field.blockReferences ?? field.blocks).find(
+                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+                ) as Block | undefined)
 
               if (block) {
                 ;(row as JsonObject).blockType = blockTypeToMatch
@@ -270,45 +302,76 @@ export const promise = async <T>({
                 promises.push(
                   traverseFields({
                     id,
+                    blockData: row,
                     collection,
                     context,
                     doc,
                     fields: block.fields,
                     overrideAccess,
-                    path: [...fieldPath, i],
+                    parentIndexPath: '',
+                    parentIsLocalized: parentIsLocalized || field.localized!,
+                    parentPath: path + '.' + rowIndex,
+                    parentSchemaPath: schemaPath + '.' + block.slug,
                     req,
-                    schemaPath: fieldSchemaPath,
                     siblingDoc: row,
                   }),
                 )
               }
             })
+
             await Promise.all(promises)
           }
 
           break
         }
 
-        case 'group':
-
-        case 'tab': {
+        case 'group': {
           if (typeof siblingDoc[field.name] !== 'object') {
             siblingDoc[field.name] = {}
           }
 
-          const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+          const groupDoc = siblingDoc[field.name] as JsonObject
 
           await traverseFields({
             id,
+            blockData,
             collection,
             context,
             doc,
             fields: field.fields,
             overrideAccess,
-            path: fieldPath,
+            parentIndexPath: '',
+            parentIsLocalized: parentIsLocalized || field.localized!,
+            parentPath: path,
+            parentSchemaPath: schemaPath,
             req,
-            schemaPath: fieldSchemaPath,
-            siblingDoc: groupDoc as JsonObject,
+            siblingDoc: groupDoc,
+          })
+
+          break
+        }
+
+        case 'tab': {
+          if (typeof siblingDoc[field.name!] !== 'object') {
+            siblingDoc[field.name!] = {}
+          }
+
+          const tabDoc = siblingDoc[field.name!] as JsonObject
+
+          await traverseFields({
+            id,
+            blockData,
+            collection,
+            context,
+            doc,
+            fields: field.fields,
+            overrideAccess,
+            parentIndexPath: '',
+            parentIsLocalized: parentIsLocalized || field.localized!,
+            parentPath: path,
+            parentSchemaPath: schemaPath,
+            req,
+            siblingDoc: tabDoc,
           })
 
           break
@@ -316,20 +379,47 @@ export const promise = async <T>({
       }
     }
   } else {
-    // Finally, we traverse fields which do not affect data here
+    // Finally, we traverse fields which do not affect data here - collapsibles, rows, unnamed groups
     switch (field.type) {
       case 'collapsible':
+      case 'group':
       case 'row': {
         await traverseFields({
           id,
+          blockData,
           collection,
           context,
           doc,
           fields: field.fields,
           overrideAccess,
-          path: fieldPath,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
           req,
-          schemaPath: fieldSchemaPath,
+          siblingDoc,
+        })
+
+        break
+      }
+
+      // Unnamed Tab
+      // @ts-expect-error `fieldAffectsData` inferred return type doesn't account for TabAsField
+      case 'tab': {
+        await traverseFields({
+          id,
+          blockData,
+          collection,
+          context,
+          doc,
+          // @ts-expect-error `fieldAffectsData` inferred return type doesn't account for TabAsField
+          fields: field.fields,
+          overrideAccess,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          req,
           siblingDoc,
         })
 
@@ -339,14 +429,17 @@ export const promise = async <T>({
       case 'tabs': {
         await traverseFields({
           id,
+          blockData,
           collection,
           context,
           doc,
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           overrideAccess,
-          path: fieldPath,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
           req,
-          schemaPath: fieldSchemaPath,
           siblingDoc,
         })
 

@@ -9,8 +9,8 @@
   h4,
   h5,
   h6 {
-    font-size: auto;
-    font-weight: auto;
+    font-size: unset;
+    font-weight: unset;
   }
 
   :root {
@@ -38,7 +38,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 240 6% 90%;
+    --border: 240 6% 80%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
@@ -53,7 +53,7 @@
     --background: 0 0% 0%;
     --foreground: 210 40% 98%;
 
-    --card: 240 6% 10%;
+    --card: 0 0% 4%;
     --card-foreground: 210 40% 98%;
 
     --popover: 222.2 84% 4.9%;
@@ -74,7 +74,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 240 4% 16%;
+    --border: 0, 0%, 15%, 0.8;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
@@ -89,7 +89,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-[100vh] flex flex-col;
   }
 }
 

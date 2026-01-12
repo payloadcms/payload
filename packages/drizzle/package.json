@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "3.0.0-beta.130",
+  "version": "3.70.0",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -29,31 +30,36 @@
       "types": "./src/exports/postgres.ts",
       "default": "./src/exports/postgres.ts"
     },
+    "./sqlite": {
+      "import": "./src/exports/sqlite.ts",
+      "types": "./src/exports/sqlite.ts",
+      "default": "./src/exports/sqlite.ts"
+    },
     "./types": {
-      "import": "./src/types.ts",
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts",
+      "default": "./src/exports/types-deprecated.ts"
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "console-table-printer": "2.12.1",
-    "drizzle-orm": "0.36.1",
+    "dequal": "2.0.3",
+    "drizzle-orm": "0.44.7",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"
@@ -80,10 +86,15 @@
         "types": "./dist/exports/postgres.d.ts",
         "default": "./dist/exports/postgres.js"
       },
+      "./sqlite": {
+        "import": "./dist/exports/sqlite.js",
+        "types": "./dist/exports/sqlite.d.ts",
+        "default": "./dist/exports/sqlite.js"
+      },
       "./types": {
-        "import": "./dist/types.js",
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "import": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts",
+        "default": "./dist/exports/types-deprecated.js"
       }
     },
     "main": "./dist/index.js",

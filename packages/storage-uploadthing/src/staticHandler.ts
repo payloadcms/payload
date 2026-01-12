@@ -9,46 +9,61 @@ type Args = {
 }
 
 export const getHandler = ({ utApi }: Args): StaticHandler => {
-  return async (req, { doc, params: { collection, filename } }) => {
+  return async (
+    req,
+    { doc, headers: incomingHeaders, params: { clientUploadContext, collection, filename } },
+  ) => {
     try {
+      let key: string
       const collectionConfig = req.payload.collections[collection]?.config
-      let retrievedDoc = doc
 
-      if (!retrievedDoc) {
-        const or: Where[] = [
-          {
-            filename: {
-              equals: filename,
-            },
-          },
-        ]
+      if (
+        clientUploadContext &&
+        typeof clientUploadContext === 'object' &&
+        'key' in clientUploadContext &&
+        typeof clientUploadContext.key === 'string'
+      ) {
+        key = clientUploadContext.key
+      } else {
+        let retrievedDoc = doc
 
-        if (collectionConfig.upload.imageSizes) {
-          collectionConfig.upload.imageSizes.forEach(({ name }) => {
-            or.push({
-              [`sizes.${name}.filename`]: {
+        if (!retrievedDoc) {
+          const or: Where[] = [
+            {
+              filename: {
                 equals: filename,
               },
+            },
+          ]
+
+          if (collectionConfig?.upload.imageSizes) {
+            collectionConfig.upload.imageSizes.forEach(({ name }) => {
+              or.push({
+                [`sizes.${name}.filename`]: {
+                  equals: filename,
+                },
+              })
             })
+          }
+
+          const result = await req.payload.db.findOne({
+            collection,
+            req,
+            where: { or },
           })
+
+          if (result) {
+            retrievedDoc = result
+          }
         }
 
-        const result = await req.payload.db.findOne({
-          collection,
-          req,
-          where: { or },
-        })
-
-        if (result) {
-          retrievedDoc = result
+        if (!retrievedDoc) {
+          return new Response(null, { status: 404, statusText: 'Not Found' })
         }
+
+        key = getKeyFromFilename(retrievedDoc, filename)!
       }
 
-      if (!retrievedDoc) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-
-      const key = getKeyFromFilename(retrievedDoc, filename)
       if (!key) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
@@ -67,11 +82,35 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
 
       const blob = await response.blob()
 
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+      const objectEtag = response.headers.get('etag')
+
+      let headers = new Headers(incomingHeaders)
+
+      headers.append('Content-Length', String(blob.size))
+      headers.append('Content-Type', blob.type)
+
+      if (objectEtag) {
+        headers.append('ETag', objectEtag)
+      }
+
+      if (
+        collectionConfig?.upload &&
+        typeof collectionConfig.upload === 'object' &&
+        typeof collectionConfig.upload.modifyResponseHeaders === 'function'
+      ) {
+        headers = collectionConfig.upload.modifyResponseHeaders({ headers }) || headers
+      }
+
+      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        return new Response(null, {
+          headers,
+          status: 304,
+        })
+      }
+
       return new Response(blob, {
-        headers: new Headers({
-          'Content-Length': String(blob.size),
-          'Content-Type': blob.type,
-        }),
+        headers,
         status: 200,
       })
     } catch (err) {

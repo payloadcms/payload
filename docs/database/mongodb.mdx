@@ -1,7 +1,7 @@
 ---
 title: MongoDB
 label: MongoDB
-order: 40
+order: 50
 desc: Payload has supported MongoDB natively since we started. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
 keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -23,21 +23,29 @@ export default buildConfig({
   db: mongooseAdapter({
     // Mongoose-specific arguments go here.
     // URL is required.
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
   }),
 })
 ```
 
 ## Options
 
-| Option               | Description |
-| -------------------- | ----------- |
-| `autoPluralization`  | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s. |
-| `connectOptions`     | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose. |
-| `disableIndexHints`  | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false |
-| `migrationDir`       | Customize the directory that migrations are stored. |
-| `transactionOptions` | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions. |
-| `collation`          | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
+| Option                       | Description                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autoPluralization`          | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s.                                                                                                                                                                                         |
+| `connectOptions`             | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.                                                        |
+| `collectionsSchemaOptions`   | Customize Mongoose schema options for collections.                                                                                                                                                                                                                                                           |
+| `disableIndexHints`          | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false                |
+| `migrationDir`               | Customize the directory that migrations are stored.                                                                                                                                                                                                                                                          |
+| `transactionOptions`         | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions.                                                                                                                                |
+| `collation`                  | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
+| `allowAdditionalKeys`        | By default, Payload strips all additional keys from MongoDB data that don't exist in the Payload schema. If you have some data that you want to include to the result but it doesn't exist in Payload, you can set this to `true`. Be careful as Payload access control _won't_ work for this data.          |
+| `allowIDOnCreate`            | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                                                                                                                                   |
+| `disableFallbackSort`        | Set to `true` to disable the adapter adding a fallback sort when sorting by non-unique fields, this can affect performance in some cases but it ensures a consistent order of results.                                                                                                                       |
+| `useAlternativeDropDatabase` | Set to `true` to use an alternative `dropDatabase` implementation that calls `collection.deleteMany({})` on every collection instead of sending a raw `dropDatabase` command. Payload only uses `dropDatabase` for testing purposes. Defaults to `false`.                                                    |
+| `useBigIntForNumberIDs`      | Set to `true` to use `BigInt` for custom ID fields of type `'number'`. Useful for databases that don't support `double` or `int32` IDs. Defaults to `false`.                                                                                                                                                 |
+| `useJoinAggregations`        | Set to `false` to disable join aggregations (which use correlated subqueries) and instead populate join fields via multiple `find` queries. Defaults to `true`.                                                                                                                                              |
+| `usePipelineInSortLookup`    | Set to `false` to disable the use of `pipeline` in the `$lookup` aggregation in sorting. Defaults to `true`.                                                                                                                                                                                                 |
 
 ## Access to Mongoose models
 
@@ -49,3 +57,59 @@ You can access Mongoose models as follows:
 - Collection models - `payload.db.collections[myCollectionSlug]`
 - Globals model - `payload.db.globals`
 - Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
+
+## Using other MongoDB implementations
+
+You can import the `compatibilityOptions` object to get the recommended settings for other MongoDB implementations. Since these databases aren't officially supported by payload, you may still encounter issues even with these settings (please create an issue or PR if you believe these options should be updated):
+
+```ts
+import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL,
+    // For example, if you're using firestore:
+    ...compatibilityOptions.firestore,
+  }),
+})
+```
+
+We export compatibility options for [DocumentDB](https://aws.amazon.com/documentdb/), [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db) and [Firestore](https://cloud.google.com/firestore/mongodb-compatibility/docs/overview). Known limitations:
+
+- Azure Cosmos DB does not support transactions that update two or more documents in different collections, which is a common case when using Payload (via hooks).
+- Azure Cosmos DB requires the root config property `indexSortableFields` to be set to `true`.
+
+## Using collation
+
+There are situations where you may want to use language-specific string comparison, for example when sorting strings with accents or in different languages. MongoDB supports this via [collation](https://www.mongodb.com/docs/manual/reference/collation/).
+
+We thread your locale automatically through to the MongoDB queries when collation is enabled in the adapter, so that when you sort by a field, it uses the correct language rules for that locale.
+
+To enable collation, set the `collation` option in the adapter configuration:
+
+```ts
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the Mongoose adapter here
+  db: mongooseAdapter({
+    // Mongoose-specific arguments go here.
+    // URL is required.
+    url: process.env.DATABASE_URL,
+    collation: {
+      // Set any MongoDB collation options here.
+      // The locale will be set automatically based on the request locale.
+      strength: 1, // Example option
+    },
+  }),
+})
+```
+
+<Banner type="warning">
+  Collation will affect things like sort based on the locale being used. Please
+  test thoroughly before using in production as it can affect your queries.
+</Banner>

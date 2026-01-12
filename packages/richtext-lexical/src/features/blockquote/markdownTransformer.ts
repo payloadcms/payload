@@ -1,7 +1,6 @@
-import type { ElementTransformer } from '@lexical/markdown'
-
 import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
-import { $createLineBreakNode } from 'lexical'
+
+import type { ElementTransformer } from '../../packages/@lexical/markdown/index.js'
 
 export const MarkdownTransformer: ElementTransformer = {
   type: 'element',
@@ -23,10 +22,7 @@ export const MarkdownTransformer: ElementTransformer = {
     if (isImport) {
       const previousNode = parentNode.getPreviousSibling()
       if ($isQuoteNode(previousNode)) {
-        previousNode.splice(previousNode.getChildrenSize(), 0, [
-          $createLineBreakNode(),
-          ...children,
-        ])
+        previousNode.splice(previousNode.getChildrenSize(), 0, [...children])
         previousNode.select(0, 0)
         parentNode.remove()
         return

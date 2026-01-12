@@ -30,6 +30,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const ItalicFeatureClient = createClientFeature({
+  enableFormats: ['italic'],
   markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
   toolbarFixed: {
     groups: toolbarGroups,

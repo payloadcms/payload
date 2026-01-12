@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
@@ -9,6 +10,12 @@ function hasKey<T, K extends string>(
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)
 }
 
+const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
+  'Cell',
+  'Description',
+  'Field',
+  'Filter',
+]
 export function genImportMapIterateFields({
   addToImportMap,
   baseDir,
@@ -39,7 +46,7 @@ export function genImportMapIterateFields({
         addToImportMap,
         baseDir,
         config,
-        fields: field.blocks,
+        fields: field.blocks.filter((block) => typeof block !== 'string'),
         importMap,
         imports,
       })
@@ -67,9 +74,23 @@ export function genImportMapIterateFields({
           imports,
         })
       }
+    } else if (field.type === 'ui') {
+      if (field?.admin?.components) {
+        // Render any extra, untyped components
+        for (const key in field.admin.components) {
+          if (key in defaultUIFieldComponentKeys) {
+            continue
+          }
+          addToImportMap(field.admin.components[key])
+        }
+      }
     }
 
+    hasKey(field?.admin, 'jsx') && addToImportMap(field.admin.jsx) // For Blocks
+
     hasKey(field?.admin?.components, 'Label') && addToImportMap(field.admin.components.Label)
+
+    hasKey(field?.admin?.components, 'Block') && addToImportMap(field.admin.components.Block)
 
     hasKey(field?.admin?.components, 'Cell') && addToImportMap(field?.admin?.components?.Cell)
 
@@ -89,5 +110,7 @@ export function genImportMapIterateFields({
 
     hasKey(field?.admin?.components, 'RowLabel') &&
       addToImportMap(field?.admin?.components?.RowLabel)
+
+    hasKey(field?.admin?.components, 'Diff') && addToImportMap(field?.admin?.components?.Diff)
   }
 }

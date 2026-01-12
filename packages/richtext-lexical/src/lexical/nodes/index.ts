@@ -1,5 +1,6 @@
 import type { Klass, LexicalNode, LexicalNodeReplacement } from 'lexical'
 
+import type { NodeWithHooks } from '../../features/typesServer.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
 export function getEnabledNodes({
@@ -7,7 +8,17 @@ export function getEnabledNodes({
 }: {
   editorConfig: SanitizedClientEditorConfig | SanitizedServerEditorConfig
 }): Array<Klass<LexicalNode> | LexicalNodeReplacement> {
-  return editorConfig.features.nodes.map((node) => {
+  return getEnabledNodesFromServerNodes({
+    nodes: editorConfig.features.nodes,
+  })
+}
+
+export function getEnabledNodesFromServerNodes({
+  nodes,
+}: {
+  nodes: Array<Klass<LexicalNode> | LexicalNodeReplacement> | Array<NodeWithHooks>
+}): Array<Klass<LexicalNode> | LexicalNodeReplacement> {
+  return nodes.map((node) => {
     if ('node' in node) {
       return node.node
     }

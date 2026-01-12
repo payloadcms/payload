@@ -1,18 +1,324 @@
 ---
-title: Overview
+description: The Payload editor, based on Lexical, allows for great customization with unparalleled ease.
+keywords: lexical, rich text, editor, headless cms
 label: Overview
 order: 10
-desc: Rich Text within Payload is extremely powerful. We've combined the beauty of the Medium editor with the power of the Notion editor all in one place.
-keywords: slatejs, lexical, rich text, json, custom editor, javascript, typescript
+title: Rich Text Editor
 ---
 
-Payload currently supports two official rich text editors and you can choose either one depending on your needs.
+<Banner type="success">
 
-1. [SlateJS](/docs/rich-text/slate) - stable, backwards-compatible with 1.0
-2. [Lexical](/docs/lexical/overview) - beta, where things will be moving in the future
+This documentation is about our new editor, based on Lexical (Meta's rich text editor). The previous default
+editor, based on Slate, has been deprecated and will be removed in 4.0. You can read [its documentation](/docs/rich-text/slate),
+or the [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
 
-These editors are built on an "adapter pattern" which means that you will need to install the editor you'd like to use. Take a look at the docs for the editor you'd like to use for instructions on how to install it.
+</Banner>
 
-The big TL;DR here is that Slate is what we have used in the past, and we still support it for existing projects, but if you're building something new and you're feeling adventurous, you should give Lexical a shot. Slate has a lot of good stuff, but Lexical has lots more.
+The editor is the most important property of the [rich text field](/docs/fields/rich-text).
 
-No matter which editor you use, you have to install it at the top-level on the `config.editor` property, which will then cascade throughout all of your rich text fields and be used accordingly. Additionally, you also have the option to override the editor on a field-by-field basis if you'd like.
+As a key part of Payload, we are proud to offer you the best editing experience you can imagine. With healthy
+defaults out of the box, but also with the flexibility to customize every detail: from the “/” menu
+and toolbars (whether inline or fixed) to inserting any component or subfield you can imagine.
+
+To use the rich text editor, first you need to install it:
+
+```bash
+pnpm install @payloadcms/richtext-lexical
+```
+
+Once you have it installed, you can pass it to your top-level Payload Config as follows:
+
+```ts
+import { buildConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export default buildConfig({
+  collections: [
+    // your collections here
+  ],
+  // Pass the Lexical editor to the root config
+  editor: lexicalEditor({}),
+})
+```
+
+You can also override Lexical settings on a field-by-field basis as follows:
+
+```ts
+import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      // Pass the Lexical editor here and override base settings as necessary
+      editor: lexicalEditor({}),
+    },
+  ],
+}
+```
+
+## Extending the lexical editor with Features
+
+Lexical has been designed with extensibility in mind. Whether you're aiming to introduce new functionalities or tweak the existing ones, Lexical makes it seamless for you to bring those changes to life.
+
+### Features: The Building Blocks
+
+At the heart of Lexical's customization potential are "features". While Lexical ships with a set of default features we believe are essential for most use cases, the true power lies in your ability to redefine, expand, or prune these as needed.
+
+If you remove all the default features, you're left with a blank editor. You can then add in only the features you need, or you can build your own custom features from scratch.
+
+### Integrating New Features
+
+To weave in your custom features, utilize the `features` prop when initializing the Lexical Editor. Here's a basic example of how this is done:
+
+```ts
+import {
+  BlocksFeature,
+  LinkFeature,
+  UploadFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+import { Banner } from '../blocks/Banner'
+import { CallToAction } from '../blocks/CallToAction'
+
+{
+  editor: lexicalEditor({
+    features: ({ defaultFeatures, rootFeatures }) => [
+      ...defaultFeatures,
+      LinkFeature({
+        // Example showing how to customize the built-in fields
+        // of the Link feature
+        fields: ({ defaultFields }) => [
+          ...defaultFields,
+          {
+            name: 'rel',
+            label: 'Rel Attribute',
+            type: 'select',
+            hasMany: true,
+            options: ['noopener', 'noreferrer', 'nofollow'],
+            admin: {
+              description:
+                'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+            },
+          },
+        ],
+      }),
+      UploadFeature({
+        collections: {
+          uploads: {
+            // Example showing how to customize the built-in fields
+            // of the Upload feature
+            fields: [
+              {
+                name: 'caption',
+                type: 'richText',
+                editor: lexicalEditor(),
+              },
+            ],
+          },
+        },
+      }),
+      // This is incredibly powerful. You can reuse your Payload blocks
+      // directly in the Lexical editor as follows:
+      BlocksFeature({
+        blocks: [Banner, CallToAction],
+      }),
+    ],
+  })
+}
+```
+
+`features` can be both an array of features, or a function returning an array of features. The function provides the following props:
+
+| Prop                  | Description                                                                                                                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`defaultFeatures`** | This opinionated array contains all "recommended" default features. You can see which features are included in the default features in the table below.                                                                                                |
+| **`rootFeatures`**    | This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts). If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty. |
+
+## Official Features
+
+You can find more information about the official features in our [official features docs](../rich-text/official-features).
+
+## Creating your own, custom Feature
+
+You can find more information about creating your own feature in our [building custom feature docs](../rich-text/custom-features).
+
+## TypeScript
+
+Every single piece of saved data is 100% fully typed within lexical. It provides a type for every single node, which can be imported from `@payloadcms/richtext-lexical` - each type is prefixed with `Serialized`, e.g., `SerializedUploadNode`.
+
+To fully type the entire editor JSON, you can use our `TypedEditorState` helper type, which accepts a union of all possible node types as a generic. We don't provide a type that already contains all possible node types because they depend on which features you have enabled in your editor. Here is an example:
+
+```ts
+import type {
+  SerializedAutoLinkNode,
+  SerializedBlockNode,
+  SerializedHorizontalRuleNode,
+  SerializedLinkNode,
+  SerializedListItemNode,
+  SerializedListNode,
+  SerializedParagraphNode,
+  SerializedQuoteNode,
+  SerializedRelationshipNode,
+  SerializedTextNode,
+  SerializedUploadNode,
+  TypedEditorState,
+  SerializedHeadingNode,
+} from '@payloadcms/richtext-lexical'
+
+const editorState: TypedEditorState<
+  | SerializedAutoLinkNode
+  | SerializedBlockNode
+  | SerializedHorizontalRuleNode
+  | SerializedLinkNode
+  | SerializedListItemNode
+  | SerializedListNode
+  | SerializedParagraphNode
+  | SerializedQuoteNode
+  | SerializedRelationshipNode
+  | SerializedTextNode
+  | SerializedUploadNode
+  | SerializedHeadingNode
+> = {
+  root: {
+    type: 'root',
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Some text. Every property here is fully-typed',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        textFormat: 0,
+        version: 1,
+      },
+    ],
+  },
+}
+```
+
+Alternatively, you can use the `DefaultTypedEditorState` type, which includes all types for all nodes included in the `defaultFeatures`:
+
+```ts
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+
+const editorState: DefaultTypedEditorState = {
+  root: {
+    type: 'root',
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Some text. Every property here is fully-typed',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        textFormat: 0,
+        version: 1,
+      },
+    ],
+  },
+}
+```
+
+Just like `TypedEditorState`, the `DefaultTypedEditorState` also accepts an optional node type union as a generic. Here, this would **add** the specified node types to the default ones. Example:
+
+```ts
+DefaultTypedEditorState<SerializedBlockNode | YourCustomSerializedNode>
+```
+
+This is a type-safe representation of the editor state. If you look at the auto suggestions of a node's `type` property, you will see all the possible node types you can use.
+
+Make sure to only use types exported from `@payloadcms/richtext-lexical`, not from the lexical core packages. We only have control over the types we export and can make sure they're correct, even though the lexical core may export types with identical names.
+
+### Automatic type generation
+
+Lexical does not generate accurate type definitions for your richText fields for you yet - this will be improved in the future. Currently, it only outputs the rough shape of the editor JSON, which you can enhance using type assertions.
+
+## Admin customization
+
+The Rich Text Field editor configuration has an `admin` property with the following options:
+
+| Property                        | Description                                                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **`placeholder`**               | Set this property to define a placeholder string for the field.                                             |
+| **`hideGutter`**                | Set this property to `true` to hide this field's gutter within the Admin Panel.                             |
+| **`hideInsertParagraphAtEnd`**  | Set this property to `true` to hide the "+" button that appears at the end of the editor.                   |
+| **`hideDraggableBlockElement`** | Set this property to `true` to hide the draggable element that appears when you hover a node in the editor. |
+| **`hideAddBlockButton`**        | Set this property to `true` to hide the "+" button that appears when you hover a node in the editor.        |
+
+### Disable the gutter
+
+You can disable the gutter (the vertical line padding between the editor and the left edge of the screen) by setting the `hideGutter` prop to `true`:
+
+```ts
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    admin: {
+      hideGutter: true
+    },
+  }),
+}
+```
+
+### Customize the placeholder
+
+You can customize the placeholder (the text that appears in the editor when it's empty) by setting the `placeholder` prop:
+
+```ts
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    admin: {
+      placeholder: 'Type your content here...'
+    },
+  }),
+}
+```
+
+## Detecting empty editor state
+
+When you first type into a rich text field and subsequently delete everything through the admin panel, its value changes from `null` to a JSON object containing an empty paragraph.
+
+If needed, you can reset the field value to `null` programmatically - for example, by using a custom hook to detect when the editor is empty.
+
+This also applies to fields like `text` and `textArea`, which could be stored as either `null` or an empty value in the database. Since the empty value for richText is a JSON object, checking for emptiness is a bit more involved - so Payload provides a utility for it:
+
+```ts
+import { hasText } from '@payloadcms/richtext-lexical/shared'
+
+hasText(richtextData)
+```

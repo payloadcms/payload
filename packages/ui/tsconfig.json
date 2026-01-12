@@ -1,33 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true, // Make sure typescript knows that this module depends on their references
-    "noEmit": false /* Do not emit outputs. */,
-    "emitDeclarationOnly": true,
-    "esModuleInterop": true,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */
+    /* TODO: remove the following lines */
+    "strict": false,
   },
-  "exclude": [
-    "dist",
-    "build",
-    "tests",
-    "test",
-    "node_modules",
-    "eslint.config.js",
-    "src/**/*.spec.js",
-    "src/**/*.spec.jsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx"
-  ],
-  "include": [
-    "src/scss/app.scss",
-    "src/**/*.png",
-    "src/**/*.svg",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
-    "src/**/*.json"
-  ],
   "references": [{ "path": "../payload" }, { "path": "../translations" }]
 }

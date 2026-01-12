@@ -6,28 +6,100 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     uploads: Upload;
+    'uploads-two': UploadsTwo;
     posts: Post;
     users: User;
     'hidden-collection': HiddenCollection;
+    'not-in-view-collection': NotInViewCollection;
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
+    'reorder-tabs': ReorderTab;
     'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
     'group-one-collection-twos': GroupOneCollectionTwo;
     'group-two-collection-ones': GroupTwoCollectionOne;
     'group-two-collection-twos': GroupTwoCollectionTwo;
     geo: Geo;
-    customIdTab: CustomIdTab;
-    customIdRow: CustomIdRow;
+    array: Array;
     'disable-duplicate': DisableDuplicate;
+    'disable-copy-to-locale': DisableCopyToLocale;
+    'edit-menu-items': EditMenuItem;
+    'format-doc-url': FormatDocUrl;
     'base-list-filters': BaseListFilter;
+    with300documents: With300Document;
+    'with-list-drawer': WithListDrawer;
+    placeholder: Placeholder;
+    'use-as-title-group-field': UseAsTitleGroupField;
+    'disable-bulk-edit': DisableBulkEdit;
+    'custom-list-drawer': CustomListDrawer;
+    'list-view-select-api': ListViewSelectApi;
+    virtuals: Virtual;
+    'no-timestamps': NoTimestamp;
+    localized: Localized;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -35,22 +107,38 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
+    'uploads-two': UploadsTwoSelect<false> | UploadsTwoSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
+    'not-in-view-collection': NotInViewCollectionSelect<false> | NotInViewCollectionSelect<true>;
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
+    'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
     'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
     'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
     'group-two-collection-ones': GroupTwoCollectionOnesSelect<false> | GroupTwoCollectionOnesSelect<true>;
     'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
     geo: GeoSelect<false> | GeoSelect<true>;
-    customIdTab: CustomIdTabSelect<false> | CustomIdTabSelect<true>;
-    customIdRow: CustomIdRowSelect<false> | CustomIdRowSelect<true>;
+    array: ArraySelect<false> | ArraySelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
+    'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
+    'edit-menu-items': EditMenuItemsSelect<false> | EditMenuItemsSelect<true>;
+    'format-doc-url': FormatDocUrlSelect<false> | FormatDocUrlSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
+    with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
+    'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
+    placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
+    'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
+    'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
+    'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
+    'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
+    virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
+    'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
+    localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -58,8 +146,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globals: {
     'hidden-global': HiddenGlobal;
+    'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
     global: Global;
     'custom-global-views-one': CustomGlobalViewsOne;
@@ -70,6 +160,7 @@ export interface Config {
   };
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
+    'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
     'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
@@ -82,9 +173,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -123,8 +214,39 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-two".
+ */
+export interface UploadsTwo {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This is a custom collection description.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -138,12 +260,38 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
-  group?: {
-    title?: string | null;
+  someTextField?: string | null;
+  namedGroup?: {
+    someTextField?: string | null;
   };
+  textFieldInUnnamedGroup?: string | null;
+  groupWithCustomCell?: {
+    nestedTextFieldInGroupWithCustomCell?: string | null;
+  };
+  namedTab?: {
+    nestedTextFieldInNamedTab?: string | null;
+  };
+  nestedTextFieldInUnnamedTab?: string | null;
   relationship?: (string | null) | Post;
+  users?: (string | null) | User;
   customCell?: string | null;
+  upload?: (string | null) | Upload;
+  hiddenField?: string | null;
+  adminHiddenField?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
+  /**
+   * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
+   */
   sidebarField?: string | null;
+  wavelengths?: ('fm' | 'am') | null;
+  selectField?: ('option1' | 'option2')[] | null;
+  file?: string | null;
+  noReadAccessField?: string | null;
+  disableListColumnTextInRow?: string | null;
+  someGroup?: {
+    disableListColumnTextInGroup?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -165,6 +313,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -172,6 +327,16 @@ export interface User {
  * via the `definition` "hidden-collection".
  */
 export interface HiddenCollection {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-collection".
+ */
+export interface NotInViewCollection {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -208,16 +373,52 @@ export interface CustomViewsTwo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reorder-tabs".
+ */
+export interface ReorderTab {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-fields".
  */
 export interface CustomField {
   id: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
+  /**
+   * Static field description.
+   */
   descriptionAsString?: string | null;
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
+  customSelectInput?: string | null;
+  customMultiSelectField?: string[] | null;
+  relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
+  arrayFieldWithBeforeAfterInputs?:
+    | {
+        someTextField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksFieldWithBeforeAfterInputs?:
+    | {
+        textField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockFields';
+      }[]
+    | null;
+  text?: string | null;
+  groupFieldWithBeforeAfterInputs?: {
+    textOne?: string | null;
+    textTwo?: string | null;
+  };
+  radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -277,25 +478,16 @@ export interface Geo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab".
+ * via the `definition` "array".
  */
-export interface CustomIdTab {
-  id: string | null;
-  title?: string | null;
-  description?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow".
- */
-export interface CustomIdRow {
-  id: string | null;
-  title?: string | null;
-  description?: string | null;
-  number?: number | null;
+export interface Array {
+  id: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -311,6 +503,39 @@ export interface DisableDuplicate {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-copy-to-locale".
+ */
+export interface DisableCopyToLocale {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-menu-items".
+ */
+export interface EditMenuItem {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "format-doc-url".
+ */
+export interface FormatDocUrl {
+  id: string;
+  title: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
@@ -318,6 +543,132 @@ export interface BaseListFilter {
   title?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with300documents".
+ */
+export interface With300Document {
+  id: string;
+  text?: string | null;
+  selfRelation?: (string | null) | With300Document;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-list-drawer".
+ */
+export interface WithListDrawer {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  number?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "placeholder".
+ */
+export interface Placeholder {
+  id: string;
+  defaultSelect?: 'option1' | null;
+  placeholderSelect?: 'option1' | null;
+  defaultRelationship?: (string | null) | Post;
+  placeholderRelationship?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "use-as-title-group-field".
+ */
+export interface UseAsTitleGroupField {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-bulk-edit".
+ */
+export interface DisableBulkEdit {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer".
+ */
+export interface CustomListDrawer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-select-api".
+ */
+export interface ListViewSelectApi {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  group?: {
+    groupNameField?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals".
+ */
+export interface Virtual {
+  id: string;
+  virtualTitleFromPost?: string | null;
+  virtualText?: string | null;
+  post?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps".
+ */
+export interface NoTimestamp {
+  id: string;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized".
+ */
+export interface Localized {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -329,6 +680,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads';
         value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'uploads-two';
+        value: string | UploadsTwo;
       } | null)
     | ({
         relationTo: 'posts';
@@ -343,6 +698,10 @@ export interface PayloadLockedDocument {
         value: string | HiddenCollection;
       } | null)
     | ({
+        relationTo: 'not-in-view-collection';
+        value: string | NotInViewCollection;
+      } | null)
+    | ({
         relationTo: 'collection-no-api-view';
         value: string | CollectionNoApiView;
       } | null)
@@ -353,6 +712,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-views-two';
         value: string | CustomViewsTwo;
+      } | null)
+    | ({
+        relationTo: 'reorder-tabs';
+        value: string | ReorderTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
@@ -379,20 +742,68 @@ export interface PayloadLockedDocument {
         value: string | Geo;
       } | null)
     | ({
-        relationTo: 'customIdTab';
-        value: string | CustomIdTab;
-      } | null)
-    | ({
-        relationTo: 'customIdRow';
-        value: string | CustomIdRow;
+        relationTo: 'array';
+        value: string | Array;
       } | null)
     | ({
         relationTo: 'disable-duplicate';
         value: string | DisableDuplicate;
       } | null)
     | ({
+        relationTo: 'disable-copy-to-locale';
+        value: string | DisableCopyToLocale;
+      } | null)
+    | ({
+        relationTo: 'edit-menu-items';
+        value: string | EditMenuItem;
+      } | null)
+    | ({
+        relationTo: 'format-doc-url';
+        value: string | FormatDocUrl;
+      } | null)
+    | ({
         relationTo: 'base-list-filters';
         value: string | BaseListFilter;
+      } | null)
+    | ({
+        relationTo: 'with300documents';
+        value: string | With300Document;
+      } | null)
+    | ({
+        relationTo: 'with-list-drawer';
+        value: string | WithListDrawer;
+      } | null)
+    | ({
+        relationTo: 'placeholder';
+        value: string | Placeholder;
+      } | null)
+    | ({
+        relationTo: 'use-as-title-group-field';
+        value: string | UseAsTitleGroupField;
+      } | null)
+    | ({
+        relationTo: 'disable-bulk-edit';
+        value: string | DisableBulkEdit;
+      } | null)
+    | ({
+        relationTo: 'custom-list-drawer';
+        value: string | CustomListDrawer;
+      } | null)
+    | ({
+        relationTo: 'list-view-select-api';
+        value: string | ListViewSelectApi;
+      } | null)
+    | ({
+        relationTo: 'virtuals';
+        value: string | Virtual;
+      } | null)
+    | ({
+        relationTo: 'no-timestamps';
+        value: string | NoTimestamp;
+      } | null)
+    | ({
+        relationTo: 'localized';
+        value: string | Localized;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -453,6 +864,38 @@ export interface UploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-two_select".
+ */
+export interface UploadsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -463,15 +906,43 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
-  demoUIField?: T;
-  group?:
+  someTextField?: T;
+  namedGroup?:
     | T
     | {
-        title?: T;
+        someTextField?: T;
       };
+  textFieldInUnnamedGroup?: T;
+  groupWithCustomCell?:
+    | T
+    | {
+        nestedTextFieldInGroupWithCustomCell?: T;
+      };
+  namedTab?:
+    | T
+    | {
+        nestedTextFieldInNamedTab?: T;
+      };
+  nestedTextFieldInUnnamedTab?: T;
   relationship?: T;
+  users?: T;
   customCell?: T;
+  upload?: T;
+  hiddenField?: T;
+  adminHiddenField?: T;
+  disableListColumnText?: T;
+  disableListFilterText?: T;
   sidebarField?: T;
+  wavelengths?: T;
+  selectField?: T;
+  file?: T;
+  noReadAccessField?: T;
+  disableListColumnTextInRow?: T;
+  someGroup?:
+    | T
+    | {
+        disableListColumnTextInGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -492,12 +963,28 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-collection_select".
  */
 export interface HiddenCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-collection_select".
+ */
+export interface NotInViewCollectionSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -530,6 +1017,15 @@ export interface CustomViewsTwoSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reorder-tabs_select".
+ */
+export interface ReorderTabsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-fields_select".
  */
 export interface CustomFieldsSelect<T extends boolean = true> {
@@ -539,6 +1035,34 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsFunction?: T;
   descriptionAsComponent?: T;
   customSelectField?: T;
+  customSelectInput?: T;
+  customMultiSelectField?: T;
+  relationshipFieldWithBeforeAfterInputs?: T;
+  arrayFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        someTextField?: T;
+        id?: T;
+      };
+  blocksFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        blockFields?:
+          | T
+          | {
+              textField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  text?: T;
+  groupFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        textOne?: T;
+        textTwo?: T;
+      };
+  radioFieldWithBeforeAfterInputs?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -589,25 +1113,15 @@ export interface GeoSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab_select".
+ * via the `definition` "array_select".
  */
-export interface CustomIdTabSelect<T extends boolean = true> {
-  title?: T;
-  id?: T;
-  description?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow_select".
- */
-export interface CustomIdRowSelect<T extends boolean = true> {
-  title?: T;
-  id?: T;
-  description?: T;
-  number?: T;
+export interface ArraySelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -622,12 +1136,151 @@ export interface DisableDuplicateSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-copy-to-locale_select".
+ */
+export interface DisableCopyToLocaleSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-menu-items_select".
+ */
+export interface EditMenuItemsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "format-doc-url_select".
+ */
+export interface FormatDocUrlSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters_select".
  */
 export interface BaseListFiltersSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with300documents_select".
+ */
+export interface With300DocumentsSelect<T extends boolean = true> {
+  text?: T;
+  selfRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-list-drawer_select".
+ */
+export interface WithListDrawerSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "placeholder_select".
+ */
+export interface PlaceholderSelect<T extends boolean = true> {
+  defaultSelect?: T;
+  placeholderSelect?: T;
+  defaultRelationship?: T;
+  placeholderRelationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "use-as-title-group-field_select".
+ */
+export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-bulk-edit_select".
+ */
+export interface DisableBulkEditSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer_select".
+ */
+export interface CustomListDrawerSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-select-api_select".
+ */
+export interface ListViewSelectApiSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  group?:
+    | T
+    | {
+        groupNameField?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals_select".
+ */
+export interface VirtualsSelect<T extends boolean = true> {
+  virtualTitleFromPost?: T;
+  virtualText?: T;
+  post?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps_select".
+ */
+export interface NoTimestampsSelect<T extends boolean = true> {
+  title?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_select".
+ */
+export interface LocalizedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -666,6 +1319,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "hidden-global".
  */
 export interface HiddenGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-global".
+ */
+export interface NotInViewGlobal {
   id: string;
   title?: string | null;
   updatedAt?: string | null;
@@ -747,6 +1410,16 @@ export interface Setting {
  * via the `definition` "hidden-global_select".
  */
 export interface HiddenGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-global_select".
+ */
+export interface NotInViewGlobalSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

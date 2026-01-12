@@ -1,3 +1,6 @@
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
+
 export const path = '/re-initialize'
 
 export const reInitializeDB = async ({
@@ -19,17 +22,26 @@ export const reInitializeDB = async ({
     try {
       console.log(`Attempting to reinitialize DB (attempt ${attempt}/${maxAttempts})...`)
 
-      const response = await fetch(`${serverURL}/api${path}`, {
-        method: 'post',
-        body: JSON.stringify({
+      const queryParams = qs.stringify(
+        {
           snapshotKey,
           uploadsDir,
           deleteOnly,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
         },
-      })
+        {
+          addQueryPrefix: true,
+        },
+      )
+
+      const response = await fetch(
+        formatAdminURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -39,7 +51,7 @@ export const reInitializeDB = async ({
       console.log(`Successfully reinitialized DB (took ${timeTaken}ms)`)
       return
     } catch (error) {
-      console.error(`Failed to reinitialize DB: ${error.message}`)
+      console.error(`Failed to reinitialize DB`, error)
 
       if (attempt === maxAttempts) {
         console.error('Max retry attempts reached. Giving up.')

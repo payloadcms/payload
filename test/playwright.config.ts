@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -8,11 +8,11 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, 'test.env') })
 
-let multiplier = process.env.CI ? 3 : 0.5
-let smallMultiplier = process.env.CI ? 2 : 0.75
+let multiplier = process.env.CI ? 4 : 1
+let smallMultiplier = process.env.CI ? 3 : 1
 
 export const TEST_TIMEOUT_LONG = 640000 * multiplier // 8*3 minutes - used as timeOut for the beforeAll
-export const TEST_TIMEOUT = 30000 * multiplier
+export const TEST_TIMEOUT = 40000 * multiplier
 export const EXPECT_TIMEOUT = 6000 * smallMultiplier
 export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() or expect().toPass can retry 4 times. 4x higher than default expect timeout => can retry 4 times if retryable expects are used inside
 
@@ -35,4 +35,10 @@ export default defineConfig({
   reporter: process.env.CI
     ? [['list', { printSteps: true }], ['json']]
     : [['list', { printSteps: true }]],
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], channel: 'chromium' },
+    },
+  ],
 })

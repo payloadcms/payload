@@ -1,27 +1,37 @@
 'use client'
 import React, { useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
 
 import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { CollapsibleProvider, useCollapsible } from './provider.js'
 
 const baseClass = 'collapsible'
 
 export { CollapsibleProvider, useCollapsible }
 
-export type Props = {
+export type CollapsibleProps = {
   actions?: React.ReactNode
+  /**
+   * Components that will be rendered within the collapsible provider but after the wrapper.
+   */
+  AfterCollapsible?: React.ReactNode
   children: React.ReactNode
   className?: string
   collapsibleStyle?: 'default' | 'error'
+  /**
+   * If set to true, clicking on the collapsible header will not toggle the collapsible state.
+   * This is useful if the collapsible state is controlled externally (e.g. from a parent component or custom button).
+   */
+  disableHeaderToggle?: boolean
+  /**
+   * If set to true, the toggle indicator (chevron) on the right side of the header will be hidden.
+   */
+  disableToggleIndicator?: boolean
   dragHandleProps?: DragHandleProps
   header?: React.ReactNode
   initCollapsed?: boolean
@@ -29,11 +39,14 @@ export type Props = {
   onToggle?: (collapsed: boolean) => Promise<void> | void
 }
 
-export const Collapsible: React.FC<Props> = ({
+export const Collapsible: React.FC<CollapsibleProps> = ({
   actions,
+  AfterCollapsible,
   children,
   className,
   collapsibleStyle = 'default',
+  disableHeaderToggle = false,
+  disableToggleIndicator = false,
   dragHandleProps,
   header,
   initCollapsed,
@@ -62,7 +75,7 @@ export const Collapsible: React.FC<Props> = ({
         dragHandleProps && `${baseClass}--has-drag-handle`,
         isCollapsed && `${baseClass}--collapsed`,
         isWithinCollapsible && `${baseClass}--nested`,
-        hoveringToggle && `${baseClass}--hovered`,
+        hoveringToggle && !disableHeaderToggle && `${baseClass}--hovered`,
         `${baseClass}--style-${collapsibleStyle}`,
       ]
         .filter(Boolean)
@@ -70,22 +83,25 @@ export const Collapsible: React.FC<Props> = ({
     >
       <CollapsibleProvider isCollapsed={isCollapsed} toggle={toggleCollapsible}>
         <div
-          className={`${baseClass}__toggle-wrap`}
+          className={`${baseClass}__toggle-wrap${disableHeaderToggle ? ' toggle-disabled' : ''}`}
           onMouseEnter={() => setHoveringToggle(true)}
           onMouseLeave={() => setHoveringToggle(false)}
         >
-          <button
-            className={[
-              `${baseClass}__toggle`,
-              `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={toggleCollapsible}
-            type="button"
-          >
-            <span>{t('fields:toggleBlock')}</span>
-          </button>
+          {!disableHeaderToggle && (
+            <button
+              className={[
+                `${baseClass}__toggle`,
+                `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={toggleCollapsible}
+              type="button"
+            >
+              <span>{t('fields:toggleBlock')}</span>
+            </button>
+          )}
+
           {dragHandleProps && (
             <div
               className={`${baseClass}__drag`}
@@ -109,14 +125,17 @@ export const Collapsible: React.FC<Props> = ({
           ) : null}
           <div className={`${baseClass}__actions-wrap`}>
             {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
-            <div className={`${baseClass}__indicator`}>
-              <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
-            </div>
+            {!disableToggleIndicator && (
+              <div className={`${baseClass}__indicator`}>
+                <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
+              </div>
+            )}
           </div>
         </div>
-        <AnimateHeight duration={200} height={isCollapsed ? 0 : 'auto'}>
+        <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
           <div className={`${baseClass}__content`}>{children}</div>
         </AnimateHeight>
+        {AfterCollapsible}
       </CollapsibleProvider>
     </div>
   )

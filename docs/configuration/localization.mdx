@@ -17,7 +17,8 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  localization: { // highlight-line
+  localization: {
+    // highlight-line
     // ...
   },
 })
@@ -35,7 +36,7 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   localization: {
-    locales: ['en', 'es', 'de'] // required
+    locales: ['en', 'es', 'de'], // required
     defaultLocale: 'en', // required
   },
 })
@@ -71,17 +72,18 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  Localization works very well alongside [I18n](/docs/configuration/i18n).
+  **Tip:** Localization works very well alongside
+  [I18n](/docs/configuration/i18n).
 </Banner>
 
 The following options are available:
 
-| Option         | Description                                                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **`locales`**  | Array of all the languages that you would like to support. [More details](#locales)                                            |
-| **`defaultLocale`** | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale. |
-| **`fallback`** | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
+| Option                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`locales`**                | Array of all the languages that you would like to support. [More details](#locales)                                                                                                                                                                                                                                                                                                                                               |
+| **`defaultLocale`**          | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.                                                                                                                                                                                                                                                                   |
+| **`fallback`**               | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
+| **`filterAvailableLocales`** | A function that is called with the array of `locales` and the `req`, it should return locales to show in admin UI selector. [See more](#filter-available-options).                                                                                                                                                                                                                                                                |
 
 ### Locales
 
@@ -91,14 +93,43 @@ The locale codes do not need to be in any specific format. It's up to you to def
 
 #### Locale Object
 
-| Option               | Description                                                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                     |
-| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use. |
-| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                      |
-| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present.                                       |
+| Option               | Description                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                                |
+| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use.            |
+| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                                 |
+| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present. This can be a single locale or array of locales. |
 
 _\* An asterisk denotes that a property is required._
+
+#### Filter Available Options
+
+In some projects you may want to filter the available locales shown in the admin UI selector. You can do this by providing a `filterAvailableLocales` function in your Payload Config. This is called on the server side and is passed the array of locales. This means that you can determine what locales are visible in the localizer selection menu at the top of the admin panel. You could do this per user, or implement a function that scopes these to tenants and more. Here is an example using request headers in a multi-tenant application:
+
+```ts
+// ... rest of Payload config
+localization: {
+  defaultLocale: 'en',
+  locales: ['en', 'es'],
+  filterAvailableLocales: async ({ req, locales }) => {
+    if (getTenantFromCookie(req.headers, 'text')) {
+      const fullTenant = await req.payload.findByID({
+        id: getTenantFromCookie(req.headers, 'text') as string,
+        collection: 'tenants',
+        req,
+      })
+      if (fullTenant && fullTenant.supportedLocales?.length) {
+        return locales.filter((locale) => {
+          return fullTenant.supportedLocales?.includes(locale.code as 'en' | 'es')
+        })
+      }
+    }
+    return locales
+  },
+}
+```
+
+Since the filtering happens at the root level of the application and its result is not calculated every time you navigate to a new page, you may want to call `router.refresh` in a custom component that watches when values that affect the result change. In the example above, you would want to do this when `supportedLocales` changes on the tenant document.
 
 ## Field Localization
 
@@ -121,18 +152,18 @@ With the above configuration, the `title` field will now be saved in the databas
 All field types with a `name` property support the `localized` property—even the more complex field types like `array`s and `block`s.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  Enabling Localization for field types that support nested fields will automatically create
-  localized "sets" of all fields contained within the field. For example, if you have a page layout
-  using a blocks field type, you have the choice of either localizing the full layout, by enabling
-  Localization on the top-level blocks field, or only certain fields within the layout.
+  **Note:** Enabling Localization for field types that support nested fields
+  will automatically create localized "sets" of all fields contained within the
+  field. For example, if you have a page layout using a blocks field type, you
+  have the choice of either localizing the full layout, by enabling Localization
+  on the top-level blocks field, or only certain fields within the layout.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  When converting an existing field to or from `localized: true` the data structure in the document
-  will change for this field and so existing data for this field will be lost. Before changing the
-  Localization setting on fields with existing data, you may need to consider a field migration
+  **Important:** When converting an existing field to or from `localized: true`
+  the data structure in the document will change for this field and so existing
+  data for this field will be lost. Before changing the Localization setting on
+  fields with existing data, you may need to consider a field migration
   strategy.
 </Banner>
 
@@ -168,7 +199,7 @@ The `locale` arg will only accept valid locales, but locales will be formatted a
 values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious
 to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
 
-The `fallbackLocale` arg will accept valid locales as well as `none` to disable falling back.
+The `fallbackLocale` arg will accept valid locales, an array of locales, as well as `none` to disable falling back.
 
 **Example:**
 
@@ -183,16 +214,17 @@ query {
 ```
 
 <Banner>
-  In GraphQL, specifying the locale at the top level of a query will automatically apply it
-  throughout all nested relationship fields. You can override this behavior by re-specifying locale
-  arguments in nested related document queries.
+  In GraphQL, specifying the locale at the top level of a query will
+  automatically apply it throughout all nested relationship fields. You can
+  override this behavior by re-specifying locale arguments in nested related
+  document queries.
 </Banner>
 
 #### Local API
 
 You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options`
 argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid
-locale as well as `'null'`, `'false'`, `false`, and `'none'`.
+locale, array of locales, as well as `'null'`, `'false'`, `false`, and `'none'`.
 
 **Example:**
 
@@ -205,8 +237,8 @@ const posts = await payload.find({
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  The REST and Local APIs can return all Localization data in one request by passing 'all' or '*' as
-  the <strong>locale</strong> parameter. The response will be structured so that field values come
-  back as the full objects keyed for each locale instead of the single, translated value.
+  **Tip:** The REST and Local APIs can return all Localization data in one
+  request by passing 'all' or '*' as the **locale** parameter. The response will
+  be structured so that field values come back as the full objects keyed for
+  each locale instead of the single, translated value.
 </Banner>

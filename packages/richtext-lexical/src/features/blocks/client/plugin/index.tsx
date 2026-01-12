@@ -1,11 +1,8 @@
 'use client'
 
-import type { BlocksFieldClient } from 'payload'
-
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
-import { getTranslation } from '@payloadcms/translations'
-import { formatDrawerSlug, useEditDepth, useTranslation } from '@payloadcms/ui'
+import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -16,37 +13,26 @@ import {
   $isRangeSelection,
   $isRootOrShadowRoot,
   COMMAND_PRIORITY_EDITOR,
-  type RangeSelection,
 } from 'lexical'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
 import type { BlockFields, BlockFieldsOptionalID } from '../../server/nodes/BlocksNode.js'
-import type { BlocksFeatureClientProps } from '../index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
 import { $createInlineBlockNode, $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
-import {
-  INSERT_BLOCK_COMMAND,
-  INSERT_INLINE_BLOCK_COMMAND,
-  OPEN_INLINE_BLOCK_DRAWER_COMMAND,
-} from './commands.js'
+import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './commands.js'
 
 export type InsertBlockPayload = BlockFieldsOptionalID
 
-export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
+export const BlocksPlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
-  const [blockFields, setBlockFields] = useState<BlockFields | null>(null)
-  const [blockType, setBlockType] = useState<string>('' as any)
+
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
-  const { i18n, t } = useTranslation<string, any>()
-  const {
-    fieldProps: { featureClientSchemaMap, schemaPath },
-  } = useEditorConfigContext()
-  const { uuid } = useEditorConfigContext()
+
+  const { setCreatedInlineBlock, uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
 
   const drawerSlug = formatDrawerSlug({
@@ -70,22 +56,15 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
 
             if ($isRangeSelection(selection)) {
               const blockNode = $createBlockNode(payload)
+
+              // we need to get the focus node before inserting the block node, as $insertNodeToNearestRoot can change the focus node
+              const { focus } = selection
+              const focusNode = focus.getNode()
               // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
               $insertNodeToNearestRoot(blockNode)
 
-              const { focus } = selection
-              const focusNode = focus.getNode()
-
-              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
-              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
-              if (
-                $isParagraphNode(focusNode) &&
-                focusNode.getTextContentSize() === 0 &&
-                focusNode
-                  .getParentOrThrow()
-                  .getChildren()
-                  .filter((node) => $isParagraphNode(node)).length > 1
-              ) {
+              // Delete the node it it's an empty paragraph
+              if ($isParagraphNode(focusNode) && !focusNode.__first) {
                 focusNode.remove()
               }
             }
@@ -112,6 +91,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
           }
 
           const inlineBlockNode = $createInlineBlockNode(fields as BlockFields)
+          setCreatedInlineBlock?.(inlineBlockNode)
           $insertNodes([inlineBlockNode])
           if ($isRootOrShadowRoot(inlineBlockNode.getParentOrThrow())) {
             $wrapNodeInElement(inlineBlockNode, $createParagraphNode).selectEnd()
@@ -121,78 +101,8 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         },
         COMMAND_PRIORITY_EDITOR,
       ),
-      editor.registerCommand(
-        OPEN_INLINE_BLOCK_DRAWER_COMMAND,
-        ({ fields, nodeKey }) => {
-          setBlockFields((fields as BlockFields) ?? null)
-          setTargetNodeKey(nodeKey ?? null)
-          setBlockType(fields?.blockType ?? ('' as any))
-
-          if (nodeKey) {
-            toggleDrawer()
-            return true
-          }
-
-          let rangeSelection: null | RangeSelection = null
-
-          editor.getEditorState().read(() => {
-            const selection = $getSelection()
-            if ($isRangeSelection(selection)) {
-              rangeSelection = selection
-            }
-          })
-
-          if (rangeSelection) {
-            //setLastSelection(rangeSelection)
-            toggleDrawer()
-          }
-          return true
-        },
-        COMMAND_PRIORITY_EDITOR,
-      ),
     )
-  }, [editor, targetNodeKey, toggleDrawer])
+  }, [editor, setCreatedInlineBlock, targetNodeKey, toggleDrawer])
 
-  if (!blockFields) {
-    return null
-  }
-
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockFields?.blockType}`
-
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient = clientSchemaMap[schemaFieldsPath][0] as BlocksFieldClient
-
-  const clientBlock = blocksField.blocks[0]
-
-  if (!blocksField) {
-    return null
-  }
-
-  const blockDisplayName = clientBlock?.labels?.singular
-    ? getTranslation(clientBlock?.labels?.singular, i18n)
-    : clientBlock?.slug
-
-  return (
-    <FieldsDrawer
-      data={blockFields}
-      drawerSlug={drawerSlug}
-      drawerTitle={t(`lexical:blocks:inlineBlocks:${blockFields?.id ? 'edit' : 'create'}`, {
-        label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
-      })}
-      featureKey="blocks"
-      fieldMapOverride={clientBlock?.fields}
-      handleDrawerSubmit={(_fields, data) => {
-        if (!data) {
-          return
-        }
-
-        data.blockType = blockType
-
-        editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, data)
-      }}
-      schemaPath={schemaPath}
-      schemaPathSuffix={`lexical_inline_blocks.${blockFields?.blockType}.fields`}
-    />
-  )
+  return null
 }

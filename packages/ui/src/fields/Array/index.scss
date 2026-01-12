@@ -76,11 +76,25 @@
 
     &__add-row {
       align-self: flex-start;
-      color: var(--theme-elevation-400);
       margin: 2px 0;
+      --btn-color: var(--theme-elevation-400);
 
-      &:hover {
-        color: var(--theme-elevation-800);
+      &:hover:not(:disabled) {
+        --btn-color: var(--theme-elevation-800);
+      }
+
+      &:disabled {
+        --btn-color: var(--theme-elevation-300);
+      }
+
+      .btn__label {
+        color: var(--btn-color);
+      }
+      .btn__icon {
+        border-color: var(--btn-color);
+        path {
+          stroke: var(--btn-color);
+        }
       }
     }
   }

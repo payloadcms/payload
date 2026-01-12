@@ -1,27 +1,12 @@
-import type { CollectionConfig } from 'payload/types'
-import generateEmailHTML from '../email/generateEmailHTML'
+import type { CollectionConfig } from 'payload'
+import { sanitizeUserDataForEmail } from 'payload/shared'
 
-const Newsletter: CollectionConfig = {
+import { generateEmailHTML } from '../email/generateEmailHTML'
+
+export const Newsletter: CollectionConfig = {
   slug: 'newsletter-signups',
   admin: {
     defaultColumns: ['name', 'email'],
-  },
-  hooks: {
-    afterChange: [
-      async ({ doc, operation, req }) => {
-        if (operation === 'create') {
-          req.payload.sendEmail({
-            to: doc.email,
-            from: 'sender@example.com',
-            subject: 'Thanks for signing up!',
-            html: await generateEmailHTML({
-              headline: 'Welcome to the newsletter!',
-              content: `<p>${doc.name ? `Hi ${doc.name}!` : 'Hi!'} We'll be in touch soon...</p>`,
-            }),
-          })
-        }
-      },
-    ],
   },
   fields: [
     {
@@ -34,6 +19,25 @@ const Newsletter: CollectionConfig = {
       required: true,
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation === 'create') {
+          req.payload
+            .sendEmail({
+              from: 'sender@example.com',
+              html: await generateEmailHTML({
+                content: `<p>${doc.name ? `Hi ${sanitizeUserDataForEmail(doc.name)}!` : 'Hi!'} We'll be in touch soon...</p>`,
+                headline: 'Welcome to the newsletter!',
+              }),
+              subject: 'Thanks for signing up!',
+              to: doc.email,
+            })
+            .catch((error) => {
+              console.error('Error sending email:', error)
+            })
+        }
+      },
+    ],
+  },
 }
-
-export default Newsletter

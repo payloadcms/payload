@@ -6,7 +6,7 @@ import React from 'react'
 
 export const CustomRelationshipFieldLabelClient: RelationshipFieldLabelClientComponent = ({
   field,
-  label,
+  path,
 }) => {
-  return <FieldLabel field={field} label={label} />
+  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
 }

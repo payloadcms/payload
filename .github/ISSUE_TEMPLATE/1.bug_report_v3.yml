@@ -1,6 +1,6 @@
 name: Functionality Bug
 description: '[REPRODUCTION REQUIRED] - Create a bug report'
-labels: ['status: needs-triage', 'v3', 'validate-reproduction']
+labels: ['status: needs-triage', 'validate-reproduction']
 body:
   - type: textarea
     attributes:
@@ -14,7 +14,7 @@ body:
       label: Link to the code that reproduces this issue
       description: >-
         _REQUIRED_: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
-        Either use `npx create-payload-app@beta -t blank` then push to a repo or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+        Either use `pnpx create-payload-app@latest -t blank` then push to a repo or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
     validations:
       required: true
 
@@ -27,27 +27,35 @@ body:
 
   - type: dropdown
     attributes:
-      label: Which area(s) are affected? (Select all that apply)
+      label: Which area(s) are affected?
       multiple: true
       options:
         - 'Not sure'
         - 'area: core'
         - 'area: docs'
+        - 'area: graphql'
+        - 'area: live-preview'
         - 'area: templates'
         - 'area: ui'
-        - 'db-mongodb'
-        - 'db-postgres'
-        - 'db-sqlite'
-        - 'db-vercel-postgres'
-        - 'plugin: cloud'
+        - 'db: d1-sqlite'
+        - 'db: mongodb'
+        - 'db: postgres'
+        - 'db: sqlite'
+        - 'db: vercel-postgres'
         - 'plugin: cloud-storage'
+        - 'plugin: ecommerce'
         - 'plugin: form-builder'
+        - 'plugin: import-export'
+        - 'plugin: mcp'
+        - 'plugin: multi-tenant'
         - 'plugin: nested-docs'
+        - 'plugin: redirects'
         - 'plugin: richtext-lexical'
         - 'plugin: richtext-slate'
         - 'plugin: search'
         - 'plugin: sentry'
         - 'plugin: seo'
+        - 'plugin: storage-*'
         - 'plugin: stripe'
         - 'plugin: other'
     validations:
@@ -56,12 +64,9 @@ body:
   - type: textarea
     attributes:
       label: Environment Info
-      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
+      description: Paste output from `pnpm payload info` _or_ Payload, Node.js, and Next.js versions. Please avoid using "latest"—specific version numbers help us accurately diagnose and resolve issues.
       render: text
-      placeholder: |
-        Payload:
-        Node.js:
-        Next.js:
+      placeholder: Run `pnpm payload info` in your terminal and paste the output here.
     validations:
       required: true
 

@@ -1,4 +1,4 @@
-@import '../../../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .link-editor {
@@ -32,6 +32,10 @@
       outline: 0;
       position: relative;
       font-family: var(--font-body);
+
+      .icon--externalLink {
+        margin-right: 5px;
+      }
 
       &__label-pure {
         color: var(--theme-elevation-1000);

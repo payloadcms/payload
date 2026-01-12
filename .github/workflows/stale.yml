@@ -1,11 +1,21 @@
 name: stale
 
 on:
+  schedule:
+    # Run nightly at 1am EST, staggered with lock-issues workflow
+    - cron: '0 6 * * *'
+
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Run the stale action in debug-only mode
+        default: false
+        required: false
+        type: boolean
 
 jobs:
   stale:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       issues: write
       pull-requests: write
@@ -13,30 +23,29 @@ jobs:
       - uses: actions/stale@v9
         id: stale
         with:
-          debug-only: true
-          days-before-stale: 90
-          days-before-close: 7
+          debug-only: ${{ inputs.dry-run || false }}
+
+          days-before-stale: 30
+          days-before-close: -1 # Disable closing
           ascending: true
           operations-per-run: 300
-
-          # Ignore all assigned
-          exempt-all-assignees: false
+          exempt-all-assignees: true
 
           # Issues
-          stale-issue-label: 'stale'
-          exempt-issue-labels: 'blocked,must,should,keep,created-by: Payload team,created-by: Contributor'
-          stale-issue-message: >
-            This issue has been marked as stale due to lack of activity. To keep the ticket open, please indicate that it is still relevant in a comment below.
-          close-issue-message: >
+          stale-issue-label: stale
+          exempt-issue-labels: 'prioritized,keep,created-by: Payload team,created-by: Contributor,status: verified'
+          stale-issue-message: ''
+
+          close-issue-message: |
             This issue was automatically closed due to lack of activity.
 
           # Pull Requests
-          stale-pr-label: 'stale'
-          exempt-pr-labels: 'blocked,must,should,keep,created-by: Payload team,created-by: Contributor'
-          stale-pr-message: >
-            This PR is stale due to lack of activity. To keep the PR open, please indicate that it is still relevant in a comment below.
-          close-pr-message: >
+          stale-pr-label: stale
+          exempt-pr-labels: 'prioritized,keep,created-by: Payload team,created-by: Contributor'
+          stale-pr-message: ''
+          close-pr-message: |
             This pull request was automatically closed due to lack of activity.
 
+      # TODO: Add a step to notify team
       - name: Print outputs
         run: echo ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}

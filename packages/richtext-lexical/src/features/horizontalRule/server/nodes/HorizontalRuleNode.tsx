@@ -6,22 +6,20 @@ import type {
   LexicalCommand,
   LexicalNode,
   SerializedLexicalNode,
-  Spread,
 } from 'lexical'
 import type * as React from 'react'
 
 import { addClassNamesToElement } from '@lexical/utils'
 import { $applyNodeReplacement, createCommand, DecoratorNode } from 'lexical'
 
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+
 /**
  * Serialized representation of a horizontal rule node. Serialized = converted to JSON. This is what is stored in the database / in the lexical editor state.
  */
-export type SerializedHorizontalRuleNode = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    type: 'horizontalrule'
-  },
-  SerializedLexicalNode
+export type SerializedHorizontalRuleNode = StronglyTypedLeafNode<
+  SerializedLexicalNode,
+  'horizontalrule'
 >
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createCommand(
@@ -36,11 +34,11 @@ export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createComman
  * If we used DecoratorBlockNode instead, we would only need a decorate method
  */
 export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactElement> {
-  static clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
+  static override clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
     return new this(node.__key)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'horizontalrule'
   }
 
@@ -49,7 +47,7 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
    *
    * This also determines the behavior of lexical's internal HTML -> Lexical converter
    */
-  static importDOM(): DOMConversionMap | null {
+  static override importDOM(): DOMConversionMap | null {
     return {
       hr: () => ({
         conversion: $convertHorizontalRuleElement,
@@ -61,20 +59,22 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
   /**
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
-  static importJSON(serializedNode: SerializedHorizontalRuleNode): HorizontalRuleServerNode {
+  static override importJSON(
+    serializedNode: SerializedHorizontalRuleNode,
+  ): HorizontalRuleServerNode {
     return $createHorizontalRuleServerNode()
   }
 
   /**
    * Determines how the hr element is rendered in the lexical editor. This is only the "initial" / "outer" HTML element.
    */
-  createDOM(config: EditorConfig): HTMLElement {
+  override createDOM(config: EditorConfig): HTMLElement {
     const element = document.createElement('hr')
     addClassNamesToElement(element, config.theme.hr)
     return element
   }
 
-  decorate(): null | React.ReactElement {
+  override decorate(): null | React.ReactElement {
     return null
   }
 
@@ -83,28 +83,28 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
    *
    * This also determines the behavior of lexical's internal Lexical -> HTML converter
    */
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     return { element: document.createElement('hr') }
   }
   /**
    * Opposite of importJSON. This determines what data is saved in the database / in the lexical editor state.
    */
-  exportJSON(): SerializedLexicalNode {
+  override exportJSON(): SerializedLexicalNode {
     return {
       type: 'horizontalrule',
       version: 1,
     }
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return '\n'
   }
 
-  isInline(): false {
+  override isInline(): false {
     return false
   }
 
-  updateDOM(): boolean {
+  override updateDOM(): boolean {
     return false
   }
 }

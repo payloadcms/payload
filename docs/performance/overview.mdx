@@ -1,0 +1,244 @@
+---
+title: Performance
+label: Overview
+order: 10
+desc: Ensure your Payload app runs as quickly and efficiently as possible.
+keywords: performance, optimization, indexes, depth, select, block references, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload is designed with performance in mind, but its customizability means that there are many ways to configure your app that can impact performance.
+
+With this in mind, Payload provides several options and best practices to help you optimize your app's specific performance needs. This includes the database, APIs, and Admin Panel.
+
+Whether you're building an app or troubleshooting an existing one, follow these guidelines to ensure that it runs as quickly and efficiently as possible.
+
+## Building your application
+
+### Database proximity
+
+The proximity of your database to your server can significantly impact performance. Ensure that your database is hosted in the same region as your server to minimize latency and improve response times.
+
+### Indexing your fields
+
+If a particular field is queried often, build an [Index](../database/indexes) for that field to produce faster queries.
+
+When your query runs, the database will not search the entire document to find that one field, but will instead use the index to quickly locate the data.
+
+To learn more, see the [Indexes](../database/indexes) docs.
+
+### Querying your data
+
+There are several ways to optimize your [Queries](../queries/overview). Many of these options directly impact overall database overhead, response sizes, and/or computational load and can significantly improve performance.
+
+When building queries, combine as many of these options together as possible. This will ensure your queries are as efficient as they can be.
+
+To learn more, see the [Query Performance](../queries/overview#performance) docs.
+
+### Optimizing your APIs
+
+When querying data through Payload APIs, the request lifecycle includes running hooks, access control, validations, and other operations that can add significant overhead to the request.
+
+To optimize your APIs, any custom logic should be as efficient as possible. This includes writing lightweight hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
+
+To learn more, see the [Hooks Performance](../hooks/overview#performance) docs.
+
+### Writing efficient validations
+
+If your validation functions are asynchronous or computationally heavy, ensure they only run when necessary.
+
+To learn more, see the [Validation Performance](../fields/overview#validation-performance) docs.
+
+### Optimizing custom components
+
+When building custom components in the Admin Panel, ensure that they are as efficient as possible. This includes using React best practices such as memoization, lazy loading, and avoiding unnecessary re-renders.
+
+To learn more, see the [Custom Components Performance](../admin/custom-components#performance) docs.
+
+## Other Best Practices
+
+### Block references
+
+Use [Block References](../fields/blocks#block-references) to share the same block across multiple fields without bloating the config. This will reduce the number of fields to traverse when processing permissions, etc. and can significantly reduce the amount of data sent from the server to the client in the Admin Panel.
+
+For example, if you have a block that is used in multiple fields, you can define it once and reference it in each field.
+
+To do this, use the `blockReferences` option in your blocks field:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  blocks: [
+    {
+      slug: 'TextBlock',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'content',
+          type: 'blocks',
+          // highlight-start
+          blockReferences: ['TextBlock'],
+          blocks: [], // Required to be empty, for compatibility reasons
+          // highlight-end
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          name: 'content',
+          type: 'blocks',
+          // highlight-start
+          blockReferences: ['TextBlock'],
+          blocks: [], // Required to be empty, for compatibility reasons
+          // highlight-end
+        },
+      ],
+    },
+  ],
+})
+```
+
+### Using the cached Payload instance
+
+Ensure that you do not instantiate Payload unnecessarily. Instead, Payload provides a caching mechanism to reuse the same instance across your app.
+
+To do this, use the `getPayload` function to get the cached instance of Payload:
+
+```ts
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+const myFunction = async () => {
+  const payload = await getPayload({ config })
+
+  // use payload here
+}
+```
+
+### When to make direct-to-db calls
+
+<Banner type="warning">
+  **Warning:** Direct database calls bypass all hooks and validations. Only use
+  this method when you are certain that the operation is safe and does not
+  require any of these features.
+</Banner>
+
+Making direct database calls can significantly improve performance by bypassing much of the request lifecycle such as hooks, validations, and other overhead associated with Payload APIs.
+
+For example, this can be especially useful for the `update` operation, where Payload would otherwise need to make multiple API calls to fetch, update, and fetch again. Making a direct database call can reduce this to a single operation.
+
+To do this, use the `payload.db` methods:
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    title: 'New Title',
+  },
+})
+```
+
+<Banner type="warning">
+  **Note:** Direct database methods do not start a
+  [transaction](../database/transactions). You have to start that yourself.
+</Banner>
+
+#### Returning
+
+To prevent unnecessary database computation and reduce the size of the response, you can also set `returning: false` in your direct database calls if you don't need the updated document returned to you.
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: { title: 'New Title' }, // See note above ^ about Postgres
+  // highlight-start
+  returning: false,
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  **Note:** The `returning` option is only available on direct-to-db methods.
+  E.g. those on the `payload.db` object. It is not exposed to the Local API.
+</Banner>
+
+### Avoid bundling the entire UI library in your front-end
+
+If your front-end imports from `@payloadcms/ui`, ensure that you do not bundle the entire package as this can significantly increase your bundle size.
+
+To do this, import using the full path to the specific component you need:
+
+```ts
+import { Button } from '@payloadcms/ui/elements/Button'
+```
+
+Custom components within the Admin Panel, however, do not have this same restriction and can import directly from `@payloadcms/ui`:
+
+```ts
+import { Button } from '@payloadcms/ui'
+```
+
+<Banner type="success">
+  **Tip:** Use
+  [`@next/bundle-analyzer`](https://nextjs.org/docs/app/guides/package-bundling)
+  to analyze your component tree and identify unnecessary re-renders or large
+  components that could be optimized.
+</Banner>
+
+## Optimizing local development
+
+Everything mentioned above applies to local development as well, but there are a few additional steps you can take to optimize your local development experience.
+
+### Enable Turbopack
+
+<Banner type="warning">
+  **Note:** In the future this will be the default. Use at your own risk.
+</Banner>
+
+Add `--turbo` to your dev script to significantly speed up your local development server start time.
+
+```json
+{
+  "scripts": {
+    "dev": "next dev --turbo"
+  }
+}
+```
+
+### Only bundle server packages in production
+
+<Banner type="warning">
+  **Note:** This is enabled by default in `create-payload-app` since v3.28.0. If
+  you created your app after this version, you don't need to do anything.
+</Banner>
+
+By default, Next.js bundles both server and client code. However, during development, bundling certain server packages isn't necessary.
+
+Payload has thousands of modules, slowing down compilation.
+
+Setting this option skips bundling Payload server modules during development. Fewer files to compile means faster compilation speeds.
+
+To do this, add the `devBundleServerPackages` option to `withPayload` in your `next.config.js` file:
+
+```ts
+const nextConfig = {
+  // your existing next config
+}
+
+export default withPayload(nextConfig, { devBundleServerPackages: false })
+```

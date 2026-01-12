@@ -12,9 +12,15 @@ export const hungarianLocale = 'hu'
 
 // Slugs
 export const localizedPostsSlug = 'localized-posts'
+export const localizedDateFieldsSlug = 'localized-date-fields'
 export const withLocalizedRelSlug = 'with-localized-relationship'
 export const relationshipLocalizedSlug = 'relationship-localized'
 export const withRequiredLocalizedFields = 'localized-required'
 export const localizedSortSlug = 'localized-sort'
+
+export const localizedDraftsSlug = 'localized-drafts'
 export const usersSlug = 'users'
 export const blocksWithLocalizedSameName = 'blocks-same-name'
+export const cannotCreateDefaultLocale = 'cannot-create-default-locale'
+export const allFieldsLocalizedSlug = 'all-fields-localized'
+export const arrayWithFallbackCollectionSlug = 'array-with-fallback-fields'

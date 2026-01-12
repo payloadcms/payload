@@ -1,7 +1,7 @@
 name: triage
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
   issues:
@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   debug-context:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: View context attributes
         uses: actions/github-script@v7
@@ -27,11 +27,10 @@ jobs:
 
   label-created-by:
     name: label-on-open
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Tag with 'created-by'
         uses: actions/github-script@v7
-        if: github.event.action == 'opened'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -89,10 +88,11 @@ jobs:
   triage:
     name: initial-triage
     if: github.event_name == 'issues'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
+          ref: ${{ github.event.pull_request.base.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./.github/actions/triage
         with:
@@ -100,3 +100,5 @@ jobs:
           reproduction-link-section: '### Link to the code that reproduces this issue(.*)### Reproduction Steps'
           reproduction-issue-labels: 'validate-reproduction'
           actions-to-perform: 'tag,comment'
+          area-label-section: '### Which area\(s\) are affected\?(.*)### Environment Info'
+          area-label-skip: 'Not sure'

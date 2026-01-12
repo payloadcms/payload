@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import { URL } from 'url'
 
 import type {
@@ -9,11 +9,16 @@ import type {
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError } from '../../errors/index.js'
+import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { getLoginOptions } from '../getLoginOptions.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
@@ -33,8 +38,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
   const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
   const { data } = incomingArgs
 
-  const canLoginWithUsername = Boolean(loginWithUsername)
-  const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const sanitizedEmail =
     (canLoginWithEmail && (incomingArgs.data.email || '').toLowerCase().trim()) || null
@@ -43,6 +47,11 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       ? data.username.toLowerCase().trim()
       : null
 
+  let args = incomingArgs
+
+  if (incomingArgs.collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(incomingArgs.req.t)
+  }
   if (!sanitizedEmail && !sanitizedUsername) {
     throw new APIError(
       `Missing ${loginWithUsername ? 'username' : 'email'}.`,
@@ -50,31 +59,20 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     )
   }
 
-  let args = incomingArgs
-
   try {
     const shouldCommit = await initTransaction(args.req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection?.config,
-          context: args.req.context,
-          operation: 'forgotPassword',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'forgotPassword',
+    })
 
     const {
       collection: { config: collectionConfig },
-      data,
       disableEmail,
       expiration,
       req: {
@@ -119,6 +117,13 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       }
     }
 
+    // Exclude trashed users unless `trash: true`
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
+      where: whereConstraint,
+    })
+
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
@@ -129,31 +134,40 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
     if (!user) {
+      await commitTransaction(args.req)
       return null
     }
 
-    user.resetPasswordToken = token
-    user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
+    const resetPasswordExpiration = new Date(
+      Date.now() + (collectionConfig.auth?.forgotPassword?.expiration ?? expiration ?? 3600000),
+    ).toISOString()
 
     user = await payload.update({
       id: user.id,
       collection: collectionConfig.slug,
-      data: user,
+      data: {
+        resetPasswordExpiration,
+        resetPasswordToken: token,
+      },
       req,
     })
 
     if (!disableEmail && user.email) {
-      const protocol = new URL(req.url).protocol // includes the final :
+      const protocol = new URL(req.url!).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
           : `${protocol}//${req.headers.get('host')}`
-
+      const forgotURL = formatAdminURL({
+        adminRoute: config.routes.admin,
+        path: `${config.admin.routes.reset}/${token}`,
+        serverURL,
+      })
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
+    <a href="${forgotURL}">${forgotURL}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
-      if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
+      if (typeof collectionConfig.auth.forgotPassword?.generateEmailHTML === 'function') {
         html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
           req,
           token,
@@ -163,7 +177,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
 
       let subject = req.t('authentication:resetYourPassword')
 
-      if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
+      if (typeof collectionConfig.auth.forgotPassword?.generateEmailSubject === 'function') {
         subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
           req,
           token,
@@ -183,10 +197,11 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // afterForgotPassword - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
-      await priorHook
-      await hook({ args, collection: args.collection?.config, context: req.context })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterForgotPassword?.length) {
+      for (const hook of collectionConfig.hooks.afterForgotPassword) {
+        await hook({ args, collection: args.collection?.config, context: req.context })
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
@@ -21,22 +21,13 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
-    components: {
-      views: {
-        edit: {
-          livePreview: {
-            actions: [
-              '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
-            ],
-          },
-        },
-      },
-    },
+    preview: (doc) => `/live-preview/${doc?.slug}`,
   },
   fields: [
     {
       name: 'slug',
       type: 'text',
+      unique: true,
       required: true,
       admin: {
         position: 'sidebar',
@@ -76,6 +67,16 @@ export const Pages: CollectionConfig = {
           label: 'Test',
           fields: [
             {
+              name: 'localizedTitle',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'relationToLocalized',
+              type: 'relationship',
+              relationTo: postsSlug,
+            },
+            {
               label: 'Rich Text — Slate',
               type: 'richText',
               name: 'richTextSlate',
@@ -85,7 +86,24 @@ export const Pages: CollectionConfig = {
               label: 'Rich Text — Lexical',
               type: 'richText',
               name: 'richTextLexical',
-              editor: lexicalEditor({}),
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
+            },
+            {
+              label: 'Rich Text — Lexical — Localized',
+              type: 'richText',
+              name: 'richTextLexicalLocalized',
+              localized: true,
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
             },
             {
               name: 'relationshipAsUpload',

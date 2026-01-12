@@ -84,6 +84,22 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: relationSlug,
         },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'relationField',
+                  type: 'relationship',
+                  relationTo: relationSlug,
+                },
+              ],
+            },
+          ],
+        },
         // Relationship w/ default access
         {
           name: 'defaultAccessRelation',
@@ -207,15 +223,39 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'movies',
+      versions: { drafts: true },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
         {
+          name: 'select',
+          type: 'select',
+          hasMany: true,
+          options: ['a', 'b', 'c'],
+        },
+        {
           name: 'director',
           type: 'relationship',
           relationTo: 'directors',
+        },
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'director',
+              type: 'relationship',
+              relationTo: 'directors',
+              hasMany: true,
+            },
+            {
+              name: 'polymorphic',
+              type: 'relationship',
+              relationTo: ['directors'],
+            },
+          ],
         },
       ],
     },
@@ -227,9 +267,25 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
           name: 'movies',
           type: 'relationship',
           relationTo: 'movies',
+          hasMany: true,
+        },
+        {
+          name: 'movie',
+          type: 'relationship',
+          relationTo: 'movies',
+        },
+        {
+          name: 'directors',
+          type: 'relationship',
+          relationTo: 'directors',
           hasMany: true,
         },
       ],
@@ -272,6 +328,25 @@ export default buildConfigWithDefaults({
         {
           type: 'relationship',
           name: 'polymorphic',
+          relationTo: ['movies'],
+        },
+        {
+          type: 'relationship',
+          name: 'polymorphicLocalized',
+          relationTo: ['movies'],
+          localized: true,
+        },
+        {
+          type: 'relationship',
+          name: 'polymorphicMany',
+          hasMany: true,
+          relationTo: ['movies'],
+        },
+        {
+          type: 'relationship',
+          hasMany: true,
+          name: 'polymorphicManyLocalized',
+          localized: true,
           relationTo: ['movies'],
         },
       ],
@@ -322,6 +397,121 @@ export default buildConfigWithDefaults({
           name: 'rel',
           type: 'relationship',
           relationTo: ['pages', 'custom-id', 'custom-id-number'],
+        },
+      ],
+    },
+    {
+      slug: 'object-writes',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'one',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'many',
+          hasMany: true,
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'onePoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'manyPoly',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'deep-nested',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'content',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'testBlock',
+                      fields: [
+                        {
+                          type: 'tabs',
+                          tabs: [
+                            {
+                              name: 'meta',
+                              fields: [
+                                {
+                                  type: 'relationship',
+                                  relationTo: 'movies',
+                                  name: 'movie',
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'relations',
+      fields: [
+        {
+          name: 'item',
+          type: 'relationship',
+          relationTo: ['items'],
+        },
+      ],
+    },
+    {
+      slug: 'items',
+      fields: [
+        {
+          type: 'select',
+          options: ['completed', 'failed', 'pending'],
+          name: 'status',
+        },
+        {
+          type: 'join',
+          on: 'item',
+          collection: 'relations',
+          name: 'relation',
+        },
+      ],
+    },
+    {
+      slug: 'blocks',
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'some',
+              fields: [
+                {
+                  type: 'relationship',
+                  relationTo: 'directors',
+                  name: 'director',
+                },
+              ],
+            },
+          ],
         },
       ],
     },

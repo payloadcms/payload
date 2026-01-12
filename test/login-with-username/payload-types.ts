@@ -6,14 +6,72 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
     'login-with-either': LoginWithEitherAuthOperations;
+    'require-email': RequireEmailAuthOperations;
   };
+  blocks: {};
   collections: {
     users: User;
     'login-with-either': LoginWithEither;
+    'require-email': RequireEmail;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -22,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'login-with-either': LoginWithEitherSelect<false> | LoginWithEitherSelect<true>;
+    'require-email': RequireEmailSelect<false> | RequireEmailSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -38,10 +97,13 @@ export interface Config {
       })
     | (LoginWithEither & {
         collection: 'login-with-either';
+      })
+    | (RequireEmail & {
+        collection: 'require-email';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -90,6 +152,23 @@ export interface LoginWithEitherAuthOperations {
         username: string;
       };
 }
+export interface RequireEmailAuthOperations {
+  forgotPassword: {
+    username: string;
+  };
+  login: {
+    password: string;
+    username: string;
+  };
+  registerFirstUser: {
+    password: string;
+    username: string;
+    email: string;
+  };
+  unlock: {
+    username: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -128,6 +207,24 @@ export interface LoginWithEither {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "require-email".
+ */
+export interface RequireEmail {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  username: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -140,6 +237,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'login-with-either';
         value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
       } | null);
   globalSlug?: string | null;
   user:
@@ -150,6 +251,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'login-with-either';
         value: string | LoginWithEither;
+      }
+    | {
+        relationTo: 'require-email';
+        value: string | RequireEmail;
       };
   updatedAt: string;
   createdAt: string;
@@ -168,6 +273,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'login-with-either';
         value: string | LoginWithEither;
+      }
+    | {
+        relationTo: 'require-email';
+        value: string | RequireEmail;
       };
   key?: string | null;
   value?:
@@ -214,6 +323,22 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "login-with-either_select".
  */
 export interface LoginWithEitherSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  username?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "require-email_select".
+ */
+export interface RequireEmailSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;

@@ -6,12 +6,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -29,14 +32,18 @@ type RadioFieldBaseClientProps = {
   readonly value?: string
 }
 
+type RadioFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType> &
   RadioFieldBaseClientProps
 
-export type RadioFieldServerProps = ServerFieldBase<RadioField, RadioFieldClientWithoutType>
+export type RadioFieldServerProps = RadioFieldBaseServerProps &
+  ServerFieldBase<RadioField, RadioFieldClientWithoutType>
 
 export type RadioFieldServerComponent = FieldServerComponent<
   RadioField,
-  RadioFieldClientWithoutType
+  RadioFieldClientWithoutType,
+  RadioFieldBaseServerProps
 >
 
 export type RadioFieldClientComponent = FieldClientComponent<
@@ -44,7 +51,7 @@ export type RadioFieldClientComponent = FieldClientComponent<
   RadioFieldBaseClientProps
 >
 
-export type OnChange<T = string> = (value: T) => void
+type OnChange<T = string> = (value: T) => void
 
 export type RadioFieldLabelServerComponent = FieldLabelServerComponent<
   RadioField,
@@ -67,3 +74,7 @@ export type RadioFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type RadioFieldErrorClientComponent = FieldErrorClientComponent<RadioFieldClientWithoutType>
+
+export type RadioFieldDiffServerComponent = FieldDiffServerComponent<RadioField, RadioFieldClient>
+
+export type RadioFieldDiffClientComponent = FieldDiffClientComponent<RadioFieldClient>

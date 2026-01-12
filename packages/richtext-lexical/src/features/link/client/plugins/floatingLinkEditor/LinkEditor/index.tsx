@@ -3,11 +3,13 @@ import type { ElementNode, LexicalNode } from 'lexical'
 import type { Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
   CloseMenuIcon,
   EditIcon,
+  ExternalLinkIcon,
   formatDrawerSlug,
   useConfig,
   useEditDepth,
@@ -21,11 +23,14 @@ import {
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
+  getDOMSelection,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
@@ -38,8 +43,17 @@ import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
+function preventDefault(
+  event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLElement>,
+): void {
+  event.preventDefault()
+}
+
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
+  // TO-DO: There are several states that should not be state, because they
+  // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
+  const [linkNode, setLinkNode] = useState<LinkNode>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [linkUrl, setLinkUrl] = useState<null | string>(null)
@@ -49,8 +63,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     fieldProps: { schemaPath },
     uuid,
   } = useEditorConfigContext()
+  const isEditable = useLexicalEditable()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
@@ -116,6 +131,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       setNotLink()
       return
     }
+    setLinkNode(focusLinkParent)
 
     const fields = focusLinkParent.getFields()
 
@@ -137,7 +153,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }`,
       )
 
-      const relatedField = config.collections.find((coll) => coll.slug === fields?.doc?.relationTo)
+      const relatedField = fields?.doc?.relationTo
+        ? getEntityConfig({ collectionSlug: fields?.doc?.relationTo })
+        : undefined
       if (!relatedField) {
         // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
         // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.
@@ -156,15 +174,22 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         setLinkLabel(loadingLabel)
 
         requests
-          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
+          .get(
+            formatAdminURL({
+              apiRoute: config.routes.api,
+              path: `/${collection}/${id}`,
+              serverURL: config.serverURL,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              params: {
+                depth: 0,
+                locale: locale?.code,
+              },
             },
-            params: {
-              depth: 0,
-              locale: locale?.code,
-            },
-          })
+          )
           .then(async (res) => {
             if (!res.ok) {
               throw new Error(`HTTP error! Status: ${res.status}`)
@@ -197,7 +222,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     const editorElem = editorRef.current
-    const nativeSelection = window.getSelection()
+    const nativeSelection = getDOMSelection(editor._window)
     const { activeElement } = document
 
     if (editorElem === null) {
@@ -235,8 +260,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setNotLink,
     config.routes.admin,
     config.routes.api,
-    config.collections,
     config.serverURL,
+    getEntityConfig,
     t,
     i18n,
     locale?.code,
@@ -328,23 +353,26 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         <div className="link-input">
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
-            <span className="link-input__label-pure">{linkLabel}</span>
+            <>
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
+              <span className="link-input__label-pure">{linkLabel}</span>
+            </>
           ) : null}
 
-          {editor.isEditable() && (
+          {isEditable && (
             <React.Fragment>
               <button
                 aria-label="Edit link"
                 className="link-edit"
-                onClick={() => {
+                onClick={(event) => {
+                  event.preventDefault()
                   toggleDrawer()
                 }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
+                onMouseDown={preventDefault}
                 tabIndex={0}
                 type="button"
               >
@@ -357,9 +385,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   onClick={() => {
                     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
                   }}
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                  }}
+                  onMouseDown={preventDefault}
                   tabIndex={0}
                   type="button"
                 >
@@ -392,7 +418,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               linkParent = getSelectedNode(selection).getParent()
             } else {
               if (selectedNodes.length) {
-                linkParent = selectedNodes[0].getParent()
+                linkParent = selectedNodes[0]?.getParent() ?? null
               }
             }
 

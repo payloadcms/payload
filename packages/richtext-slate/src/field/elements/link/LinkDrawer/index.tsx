@@ -33,7 +33,7 @@ export const LinkDrawer: React.FC<Props> = ({
   const { t } = useTranslation()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
-  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -42,7 +42,9 @@ export const LinkDrawer: React.FC<Props> = ({
       const { state } = await getFormState({
         id,
         collectionSlug,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -53,7 +55,7 @@ export const LinkDrawer: React.FC<Props> = ({
       return state
     },
 
-    [getFormState, id, collectionSlug, getDocPreferences, docPermissions, globalSlug, fieldMapPath],
+    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, fieldMapPath],
   )
 
   return (
@@ -72,7 +74,7 @@ export const LinkDrawer: React.FC<Props> = ({
             parentIndexPath=""
             parentPath={''}
             parentSchemaPath=""
-            permissions={docPermissions.fields}
+            permissions={true}
             readOnly={false}
           />
           <LinkSubmit />

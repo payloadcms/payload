@@ -45,8 +45,10 @@ export async function generateStaticParams() {
   process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
     const ssrPages = await getDocs<Page>(ssrAutosavePagesSlug)
-    return ssrPages?.map(({ slug }) => slug)
-  } catch (error) {
+    return ssrPages?.map((page) => {
+      return { slug: page.slug }
+    })
+  } catch (_err) {
     return []
   }
 }

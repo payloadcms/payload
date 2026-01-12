@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -15,26 +15,25 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
       admin: {
         autoComplete,
         className,
         description,
         placeholder,
-        style,
-        width,
       } = {} as EmailFieldClientProps['field']['admin'],
       label,
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -52,23 +51,30 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+      className={[
+        fieldBaseClass,
+        'email',
+        className,
+        showError && 'error',
+        (readOnly || disabled) && 'read-only',
+      ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}
@@ -86,7 +92,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
-          disabled={readOnly}
+          disabled={readOnly || disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

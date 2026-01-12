@@ -4,7 +4,7 @@ import type { KeyboardEventHandler } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useId } from 'react'
-import Select from 'react-select'
+import Select, { type StylesConfig } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
 import type { Option, ReactSelectAdapterProps } from './types.js'
@@ -67,6 +67,13 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
+  const styles: StylesConfig<Option> = {
+    // Remove the default react-select z-index from the menu so that our custom
+    // z-index in the "payload-default" css layer can take effect, in such a way
+    // that end users can easily override it as with other styles.
+    menu: (rsStyles) => ({ ...rsStyles, zIndex: undefined }),
+  }
+
   if (!hasMounted) {
     return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
   }
@@ -77,7 +84,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         captureMenuScroll
         customProps={customProps}
         isLoading={isLoading}
-        placeholder={getTranslation(placeholder, i18n)}
         {...props}
         className={classes}
         classNamePrefix="rs"
@@ -106,6 +112,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         options={options}
+        placeholder={getTranslation(placeholder, i18n)}
+        styles={styles}
         unstyled={true}
         value={value}
       />
@@ -152,7 +160,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     <CreatableSelect
       captureMenuScroll
       isLoading={isLoading}
-      placeholder={getTranslation(placeholder, i18n)}
       {...props}
       className={classes}
       classNamePrefix="rs"
@@ -183,6 +190,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       options={options}
+      placeholder={getTranslation(placeholder, i18n)}
+      styles={styles}
       unstyled={true}
       value={value}
     />

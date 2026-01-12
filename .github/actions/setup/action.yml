@@ -1,15 +1,26 @@
 name: Setup node and pnpm
-description: Configure the Node.js and pnpm versions
+description: |
+  Configures Node, pnpm, cache, performs pnpm install
 
 inputs:
   node-version:
-    description: 'The Node.js version to use'
-    required: true
-    default: 22.6.2
+    description: Node.js version override
   pnpm-version:
-    description: 'The pnpm version to use'
-    required: true
-    default: 9.7.1
+    description: Pnpm version override
+  pnpm-run-install:
+    description: Whether to run pnpm install
+    default: 'true'
+  pnpm-restore-cache:
+    description: Whether to restore cache
+    default: 'true'
+  pnpm-install-cache-key:
+    description: The cache key override for the pnpm install cache
+
+outputs:
+  pnpm-store-path:
+    description: The resolved pnpm store path
+  pnpm-install-cache-key:
+    description: The cache key used for pnpm install cache
 
 runs:
   using: composite
@@ -19,30 +30,80 @@ runs:
       shell: bash
       run: sudo ethtool -K eth0 tx off rx off
 
+    - name: Get versions from .tool-versions or use overrides
+      shell: bash
+      run: |
+        # if node-version input is provided, use it; otherwise, read from .tool-versions
+        if [ "${{ inputs.node-version }}" ]; then
+          echo "Node version override provided: ${{ inputs.node-version }}"
+          echo "NODE_VERSION=${{ inputs.node-version }}" >> $GITHUB_ENV
+        elif [ -f .tool-versions ]; then
+          NODE_VERSION=$(grep '^nodejs ' .tool-versions | awk '{print $2}')
+          echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
+          echo "Node version resolved to: $NODE_VERSION"
+        else
+          echo "No .tool-versions file found and no node-version input provided. Invalid configuration."
+          exit 1
+        fi
+
+        # if pnpm-version input is provided, use it; otherwise, read from .tool-versions
+        if [ "${{ inputs.pnpm-version }}" ]; then
+          echo "Pnpm version override provided: ${{ inputs.pnpm-version }}"
+          echo "PNPM_VERSION=${{ inputs.pnpm-version }}" >> $GITHUB_ENV
+        elif [ -f .tool-versions ]; then
+          PNPM_VERSION=$(grep '^pnpm ' .tool-versions | awk '{print $2}')
+          echo "PNPM_VERSION=$PNPM_VERSION" >> $GITHUB_ENV
+          echo "Pnpm version resolved to: $PNPM_VERSION"
+        else
+          echo "No .tool-versions file found and no pnpm-version input provided. Invalid configuration."
+          exit 1
+        fi
+
     - name: Setup Node@${{ inputs.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version: ${{ env.NODE_VERSION }}
 
     - name: Install pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: ${{ inputs.pnpm-version }}
+        version: ${{ env.PNPM_VERSION }}
         run_install: false
 
-    - name: Get pnpm store directory
+    - name: Get pnpm store path
       shell: bash
       run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        STORE_PATH=$(pnpm store path --silent)
+        echo "STORE_PATH=$STORE_PATH" >> $GITHUB_ENV
+        echo "Pnpm store path resolved to: $STORE_PATH"
 
-    - name: Setup pnpm cache
+    - name: Compute Cache Key
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.pnpm-install-cache-key }}" ]; then
+          PNPM_INSTALL_CACHE_KEY="${{ inputs.pnpm-install-cache-key }}"
+        else
+          PNPM_INSTALL_CACHE_KEY="pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}"
+        fi
+        echo "Computed PNPM_INSTALL_CACHE_KEY: $PNPM_INSTALL_CACHE_KEY"
+        echo "PNPM_INSTALL_CACHE_KEY=$PNPM_INSTALL_CACHE_KEY" >> $GITHUB_ENV
+
+    - name: Restore pnpm install cache
+      if: ${{ inputs.pnpm-restore-cache == 'true' }}
       uses: actions/cache@v4
       with:
         path: ${{ env.STORE_PATH }}
-        key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ env.PNPM_INSTALL_CACHE_KEY }}
         restore-keys: |
+          pnpm-store-${{ env.PNPM_VERSION }}-
           pnpm-store-
-          pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-    - shell: bash
+    - name: Run pnpm install
+      if: ${{ inputs.pnpm-run-install == 'true' }}
+      shell: bash
       run: pnpm install
+
+      # Set the cache key output
+    - run: |
+        echo "pnpm-install-cache-key=${{ env.PNPM_INSTALL_CACHE_KEY }}" >> $GITHUB_OUTPUT
+      shell: bash

@@ -6,10 +6,19 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { Fragment, useCallback, useId, useMemo } from 'react'
+import { toast } from 'sonner'
+
+import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
+import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
+import {
+  mergeFormStateFromClipboard,
+  reduceFormStateByPath,
+} from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -27,6 +36,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -35,8 +45,10 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
+    field,
     field: {
       name,
+      type,
       admin: { className, description, isSortable = true } = {},
       fields,
       label,
@@ -46,18 +58,27 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const {
+    addFieldRow,
+    dispatchFields,
+    getFields,
+    moveFieldRow,
+    removeFieldRow,
+    replaceState,
+    setModified,
+  } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -68,7 +89,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -109,17 +130,22 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     errorPaths,
-    rows: rowsData = [],
+    path,
+    rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const componentId = useId()
+  const scrollIdPrefix = useMemo(() => `scroll-${componentId}`, [componentId])
 
   const addRow = useCallback(
     (rowIndex: number) => {
@@ -129,13 +155,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setModified(true)
-
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex}`)
+        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, schemaPath, setModified],
+    [addFieldRow, path, schemaPath, scrollIdPrefix],
   )
 
   const duplicateRow = useCallback(
@@ -145,38 +169,40 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       setModified(true)
 
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex}`)
+        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
       }, 0)
     },
-    [dispatchFields, path, setModified],
+    [dispatchFields, path, scrollIdPrefix, setModified],
   )
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
-      setModified(true)
+      removeFieldRow({ path, rowIndex })
     },
-    [dispatchFields, path, setModified],
+    [removeFieldRow, path],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
     },
-    [dispatchFields, path, setModified],
+    [path, moveFieldRow],
   )
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
       const { collapsedIDs, updatedRows } = toggleAllRows({
         collapsed,
-        rows: rowsData,
+        rows,
       })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
     },
-    [dispatchFields, path, rowsData, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
@@ -184,22 +210,101 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
         collapsed,
         rowID,
-        rows: rowsData,
+        rows,
       })
 
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, rowsData, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
-  const hasMaxRows = maxRows && rowsData.length >= maxRows
+  const copyRow = useCallback(
+    (rowIndex: number) => {
+      const formState = { ...getFields() }
+      const clipboardResult = clipboardCopy({
+        type,
+        fields,
+        getDataToCopy: () =>
+          reduceFormStateByPath({
+            formState,
+            path,
+            rowIndex,
+          }),
+        path,
+        rowIndex,
+        t,
+      })
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      } else {
+        toast.success(t('general:copied'))
+      }
+    },
+    [fields, getFields, path, t, type],
+  )
+
+  const pasteRow = useCallback(
+    (rowIndex: number) => {
+      const formState = { ...getFields() }
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const newState = mergeFormStateFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex,
+          })
+          replaceState(newState)
+          setModified(true)
+        },
+        path,
+        schemaFields: fields,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [fields, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteField = useCallback(
+    (dataFromClipboard: ClipboardPasteData) => {
+      const formState = { ...getFields() }
+      const newState = mergeFormStateFromClipboard({
+        dataFromClipboard,
+        formState,
+        path,
+      })
+      replaceState(newState)
+      setModified(true)
+    },
+    [getFields, path, replaceState, setModified],
+  )
+
+  const getDataToCopy = useCallback(
+    () =>
+      reduceFormStateByPath({
+        formState: { ...getFields() },
+        path,
+      }),
+    [getFields, path],
+  )
+
+  const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = readOnly && rowsData.length === 0
-  const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
+  const showRequired = (readOnly || disabled) && rows.length === 0
+  const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -212,6 +317,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent
@@ -240,43 +346,64 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rowsData?.length > 0 && (
-            <ul className={`${baseClass}__header-actions`}>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(true)}
-                  type="button"
-                >
-                  {t('fields:collapseAll')}
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(false)}
-                  type="button"
-                >
-                  {t('fields:showAll')}
-                </button>
-              </li>
-            </ul>
-          )}
+          <ul className={`${baseClass}__header-actions`}>
+            {rows?.length > 0 && (
+              <Fragment>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(true)}
+                    type="button"
+                  >
+                    {t('fields:collapseAll')}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(false)}
+                    type="button"
+                  >
+                    {t('fields:showAll')}
+                  </button>
+                </li>
+              </Fragment>
+            )}
+            <li>
+              <ClipboardAction
+                allowCopy={rows?.length > 0}
+                allowPaste={!readOnly}
+                className={`${baseClass}__header-action`}
+                disabled={disabled}
+                fields={fields}
+                getDataToCopy={getDataToCopy}
+                onPaste={pasteField}
+                path={path}
+                type={type}
+              />
+            </li>
+          </ul>
         </div>
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
-      <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-      {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
+      <NullifyLocaleField
+        fieldValue={value}
+        localized={localized}
+        path={path}
+        readOnly={readOnly}
+      />
+      {BeforeInput}
+      {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
-          ids={rowsData.map((row) => row.id)}
+          ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
-          {rowsData.map((rowData, i) => {
-            const { id: rowID } = rowData
+          {rows.map((rowData, i) => {
+            const { id: rowID, isLoading } = rowData
 
             const rowPath = `${path}.${i}`
 
@@ -285,29 +412,37 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             ).length
 
             return (
-              <DraggableSortableItem disabled={readOnly || !isSortable} id={rowID} key={rowID}>
+              <DraggableSortableItem
+                disabled={readOnly || disabled || !isSortable}
+                id={rowID}
+                key={rowID}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
                     addRow={addRow}
-                    CustomRowLabel={RowLabels?.[i]}
+                    copyRow={copyRow}
+                    CustomRowLabel={rows?.[i]?.customComponents?.RowLabel}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
+                    isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
                     parentPath={path}
+                    pasteRow={pasteRow}
                     path={rowPath}
                     permissions={permissions}
-                    readOnly={readOnly}
+                    readOnly={readOnly || disabled}
                     removeRow={removeRow}
                     row={rowData}
-                    rowCount={rowsData?.length}
+                    rowCount={rows?.length}
                     rowIndex={i}
                     schemaPath={schemaPath}
+                    scrollIdPrefix={scrollIdPrefix}
                     setCollapse={setCollapse}
                   />
                 )}
@@ -335,11 +470,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
-          disabled={readOnly}
+          disabled={disabled}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
@@ -350,6 +485,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
       )}
+      {AfterInput}
     </div>
   )
 }

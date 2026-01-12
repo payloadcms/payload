@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../../types/index.js'
-import type { Permissions } from '../types.js'
+import type { SanitizedPermissions } from '../types.js'
 
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit.js'
@@ -9,7 +9,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
-export const accessOperation = async (args: Arguments): Promise<Permissions> => {
+export const accessOperation = async (args: Arguments): Promise<SanitizedPermissions> => {
   const { req } = args
 
   adminInitTelemetry(req)

@@ -19,7 +19,7 @@ To report an issue, please follow the steps below:
 ```
 
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
-- `int.spec.ts` [Optional] - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
+- `int.spec.ts` [Optional] - This is the test file run by vitest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` [Optional] - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests.
 - `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types _community`.
 
@@ -43,9 +43,9 @@ An issue does not need to have failing tests — reproduction steps with your fo
 
 There are a couple ways to do this:
 
-- **Granularly** - you can run individual tests in vscode by installing the Jest Runner plugin and using that to run individual tests. Clicking the `debug` button will run the test in debug mode allowing you to set break points.
+- **Granularly** - you can run individual tests in vscode by installing the [Vitest Plugin](https://marketplace.visualstudio.com/items?itemName=vitest.explorer) and using that to run individual tests. Clicking the `debug` button will run the test in debug mode allowing you to set break points.
 
-  <img src="https://raw.githubusercontent.com/payloadcms/payload/main/src/admin/assets/images/github/int-debug.png" />
+  <img src="https://raw.githubusercontent.com/payloadcms/payload/main/.github/assets/int-debug.png" />
 
 - **Manually** - you can run all int tests in the `/test/_community/int.spec.ts` file by running the following command:
 
@@ -62,7 +62,7 @@ The easiest way to run E2E tests is to install
 
 Once they are installed you can open the `testing` tab in vscode sidebar and drill down to the test you want to run, i.e. `/test/_community/e2e.spec.ts`
 
-<img src="https://raw.githubusercontent.com/payloadcms/payload/main/src/admin/assets/images/github/e2e-debug.png" />
+<img src="https://raw.githubusercontent.com/payloadcms/payload/main/.github/assets/e2e-debug.png" />
 
 #### Notes
 

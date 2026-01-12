@@ -2,15 +2,12 @@
 import type { NavPreferences } from 'payload'
 
 import React, { useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import './index.scss'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { useNav } from '../Nav/context.js'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 const baseClass = 'nav-group'
 

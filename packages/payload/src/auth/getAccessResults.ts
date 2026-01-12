@@ -1,28 +1,33 @@
 import type { AllOperations, PayloadRequest } from '../types/index.js'
-import type { Permissions } from './types.js'
+import type { Permissions, SanitizedPermissions } from './types.js'
 
-import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
+import { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
+import { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 
 type GetAccessResultsArgs = {
   req: PayloadRequest
 }
-export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<Permissions> {
-  const results = {} as Permissions
+export async function getAccessResults({
+  req,
+}: GetAccessResultsArgs): Promise<SanitizedPermissions> {
+  const results = {
+    collections: {},
+    globals: {},
+  } as Permissions
   const { payload, user } = req
 
   const isLoggedIn = !!user
   const userCollectionConfig =
-    user && user.collection
-      ? payload.config.collections.find((collection) => collection.slug === user.collection)
-      : null
+    user && user.collection ? payload?.collections?.[user.collection]?.config : null
 
-  if (userCollectionConfig && payload.config.admin.user === user.collection) {
+  if (userCollectionConfig && payload.config.admin.user === user?.collection) {
     results.canAccessAdmin = userCollectionConfig.access.admin
       ? await userCollectionConfig.access.admin({ req })
       : isLoggedIn
   } else {
     results.canAccessAdmin = false
   }
+  const blockReferencesPermissions = {}
 
   await Promise.all(
     payload.config.collections.map(async (collection) => {
@@ -40,16 +45,15 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
         collectionOperations.push('readVersions')
       }
 
-      const collectionPolicy = await getEntityPolicies({
-        type: 'collection',
+      const collectionPermissions = await getEntityPermissions({
+        blockReferencesPermissions,
         entity: collection,
+        entityType: 'collection',
+        fetchData: false,
         operations: collectionOperations,
         req,
       })
-      results.collections = {
-        ...results.collections,
-        [collection.slug]: collectionPolicy,
-      }
+      results.collections![collection.slug] = collectionPermissions
     }),
   )
 
@@ -61,18 +65,17 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
         globalOperations.push('readVersions')
       }
 
-      const globalPolicy = await getEntityPolicies({
-        type: 'global',
+      const globalPermissions = await getEntityPermissions({
+        blockReferencesPermissions,
         entity: global,
+        entityType: 'global',
+        fetchData: false,
         operations: globalOperations,
         req,
       })
-      results.globals = {
-        ...results.globals,
-        [global.slug]: globalPolicy,
-      }
+      results.globals![global.slug] = globalPermissions
     }),
   )
 
-  return results
+  return sanitizePermissions(results)
 }

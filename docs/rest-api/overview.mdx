@@ -7,19 +7,27 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 ---
 
 <Banner>
-  A fully functional REST API is automatically generated from your Collection and Global configs.
+  A fully functional REST API is automatically generated from your Collection
+  and Global configs.
 </Banner>
 
 The REST API is a fully functional HTTP client that allows you to interact with your Documents in a RESTful manner. It supports all CRUD operations and is equipped with automatic pagination, depth, and sorting.
 All Payload API routes are mounted and prefixed to your config's `routes.api` URL segment (default: `/api`).
+
+To enhance DX, you can use [Payload SDK](#payload-rest-api-sdk) to query your REST API.
 
 **REST query parameters:**
 
 - [depth](../queries/depth) - automatically populates relationships and uploads
 - [locale](/docs/configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
-- [select](../queries/select) - specifies which fields to include to the result
-- [populate](../queries/select#populate) - specifies which fields to include to the result from populated documents
+- [select](../queries/select) - specifies which fields to include in the result
+- [populate](../queries/select#populate) - specifies which fields to include in the result from populated documents
+- [limit](../queries/pagination#pagination-controls) - limits the number of documents returned
+- [page](../queries/pagination#pagination-controls) - specifies which page to get documents from when used with a limit
+- [sort](../queries/sort#rest-api) - specifies the field(s) to use to sort the returned documents by
+- [where](../queries/overview) - specifies advanced filters to use to query documents
+- [joins](/docs/fields/join#rest-api) - specifies the custom request for each join field by name of the field
 
 ## Collections
 
@@ -50,213 +58,200 @@ Note: Collection slugs must be formatted in kebab-case
             updatedAt: "2023-04-27T11:27:32.419Z",
           },
         },
-        drawerContent: (
-          <>
-            <h6>Additional <code>find</code> query parameters</h6>
-            The <code>find</code> endpoint supports the following additional query parameters:
-            <ul>
-              <li>
-                <a href="/docs/queries/overview#sort">sort</a> - sort by field
-              </li>
-              <li>
-                <a href="/docs/queries/overview">where</a> - pass a where query to constrain returned
-                documents
-              </li>
-              <li>
-                <a href="/docs/queries/pagination#pagination-controls">limit</a> - limit the returned
-                documents to a certain number
-              </li>
-              <li>
-                <a href="/docs/queries/pagination#pagination-controls">page</a> - get a specific page of
-                documents
-              </li>
-            </ul>
-          </>
-        ),
-      },
-    },
-    {
-      operation: "Find By ID",
-      method: "GET",
-      path: "/api/{collection-slug}/{id}",
-      description: "Find a specific document by ID",
-      example: {
-        slug: "findByID",
-        req: true,
-        res: {
-          id: "644a5c24cc1383022535fc7c",
-          title: "Home",
-          content: "REST API examples",
-          slug: "home",
-          createdAt: "2023-04-27T11:27:32.419Z",
-          updatedAt: "2023-04-27T11:27:32.419Z",
-        },
-      },
-    },
-    {
-      operation: "Count",
-      method: "GET",
-      path: "/api/{collection-slug}/count",
-      description: "Count the documents",
-      example: {
-        slug: "count",
-        req: true,
-        res: {
-         totalDocs: 10
-        },
-      },
-    },
-    {
-      operation: "Create",
-      method: "POST",
-      path: "/api/{collection-slug}",
-      description: "Create a new document",
-      example: {
-        slug: "createDocument",
-        req: {
-          credentials: true,
-          headers: true,
-          body: {
-            title: "New page",
-            content: "Here is some content",
-          },
-        },
-        res: {
-          message: "Page successfully created.",
-          doc: {
-            id: "644ba34c86359864f9535932",
-            title: "New page",
-            content: "Here is some content",
-            slug: "new-page",
-            createdAt: "2023-04-28T10:43:24.466Z",
-            updatedAt: "2023-04-28T10:43:24.466Z",
-          },
-        },
-      },
-    },
-    {
-      operation: "Update",
-      method: "PATCH",
-      path: "/api/{collection-slug}",
-      description: "Update all documents matching the where query",
-      example: {
-        slug: "updateDocument",
-        req: {
-          credentials: true,
-          query: true,
-          headers: true,
-          body: {
-            title: "I have been updated!",
-          },
-        },
-        res: {
-          docs: [
-            {
-              id: "644ba34c86359864f9535932",
-              title: "I have been updated!",
-              content: "Here is some content",
-              slug: "new-page",
-              createdAt: "2023-04-28T10:43:24.466Z",
-              updatedAt: "2023-04-28T10:45:23.724Z",
-            },
-          ],
-          errors: [],
-        },
-      },
-    },
-    {
-      operation: "Update By ID",
-      method: "PATCH",
-      path: "/api/{collection-slug}/{id}",
-      description: "Update a document by ID",
-      example: {
-        slug: "updateDocumentByID",
-        req: {
-          credentials: true,
-          headers: true,
-          body: {
-            title: "I have been updated by ID!",
-            categories: "example-uuid",
-            tags: {
-              relationTo: "location",
-              value: "another-example-uuid",
-            },
-          },
-        },
-        res: {
-          message: "Updated successfully.",
-          doc: {
-            id: "644a5c24cc1383022535fc7c",
-            title: "I have been updated by ID!",
-            content: "REST API examples",
-            categories: {
-              id: "example-uuid",
-              name: "Test Category",
-            },
-            tags: [
-              {
-                relationTo: "location",
-                value: {
-                  id: "another-example-uuid",
-                  name: "Test Location",
-                },
-              },
-            ],
-            slug: "home",
-            createdAt: "2023-04-27T11:27:32.419Z",
-            updatedAt: "2023-04-28T10:47:59.259Z",
-          },
-        },
-      },
-    },
-    {
-      operation: "Delete",
-      method: "DELETE",
-      path: "/api/{collection-slug}",
-      description: "Delete all documents matching the where query",
-      example: {
-        slug: "deleteDocuments",
-        req: {
-          credentials: true,
-          query: true,
-          headers: true,
-        },
-        res: {
-          docs: [
-            {
-              id: "644ba4cf86359864f953594b",
-              title: "New page",
-              content: "Here is some content",
-              slug: "new-page",
-              createdAt: "2023-04-28T10:49:51.359Z",
-              updatedAt: "2023-04-28T10:49:51.359Z",
-            },
-          ],
-          errors: [],
-        },
-      },
-    },
-    {
-      operation: "Delete by ID",
-      method: "DELETE",
-      path: "/api/{collection-slug}/{id}",
-      description: "Delete an existing document by ID",
-      example: {
-        slug: "deleteByID",
-        req: {
-          credentials: true,
-          headers: true,
-        },
-        res: {
-          id: "644ba51786359864f9535954",
-          title: "New page",
-          content: "Here is some content",
-          slug: "new-page",
-          createdAt: "2023-04-28T10:51:03.028Z",
-          updatedAt: "2023-04-28T10:51:03.028Z",
-        },
-      },
-    },
+        drawerContent: `
+#### Additional \`find\` query parameters
+
+The \`find\` endpoint supports the following additional query parameters:
+
+- [sort](/docs/queries/overview#sort) - sort by field
+- [where](/docs/queries/overview) - pass a where query to constrain returned documents
+- [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
+- [page](/docs/queries/pagination#pagination-controls) - get a specific page of documents
+  `
+  },
+  },
+  {
+  operation: "Find By ID",
+  method: "GET",
+  path: "/api/{collection-slug}/{id}",
+  description: "Find a specific document by ID",
+  example: {
+  slug: "findByID",
+  req: true,
+  res: {
+  id: "644a5c24cc1383022535fc7c",
+  title: "Home",
+  content: "REST API examples",
+  slug: "home",
+  createdAt: "2023-04-27T11:27:32.419Z",
+  updatedAt: "2023-04-27T11:27:32.419Z",
+  },
+  },
+  },
+  {
+  operation: "Count",
+  method: "GET",
+  path: "/api/{collection-slug}/count",
+  description: "Count the documents",
+  example: {
+  slug: "count",
+  req: true,
+  res: {
+  totalDocs: 10
+  },
+  },
+  },
+  {
+  operation: "Create",
+  method: "POST",
+  path: "/api/{collection-slug}",
+  description: "Create a new document",
+  example: {
+  slug: "createDocument",
+  req: {
+  credentials: true,
+  headers: true,
+  body: {
+  title: "New page",
+  content: "Here is some content",
+  },
+  },
+  res: {
+  message: "Page successfully created.",
+  doc: {
+  id: "644ba34c86359864f9535932",
+  title: "New page",
+  content: "Here is some content",
+  slug: "new-page",
+  createdAt: "2023-04-28T10:43:24.466Z",
+  updatedAt: "2023-04-28T10:43:24.466Z",
+  },
+  },
+  },
+  },
+  {
+  operation: "Update",
+  method: "PATCH",
+  path: "/api/{collection-slug}",
+  description: "Update all documents matching the where query",
+  example: {
+  slug: "updateDocument",
+  req: {
+  credentials: true,
+  query: true,
+  headers: true,
+  body: {
+  title: "I have been updated!",
+  },
+  },
+  res: {
+  docs: [
+  {
+  id: "644ba34c86359864f9535932",
+  title: "I have been updated!",
+  content: "Here is some content",
+  slug: "new-page",
+  createdAt: "2023-04-28T10:43:24.466Z",
+  updatedAt: "2023-04-28T10:45:23.724Z",
+  },
+  ],
+  errors: [],
+  },
+  },
+  },
+  {
+  operation: "Update By ID",
+  method: "PATCH",
+  path: "/api/{collection-slug}/{id}",
+  description: "Update a document by ID",
+  example: {
+  slug: "updateDocumentByID",
+  req: {
+  credentials: true,
+  headers: true,
+  body: {
+  title: "I have been updated by ID!",
+  categories: "example-uuid",
+  tags: {
+  relationTo: "location",
+  value: "another-example-uuid",
+  },
+  },
+  },
+  res: {
+  message: "Updated successfully.",
+  doc: {
+  id: "644a5c24cc1383022535fc7c",
+  title: "I have been updated by ID!",
+  content: "REST API examples",
+  categories: {
+  id: "example-uuid",
+  name: "Test Category",
+  },
+  tags: [
+  {
+  relationTo: "location",
+  value: {
+  id: "another-example-uuid",
+  name: "Test Location",
+  },
+  },
+  ],
+  slug: "home",
+  createdAt: "2023-04-27T11:27:32.419Z",
+  updatedAt: "2023-04-28T10:47:59.259Z",
+  },
+  },
+  },
+  },
+  {
+  operation: "Delete",
+  method: "DELETE",
+  path: "/api/{collection-slug}",
+  description: "Delete all documents matching the where query",
+  example: {
+  slug: "deleteDocuments",
+  req: {
+  credentials: true,
+  query: true,
+  headers: true,
+  },
+  res: {
+  docs: [
+  {
+  id: "644ba4cf86359864f953594b",
+  title: "New page",
+  content: "Here is some content",
+  slug: "new-page",
+  createdAt: "2023-04-28T10:49:51.359Z",
+  updatedAt: "2023-04-28T10:49:51.359Z",
+  },
+  ],
+  errors: [],
+  },
+  },
+  },
+  {
+  operation: "Delete by ID",
+  method: "DELETE",
+  path: "/api/{collection-slug}/{id}",
+  description: "Delete an existing document by ID",
+  example: {
+  slug: "deleteByID",
+  req: {
+  credentials: true,
+  headers: true,
+  },
+  res: {
+  id: "644ba51786359864f9535954",
+  title: "New page",
+  content: "Here is some content",
+  slug: "new-page",
+  createdAt: "2023-04-28T10:51:03.028Z",
+  updatedAt: "2023-04-28T10:51:03.028Z",
+  },
+  },
+  },
 
 ]}
 />
@@ -501,7 +496,7 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 
 ## Preferences
 
-In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/overview#preferences) for data specific to the authenticated user.
+In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/preferences) for data specific to the authenticated user.
 
 <RestExamples
   data={[
@@ -576,9 +571,9 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
 <Banner type="warning">
-  Custom endpoints are not authenticated by default. You are responsible for securing your own endpoints.
+  Custom endpoints are not authenticated by default. You are responsible for
+  securing your own endpoints.
 </Banner>
-
 
 Each endpoint object needs to have:
 
@@ -586,7 +581,7 @@ Each endpoint object needs to have:
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
 | **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Next.js](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)                                                                                          |
+| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`.                          |
 | **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
@@ -610,7 +605,7 @@ export const Orders: CollectionConfig = {
         const tracking = await getTrackingInfo(req.routeParams.id)
 
         if (!tracking) {
-          return Response.json({ error: 'not found' }, { status: 404})
+          return Response.json({ error: 'not found' }, { status: 404 })
         }
 
         return Response.json({
@@ -630,12 +625,12 @@ export const Orders: CollectionConfig = {
           collection: 'tracking',
           data: {
             // data to update the document with
-          }
+          },
         })
         return Response.json({
-          message: 'successfully updated tracking info'
+          message: 'successfully updated tracking info',
         })
-      }
+      },
     },
     {
       path: '/:id/forbidden',
@@ -649,21 +644,24 @@ export const Orders: CollectionConfig = {
         // do something
 
         return Response.json({
-          message: 'successfully updated tracking info'
+          message: 'successfully updated tracking info',
         })
-      }
-    }
+      },
+    },
   ],
   // highlight-end
 }
 ```
 
 <Banner>
-  <strong>Note:</strong>
-  **req** will have the **payload** object and can be used inside your endpoint handlers for making calls like req.payload.find() that will make use of [Access Control](../access-control/overview) and [Hooks](../hooks/overview).
+  **Note:** **req** will have the **payload** object and can be used inside your
+  endpoint handlers for making calls like req.payload.find() that will make use
+  of [Access Control](../access-control/overview) and
+  [Hooks](../hooks/overview).
 </Banner>
 
 #### Helpful tips
+
 `req.data`
 
 Data is not automatically appended to the request. You can read the body data by calling `await req.json()`.
@@ -671,7 +669,7 @@ Data is not automatically appended to the request. You can read the body data by
 Or you could use our helper function that mutates the request and appends data and file if found.
 
 ```ts
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { addDataAndFileToRequest } from 'payload'
 
 // custom endpoint example
 {
@@ -697,7 +695,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 The locale and the fallback locale are not automatically appended to custom endpoint requests. If you would like to add them you can use this helper function.
 
 ```ts
-import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+import { addLocalesToRequestFromData } from 'payload'
 
 // custom endpoint example
 {
@@ -711,13 +709,38 @@ import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
 }
 ```
 
+`headersWithCors`
+
+By default, custom endpoints don't handle CORS headers in responses. The `headersWithCors` function checks the Payload config and sets the appropriate CORS headers in the response accordingly.
+
+```ts
+import { headersWithCors } from 'payload'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: async (req) => {
+    return Response.json(
+      { message: 'success' },
+      {
+        headers: headersWithCors({
+          headers: new Headers(),
+          req,
+        })
+      },
+    )
+  }
+}
+```
+
 ## Method Override for GET Requests
 
 Payload supports a method override feature that allows you to send GET requests using the HTTP POST method. This can be particularly useful in scenarios when the query string in a regular GET request is too long.
 
 ### How to Use
 
-To use this feature, include the `X-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
+To use this feature, include the `X-Payload-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
 
 ### Example
 
@@ -732,7 +755,7 @@ const res = await fetch(`${api}/${collectionSlug}`, {
   headers: {
     'Accept-Language': i18n.language,
     'Content-Type': 'application/x-www-form-urlencoded',
-    'X-HTTP-Method-Override': 'GET',
+    'X-Payload-HTTP-Method-Override': 'GET',
   },
   body: qs.stringify({
     depth: 1,
@@ -749,6 +772,303 @@ const res = await fetch(`${api}/${collectionSlug}?depth=1&locale=en`, {
   credentials: 'include',
   headers: {
     'Accept-Language': i18n.language,
+  },
+})
+```
+
+### Passing as JSON
+
+When using `X-Payload-HTTP-Method-Override`, it expects the body to be a query string. If you want to pass JSON instead, you can set the `Content-Type` to `application/json` and include the JSON body in the request.
+
+#### Example
+
+```ts
+const res = await fetch(`${api}/${collectionSlug}/${id}`, {
+  // Only the findByID endpoint supports HTTP method overrides with JSON data
+  method: 'POST',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
+    'Content-Type': 'application/json',
+    'X-Payload-HTTP-Method-Override': 'GET',
+  },
+  body: JSON.stringify({
+    depth: 1,
+    locale: 'en',
+  }),
+})
+```
+
+This can be more efficient for large JSON payloads, as you avoid converting data to and from query strings. However, only certain endpoints support this. Supported endpoints will read the parsed body under a `data` property, instead of reading from query parameters as with standard GET requests.
+
+## Payload REST API SDK
+
+The best, fully type-safe way to query Payload REST API is to use the SDK package, which can be installed with:
+
+```bash
+pnpm add @payloadcms/sdk
+```
+
+Its usage is very similar to [the Local API](../local-api/overview).
+
+<Banner type="warning">
+  **Note:** The SDK package is currently in beta and may be subject to change in
+  minor versions updates prior to being stable.
+</Banner>
+
+Example:
+
+```ts
+import { PayloadSDK } from '@payloadcms/sdk'
+import type { Config } from './payload-types'
+
+// Pass your config from generated types as generic
+const sdk = new PayloadSDK<Config>({
+  baseURL: 'https://example.com/api',
+})
+
+// Find operation
+const posts = await sdk.find({
+  collection: 'posts',
+  draft: true,
+  limit: 10,
+  locale: 'en',
+  page: 1,
+  where: { _status: { equals: 'published' } },
+})
+
+// Find by ID operation
+const posts = await sdk.findByID({
+  id,
+  collection: 'posts',
+  draft: true,
+  locale: 'en',
+})
+
+// Auth login operation
+const result = await sdk.login({
+  collection: 'users',
+  data: {
+    email: 'dev@payloadcms.com',
+    password: '12345',
+  },
+})
+
+// Create operation
+const result = await sdk.create({
+  collection: 'posts',
+  data: { text: 'text' },
+})
+
+// Create operation with a file
+// `file` can be either a Blob | File object or a string URL
+const result = await sdk.create({ collection: 'media', file, data: {} })
+
+// Count operation
+const result = await sdk.count({
+  collection: 'posts',
+  where: { id: { equals: post.id } },
+})
+
+// Update (by ID) operation
+const result = await sdk.update({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    text: 'updated-text',
+  },
+})
+
+// Update (bulk) operation
+const result = await sdk.update({
+  collection: 'posts',
+  where: {
+    id: {
+      equals: post.id,
+    },
+  },
+  data: { text: 'updated-text-bulk' },
+})
+
+// Delete (by ID) operation
+const result = await sdk.delete({ id: post.id, collection: 'posts' })
+
+// Delete (bulk) operation
+const result = await sdk.delete({
+  where: { id: { equals: post.id } },
+  collection: 'posts',
+})
+
+// Find Global operation
+const result = await sdk.findGlobal({ slug: 'global' })
+
+// Update Global operation
+const result = await sdk.updateGlobal({
+  slug: 'global',
+  data: { text: 'some-updated-global' },
+})
+
+// Auth Login operation
+const result = await sdk.login({
+  collection: 'users',
+  data: { email: 'dev@payloadcms.com', password: '123456' },
+})
+
+// Auth Me operation
+const result = await sdk.me(
+  { collection: 'users' },
+  {
+    headers: {
+      Authorization: `JWT  ${user.token}`,
+    },
+  },
+)
+
+// Auth Refresh Token operation
+const result = await sdk.refreshToken(
+  { collection: 'users' },
+  { headers: { Authorization: `JWT ${user.token}` } },
+)
+
+// Auth Forgot Password operation
+const result = await sdk.forgotPassword({
+  collection: 'users',
+  data: { email: user.email },
+})
+
+// Auth Reset Password operation
+const result = await sdk.resetPassword({
+  collection: 'users',
+  data: { password: '1234567', token: resetPasswordToken },
+})
+
+// Find Versions operation
+const result = await sdk.findVersions({
+  collection: 'posts',
+  where: { parent: { equals: post.id } },
+})
+
+// Find Version by ID operation
+const result = await sdk.findVersionByID({
+  collection: 'posts',
+  id: version.id,
+})
+
+// Restore Version operation
+const result = await sdk.restoreVersion({
+  collection: 'posts',
+  id,
+})
+
+// Find Global Versions operation
+const result = await sdk.findGlobalVersions({
+  slug: 'global',
+})
+
+// Find Global Version by ID operation
+const result = await sdk.findGlobalVersionByID({
+  id: version.id,
+  slug: 'global',
+})
+
+// Restore Global Version operation
+const result = await sdk.restoreGlobalVersion({
+  slug: 'global',
+  id,
+})
+```
+
+Every operation has optional 3rd parameter which is used to add additional data to the RequestInit object (like headers):
+
+```ts
+await sdk.me(
+  {
+    collection: 'users',
+  },
+  {
+    // RequestInit object
+    headers: {
+      Authorization: `JWT ${token}`,
+    },
+  },
+)
+```
+
+To query custom endpoints, you can use the `request` method, which is used internally for all other methods:
+
+```ts
+await sdk.request({
+  method: 'POST',
+  path: '/send-data',
+  json: {
+    id: 1,
+  },
+})
+```
+
+Custom `fetch` implementation and `baseInit` for shared `RequestInit` properties:
+
+```ts
+const sdk = new PayloadSDK<Config>({
+  baseInit: { credentials: 'include' },
+  baseURL: 'https://example.com/api',
+  fetch: async (url, init) => {
+    console.log('before req')
+    const response = await fetch(url, init)
+    console.log('after req')
+    return response
+  },
+})
+```
+
+Example of a custom `fetch` implementation for testing the REST API without needing to spin up a next development server:
+
+```ts
+import type { GeneratedTypes, SanitizedConfig } from 'payload'
+
+import config from '@payload-config'
+import {
+  REST_DELETE,
+  REST_GET,
+  REST_PATCH,
+  REST_POST,
+  REST_PUT,
+} from '@payloadcms/next/routes'
+import { PayloadSDK } from '@payloadcms/sdk'
+
+export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
+
+const api = {
+  GET: REST_GET(config),
+  POST: REST_POST(config),
+  PATCH: REST_PATCH(config),
+  DELETE: REST_DELETE(config),
+  PUT: REST_PUT(config),
+}
+
+const awaitedConfig = await config
+
+export const sdk = new PayloadSDK<GeneratedTypes>({
+  baseURL: ``,
+  fetch: (path: string, init: RequestInit) => {
+    const [slugs, search] = path.slice(1).split('?')
+    const url = `${awaitedConfig.serverURL || 'http://localhost:3000'}${awaitedConfig.routes.api}/${slugs}${search ? `?${search}` : ''}`
+
+    if (init.body instanceof FormData) {
+      const file = init.body.get('file') as Blob
+      if (file && init.headers instanceof Headers) {
+        init.headers.set('Content-Length', file.size.toString())
+      }
+    }
+    const request = new Request(url, init)
+
+    const params = {
+      params: Promise.resolve({
+        slug: slugs.split('/'),
+      }),
+    }
+
+    return api[init.method.toUpperCase()](request, params)
   },
 })
 ```

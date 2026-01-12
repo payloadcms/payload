@@ -9,8 +9,9 @@ keywords: authentication, config, configuration, documentation, Content Manageme
 Payload offers the ability to [Authenticate](./overview) via HTTP-only cookies. These can be read from the responses of `login`, `logout`, `refresh`, and `me` auth operations.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  You can access the logged-in user from within [Access Control](../access-control/overview) and [Hooks](../hooks/overview) through the `req.user` argument. [More details](./token-data).
+  **Tip:** You can access the logged-in user from within [Access
+  Control](../access-control/overview) and [Hooks](../hooks/overview) through
+  the `req.user` argument. [More details](./token-data).
 </Banner>
 
 ### Automatic browser inclusion
@@ -34,17 +35,17 @@ const pages = await response.json()
 For more about including cookies in requests from your app to your Payload API, [read the MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Sending_a_request_with_credentials_included).
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  To make sure you have a Payload cookie set properly in your browser after logging in, you can use
-  the browsers Developer Tools > Application > Cookies > [your-domain-here]. The Developer tools
-  will still show HTTP-only cookies.
+  **Tip:** To make sure you have a Payload cookie set properly in your browser
+  after logging in, you can use the browsers Developer Tools > Application >
+  Cookies > [your-domain-here]. The Developer tools will still show HTTP-only
+  cookies.
 </Banner>
 
 ### CSRF Attacks
 
 CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes many XSS vulnerabilities, however, CSRF attacks can still be possible.
 
-For example, let's say you have a popular app `https://payload-finances.com` that allows users to manage finances, send and receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - <strong>no matter what page created the request</strong>.
+For example, let's say you have a popular app `https://payload-finances.com` that allows users to manage finances, send and receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - **no matter what page created the request**.
 
 So, if a user of `https://payload-finances.com` is logged in and is browsing around on the internet, they might stumble onto a page with malicious intent. Let's look at an example:
 
@@ -53,15 +54,15 @@ So, if a user of `https://payload-finances.com` is logged in and is browsing aro
 // makes an authenticated request as on your behalf
 
 const maliciousRequest = await fetch(`https://payload-finances.com/api/me`, {
-  credentials: 'include'
-}).then(res => await res.json())
+  credentials: 'include',
+}).then((res) => await res.json())
 ```
 
 In this scenario, if your cookie was still valid, malicious-intent.com would be able to make requests like the one above on your behalf. This is a CSRF attack.
 
 ### CSRF Prevention
 
-Define domains that your trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
+Define domains that you trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
 
 ```ts
 // payload.config.ts
@@ -101,8 +102,8 @@ If option 1 isn't possible, then you can get around this limitation by [configur
 
 ```
 SameSite: None // allows the cookie to cross domains
-Secure: true // ensures its sent over HTTPS only
-HttpOnly: true // ensures its not accessible via client side JavaScript
+Secure: true // ensures it's sent over HTTPS only
+HttpOnly: true // ensures it's not accessible via client side JavaScript
 ```
 
 Configuration example:
@@ -124,8 +125,8 @@ Configuration example:
 
 If you're configuring [cors](../production/preventing-abuse#cross-origin-resource-sharing-cors) in your Payload config, you won't be able to use a wildcard anymore, you'll need to specify the list of allowed domains.
 
-
 <Banner type="success">
-  <strong>Good to know:</strong>
-  Setting up <code>secure: true</code> will not work if you're developing on <code>http://localhost</code> or any non-https domain. For local development you should conditionally set this to <code>false</code> based on the environment.
+  **Good to know:** Setting up `secure: true` will not work if you're developing
+  on `http://localhost` or any non-https domain. For local development you
+  should conditionally set this to `false` based on the environment.
 </Banner>

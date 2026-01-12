@@ -1,4 +1,4 @@
-@import '../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .toolbar-popup__dropdown {
@@ -75,6 +75,7 @@
         cursor: pointer;
         color: var(--theme-elevation-900);
         transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
+        position: relative;
 
         .text {
           overflow: hidden;
@@ -89,6 +90,13 @@
         &.disabled {
           cursor: not-allowed;
           opacity: 0.2;
+        }
+
+        .btn__icon {
+          // Override default button icon styles that
+          // set a background color when focused
+          background: none !important;
+          background-color: none !important;
         }
 
         padding-left: 6.25px;

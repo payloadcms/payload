@@ -17,6 +17,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odkaz',
     loadingWithEllipsis: 'Načítání...',
   },
+  da: {
+    label: 'Link',
+    loadingWithEllipsis: 'Indlæser...',
+  },
   de: {
     label: 'Verknüpfung',
     loadingWithEllipsis: 'Laden...',
@@ -28,6 +32,10 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Enlace',
     loadingWithEllipsis: 'Cargando...',
+  },
+  et: {
+    label: 'Link',
+    loadingWithEllipsis: 'Laadimine...',
   },
   fa: {
     label: 'پیوند',
@@ -48,6 +56,10 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Hivatkozás',
     loadingWithEllipsis: 'Betöltés...',
+  },
+  is: {
+    label: 'Hlekkur',
+    loadingWithEllipsis: 'Hleð...',
   },
   it: {
     label: 'Collegamento',
@@ -86,7 +98,7 @@ export const i18n: Partial<GenericLanguages> = {
     loadingWithEllipsis: 'Se încarcă...',
   },
   rs: {
-    label: 'Veza',
+    label: 'Веза',
     loadingWithEllipsis: 'Учитавање...',
   },
   'rs-latin': {
@@ -101,9 +113,17 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odkaz',
     loadingWithEllipsis: 'Načítava sa...',
   },
+  sl: {
+    label: 'Povezava',
+    loadingWithEllipsis: 'Nalaganje...',
+  },
   sv: {
     label: 'Länk',
     loadingWithEllipsis: 'Laddar...',
+  },
+  ta: {
+    label: 'இணைப்பு',
+    loadingWithEllipsis: 'போர்த்துவருகிறது...',
   },
   th: {
     label: 'ลิงค์',

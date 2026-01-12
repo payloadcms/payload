@@ -34,7 +34,7 @@ Hooks allow you to execute your own side effects during specific events of the D
 
 ## Authentication
 
-Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the Admin Panel, all well as your own external applications. [More details](../authentication/overview).
+Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the Admin Panel, as well as your own external applications. [More details](../authentication/overview).
 
 ## Access Control
 
@@ -50,11 +50,11 @@ Everything Payload does (create, read, update, delete, login, logout, etc.) is e
 
 - [Local API](#local-api) - Extremely fast, direct-to-database access
 - [REST API](#rest-api) - Standard HTTP endpoints for querying and mutating data
-- [GraphQL](#graphql) - A full GraphQL API with a GraphQL Playground
+- [GraphQL](#graphql-api) - A full GraphQL API with a GraphQL Playground
 
 <Banner type="success">
-  <strong>Note:</strong>
-  All of these APIs share the exact same query language. [More details](../queries/overview).
+  **Note:** All of these APIs share the exact same query language. [More
+  details](../queries/overview).
 </Banner>
 
 ### Local API
@@ -68,15 +68,10 @@ Here's a quick example of a React Server Component fetching data using the Local
 ```tsx
 import React from 'react'
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload'
 
 const MyServerComponent: React.FC = () => {
-  // If you're working in Next.js, and you want HMR,
-  // you should get Payload via the `getPayloadHMR` function.
-  const payload = await getPayloadHMR({ config })
-
-  // If you are writing a standalone script and do not need HMR,
-  // you can get Payload via import { getPayload } from 'payload' instead.
+  const payload = await getPayload({ config })
 
   // The `findResult` here will be fully typed as `PaginatedDocs<Page>`,
   // where you will have the `docs` that are returned as well as
@@ -132,8 +127,9 @@ You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few p
 Payload is abstracted into a set of dedicated packages to keep the core `payload` package as lightweight as possible. This allows you to only install the parts of Payload based on your unique project requirements.
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  Version numbers of all official Payload packages are always published in sync. You should make sure that you always use matching versions for all official Payload packages.
+  **Important:** Version numbers of all official Payload packages are always
+  published in sync. You should make sure that you always use matching versions
+  for all official Payload packages.
 </Banner>
 
 `payload`
@@ -156,13 +152,13 @@ Whereas Payload itself is responsible for direct database access, and control ov
 
 `@payloadcms/graphql`
 
-All of Payload's GraphQL functionality is abstracted into a separate package. Payload, its Admin UI, and REST API have absolutely no overlap with GraphQL, and you will incur no performance overhead from GraphQL if you are not using it. However, it's installed within in the `@payloadcms/next` package so you don't have to install it manually. You do, however, need to have GraphQL installed separately in your `package.json` if you are using GraphQL.
+All of Payload's GraphQL functionality is abstracted into a separate package. Payload, its Admin UI, and REST API have absolutely no overlap with GraphQL, and you will incur no performance overhead from GraphQL if you are not using it. However, it's installed within the `@payloadcms/next` package so you don't have to install it manually. You do, however, need to have GraphQL installed separately in your `package.json` if you are using GraphQL.
 
 `@payloadcms/ui`
 
 This is the UI library that Payload's Admin Panel uses. All components are exported from this package and can be re-used as you build extensions to the Payload admin UI, or want to use Payload components in your own React apps. Some exports are server components and some are client components.
 
-`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-mongodb`
+`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-mongodb`, `@payloadcms/db-sqlite`
 
 You can choose which Database Adapter you'd like to use for your project, and no matter which you choose, the entire data layer for Payload is contained within these packages. You can only use one at a time for any given project.
 
@@ -171,6 +167,6 @@ You can choose which Database Adapter you'd like to use for your project, and no
 Payload's Rich Text functionality is abstracted into separate packages and if you want to enable Rich Text in your project, you'll need to install one of these packages. We recommend Lexical for all new projects, and this is where Payload will focus its efforts on from this point, but Slate is still supported if you have already built with it.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  Rich Text is entirely optional and you may not need it for your project.
+  **Note:** Rich Text is entirely optional and you may not need it for your
+  project.
 </Banner>

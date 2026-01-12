@@ -3,18 +3,27 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
-import type { User } from '../types.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
-import { AuthenticationError, LockedAuth, ValidationError } from '../../errors/index.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
+import {
+  AuthenticationError,
+  LockedAuth,
+  UnverifiedEmail,
+  ValidationError,
+} from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
-import isLocked from '../isLocked.js'
+import { getLoginOptions } from '../getLoginOptions.js'
+import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
+import { addSessionToUser } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -22,7 +31,7 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 export type Result = {
   exp?: number
   token?: string
-  user?: User
+  user?: TypedUser
 }
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -34,28 +43,50 @@ export type Arguments<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
 }
 
+type CheckLoginPermissionArgs = {
+  loggingInWithUsername?: boolean
+  req: PayloadRequest
+  user: any
+}
+
+/**
+ * Throws an error if the user is locked or does not exist.
+ * This does not check the login attempts, only the lock status. Whoever increments login attempts
+ * is responsible for locking the user properly, not whoever checks the login permission.
+ */
+export const checkLoginPermission = ({
+  loggingInWithUsername,
+  req,
+  user,
+}: CheckLoginPermissionArgs) => {
+  if (!user) {
+    throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
+  }
+
+  if (isUserLocked(new Date(user.lockUntil))) {
+    throw new LockedAuth(req.t)
+  }
+}
+
 export const loginOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
+
+  if (args.collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(args.req.t)
+  }
 
   try {
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection?.config,
-          context: args.req.context,
-          operation: 'login',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'login',
+    })
 
     const {
       collection: { config: collectionConfig },
@@ -76,7 +107,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Login
     // /////////////////////////////////////
 
-    let user
     const { email: unsanitizedEmail, password } = data
     const loginWithUsername = collectionConfig.auth.loginWithUsername
 
@@ -87,8 +117,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         ? data.username.toLowerCase().trim()
         : null
 
-    const canLoginWithUsername = Boolean(loginWithUsername)
-    const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+    const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
     // cannot login with email, did not provide username
     if (!canLoginWithEmail && !sanitizedUsername) {
@@ -167,24 +196,29 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       whereConstraint = usernameConstraint
     }
 
-    user = await payload.db.findOne<any>({
-      collection: collectionConfig.slug,
-      req,
+    // Exclude trashed users
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
       where: whereConstraint,
     })
 
-    if (!user || (args.collection.config.auth.verify && user._verified === false)) {
-      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
-    }
+    let user = (await payload.db.findOne<TypedUser>({
+      collection: collectionConfig.slug,
+      req,
+      where: whereConstraint,
+    })) as TypedUser
+
+    checkLoginPermission({
+      loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
+      req,
+      user,
+    })
 
     user.collection = collectionConfig.slug
-
-    if (isLocked(new Date(user.lockUntil).getTime())) {
-      throw new LockedAuth(req.t)
-    }
+    user._strategy = 'local-jwt'
 
     const authResult = await authenticateLocalStrategy({ doc: user, password })
-
     user = sanitizeInternalFields(user)
 
     const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0
@@ -193,14 +227,68 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       if (maxLoginAttemptsEnabled) {
         await incrementLoginAttempts({
           collection: collectionConfig,
-          doc: user,
           payload: req.payload,
           req,
+          user,
+        })
+
+        // Re-check login permissions and max attempts after incrementing attempts, in case parallel updates occurred
+        checkLoginPermission({
+          loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
+          req,
+          user,
         })
       }
 
       throw new AuthenticationError(req.t)
     }
+
+    if (collectionConfig.auth.verify && user._verified === false) {
+      throw new UnverifiedEmail({ t: req.t })
+    }
+
+    /*
+     * Correct password accepted - re‑check that the account didn't
+     * get locked by parallel bad attempts in the meantime.
+     */
+    if (maxLoginAttemptsEnabled) {
+      const { lockUntil, loginAttempts } = (await payload.db.findOne<TypedUser>({
+        collection: collectionConfig.slug,
+        req,
+        select: {
+          lockUntil: true,
+          loginAttempts: true,
+        },
+        where: { id: { equals: user.id } },
+      }))!
+
+      user.lockUntil = lockUntil
+      user.loginAttempts = loginAttempts
+
+      checkLoginPermission({
+        req,
+        user,
+      })
+    }
+
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+      collectionConfig,
+      email: sanitizedEmail!,
+      user,
+    }
+
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user,
+    })
+
+    if (sid) {
+      fieldsToSignArgs.sid = sid
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     if (maxLoginAttemptsEnabled) {
       await resetLoginAttempts({
@@ -211,27 +299,21 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       })
     }
 
-    const fieldsToSign = getFieldsToSign({
-      collectionConfig,
-      email: sanitizedEmail,
-      user,
-    })
-
     // /////////////////////////////////////
     // beforeLogin - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: args.req.context,
-          req: args.req,
-          user,
-        })) || user
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeLogin?.length) {
+      for (const hook of collectionConfig.hooks.beforeLogin) {
+        user =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            user,
+          })) || user
+      }
+    }
 
     const { exp, token } = await jwtSign({
       fieldsToSign,
@@ -245,18 +327,18 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // afterLogin - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterLogin.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: args.req.context,
-          req: args.req,
-          token,
-          user,
-        })) || user
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterLogin?.length) {
+      for (const hook of collectionConfig.hooks.afterLogin) {
+        user =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            token,
+            user,
+          })) || user
+      }
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -265,48 +347,33 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: user,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: req.context,
-          doc: user,
-          req,
-        })) || user
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: req.context,
-          doc: user,
-          req,
-        })) || user
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        user =
+          (await hook({
+            collection: args.collection?.config,
+            context: req.context,
+            doc: user,
+            req,
+          })) || user
+      }
+    }
 
     let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       exp,

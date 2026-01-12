@@ -1,15 +1,10 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "./src/**/*.ts",
+  ],
   "compilerOptions": {
-    "composite": true, // Make sure typescript knows that this module depends on their references
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "./src",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "noEmit": false /* Do not emit outputs. */,
-    "emitDeclarationOnly": false
-  },
-  "include": ["src/**/*.ts", "src/**/*.js"]
+    // Do not include DOM and DOM.Iterable as this is a server-only package.
+    "lib": ["ES2022"],
+  }
 }

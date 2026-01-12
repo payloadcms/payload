@@ -9,31 +9,33 @@ import type {
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type {
-  AfterChangeHook,
-  BeforeOperationHook,
-  BeforeValidateHook,
   Collection,
+  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
-import { saveVersion } from '../../versions/saveVersion.js'
-import { buildAfterOperation } from './utils.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -43,11 +45,14 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
+  selectedLocales?: string[]
   showHiddenFields?: boolean
 }
 
@@ -74,21 +79,15 @@ export const createOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'create',
+    })
 
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'create',
-            req: args.req,
-          })) || args
-      },
-      Promise.resolve(),
-    )
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
+    }
 
     const {
       autosave = false,
@@ -97,9 +96,11 @@ export const createOperation = async <
       depth,
       disableVerificationEmail,
       draft = false,
+      duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -107,13 +108,31 @@ export const createOperation = async <
         payload: { config },
       },
       req,
-      select,
+      select: incomingSelect,
+      selectedLocales,
       showHiddenFields,
     } = args
 
     let { data } = args
 
-    const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig))
+
+    let duplicatedFromDocWithLocales: JsonObject = {}
+    let duplicatedFromDoc: JsonObject = {}
+
+    if (duplicateFromID) {
+      const duplicateResult = await getDuplicateDocumentData({
+        id: duplicateFromID,
+        collectionConfig,
+        draftArg: isSavingDraft,
+        overrideAccess,
+        req,
+        selectedLocales,
+      })
+
+      duplicatedFromDoc = duplicateResult.duplicatedFromDoc
+      duplicatedFromDocWithLocales = duplicateResult.duplicatedFromDocWithLocales
+    }
 
     // /////////////////////////////////////
     // Access
@@ -131,11 +150,13 @@ export const createOperation = async <
       collection,
       config,
       data,
+      isDuplicating: Boolean(duplicateFromID),
       operation: 'create',
+      originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
-        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
+        !isSavingDraft && collection.config.upload.filesRequiredOnCreate !== false,
     })
 
     data = newFileData
@@ -148,10 +169,10 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: {},
+      doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -159,38 +180,37 @@ export const createOperation = async <
     // beforeValidate - Collections
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeValidate.reduce(
-      async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
-        await priorHook
-
+    if (collectionConfig.hooks.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
         data =
           (await hook({
             collection: collectionConfig,
             context: req.context,
             data,
             operation: 'create',
+            originalDoc: duplicatedFromDoc,
             req,
           })) || data
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'create',
-          req,
-        })) || data
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeChange?.length) {
+      for (const hook of collectionConfig.hooks.beforeChange) {
+        data =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            data,
+            operation: 'create',
+            originalDoc: duplicatedFromDoc,
+            req,
+          })) || data
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -200,15 +220,13 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: {},
-      docWithLocales: {},
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
+      overrideAccess,
       req,
-      skipValidation:
-        shouldSaveDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////
@@ -225,6 +243,12 @@ export const createOperation = async <
 
     let doc
 
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
         resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
@@ -237,14 +261,12 @@ export const createOperation = async <
         password: data.password as string,
         payload: req.payload,
         req,
-        select,
       })
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
-        select,
       })
     }
 
@@ -261,8 +283,11 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: result,
+        operation: 'create',
         payload,
+        publishSpecificLocale,
         req,
+        returning: false,
       })
     }
 
@@ -274,7 +299,7 @@ export const createOperation = async <
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
-        disableEmail: disableVerificationEmail,
+        disableEmail: disableVerificationEmail!,
         email: payload.email,
         req,
         token: verificationToken,
@@ -289,34 +314,34 @@ export const createOperation = async <
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
       draft,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -337,22 +362,20 @@ export const createOperation = async <
     // afterChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterChange.reduce(
-      async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
-        await priorHook
-
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data,
             doc: result,
             operation: 'create',
             previousDoc: {},
             req: args.req,
           })) || result
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

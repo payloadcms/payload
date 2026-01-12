@@ -22,7 +22,9 @@ const DraftGlobal: GlobalConfig = {
   },
   versions: {
     max: 20,
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
   },
   access: {
     read: ({ req: { user } }) => {

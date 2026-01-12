@@ -1,0 +1,139 @@
+---
+title: Ecommerce Overview
+label: Overview
+order: 10
+desc: Add ecommerce functionality to your Payload CMS application with this plugin.
+keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-ecommerce](https://img.shields.io/npm/v/@payloadcms/plugin-ecommerce)
+
+<Banner type="warning">
+  This plugin is currently in Beta and may have breaking changes in future
+  releases.
+</Banner>
+
+Payload provides an Ecommerce Plugin that allows you to add ecommerce functionality to your app. It comes with a set of utilities and collections to manage products, orders, and payments. It also integrates with popular payment gateways like Stripe to handle transactions.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-ecommerce).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%redirects&template=bug_report.md&title=plugin-ecommerce%3A)
+  with as much detail as possible.
+</Banner>
+
+## Core features
+
+The plugin ships with a wide range of features to help you get started with ecommerce:
+
+- Products with Variants are supported by default
+- Carts are tracked in Payload
+- Orders and Transactions
+- Addresses linked to your Customers
+- Payments adapter pattern to create your own integrations (Stripe currently supported)
+- Multiple currencies are supported
+- React UI utilities to help you manage your frontend logic
+
+_Currently_ the plugin does not handle shipping, taxes or subscriptions natively, but you can implement these features yourself using the provided collections and hooks.
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+  pnpm add @payloadcms/plugin-ecommerce
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with:
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      fields: [],
+    },
+  ],
+  plugins: [
+    ecommercePlugin({
+      // You must add your access control functions here
+      access: {
+        adminOnlyFieldAccess,
+        adminOrPublishedStatus,
+        customerOnlyFieldAccess,
+        isAdmin,
+        isAuthenticated,
+        isDocumentOwner,
+      },
+      customers: { slug: 'users' },
+    }),
+  ],
+})
+
+export default config
+```
+
+## Concepts
+
+It's important to understand overall how the plugin works and the relationships between the different collections.
+
+**Customers**
+
+Can be any collection of users in your application. You can then limit access control only to customers depending on individual fields such
+as roles on the customer collection or by collection slug if you've opted to keep them separate. Customers are linked to Carts and Orders.
+
+**Products and Variants**
+
+Products are the items you are selling and they will contain a price and optionally variants via a join field as well as allowed Variant Types.
+
+Each Variant Type can contain a set of Variant Options. For example, a T-Shirt product can have a Variant Type of Size with options Small, Medium, and Large and each Variant can therefore have those options assigned to it.
+
+**Carts**
+
+Carts are linked to Customers or they're left entirely public for guest users and can contain multiple Products and Variants. Carts are stored in the database and can be retrieved at any time. Carts are automatically created for Customers when they add a product to their cart for the first time.
+
+**Transactions and Orders**
+
+Transactions are created when a payment is initiated. They contain the payment status and are linked to a Cart and Customer. Orders are created when a Transaction is successful and contain the final details of the purchase including the items, total, and customer information.
+
+**Addresses**
+
+Addresses are linked to Customers and can be used for billing and shipping information. They can be reused across multiple Orders.
+
+**Payments**
+
+The plugin uses an adapter pattern to allow for different payment gateways. The default adapter is for Stripe, but you can create your own by implementing the `PaymentAdapter` interface.
+
+**Currencies**
+
+The plugin supports using multiple currencies at the configuration level. Each currency will create a separate price field on the Product and Variants collections.
+
+The package can also be used piece-meal if you only want to re-use certain parts of it, such as just the creation of Products and Variants. See [Advanced uses and examples](./advanced) for more details.
+
+## TypeScript
+
+The plugin will inherit the types from your generated Payload types where possible. We also export the following types:
+
+- `Cart` - The cart type as stored in the React state and local storage and on the client side.
+- `CollectionOverride` - Type for overriding collections.
+- `CurrenciesConfig` - Type for the currencies configuration.
+- `EcommercePluginConfig` - The configuration object for the ecommerce plugin.
+- `FieldsOverride` - Type for overriding fields in collections.
+
+All types can be directly imported:
+
+```ts
+import { EcommercePluginConfig } from '@payloadcms/plugin-ecommerce/types'
+```
+
+## Template
+
+The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) also contains an official [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce), which uses this plugin.

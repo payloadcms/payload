@@ -1,4 +1,4 @@
-@import '../../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   html[data-theme='dark'] {
@@ -62,6 +62,7 @@
     // Make it so border itself is round too and not cut off at the corners
     border-collapse: unset;
     transform: translateY(1px); // aligns with top bar pixel line when stuck
+    min-height: 40px; // Reduces shift when saving document if toolbar items did not load yet
 
     &__group {
       display: flex;
@@ -91,7 +92,7 @@
         }
       }
 
-      > .editor-scroller > .editor > div > .editor-placeholder {
+      > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
         top: calc(var(--base) * 1.25);
       }
     }

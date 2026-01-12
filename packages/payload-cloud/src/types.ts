@@ -1,4 +1,11 @@
-import type { CollectionConfig, Config, FileData, PayloadRequest, TypeWithID } from 'payload'
+import type {
+  CollectionConfig,
+  Config,
+  FileData,
+  PayloadRequest,
+  TypeWithID,
+  UploadCollectionSlug,
+} from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -47,6 +54,13 @@ export interface PayloadCloudEmailOptions {
 }
 
 export interface PluginOptions {
+  /**
+   * Enable additional debug logging
+   *
+   * @default false
+   */
+  debug?: boolean
+
   /** Payload Cloud Email
    * @default true
    */
@@ -57,6 +71,14 @@ export interface PluginOptions {
         skipVerify?: boolean
       }
     | false
+
+  /**
+   *
+   * Configures whether cron jobs defined in config.jobs.autoRun will be run or not
+   *
+   * @default true
+   */
+  enableAutoRun?: boolean
 
   /**
    * Payload Cloud API endpoint
@@ -94,7 +116,7 @@ export interface PluginOptions {
         /**
          * Caching configuration per-collection
          */
-        collections?: Record<string, CollectionCachingConfig>
+        collections?: Partial<Record<UploadCollectionSlug, CollectionCachingConfig>>
         /** Caching in seconds override for all collections
          * @default 86400 (24 hours)
          */

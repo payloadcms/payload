@@ -1,12 +1,17 @@
+import type {
+  FieldAffectingData,
+  FlattenedField,
+  SelectIncludeType,
+  SelectMode,
+  SelectType,
+} from 'payload'
+
 import {
   deepCopyObjectSimple,
-  type Field,
-  type FieldAffectingData,
-  type SelectMode,
-  type SelectType,
-  type TabAsField,
-} from 'payload'
-import { fieldAffectsData, getSelectMode, tabHasName } from 'payload/shared'
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  getSelectMode,
+} from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -14,18 +19,18 @@ const addFieldToProjection = ({
   adapter,
   databaseSchemaPath,
   field,
+  parentIsLocalized,
   projection,
-  withinLocalizedField,
 }: {
   adapter: MongooseAdapter
   databaseSchemaPath: string
   field: FieldAffectingData
+  parentIsLocalized: boolean
   projection: Record<string, true>
-  withinLocalizedField: boolean
 }) => {
   const { config } = adapter.payload
 
-  if (withinLocalizedField && config.localization) {
+  if (parentIsLocalized && config.localization) {
     for (const locale of config.localization.localeCodes) {
       const localeDatabaseSchemaPath = databaseSchemaPath.replace('<locale>', locale)
       projection[`${localeDatabaseSchemaPath}${field.name}`] = true
@@ -39,20 +44,20 @@ const traverseFields = ({
   adapter,
   databaseSchemaPath = '',
   fields,
+  parentIsLocalized = false,
   projection,
   select,
   selectAllOnCurrentLevel = false,
   selectMode,
-  withinLocalizedField = false,
 }: {
   adapter: MongooseAdapter
   databaseSchemaPath?: string
-  fields: (Field | TabAsField)[]
+  fields: FlattenedField[]
+  parentIsLocalized?: boolean
   projection: Record<string, true>
   select: SelectType
   selectAllOnCurrentLevel?: boolean
   selectMode: SelectMode
-  withinLocalizedField?: boolean
 }) => {
   for (const field of fields) {
     if (fieldAffectsData(field)) {
@@ -62,8 +67,8 @@ const traverseFields = ({
             adapter,
             databaseSchemaPath,
             field,
+            parentIsLocalized,
             projection,
-            withinLocalizedField,
           })
           continue
         }
@@ -79,8 +84,8 @@ const traverseFields = ({
             adapter,
             databaseSchemaPath,
             field,
+            parentIsLocalized,
             projection,
-            withinLocalizedField,
           })
           continue
         }
@@ -92,14 +97,12 @@ const traverseFields = ({
     }
 
     let fieldDatabaseSchemaPath = databaseSchemaPath
-    let fieldWithinLocalizedField = withinLocalizedField
 
     if (fieldAffectsData(field)) {
       fieldDatabaseSchemaPath = `${databaseSchemaPath}${field.name}.`
 
-      if (field.localized) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
         fieldDatabaseSchemaPath = `${fieldDatabaseSchemaPath}<locale>.`
-        fieldWithinLocalizedField = true
       }
     }
 
@@ -107,35 +110,34 @@ const traverseFields = ({
       case 'array':
       case 'group':
       case 'tab': {
-        let fieldSelect: SelectType
-
-        if (field.type === 'tab' && !tabHasName(field)) {
-          fieldSelect = select
-        } else {
-          fieldSelect = select[field.name] as SelectType
-        }
+        const fieldSelect = select[field.name] as SelectType
 
         if (field.type === 'array' && selectMode === 'include') {
-          fieldSelect['id'] = true
+          fieldSelect.id = true
         }
 
         traverseFields({
           adapter,
           databaseSchemaPath: fieldDatabaseSchemaPath,
-          fields: field.fields,
+          fields: field.flattenedFields,
+          parentIsLocalized: parentIsLocalized || field.localized,
           projection,
           select: fieldSelect,
           selectMode,
-          withinLocalizedField: fieldWithinLocalizedField,
         })
 
         break
       }
-
       case 'blocks': {
         const blocksSelect = select[field.name] as SelectType
 
-        for (const block of field.blocks) {
+        for (const _block of field.blockReferences ?? field.blocks) {
+          const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
+
+          if (!block) {
+            continue
+          }
+
           if (
             (selectMode === 'include' && blocksSelect[block.slug] === true) ||
             (selectMode === 'exclude' && typeof blocksSelect[block.slug] === 'undefined')
@@ -143,12 +145,12 @@ const traverseFields = ({
             traverseFields({
               adapter,
               databaseSchemaPath: fieldDatabaseSchemaPath,
-              fields: block.fields,
+              fields: block.flattenedFields,
+              parentIsLocalized: parentIsLocalized || field.localized,
               projection,
               select: {},
               selectAllOnCurrentLevel: true,
               selectMode: 'include',
-              withinLocalizedField: fieldWithinLocalizedField,
             })
             continue
           }
@@ -163,48 +165,25 @@ const traverseFields = ({
             blocksSelect[block.slug] = {}
           }
 
-          if (blockSelectMode === 'include') {
-            blocksSelect[block.slug]['id'] = true
-            blocksSelect[block.slug]['blockType'] = true
+          if (blockSelectMode === 'include' && typeof blocksSelect[block.slug] === 'object') {
+            const blockSelect = blocksSelect[block.slug] as SelectIncludeType
+            blockSelect.id = true
+            blockSelect.blockType = true
           }
 
           traverseFields({
             adapter,
             databaseSchemaPath: fieldDatabaseSchemaPath,
-            fields: block.fields,
+            fields: block.flattenedFields,
+            parentIsLocalized: parentIsLocalized || field.localized,
             projection,
             select: blocksSelect[block.slug] as SelectType,
             selectMode: blockSelectMode,
-            withinLocalizedField: fieldWithinLocalizedField,
           })
         }
 
         break
       }
-      case 'collapsible':
-      case 'row':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.fields,
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
-      case 'tabs':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
 
       default:
         break
@@ -218,7 +197,7 @@ export const buildProjectionFromSelect = ({
   select,
 }: {
   adapter: MongooseAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   select?: SelectType
 }): Record<string, true> | undefined => {
   if (!select) {

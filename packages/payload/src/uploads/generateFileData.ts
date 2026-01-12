@@ -1,8 +1,7 @@
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
-import fs from 'fs'
-import { mkdirSync } from 'node:fs'
+import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
@@ -10,8 +9,9 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
-import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
+import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { canResizeImage } from './canResizeImage.js'
+import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
@@ -20,15 +20,14 @@ import { getSafeFileName } from './getSafeFilename.js'
 import { resizeAndTransformImageSizes } from './imageResizer.js'
 import { isImage } from './isImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
-
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
-  /** pass forceDisable to not overwrite existing files even if they already exist in `data` */
-  overwriteExistingFiles?: 'forceDisable' | boolean
+  overwriteExistingFiles?: boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
 }
@@ -38,9 +37,37 @@ type Result<T> = Promise<{
   files: FileToSave[]
 }>
 
+const shouldReupload = (
+  uploadEdits: UploadEdits,
+  fileData: Record<string, unknown> | undefined,
+) => {
+  if (!fileData) {
+    return false
+  }
+
+  if (uploadEdits.crop || uploadEdits.heightInPixels || uploadEdits.widthInPixels) {
+    return true
+  }
+
+  // Since uploadEdits always has focalPoint, compare to the value in the data if it was changed
+  if (uploadEdits.focalPoint) {
+    const incomingFocalX = uploadEdits.focalPoint.x
+    const incomingFocalY = uploadEdits.focalPoint.y
+
+    const currentFocalX = 'focalX' in fileData && fileData.focalX
+    const currentFocalY = 'focalY' in fileData && fileData.focalY
+
+    const isEqual = incomingFocalX === currentFocalX && incomingFocalY === currentFocalY
+    return !isEqual
+  }
+
+  return false
+}
+
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
+  isDuplicating,
   operation,
   originalDoc,
   overwriteExistingFiles,
@@ -60,12 +87,14 @@ export const generateFileData = async <T>({
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
+    isDuplicating,
     operation,
     originalDoc,
     req,
   })
 
   const {
+    constructorOptions,
     disableLocalStorage,
     focalPoint: focalPointEnabled = true,
     formatOptions,
@@ -78,33 +107,38 @@ export const generateFileData = async <T>({
 
   const staticPath = staticDir
 
-  if (!file && uploadEdits && data) {
-    const { filename, url } = data as FileData
+  const incomingFileData = isDuplicating ? originalDoc : data
+
+  if (
+    !file &&
+    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+  ) {
+    const { filename, url } = incomingFileData as unknown as FileData
+
+    if (filename && (filename.includes('../') || filename.includes('..\\'))) {
+      throw new Forbidden(req.t)
+    }
 
     try {
       if (url && url.startsWith('/') && !disableLocalStorage) {
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
-        if (overwriteExistingFiles !== 'forceDisable') {
-          overwriteExistingFiles = true
-        }
+        overwriteExistingFiles = true
       } else if (filename && url) {
         file = await getExternalFile({
-          data: data as FileData,
+          data: incomingFileData as unknown as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        if (overwriteExistingFiles !== 'forceDisable') {
-          overwriteExistingFiles = true
-        }
+        overwriteExistingFiles = true
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
   }
 
-  if (overwriteExistingFiles === 'forceDisable') {
+  if (isDuplicating) {
     overwriteExistingFiles = false
   }
 
@@ -119,8 +153,14 @@ export const generateFileData = async <T>({
     }
   }
 
+  await checkFileRestrictions({
+    collection: collectionConfig,
+    file,
+    req,
+  })
+
   if (!disableLocalStorage) {
-    mkdirSync(staticPath, { recursive: true })
+    await fs.mkdir(staticPath!, { recursive: true })
   }
 
   let newData = data
@@ -135,14 +175,16 @@ export const generateFileData = async <T>({
     let fsSafeName: string
     let sharpFile: Sharp | undefined
     let dimensions: ProbedImageSize | undefined
-    let fileBuffer: { data: Buffer; info: OutputInfo }
+    let fileBuffer!: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
+      Boolean(
+        resizeOptions || formatOptions || trimOptions || constructorOptions || file.tempFilePath,
+      )
 
-    const sharpOptions: SharpOptions = {}
+    const sharpOptions: SharpOptions = { ...constructorOptions }
 
     if (fileIsAnimatedType) {
       sharpOptions.animated = true
@@ -179,10 +221,10 @@ export const generateFileData = async <T>({
       sharpFile = await optionallyAppendMetadata({
         req,
         sharpFile,
-        withMetadata,
+        withMetadata: withMetadata!,
       })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
+      ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
       fileData.filesize = fileBuffer.info.size
@@ -197,7 +239,7 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop().split('?')[0]
+        ext = file.name.split('.').pop()?.split('?')[0]
       } else {
         ext = ''
       }
@@ -213,11 +255,14 @@ export const generateFileData = async <T>({
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
     if (!overwriteExistingFiles) {
+      // Extract prefix if present (added by plugin-cloud-storage)
+      const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
       fsSafeName = await getSafeFileName({
         collectionSlug: collectionConfig.slug,
         desiredFilename: fsSafeName,
+        prefix,
         req,
-        staticPath,
+        staticPath: staticPath!,
       })
     }
 
@@ -227,17 +272,17 @@ export const generateFileData = async <T>({
     if (cropData && sharp) {
       const { data: croppedImage, info } = await cropImage({
         cropData,
-        dimensions,
+        dimensions: dimensions!,
         file,
-        heightInPixels: uploadEdits.heightInPixels,
+        heightInPixels: uploadEdits.heightInPixels!,
         req,
         sharp,
-        widthInPixels: uploadEdits.widthInPixels,
+        widthInPixels: uploadEdits.widthInPixels!,
         withMetadata,
       })
 
       // Apply resize after cropping to ensure it conforms to resizeOptions
-      if (resizeOptions) {
+      if (resizeOptions && !resizeOptions.withoutEnlargement) {
         const resizedAfterCrop = await sharp(croppedImage)
           .resize({
             fit: resizeOptions?.fit || 'cover',
@@ -261,7 +306,7 @@ export const generateFileData = async <T>({
         fileData.width = resizedAfterCrop.info.width
         fileData.height = resizedAfterCrop.info.height
         if (fileIsAnimatedType) {
-          const metadata = await sharpFile.metadata()
+          const metadata = await sharpFile!.metadata()
           fileData.height = metadata.pages
             ? resizedAfterCrop.info.height / metadata.pages
             : resizedAfterCrop.info.height
@@ -283,14 +328,14 @@ export const generateFileData = async <T>({
         fileData.width = info.width
         fileData.height = info.height
         if (fileIsAnimatedType) {
-          const metadata = await sharpFile.metadata()
+          const metadata = await sharpFile!.metadata()
           fileData.height = metadata.pages ? info.height / metadata.pages : info.height
         }
         fileData.filesize = info.size
       }
 
       if (file.tempFilePath) {
-        await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
       } else {
         req.file = fileForResize
       }
@@ -303,7 +348,7 @@ export const generateFileData = async <T>({
       // If using temp files and the image is being resized, write the file to the temp path
       if (fileBuffer?.data || file.data.length > 0) {
         if (file.tempFilePath) {
-          await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+          await fs.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
         } else {
           // Assign the _possibly modified_ file to the request object
           req.file = {
@@ -320,18 +365,18 @@ export const generateFileData = async <T>({
       const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
         dimensions: !cropData
-          ? dimensions
+          ? dimensions!
           : {
               ...dimensions,
-              height: fileData.height,
-              width: fileData.width,
+              height: fileData.height!,
+              width: fileData.width!,
             },
         file: fileForResize,
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,
         sharp,
-        staticPath,
+        staticPath: staticPath!,
         uploadEdits,
         withMetadata,
       })
@@ -362,11 +407,12 @@ export const generateFileData = async <T>({
  */
 function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
+  isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc: unknown
   req: PayloadRequest
 }): UploadEdits {
-  const { data, operation, originalDoc, req } = args
+  const { data, isDuplicating, operation, originalDoc, req } = args
 
   // Get intended focal point change from query string or incoming data
   const uploadEdits =
@@ -381,10 +427,19 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   const incomingData = data as FileData
   const origDoc = originalDoc as FileData
 
-  // If no change in focal point, return undefined.
-  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
-    return undefined
+  if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
+    // If no change in focal point, return undefined.
+    // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+    if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+      return undefined!
+    }
+
+    if (isDuplicating) {
+      uploadEdits.focalPoint = {
+        x: incomingData?.focalX || origDoc.focalX!,
+        y: incomingData?.focalY || origDoc.focalX!,
+      }
+    }
   }
 
   if (incomingData?.focalX && incomingData?.focalY) {
@@ -402,5 +457,6 @@ function parseUploadEditsFromReqOrIncomingData(args: {
       y: 50,
     }
   }
+
   return uploadEdits
 }

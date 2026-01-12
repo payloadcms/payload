@@ -1,10 +1,16 @@
-import type { FormState } from 'payload'
+import type { FormState, UploadEdits } from 'payload'
+
+import { v4 as uuidv4 } from 'uuid'
+
+import type { InitialForms } from './index.js'
 
 export type State = {
   activeIndex: number
   forms: {
     errorCount: number
+    formID: string
     formState: FormState
+    uploadEdits?: UploadEdits
   }[]
   totalErrorCount: number
 }
@@ -16,8 +22,15 @@ type Action =
       type: 'UPDATE_ERROR_COUNT'
     }
   | {
-      files: FileList
-      initialState: FormState | null
+      errorCount: number
+      formState: FormState
+      index: number
+      type: 'UPDATE_FORM'
+      updatedFields?: Record<string, unknown>
+      uploadEdits?: UploadEdits
+    }
+  | {
+      forms: InitialForms
       type: 'ADD_FORMS'
     }
   | {
@@ -37,17 +50,19 @@ export function formsManagementReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'ADD_FORMS': {
       const newForms: State['forms'] = []
-      for (let i = 0; i < action.files.length; i++) {
+      for (let i = 0; i < action.forms.length; i++) {
         newForms[i] = {
           errorCount: 0,
+          formID: action.forms[i].formID ?? (crypto.randomUUID ? crypto.randomUUID() : uuidv4()),
           formState: {
-            ...(action.initialState || {}),
+            ...(action.forms[i].initialState || {}),
             file: {
-              initialValue: action.files[i],
+              initialValue: action.forms[i].file,
               valid: true,
-              value: action.files[i],
+              value: action.forms[i].file,
             },
           },
+          uploadEdits: {},
         }
       }
 
@@ -96,6 +111,29 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
+        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+      }
+    }
+    case 'UPDATE_FORM': {
+      const updatedForms = [...state.forms]
+      updatedForms[action.index].errorCount = action.errorCount
+
+      // Merge the existing formState with the new formState
+      updatedForms[action.index] = {
+        ...updatedForms[action.index],
+        formState: {
+          ...updatedForms[action.index].formState,
+          ...action.formState,
+        },
+        uploadEdits: {
+          ...updatedForms[action.index].uploadEdits,
+          ...action.uploadEdits,
+        },
+      }
+
+      return {
+        ...state,
+        forms: updatedForms,
         totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }

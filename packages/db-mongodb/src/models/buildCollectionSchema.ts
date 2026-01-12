@@ -1,29 +1,36 @@
 import type { PaginateOptions, Schema } from 'mongoose'
-import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload'
+import type { Payload, SanitizedCollectionConfig } from 'payload'
 
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 
-import { getBuildQueryPlugin } from '../queries/buildQuery.js'
+import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'
 
 export const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
-  config: SanitizedConfig,
+  payload: Payload,
   schemaOptions = {},
 ): Schema => {
-  const schema = buildSchema(config, collection.fields, {
-    draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
-    indexSortableFields: config.indexSortableFields,
-    options: {
-      minimize: false,
-      timestamps: collection.timestamps !== false,
-      ...schemaOptions,
+  const schema = buildSchema({
+    buildSchemaOptions: {
+      draftsEnabled: Boolean(
+        typeof collection?.versions === 'object' && collection.versions.drafts,
+      ),
+      indexSortableFields: payload.config.indexSortableFields,
+      options: {
+        minimize: false,
+        timestamps: collection.timestamps !== false,
+        ...schemaOptions,
+      },
     },
+    compoundIndexes: collection.sanitizedIndexes,
+    configFields: collection.fields,
+    flattenedFields: collection.flattenedFields,
+    payload,
   })
 
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {
-    const indexDefinition: Record<string, 1> = collection.upload.filenameCompoundIndex.reduce(
+    const indexDefinition = collection.upload.filenameCompoundIndex.reduce<Record<string, 1>>(
       (acc, index) => {
         acc[index] = 1
         return acc
@@ -34,18 +41,9 @@ export const buildCollectionSchema = (
     schema.index(indexDefinition, { unique: true })
   }
 
-  if (config.indexSortableFields && collection.timestamps !== false) {
-    schema.index({ updatedAt: 1 })
-    schema.index({ createdAt: 1 })
-  }
-
   schema
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))
-
-  if (Object.keys(collection.joins).length > 0) {
-    schema.plugin(mongooseAggregatePaginate)
-  }
 
   return schema
 }

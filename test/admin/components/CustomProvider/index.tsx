@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, use, useState } from 'react'
 
 type CustomContext = {
   getCustom
@@ -17,9 +17,14 @@ export const CustomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCustom,
   }
 
-  console.log('custom provider called')
-
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return (
+    <Context value={value}>
+      <div className="custom-provider" style={{ display: 'none' }}>
+        This is a custom provider.
+      </div>
+      {children}
+    </Context>
+  )
 }
 
-export const useCustom = () => useContext(Context)
+export const useCustom = () => use(Context)

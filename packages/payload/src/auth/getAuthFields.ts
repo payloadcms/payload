@@ -5,6 +5,7 @@ import { accountLockFields } from './baseFields/accountLock.js'
 import { apiKeyFields } from './baseFields/apiKey.js'
 import { baseAuthFields } from './baseFields/auth.js'
 import { emailFieldConfig } from './baseFields/email.js'
+import { sessionsFieldConfig } from './baseFields/sessions.js'
 import { usernameFieldConfig } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
 
@@ -15,7 +16,11 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
     authFields.push(...apiKeyFields)
   }
 
-  if (!authConfig.disableLocalStrategy) {
+  if (
+    !authConfig.disableLocalStrategy ||
+    (typeof authConfig.disableLocalStrategy === 'object' &&
+      authConfig.disableLocalStrategy.enableFields)
+  ) {
     const emailField = { ...emailFieldConfig }
     let usernameField: TextField | undefined
 
@@ -27,6 +32,9 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
         }
         if (authConfig.loginWithUsername.requireUsername === false) {
           usernameField.required = false
+        }
+        if (authConfig.loginWithUsername.allowEmailLogin === false) {
+          emailField.unique = false
         }
       }
     }
@@ -42,8 +50,12 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
       authFields.push(...verificationFields)
     }
 
-    if (authConfig.maxLoginAttempts > 0) {
+    if (authConfig?.maxLoginAttempts && authConfig.maxLoginAttempts > 0) {
       authFields.push(...accountLockFields)
+    }
+
+    if (authConfig.useSessions) {
+      authFields.push(sessionsFieldConfig)
     }
   }
 

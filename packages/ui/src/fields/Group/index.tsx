@@ -3,7 +3,8 @@
 import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import { groupHasName } from 'payload/shared'
+import React, { useMemo } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -15,40 +16,47 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
+import './index.scss'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { useTabs } from '../Tabs/provider.js'
-import './index.scss'
 import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    field: {
-      name,
-      admin: { className, description, hideGutter, style, width } = {},
-      fields,
-      label,
-    },
+    field,
+    field: { admin: { className, description, hideGutter } = {}, fields, label },
+    indexPath,
+    parentPath,
+    parentSchemaPath,
     path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
-  const schemaPath = schemaPathFromProps ?? name
+
+  const schemaPath =
+    schemaPathFromProps ?? (field.type === 'group' && groupHasName(field) ? field.name : path)
 
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const { customComponents: { Description, Label } = {}, errorPaths } = useField({ path })
+
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, errorPaths } =
+    useField({ path })
+
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -67,48 +75,63 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__header`}>
-            {Boolean(Label || Description || label) && (
-              <header>
-                <RenderCustomComponent
-                  CustomComponent={Label}
-                  Fallback={
-                    <h3 className={`${baseClass}__title`}>
-                      <FieldLabel
-                        label={getTranslation(label, i18n)}
-                        localized={false}
-                        path={path}
-                        required={false}
-                      />
-                    </h3>
-                  }
-                />
-                <RenderCustomComponent
-                  CustomComponent={Description}
-                  Fallback={<FieldDescription description={description} path={path} />}
-                />
-              </header>
-            )}
-            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-          </div>
-          <RenderFields
-            fields={fields}
-            margins="small"
-            parentIndexPath=""
-            parentPath={path}
-            parentSchemaPath={schemaPath}
-            permissions={permissions?.fields}
-            readOnly={readOnly}
-          />
+          {Boolean(Label || Description || label || fieldHasErrors) && (
+            <div className={`${baseClass}__header`}>
+              {Boolean(Label || Description || label) && (
+                <header>
+                  <RenderCustomComponent
+                    CustomComponent={Label}
+                    Fallback={
+                      <h3 className={`${baseClass}__title`}>
+                        <FieldLabel
+                          as="span"
+                          label={getTranslation(label, i18n)}
+                          localized={false}
+                          path={path}
+                          required={false}
+                        />
+                      </h3>
+                    }
+                  />
+                  <RenderCustomComponent
+                    CustomComponent={Description}
+                    Fallback={<FieldDescription description={description} path={path} />}
+                  />
+                </header>
+              )}
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+            </div>
+          )}
+          {BeforeInput}
+          {/* Render an unnamed group differently */}
+          {groupHasName(field) ? (
+            <RenderFields
+              fields={fields}
+              margins="small"
+              parentIndexPath=""
+              parentPath={path}
+              parentSchemaPath={schemaPath}
+              permissions={permissions === true ? permissions : permissions?.fields}
+              readOnly={readOnly}
+            />
+          ) : (
+            <RenderFields
+              fields={fields}
+              margins="small"
+              parentIndexPath={indexPath}
+              parentPath={parentPath}
+              parentSchemaPath={parentSchemaPath}
+              permissions={permissions}
+              readOnly={readOnly}
+            />
+          )}
         </div>
       </GroupProvider>
+      {AfterInput}
     </div>
   )
 }

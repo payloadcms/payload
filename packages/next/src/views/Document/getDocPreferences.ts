@@ -1,5 +1,7 @@
 import type { DocumentPreferences, Payload, TypedUser } from 'payload'
 
+import { sanitizeID } from '@payloadcms/ui/shared'
+
 type Args = {
   collectionSlug?: string
   globalSlug?: string
@@ -44,7 +46,7 @@ export const getDocPreferences = async ({
           },
           {
             'user.value': {
-              equals: user.id,
+              equals: sanitizeID(user.id),
             },
           },
         ],

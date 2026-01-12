@@ -1,41 +1,80 @@
 import type { Payload } from 'payload'
 
-import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
+import {
+  handleMessage as handleMessageImport,
+  type LivePreviewMessageEvent,
+  mergeData as mergeDataImport,
+} from '@payloadcms/live-preview'
 import path from 'path'
 import { getFileByPath } from 'payload'
-import { fieldSchemaToJSON } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import { Pages } from './collections/Pages.js'
-import { postsSlug, tenantsSlug } from './shared.js'
+import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields)
-
 let payload: Payload
 let restClient: NextRESTClient
 
+import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
-function collectionPopulationRequestHandler({ endpoint }: { endpoint: string }) {
-  return restClient.GET(`/${endpoint}`)
+const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
+  const url = `/${endpoint}`
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Payload-HTTP-Method-Override': 'GET',
+  }
+
+  return restClient.POST(url as any, {
+    body: JSON.stringify(data),
+    credentials: 'include',
+    headers,
+  })
 }
 
 describe('Collections - Live Preview', () => {
-  let serverURL
+  const serverURL: string = 'http://localhost:3000'
 
   let testPost: Post
-  let testPostTwo: Post
   let tenant: Tenant
   let media: Media
+  let handleMessage: (
+    args: Omit<Parameters<typeof handleMessageImport>[0], 'requestHandler' | 'serverURL'>,
+  ) => Promise<Record<string, any>> = handleMessageImport as any
+
+  let mergeData: (
+    args: Omit<Parameters<typeof mergeDataImport<any>>[0], 'requestHandler' | 'serverURL'>,
+  ) => Promise<Record<string, any>> = mergeDataImport as any
 
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
+
+    mergeData = async (args) => {
+      return await mergeDataImport({
+        ...args,
+        serverURL,
+        requestHandler,
+      })
+    }
+    handleMessage = async (args) => {
+      const newArgs: Parameters<typeof handleMessageImport>[0] = args as any
+      newArgs.requestHandler = requestHandler
+      newArgs.serverURL = serverURL
+
+      if (newArgs.event) {
+        // @ts-expect-error need to overwrite serverURL
+        newArgs.event.origin = serverURL
+      }
+
+      return await handleMessageImport(newArgs)
+    }
 
     tenant = await payload.create({
       collection: tenantsSlug,
@@ -45,27 +84,9 @@ describe('Collections - Live Preview', () => {
       },
     })
 
-    testPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        slug: 'post-1',
-        title: 'Test Post',
-        tenant: tenant.id,
-      },
-    })
-
-    testPostTwo = await payload.create({
-      collection: postsSlug,
-      data: {
-        slug: 'post-2',
-        title: 'Test Post 2',
-        tenant: tenant.id,
-      },
-    })
-
     // Create image
     const filePath = path.resolve(dirname, './seed/image-1.jpg')
-    const file = await getFileByPath(filePath)
+    const file = (await getFileByPath(filePath))!
     file.name = 'image-1.jpg'
 
     media = await payload.create({
@@ -75,12 +96,24 @@ describe('Collections - Live Preview', () => {
       },
       file,
     })
+
+    testPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        slug: 'post-1',
+        title: 'Test Post',
+        tenant: tenant.id,
+        localizedTitle: 'Test Post',
+        hero: {
+          type: 'highImpact',
+          media: media.id,
+        },
+      },
+    })
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('handles `postMessage`', async () => {
@@ -88,96 +121,133 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       event: {
         data: {
-          data: {
-            title: 'Test Page (Changed)',
-          },
-          fieldSchemaJSON: schemaJSON,
-          type: 'payload-live-preview',
-        },
-        origin: serverURL,
-      } as MessageEvent,
-      initialData: {
-        title: 'Test Page',
-      } as Page,
-      serverURL,
-    })
-
-    expect(handledMessage.title).toEqual('Test Page (Changed)')
-  })
-
-  it('caches `fieldSchemaJSON`', async () => {
-    const handledMessage = await handleMessage({
-      depth: 1,
-      event: {
-        data: {
+          collectionSlug: postsSlug,
           data: {
             title: 'Test Page (Changed)',
           },
           type: 'payload-live-preview',
         },
-        origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
+        id: 1 as number | string,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        hero: {
+          type: 'highImpact',
+        },
+        slug: 'testPage',
       } as Page,
-      serverURL,
     })
 
     expect(handledMessage.title).toEqual('Test Page (Changed)')
   })
 
-  it('merges data', async () => {
-    const initialData: Partial<Page> = {
-      id: '123',
-      title: 'Test Page',
-    }
-
-    const mergedData = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        title: 'Test Page (Merged)',
+  async function createPageWithInitialData(initialData: Partial<Page>) {
+    await payload.db.deleteOne({
+      collection: pagesSlug,
+      where: {
+        slug: {
+          equals: 'testPage',
+        },
       },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
+      returning: false,
     })
 
-    expect(mergedData.id).toEqual(initialData.id)
-    expect(mergedData._numberOfRequests).toEqual(0)
-  })
+    const page = await payload.create({
+      collection: pagesSlug,
+      depth: 0,
+      data: {
+        ...initialData,
+        slug: 'testPage',
+      } as Page,
+    })
+
+    return page
+  }
 
   it('— strings - merges data', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const mergedData = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         title: 'Test Page (Changed)',
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedData.title).toEqual('Test Page (Changed)')
-    expect(mergedData._numberOfRequests).toEqual(0)
+  })
+
+  it('— strings - merges localized data', async () => {
+    const initialData = await createPageWithInitialData({
+      title: 'Test Page',
+    })
+
+    const mergedData = await mergeData({
+      depth: 1,
+      incomingData: {
+        ...initialData,
+        localizedTitle: 'Test Page (Changed)',
+      },
+      initialData,
+      collectionSlug: pagesSlug,
+    })
+
+    expect(mergedData.localizedTitle).toEqual('Test Page (Changed)')
+  })
+
+  it('— arrays - can clear all rows', async () => {
+    const initialData = await createPageWithInitialData({
+      title: 'Test Page',
+      arrayOfRelationships: [
+        {
+          id: '123',
+          relationshipInArrayMonoHasOne: testPost.id,
+        },
+      ],
+    })
+
+    const mergedData = await mergeData({
+      depth: 1,
+      incomingData: {
+        ...initialData,
+        arrayOfRelationships: [],
+      },
+      initialData,
+      collectionSlug: pagesSlug,
+    })
+
+    expect(mergedData.arrayOfRelationships).toEqual([])
+
+    // do the same but with arrayOfRelationships: 0
+
+    const mergedData2 = await mergeData({
+      depth: 1,
+      incomingData: {
+        ...initialData,
+        arrayOfRelationships: 0, // this is how form state represents an empty array
+      },
+      initialData,
+      collectionSlug: pagesSlug,
+    })
+
+    expect(mergedData2.arrayOfRelationships).toEqual([])
   })
 
   it('— uploads - adds and removes media', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add upload
     const mergedData = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         hero: {
@@ -186,18 +256,14 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedData.hero.media).toMatchObject(media)
-    expect(mergedData._numberOfRequests).toEqual(1)
 
     // Add upload
     const mergedDataWithoutUpload = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...mergedData,
         hero: {
@@ -206,46 +272,42 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData: mergedData,
-      serverURL,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
   })
 
   it('— uploads - populates within Slate rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add upload
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         richTextSlate: [
           {
             type: 'upload',
             relationTo: 'media',
-            value: media.id,
+            value: {
+              id: media.id,
+            },
           },
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.richTextSlate).toHaveLength(1)
     expect(merge1.richTextSlate[0].value).toMatchObject(media)
-    expect(merge1._numberOfRequests).toEqual(1)
 
     // Remove upload
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
         richTextSlate: [
@@ -260,26 +322,23 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge2.richTextSlate).toHaveLength(1)
     expect(merge2.richTextSlate[0].value).toBeFalsy()
     expect(merge2.richTextSlate[0].type).toEqual('paragraph')
-    expect(merge2._numberOfRequests).toEqual(0)
   })
 
   it('— uploads - populates within Lexical rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add upload
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         richTextLexical: {
@@ -320,19 +379,15 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
     expect(merge1.richTextLexical.root.children).toHaveLength(2)
     expect(merge1.richTextLexical.root.children[1].value).toMatchObject(media)
-    expect(merge1._numberOfRequests).toEqual(1)
 
     // Remove upload
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         richTextLexical: {
@@ -366,9 +421,6 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
     expect(merge2.richTextLexical.root.children).toHaveLength(1)
@@ -377,68 +429,56 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates monomorphic has one relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         relationshipMonoHasOne: testPost.id,
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
   })
 
   it('— relationships - populates monomorphic has many relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
       incomingData: {
         ...initialData,
         relationshipMonoHasMany: [testPost.id],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
   })
 
   it('— relationships - populates polymorphic has one relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
       incomingData: {
         ...initialData,
         relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipPolyHasOne).toMatchObject({
       value: testPost,
       relationTo: postsSlug,
@@ -446,41 +486,36 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates polymorphic has many relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
       incomingData: {
         ...initialData,
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
   })
 
   it('— relationships - can clear relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
       relationshipMonoHasOne: testPost.id,
       relationshipMonoHasMany: [testPost.id],
       relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
       relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
-    }
+    })
 
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         relationshipMonoHasOne: null,
         relationshipMonoHasMany: [],
@@ -488,12 +523,9 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
-    expect(merge2._numberOfRequests).toEqual(0)
     expect(merge2.relationshipMonoHasOne).toBeFalsy()
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasOne).toBeFalsy()
@@ -501,13 +533,12 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates within tabs', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
       incomingData: {
         ...initialData,
         tab: {
@@ -515,21 +546,20 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      collectionPopulationRequestHandler,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.tab.relationshipInTab).toMatchObject(testPost)
   })
 
   it('— relationships - populates within arrays', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         arrayOfRelationships: [
@@ -551,12 +581,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
@@ -578,8 +604,8 @@ describe('Collections - Live Preview', () => {
 
     // Add a new block before the populated one, then check to see that the relationship is still populated
     const merge2 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         arrayOfRelationships: [
@@ -608,12 +634,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData: merge1,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
       {
@@ -638,14 +660,14 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates within Slate rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add a relationship and an upload
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         richTextSlate: [
@@ -684,12 +706,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(2)
     expect(merge1.richTextSlate).toHaveLength(3)
     expect(merge1.richTextSlate[0].type).toEqual('relationship')
     expect(merge1.richTextSlate[0].value).toMatchObject(testPost)
@@ -699,8 +717,8 @@ describe('Collections - Live Preview', () => {
 
     // Add a new node between the relationship and the upload
     const merge2 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         richTextSlate: [
@@ -747,12 +765,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData: merge1,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.richTextSlate).toHaveLength(4)
     expect(merge2.richTextSlate[0].type).toEqual('relationship')
     expect(merge2.richTextSlate[0].value).toMatchObject(testPost)
@@ -762,18 +776,18 @@ describe('Collections - Live Preview', () => {
     expect(merge2.richTextSlate[3].value).toMatchObject(media)
   })
 
-  it('— relationships - populates within Lexical rich text editor', async () => {
-    const initialData: Partial<Page> = {
+  async function lexicalTest(fieldName: string) {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add a relationship
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
-        richTextLexical: {
+        [fieldName]: {
           root: {
             type: 'root',
             format: '',
@@ -813,26 +827,22 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(2)
-    expect(merge1.richTextLexical.root.children).toHaveLength(3)
-    expect(merge1.richTextLexical.root.children[0].type).toEqual('relationship')
-    expect(merge1.richTextLexical.root.children[0].value).toMatchObject(testPost)
-    expect(merge1.richTextLexical.root.children[1].type).toEqual('paragraph')
-    expect(merge1.richTextLexical.root.children[2].type).toEqual('upload')
-    expect(merge1.richTextLexical.root.children[2].value).toMatchObject(media)
+    expect(merge1[fieldName].root.children).toHaveLength(3)
+    expect(merge1[fieldName].root.children[0].type).toEqual('relationship')
+    expect(merge1[fieldName].root.children[0].value).toMatchObject(testPost)
+    expect(merge1[fieldName].root.children[1].type).toEqual('paragraph')
+    expect(merge1[fieldName].root.children[2].type).toEqual('upload')
+    expect(merge1[fieldName].root.children[2].value).toMatchObject(media)
 
     // Add a node before the populated one
     const merge2 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
-        richTextLexical: {
+        [fieldName]: {
           root: {
             type: 'root',
             format: '',
@@ -880,141 +890,34 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData: merge1,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
-    expect(merge2.richTextLexical.root.children).toHaveLength(4)
-    expect(merge2.richTextLexical.root.children[0].type).toEqual('relationship')
-    expect(merge2.richTextLexical.root.children[0].value).toMatchObject(testPost)
-    expect(merge2.richTextLexical.root.children[1].type).toEqual('paragraph')
-    expect(merge2.richTextLexical.root.children[2].type).toEqual('paragraph')
-    expect(merge2.richTextLexical.root.children[3].type).toEqual('upload')
-    expect(merge2.richTextLexical.root.children[3].value).toMatchObject(media)
+    expect(merge2[fieldName].root.children).toHaveLength(4)
+    expect(merge2[fieldName].root.children[0].type).toEqual('relationship')
+    expect(merge2[fieldName].root.children[0].value).toMatchObject(testPost)
+    expect(merge2[fieldName].root.children[1].type).toEqual('paragraph')
+    expect(merge2[fieldName].root.children[2].type).toEqual('paragraph')
+    expect(merge2[fieldName].root.children[3].type).toEqual('upload')
+    expect(merge2[fieldName].root.children[3].value).toMatchObject(media)
+  }
+
+  it('— relationships - populates within Lexical rich text editor', async () => {
+    await lexicalTest('richTextLexical')
   })
 
-  it('— relationships - does not re-populate existing rich text relationships', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-      richTextSlate: [
-        {
-          type: 'paragraph',
-          text: 'Paragraph 1',
-        },
-        {
-          type: 'reference',
-          reference: {
-            relationTo: postsSlug,
-            value: testPost,
-          },
-        },
-      ],
-    }
-
-    // Make a change to the text
-    const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        richTextSlate: [
-          {
-            type: 'paragraph',
-            text: 'Paragraph 1 (Updated)',
-          },
-          {
-            type: 'reference',
-            reference: {
-              relationTo: postsSlug,
-              value: testPost.id,
-            },
-          },
-        ],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
-    })
-
-    expect(merge1._numberOfRequests).toEqual(0)
-    expect(merge1.richTextSlate).toHaveLength(2)
-    expect(merge1.richTextSlate[0].text).toEqual('Paragraph 1 (Updated)')
-    expect(merge1.richTextSlate[1].reference.value).toMatchObject(testPost)
-  })
-
-  it('— relationships - populates within blocks', async () => {
-    const block1 = (shallow?: boolean): Extract<Page['layout'][0], { blockType: 'cta' }> => ({
-      blockType: 'cta',
-      id: '123',
-      links: [
-        {
-          link: {
-            label: 'Link 1',
-            type: 'reference',
-            reference: {
-              relationTo: postsSlug,
-              value: shallow ? testPost?.id : testPost,
-            },
-          },
-        },
-      ],
-    })
-
-    const block2: Extract<Page['layout'][0], { blockType: 'content' }> = {
-      blockType: 'content',
-      id: '456',
-      columns: [
-        {
-          id: '789',
-          richText: [
-            {
-              type: 'paragraph',
-              text: 'Column 1',
-            },
-          ],
-        },
-      ],
-    }
-
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-      layout: [block1(), block2],
-    }
-
-    // Add a new block before the populated one
-    // Then check to see that the relationship is still populated
-    const merge2 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        layout: [block2, block1(true)],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
-    })
-
-    // Check that the relationship on the first has been removed
-    // And that the relationship on the second has been populated
-    expect(merge2.layout[0].links).toBeUndefined()
-    expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
-    expect(merge2._numberOfRequests).toEqual(1)
+  it('— relationships - populates within Localized Lexical rich text editor', async () => {
+    await lexicalTest('richTextLexicalLocalized')
   })
 
   it('— relationships - re-populates externally updated relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Populate the relationships
     const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         title: 'Test Page',
         relationshipMonoHasOne: testPost.id,
@@ -1023,12 +926,10 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
+    merge1.id = initialData.id
+
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
 
@@ -1050,16 +951,9 @@ describe('Collections - Live Preview', () => {
       },
     })
 
-    const externallyUpdatedRelationship = {
-      id: updatedTestPost.id,
-      entitySlug: postsSlug,
-      updatedAt: updatedTestPost.updatedAt,
-    }
-
-    // Merge again using the `externallyUpdatedRelationship` argument
     const merge2 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         title: 'Test Page',
         relationshipMonoHasOne: testPost.id,
@@ -1068,13 +962,8 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData: merge1,
-      externallyUpdatedRelationship,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.relationshipMonoHasOne).toMatchObject(updatedTestPost)
     expect(merge2.relationshipMonoHasMany).toMatchObject([updatedTestPost])
 
@@ -1088,90 +977,65 @@ describe('Collections - Live Preview', () => {
     ])
   })
 
-  it('— rich text - merges text changes', async () => {
-    // Add a relationship
-    const merge1 = await traverseRichText({
-      incomingData: [
-        {
-          type: 'paragraph',
-          children: [
-            {
-              text: 'Paragraph 1',
-            },
-          ],
+  it('— relationships - populates localized relationships', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+        slug: 'test-post',
+        hero: {
+          type: 'highImpact',
+          media: media.id,
         },
-      ],
-      result: [],
-      populationsByCollection: {},
+        localizedTitle: 'Test Post Spanish',
+      },
+      locale: 'es',
     })
 
-    expect(merge1).toHaveLength(1)
-    expect(merge1[0].children[0].text).toEqual('Paragraph 1')
-
-    // Update the rich text
-    const merge2 = await traverseRichText({
-      incomingData: [
-        {
-          type: 'paragraph',
-          children: [
-            {
-              text: 'Paragraph 1 (Updated)',
-            },
-          ],
-        },
-      ],
-      populationsByCollection: {},
-      result: merge1,
+    await payload.update({
+      id: post.id,
+      locale: 'en',
+      collection: postsSlug,
+      data: {
+        localizedTitle: 'Test Post English',
+      },
     })
 
-    expect(merge2).toHaveLength(1)
-    expect(merge2[0].children[0].text).toEqual('Paragraph 1 (Updated)')
-  })
-
-  it('— rich text - can reset heading type', async () => {
-    // Add a heading with an H1 type
-    const merge1 = await traverseRichText({
-      incomingData: [
-        {
-          type: 'h1',
-          children: [
-            {
-              text: 'Heading',
-            },
-          ],
-        },
-      ],
-      populationsByCollection: {},
-      result: [],
+    const page = await payload.create({
+      collection: pagesSlug,
+      data: {
+        title: 'Test Page',
+        hero: { type: 'none' },
+        slug: 'testpage',
+      },
+      locale: 'en',
     })
 
-    expect(merge1).toHaveLength(1)
-    expect(merge1[0].type).toEqual('h1')
-
-    // Update the rich text to remove the heading type
-    const merge2 = await traverseRichText({
-      incomingData: [
-        {
-          children: [
-            {
-              text: 'Heading',
-            },
-          ],
-        },
-      ],
-      populationsByCollection: {},
-      result: merge1,
+    const initialData = await createPageWithInitialData({
+      ...page,
+      relationToLocalized: post.id,
     })
 
-    expect(merge2).toHaveLength(1)
-    expect(merge2[0].type).toBeUndefined()
+    // Populate the relationships
+    const merge1 = await mergeData({
+      depth: 1,
+      incomingData: {
+        ...initialData,
+        relationToLocalized: post.id,
+      },
+      initialData,
+      locale: 'es',
+      collectionSlug: pagesSlug,
+    })
+
+    expect(merge1.relationToLocalized).toHaveProperty('localizedTitle', 'Test Post Spanish')
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {
     const block1ID = '123'
     const block2ID = '456'
 
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
       layout: [
         {
@@ -1195,12 +1059,12 @@ describe('Collections - Live Preview', () => {
           ],
         },
       ],
-    }
+    })
 
     // Reorder the blocks
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         layout: [
@@ -1227,9 +1091,6 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
     // Check that the blocks have been reordered
@@ -1238,12 +1099,11 @@ describe('Collections - Live Preview', () => {
     expect(merge1.layout[1].id).toEqual(block1ID)
     expect(merge1.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge1.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
-    expect(merge1._numberOfRequests).toEqual(0)
 
     // Remove a block
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         layout: [
@@ -1260,114 +1120,25 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
     // Check that the block has been removed
     expect(merge2.layout).toHaveLength(1)
     expect(merge2.layout[0].id).toEqual(block2ID)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
-    expect(merge2._numberOfRequests).toEqual(0)
 
     // Remove the last block to ensure that all blocks can be cleared
     const merge3 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         layout: [],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
     })
 
     // Check that the block has been removed
     expect(merge3.layout).toHaveLength(0)
-    expect(merge3._numberOfRequests).toEqual(0)
-  })
-
-  it('properly encodes URLs in requests', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-    }
-
-    let capturedEndpoint: string | undefined
-
-    const customRequestHandler = async ({ apiPath, endpoint, serverURL }) => {
-      capturedEndpoint = `${serverURL}${apiPath}/${endpoint}`
-
-      const mockResponse = {
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'Content-Type': 'application/json' }),
-        json: () => ({
-          docs: [
-            {
-              id: testPost.id,
-              slug: 'post-1',
-              tenant: { id: 'tenant-id', title: 'Tenant 1' },
-              title: 'Test Post',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            {
-              id: testPostTwo.id,
-              slug: 'post-2',
-              tenant: { id: 'tenant-id', title: 'Tenant 1' },
-              title: 'Test Post 2',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          ],
-        }),
-      }
-
-      return Promise.resolve(mockResponse as unknown as Response)
-    }
-
-    const mergedData = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        relationshipPolyHasMany: [
-          { value: testPost.id, relationTo: postsSlug },
-          { value: testPostTwo.id, relationTo: postsSlug },
-        ],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      collectionPopulationRequestHandler: customRequestHandler,
-    })
-
-    expect(mergedData.relationshipPolyHasMany).toMatchObject([
-      {
-        value: {
-          id: testPost.id,
-          slug: 'post-1',
-          title: 'Test Post',
-        },
-        relationTo: postsSlug,
-      },
-      {
-        value: {
-          id: testPostTwo.id,
-          slug: 'post-2',
-          title: 'Test Post 2',
-        },
-        relationTo: postsSlug,
-      },
-    ])
-
-    // Verify that the request was made to the properly encoded URL
-    // Without encodeURI wrapper the request URL - would receive string: "undefined/api/posts?depth=1&where[id][in]=66ba7ab6a60a945d10c8b976,66ba7ab6a60a945d10c8b979
-    expect(capturedEndpoint).toContain(
-      encodeURI(`posts?depth=1&where[id][in]=${testPost.id},${testPostTwo.id}`),
-    )
   })
 })

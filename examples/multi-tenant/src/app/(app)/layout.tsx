@@ -9,6 +9,7 @@ export const metadata = {
   title: 'Next.js',
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html className={baseClass} lang="en">

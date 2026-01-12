@@ -1,5 +1,6 @@
-import type { ElementTransformer } from '@lexical/markdown'
 import type { ElementNode } from 'lexical'
+
+import type { ElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 export const createBlockNode = (
   createNode: (match: Array<string>) => ElementNode,

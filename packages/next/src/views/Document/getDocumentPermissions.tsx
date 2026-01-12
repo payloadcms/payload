@@ -1,8 +1,8 @@
 import type {
   Data,
-  DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -10,84 +10,84 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal } from 'payload'
+import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   data: Data
   globalConfig?: SanitizedGlobalConfig
+  /**
+   * When called for creating a new document, id is not provided.
+   */
   id?: number | string
   req: PayloadRequest
 }): Promise<{
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   hasPublishPermission: boolean
   hasSavePermission: boolean
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
-  let docPermissions: DocumentPermissions
+  let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
 
   if (collectionConfig) {
     try {
       docPermissions = await docAccessOperation({
-        id: id?.toString(),
+        id,
         collection: {
           config: collectionConfig,
         },
-        req: {
-          ...req,
-          data: {
-            ...data,
-            _status: 'draft',
-          },
+        data: {
+          ...data,
+          _status: 'draft',
         },
+        req,
       })
 
-      if (collectionConfig.versions?.drafts) {
-        hasPublishPermission = await docAccessOperation({
-          id: id?.toString(),
-          collection: {
-            config: collectionConfig,
-          },
-          req: {
-            ...req,
+      if (hasDraftsEnabled(collectionConfig)) {
+        hasPublishPermission = (
+          await docAccessOperation({
+            id,
+            collection: {
+              config: collectionConfig,
+            },
             data: {
               ...data,
               _status: 'published',
             },
-          },
-        }).then(({ update }) => update?.permission)
+            req,
+          })
+        ).update
       }
-    } catch (error) {
-      req.payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 
   if (globalConfig) {
     try {
       docPermissions = await docAccessOperationGlobal({
+        data,
         globalConfig,
-        req: {
-          ...req,
-          data,
-        },
+        req,
       })
 
-      if (globalConfig.versions?.drafts) {
-        hasPublishPermission = await docAccessOperationGlobal({
-          globalConfig,
-          req: {
-            ...req,
+      if (hasDraftsEnabled(globalConfig)) {
+        hasPublishPermission = (
+          await docAccessOperationGlobal({
             data: {
               ...data,
               _status: 'published',
             },
-          },
-        }).then(({ update }) => update?.permission)
+            globalConfig,
+            req,
+          })
+        ).update
       }
-    } catch (error) {
-      req.payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 

@@ -6,9 +6,9 @@
 //
 // - code should go first as it prevents any transformations inside
 
-import type { TextMatchTransformer } from '@lexical/markdown'
-
 import { $createTextNode, $isTextNode } from 'lexical'
+
+import type { TextMatchTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'
 
@@ -16,21 +16,18 @@ import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'
 export const LinkMarkdownTransformer: TextMatchTransformer = {
   type: 'text-match',
   dependencies: [LinkNode],
-  export: (_node, exportChildren, exportFormat) => {
+  export: (_node, exportChildren) => {
     if (!$isLinkNode(_node)) {
       return null
     }
     const node: LinkNode = _node
     const { url } = node.getFields()
-    const linkContent = `[${node.getTextContent()}](${url})`
-    const firstChild = node.getFirstChild()
-    // Add text styles only if link has single text node inside. If it's more
-    // then one we ignore it as markdown does not support nested styles for links
-    if (node.getChildrenSize() === 1 && $isTextNode(firstChild)) {
-      return exportFormat(firstChild, linkContent)
-    } else {
-      return linkContent
-    }
+
+    const textContent = exportChildren(node)
+
+    const linkContent = `[${textContent}](${url})`
+
+    return linkContent
   },
   importRegExp: /\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)/,
   regExp: /\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)$/,
@@ -48,6 +45,8 @@ export const LinkMarkdownTransformer: TextMatchTransformer = {
     linkTextNode.setFormat(textNode.getFormat())
     linkNode.append(linkTextNode)
     textNode.replace(linkNode)
+
+    return linkTextNode
   },
   trigger: ')',
 }

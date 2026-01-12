@@ -11,10 +11,10 @@ import {
   lt,
   lte,
   ne,
+  notIlike,
   notInArray,
   or,
   type SQL,
-  type SQLWrapper,
 } from 'drizzle-orm'
 
 type OperatorKeys =
@@ -31,9 +31,10 @@ type OperatorKeys =
   | 'like'
   | 'not_equals'
   | 'not_in'
+  | 'not_like'
   | 'or'
 
-export type Operators = Record<OperatorKeys, (column: Column, value: SQLWrapper | unknown) => SQL>
+export type Operators = Record<OperatorKeys, (column: Column, value: unknown) => SQL>
 
 export const operatorMap: Operators = {
   and,
@@ -48,6 +49,8 @@ export const operatorMap: Operators = {
   less_than_equal: lte,
   like: ilike,
   not_equals: ne,
+  not_like: notIlike,
+  // TODO: support this
   // all: all,
   not_in: notInArray,
   or,

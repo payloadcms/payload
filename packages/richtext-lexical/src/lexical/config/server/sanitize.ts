@@ -69,17 +69,21 @@ export const sanitizeServerFeatures = (
 
     if (feature?.i18n) {
       for (const lang in feature.i18n) {
-        if (!sanitized.i18n[lang]) {
-          sanitized.i18n[lang] = {
+        if (!sanitized.i18n[lang as keyof typeof sanitized.i18n]) {
+          sanitized.i18n[lang as keyof typeof sanitized.i18n] = {
             lexical: {},
           }
         }
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         sanitized.i18n[lang].lexical[feature.key] = feature.i18n[lang]
       }
     }
 
     if (feature.nodes?.length) {
-      sanitized.nodes = sanitized.nodes.concat(feature.nodes)
+      // Do not concat here. We need to keep the object reference of sanitized.nodes so that function markdown transformers of features automatically get the updated nodes
+      for (const node of feature.nodes) {
+        sanitized.nodes.push(node)
+      }
       feature.nodes.forEach((node) => {
         const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
         if (node?.graphQLPopulationPromises?.length) {
@@ -113,9 +117,20 @@ export const sanitizeServerFeatures = (
     }
 
     if (feature.markdownTransformers?.length) {
-      sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
-        feature.markdownTransformers,
-      )
+      // Do not concat here. We need to keep the object reference of feature.markdownTransformers
+
+      for (const transformer of feature.markdownTransformers) {
+        if (typeof transformer === 'function') {
+          sanitized.markdownTransformers.push(
+            transformer({
+              allNodes: sanitized.nodes,
+              allTransformers: sanitized.markdownTransformers,
+            }),
+          )
+        } else {
+          sanitized.markdownTransformers.push(transformer)
+        }
+      }
     }
 
     sanitized.enabledFeatures.push(feature.key)

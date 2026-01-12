@@ -1,4 +1,4 @@
-import type { DeleteOne, PayloadRequest } from 'payload'
+import type { DeleteOne } from 'payload'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -6,21 +6,15 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs.js'
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { transform } from './transform/read/index.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  {
-    collection: collectionSlug,
-    joins: joinQuery,
-    req = {} as PayloadRequest,
-    select,
-    where: whereArg,
-  },
+  { collection: collectionSlug, req, returning, select, where: whereArg },
 ) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
@@ -29,17 +23,19 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
-    fields: collection.fields,
-    locale: req.locale,
+    fields: collection.flattenedFields,
+    locale: req?.locale,
     tableName,
     where: whereArg,
   })
 
+  const db = await getTransaction(this, req)
+
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    chainedMethods: [{ args: [1], method: 'limit' }],
     db,
     joins,
+    query: ({ query }) => query.limit(1),
     selectFields,
     tableName,
     where,
@@ -53,8 +49,8 @@ export const deleteOne: DeleteOne = async function deleteOne(
     const findManyArgs = buildFindManyArgs({
       adapter: this,
       depth: 0,
-      fields: collection.fields,
-      joinQuery,
+      fields: collection.flattenedFields,
+      joinQuery: false,
       select,
       tableName,
     })
@@ -64,13 +60,21 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await db.query[tableName].findFirst(findManyArgs)
   }
 
-  const result = transform({
-    adapter: this,
-    config: this.payload.config,
-    data: docToDelete,
-    fields: collection.fields,
-    joinQuery,
-  })
+  if (!docToDelete) {
+    return null
+  }
+
+  const result =
+    returning === false
+      ? null
+      : transform({
+          adapter: this,
+          config: this.payload.config,
+          data: docToDelete,
+          fields: collection.flattenedFields,
+          joinQuery: false,
+          tableName,
+        })
 
   await this.deleteWhere({
     db,

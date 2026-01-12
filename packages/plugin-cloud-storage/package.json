@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
-  "version": "3.0.0-beta.130",
+  "version": "3.70.0",
   "description": "The official cloud storage plugin for Payload CMS",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -34,25 +35,10 @@
       "types": "./src/exports/utilities.ts",
       "default": "./src/exports/utilities.ts"
     },
-    "./azure": {
-      "import": "./src/exports/azure.ts",
-      "types": "./src/exports/azure.ts",
-      "default": "./src/exports/azure.ts"
-    },
-    "./gcs": {
-      "import": "./src/exports/gcs.ts",
-      "types": "./src/exports/gcs.ts",
-      "default": "./src/exports/gcs.ts"
-    },
-    "./s3": {
-      "import": "./src/exports/s3.ts",
-      "types": "./src/exports/s3.ts",
-      "default": "./src/exports/s3.ts"
-    },
-    "./vercelBlob": {
-      "import": "./src/exports/vercelBlob.ts",
-      "types": "./src/exports/vercelBlob.ts",
-      "default": "./src/exports/vercelBlob.ts"
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -64,55 +50,29 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc ",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
+    "@payloadcms/ui": "workspace:*",
     "find-node-modules": "^2.1.3",
     "range-parser": "^1.2.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@aws-sdk/lib-storage": "^3.614.0",
-    "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^7.7.0",
     "@types/find-node-modules": "^2.1.2",
-    "@vercel/blob": "^0.22.3",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@aws-sdk/lib-storage": "^3.614.0",
-    "@azure/abort-controller": "^1.0.0",
-    "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^7.7.0",
-    "@vercel/blob": "^0.22.3",
-    "payload": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "@aws-sdk/client-s3": {
-      "optional": true
-    },
-    "@aws-sdk/lib-storage": {
-      "optional": true
-    },
-    "@azure/abort-controller": {
-      "optional": true
-    },
-    "@azure/storage-blob": {
-      "optional": true
-    },
-    "@google-cloud/storage": {
-      "optional": true
-    },
-    "@vercel/blob": {
-      "optional": true
-    }
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {
@@ -131,25 +91,10 @@
         "types": "./dist/exports/utilities.d.ts",
         "default": "./dist/exports/utilities.js"
       },
-      "./azure": {
-        "import": "./dist/exports/azure.js",
-        "types": "./dist/exports/azure.d.ts",
-        "default": "./dist/exports/azure.js"
-      },
-      "./gcs": {
-        "import": "./dist/exports/gcs.js",
-        "types": "./dist/exports/gcs.d.ts",
-        "default": "./dist/exports/gcs.js"
-      },
-      "./s3": {
-        "import": "./dist/exports/s3.js",
-        "types": "./dist/exports/s3.d.ts",
-        "default": "./dist/exports/s3.js"
-      },
-      "./vercelBlob": {
-        "import": "./dist/exports/vercelBlob.js",
-        "types": "./dist/exports/vercelBlob.d.ts",
-        "default": "./dist/exports/vercelBlob.js"
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",

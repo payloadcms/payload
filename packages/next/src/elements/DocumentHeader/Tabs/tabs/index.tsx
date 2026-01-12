@@ -1,84 +1,87 @@
-import type { DocumentTabConfig } from 'payload'
-import type React from 'react'
+import type { DocumentTabConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { VersionsPill } from './VersionsPill/index.js'
 
-export const documentViewKeys = [
-  'api',
-  'default',
-  'livePreview',
-  'references',
-  'relationships',
-  'version',
-  'versions',
-]
+export const documentViewKeys = ['api', 'default', 'livePreview', 'versions']
 
 export type DocumentViewKey = (typeof documentViewKeys)[number]
 
-export const tabs: Record<
-  DocumentViewKey,
-  {
-    order?: number // TODO: expose this to the globalConfig config
-    Pill_Component?: React.FC
-  } & DocumentTabConfig
-> = {
-  api: {
-    condition: ({ collectionConfig, globalConfig }) =>
-      (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
-      (globalConfig && !globalConfig?.admin?.hideAPIURL),
-    href: '/api',
-    label: 'API',
-    order: 1000,
-  },
-  default: {
-    href: '',
-    // isActive: ({ href, location }) =>
-    // location.pathname === href || location.pathname === `${href}/create`,
-    label: ({ t }) => t('general:edit'),
-    order: 0,
-  },
-  livePreview: {
-    condition: ({ collectionConfig, config, globalConfig }) => {
-      if (collectionConfig) {
-        return Boolean(
-          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-            collectionConfig?.admin?.livePreview,
-        )
-      }
+export const getTabs = ({
+  collectionConfig,
+  globalConfig,
+}: {
+  collectionConfig?: SanitizedCollectionConfig
+  globalConfig?: SanitizedGlobalConfig
+}): { tab: DocumentTabConfig; viewPath: string }[] => {
+  const customViews =
+    collectionConfig?.admin?.components?.views?.edit ||
+    globalConfig?.admin?.components?.views?.edit ||
+    {}
 
-      if (globalConfig) {
-        return Boolean(
-          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-            globalConfig?.admin?.livePreview,
-        )
-      }
-
-      return false
+  return [
+    {
+      tab: {
+        href: '',
+        label: ({ t }) => t('general:edit'),
+        order: 100,
+        ...(customViews?.['default']?.tab || {}),
+      },
+      viewPath: '/',
     },
-    href: '/preview',
-    label: ({ t }) => t('general:livePreview'),
-    order: 100,
-  },
-  references: {
-    condition: () => false,
-  },
-  relationships: {
-    condition: () => false,
-  },
-  version: {
-    condition: () => false,
-  },
-  versions: {
-    condition: ({ collectionConfig, globalConfig, permissions }) =>
-      Boolean(
-        (collectionConfig?.versions &&
-          permissions?.collections?.[collectionConfig?.slug]?.readVersions?.permission) ||
-          (globalConfig?.versions &&
-            permissions?.globals?.[globalConfig?.slug]?.readVersions?.permission),
-      ),
-    href: '/versions',
-    label: ({ t }) => t('version:versions'),
-    order: 200,
-    Pill_Component: VersionsPill,
-  },
+    {
+      tab: {
+        condition: ({ collectionConfig, globalConfig, permissions }) =>
+          Boolean(
+            (collectionConfig?.versions &&
+              permissions?.collections?.[collectionConfig?.slug]?.readVersions) ||
+              (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
+          ),
+        href: '/versions',
+        label: ({ t }) => t('version:versions'),
+        order: 300,
+        Pill_Component: VersionsPill,
+        ...(customViews?.['versions']?.tab || {}),
+      },
+      viewPath: '/versions',
+    },
+    {
+      tab: {
+        condition: ({ collectionConfig, globalConfig }) =>
+          (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
+          (globalConfig && !globalConfig?.admin?.hideAPIURL),
+        href: '/api',
+        label: 'API',
+        order: 400,
+        ...(customViews?.['api']?.tab || {}),
+      },
+      viewPath: '/api',
+    },
+  ]
+    .concat(
+      Object.entries(customViews).reduce((acc, [key, value]) => {
+        if (documentViewKeys.includes(key)) {
+          return acc
+        }
+
+        if (value?.tab) {
+          acc.push({
+            tab: value.tab,
+            viewPath: 'path' in value ? value.path : '',
+          })
+        }
+
+        return acc
+      }, []),
+    )
+    ?.sort(({ tab: a }, { tab: b }) => {
+      if (a.order === undefined && b.order === undefined) {
+        return 0
+      } else if (a.order === undefined) {
+        return 1
+      } else if (b.order === undefined) {
+        return -1
+      }
+
+      return a.order - b.order
+    })
 }

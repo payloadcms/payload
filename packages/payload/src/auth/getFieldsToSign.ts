@@ -27,25 +27,35 @@ const traverseFields = ({
         break
       }
       case 'group': {
-        let targetResult
-        if (typeof field.saveToJWT === 'string') {
-          targetResult = field.saveToJWT
-          result[field.saveToJWT] = data[field.name]
-        } else if (field.saveToJWT) {
-          targetResult = field.name
-          result[field.name] = data[field.name]
+        if (fieldAffectsData(field)) {
+          let targetResult
+          if (typeof field.saveToJWT === 'string') {
+            targetResult = field.saveToJWT
+            result[field.saveToJWT] = data[field.name]
+          } else if (field.saveToJWT) {
+            targetResult = field.name
+            result[field.name] = data[field.name]
+          }
+          const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
+          const groupResult = (targetResult ? result[targetResult] : result) as Record<
+            string,
+            unknown
+          >
+          traverseFields({
+            data: groupData,
+            fields: field.fields,
+            result: groupResult,
+          })
+          break
+        } else {
+          traverseFields({
+            data,
+            fields: field.fields,
+            result,
+          })
+
+          break
         }
-        const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
-        const groupResult = (targetResult ? result[targetResult] : result) as Record<
-          string,
-          unknown
-        >
-        traverseFields({
-          data: groupData,
-          fields: field.fields,
-          result: groupResult,
-        })
-        break
       }
       case 'tab': {
         if (tabHasName(field)) {
@@ -104,18 +114,23 @@ const traverseFields = ({
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig
   email: string
+  sid?: string
   user: PayloadRequest['user']
 }): Record<string, unknown> => {
-  const { collectionConfig, email, user } = args
+  const { collectionConfig, email, sid, user } = args
 
   const result: Record<string, unknown> = {
-    id: user.id,
+    id: user?.id,
     collection: collectionConfig.slug,
     email,
   }
 
+  if (sid) {
+    result.sid = sid
+  }
+
   traverseFields({
-    data: user,
+    data: user!,
     fields: collectionConfig.fields,
     result,
   })

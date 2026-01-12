@@ -3,6 +3,8 @@ import type { ClientUser } from 'payload'
 
 import React, { useEffect } from 'react'
 
+import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
@@ -24,7 +26,7 @@ const formatDate = (date) => {
     minute: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(date)
+  }).format(new Date(date))
 }
 
 export const DocumentLocked: React.FC<{
@@ -37,6 +39,8 @@ export const DocumentLocked: React.FC<{
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
+  const { clearRouteCache } = useRouteCache()
+  const { startRouteTransition } = useRouteTransition()
 
   useEffect(() => {
     if (isActive) {
@@ -47,7 +51,15 @@ export const DocumentLocked: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal className={baseClass} onClose={handleGoBack} slug={modalSlug}>
+    <Modal
+      className={baseClass}
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
+      onClose={() => {
+        startRouteTransition(() => handleGoBack())
+      }}
+      slug={modalSlug}
+    >
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{t('general:documentLocked')}</h1>
@@ -65,7 +77,10 @@ export const DocumentLocked: React.FC<{
           <Button
             buttonStyle="secondary"
             id={`${modalSlug}-go-back`}
-            onClick={handleGoBack}
+            onClick={() => {
+              closeModal(modalSlug)
+              startRouteTransition(() => handleGoBack())
+            }}
             size="large"
           >
             {t('general:goBack')}
@@ -76,6 +91,7 @@ export const DocumentLocked: React.FC<{
             onClick={() => {
               onReadOnly()
               closeModal(modalSlug)
+              clearRouteCache()
             }}
             size="large"
           >
@@ -85,7 +101,7 @@ export const DocumentLocked: React.FC<{
             buttonStyle="primary"
             id={`${modalSlug}-take-over`}
             onClick={() => {
-              void onTakeOver()
+              onTakeOver()
               closeModal(modalSlug)
             }}
             size="large"

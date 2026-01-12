@@ -6,49 +6,119 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
+    richText: RichText;
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
+    'localized-drafts': LocalizedDraft;
+    'localized-date-fields': LocalizedDateField;
+    'all-fields-localized': AllFieldsLocalized;
     users: User;
     'localized-posts': LocalizedPost;
+    'no-localized-fields': NoLocalizedField;
     'array-fields': ArrayField;
     'localized-required': LocalizedRequired;
     'with-localized-relationship': WithLocalizedRelationship;
     'relationship-localized': RelationshipLocalized;
-    dummy: Dummy;
+    'cannot-create-default-locale': CannotCreateDefaultLocale;
     nested: Nested;
     groups: Group;
     tabs: Tab;
     'localized-sort': LocalizedSort;
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
+    'array-with-fallback-fields': ArrayWithFallbackField;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
+    richText: RichTextSelect<false> | RichTextSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
+    'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
+    'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
+    'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'localized-required': LocalizedRequiredSelect<false> | LocalizedRequiredSelect<true>;
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
     'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
-    dummy: DummySelect<false> | DummySelect<true>;
+    'cannot-create-default-locale': CannotCreateDefaultLocaleSelect<false> | CannotCreateDefaultLocaleSelect<true>;
     nested: NestedSelect<false> | NestedSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
     'localized-sort': LocalizedSortSelect<false> | LocalizedSortSelect<true>;
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
+    'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -56,19 +126,27 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
     'global-array': GlobalArray;
+    'global-text': GlobalText;
   };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
+    'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
-  locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
+  locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -91,12 +169,51 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText".
+ */
+export interface RichText {
+  id: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-fields".
  */
 export interface BlocksField {
   id: string;
+  title?: string | null;
+  tabContent?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockInsideTab';
+      }[]
+    | null;
   content?:
     | {
+        text?: string | null;
         content?:
           | {
               text?: string | null;
@@ -120,6 +237,7 @@ export interface BlocksField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -228,10 +346,126 @@ export interface NestedFieldTable {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts".
+ */
+export interface LocalizedDraft {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields".
+ */
+export interface LocalizedDateField {
+  id: string;
+  localizedDate?: string | null;
+  date?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-fields-localized".
+ */
+export interface AllFieldsLocalized {
+  id: string;
+  text?: string | null;
+  textarea?: string | null;
+  number?: number | null;
+  email?: string | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  select?: ('option1' | 'option2' | 'option3') | null;
+  radio?: ('radio1' | 'radio2') | null;
+  checkbox?: boolean | null;
+  date?: string | null;
+  localizedGroup?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  nonLocalizedGroup?: {
+    localizedText?: string | null;
+    nonLocalizedText?: string | null;
+  };
+  localizedArray?:
+    | {
+        item?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  nonLocalizedArray?:
+    | {
+        localizedItem?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'localizedTextBlock';
+          }
+        | {
+            nestedArray?:
+              | {
+                  item?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'nestedBlock';
+          }
+      )[]
+    | null;
+  localizedTab?: {
+    tabText?: string | null;
+  };
+  nonLocalizedTab?: {
+    localizedInNonLocalizedTab?: string | null;
+  };
+  unnamedTabLocalizedText?: string | null;
+  t1?: {
+    t2?: {
+      text?: string | null;
+    };
+  };
+  g1?: {
+    g2?: {
+      g2a1?:
+        | {
+            text?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  selfRelation?: (string | null) | AllFieldsLocalized;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  name?: string | null;
   relation?: (string | null) | LocalizedPost;
   updatedAt: string;
   createdAt: string;
@@ -242,7 +476,30 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields".
+ */
+export interface NoLocalizedField {
+  id: string;
+  text?: string | null;
+  group?: {
+    en?: {
+      text?: string | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -252,7 +509,7 @@ export interface ArrayField {
   id: string;
   items?:
     | {
-        text: string;
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -333,8 +590,8 @@ export interface WithLocalizedRelationship {
         value: string | LocalizedPost;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null);
   localizedRelationMultiRelationToHasMany?:
     | (
@@ -343,8 +600,8 @@ export interface WithLocalizedRelationship {
             value: string | LocalizedPost;
           }
         | {
-            relationTo: 'dummy';
-            value: string | Dummy;
+            relationTo: 'cannot-create-default-locale';
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -353,9 +610,9 @@ export interface WithLocalizedRelationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
+ * via the `definition` "cannot-create-default-locale".
  */
-export interface Dummy {
+export interface CannotCreateDefaultLocale {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -375,8 +632,8 @@ export interface RelationshipLocalized {
         value: string | LocalizedPost;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null);
   relationMultiRelationToHasMany?:
     | (
@@ -385,8 +642,8 @@ export interface RelationshipLocalized {
             value: string | LocalizedPost;
           }
         | {
-            relationTo: 'dummy';
-            value: string | Dummy;
+            relationTo: 'cannot-create-default-locale';
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -407,6 +664,7 @@ export interface Nested {
   id: string;
   blocks?:
     | {
+        someText?: string | null;
         array?:
           | {
               text?: string | null;
@@ -417,6 +675,19 @@ export interface Nested {
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
+      }[]
+    | null;
+  topLevelArray?:
+    | {
+        localizedText?: string | null;
+        notLocalizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topLevelArrayLocalized?:
+    | {
+        text?: string | null;
+        id?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -464,6 +735,12 @@ export interface Tab {
   id: string;
   tabLocalized?: {
     title?: string | null;
+    array?:
+      | {
+          title?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   tab?: {
     title?: string | null;
@@ -554,11 +831,51 @@ export interface LocalizedWithinLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-with-fallback-fields".
+ */
+export interface ArrayWithFallbackField {
+  id: string;
+  items: {
+    text?: string | null;
+    id?: string | null;
+  }[];
+  itemsReadOnly?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'richText';
+        value: string | RichText;
+      } | null)
     | ({
         relationTo: 'blocks-fields';
         value: string | BlocksField;
@@ -572,12 +889,28 @@ export interface PayloadLockedDocument {
         value: string | NestedFieldTable;
       } | null)
     | ({
+        relationTo: 'localized-drafts';
+        value: string | LocalizedDraft;
+      } | null)
+    | ({
+        relationTo: 'localized-date-fields';
+        value: string | LocalizedDateField;
+      } | null)
+    | ({
+        relationTo: 'all-fields-localized';
+        value: string | AllFieldsLocalized;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
     | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'no-localized-fields';
+        value: string | NoLocalizedField;
       } | null)
     | ({
         relationTo: 'array-fields';
@@ -596,8 +929,8 @@ export interface PayloadLockedDocument {
         value: string | RelationshipLocalized;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null)
     | ({
         relationTo: 'nested';
@@ -622,6 +955,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized-within-localized';
         value: string | LocalizedWithinLocalized;
+      } | null)
+    | ({
+        relationTo: 'array-with-fallback-fields';
+        value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'payload-kv';
+        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -667,15 +1008,38 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText_select".
+ */
+export interface RichTextSelect<T extends boolean = true> {
+  richText?: T;
+  lexical?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
+  title?: T;
+  tabContent?:
+    | T
+    | {
+        blockInsideTab?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   content?:
     | T
     | {
         blockInsideBlock?:
           | T
           | {
+              text?: T;
               content?:
                 | T
                 | {
@@ -703,6 +1067,7 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -788,9 +1153,132 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts_select".
+ */
+export interface LocalizedDraftsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields_select".
+ */
+export interface LocalizedDateFieldsSelect<T extends boolean = true> {
+  localizedDate?: T;
+  date?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-fields-localized_select".
+ */
+export interface AllFieldsLocalizedSelect<T extends boolean = true> {
+  text?: T;
+  textarea?: T;
+  number?: T;
+  email?: T;
+  code?: T;
+  json?: T;
+  select?: T;
+  radio?: T;
+  checkbox?: T;
+  date?: T;
+  localizedGroup?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  nonLocalizedGroup?:
+    | T
+    | {
+        localizedText?: T;
+        nonLocalizedText?: T;
+      };
+  localizedArray?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  nonLocalizedArray?:
+    | T
+    | {
+        localizedItem?: T;
+        id?: T;
+      };
+  localizedBlocks?:
+    | T
+    | {
+        localizedTextBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nestedBlock?:
+          | T
+          | {
+              nestedArray?:
+                | T
+                | {
+                    item?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  localizedTab?:
+    | T
+    | {
+        tabText?: T;
+      };
+  nonLocalizedTab?:
+    | T
+    | {
+        localizedInNonLocalizedTab?: T;
+      };
+  unnamedTabLocalizedText?: T;
+  t1?:
+    | T
+    | {
+        t2?:
+          | T
+          | {
+              text?: T;
+            };
+      };
+  g1?:
+    | T
+    | {
+        g2?:
+          | T
+          | {
+              g2a1?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+            };
+      };
+  selfRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   relation?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -801,6 +1289,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -820,6 +1315,25 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
   unique?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields_select".
+ */
+export interface NoLocalizedFieldsSelect<T extends boolean = true> {
+  text?: T;
+  group?:
+    | T
+    | {
+        en?:
+          | T
+          | {
+              text?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -936,9 +1450,9 @@ export interface RelationshipLocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy_select".
+ * via the `definition` "cannot-create-default-locale_select".
  */
-export interface DummySelect<T extends boolean = true> {
+export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -954,6 +1468,7 @@ export interface NestedSelect<T extends boolean = true> {
         block?:
           | T
           | {
+              someText?: T;
               array?:
                 | T
                 | {
@@ -964,6 +1479,19 @@ export interface NestedSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  topLevelArray?:
+    | T
+    | {
+        localizedText?: T;
+        notLocalizedText?: T;
+        id?: T;
+      };
+  topLevelArrayLocalized?:
+    | T
+    | {
+        text?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1021,6 +1549,12 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
       };
   tab?:
     | T
@@ -1124,6 +1658,34 @@ export interface LocalizedWithinLocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-with-fallback-fields_select".
+ */
+export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  itemsReadOnly?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1171,6 +1733,16 @@ export interface GlobalArray {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text".
+ */
+export interface GlobalText {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1186,6 +1758,16 @@ export interface GlobalArraySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text_select".
+ */
+export interface GlobalTextSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1194,6 +1776,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

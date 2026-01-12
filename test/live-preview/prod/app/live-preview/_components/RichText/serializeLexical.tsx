@@ -1,4 +1,4 @@
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import React from 'react'
 
@@ -29,21 +29,34 @@ const serializer = (
       case 'h6':
         return <h6 key={i}>{serializeLexical(node?.children, renderUploadFilenameOnly)}</h6>
 
+      case 'li':
+        return <li key={i}>{serializeLexical(node.children, renderUploadFilenameOnly)}</li>
+
+      case 'link':
+        return (
+          <CMSLink
+            key={i}
+            newTab={Boolean(node?.newTab)}
+            reference={node.doc}
+            type={node.linkType === 'internal' ? 'reference' : 'custom'}
+            url={node.url}
+          >
+            {serializer(node?.children, renderUploadFilenameOnly)}
+          </CMSLink>
+        )
+
+      case 'ol':
+        return <ol key={i}>{serializeLexical(node.children, renderUploadFilenameOnly)}</ol>
+
+      case 'paragraph':
+        return <p key={i}>{serializer(node?.children, renderUploadFilenameOnly)}</p>
+
       case 'quote':
         return (
           <blockquote key={i}>
             {serializeLexical(node?.children, renderUploadFilenameOnly)}
           </blockquote>
         )
-
-      case 'ul':
-        return <ul key={i}>{serializeLexical(node?.children, renderUploadFilenameOnly)}</ul>
-
-      case 'ol':
-        return <ol key={i}>{serializeLexical(node.children, renderUploadFilenameOnly)}</ol>
-
-      case 'li':
-        return <li key={i}>{serializeLexical(node.children, renderUploadFilenameOnly)}</li>
 
       case 'relationship':
         return (
@@ -54,31 +67,18 @@ const serializer = (
           </span>
         )
 
-      case 'link':
-        return (
-          <CMSLink
-            key={i}
-            newTab={Boolean(node?.newTab)}
-            reference={node.doc as any}
-            type={node.linkType === 'internal' ? 'reference' : 'custom'}
-            url={node.url}
-          >
-            {serializer(node?.children, renderUploadFilenameOnly)}
-          </CMSLink>
-        )
+      case 'text':
+        return <span key={i}>{node.text}</span>
+
+      case 'ul':
+        return <ul key={i}>{serializeLexical(node?.children, renderUploadFilenameOnly)}</ul>
 
       case 'upload':
         if (renderUploadFilenameOnly) {
-          return <span key={i}>{node.value.filename}</span>
+          return <span key={i}>{node.value?.filename}</span>
         }
 
         return <Media key={i} resource={node?.value} />
-
-      case 'paragraph':
-        return <p key={i}>{serializer(node?.children, renderUploadFilenameOnly)}</p>
-
-      case 'text':
-        return <span key={i}>{node.text}</span>
     }
   })
 

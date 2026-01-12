@@ -1,0 +1,30 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .browse-by-folder-button {
+    border: 1px solid var(--theme-elevation-100);
+    text-decoration: none;
+    padding: calc(var(--base) / 2);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: calc(var(--base) * 0.33);
+    margin-top: calc(var(--base) * 0.25);
+    margin-bottom: var(--base);
+    border-radius: var(--style-radius-m);
+    color: var(--theme-text);
+
+    &.active {
+      background-color: var(--theme-elevation-50);
+      font-weight: 600;
+
+      .icon {
+        color: var(--theme-elevation-400);
+      }
+    }
+
+    .icon {
+      color: var(--theme-elevation-300);
+    }
+  }
+}

@@ -1,11 +1,5 @@
-import type {
-  AggregatePaginateModel,
-  IndexDefinition,
-  IndexOptions,
-  Model,
-  PaginateModel,
-  SchemaOptions,
-} from 'mongoose'
+import type { ClientSession } from 'mongodb'
+import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
 import type {
   ArrayField,
   BlocksField,
@@ -18,6 +12,7 @@ import type {
   GroupField,
   JoinField,
   JSONField,
+  MigrationData,
   NumberField,
   Payload,
   PayloadRequest,
@@ -34,12 +29,9 @@ import type {
   UploadField,
 } from 'payload'
 
-import type { BuildQueryArgs } from './queries/buildQuery.js'
+import type { BuildQueryArgs } from './queries/getBuildQueryPlugin.js'
 
-export interface CollectionModel
-  extends Model<any>,
-    PaginateModel<any>,
-    AggregatePaginateModel<any> {
+export interface CollectionModel extends Model<any>, PaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
@@ -110,5 +102,70 @@ export type FieldToSchemaMap<TSchema> = {
   upload: FieldGeneratorFunction<TSchema, UploadField>
 }
 
-export type MigrateUpArgs = { payload: Payload; req: PayloadRequest }
-export type MigrateDownArgs = { payload: Payload; req: PayloadRequest }
+export type MigrateUpArgs = {
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   *  import { type MigrateUpArgs } from '@payloadcms/db-mongodb'
+   *
+   * export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
+  payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
+  req: PayloadRequest
+  /**
+   * The MongoDB client session that you can use to execute MongoDB methods directly within the current transaction.
+   * @example
+   * ```ts
+   * import { type MigrateUpArgs } from '@payloadcms/db-mongodb'
+   *
+   * export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const { rows: posts } = await payload.db.collections.posts.collection.find({ session }).toArray()
+   * }
+   * ```
+   */
+  session?: ClientSession
+}
+export type MigrateDownArgs = {
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * import { type MigrateDownArgs } from '@payloadcms/db-mongodb'
+   *
+   * export async function down({ session, payload, req }: MigrateDownArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
+  payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
+  req: PayloadRequest
+  /**
+   * The MongoDB client session that you can use to execute MongoDB methods directly within the current transaction.
+   * @example
+   * ```ts
+   * import { type MigrateDownArgs } from '@payloadcms/db-mongodb'
+   *
+   * export async function down({ session, payload, req }: MigrateDownArgs): Promise<void> {
+   *   const { rows: posts } = await payload.db.collections.posts.collection.find({ session }).toArray()
+   * }
+   * ```
+   */
+  session?: ClientSession
+}
+
+export type MongooseMigration = {
+  down: (args: MigrateDownArgs) => Promise<void>
+  up: (args: MigrateUpArgs) => Promise<void>
+} & MigrationData

@@ -1,5 +1,15 @@
-import httpStatus from 'http-status'
-import { APIError, ValidationError } from 'payload'
+import type { PayloadRequest } from 'payload'
+
+import { ValidationError } from 'payload'
+
+function extractFieldFromMessage(message: string) {
+  // eslint-disable-next-line regexp/no-super-linear-backtracking
+  const match = message.match(/index:\s*(.*?)_/)
+  if (match && match[1]) {
+    return match[1] // e.g., returns "email" from "index: email_1"
+  }
+  return null
+}
 
 export const handleError = ({
   collection,
@@ -8,28 +18,39 @@ export const handleError = ({
   req,
 }: {
   collection?: string
-  error
+  error: unknown
   global?: string
-  req
+  req?: Partial<PayloadRequest>
 }) => {
+  if (!error || typeof error !== 'object') {
+    throw error
+  }
+
   // Handle uniqueness error from MongoDB
-  if (error.code === 11000 && error.keyValue) {
+  if ('code' in error && error.code === 11000) {
+    let path: null | string = null
+
+    if ('keyValue' in error && error.keyValue && typeof error.keyValue === 'object') {
+      path = Object.keys(error.keyValue)[0] ?? ''
+    } else if ('message' in error && typeof error.message === 'string') {
+      path = extractFieldFromMessage(error.message)
+    }
+
     throw new ValidationError(
       {
         collection,
         errors: [
           {
-            message: req.t('error:valueMustBeUnique'),
-            path: Object.keys(error.keyValue)[0],
+            message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
+            path: path ?? '',
           },
         ],
         global,
       },
-      req.t,
+      req?.t,
     )
-  } else if (error.code === 11000) {
-    throw new APIError(req.t('error:valueMustBeUnique'), httpStatus.BAD_REQUEST)
-  } else {
-    throw error
   }
+
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
+  throw error
 }

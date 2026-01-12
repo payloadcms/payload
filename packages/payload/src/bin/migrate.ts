@@ -14,25 +14,50 @@ const prettySyncLogger = {
   loggerOptions: {},
 }
 
-const availableCommands = [
+export const availableCommands = [
   'migrate',
   'migrate:create',
   'migrate:down',
   'migrate:refresh',
   'migrate:reset',
   'migrate:status',
-  'migration:fresh',
+  'migrate:fresh',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
 type Args = {
   config: SanitizedConfig
+  /**
+   * Override the migration directory. Useful for testing when the CWD differs
+   * from where the test config expects migrations to be stored.
+   */
+  migrationDir?: string
   parsedArgs: ParsedArgs
 }
 
-export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
-  const { _: args, file, forceAcceptWarning, help } = parsedArgs
+export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promise<void> => {
+  const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
+
+  const formattedArgs = Object.keys(parsedArgs)
+    .map((key) => {
+      const formattedKey = key.replace(/^[-_]+/, '')
+      if (!formattedKey) {
+        return null
+      }
+
+      return formattedKey
+        .split('-')
+        .map((word, index) =>
+          index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1),
+        )
+        .join('')
+    })
+    .filter(Boolean)
+
+  const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
+  const skipEmpty = formattedArgs.includes('skipEmpty')
+
   if (help) {
     // eslint-disable-next-line no-console
     console.log(`\n\n${availableCommandsMsg}\n`) // Avoid having to init payload to get the logger
@@ -44,6 +69,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
     config,
+    disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
     ...prettySyncLogger,
   })
@@ -52,6 +78,11 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
 
   if (!adapter) {
     throw new Error('No database adapter found')
+  }
+
+  // Override migrationDir if provided (useful for testing)
+  if (migrationDir) {
+    adapter.migrationDir = migrationDir
   }
 
   if (!args.length) {
@@ -72,9 +103,11 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           forceAcceptWarning,
           migrationName: args[1],
           payload,
+          skipEmpty,
         })
       } catch (err) {
-        throw new Error(`Error creating migration: ${err.message}`)
+        const error = err instanceof Error ? err.message : 'Unknown error'
+        throw new Error(`Error creating migration: ${error}`)
       }
       break
     case 'migrate:down':

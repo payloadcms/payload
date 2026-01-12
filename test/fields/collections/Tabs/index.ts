@@ -22,8 +22,102 @@ const TabsFields: CollectionConfig = {
       },
     },
     {
+      name: 'conditionalTabVisible',
+      type: 'checkbox',
+      label: 'Toggle Conditional Tab',
+      admin: {
+        position: 'sidebar',
+        description:
+          'When active, the conditional tab should be visible. When inactive, it should be hidden.',
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
+        {
+          name: 'conditionalTab',
+          label: 'Conditional Tab',
+          description: 'This tab should only be visible when the conditional field is checked.',
+          fields: [
+            {
+              name: 'conditionalTabField',
+              type: 'text',
+              label: 'Conditional Tab Field',
+              defaultValue:
+                'This field should only be visible when the conditional tab is visible.',
+            },
+            {
+              name: 'nestedConditionalTabVisible',
+              type: 'checkbox',
+              label: 'Toggle Nested Conditional Tab',
+              defaultValue: true,
+              admin: {
+                description:
+                  'When active, the nested conditional tab should be visible. When inactive, it should be hidden.',
+              },
+            },
+            {
+              type: 'group',
+              name: 'conditionalTabGroup',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'conditionalTabGroupTitle',
+                },
+                {
+                  type: 'tabs',
+                  tabs: [
+                    {
+                      // duplicate name as above, should not conflict with tab IDs in form-state, if it does then tests will fail
+                      name: 'conditionalTab',
+                      label: 'Duplicate conditional tab',
+                      fields: [],
+                      admin: {
+                        condition: ({ conditionalTab }) =>
+                          !!conditionalTab?.nestedConditionalTabVisible,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'tabs',
+
+              tabs: [
+                {
+                  label: 'Nested Unconditional Tab',
+                  description: 'Description for a nested unconditional tab',
+                  fields: [
+                    {
+                      name: 'nestedUnconditionalTabInput',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  label: 'Nested Conditional Tab',
+                  description: 'Here is a description for a nested conditional tab',
+                  fields: [
+                    {
+                      name: 'nestedConditionalTabInput',
+                      type: 'textarea',
+                      defaultValue:
+                        'This field should only be visible when the nested conditional tab is visible.',
+                    },
+                  ],
+                  admin: {
+                    condition: ({ conditionalTab }) =>
+                      !!conditionalTab?.nestedConditionalTabVisible,
+                  },
+                },
+              ],
+            },
+          ],
+          admin: {
+            condition: ({ conditionalTabVisible }) => !!conditionalTabVisible,
+          },
+        },
         {
           label: 'Tab with Array',
           description: 'This tab has an array.',
@@ -47,6 +141,8 @@ const TabsFields: CollectionConfig = {
               type: 'array',
               required: true,
               fields: [
+                // path: 'array.n.text'
+                // schemaPath: '_index-1-0.array.text'
                 {
                   name: 'text',
                   type: 'text',
@@ -113,6 +209,7 @@ const TabsFields: CollectionConfig = {
         {
           name: 'tab',
           label: 'Tab with Name',
+          interfaceName: 'TabWithName',
           description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {
@@ -308,6 +405,7 @@ const TabsFields: CollectionConfig = {
               ],
             },
             {
+              // expected schema path: 'tabs-fields._index-3-0.nestedTab'
               name: 'nestedTab',
               label: 'Nested Tab with Name',
               description: 'This tab has a name, which should namespace the contained fields.',

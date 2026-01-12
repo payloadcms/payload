@@ -1,7 +1,7 @@
 name: pr-title
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - edited
@@ -12,9 +12,9 @@ permissions:
 jobs:
   main:
     name: lint-pr-title
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@v6
         id: lint_pr_title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -24,32 +24,44 @@ jobs:
             chore
             ci
             docs
+            examples
             feat
             fix
             perf
             refactor
             revert
             style
+            templates
             test
-            types
           scopes: |
             cpa
+            claude
             db-\*
+            db-d1-sqlite
             db-mongodb
             db-postgres
             db-vercel-postgres
             db-sqlite
+            db-d1-sqlite
             drizzle
+            email-\*
             email-nodemailer
+            email-resend
             eslint
             graphql
+            kv
+            kv-redis
             live-preview
             live-preview-react
             next
             payload-cloud
             plugin-cloud
             plugin-cloud-storage
+            plugin-ecommerce
             plugin-form-builder
+            plugin-import-export
+            plugin-mcp
+            plugin-multi-tenant
             plugin-nested-docs
             plugin-redirects
             plugin-search
@@ -59,9 +71,11 @@ jobs:
             richtext-\*
             richtext-lexical
             richtext-slate
+            sdk
             storage-\*
             storage-azure
             storage-gcs
+            storage-r2
             storage-uploadthing
             storage-vercel-blob
             storage-s3
@@ -106,16 +120,11 @@ jobs:
 
   label-pr-on-open:
     name: label-pr-on-open
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.action == 'opened'
     steps:
-      - name: Tag with main branch with v2
-        if: github.event.pull_request.base.ref == 'main'
+      - name: Tag with 2.x branch with v2
+        if: github.event.pull_request.base.ref == '2.x'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v2
-      - name: Tag with beta branch with v3
-        if: github.event.pull_request.base.ref == 'beta'
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: v3

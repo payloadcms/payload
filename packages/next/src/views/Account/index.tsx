@@ -1,9 +1,10 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -16,13 +17,7 @@ import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
-export { generateAccountMetadata } from './meta.js'
-
-export const Account: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -37,16 +32,12 @@ export const Account: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   const {
-    admin: {
-      components: { views: { Account: CustomAccountComponent } = {} } = {},
-      theme,
-      user: userSlug,
-    },
+    admin: { theme, user: userSlug },
     routes: { api },
     serverURL,
   } = config
 
-  const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
+  const collectionConfig = payload?.collections?.[userSlug]?.config
 
   if (collectionConfig && user?.id) {
     // Fetch the data required for the view
@@ -55,6 +46,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       collectionSlug: collectionConfig.slug,
       locale,
       payload,
+      req,
       user,
     })
 
@@ -91,6 +83,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       renderAllFields: true,
       req,
       schemaPath: collectionConfig.slug,
+      skipValidation: true,
     })
 
     // Fetch document lock state
@@ -106,6 +99,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       await getVersions({
         id: user.id,
         collectionConfig,
+        doc: data,
         docPermissions,
         locale: locale?.code,
         payload,
@@ -114,8 +108,19 @@ export const Account: React.FC<AdminViewProps> = async ({
 
     return (
       <DocumentInfoProvider
-        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} theme={theme} />}
-        apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
+        AfterFields={
+          <Settings
+            i18n={i18n}
+            languageOptions={languageOptions}
+            payload={payload}
+            theme={theme}
+            user={user}
+          />
+        }
+        apiURL={formatAdminURL({
+          apiRoute: api,
+          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
+        })}
         collectionSlug={userSlug}
         currentEditor={currentEditor}
         docPermissions={docPermissions}
@@ -136,15 +141,17 @@ export const Account: React.FC<AdminViewProps> = async ({
           <DocumentHeader
             collectionConfig={collectionConfig}
             hideTabs
-            i18n={i18n}
-            payload={payload}
             permissions={permissions}
+            req={req}
           />
           <HydrateAuthProvider permissions={permissions} />
-          <RenderServerComponent
-            Component={CustomAccountComponent}
-            importMap={payload.importMap}
-            serverProps={{
+          {RenderServerComponent({
+            Component: config.admin?.components?.views?.account?.Component,
+            Fallback: EditView,
+            importMap: payload.importMap,
+            serverProps: {
+              doc: data,
+              hasPublishedDoc,
               i18n,
               initPageResult,
               locale,
@@ -154,9 +161,8 @@ export const Account: React.FC<AdminViewProps> = async ({
               routeSegments: [],
               searchParams,
               user,
-            }}
-          />
-          <EditView />
+            } satisfies DocumentViewServerPropsOnly,
+          })}
           <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>

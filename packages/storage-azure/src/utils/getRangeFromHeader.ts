@@ -22,5 +22,5 @@ export const getRangeFromHeader = async (
     return fullRange
   }
 
-  return range[0]
+  return range[0] ?? fullRange
 }

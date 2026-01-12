@@ -34,6 +34,7 @@ export function helpMessage(): void {
 
       -n     {underline my-payload-app}         Set project name
       -t     {underline template_name}          Choose specific template
+      -e     {underline example_name}           Choose specific example
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
@@ -58,12 +59,7 @@ export function successMessage(projectDir: string, packageManager: PackageManage
 ${header('Launch Application:')}
 
   - cd ./${relativePath}
-  - ${
-    packageManager === 'npm' ? 'npm run' : packageManager
-  } dev or follow directions in ${createTerminalLink(
-    'README.md',
-    `file://${path.resolve(projectDir, 'README.md')}`,
-  )}
+  - ${packageManager === 'npm' ? 'npm run' : packageManager} dev or follow directions in README.md
 
 ${header('Documentation:')}
 

@@ -29,6 +29,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const SubscriptFeatureClient = createClientFeature({
+  enableFormats: ['subscript'],
   toolbarFixed: {
     groups: toolbarGroups,
   },

@@ -13,8 +13,8 @@ import classes from './index.module.scss'
 
 const { breakpoints } = cssVariables
 
-const NextImage = (NextImageWithDefault.default ||
-  NextImageWithDefault) as typeof NextImageWithDefault.default
+const NextImage =
+  'default' in NextImageWithDefault ? NextImageWithDefault.default : NextImageWithDefault
 
 export const Image: React.FC<MediaProps> = (props) => {
   const {
@@ -51,6 +51,8 @@ export const Image: React.FC<MediaProps> = (props) => {
 
     src = `${PAYLOAD_SERVER_URL}/api/media/file/${filename}`
   }
+
+  if (!src) return null
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes = Object.entries(breakpoints)

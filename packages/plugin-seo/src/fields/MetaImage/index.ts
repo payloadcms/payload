@@ -12,7 +12,7 @@ interface FieldFunctionProps {
 type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => UploadField
 
 export const MetaImageField: FieldFunction = ({ hasGenerateFn = false, overrides, relationTo }) => {
-  return {
+  const imageField = {
     name: 'image',
     type: 'upload',
     admin: {
@@ -29,6 +29,8 @@ export const MetaImageField: FieldFunction = ({ hasGenerateFn = false, overrides
     label: 'Meta Image',
     localized: true,
     relationTo,
-    ...((overrides as unknown as UploadField) ?? {}),
-  }
+    ...((overrides ?? {}) as { hasMany: boolean } & Partial<UploadField>),
+  } as UploadField
+
+  return imageField
 }

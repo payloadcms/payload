@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     postsLocalized: PostsLocalized;
@@ -27,12 +83,21 @@ export interface Config {
     pages: Page;
     'rels-to-pages': RelsToPage;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
+    'object-writes': ObjectWrite;
+    'deep-nested': DeepNested;
+    relations: Relation1;
+    items: Item;
+    blocks: Block;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    items: {
+      relation: 'relations';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     postsLocalized: PostsLocalizedSelect<false> | PostsLocalizedSelect<true>;
@@ -50,6 +115,11 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'rels-to-pages': RelsToPagesSelect<false> | RelsToPagesSelect<true>;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdsSelect<false> | RelsToPagesAndCustomTextIdsSelect<true>;
+    'object-writes': ObjectWritesSelect<false> | ObjectWritesSelect<true>;
+    'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
+    relations: RelationsSelect<false> | RelationsSelect<true>;
+    items: ItemsSelect<false> | ItemsSelect<true>;
+    blocks: BlocksSelect<false> | BlocksSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -64,9 +134,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -97,6 +167,14 @@ export interface Post {
   description?: string | null;
   number?: number | null;
   relationField?: (string | null) | Relation;
+  blocks?:
+    | {
+        relationField?: (string | null) | Relation;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   defaultAccessRelation?: (string | null) | StrictAccess;
   chainedRelation?: (string | null) | Chained;
   maxDepthRelation?: (string | null) | Relation;
@@ -188,9 +266,21 @@ export interface Screening {
 export interface Movie {
   id: string;
   name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
   director?: (string | null) | Director;
+  array?:
+    | {
+        director?: (string | Director)[] | null;
+        polymorphic?: {
+          relationTo: 'directors';
+          value: string | Director;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -199,7 +289,10 @@ export interface Movie {
 export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
   movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
+  directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -230,6 +323,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -242,6 +342,22 @@ export interface PolymorphicRelationship {
     relationTo: 'movies';
     value: string | Movie;
   } | null;
+  polymorphicLocalized?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  polymorphicMany?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  polymorphicManyLocalized?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -300,6 +416,93 @@ export interface RelsToPagesAndCustomTextId {
         relationTo: 'custom-id-number';
         value: number | CustomIdNumber;
       } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes".
+ */
+export interface ObjectWrite {
+  id: string;
+  one?: (string | null) | Movie;
+  many?: (string | Movie)[] | null;
+  onePoly?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  manyPoly?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested".
+ */
+export interface DeepNested {
+  id: string;
+  content?: {
+    blocks?:
+      | {
+          meta?: {
+            movie?: (string | null) | Movie;
+          };
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'testBlock';
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations".
+ */
+export interface Relation1 {
+  id: string;
+  item?: {
+    relationTo: 'items';
+    value: string | Item;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items".
+ */
+export interface Item {
+  id: string;
+  status?: ('completed' | 'failed' | 'pending') | null;
+  relation?: {
+    docs?: (string | Relation1)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks".
+ */
+export interface Block {
+  id: string;
+  blocks?:
+    | {
+        director?: (string | null) | Director;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -375,6 +578,26 @@ export interface PayloadLockedDocument {
         value: string | RelsToPagesAndCustomTextId;
       } | null)
     | ({
+        relationTo: 'object-writes';
+        value: string | ObjectWrite;
+      } | null)
+    | ({
+        relationTo: 'deep-nested';
+        value: string | DeepNested;
+      } | null)
+    | ({
+        relationTo: 'relations';
+        value: string | Relation1;
+      } | null)
+    | ({
+        relationTo: 'items';
+        value: string | Item;
+      } | null)
+    | ({
+        relationTo: 'blocks';
+        value: string | Block;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -429,6 +652,17 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   relationField?: T;
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              relationField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   defaultAccessRelation?: T;
   chainedRelation?: T;
   maxDepthRelation?: T;
@@ -514,9 +748,18 @@ export interface ScreeningsSelect<T extends boolean = true> {
  */
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
+  select?: T;
   director?: T;
+  array?:
+    | T
+    | {
+        director?: T;
+        polymorphic?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -524,7 +767,10 @@ export interface MoviesSelect<T extends boolean = true> {
  */
 export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
+  localized?: T;
   movies?: T;
+  movie?: T;
+  directors?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -545,6 +791,9 @@ export interface MovieReviewsSelect<T extends boolean = true> {
  */
 export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
   polymorphic?: T;
+  polymorphicLocalized?: T;
+  polymorphicMany?: T;
+  polymorphicManyLocalized?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -592,6 +841,83 @@ export interface RelsToPagesAndCustomTextIdsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes_select".
+ */
+export interface ObjectWritesSelect<T extends boolean = true> {
+  one?: T;
+  many?: T;
+  onePoly?: T;
+  manyPoly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested_select".
+ */
+export interface DeepNestedSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        blocks?:
+          | T
+          | {
+              testBlock?:
+                | T
+                | {
+                    meta?:
+                      | T
+                      | {
+                          movie?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations_select".
+ */
+export interface RelationsSelect<T extends boolean = true> {
+  item?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items_select".
+ */
+export interface ItemsSelect<T extends boolean = true> {
+  status?: T;
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_select".
+ */
+export interface BlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              director?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -604,6 +930,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

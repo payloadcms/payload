@@ -11,13 +11,19 @@ import type {
 } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
-import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
+import type {
+  PgColumn,
+  PgTable,
+  PgTransaction,
+  Precision,
+  UpdateDeleteAction,
+} from 'drizzle-orm/pg-core'
 import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
 import type { Result } from 'drizzle-orm/sqlite-core/session'
 import type {
   BaseDatabaseAdapter,
+  FlattenedField,
   MigrationData,
-  MigrationTemplateArgs,
   Payload,
   PayloadRequest,
 } from 'payload'
@@ -27,13 +33,11 @@ import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 export { BuildQueryJoinAliases }
 
 import type { ResultSet } from '@libsql/client'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
-import type { ChainedMethods } from './find/chainMethods.js'
 import type { Operators } from './queries/operatorMap.js'
-
-export { ChainedMethods }
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -85,6 +89,7 @@ export type TransactionPg = PgTransaction<
 export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
 export type CountDistinct = (args: {
+  column?: PgColumn<any> | SQLiteColumn<any>
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
   joins: BuildQueryJoinAliases
   tableName: string
@@ -117,7 +122,10 @@ export type Insert = (args: {
 }) => Promise<Record<string, unknown>[]>
 
 export type RequireDrizzleKit = () => {
-  generateDrizzleJson: (args: { schema: Record<string, unknown> }) => unknown
+  generateDrizzleJson: (
+    args: Record<string, unknown>,
+  ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
+  generateMigration: (prev: DrizzleSnapshotJSON, cur: DrizzleSnapshotJSON) => Promise<string[]>
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
@@ -125,6 +133,7 @@ export type RequireDrizzleKit = () => {
     tablesFilter?: string[],
     extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
+  upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
 }
 
 export type Migration = {
@@ -152,13 +161,181 @@ export type CreateJSONQueryArgs = {
   column?: Column | string
   operator: string
   pathSegments: string[]
+  rawColumn?: SQL<unknown>
   table?: string
   treatAsArray?: string[]
   treatRootAsArray?: boolean
-  value: boolean | number | string
+  value: boolean | number | number[] | string | string[]
 }
 
+/**
+ * Abstract relation link
+ */
+export type RawRelation =
+  | {
+      fields: { name: string; table: string }[]
+      references: string[]
+      relationName?: string
+      to: string
+      type: 'one'
+    }
+  | {
+      relationName?: string
+      to: string
+      type: 'many'
+    }
+
+/**
+ * Abstract SQL table that later gets converted by database specific implementation to Drizzle
+ */
+export type RawTable = {
+  columns: Record<string, RawColumn>
+  foreignKeys?: Record<string, RawForeignKey>
+  indexes?: Record<string, RawIndex>
+  name: string
+}
+
+/**
+ * Abstract SQL foreign key that later gets converted by database specific implementation to Drizzle
+ */
+export type RawForeignKey = {
+  columns: string[]
+  foreignColumns: { name: string; table: string }[]
+  name: string
+  onDelete?: UpdateDeleteAction
+  onUpdate?: UpdateDeleteAction
+}
+
+/**
+ * Abstract SQL index that later gets converted by database specific implementation to Drizzle
+ */
+export type RawIndex = {
+  name: string
+  on: string | string[]
+  unique?: boolean
+}
+
+/**
+ * Abstract SQL column that later gets converted by database specific implementation to Drizzle
+ */
+export type BaseRawColumn = {
+  default?: any
+  name: string
+  notNull?: boolean
+  primaryKey?: boolean
+  reference?: {
+    name: string
+    onDelete: UpdateDeleteAction
+    table: string
+  }
+}
+
+/**
+ * Postgres: native timestamp type
+ * SQLite: text column, defaultNow achieved through strftime('%Y-%m-%dT%H:%M:%fZ', 'now'). withTimezone/precision have no any effect.
+ */
+export type TimestampRawColumn = {
+  defaultNow?: boolean
+  mode: 'date' | 'string'
+  precision: Precision
+  type: 'timestamp'
+  withTimezone?: boolean
+} & BaseRawColumn
+
+/**
+ * Postgres: native UUID type and db lavel defaultRandom
+ * SQLite: text type and defaultRandom in the app level
+ */
+export type UUIDRawColumn = {
+  defaultRandom?: boolean
+  type: 'uuid'
+} & BaseRawColumn
+
+/**
+ * Accepts either `locale: true` to have options from locales or `options` string array
+ * Postgres: native enums
+ * SQLite: text column with checks.
+ */
+export type EnumRawColumn = (
+  | {
+      enumName: string
+      options: string[]
+      type: 'enum'
+    }
+  | {
+      locale: true
+      type: 'enum'
+    }
+) &
+  BaseRawColumn
+
+export type IntegerRawColumn = {
+  /**
+   * SQLite only.
+   * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary key to ensure that the same ID cannot be reused from previously deleted rows.
+   */
+  autoIncrement?: boolean
+  type: 'integer'
+} & BaseRawColumn
+
+export type VectorRawColumn = {
+  dimensions?: number
+  type: 'vector'
+} & BaseRawColumn
+
+export type HalfVecRawColumn = {
+  dimensions?: number
+  type: 'halfvec'
+} & BaseRawColumn
+
+export type SparseVecRawColumn = {
+  dimensions?: number
+  type: 'sparsevec'
+} & BaseRawColumn
+
+export type BinaryVecRawColumn = {
+  dimensions?: number
+  type: 'bit'
+} & BaseRawColumn
+
+export type RawColumn =
+  | ({
+      type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
+    } & BaseRawColumn)
+  | BinaryVecRawColumn
+  | EnumRawColumn
+  | HalfVecRawColumn
+  | IntegerRawColumn
+  | SparseVecRawColumn
+  | TimestampRawColumn
+  | UUIDRawColumn
+  | VectorRawColumn
+
+export type IDType = 'integer' | 'numeric' | 'text' | 'uuid' | 'varchar'
+
+export type SetColumnID = (args: {
+  adapter: DrizzleAdapter
+  columns: Record<string, RawColumn>
+  fields: FlattenedField[]
+}) => IDType
+
+export type ColumnToCodeConverter = (args: {
+  adapter: DrizzleAdapter
+  addEnum: (name: string, options: string[]) => void
+  addImport: (from: string, name: string) => void
+  column: RawColumn
+  locales?: string[]
+  tableKey: string
+}) => string
+
+export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args: {
+  adapter: T
+  locales: string[]
+  rawTable: RawTable
+}) => void
+
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
+  blocksAsJSON?: boolean
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -177,16 +354,20 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  getMigrationTemplate: (args: MigrationTemplateArgs) => string
+  foreignKeys: Set<string>
   idType: 'serial' | 'uuid'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
+  limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
   push: boolean
+  rawRelations: Record<string, Record<string, RawRelation>>
+  rawTables: Record<string, RawTable>
   rejectInitializing: () => void
+
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
@@ -206,3 +387,18 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   transactionOptions: unknown
   versionsSuffix?: string
 }
+
+export type RelationMap = Map<
+  string,
+  {
+    localized: boolean
+    relationName?: string
+    target: string
+    type: 'many' | 'one'
+  }
+>
+
+/**
+ * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
+ */
+export type { ChainedMethods } from './find/chainMethods.js'

@@ -14,6 +14,8 @@ type Result = {
   user: TypedUser
 }
 
+const lockDurationDefault = 300 // Default 5 minutes in seconds
+
 export const handleFormStateLocking = async ({
   id,
   collectionSlug,
@@ -39,9 +41,8 @@ export const handleFormStateLocking = async ({
       }
     }
 
-    const lockDurationDefault = 300 // Default 5 minutes in seconds
     const lockDocumentsProp = collectionSlug
-      ? req.payload.config.collections.find((c) => c.slug === collectionSlug)?.lockDocuments
+      ? req.payload.collections?.[collectionSlug]?.config.lockDocuments
       : req.payload.config.globals.find((g) => g.slug === globalSlug)?.lockDocuments
 
     const lockDuration =
@@ -63,7 +64,7 @@ export const handleFormStateLocking = async ({
         limit: 1,
         overrideAccess: false,
         pagination: false,
-        req,
+        user: req.user,
         where: lockedDocumentQuery,
       })
 
@@ -74,17 +75,17 @@ export const handleFormStateLocking = async ({
           user: lockedDocument.docs[0]?.user?.value,
         }
 
-        const lockOwnerId =
+        const lockOwnerID =
           typeof lockedDocument.docs[0]?.user?.value === 'object'
             ? lockedDocument.docs[0]?.user?.value?.id
             : lockedDocument.docs[0]?.user?.value
         // Should only update doc if the incoming / current user is also the owner of the locked doc
-        if (updateLastEdited && req.user && lockOwnerId === req.user.id) {
+        if (updateLastEdited && req.user && lockOwnerID === req.user.id) {
           await req.payload.db.updateOne({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
             data: {},
-            req,
+            returning: false,
           })
         }
       } else {
@@ -118,7 +119,6 @@ export const handleFormStateLocking = async ({
 
         await req.payload.db.deleteMany({
           collection: 'payload-locked-documents',
-          req,
           where: deleteExpiredLocksQuery,
         })
 
@@ -137,7 +137,7 @@ export const handleFormStateLocking = async ({
               value: req.user.id,
             },
           },
-          req,
+          returning: false,
         })
 
         result = {

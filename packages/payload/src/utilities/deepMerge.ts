@@ -8,15 +8,19 @@ export { deepMerge }
  *
  * Array handling: Arrays in the target object are combined with the source object's arrays.
  */
-export function deepMergeWithCombinedArrays<T extends object>(obj1: object, obj2: object): T {
+export function deepMergeWithCombinedArrays<T extends object>(
+  obj1: object,
+  obj2: object,
+  options: deepMerge.Options = {},
+): T {
   return deepMerge<T>(obj1, obj2, {
     arrayMerge: (target, source, options) => {
       const destination = target.slice()
 
       source.forEach((item, index) => {
         if (typeof destination[index] === 'undefined') {
-          destination[index] = options.cloneUnlessOtherwiseSpecified(item, options)
-        } else if (options.isMergeableObject(item)) {
+          destination[index] = options?.cloneUnlessOtherwiseSpecified(item, options)
+        } else if (options?.isMergeableObject(item)) {
           destination[index] = deepMerge(target[index], item, options)
         } else if (target.indexOf(item) === -1) {
           destination.push(item)
@@ -24,6 +28,7 @@ export function deepMergeWithCombinedArrays<T extends object>(obj1: object, obj2
       })
       return destination
     },
+    ...options,
   })
 }
 

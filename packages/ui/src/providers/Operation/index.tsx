@@ -1,13 +1,13 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 export const OperationContext = createContext('' as Operation)
 
 export const OperationProvider: React.FC<{ children: React.ReactNode; operation: Operation }> = ({
   children,
   operation,
-}) => <OperationContext.Provider value={operation}>{children}</OperationContext.Provider>
+}) => <OperationContext value={operation}>{children}</OperationContext>
 
 export type Operation = 'create' | 'update'
 
-export const useOperation = (): Operation | undefined => useContext(OperationContext)
+export const useOperation = (): Operation | undefined => use(OperationContext)
