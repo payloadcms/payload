@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { EditFormProps } from './types.js'
 
@@ -168,44 +168,40 @@ export function EditForm({
 
 function GetFieldProxy() {
   const { getField, getFields } = useForm()
-  const { getFormDataRef, getFormFileRef } = useFormsManager()
+  const { getFormDataRef } = useFormsManager()
 
   useEffect(() => {
     // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
-    getFormFileRef.current = () => getField('file')?.value
-  }, [getFields, getField, getFormDataRef, getFormFileRef])
+  }, [getFields, getField, getFormDataRef])
 
   return null
 }
 
 function ReportAllErrors() {
   const { docConfig } = useDocumentInfo()
-  const { activeIndex, getFormFileRef, setFormTotalErrorCount } = useFormsManager()
+  const { activeIndex, forms, setFormTotalErrorCount } = useFormsManager()
   const errorCountRef = React.useRef(0)
-  const prevActiveIndexRef = React.useRef(activeIndex)
+
+  const fileIsValid = useMemo(() => {
+    const currentForm = forms[activeIndex]
+    return currentForm?.formState?.file?.valid ?? true
+  }, [activeIndex, forms])
 
   const reportFormErrorCount = React.useCallback(
-    (errorCount) => {
-      // Reset error count ref when active form changes
-      if (prevActiveIndexRef.current !== activeIndex) {
-        errorCountRef.current = 0
-        prevActiveIndexRef.current = activeIndex
+    (fieldErrorCount: number) => {
+      let newErrorCount = fieldErrorCount
+      // If the file is invalid, count that as an error
+      if (!fileIsValid) {
+        newErrorCount += 1
       }
-
-      // Get current file state from the live form via ref
-      const fileValue = getFormFileRef.current?.()
-      const hasFile = Boolean(fileValue)
-      const totalErrorCount = errorCount + (hasFile ? 0 : 1)
-
-      if (totalErrorCount === errorCountRef.current) {
+      if (newErrorCount === errorCountRef.current) {
         return
       }
-
-      setFormTotalErrorCount({ errorCount: totalErrorCount, index: activeIndex })
-      errorCountRef.current = totalErrorCount
+      setFormTotalErrorCount({ errorCount: newErrorCount, index: activeIndex })
+      errorCountRef.current = newErrorCount
     },
-    [activeIndex, setFormTotalErrorCount, getFormFileRef],
+    [activeIndex, setFormTotalErrorCount, fileIsValid],
   )
 
   if (!docConfig) {

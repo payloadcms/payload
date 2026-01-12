@@ -44,7 +44,6 @@ type FormsManagerContext = {
   readonly documentSlots: DocumentSlots
   readonly forms: State['forms']
   getFormDataRef: React.RefObject<() => Data>
-  getFormFileRef: React.RefObject<() => unknown>
   readonly hasPublishPermission: boolean
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
@@ -73,7 +72,6 @@ const Context = React.createContext<FormsManagerContext>({
   documentSlots: {},
   forms: [],
   getFormDataRef: { current: () => ({}) },
-  getFormFileRef: { current: () => null },
   hasPublishPermission: false,
   hasSavePermission: false,
   hasSubmitted: false,
@@ -146,7 +144,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
-  const getFormFileRef = React.useRef<() => unknown>(() => null)
 
   const baseAPIPath = formatAdminURL({
     apiRoute: api,
@@ -233,6 +230,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
     (index: number) => {
       const currentFormsData = getFormDataRef.current()
+
       dispatch({
         type: 'REPLACE',
         state: {
@@ -241,10 +239,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             if (i === activeIndex) {
               return {
                 errorCount: form.errorCount,
-                exceedsLimit: form.exceedsLimit,
                 formID: form.formID,
                 formState: currentFormsData,
-                missingFile: form.missingFile,
                 uploadEdits: form.uploadEdits,
               }
             }
@@ -263,10 +259,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         dispatch({
           type: 'UPDATE_FORM',
           errorCount: forms[activeIndex].errorCount,
-          exceedsLimit: forms[activeIndex].exceedsLimit,
           formState: getFormDataRef.current(),
           index: activeIndex,
-          missingFile: forms[activeIndex].missingFile,
         })
       }
 
@@ -327,10 +321,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       const currentForms = [...forms]
       currentForms[activeIndex] = {
         errorCount: currentForms[activeIndex].errorCount,
-        exceedsLimit: currentForms[activeIndex].exceedsLimit,
         formID: currentForms[activeIndex].formID,
         formState: currentFormsData,
-        missingFile: currentForms[activeIndex].missingFile,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
       const newDocs: Array<{
@@ -348,22 +340,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         try {
           const form = currentForms[i]
           const fileValue = form.formState?.file?.value
-
-          // Skip upload if file is missing a filename
-          if (
-            fileValue &&
-            typeof fileValue === 'object' &&
-            'name' in fileValue &&
-            (!fileValue.name || fileValue.name === '')
-          ) {
-            currentForms[i] = {
-              ...currentForms[i],
-              errorCount: 1,
-              exceedsLimit: false,
-              missingFile: true,
-            }
-            continue
-          }
 
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
@@ -426,22 +402,47 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             [[], []],
           )
 
-          const exceedsLimit = req.status === 413
-          const missingFile = req.status === 400 && !fileValue
+          const missingFile = !fileValue && req.status === 400
+          const exceedsLimit = fileValue && req.status === 413
+          const missingFilename =
+            fileValue &&
+            typeof fileValue === 'object' &&
+            'name' in fileValue &&
+            (!fileValue.name || fileValue.name === '')
 
-          currentForms[i] = {
-            errorCount: fieldErrors.length + (missingFile || exceedsLimit ? 1 : 0),
-            exceedsLimit,
-            formID: currentForms[i].formID,
-            formState: fieldReducer(currentForms[i].formState, {
-              type: 'ADD_SERVER_ERRORS',
-              errors: fieldErrors,
-            }),
-            missingFile,
-          }
+          if (missingFile || exceedsLimit || missingFilename) {
+            currentForms[i].formState.file.valid = false
 
-          if (currentForms[i].missingFile || currentForms[i].exceedsLimit) {
+            // neeed to get the field state to extract count since field errors
+            // are not returned when file is missing or exceeds limit
+            const { state: newState } = await getFormState({
+              collectionSlug,
+              docPermissions,
+              docPreferences: null,
+              formState: currentForms[i].formState,
+              operation: 'update',
+              schemaPath: collectionSlug,
+            })
+
+            currentForms[i] = {
+              errorCount: Object.values(newState).reduce(
+                (acc, value) => (value?.valid === false ? acc + 1 : acc),
+                0,
+              ),
+              formID: currentForms[i].formID,
+              formState: newState,
+            }
+
             toast.error(nonFieldErrors[0]?.message)
+          } else {
+            currentForms[i] = {
+              errorCount: fieldErrors.length,
+              formID: currentForms[i].formID,
+              formState: fieldReducer(currentForms[i].formState, {
+                type: 'ADD_SERVER_ERRORS',
+                errors: fieldErrors,
+              }),
+            }
           }
         } catch (_) {
           // swallow
@@ -481,7 +482,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       dispatch({
         type: 'REPLACE',
         state: {
-          activeIndex: 0,
           forms: remainingForms,
           totalErrorCount: remainingForms.reduce((acc, { errorCount }) => acc + errorCount, 0),
         },
@@ -500,9 +500,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       code,
       collectionSlug,
       getUploadHandler,
+      getFormState,
+      docPermissions,
+      setSuccessfullyUploaded,
       onSuccess,
       closeModal,
-      setSuccessfullyUploaded,
       drawerSlug,
       setInitialFiles,
       setInitialForms,
@@ -519,10 +521,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             dispatch({
               type: 'UPDATE_FORM',
               errorCount: forms[i].errorCount,
-              exceedsLimit: forms[i].exceedsLimit,
               formState: forms[i].formState,
               index: i,
-              missingFile: forms[i].missingFile,
             })
           }
         })
@@ -549,10 +549,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           dispatch({
             type: 'UPDATE_FORM',
             errorCount: newFormErrorCount,
-            exceedsLimit: forms[i].exceedsLimit,
             formState: state,
             index: i,
-            missingFile: forms[i].missingFile,
           })
         }
       }
@@ -565,10 +563,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       dispatch({
         type: 'UPDATE_FORM',
         errorCount: forms[activeIndex].errorCount,
-        exceedsLimit: forms[activeIndex].exceedsLimit,
         formState: forms[activeIndex].formState,
         index: activeIndex,
-        missingFile: forms[activeIndex].missingFile,
         uploadEdits,
       })
     },
@@ -642,7 +638,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         documentSlots,
         forms,
         getFormDataRef,
-        getFormFileRef,
         hasPublishPermission,
         hasSavePermission,
         hasSubmitted,

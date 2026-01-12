@@ -1403,6 +1403,94 @@ describe('Uploads', () => {
       expect(errorCounts).toEqual(['1', '1', '1'])
     })
 
+    test('should maintain correct error counts when cycling through forms after submit with errors', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Upload 3 files
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+          path.resolve(dirname, './small.png'),
+        ])
+
+      // Form 1: Fill prefix but remove file (should have 1 error: missing file)
+      await bulkUploadModal.locator('#field-prefix').fill('prefix-one')
+      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+
+      // Form 2: Omit prefix and remove file (should have 2 errors: missing file + missing prefix)
+      const nextButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextButton.click()
+      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+
+      // Form 3: Fill prefix and keep file (should have 0 errors - will succeed)
+      await nextButton.click()
+      await bulkUploadModal.locator('#field-prefix').fill('prefix-three')
+
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show mixed results: 1 successful, 2 failed
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 2 files")'),
+      ).toBeVisible()
+
+      // After submission, the successful form (form 3) is removed from sidebar
+      // Only the 2 failed forms remain in the sidebar
+      const fileSelections = bulkUploadModal.locator('.file-selections__filesContainer')
+
+      // Wait for the successful form to be removed and only 2 forms to remain
+      const remainingRows = fileSelections.locator('button.file-selections__fileRow')
+      await expect(remainingRows).toHaveCount(2, { timeout: 5000 })
+
+      // The remaining forms are form 1 (index 0) and form 2 (index 1)
+      const form1Row = remainingRows.nth(0)
+      const form2Row = remainingRows.nth(1)
+
+      // Verify initial error counts in sidebar (re-query each time to avoid stale elements)
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1') // missing file
+      await expect(form2Row.locator('.error-pill__count')).toHaveText('2') // missing file + missing prefix
+
+      // Click on form 1 and verify count remains stable
+      await form1Row.click()
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1')
+
+      // Click on form 2 and verify count remains stable
+      await form2Row.click()
+      await expect(form2Row.locator('.error-pill__count')).toHaveText('2')
+
+      // Cycle through again to ensure counts remain stable
+      await form1Row.click()
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1')
+
+      await form2Row.click()
+      await expect(form2Row.locator('.error-pill__count')).toHaveText('2')
+
+      await form1Row.click()
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1')
+    })
+
     test('should show correct error count when bulk uploading files that exceed size limit', async () => {
       await page.goto(uploadsOne.create)
 

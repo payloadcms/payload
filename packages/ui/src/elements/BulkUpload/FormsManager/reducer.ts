@@ -8,10 +8,8 @@ export type State = {
   activeIndex: number
   forms: {
     errorCount: number
-    exceedsLimit: boolean
     formID: string
     formState: FormState
-    missingFile: boolean
     uploadEdits?: UploadEdits
   }[]
   totalErrorCount: number
@@ -25,10 +23,8 @@ type Action =
     }
   | {
       errorCount: number
-      exceedsLimit?: boolean
       formState: FormState
       index: number
-      missingFile?: boolean
       type: 'UPDATE_FORM'
       updatedFields?: Record<string, unknown>
       uploadEdits?: UploadEdits
@@ -57,7 +53,6 @@ export function formsManagementReducer(state: State, action: Action): State {
       for (let i = 0; i < action.forms.length; i++) {
         newForms[i] = {
           errorCount: 0,
-          exceedsLimit: false,
           formID: action.forms[i].formID ?? (crypto.randomUUID ? crypto.randomUUID() : uuidv4()),
           formState: {
             ...(action.forms[i].initialState || {}),
@@ -67,7 +62,6 @@ export function formsManagementReducer(state: State, action: Action): State {
               value: action.forms[i].file,
             },
           },
-          missingFile: false,
           uploadEdits: {},
         }
       }
@@ -112,20 +106,7 @@ export function formsManagementReducer(state: State, action: Action): State {
     }
     case 'UPDATE_ERROR_COUNT': {
       const forms = [...state.forms]
-      const form = forms[action.index]
-
-      // Update missingFile flag based on current file state
-      // If file exists, clear the flag. If no file exists, set the flag.
-      const hasFile = form.formState?.file?.value
-      const missingFile = !hasFile
-
-      const fileErrorCount = (missingFile ? 1 : 0) + (form.exceedsLimit ? 1 : 0)
-
-      forms[action.index] = {
-        ...form,
-        errorCount: action.count + fileErrorCount,
-        missingFile,
-      }
+      forms[action.index].errorCount = action.count
 
       return {
         ...state,
@@ -136,14 +117,6 @@ export function formsManagementReducer(state: State, action: Action): State {
     case 'UPDATE_FORM': {
       const updatedForms = [...state.forms]
       updatedForms[action.index].errorCount = action.errorCount
-
-      // Update file error flags if provided, otherwise preserve existing values
-      if (action.exceedsLimit !== undefined) {
-        updatedForms[action.index].exceedsLimit = action.exceedsLimit
-      }
-      if (action.missingFile !== undefined) {
-        updatedForms[action.index].missingFile = action.missingFile
-      }
 
       // Merge the existing formState with the new formState
       updatedForms[action.index] = {
