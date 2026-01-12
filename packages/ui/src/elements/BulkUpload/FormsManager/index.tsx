@@ -325,6 +325,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         formState: currentFormsData,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
+      const activeFormID = currentForms[activeIndex]?.formID
       const newDocs: Array<{
         collectionSlug: CollectionSlug
         doc: JsonObject
@@ -482,6 +483,12 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       dispatch({
         type: 'REPLACE',
         state: {
+          activeIndex: remainingForms.reduce((acc, { formID }, i) => {
+            if (formID === activeFormID) {
+              return i
+            }
+            return acc
+          }, 0),
           forms: remainingForms,
           totalErrorCount: remainingForms.reduce((acc, { errorCount }) => acc + errorCount, 0),
         },
