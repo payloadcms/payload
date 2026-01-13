@@ -26,6 +26,7 @@ import {
   defaultAccessRelSlug,
   polymorphicRelationshipsSlug,
   relationSlug,
+  relationWithRestrictedFilterOptionsSlug,
   slug,
   slugWithLocalizedRel,
   treeSlug,
@@ -1560,6 +1561,113 @@ describe('Relationships', () => {
         expect(result.one).toStrictEqual(movie)
         expect(result.manyPoly[0]).toStrictEqual({ relationTo: 'movies', value: movie })
         expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
+      })
+
+      it('should fail validation if passing a relation for a collection restricted by the filter options', async () => {
+        const movie = await payload.create({ collection: 'movies', data: {} })
+        await expect(
+          async () =>
+            await payload.create({
+              collection: relationWithRestrictedFilterOptionsSlug,
+              data: {
+                relationWithFilterOptions: [
+                  {
+                    relationTo: 'movies',
+                    value: movie.id,
+                  },
+                ],
+              },
+            }),
+        ).rejects.toThrow('The following field is invalid: Relation With Filter Options')
+      })
+    })
+
+    describe('With filterOptions validation failures', () => {
+      it('should include the id in the validation message if the field does not have "useAsTitle"', async () => {
+        const relatedId = 'customIdExample'
+        const item = await payload.create({
+          collection: customIdSlug,
+          data: { id: relatedId, name: 'unused' },
+        })
+        let error
+        try {
+          await payload.create({
+            collection: relationWithRestrictedFilterOptionsSlug,
+            data: {
+              relationWithFilterOptions: [
+                {
+                  relationTo: customIdSlug,
+                  value: item.id,
+                },
+              ],
+            },
+            user: {},
+          })
+        } catch (e) {
+          error = e
+        }
+        expect(error).toBeDefined()
+        expect(error.data.errors).toHaveLength(1)
+        expect(error.data.errors[0].message).toBe(
+          `This field has the following invalid selections: "${relatedId}"`,
+        )
+      })
+
+      it('should include the "useAsTitle" field in the validation message if the field does have "useAsTitle"', async () => {
+        const movieName = 'Jaws'
+        const movie = await payload.create({ collection: 'movies', data: { name: movieName } })
+        let error
+        try {
+          await payload.create({
+            collection: relationWithRestrictedFilterOptionsSlug,
+            data: {
+              relationWithFilterOptions: [
+                {
+                  relationTo: 'movies',
+                  value: movie.id,
+                },
+              ],
+            },
+            user: {},
+          })
+        } catch (e) {
+          error = e
+        }
+        expect(error).toBeDefined()
+        expect(error.data.errors).toHaveLength(1)
+        expect(error.data.errors[0].message).toBe(
+          `This field has the following invalid selections: "${movieName}"`,
+        )
+      })
+
+      it('should include the id in the validation message if the requesting user does not have access to useAsTitle', async () => {
+        const movieName = 'Jaws'
+        const movie = await payload.create({ collection: 'movies', data: { name: movieName } })
+        let error
+        try {
+          await payload.create({
+            collection: relationWithRestrictedFilterOptionsSlug,
+            data: {
+              relationWithFilterOptions: [
+                {
+                  relationTo: 'movies',
+                  value: movie.id,
+                },
+              ],
+            },
+            user: {
+              name: 'UserWhoCannotReadMovieNames',
+            },
+          })
+        } catch (e) {
+          error = e
+        }
+
+        expect(error).toBeDefined()
+        expect(error.data.errors).toHaveLength(1)
+        expect(error.data.errors[0].message).toBe(
+          `This field has the following invalid selections: {"relationTo":"movies","value":"${movie.id}"}`,
+        )
       })
     })
   })

@@ -78,6 +78,7 @@ export interface Config {
     movies: Movie;
     directors: Director;
     movieReviews: MovieReview;
+    'restricted-filter-options': RestrictedFilterOption;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
     pages: Page;
@@ -111,6 +112,7 @@ export interface Config {
     movies: MoviesSelect<false> | MoviesSelect<true>;
     directors: DirectorsSelect<false> | DirectorsSelect<true>;
     movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
+    'restricted-filter-options': RestrictedFilterOptionsSelect<false> | RestrictedFilterOptionsSelect<true>;
     'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
     tree: TreeSelect<false> | TreeSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -334,6 +336,29 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-filter-options".
+ */
+export interface RestrictedFilterOption {
+  id: string;
+  relationWithFilterOptions: (
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }
+    | {
+        relationTo: 'directors';
+        value: string | Director;
+      }
+    | {
+        relationTo: 'custom-id';
+        value: string | CustomId;
+      }
+  )[];
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -578,6 +603,10 @@ export interface PayloadLockedDocument {
         value: string | MovieReview;
       } | null)
     | ({
+        relationTo: 'restricted-filter-options';
+        value: string | RestrictedFilterOption;
+      } | null)
+    | ({
         relationTo: 'polymorphic-relationships';
         value: string | PolymorphicRelationship;
       } | null)
@@ -802,6 +831,15 @@ export interface MovieReviewsSelect<T extends boolean = true> {
   movieReviewer?: T;
   likes?: T;
   visibility?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-filter-options_select".
+ */
+export interface RestrictedFilterOptionsSelect<T extends boolean = true> {
+  relationWithFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
