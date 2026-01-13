@@ -152,6 +152,7 @@ export function UploadComponentHasMany(props: Props) {
                       showCollectionSlug={showCollectionSlug}
                       src={src}
                       thumbnailSrc={thumbnailSrc}
+                      updatedAt={value?.updatedAt as string}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}
