@@ -3,11 +3,11 @@ import type { PluginLanguage } from '../types.js'
 export const hyTranslations = {
   $schema: './translation-schema.json',
   'plugin-ecommerce': {
-    abandoned: 'Լdelays',
+    abandoned: 'Լքված',
     active: 'Ակտիվ',
     address: 'Հասցե',
     addressCity: 'Քաղաք',
-    addressCompany: 'Ընկdelays',
+    addressCompany: 'Ընկերություն',
     addressCountry: 'Երկիր',
     addresses: 'Հասցեներ',
     addressesCollectionDescription:
@@ -65,7 +65,7 @@ export const hyTranslations = {
     quantity: 'Քանակ',
     refunded: 'Վերադարձված',
     shipping: 'Ասառաքում',
-    shippingAddress: 'Աճdelaysumpdelays հասցե',
+    shippingAddress: 'Ասառաքման հասցե',
     status: 'Կարգավիճակ',
     subtotal: 'Ենթագումար',
     succeeded: 'Հաջողված',
