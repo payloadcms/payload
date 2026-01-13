@@ -1168,10 +1168,10 @@ importers:
         specifier: workspace:*
         version: link:../ui
       csv-parse:
-        specifier: ^5.6.0
+        specifier: 5.6.0
         version: 5.6.0
       csv-stringify:
-        specifier: ^6.5.2
+        specifier: 6.5.2
         version: 6.5.2
       qs-esm:
         specifier: 7.0.2

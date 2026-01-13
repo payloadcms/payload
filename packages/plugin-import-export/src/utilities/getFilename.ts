@@ -1,3 +1,7 @@
+/**
+ * Generates a filename based on current date and time.
+ * Format: "YYYY-MM-DD HH:MM:SS"
+ */
 export const getFilename = () => {
   const now = new Date()
   const yyymmdd = now.toISOString().split('T')[0] // "YYYY-MM-DD"
