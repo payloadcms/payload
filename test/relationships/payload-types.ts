@@ -501,6 +501,7 @@ export interface Block {
   blocks?:
     | {
         director?: (string | null) | Director;
+        directors?: (string | Director)[] | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'some';
@@ -929,6 +930,7 @@ export interface BlocksSelect<T extends boolean = true> {
           | T
           | {
               director?: T;
+              directors?: T;
               id?: T;
               blockName?: T;
             };
