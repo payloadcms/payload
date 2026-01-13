@@ -61,6 +61,7 @@ export const buildRawSchema = ({
       adapter,
       blocksTableNameMap: {},
       compoundIndexes: collection.sanitizedIndexes,
+      baseIndexes: baseIndexes,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.flattenedFields,
