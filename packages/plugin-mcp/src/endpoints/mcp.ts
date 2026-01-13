@@ -30,20 +30,15 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
         .update(apiKey || '')
         .digest('hex')
 
-      const apiKeyConstraints = [
-        {
-          apiKeyIndex: {
-            equals: sha256APIKeyIndex,
-          },
-        },
-      ]
-
       const where: Where = {
-        or: apiKeyConstraints,
+        apiKeyIndex: {
+          equals: sha256APIKeyIndex,
+        },
       }
 
       const { docs } = await payload.find({
         collection: 'payload-mcp-api-keys',
+        depth: 1,
         limit: 1,
         pagination: false,
         where,
@@ -58,11 +53,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       }
 
       const user = docs[0]?.user as TypedUser
-      const customUserCollection =
-        typeof pluginOptions.userCollection === 'string'
-          ? pluginOptions.userCollection
-          : pluginOptions.userCollection?.slug
-      user.collection = customUserCollection ?? 'users'
+      user.collection = pluginOptions.userCollection as string
       user._strategy = 'mcp-api-key' as const
 
       return docs[0] as unknown as MCPAccessSettings

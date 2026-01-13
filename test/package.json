@@ -96,7 +96,7 @@
     "jwt-decode": "4.0.0",
     "mongoose": "8.15.1",
     "next": "15.4.10",
-    "nodemailer": "7.0.9",
+    "nodemailer": "7.0.12",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
     "pg": "8.16.3",

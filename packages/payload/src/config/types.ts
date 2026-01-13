@@ -699,7 +699,16 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+export type ErrorResult = {
+  data?: any
+  errors: {
+    data?: Record<string, unknown>
+    field?: string
+    message?: string
+    name?: string
+  }[]
+  stack?: string
+}
 
 export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError
@@ -1398,6 +1407,14 @@ export type Config = {
         jsonSchema: JSONSchema4
       }) => JSONSchema4
     >
+
+    /**
+     * Enable strict type safety for draft mode queries.
+     * When enabled, find operations with draft: true will type required fields as optional.
+     * @default false
+     * @todo Remove in v4. Strict draft types will become the default behavior.
+     */
+    strictDraftTypes?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

@@ -322,7 +322,7 @@ describe('List View', () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-      await goToFirstCell(page, postsUrl)
+      await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
       await page.waitForURL(url)

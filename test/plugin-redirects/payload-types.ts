@@ -88,6 +88,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
@@ -352,6 +353,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

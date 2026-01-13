@@ -140,19 +140,6 @@ export const handleEndpoints = async ({
       request,
     })
 
-    if (req.method?.toLowerCase() === 'options') {
-      return Response.json(
-        {},
-        {
-          headers: headersWithCors({
-            headers: new Headers(),
-            req,
-          }),
-          status: 200,
-        },
-      )
-    }
-
     const { payload } = req
     const { config } = payload
 
@@ -257,6 +244,21 @@ export const handleEndpoints = async ({
     }
 
     if (!handler) {
+      // If no custom handler found and this is an OPTIONS request,
+      // return default CORS response for preflight requests
+      if (req.method?.toLowerCase() === 'options') {
+        return Response.json(
+          {},
+          {
+            headers: headersWithCors({
+              headers: new Headers(),
+              req,
+            }),
+            status: 200,
+          },
+        )
+      }
+
       return notFoundResponse(req, pathname)
     }
 

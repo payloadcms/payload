@@ -1,4 +1,4 @@
-import type { Locator } from '@playwright/test'
+import { expect, type Locator } from '@playwright/test'
 
 import { exactText } from '../../helpers.js'
 
@@ -124,7 +124,7 @@ type GetSelectInputValueFunction = <TMultiSelect = true>(args: {
   selectLocator: Locator
   selectType?: 'relationship' | 'select'
   valueLabelClass?: string
-}) => Promise<TMultiSelect extends true ? string[] : string | undefined>
+}) => Promise<TMultiSelect extends true ? string[] : false | string | undefined>
 
 export const getSelectInputValue: GetSelectInputValueFunction = async ({
   selectLocator,
@@ -139,8 +139,15 @@ export const getSelectInputValue: GetSelectInputValueFunction = async ({
     return selectedOptions || []
   }
 
+  await expect(selectLocator).toBeVisible()
+
   // For single-select, get the selected value
-  const singleValue = await selectLocator.locator(selectors.hasOne[selectType]).textContent()
+  const valueLocator = selectLocator.locator(selectors.hasOne[selectType])
+  const count = await valueLocator.count()
+  if (count === 0) {
+    return false
+  }
+  const singleValue = await valueLocator.textContent()
   return (singleValue ?? undefined) as any
 }
 

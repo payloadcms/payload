@@ -3,12 +3,14 @@ import type {
   CollectionSlug,
   JoinQuery,
   Payload,
+  PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
 } from '../../../index.js'
 import type {
   Document,
+  DraftTransformCollectionWithSelect,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -137,10 +139,19 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDraft extends boolean = false,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
+  options: { draft?: TDraft } & Options<TSlug, TSelect>,
+): Promise<
+  PaginatedDocs<
+    TDraft extends true
+      ? PayloadTypes extends { strictDraftTypes: true }
+        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>
+      : TransformCollectionWithSelect<TSlug, TSelect>
+  >
+> {
   const {
     collection: collectionSlug,
     currentDepth,

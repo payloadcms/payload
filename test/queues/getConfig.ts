@@ -14,6 +14,7 @@ import { DoNothingTask } from './tasks/DoNothingTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
 import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
 import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
+import { SelfCancelTask } from './tasks/SelfCancelTask.js'
 import { ThrowErrorTask } from './tasks/ThrowErrorTask.js'
 import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
 import { UpdatePostTask } from './tasks/UpdatePostTask.js'
@@ -30,6 +31,7 @@ import { retriesBackoffTestWorkflow } from './workflows/retriesBackoffTest.js'
 import { retriesRollbackTestWorkflow } from './workflows/retriesRollbackTest.js'
 import { retriesTestWorkflow } from './workflows/retriesTest.js'
 import { retriesWorkflowLevelTestWorkflow } from './workflows/retriesWorkflowLevelTest.js'
+import { selfCancelWorkflow } from './workflows/selfCancel.js'
 import { subTaskWorkflow } from './workflows/subTask.js'
 import { subTaskFailsWorkflow } from './workflows/subTaskFails.js'
 import { updatePostWorkflow } from './workflows/updatePost.js'
@@ -144,8 +146,10 @@ export const getConfig: () => Partial<Config> = () => ({
       ReturnErrorTask,
       ReturnCustomErrorTask,
       DoNothingTask,
+      SelfCancelTask,
     ],
     workflows: [
+      selfCancelWorkflow,
       updatePostWorkflow,
       updatePostJSONWorkflow,
       retriesTestWorkflow,
