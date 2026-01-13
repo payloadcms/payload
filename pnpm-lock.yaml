@@ -2657,6 +2657,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/payload
     devDependencies:
+      '@payloadcms/plugin-ecommerce':
+        specifier: workspace:*
+        version: link:../../packages/plugin-ecommerce
       '@payloadcms/plugin-import-export':
         specifier: workspace:*
         version: link:../../packages/plugin-import-export
