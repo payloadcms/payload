@@ -1068,6 +1068,9 @@ export type PolymorphicUploadField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
 
@@ -1280,6 +1283,9 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 
