@@ -4,7 +4,6 @@ import type {
 } from '@payloadcms/richtext-lexical/lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
-/* eslint-disable jest/no-conditional-in-test */
 import {
   buildEditorState,
   type DefaultNodeTypes,
@@ -15,6 +14,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 

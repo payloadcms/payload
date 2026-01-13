@@ -32,11 +32,11 @@ To help us work on new features, you can create a new feature request post in [G
 
 ### Installation & Requirements
 
-Payload is structured as a Monorepo, encompassing not only the core Payload platform but also various plugins and packages. To install all required dependencies, you have to run `pnpm install` once in the root directory. **PNPM IS REQUIRED!** Yarn or npm will not work - you will have to use pnpm to develop in the core repository. In most systems, the easiest way to install pnpm is to run `corepack enable` in your terminal.
+Payload is structured as a Monorepo, encompassing not only the core Payload platform but also various plugins and packages. To install all required dependencies, you have to run `pnpm install` once in the root directory. **PNPM IS REQUIRED!** Yarn or npm will not work - you will have to use pnpm to develop in the core repository. In most systems, the easiest way to install pnpm is to run `npm add -g pnpm` in your terminal.
 
-If you're coming from a very outdated version of payload, it is recommended to nuke the node_modules folder before running pnpm install. On UNIX systems, you can easily do that using the `pnpm clean:unix` command, which will delete all node_modules folders and build artefacts.
+If you're coming from a very outdated version of payload, it is recommended to perform a clean install, which nukes the node_modules folder and reinstalls all dependencies. You can easily do that using the `pnpm reinstall` command.
 
-It is also recommended to use at least Node v18 or higher. You can check your current node version by typing `node --version` in your terminal. The easiest way to switch between different node versions is to use [nvm](https://github.com/nvm-sh/nvm#intro).
+It is also recommended to use at least Node v23.11.0 or higher. You can check your current node version by typing `node --version` in your terminal. The easiest way to switch between different node versions is to use [nvm](https://github.com/nvm-sh/nvm#intro).
 
 ### Code
 
@@ -55,7 +55,7 @@ A typical directory with `test/` will be structured like this:
 ```
 
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
-- `int.spec.ts` - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
+- `int.spec.ts` - This is the test file run by vitest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests. These tests are typically only needed if a large change is being made to the Admin UI.
 - `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types my-test-dir`. Replace `my-test-dir` with the name of your testing directory.
 
@@ -67,19 +67,72 @@ By default, payload will [automatically log you in](https://payloadcms.com/docs/
 
 The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password. These are used in the auto-login.
 
-### Testing with your own MongoDB database
+### Database Setup
 
-If you wish to use your own MongoDB database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
+First, copy the `.env.example` file to your `.env`.
 
-- `process.env.NODE_ENV`
-- `process.env.PAYLOAD_TEST_MONGO_URL`
-- Simply set `process.env.NODE_ENV` to `test` and set `process.env.PAYLOAD_TEST_MONGO_URL` to your MongoDB URL e.g. `mongodb://127.0.0.1/your-test-db`.
+Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 
-### Using Postgres
+- `mongodb` - MongoDB Community with vector search (mongot)
+- `mongodb-atlas` - MongoDB Atlas Local (all-in-one container)
+- `cosmosdb` - MongoDB with compatibility options for Cosmos DB
+- `documentdb` - MongoDB with compatibility options for Document DB
+- `firestore` - MongoDB with compatibility options for Firestore
+- `postgres` - PostgreSQL with pgvector and PostGIS
+- `postgres-custom-schema` - PostgreSQL with custom schema
+- `postgres-uuid` - PostgreSQL with UUID primary keys
+- `postgres-read-replica` - PostgreSQL with read replica
+- `sqlite` - SQLite
+- `sqlite-uuid` - SQLite with UUID primary keys
+- `supabase` - Supabase (PostgreSQL)
+- `d1` - D1 (SQLite)
 
-If you have postgres installed on your system, you can also run the test suites using postgres. By default, mongodb is used.
+Then use Docker to start your database.
 
-To do that, simply set the `PAYLOAD_DATABASE` environment variable to `postgres`.
+On MacOS, the easiest way to install Docker is to use brew. Simply run `pnpm install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
+
+### PostgreSQL
+
+```bash
+pnpm docker:postgres:start         # Start (persists data)
+pnpm docker:postgres:restart:clean # Start fresh (removes data)
+pnpm docker:postgres:stop          # Stop
+```
+
+URL: `postgres://payload:payload@127.0.0.1:5433/payload`
+
+### MongoDB (with vector search)
+
+```bash
+pnpm docker:mongodb:start          # Start (persists data)
+pnpm docker:mongodb:restart:clean  # Start fresh (removes data)
+pnpm docker:mongodb:stop           # Stop
+```
+
+URL: `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0`
+
+### MongoDB Atlas Local
+
+```bash
+pnpm docker:mongodb-atlas:start         # Start (persists data)
+pnpm docker:mongodb-atlas:restart:clean # Start fresh (removes data)
+pnpm docker:mongodb-atlas:stop          # Stop
+```
+
+URL: `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
+
+### SQLite
+
+SQLite databases don't require Docker - they're stored as files in the project.
+
+### Testing with your own database
+
+If you wish to use your own MongoDB database for the `test` directory instead of using the docker database, add the following to your `.env` file:
+
+```env
+MONGODB_URL=mongodb://127.0.0.1/payloadtests # Point this to your locally installed MongoDB database
+POSTGRES_URL=postgres://127.0.0.1:5432/payloadtests # Point this to your locally installed PostgreSQL database
+```
 
 ### Running the e2e and int tests
 
@@ -120,10 +173,7 @@ This is how you can preview changes you made locally to the docs:
 
 1. Clone our [website repository](https://github.com/payloadcms/website)
 2. Run `pnpm install`
-3. Duplicate the `.env.example` file and rename it to `.env`
-4. Add a `DOCS_DIR` environment variable to the `.env` file which points to the absolute path of your modified docs folder. For example `DOCS_DIR=/Users/yourname/Documents/GitHub/payload/docs`
-5. Run `pnpm fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
-6. You're done! Now you can start the website locally using `pnpm dev` and preview the docs under [http://localhost:3000/docs/local](http://localhost:3000/docs/local)
+3. Follow the instructions in the [README of the website repository](https://github.com/payloadcms/website/blob/main/README.md#documentation) to preview the docs locally.
 
 ## Internationalization (i18n)
 

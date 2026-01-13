@@ -322,7 +322,6 @@ export function DefaultEditView({
         const redirectRoute = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
-          serverURL,
         })
 
         startRouteTransition(() => router.push(redirectRoute))
@@ -413,7 +412,6 @@ export function DefaultEditView({
       incrementVersionCount,
       adminRoute,
       locale,
-      serverURL,
       startRouteTransition,
       router,
       resetUploadEdits,

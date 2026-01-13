@@ -4,7 +4,7 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: [],
-  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
+  db: mongooseAdapter({ url: process.env.DATABASE_URL || '' }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
 })

@@ -48,7 +48,7 @@ export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> =
     adapterName: 'sqliteAdapter',
     configTemplate: () => `sqliteAdapter({
   client: {
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URL || '',
   },
 })`,
     packageName: '@payloadcms/db-sqlite',

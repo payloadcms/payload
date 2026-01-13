@@ -62,3 +62,5 @@ export const customAdminRoutes: Config['admin']['routes'] = {
   inactivity: '/custom-inactivity',
   logout: '/custom-logout',
 }
+
+export const BASE_PATH: '' | `/${string}` = ''

@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 

@@ -1,20 +1,41 @@
 import type { Payload } from 'payload'
+import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
+import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
-import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { mediaSlug, mediaWithPrefixSlug, prefix, restrictedMediaSlug } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
+
+// needs to be here as it imports vitest functions and conflicts with playwright that uses jest
+export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
+  if (process.env.CI) {
+    return describe
+  }
+
+  // Check that localstack is running
+  const { code } = shelljs.exec(`docker ps | grep localstack`)
+
+  if (code !== 0) {
+    console.warn('Localstack is not running. Skipping test suite.')
+    return describe.skip
+  }
+
+  console.log('Localstack is running. Running test suite.')
+
+  return describe
+}
 
 describe('@payloadcms/plugin-cloud-storage', () => {
   let TEST_BUCKET: string
@@ -82,6 +103,48 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           prefix,
         })
         expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+      })
+
+      it('should not upload to S3 when mimeType validation fails', async () => {
+        // Get initial bucket contents
+        const listBefore = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
+        const fileCountBefore = listBefore.Contents?.length || 0
+
+        // Try to upload a JSON file to a collection that only accepts PNG
+        await expect(
+          payload.create({
+            collection: restrictedMediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, './test.json'),
+          }),
+        ).rejects.toThrow()
+
+        // Verify no new files were uploaded to S3
+        const listAfter = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
+        const fileCountAfter = listAfter.Contents?.length || 0
+
+        expect(fileCountAfter).toBe(fileCountBefore)
+      })
+
+      it('should upload to S3 when mimeType validation passes', async () => {
+        // Upload a valid PNG file
+        const upload = await payload.create({
+          collection: restrictedMediaSlug,
+          data: {},
+          filePath: path.resolve(dirname, './image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+
+        // Verify the file was uploaded to S3
+        const { $metadata } = await client.send(
+          new AWS.HeadObjectCommand({
+            Bucket: TEST_BUCKET,
+            Key: upload.filename,
+          }),
+        )
+
+        expect($metadata.httpStatusCode).toBe(200)
       })
     })
   })

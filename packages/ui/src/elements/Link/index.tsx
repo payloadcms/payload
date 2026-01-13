@@ -62,15 +62,18 @@ export const Link: React.FC<Props> = ({
           e.preventDefault()
         }
 
-        startRouteTransition(() => {
-          const url = typeof href === 'string' ? href : formatUrl(href)
+        const url = typeof href === 'string' ? href : formatUrl(href)
 
+        const navigate = () => {
           if (replace) {
             void router.replace(url, { scroll })
           } else {
             void router.push(url, { scroll })
           }
-        })
+        }
+
+        // Call startRouteTransition if available, otherwise navigate directly
+        startRouteTransition(navigate)
       }}
       ref={ref}
       {...rest}

@@ -80,16 +80,31 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
   RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 /**
- * Helper type for draft data - makes all fields optional except auto-generated ones
+ * Helper type for draft data INPUT (e.g., create operations) - makes all fields optional except system fields
  * When creating a draft, required fields don't need to be provided as validation is skipped
+ * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'>
->
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
 >
+
+/**
+ * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional but keeps id required
+ * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
+ */
+export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
+  Pick<TData, 'id'>
+
+export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  QueryDraftDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'

@@ -11,6 +11,6 @@ const Users: CollectionConfig = {
 
 export default buildConfig({
   collections: [Users],
-  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
+  db: mongooseAdapter({ url: process.env.DATABASE_URL || '' }),
   editor: lexicalEditor(),
 })

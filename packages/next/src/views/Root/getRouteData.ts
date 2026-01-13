@@ -163,8 +163,6 @@ export const getRouteData = ({
             path: formatAdminURL({
               adminRoute,
               path: route,
-              relative: true,
-              serverURL: config.serverURL,
             }),
           })
         })

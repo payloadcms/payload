@@ -1,3 +1,4 @@
+import { describe, it, expect, vitest } from 'vitest'
 import type { SanitizedEcommercePluginConfig } from '../types/index.js'
 
 import { USD } from '../currencies/index.js'
@@ -5,13 +6,13 @@ import { getCollectionSlugMap } from './getCollectionSlugMap'
 
 describe('getCollectionSlugMap', () => {
   const mockAccessConfig = {
-    adminOnlyFieldAccess: jest.fn(),
-    adminOrPublishedStatus: jest.fn(),
-    customerOnlyFieldAccess: jest.fn(),
-    isAdmin: jest.fn(),
-    isAuthenticated: jest.fn(),
-    isDocumentOwner: jest.fn(),
-    publicAccess: jest.fn(),
+    adminOnlyFieldAccess: vitest.fn(),
+    adminOrPublishedStatus: vitest.fn(),
+    customerOnlyFieldAccess: vitest.fn(),
+    isAdmin: vitest.fn(),
+    isAuthenticated: vitest.fn(),
+    isDocumentOwner: vitest.fn(),
+    publicAccess: vitest.fn(),
   }
 
   const baseConfig: SanitizedEcommercePluginConfig = {

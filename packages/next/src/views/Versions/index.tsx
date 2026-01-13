@@ -1,7 +1,7 @@
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'payload'
-import { formatApiURL, hasDraftsEnabled, isNumber } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
 import { fetchLatestVersion, fetchVersions } from '../Version/fetchVersions.js'
@@ -115,10 +115,9 @@ export async function VersionsView(props: DocumentViewServerProps) {
       : Promise.resolve(null),
   ])
 
-  const fetchURL = formatApiURL({
+  const fetchURL = formatAdminURL({
     apiRoute,
     path: collectionSlug ? `/${collectionSlug}/versions` : `/${globalSlug}/versions`,
-    serverURL,
   })
 
   const columns = buildVersionColumns({

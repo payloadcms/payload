@@ -16,6 +16,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customEditLabel,
   customNestedTabViewPath,
@@ -42,6 +43,7 @@ import {
   postsCollectionSlug,
   reorderTabsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 

@@ -6,6 +6,8 @@ import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
 import { detectSvgFromXml } from './detectSvgFromXml.js'
+import { getFileTypeFallback } from './getFileTypeFallback.js'
+import { validateSvg } from './validateSvg.js'
 
 /**
  * Restricted file types and their extensions.
@@ -103,8 +105,37 @@ export const checkFileRestrictions = async ({
       }
     }
 
-    if (!detected && expectsDetectableType(typeFromExtension) && !useTempFiles) {
-      errors.push(`File buffer returned no detectable MIME type.`)
+    if (!detected && !useTempFiles) {
+      const mimeTypeFromExtension = getFileTypeFallback(file.name).mime
+      const extIsValid = validateMimeType(mimeTypeFromExtension, configMimeTypes)
+
+      if (!extIsValid) {
+        errors.push(
+          `File type ${mimeTypeFromExtension} (from extension ${typeFromExtension}) is not allowed.`,
+        )
+      } else {
+        // SVG security check (text-based files not detectable by buffer)
+        if (typeFromExtension.toLowerCase() === 'svg') {
+          const isSafeSvg = validateSvg(file.data)
+          if (!isSafeSvg) {
+            errors.push('SVG file contains potentially harmful content.')
+          }
+        }
+
+        // PDF validation
+        if (mimeTypeFromExtension === 'application/pdf') {
+          const isValidPDF = validatePDF(file.data)
+          if (!isValidPDF) {
+            errors.push('Invalid or corrupted PDF file.')
+          }
+        }
+      }
+
+      if (expectsDetectableType(mimeTypeFromExtension)) {
+        req.payload.logger.warn(
+          `File buffer returned no detectable MIME type for ${file.name}. Falling back to extension-based validation.`,
+        )
+      }
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)

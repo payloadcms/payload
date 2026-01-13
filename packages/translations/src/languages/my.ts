@@ -79,6 +79,11 @@ export const myTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
+  dashboard: {
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Padam widget {{id}}',
+    searchWidgets: 'Cari widget...',
+  },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
     autosaving: 'ဖိုင်ကို အလိုအလျောက်သိမ်းဆည်းရာတွင် ပြဿနာတစ်ခုရှိနေသည်။',

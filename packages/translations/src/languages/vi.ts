@@ -79,6 +79,11 @@ export const viTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
+  dashboard: {
+    addWidget: 'Thêm Widget',
+    deleteWidget: 'Xóa widget {{id}}',
+    searchWidgets: 'Tìm kiếm các widget...',
+  },
   error: {
     accountAlreadyActivated: 'Lỗi - Tài khoản này đã được kích hoạt.',
     autosaving: 'Lỗi - Đã xảy ra vấn đề khi tự động sao lưu bản tài liệu này.',

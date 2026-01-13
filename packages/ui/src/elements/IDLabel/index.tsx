@@ -19,7 +19,6 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
   const {
     config: {
       routes: { admin: adminRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -29,7 +28,6 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
   const docPath = formatAdminURL({
     adminRoute,
     path: `/${collectionSlug ? `collections/${collectionSlug}` : `globals/${globalSlug}`}/${id}`,
-    serverURL,
   })
 
   return (

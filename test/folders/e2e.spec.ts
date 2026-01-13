@@ -2,9 +2,15 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  getRoutes,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import {
   getSelectInputOptions,
@@ -32,6 +38,7 @@ test.describe('Folders', () => {
   let postURL: AdminUrlUtil
   let OmittedFromBrowseBy: AdminUrlUtil
   let serverURL: string
+  let adminRoute: string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -40,6 +47,11 @@ test.describe('Folders', () => {
     serverURL = serverFromInit
     postURL = new AdminUrlUtil(serverURL, postSlug)
     OmittedFromBrowseBy = new AdminUrlUtil(serverURL, omittedFromBrowseBySlug)
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -56,7 +68,7 @@ test.describe('Folders', () => {
 
   test.describe('No folders', () => {
     test('should show no results and create button in folder view', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await expectNoResultsAndCreateFolderButton({ page })
     })
 
@@ -71,7 +83,7 @@ test.describe('Folders', () => {
 
   test.describe('Creating folders', () => {
     test('should create new folder from folder view', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'New Folder From Root', page })
     })
 
@@ -91,13 +103,13 @@ test.describe('Folders', () => {
 
   test.describe('Folder view actions', () => {
     test('should show Browse by Folder button', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       const folderButton = page.locator('text=Browse by folder')
       await expect(folderButton).toBeVisible()
     })
 
     test('should rename folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Test Folder', page })
       await clickFolderCard({ folderName: 'Test Folder', page })
       const editFolderDocButton = page.locator('.list-selection__actions button', {
@@ -119,7 +131,7 @@ test.describe('Folders', () => {
     })
 
     test('should delete folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Delete This Folder', page })
       await clickFolderCard({ folderName: 'Delete This Folder', page })
       const deleteButton = page.locator('.list-selection__actions button', {
@@ -136,12 +148,12 @@ test.describe('Folders', () => {
     })
 
     test('should delete folder but not delete documents', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Folder With Documents', page })
       await createPostWithExistingFolder('Document 1', 'Folder With Documents')
       await createPostWithExistingFolder('Document 2', 'Folder With Documents')
 
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await clickFolderCard({ folderName: 'Folder With Documents', page })
       const deleteButton = page.locator('.list-selection__actions button', {
         hasText: 'Delete',
@@ -163,7 +175,7 @@ test.describe('Folders', () => {
     })
 
     test('should move folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Move Into This Folder', page })
       await createFolder({ folderName: 'Move Me', page })
       await clickFolderCard({ folderName: 'Move Me', page })
@@ -194,7 +206,7 @@ test.describe('Folders', () => {
 
     // this test currently fails in postgres
     test('should create new document from folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({
         folderName: 'Create New Here',
         page,
@@ -225,7 +237,7 @@ test.describe('Folders', () => {
     })
 
     test('should create nested folder from folder view', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Parent Folder', page })
       await clickFolderCard({ folderName: 'Parent Folder', page, doubleClick: true })
       const pageTitle = page.locator('h1.list-header__title')
@@ -248,7 +260,7 @@ test.describe('Folders', () => {
     })
 
     test('should toggle between grid and list view', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Test Folder', page })
       const listViewButton = page.locator('.folder-view-toggle-button').nth(1)
       await listViewButton.click()
@@ -262,7 +274,7 @@ test.describe('Folders', () => {
     })
 
     test('should sort folders', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'A Folder', page })
       await createFolder({ folderName: 'B Folder', page })
       await createFolder({ folderName: 'C Folder', page })
@@ -282,7 +294,7 @@ test.describe('Folders', () => {
     })
 
     test('should allow filtering within folders', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Filtering Folder', page })
       await clickFolderCard({ folderName: 'Filtering Folder', page, doubleClick: true })
 
@@ -339,7 +351,7 @@ test.describe('Folders', () => {
     })
 
     test('should allow searching within folders', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Test', page })
       await createFolder({ folderName: 'Search Me', page })
 
@@ -362,7 +374,7 @@ test.describe('Folders', () => {
 
   test.describe('Collection view actions', () => {
     test.beforeEach(async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Move Into This Folder', page })
       await createPostWithNoFolder()
       await page.goto(postURL.list)
@@ -375,7 +387,9 @@ test.describe('Folders', () => {
     test('should navigate to By Folder view', async () => {
       const folderButton = page.locator('.default-list-view-tabs__button', { hasText: 'By Folder' })
       await folderButton.click()
-      await expect(page).toHaveURL(`${serverURL}/admin/collections/posts/payload-folders`)
+      await expect(page).toHaveURL(
+        formatAdminURL({ adminRoute, path: '/collections/posts/payload-folders', serverURL }),
+      )
       const foldersTitle = page.locator('.collection-folder-list', { hasText: 'Folders' })
       await expect(foldersTitle).toBeVisible()
     })
@@ -439,7 +453,7 @@ test.describe('Folders', () => {
 
   test.describe('Document view actions', () => {
     test.beforeEach(async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Test Folder', page })
       await createPostWithNoFolder()
     })
@@ -506,7 +520,7 @@ test.describe('Folders', () => {
       await saveDocAndAssert(page)
 
       // go to browse by folder view
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await clickFolderCard({ folderName, page, doubleClick: true })
 
       // folder should be empty
@@ -515,7 +529,7 @@ test.describe('Folders', () => {
 
     test('should not show collection type in browse by folder view', async () => {
       const folderName = 'omitted collection pill test folder'
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName, page })
       await clickFolderCard({ folderName, page, doubleClick: true })
 
@@ -531,7 +545,7 @@ test.describe('Folders', () => {
 
   test.describe('Multiple select options', () => {
     test.beforeEach(async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Test Folder 1', page })
       await createFolder({ folderName: 'Test Folder 2', page })
       await createFolder({ folderName: 'Test Folder 3', page })
@@ -606,7 +620,7 @@ test.describe('Folders', () => {
 
   test.describe('should inherit folderType select values from parent folder', () => {
     test('should scope folderType select options for: scoped > child folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Posts and Media', page, folderType: ['Posts', 'Media'] })
       await clickFolderCard({ folderName: 'Posts and Media', page, doubleClick: true })
 
@@ -641,7 +655,7 @@ test.describe('Folders', () => {
     })
 
     test('should scope folderType select options for: unscoped > scoped > child folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
 
       // create an unscoped parent folder
       await createFolder({ folderName: 'All collections', page, folderType: [] })
@@ -699,7 +713,7 @@ test.describe('Folders', () => {
     })
 
     test('should not scope child folder of an unscoped parent folder', async () => {
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'All collections', page, folderType: [] })
       await clickFolderCard({ folderName: 'All collections', page, doubleClick: true })
 
