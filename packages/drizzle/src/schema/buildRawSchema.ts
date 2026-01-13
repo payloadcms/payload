@@ -48,7 +48,7 @@ export const buildRawSchema = ({
     const baseIndexes: Record<string, RawIndex> = {}
 
     if (collection.upload.filenameCompoundIndex) {
-      const indexName = buildIndexName({ name: `${tableName}_filename_compound_idx`, adapter })
+      const indexName = buildIndexName({ name: `${tableName}_filename_compound`, adapter })
 
       baseIndexes.filename_compound_index = {
         name: indexName,
