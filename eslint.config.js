@@ -61,7 +61,7 @@ export const rootEslintConfig = [
     },
   },
   {
-    files: ['packages/ui/**/*.ts'],
+    files: ['packages/ui/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'error',
     },
