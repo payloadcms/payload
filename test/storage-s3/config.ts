@@ -38,7 +38,6 @@ export default buildConfigWithDefaults({
   collections: [
     Media,
     MediaWithAlwaysInsertFields,
-    MediaWithClientUploads,
     MediaWithDirectAccess,
     MediaWithDynamicPrefix,
     MediaWithPrefix,
