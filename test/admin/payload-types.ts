@@ -629,6 +629,7 @@ export interface ListViewSelectApi {
 export interface Virtual {
   id: string;
   virtualTitleFromPost?: string | null;
+  textField?: string | null;
   virtualText?: string | null;
   post?: (string | null) | Post;
   updatedAt: string;
@@ -1252,6 +1253,7 @@ export interface ListViewSelectApiSelect<T extends boolean = true> {
  */
 export interface VirtualsSelect<T extends boolean = true> {
   virtualTitleFromPost?: T;
+  textField?: T;
   virtualText?: T;
   post?: T;
   updatedAt?: T;
@@ -1506,6 +1508,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
