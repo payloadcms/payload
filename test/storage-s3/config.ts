@@ -7,7 +7,6 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithAlwaysInsertFields } from './collections/MediaWithAlwaysInsertFields.js'
-import { MediaWithClientUploads } from './collections/MediaWithClientUploads.js'
 import { MediaWithDirectAccess } from './collections/MediaWithDirectAccess.js'
 import { MediaWithDynamicPrefix } from './collections/MediaWithDynamicPrefix.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
@@ -16,7 +15,6 @@ import { Users } from './collections/Users.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
-  mediaWithClientUploadsSlug,
   mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
@@ -58,10 +56,8 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     s3Storage({
-      clientUploads: true,
       collections: {
         [mediaSlug]: true,
-        [mediaWithClientUploadsSlug]: true,
         [mediaWithDirectAccessSlug]: {
           disablePayloadAccessControl: true,
         },
