@@ -6,9 +6,13 @@ import type { CartItemData, CartOperationResult } from './types.js'
  * Gets the ID from a product/variant field which can be either an ID or a populated object.
  */
 const getItemID = (
-  field: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType | undefined,
+  field:
+    | { [key: string]: unknown; id: DefaultDocumentIDType }
+    | DefaultDocumentIDType
+    | null
+    | undefined,
 ): DefaultDocumentIDType | undefined => {
-  if (field === undefined) {
+  if (!field) {
     return undefined
   }
   return typeof field === 'object' ? field.id : field
@@ -156,7 +160,11 @@ export const mergeCart = async (args: MergeCartArgs): Promise<CartOperationResul
       }
     } else {
       // Item doesn't exist in target - add it
-      mergedItems.push({ ...sourceItem })
+      // Omit the source item's array row `id` so Payload generates a new one.
+      // In SQL, array items are stored in separate tables with their own IDs,
+      // and using IDs from another cart's array would cause conflicts.
+      const { id: _omit, ...sourceItemWithoutId } = sourceItem
+      mergedItems.push(sourceItemWithoutId as CartItemData)
     }
   }
 
