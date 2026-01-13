@@ -930,3 +930,66 @@ transactions: {
   })
 }
 ```
+
+## Translations
+
+The plugin includes translations for admin UI labels and messages under the `plugin-ecommerce` namespace. To add the plugin's translations to your Payload config, use the `i18n.translations` key.
+
+### Adding translations
+
+Import the plugin translations and add them to your Payload config:
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { en } from '@payloadcms/translations/languages/en'
+import { enTranslations as ecommerceEn } from '@payloadcms/plugin-ecommerce/translations/languages/en'
+
+export default buildConfig({
+  // ...
+  i18n: {
+    supportedLanguages: { en },
+    translations: {
+      en: ecommerceEn,
+    },
+  },
+  plugins: [
+    ecommercePlugin({
+      /* ... */
+    }),
+  ],
+})
+```
+
+### Overriding translations
+
+You can override specific translation strings by providing your own values under the `plugin-ecommerce` namespace:
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { en } from '@payloadcms/translations/languages/en'
+import { enTranslations as ecommerceEn } from '@payloadcms/plugin-ecommerce/translations/languages/en'
+
+export default buildConfig({
+  // ...
+  i18n: {
+    supportedLanguages: { en },
+    translations: {
+      en: {
+        ...ecommerceEn,
+        'plugin-ecommerce': {
+          ...ecommerceEn['plugin-ecommerce'],
+          cart: 'Shopping Cart',
+          orders: 'My Orders',
+        },
+      },
+    },
+  },
+  plugins: [
+    ecommercePlugin({
+      /* ... */
+    }),
+  ],
+})
+```
