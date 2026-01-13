@@ -191,7 +191,15 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       body: file,
     })
 
-    // Expect the upload to be rejected
+    if (process.env.S3_ENDPOINT?.includes('localhost')) {
+      // localstack does not enforce content-length limits on signed URLs
+      console.warn(
+        'Skipping assertion for localstack local S3 endpoint, which does not enforce content-length limits on signed URLs',
+      )
+      return
+    }
+
+    // Expect the upload to be rejected, works with AWS S3 / Cloudflare R2
     expect(uploadResponse.ok).toBe(false)
     expect(uploadResponse.status).toBe(403) // S3 should reject the upload
   })
