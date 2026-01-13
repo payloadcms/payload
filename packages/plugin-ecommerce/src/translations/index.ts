@@ -1,10 +1,16 @@
-import type { GenericTranslationsObject, NestedKeysStripped } from '@payloadcms/translations'
+import type {
+  GenericTranslationsObject,
+  NestedKeysStripped,
+  SupportedLanguages,
+} from '@payloadcms/translations'
 
-import { en } from './en.js'
+import type { PluginDefaultTranslationsObject } from './types.js'
+
+import { en } from './languages/en.js'
 
 export const translations = {
   en,
-}
+} as SupportedLanguages<PluginDefaultTranslationsObject>
 
 export type EcommerceTranslations = GenericTranslationsObject
 
