@@ -10,6 +10,7 @@ import { accessOR, conditional } from '../../utilities/accessComposition.js'
 import { beforeChangeCart } from './beforeChange.js'
 import { addItemEndpoint } from './endpoints/addItem.js'
 import { clearCartEndpoint } from './endpoints/clearCart.js'
+import { mergeCartEndpoint } from './endpoints/mergeCart.js'
 import { removeItemEndpoint } from './endpoints/removeItem.js'
 import { updateItemEndpoint } from './endpoints/updateItem.js'
 import { hasCartSecretAccess } from './hasCartSecretAccess.js'
@@ -224,9 +225,11 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
     },
     endpoints: [
       addItemEndpoint({ cartItemMatcher, cartsSlug }),
+      clearCartEndpoint({ cartsSlug }),
+      // mergeCartEndpoint uses its own matcher that handles CartItemData for both items
+      mergeCartEndpoint({ cartsSlug }),
       removeItemEndpoint({ cartsSlug }),
       updateItemEndpoint({ cartsSlug }),
-      clearCartEndpoint({ cartsSlug }),
     ],
     fields,
     hooks: {

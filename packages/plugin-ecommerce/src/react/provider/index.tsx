@@ -17,6 +17,7 @@ import type {
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
   clearCart: async () => {},
+  clearSession: () => {},
   config: {
     addressesSlug: 'addresses',
     api: {
@@ -53,6 +54,7 @@ const defaultContext: EcommerceContextType = {
   removeItem: async () => {},
   setCurrency: () => {},
   updateAddress: async () => {},
+  user: null,
 }
 
 const EcommerceContext = createContext<EcommerceContextType>(defaultContext)
@@ -201,14 +203,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const getCart = useCallback(
     async (cartID: DefaultDocumentIDType, options?: { secret?: string }) => {
-      const secret = options?.secret
-
-      // Build query params with secret if provided
-      const queryParams = {
+      const query = qs.stringify({
         ...cartQuery,
-        ...(secret ? { secret } : {}),
-      }
-      const query = qs.stringify(queryParams)
+        ...(options?.secret ? { secret: options.secret } : {}),
+      })
 
       const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
         credentials: 'include',
@@ -295,9 +293,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
             return
           }
 
-          // Refresh cart with proper depth/populate settings for UI
-          const refreshedCart = await getCart(cartID, { secret: cartSecret })
-          setCart(refreshedCart)
+          // Use the cart returned from the endpoint directly
+          setCart(result.cart as CartsCollection)
         } else {
           // If no cartID exists, create a new cart with the item
           const newCart = await createCart({ items: [{ ...item, quantity }] })
@@ -314,7 +311,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, createCart, debug, getCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, createCart, debug],
   )
 
   const removeItem: EcommerceContextType['removeItem'] = useCallback(
@@ -352,9 +349,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           return
         }
 
-        // Refresh cart with proper depth/populate settings for UI
-        const refreshedCart = await getCart(cartID, { secret: cartSecret })
-        setCart(refreshedCart)
+        // Use the cart returned from the endpoint directly
+        setCart(result.cart as CartsCollection)
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
@@ -364,7 +360,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug],
   )
 
   const incrementItem: EcommerceContextType['incrementItem'] = useCallback(
@@ -403,9 +399,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           return
         }
 
-        // Refresh cart with proper depth/populate settings for UI
-        const refreshedCart = await getCart(cartID, { secret: cartSecret })
-        setCart(refreshedCart)
+        // Use the cart returned from the endpoint directly
+        setCart(result.cart as CartsCollection)
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
@@ -415,7 +410,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug],
   )
 
   const decrementItem: EcommerceContextType['decrementItem'] = useCallback(
@@ -454,9 +449,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           return
         }
 
-        // Refresh cart with proper depth/populate settings for UI
-        const refreshedCart = await getCart(cartID, { secret: cartSecret })
-        setCart(refreshedCart)
+        // Use the cart returned from the endpoint directly
+        setCart(result.cart as CartsCollection)
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
@@ -466,7 +460,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug],
   )
 
   const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
@@ -502,9 +496,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         return
       }
 
-      // Refresh cart with proper depth/populate settings for UI
-      const refreshedCart = await getCart(cartID, { secret: cartSecret })
-      setCart(refreshedCart)
+      // Use the cart returned from the endpoint directly
+      setCart(result.cart as CartsCollection)
     } catch (error) {
       if (debug) {
         // eslint-disable-next-line no-console
@@ -513,7 +506,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }, [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart])
+  }, [baseAPIURL, cartID, cartSecret, cartsSlug, debug])
 
   const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {
@@ -546,18 +539,12 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setSelectedPaymentMethod(paymentMethodID)
 
       if (paymentMethod.initiatePayment) {
-        const fetchURL = `${baseAPIURL}/payments/${paymentMethodID}/initiate`
-
-        const data = {
-          cartID,
-          currency: selectedCurrency.code,
-          secret: cartSecret,
-        }
-
         try {
-          const response = await fetch(fetchURL, {
+          const response = await fetch(`${baseAPIURL}/payments/${paymentMethodID}/initiate`, {
             body: JSON.stringify({
-              ...data,
+              cartID,
+              currency: selectedCurrency.code,
+              secret: cartSecret,
               ...(options?.additionalData || {}),
             }),
             credentials: 'include',
@@ -606,17 +593,11 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       if (paymentMethod.confirmOrder) {
-        const fetchURL = `${baseAPIURL}/payments/${paymentMethodID}/confirm-order`
-
-        const data = {
-          cartID,
-          currency: selectedCurrency.code,
-          secret: cartSecret,
-        }
-
-        const response = await fetch(fetchURL, {
+        const response = await fetch(`${baseAPIURL}/payments/${paymentMethodID}/confirm-order`, {
           body: JSON.stringify({
-            ...data,
+            cartID,
+            currency: selectedCurrency.code,
+            secret: cartSecret,
             ...(options?.additionalData || {}),
           }),
           credentials: 'include',
@@ -823,6 +804,23 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [user, baseAPIURL, addressesSlug, getAddresses, debug],
   )
 
+  /**
+   * Clears all ecommerce session data from state and localStorage.
+   * Used during logout to ensure no user data persists.
+   */
+  const clearSession = useCallback(() => {
+    setCart(undefined)
+    setCartID(undefined)
+    setCartSecret(undefined)
+    setAddresses(undefined)
+    setUser(null)
+
+    if (syncLocalStorage) {
+      localStorage.removeItem(localStorageConfig.key)
+      localStorage.removeItem(`${localStorageConfig.key}_secret`)
+    }
+  }, [localStorageConfig.key, syncLocalStorage])
+
   // If localStorage is enabled, restore cart from storage
   useEffect(() => {
     if (!hasRendered.current) {
@@ -899,6 +897,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         addresses,
         cart,
         clearCart,
+        clearSession,
         config,
         confirmOrder,
         createAddress,
@@ -914,6 +913,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         selectedPaymentMethod,
         setCurrency,
         updateAddress,
+        user,
       }}
     >
       {children}

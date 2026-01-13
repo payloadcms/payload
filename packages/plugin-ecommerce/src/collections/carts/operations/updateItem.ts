@@ -1,5 +1,6 @@
 import type { CartItemData, CartOperationResult, UpdateItemArgs } from './types.js'
 
+import { createRequestWithSecret } from './createRequestWithSecret.js'
 import { isNumericOperator } from './types.js'
 
 /**
@@ -43,17 +44,15 @@ import { isNumericOperator } from './types.js'
 export const updateItem = async (args: UpdateItemArgs): Promise<CartOperationResult> => {
   const { cartID, cartsSlug, itemID, payload, quantity, removeOnZero = true, req, secret } = args
 
-  // Build where clause for guest cart access
-  const whereClause = secret
-    ? { and: [{ id: { equals: cartID } }, { secret: { equals: secret } }] }
-    : undefined
+  // Inject secret into request context for access control
+  const reqWithSecret = createRequestWithSecret(req, secret)
 
   const cart = await payload.findByID({
     id: cartID,
     collection: cartsSlug,
     depth: 0,
-    req,
-    ...(whereClause ? { where: whereClause } : {}),
+    overrideAccess: false,
+    req: reqWithSecret,
   })
 
   if (!cart) {
@@ -109,7 +108,8 @@ export const updateItem = async (args: UpdateItemArgs): Promise<CartOperationRes
       items: updatedItems,
     },
     depth: 0,
-    req,
+    overrideAccess: false,
+    req: reqWithSecret,
   })
 
   const wasRemoved = newQuantity <= 0 && removeOnZero

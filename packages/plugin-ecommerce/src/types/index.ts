@@ -11,6 +11,7 @@ import type {
   PopulateType,
   SelectType,
   TypedCollection,
+  TypedUser,
   Where,
 } from 'payload'
 import type React from 'react'
@@ -765,9 +766,7 @@ export type EcommercePluginConfig = {
 }
 
 export type SanitizedAccessConfig = Pick<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'> &
-  Required<
-  Omit<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'>
->
+  Required<Omit<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'>>
 
 export type SanitizedEcommercePluginConfig = {
   access: SanitizedAccessConfig
@@ -929,6 +928,12 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    */
   clearCart: () => Promise<void>
   /**
+   * Clears all ecommerce session data including cart, addresses, and user state.
+   * Should be called when a user logs out.
+   * This also clears localStorage cart data when syncLocalStorage is enabled.
+   */
+  clearSession: () => void
+  /**
    * Memoized configuration object containing collection slugs and API settings.
    * Use this to build URLs and queries with the correct collection slugs.
    */
@@ -1000,4 +1005,8 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Update an address by providing the data and the ID.
    */
   updateAddress: (addressID: DefaultDocumentIDType, data: Partial<T['addresses']>) => Promise<void>
+  /**
+   * The current authenticated user, or null if not logged in.
+   */
+  user: null | TypedUser
 }

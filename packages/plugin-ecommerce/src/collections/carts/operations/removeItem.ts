@@ -1,5 +1,7 @@
 import type { CartItemData, CartOperationResult, RemoveItemArgs } from './types.js'
 
+import { createRequestWithSecret } from './createRequestWithSecret.js'
+
 /**
  * Removes an item from a cart by its row ID.
  *
@@ -21,17 +23,15 @@ import type { CartItemData, CartOperationResult, RemoveItemArgs } from './types.
 export const removeItem = async (args: RemoveItemArgs): Promise<CartOperationResult> => {
   const { cartID, cartsSlug, itemID, payload, req, secret } = args
 
-  // Build where clause for guest cart access
-  const whereClause = secret
-    ? { and: [{ id: { equals: cartID } }, { secret: { equals: secret } }] }
-    : undefined
+  // Inject secret into request context for access control
+  const reqWithSecret = createRequestWithSecret(req, secret)
 
   const cart = await payload.findByID({
     id: cartID,
     collection: cartsSlug,
     depth: 0,
-    req,
-    ...(whereClause ? { where: whereClause } : {}),
+    overrideAccess: false,
+    req: reqWithSecret,
   })
 
   if (!cart) {
@@ -66,7 +66,8 @@ export const removeItem = async (args: RemoveItemArgs): Promise<CartOperationRes
       items: updatedItems,
     },
     depth: 0,
-    req,
+    overrideAccess: false,
+    req: reqWithSecret,
   })
 
   return {
