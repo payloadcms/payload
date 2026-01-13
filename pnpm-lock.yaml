@@ -1606,13 +1606,7 @@ importers:
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
-      range-parser:
-        specifier: ^1.2.1
-        version: 1.2.1
     devDependencies:
-      '@types/range-parser':
-        specifier: ^1.2.7
-        version: 1.2.7
       payload:
         specifier: workspace:*
         version: link:../payload

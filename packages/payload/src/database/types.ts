@@ -21,6 +21,14 @@ export interface BaseDatabaseAdapter {
    * @returns an identifier for the transaction or null if one cannot be established
    */
   beginTransaction: BeginTransaction
+  /**
+   * When true, bulk operations will process documents one at a time
+   * in separate transactions instead of all at once in a single transaction.
+   * Useful for avoiding transaction limitations with large datasets.
+   *
+   * @default false
+   */
+  bulkOperationsSingleTransaction?: boolean
 
   /**
    * Persist the changes made since the start of the transaction.

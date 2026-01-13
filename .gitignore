@@ -349,3 +349,6 @@ test/azurestoragedata/
 
 
 licenses.csv
+
+# SQLite DB
+payload.db
