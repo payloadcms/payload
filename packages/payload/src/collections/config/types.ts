@@ -516,6 +516,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * Configuration for bulk operations
+   */
   /** Extension point to add your custom data. Server only. */
   custom?: CollectionCustom
   /**
