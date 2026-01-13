@@ -1,5 +1,6 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
+import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
@@ -28,14 +29,15 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
 
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
 
@@ -49,8 +51,6 @@ let restClient: NextRESTClient
 const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
-
-const itMongo = process.env.PAYLOAD_DATABASE?.startsWith('mongodb') ? it : it.skip
 
 describe('database', () => {
   beforeAll(async () => {
@@ -599,18 +599,17 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
-    // eslint-disable-next-line jest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
-    // eslint-disable-next-line jest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
 
-    itMongo(
+    it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -619,8 +618,9 @@ describe('database', () => {
       },
     )
 
-    itMongo(
+    it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -772,7 +772,6 @@ describe('database', () => {
     ].map((title) => ({ title }))
 
     for (const { title } of titles) {
-      // eslint-disable-next-line jest/no-conditional-in-test
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
         await payload.create({ collection: 'posts', data: { title } })
@@ -840,7 +839,6 @@ describe('database', () => {
     }
 
     for (const { category } of categoriesIDS) {
-      // eslint-disable-next-line jest/no-conditional-in-test
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
         await payload.create({ collection: 'posts', data: { category, title: randomUUID() } })
@@ -938,7 +936,6 @@ describe('database', () => {
     }
 
     // Non-consistent sorting by ID
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (process.env.PAYLOAD_DATABASE?.includes('uuid')) {
       return
     }
@@ -1521,18 +1518,11 @@ describe('database', () => {
     })
 
     it('should run migrate', async () => {
-      let error
-      try {
-        await payload.db.migrate()
-      } catch (e) {
-        console.error(e)
-        error = e
-      }
+      await payload.db.migrate()
       const { docs } = await payload.find({
         collection: 'payload-migrations',
       })
       const migration = docs[0]
-      expect(error).toBeUndefined()
       expect(migration?.name).toContain('_test')
       expect(migration?.batch).toStrictEqual(1)
     })
@@ -1558,13 +1548,8 @@ describe('database', () => {
       ranFreshTest = true
     })
 
-    it('should run migrate:down', async () => {
-      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (!isMongoose(payload)) {
-        return
-      }
-
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    it('should run migrate:down', { db: 'mongo' }, async () => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1597,12 +1582,8 @@ describe('database', () => {
       await payload.delete({ collection: 'payload-migrations', where: {} })
     })
 
-    it('should run migrate:refresh', async () => {
-      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (!isMongoose(payload)) {
-        return
-      }
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    it('should run migrate:refresh', { db: 'mongo' }, async () => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -1619,12 +1600,8 @@ describe('database', () => {
     })
   })
 
-  it('should run migrate:reset', async () => {
-    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    // eslint-disable-next-line jest/no-conditional-in-test
-    if (!isMongoose(payload)) {
-      return
-    }
+  // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+  it('should run migrate:reset', { db: 'mongo' }, async () => {
     let error
     try {
       await payload.db.migrateReset()
@@ -1642,7 +1619,6 @@ describe('database', () => {
 
   describe('predefined migrations', () => {
     it('mongoose - should execute migrateVersionsV1_V2', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name !== 'mongoose') {
         return
       }
@@ -1663,7 +1639,6 @@ describe('database', () => {
     })
 
     it('mongoose - should execute migrateRelationshipsV2_V3', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name !== 'mongoose') {
         return
       }
@@ -2779,8 +2754,11 @@ describe('database', () => {
     })
   })
 
-  describe('Schema generation', () => {
-    if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
+  describe('Schema generation', { db: 'drizzle' }, () => {
+    if (
+      process.env.PAYLOAD_DATABASE.includes('postgres') ||
+      process.env.PAYLOAD_DATABASE === 'supabase'
+    ) {
       it('should generate Drizzle Postgres schema', async () => {
         const generatedAdapterName = process.env.PAYLOAD_DATABASE
 
@@ -2841,7 +2819,6 @@ describe('database', () => {
 
     // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
     it.skip('should add tables with hooks', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -2849,9 +2826,7 @@ describe('database', () => {
       let added_table_before: Table
       let added_table_after: Table
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('postgres')) {
-        // eslint-disable-next-line jest/no-conditional-in-test
         const t = (payload.db.pgSchema?.table ?? drizzlePg.pgTable) as typeof drizzlePg.pgTable
         added_table_before = t('added_table_before', {
           id: drizzlePg.serial('id').primaryKey(),
@@ -2864,7 +2839,6 @@ describe('database', () => {
         })
       }
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('sqlite')) {
         added_table_before = drizzleSqlite.sqliteTable('added_table_before', {
           id: drizzleSqlite.integer('id').primaryKey(),
@@ -2931,7 +2905,6 @@ describe('database', () => {
     })
 
     it('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -2943,11 +2916,9 @@ describe('database', () => {
           extendTable({
             columns: {
               // SQLite doesn't have DB length enforcement
-              // eslint-disable-next-line jest/no-conditional-in-test
               ...(payload.db.name === 'postgres' && {
                 city: drizzlePg.varchar('city', { length: 10 }),
               }),
-              // eslint-disable-next-line jest/no-conditional-in-test
               extraColumn: isSQLite
                 ? drizzleSqlite.integer('extra_column')
                 : drizzlePg.integer('extra_column'),
@@ -2973,7 +2944,6 @@ describe('database', () => {
         },
       })
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       const tableName = payload.db.schemaName ? `"${payload.db.schemaName}"."places"` : 'places'
 
       await payload.db.execute({
@@ -2989,7 +2959,6 @@ describe('database', () => {
       expect(res_with_extra_col.rows[0].extra_column).toBe(10)
 
       // SQLite doesn't have DB length enforcement
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'postgres') {
         await expect(
           payload.db.execute({
@@ -3001,7 +2970,6 @@ describe('database', () => {
     })
 
     it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -3012,7 +2980,6 @@ describe('database', () => {
         ({ extendTable, schema }) => {
           extendTable({
             extraConfig: (t) => ({
-              // eslint-disable-next-line jest/no-conditional-in-test
               uniqueOnCityAndCountry: (isSQLite ? drizzleSqlite : drizzlePg)
                 .unique()
                 .on(t.city, t.country),
@@ -3493,11 +3460,9 @@ describe('database', () => {
 
     it('should automatically add hasMany: true to a virtual field that references a hasMany relationship', () => {
       const field = payload.collections['virtual-relations'].config.fields.find(
-        // eslint-disable-next-line jest/no-conditional-in-test
         (each) => 'name' in each && each.name === 'postsTitles',
       )!
 
-      // eslint-disable-next-line jest/no-conditional-in-test
       expect('hasMany' in field && field.hasMany).toBe(true)
     })
 
@@ -3746,7 +3711,6 @@ describe('database', () => {
   })
 
   it('mongodb additional keys stripping', async () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (payload.db.name !== 'mongoose') {
       return
     }
@@ -3907,6 +3871,36 @@ describe('database', () => {
     }
   })
 
+  it('should throw unique constraint errors in optimized update path', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-2',
+      },
+    })
+
+    // This update goes through the optimized path (shouldUseOptimizedUpsertRow) in db-drizzle
+    // because it's a simple field update with an existing ID
+    try {
+      await payload.update({
+        collection: 'unique-fields',
+        id: doc2.id,
+        data: {
+          slugField: 'optimized-unique-1', // Try to set to doc1's unique value
+        },
+      })
+    } catch (e) {
+      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+    }
+  })
+
   it('should use optimized updateOne', async () => {
     const post = await payload.create({
       collection: 'posts',
@@ -3991,7 +3985,6 @@ describe('database', () => {
     const res = await payload.find({
       collection: 'categories',
       draft: true,
-      // eslint-disable-next-line jest/no-conditional-in-test
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
     })
     expect(res.docs).toHaveLength(1)
@@ -5134,7 +5127,6 @@ describe('database', () => {
 
   it('should ignore blocks that exist in the db but not in the config', async () => {
     // not possible w/ SQL anyway
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (payload.db.name !== 'mongoose') {
       return
     }
@@ -5180,7 +5172,6 @@ describe('database', () => {
   })
 
   it('should CRUD with blocks as JSON in SQL adapters', async () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
     if (!('drizzle' in payload.db)) {
       return
     }
@@ -5227,12 +5218,7 @@ describe('database', () => {
     await payload.db.connect()
   })
 
-  it('ensure mongodb query sanitization does not duplicate IDs', () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
-    if (!isMongoose(payload)) {
-      return
-    }
-
+  it('ensure mongodb query sanitization does not duplicate IDs', { db: 'mongo' }, () => {
     const res: any = sanitizeQueryValue({
       field: {
         name: '_id',
@@ -5251,51 +5237,55 @@ describe('database', () => {
     expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 
-  itMongo('ensure mongodb respects collation when using collection in the config', async () => {
-    // Clear any existing documents
-    await payload.delete({ collection: 'simple', where: {} })
+  it(
+    'ensure mongodb respects collation when using collection in the config',
+    { db: 'mongo' },
+    async () => {
+      // Clear any existing documents
+      await payload.delete({ collection: 'simple', where: {} })
 
-    const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
-    const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
+      const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
+      const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
 
-    const simple_1 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Роман' },
-    })
-    const simple_2 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Віктор' },
-    })
-    const simple_3 = await payload.create({
-      collection: 'simple',
-      locale: 'uk',
-      data: { text: 'Євген' },
-    })
+      const simple_1 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Роман' },
+      })
+      const simple_2 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Віктор' },
+      })
+      const simple_3 = await payload.create({
+        collection: 'simple',
+        locale: 'uk',
+        data: { text: 'Євген' },
+      })
 
-    const results = await payload.find({
-      collection: 'simple',
-      locale: 'uk',
-      sort: 'text',
-    })
+      const results = await payload.find({
+        collection: 'simple',
+        locale: 'uk',
+        sort: 'text',
+      })
 
-    const initialMappedResults = results.docs.map((doc) => doc.text)
+      const initialMappedResults = results.docs.map((doc) => doc.text)
 
-    expect(initialMappedResults).toEqual(expectedUnsortedItems)
+      expect(initialMappedResults).toEqual(expectedUnsortedItems)
 
-    payload.db.collation = { strength: 1 }
+      payload.db.collation = { strength: 1 }
 
-    const resultsWithCollation = await payload.find({
-      collection: 'simple',
-      locale: 'uk',
-      sort: 'text',
-    })
+      const resultsWithCollation = await payload.find({
+        collection: 'simple',
+        locale: 'uk',
+        sort: 'text',
+      })
 
-    const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
+      const collatedMappedResults = resultsWithCollation.docs.map((doc) => doc.text)
 
-    console.log({ docs: JSON.stringify(collatedMappedResults) })
+      console.log({ docs: JSON.stringify(collatedMappedResults) })
 
-    expect(collatedMappedResults).toEqual(expectedSortedItems)
-  })
+      expect(collatedMappedResults).toEqual(expectedSortedItems)
+    },
+  )
 })

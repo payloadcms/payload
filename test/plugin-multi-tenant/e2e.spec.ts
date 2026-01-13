@@ -17,6 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
+import { openRelationshipFieldDrawer } from '../helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import {
   clearSelectInput,
@@ -415,6 +416,45 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
       await expect(page.getByText('Pretzel Bites')).toBeHidden()
     })
+
+    test('should filter relationship fields in Lexical BlocksFeature', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+      await page.goto(menuItemsURL.create)
+      await selectDocumentTenant({
+        page,
+        payload,
+        tenant: 'Blue Dog',
+      })
+
+      // Fill in the required name field
+      await page.fill('#field-name', 'Test Menu Item')
+
+      // Find the bug-repro richtext field and insert a block
+      const rte = page.locator('.rich-text-lexical [data-lexical-editor="true"]')
+      await rte.click()
+      await rte.focus()
+
+      // Open slash menu and insert block
+      await page.keyboard.type('/')
+      await expect(page.locator('.slash-menu-popup')).toBeVisible()
+      await page.getByText('Block With Relationship').click()
+
+      // Wait for block to be inserted
+      await expect(page.locator('.LexicalEditorTheme__block')).toBeVisible()
+
+      // Open the relationship field in the block
+      await page.locator('.LexicalEditorTheme__block .rs__input').click()
+
+      // Should only show Blue Dog Menu, not Steel Cat Menu or others
+      await expect(page.getByText('Blue Dog Menu')).toBeVisible()
+      await expect(page.getByText('Steel Cat Menu')).toBeHidden()
+      await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
+      await expect(page.locator('.rs__menu')).toHaveCount(1)
+    })
   })
 
   test.describe('Globals', () => {
@@ -513,6 +553,78 @@ test.describe('Multi Tenant', () => {
       })
       await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
       await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
+    })
+  })
+
+  test.describe('Polymorphic Relationships', () => {
+    test('should not duplicate tenant constraints in polymorphic relationship queries', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Capture render-list server action requests
+      const renderListRequests: Array<{
+        payload: any[]
+        url: string
+      }> = []
+
+      page.on('request', (request) => {
+        // Check for server action POST requests
+        if (
+          request.method() === 'POST' &&
+          request.url().includes(`/admin/collections/${menuItemsSlug}`)
+        ) {
+          const postData = request.postData()
+          if (postData) {
+            try {
+              const parsedPayload = JSON.parse(postData)
+              // Check if this is a render-list action
+              if (Array.isArray(parsedPayload) && parsedPayload[0]?.name === 'render-list') {
+                renderListRequests.push({
+                  url: request.url(),
+                  payload: parsedPayload,
+                })
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
+      })
+
+      // Navigate to existing menu item
+      await page.goto(menuItemsURL.list)
+      await clearTenantFilter({ page })
+
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await openRelationshipFieldDrawer({
+        page,
+        fieldName: 'polymorphicRelationship',
+        selectRelation: 'Relationship', // select a tenant-enabled collection
+      })
+
+      await expect.poll(() => renderListRequests.length).toBeGreaterThan(0)
+
+      // Check the query.where clause for tenant constraint duplication
+      for (const request of renderListRequests) {
+        const renderListAction = request.payload[0]
+        await expect.poll(() => renderListAction.name).toBe('render-list')
+        await expect.poll(() => renderListAction.args).toBeDefined()
+        await expect.poll(() => renderListAction.args.query).toBeDefined()
+
+        const whereString = JSON.stringify(renderListAction.args.query.where)
+        const tenantMatches = whereString.match(/"tenant":/g)?.length
+
+        await expect.poll(() => tenantMatches).toEqual(1)
+      }
     })
   })
 
@@ -690,6 +802,80 @@ test.describe('Multi Tenant', () => {
         })
         .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'Public Tenant', 'House Rules'].sort())
     })
+
+    test('should allow clearing tenant filter from dashboard view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: tenantsURL,
+      })
+
+      // Navigate to dashboard view
+      await page.goto(`${serverURL}/admin`)
+
+      // Clear the tenant filter from the dashboard
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
+
+    test('should allow clearing tenant filter from list view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        urlUtil: menuItemsURL,
+      })
+
+      // Verify tenant is set
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBe('Steel Cat')
+
+      // Clear the tenant filter from the list view
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
   })
 })
 
@@ -719,8 +905,8 @@ async function openAssignTenantModal({
   }
 
   // Open the assign tenant modal
-  const docControlsPopup = page.locator('.doc-controls__popup')
-  const docControlsButton = docControlsPopup.locator('.popup-button')
+  const docControlsPopup = page.locator('.popup__content')
+  const docControlsButton = page.locator('.doc-controls__popup .popup-button')
   await expect(docControlsButton).toBeVisible()
   await docControlsButton.click()
 

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { updatePackageJson } from './package-json'
 import * as fs from 'fs'
 import * as path from 'path'

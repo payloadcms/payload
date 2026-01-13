@@ -80,6 +80,11 @@ export const skTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
+  dashboard: {
+    addWidget: 'Pridať Widget',
+    deleteWidget: 'Odstrániť widget {{id}}',
+    searchWidgets: 'Hľadať doplnky...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet už bol aktivovaný.',
     autosaving: 'Pri automatickom ukladaní tohto dokumentu došlo k chybe.',

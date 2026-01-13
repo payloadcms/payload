@@ -8,6 +8,7 @@ import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
@@ -287,6 +288,21 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
+      it('should not allow html file to be uploaded to PDF only collection', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './test.html')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+        formData.append('contentType', 'application/pdf')
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
       it('should not allow invalid mimeType to be created', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
@@ -296,6 +312,20 @@ describe('Collections - Uploads', () => {
         formData.append('contentType', 'image/png')
 
         const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow corrupted SVG to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './corrupt.svg')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${svgOnlySlug}`, {
           body: formData,
         })
         await handle.close()
@@ -739,7 +769,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
           collection: skipSafeFetchMediaSlug,
@@ -769,7 +799,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         // spin up a temporary server so fetch to the local doesn't fail
         const server = createServer((req, res) => {
@@ -813,7 +843,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
           collection: skipSafeFetchHeaderFilterSlug,
@@ -870,7 +900,6 @@ describe('Collections - Uploads', () => {
           const isIPV6 = hostname.includes('::')
 
           // Strip brackets from IPv6 addresses
-          // eslint-disable-next-line jest/no-conditional-in-test
           if (isIPV6) {
             hostname = hostname.slice(1, -1)
           }
@@ -879,7 +908,6 @@ describe('Collections - Uploads', () => {
           // we'd like to test for
           // @ts-expect-error this does not need to be mocked 100% correctly
           _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             callback(null, hostname as any, isIPV6 ? 6 : 4)
           }
 

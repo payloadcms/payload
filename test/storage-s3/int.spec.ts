@@ -3,12 +3,15 @@ import type { CollectionSlug, Payload } from 'payload'
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
+  mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
   mediaWithSignedDownloadsSlug,
@@ -85,6 +88,22 @@ describe('@payloadcms/storage-s3', () => {
     expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
   })
 
+  it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
+    // This collection uses a s3Storage plugin with enabled: false but alwaysInsertFields: true
+    // The upload will use local storage, but the prefix field should still exist
+    const upload = await payload.create({
+      collection: mediaWithAlwaysInsertFieldsSlug,
+      data: {
+        prefix: 'test',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
+
+    expect(upload.id).toBeTruthy()
+    // With alwaysInsertFields: true and enabled: false, the prefix field should still exist
+    expect(upload.prefix).toBe('test')
+  })
+
   it('can download with signed downloads', async () => {
     await payload.create({
       collection: mediaWithSignedDownloadsSlug,
@@ -121,6 +140,49 @@ describe('@payloadcms/storage-s3', () => {
     expect(response.status).toBe(404)
   })
 
+  describe('disablePayloadAccessControl', () => {
+    it('should return direct S3 URL with encoded filename when uploading file with spaces', async () => {
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+      })
+
+      expect(upload.id).toBeTruthy()
+      expect(upload.filename).toBe('image with spaces.png')
+
+      // When disablePayloadAccessControl is true, URL should point directly to S3
+      // and the filename should be URL-encoded
+      expect(upload.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.url).toContain(TEST_BUCKET)
+      expect(upload.url).toContain('image%20with%20spaces.png')
+
+      // Verify the file can be fetched using the URL
+      const response = await fetch(upload.url)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/png')
+    })
+
+    it('should return direct S3 URL without encoding issues for normal filenames', async () => {
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      expect(upload.id).toBeTruthy()
+
+      // URL should point directly to S3
+      expect(upload.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.url).toContain(TEST_BUCKET)
+      expect(upload.url).toContain('image.png')
+
+      // Verify the file can be fetched
+      const response = await fetch(upload.url)
+      expect(response.status).toBe(200)
+    })
+  })
+
   describe('R2', () => {
     it.todo('can upload')
   })
@@ -136,6 +198,10 @@ describe('@payloadcms/storage-s3', () => {
       })
       await payload.delete({
         collection: mediaSlug,
+        where: {},
+      })
+      await payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
         where: {},
       })
     })

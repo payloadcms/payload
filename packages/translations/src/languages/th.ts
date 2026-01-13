@@ -78,6 +78,11 @@ export const thTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
+  dashboard: {
+    addWidget: 'เพิ่มวิดเจ็ต',
+    deleteWidget: 'ลบวิดเจ็ต {{id}}',
+    searchWidgets: 'ค้นหาวิดเจ็ต...',
+  },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',
     autosaving: 'เกิดปัญหาระหว่างการบันทึกเอกสารอัตโนมัติ',

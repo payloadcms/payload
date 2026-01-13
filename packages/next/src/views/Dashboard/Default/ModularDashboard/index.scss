@@ -1,0 +1,316 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .modular-dashboard {
+    .widget-content {
+      height: 100%;
+    }
+
+    // In mobile, make the widget full width and hide the size button.
+    @media (max-width: 768px) {
+      .widget {
+        width: 100% !important;
+      }
+
+      .widget-wrapper__size-btn {
+        display: none;
+      }
+    }
+
+    &.editing {
+      .widget-content {
+        user-select: none;
+        -webkit-user-select: none;
+        pointer-events: none;
+      }
+
+      .draggable {
+        cursor: grab;
+      }
+    }
+
+    .drag-overlay {
+      pointer-events: none;
+      user-select: none;
+    }
+
+    &__empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      padding: 24px;
+    }
+  }
+
+  // Apply grabbing cursor to body when drag-overlay is present
+  body:has(.drag-overlay) * {
+    cursor: grabbing;
+  }
+
+  .widget-wrapper__controls {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .widget:focus,
+  .widget:focus-within {
+    .widget-wrapper__controls {
+      opacity: 1;
+    }
+  }
+
+  // This is used to highlight a newly added widget.
+  @keyframes widget-highlight {
+    0% {
+      box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.9);
+    }
+    100% {
+      box-shadow: 0 0 0 3px rgba(255, 208, 0, 0);
+    }
+  }
+
+  .widget {
+    &--highlight {
+      animation: widget-highlight 1.5s ease-out forwards;
+      border-radius: 8px;
+    }
+  }
+
+  .widget-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+    &--editing {
+      .widget-wrapper__controls {
+        // opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      &:hover {
+        .widget-wrapper__controls {
+          opacity: 1;
+        }
+      }
+    }
+
+    &__controls {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &__delete-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 28px;
+      height: 28px;
+
+      background: var(--theme-text);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+
+      transition: all 0.2s ease;
+
+      .icon {
+        width: 16px;
+        height: 16px;
+
+        .stroke {
+          stroke: var(--theme-elevation-0);
+          stroke-width: 2;
+        }
+      }
+
+      &:hover {
+        background: var(--theme-elevation-800);
+      }
+
+      &:active {
+        background: var(--theme-elevation-900);
+      }
+
+      svg {
+        pointer-events: none;
+      }
+    }
+
+    &__size-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      min-width: auto;
+      height: 28px;
+
+      background: var(--theme-text);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+
+      transition: all 0.2s ease;
+
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--theme-elevation-0);
+      white-space: nowrap;
+
+      .icon {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+
+        .stroke {
+          stroke: var(--theme-elevation-0);
+          stroke-width: 2;
+        }
+      }
+
+      &:hover {
+        background: var(--theme-elevation-800);
+      }
+
+      &:active {
+        background: var(--theme-elevation-900);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover {
+          background: var(--theme-text);
+        }
+      }
+
+      svg {
+        pointer-events: none;
+      }
+    }
+
+    &__size-btn-percentage {
+      font-size: 12px;
+      margin-left: auto;
+      color: var(--theme-elevation-500);
+    }
+  }
+
+  // Since popup uses portal and renders to body, we need global styles
+  // for the size selection buttons in widget wrappers
+  .popup-button-list:has(.widget-wrapper__size-btn-label) {
+    .popup__scroll-container {
+      padding: 0;
+    }
+  }
+
+  .popup__content:has(.widget-wrapper__size-btn-label) {
+    padding: 5px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  }
+
+  .popup-button-list__button:has(.widget-wrapper__size-btn-label) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px;
+
+    .widget-wrapper__size-btn-label {
+      flex: 0 0 auto;
+    }
+
+    .widget-wrapper__size-btn-percentage {
+      margin-left: auto !important;
+    }
+  }
+
+  .step-nav {
+    .dashboard-breadcrumb-dropdown {
+      &__editing {
+        align-items: center;
+        display: flex !important;
+        gap: 12px;
+      }
+
+      &__actions {
+        display: flex !important;
+        gap: 8px;
+      }
+    }
+
+    .dashboard-breadcrumb-select {
+      position: relative;
+      z-index: 10;
+
+      .rs__control {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        cursor: pointer;
+
+        &:hover {
+          background: transparent;
+        }
+      }
+
+      .rs__indicator-separator {
+        display: none;
+      }
+
+      .rs__dropdown-indicator {
+        padding: 0 4px;
+      }
+
+      .rs__menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 150px;
+        z-index: 9999;
+        border-radius: 4px;
+        padding: 5px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      .rs__menu-list {
+        padding: 0;
+      }
+
+      .rs__option {
+        padding: 4px 8px;
+        border-radius: 3px;
+        margin: 0;
+      }
+    }
+
+    .rs__control {
+      box-shadow: none !important;
+      cursor: pointer !important;
+    }
+
+    .drawer-toggler--unstyled {
+      background: transparent;
+      border: none;
+      margin: 0;
+      padding: 0;
+      outline: none;
+      box-shadow: none;
+
+      &:hover,
+      &:focus {
+        background: transparent;
+      }
+    }
+  }
+}

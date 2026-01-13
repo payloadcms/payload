@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.68.1",
+  "version": "3.70.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -64,6 +64,10 @@
       "import": "./src/exports/i18n/*.ts",
       "types": "./src/exports/i18n/*.ts",
       "default": "./src/exports/i18n/*.ts"
+    },
+    "./__testing__/predefinedMigration": {
+      "import": "./src/__testing__/predefinedMigration.js",
+      "default": "./src/__testing__/predefinedMigration.js"
     }
   },
   "main": "./src/index.ts",
@@ -176,6 +180,10 @@
         "import": "./dist/exports/i18n/*.js",
         "types": "./dist/exports/i18n/*.d.ts",
         "default": "./dist/exports/i18n/*.js"
+      },
+      "./__testing__/predefinedMigration": {
+        "import": "./dist/__testing__/predefinedMigration.js",
+        "default": "./dist/__testing__/predefinedMigration.js"
       }
     },
     "main": "./dist/index.js",

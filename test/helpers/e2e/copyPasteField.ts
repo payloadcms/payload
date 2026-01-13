@@ -31,9 +31,9 @@ export async function copyPasteField({
   await popupBtn.click()
 
   const actionBtnSelector = rowAction
-    ? `#${fieldName}-row-${rowIndex} .popup__content .popup-button-list button.array-actions__${action}`
-    : `.popup.clipboard-action__popup .popup__content .popup-button-list button:has-text("${isCopy ? 'Copy' : 'Paste'} Field")`
-  const actionBtn = field.locator(actionBtnSelector).first()
+    ? `.popup__content .popup-button-list button.array-actions__${action}`
+    : `.popup__content .popup-button-list button:has-text("${isCopy ? 'Copy' : 'Paste'} Field")`
+  const actionBtn = page.locator(actionBtnSelector).first()
   await expect(actionBtn).toBeVisible()
   await actionBtn.click()
 
