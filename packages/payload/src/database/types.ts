@@ -234,7 +234,6 @@ export type FindArgs = {
   projection?: Record<string, unknown>
   req?: Partial<PayloadRequest>
   select?: SelectType
-  skip?: number
   sort?: Sort
   versions?: boolean
   where?: Where
@@ -269,7 +268,6 @@ type BaseVersionArgs = {
   pagination?: boolean
   req?: Partial<PayloadRequest>
   select?: SelectType
-  skip?: number
   sort?: Sort
   versions?: boolean
   where?: Where

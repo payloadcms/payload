@@ -22,7 +22,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     pagination,
     req,
     select,
-    skip,
     sort: sortArg,
     where = {},
   },
@@ -61,7 +60,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const options: QueryOptions = {
     limit,
     session,
-    skip,
   }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
