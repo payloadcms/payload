@@ -86,6 +86,7 @@ export function UploadComponentHasOne(props: Props) {
         showCollectionSlug={showCollectionSlug}
         src={src}
         thumbnailSrc={thumbnailSrc}
+        updatedAt={value.updatedAt}
         x={value?.width as number}
         y={value?.height as number}
       />

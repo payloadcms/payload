@@ -59,6 +59,13 @@ import { startMockCorsServer } from './startMockCorsServer.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/**
+ * Regex matcher for date cache tags.
+ *
+ * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
+ */
+const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
+
 const { afterAll, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
@@ -640,7 +647,7 @@ describe('Uploads', () => {
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
     await expect(genericUploadImage).toHaveAttribute(
       'src',
-      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
+      /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg(\?.*)?$/,
     )
   })
 
@@ -671,17 +678,14 @@ describe('Uploads', () => {
     await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc!.id))
 
     const genericUploadImage = page.locator('.file-details .thumbnail img')
+    await expect(genericUploadImage).not.toHaveAttribute('src', cacheTagPattern)
+  })
 
-    const src = await genericUploadImage.getAttribute('src')
+  test('should render adminThumbnail without the additional cache tag in upload collection list', async () => {
+    await page.goto(mediaWithoutCacheTagsSlugURL.list)
 
-    /**
-     * Regex matcher for date cache tags.
-     *
-     * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
-     */
-    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
-
-    expect(src).not.toMatch(cacheTagPattern)
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
+    await expect(genericUploadImage).not.toHaveAttribute('src', cacheTagPattern)
   })
 
   test('should render adminThumbnail with the cache tag by default', async () => {
@@ -701,17 +705,37 @@ describe('Uploads', () => {
     await page.goto(adminThumbnailFunctionURL.edit(imageDoc!.id))
 
     const genericUploadImage = page.locator('.file-details .thumbnail img')
+    await expect(genericUploadImage).toHaveAttribute('src', cacheTagPattern)
+  })
 
-    const src = await genericUploadImage.getAttribute('src')
+  test('should render adminThumbnail with the cache tag in upload collection list by default', async () => {
+    await page.goto(adminThumbnailFunctionURL.list)
 
-    /**
-     * Regex matcher for date cache tags.
-     *
-     * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
-     */
-    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
+    await expect(genericUploadImage).toHaveAttribute('src', cacheTagPattern)
+  })
 
-    expect(src).toMatch(cacheTagPattern)
+  test('should render adminThumbnail with the cache tag in relation list by default', async () => {
+    await page.goto(relationPreviewURL.list)
+
+    const relationPreview1 = page.locator('.cell-imageWithPreview1 img')
+    await expect(relationPreview1).toHaveAttribute('src', cacheTagPattern)
+  })
+
+  test('should render adminThumbnail with the cache tag in upload field by default', async () => {
+    const relationPreviewDoc = (
+      await payload.find({
+        collection: relationPreviewSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(relationPreviewURL.edit(relationPreviewDoc!.id))
+
+    const relationPreview1 = page.locator('#field-imageWithPreview1 .thumbnail img')
+    await expect(relationPreview1).toHaveAttribute('src', cacheTagPattern)
   })
 
   test('should render adminThumbnail when using a specific size', async () => {
@@ -1863,7 +1887,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
+        /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg(\?.*)?$/,
       )
     })
 
@@ -1875,7 +1899,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/enlarge\/file\/test-image-180x50\.jpg$/,
+        /\/api\/enlarge\/file\/test-image-180x50\.jpg(\?.*)?$/,
       )
     })
 
@@ -1887,7 +1911,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/focal-only\/file\/test-image-400x300\.jpg$/,
+        /\/api\/focal-only\/file\/test-image-400x300\.jpg(\?.*)?$/,
       )
     })
 
@@ -1897,7 +1921,7 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png$/)
+      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png(\?.*)?$/)
     })
   })
 
