@@ -1,6 +1,6 @@
-import type { GenericTranslationsObject } from '@payloadcms/translations'
+import type { PluginLanguage } from '../types.js'
 
-export const en: GenericTranslationsObject = {
+export const enTranslations = {
   $schema: './translation-schema.json',
   'plugin-ecommerce': {
     abandoned: 'Abandoned',
@@ -94,4 +94,9 @@ export const en: GenericTranslationsObject = {
     variantTypesCollectionDescription:
       'Variant types are used to define the different types of variants your products can have, such as size or color. Each variant type can have multiple options associated with it.',
   },
+}
+
+export const en: PluginLanguage = {
+  dateFNSKey: 'en-US',
+  translations: enTranslations,
 }
