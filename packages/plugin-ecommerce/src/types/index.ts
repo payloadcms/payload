@@ -25,7 +25,11 @@ export type CollectionOverride = (args: {
 }) => CollectionConfig | Promise<CollectionConfig>
 
 export type CartItem = {
-  id: DefaultDocumentIDType
+  /**
+   * The ID of the cart item. Array item IDs are always strings in Payload,
+   * regardless of the database adapter's default ID type.
+   */
+  id: string
   product: DefaultDocumentIDType | TypedCollection['products']
   quantity: number
   variant?: DefaultDocumentIDType | TypedCollection['variants']
@@ -509,7 +513,11 @@ export type CartItemMatcherArgs = {
   /** The existing cart item to compare against */
   existingItem: {
     [key: string]: unknown
-    id?: DefaultDocumentIDType
+    /**
+     * The ID of the cart item. Array item IDs are always strings in Payload,
+     * regardless of the database adapter's default ID type.
+     */
+    id?: string
     product: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
     quantity: number
     variant?: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
@@ -960,14 +968,16 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    */
   currency: Currency
   /**
-   * Decrement an item in the cart by its index ID.
+   * Decrement an item in the cart by its array item ID.
    * If quantity reaches 0, the item will be removed from the cart.
+   * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  decrementItem: (item: DefaultDocumentIDType) => Promise<void>
+  decrementItem: (item: string) => Promise<void>
   /**
-   * Increment an item in the cart by its index ID.
+   * Increment an item in the cart by its array item ID.
+   * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  incrementItem: (item: DefaultDocumentIDType) => Promise<void>
+  incrementItem: (item: string) => Promise<void>
   /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.
@@ -1017,9 +1027,10 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    */
   refreshCart: () => Promise<void>
   /**
-   * Remove an item from the cart by its index ID.
+   * Remove an item from the cart by its array item ID.
+   * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  removeItem: (item: DefaultDocumentIDType) => Promise<void>
+  removeItem: (item: string) => Promise<void>
   /**
    * The name of the currently selected payment method.
    * This is used to determine which payment method to use when initiating a payment.

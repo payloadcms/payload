@@ -5,7 +5,11 @@ import type { DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
  */
 export type CartItemData = {
   [key: string]: unknown
-  id?: DefaultDocumentIDType
+  /**
+   * The ID of the cart item. Array item IDs are always strings in Payload,
+   * regardless of the database adapter's default ID type.
+   */
+  id?: string
   product: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
   quantity: number
   variant?: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
@@ -102,8 +106,11 @@ export type AddItemArgs = {
  * Arguments for the removeItem operation.
  */
 export type RemoveItemArgs = {
-  /** The cart item row ID to remove */
-  itemID: DefaultDocumentIDType
+  /**
+   * The cart item row ID to remove.
+   * Array item IDs are always strings in Payload, regardless of the database adapter's default ID type.
+   */
+  itemID: string
 } & BaseCartOperationArgs
 
 /**
@@ -111,8 +118,11 @@ export type RemoveItemArgs = {
  * Supports MongoDB-style operators for flexible updates.
  */
 export type UpdateItemArgs = {
-  /** The cart item row ID to update */
-  itemID: DefaultDocumentIDType
+  /**
+   * The cart item row ID to update.
+   * Array item IDs are always strings in Payload, regardless of the database adapter's default ID type.
+   */
+  itemID: string
   /**
    * The quantity value or operator.
    * - Direct number: Sets the quantity to this value
