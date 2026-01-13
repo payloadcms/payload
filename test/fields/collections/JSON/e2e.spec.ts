@@ -72,7 +72,7 @@ describe('JSON', () => {
   })
 
   test('should truncate long JSON values in list view', async () => {
-    // Create a document with long JSON (>100 chars)
+    // Create a document with very long JSON (>150 chars, should truncate)
     const longJsonData = {
       veryLongProperty:
         'This is a very long string value that will definitely exceed the 100 character universal truth when stringified.',
@@ -111,6 +111,36 @@ describe('JSON', () => {
     await expect(async () => {
       const shortCellText = await shortJsonCell.textContent()
       expect(shortCellText).not.toContain('…')
+    }).toPass()
+  })
+
+  test('should not truncate slightly long JSON values (>100 but <=150 chars)', async () => {
+    // Create JSON that's between 100-150 chars (should NOT truncate due to 1.5x rule)
+    // This string is ~120 characters when stringified
+    const slightlyLongJsonData = {
+      property1: 'This value is specifically designed to be over one hundred characters',
+      property2: 'but under 150 total',
+    }
+
+    const stringified = JSON.stringify(slightlyLongJsonData)
+    expect(stringified.length).toBeGreaterThan(100)
+    expect(stringified.length).toBeLessThanOrEqual(150)
+
+    const doc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: slightlyLongJsonData },
+    })
+
+    await page.goto(url.list)
+
+    // Verify the JSON is displayed fully without truncation
+    const jsonCell = page.locator(`tr[data-id="${doc.id}"] .cell-json`)
+
+    await expect(jsonCell).toHaveText(stringified)
+    await expect(async () => {
+      const cellText = jsonCell
+      await expect(cellText).not.toContainText('…')
+      await expect(cellText).toHaveText(stringified)
     }).toPass()
   })
 

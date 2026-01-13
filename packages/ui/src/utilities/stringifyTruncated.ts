@@ -11,7 +11,12 @@
  */
 export function stringifyTruncated(value: unknown, maxLength: number): string {
   const stringifiedJSON = JSON.stringify(value)
-  return stringifiedJSON.length > maxLength
-    ? `${stringifiedJSON.substring(0, maxLength)}\u2026`
-    : stringifiedJSON
+  const totalChars = stringifiedJSON.length
+
+  // Only truncate if the string is significantly longer (>1.5x the max length)
+  if (totalChars / maxLength > 1.5) {
+    return `${stringifiedJSON.substring(0, maxLength)}\u2026`
+  }
+
+  return stringifiedJSON
 }
