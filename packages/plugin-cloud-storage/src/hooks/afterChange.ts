@@ -42,17 +42,44 @@ export const getAfterChangeHook =
           await Promise.all(deletionPromises)
         }
 
-        const promises = files.map(async (file) => {
-          await adapter.handleUpload({
-            clientUploadContext: file.clientUploadContext,
-            collection,
-            data: doc,
-            file,
-            req,
-          })
-        })
+        const uploadResults = await Promise.all(
+          files.map((file) =>
+            adapter.handleUpload({
+              clientUploadContext: file.clientUploadContext,
+              collection,
+              data: doc,
+              file,
+              req,
+            }),
+          ),
+        )
 
-        await Promise.all(promises)
+        const uploadMetadata = uploadResults
+          .filter(
+            (result): result is Partial<FileData & TypeWithID> =>
+              result != null && typeof result === 'object',
+          )
+          .reduce(
+            (acc, metadata) => ({ ...acc, ...metadata }),
+            {} as Partial<FileData & TypeWithID>,
+          )
+
+        if (Object.keys(uploadMetadata).length > 0) {
+          try {
+            await req.payload.update({
+              id: doc.id,
+              collection: collection.slug,
+              data: uploadMetadata,
+              depth: 0,
+              req,
+            })
+            return { ...doc, ...uploadMetadata }
+          } catch (updateError: unknown) {
+            req.payload.logger.warn(
+              `Failed to persist upload data for collection ${collection.slug} document ${doc.id}: ${String(updateError)}`,
+            )
+          }
+        }
       }
     } catch (err: unknown) {
       req.payload.logger.error(

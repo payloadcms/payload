@@ -70,6 +70,7 @@ export interface Config {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
     'restricted-media': RestrictedMedia;
+    'test-metadata': TestMetadatum;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
+    'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -197,6 +199,37 @@ export interface RestrictedMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "test-metadata".
+ */
+export interface TestMetadatum {
+  id: string;
+  testUrl?: string | null;
+  testEtag?: string | null;
+  customField?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -254,6 +287,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restricted-media';
         value: string | RestrictedMedia;
+      } | null)
+    | ({
+        relationTo: 'test-metadata';
+        value: string | TestMetadatum;
       } | null)
     | ({
         relationTo: 'users';
@@ -381,6 +418,40 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "test-metadata_select".
+ */
+export interface TestMetadataSelect<T extends boolean = true> {
+  testUrl?: T;
+  testEtag?: T;
+  customField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -451,6 +522,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
