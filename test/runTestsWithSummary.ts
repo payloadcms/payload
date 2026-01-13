@@ -56,7 +56,7 @@ const TEST_SUITES = [
   'queues',
   'relationships',
   'sdk',
-  //   'select', We do not plan to support before EOY
+  // 'select', // this suite is slow. Also see this: https://figma.slack.com/archives/C097Z32TW4V/p1767978110705459
   'sort',
   'storage-azure',
   'storage-s3',
