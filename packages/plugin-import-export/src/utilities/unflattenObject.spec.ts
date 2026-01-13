@@ -2,11 +2,13 @@ import { FlattenedField, PayloadRequest } from 'payload'
 
 import { unflattenObject } from './unflattenObject.js'
 
+import { describe, it, expect, vi } from 'vitest'
+
 describe('unflattenObject', () => {
   const mockReq = {
     payload: {
       logger: {
-        error: jest.fn(),
+        error: vi.fn(),
       },
     },
   } as unknown as PayloadRequest
