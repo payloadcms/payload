@@ -5,10 +5,12 @@ import type {
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
+  JsonObject,
   PaginatedDocs,
   PayloadTypesShape,
   SelectType,
   TypedCollectionSelect,
+  TypeWithID,
   TypeWithVersion,
   Where,
 } from 'payload'
@@ -917,6 +919,21 @@ describe('Types testing', () => {
       expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
     })
 
+    test('ensure SDK without generic automatically uses GeneratedTypes', () => {
+      const _sdk = new PayloadSDK({ baseURL: '' })
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
+    })
+
     test('ensure SDK with explicit generic uses has correct collection types', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       // ensure collection property of sdk.create has posts in the union type
@@ -931,6 +948,40 @@ describe('Types testing', () => {
         | 'posts'
         | 'users'
       >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct data for collection in create', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          richText: {
+            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+          },
+          selectField: 'option-1',
+          radioField: 'option-1',
+        },
+      })
+      expect(result).type.toBe<JsonObject & LocalConfig['collections']['posts'] & TypeWithID>()
+    })
+
+    test('SDK create data should be typed and reject invalid properties', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      expect(
+        _sdk.create({
+          collection: 'posts',
+          data: {
+            title: 'Test Post',
+            richText: {
+              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            },
+            selectField: 'option-1',
+            radioField: 'option-1',
+            invalidProperty: 'should error',
+          },
+        }),
+      ).type.toRaiseError()
     })
   })
 
