@@ -2,6 +2,67 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Table of Contents
+
+### [Project Structure](#project-structure-1)
+
+- [Key Directories](#key-directories)
+- [Architecture Notes](#architecture-notes)
+
+### [Quick Start](#quick-start-1)
+
+### [Build Commands](#build-commands-1)
+
+### [Development](#development-1)
+
+- [Coding Patterns and Best Practices](#coding-patterns-and-best-practices)
+- [Running Dev Server](#running-dev-server)
+- [Development Environment](#development-environment)
+
+### [Testing](#testing-1)
+
+- [Writing Tests - Required Practices](#writing-tests---required-practices)
+- [How to run tests](#how-to-run-tests)
+- [Test Structure](#test-structure)
+
+### [Linting & Formatting](#linting--formatting-1)
+
+### [Internationalization](#internationalization-1)
+
+### [Commit & PR Guidelines](#commit--pr-guidelines-1)
+
+- [PR Title Format](#pr-title-format)
+- [Commit Guidelines](#commit-guidelines)
+
+### [Additional Resources](#additional-resources-1)
+
+### [Admin UI](#admin-ui-1)
+
+- [Component Architecture](#component-architecture)
+- [CSS Variables](#css-variables)
+- [Component Styling Patterns](#component-styling-patterns)
+- [Icons](#icons)
+- [Best Practices](#best-practices)
+
+### [Config-Defined Components & Server/Client Architecture](#config-defined-components--serverclient-architecture)
+
+- [Server-to-Client Field Transformation](#server-to-client-field-transformation)
+- [Import Map System](#import-map-system)
+- [Form State Generation](#form-state-generation)
+- [Client-Side Form Management](#client-side-form-management)
+- [Field Component Implementation](#field-component-implementation)
+- [Architecture Summary](#architecture-summary)
+
+### [List View Architecture](#list-view-architecture)
+
+- [Core Components](#core-components)
+- [Provider System](#provider-system)
+- [Data Flow](#data-flow-1)
+- [Table Implementation](#table-implementation)
+- [Column System](#column-system)
+- [Bulk Operations](#bulk-operations)
+- [Custom Cell Renderers](#custom-cell-renderers)
+
 ## Project Structure
 
 Payload is a monorepo structured around Next.js, containing the core CMS platform, database adapters, plugins, and tooling.
@@ -92,7 +153,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 **Example pattern:**
 
-```typescript
+```ts
 describe('My Feature', () => {
   const createdIDs: number[] = []
 
@@ -200,6 +261,226 @@ Examples:
 - Always use Payload's built-in CSS variables
 - All styles use `@layer payload-default` for proper cascading
 - Components automatically adapt to dark mode via CSS variables
+
+#### Component Architecture
+
+##### File Structure
+
+Standard component organization:
+
+```
+ComponentName/
+├── index.tsx          # Main component implementation
+├── index.scss         # Component styles (if needed)
+├── types.ts           # Type definitions (if complex)
+└── SubComponent/      # Nested components (if needed)
+```
+
+**Key conventions:**
+
+- Use named exports only (no default exports)
+- Client Components (75% of codebase) start with `'use client'` directive
+- Server Components for static content, layout, data fetching
+- Simple components can be single-file
+
+**Export pattern:**
+
+```ts
+export const Button: React.FC<Props> = (props) => { ... }
+export type Props = { ... }
+```
+
+##### React Patterns
+
+**State Management:**
+
+- **useState** - For local UI state only (toggles, visibility, hover states)
+  - NOT for form data (use `useField` hook instead)
+- **useReducer** - Rare, only for complex state machines (forms, bulk operations)
+- **Context** - Primary mechanism for shared state across components
+  - Use `use-context-selector` for performance-critical contexts
+  - Split contexts by concern (Auth, Config, DocumentInfo, Form, etc.)
+
+**useEffect - Use sparingly:**
+
+```ts
+// ✅ GOOD: External system sync (timers, subscriptions)
+useEffect(() => {
+  const timeout = setTimeout(callback, delay)
+  return () => clearTimeout(timeout)
+}, [delay])
+
+// ✅ GOOD: Side effects on mount
+useEffect(() => {
+  void fetchData()
+}, [])
+
+// ❌ BAD: Derived state (use useMemo instead)
+useEffect(() => {
+  setDisplayValue(formatValue(value))
+}, [value])
+
+// ❌ BAD: Event propagation (use callbacks directly)
+useEffect(() => {
+  onValueChange(value)
+}, [value])
+```
+
+**Action-based, not effect-based:**
+
+- Prefer event handlers and callbacks over useEffect
+- Let actions trigger changes directly
+- Use `useMemo` for computed values
+- Use `useCallback` for stable callback references
+
+**Custom hooks:**
+
+- Always start with `use*`
+- Export as named exports
+- Common hooks: `useField`, `useForm`, `useFormFields`, `useAuth`, `useConfig`
+- Utility hooks: `useEffectEvent`, `useDebouncedEffect`, `useThrottledValue`
+
+##### Component Composition
+
+**Props pattern:**
+
+```ts
+// Single object parameter (preferred)
+export const Component: React.FC<Props> = (props) => {
+  const { field, path, readOnly } = props
+  // Destructure after function signature
+}
+
+// Component injection via props
+type Props = {
+  Label?: React.ReactNode
+  Description?: React.ReactNode
+  Error?: React.ReactNode
+  BeforeInput?: React.ReactNode
+  AfterInput?: React.ReactNode
+}
+```
+
+**Custom component rendering:**
+
+```ts
+// Use RenderCustomComponent helper
+<RenderCustomComponent
+  CustomComponent={Label}
+  Fallback={<FieldLabel label={label} required={required} />}
+/>
+// Note: undefined renders Fallback, null renders nothing
+```
+
+**Provider pattern:**
+
+```ts
+// Compound components with context
+<CollapsibleProvider isCollapsed={isCollapsed} toggle={toggle}>
+  {children}
+</CollapsibleProvider>
+
+// Access via custom hook
+const { isCollapsed, toggle } = useCollapsible()
+```
+
+##### Data Flow
+
+**Event handling:**
+
+```ts
+// Simple: inline handlers
+<button onClick={() => toggle()}>Toggle</button>
+
+// Complex: named handlers
+const handleClick = (event) => {
+  event.preventDefault()
+  onClick?.(event)
+}
+
+// Passed down: useCallback for stability
+const handleSubmit = useCallback(async (data) => {
+  await onSubmit(data)
+}, [onSubmit])
+```
+
+**Context vs Props:**
+
+- Use props for 1-2 levels deep, component-specific values
+- Use context for app-wide state, deeply nested consumers
+
+##### Form State Management (Document Views)
+
+**Architecture:**
+
+- Mainly used in "collection-edit", "global-edit" views/drawers
+- Centralized form state via reducer pattern
+- Performance-optimized with `use-context-selector` package
+- All field state lives in form context, NOT local component state
+
+**Core hooks:**
+
+```ts
+// In field components
+const { setValue, value, showError } = useField<T>({
+  path: 'fieldName',
+  validate: memoizedValidate,
+})
+
+// Access form-level operations
+const { submit, reset, getData } = useForm()
+
+// Select specific fields for performance
+const email = useFormFields(([fields]) => fields.email?.value)
+```
+
+**Key principles:**
+
+- Pass values to `setValue(value)`, never events: `setValue(value)` not `setValue(event)`
+- Field registration happens automatically via `useField`
+- Validation runs on field blur and form submit
+- Use `useFormFields` with selector to avoid unnecessary re-renders
+
+**Field component pattern:**
+
+```ts
+'use client'
+
+export const MyField: React.FC<Props> = (props) => {
+  const { path, validate, required } = props
+
+  const memoizedValidate = useCallback(
+    (value, options) => validate(value, { ...options, required }),
+    [validate, required]
+  )
+
+  const { setValue, value, showError, errorMessage } = useField({
+    path,
+    validate: memoizedValidate
+  })
+
+  const handleChange = (newValue) => {
+    setValue(newValue)  // Dispatches to form reducer
+  }
+
+  return (
+    <div>
+      <input value={value} onChange={(e) => handleChange(e.target.value)} />
+      {showError && <Error message={errorMessage} />}
+    </div>
+  )
+}
+```
+
+##### Anti-Patterns to Avoid
+
+1. **Don't use useEffect for derived state** - Use `useMemo` instead
+2. **Don't mutate state directly** - Return new objects/arrays
+3. **Don't pass events to setValue** - Pass values directly: `setValue(value)` not `setValue(event)`
+4. **Don't use useEffect to watch prop changes** - Use callbacks in event handlers
+5. **Don't add 'use client' unnecessarily** - Only when you need hooks, state, or events
+6. **Don't use default exports** - Always use named exports
+7. **Don't use interfaces for component props** - Use types (except when extending external types)
 
 #### CSS Variables
 
@@ -418,6 +699,7 @@ Calendar, Check, Chevron, CloseMenu, CodeBlock, Copy, Document, Dots, DragHandle
     fill: var(--theme-elevation-400);
   }
 }
+```
 
 #### Best Practices
 
@@ -428,4 +710,485 @@ Calendar, Check, Chevron, CloseMenu, CodeBlock, Copy, Document, Dots, DragHandle
 5. **Standard transitions** - Use the cubic-bezier timing pattern
 6. **Layer system** - Wrap styles in `@layer payload-default`
 7. **Dark mode awareness** - Variables automatically adapt; test both themes
+
+## Config-Defined Components & Server/Client Architecture
+
+Understanding how Payload's server/client boundary works is critical for implementing UI features and working with config-defined components (components defined in the Payload config, plugins can add these as well as users).
+
+### Server-to-Client Field Transformation
+
+Server-side field configurations contain functions, hooks, and validation logic that cannot be serialized to the client. The `createClientField()` function strips server-only properties before sending field configs to the client.
+
+**Server-Only Properties (Stripped):**
+
+- `hooks`, `access`, `validate`, `defaultValue` (can be functions)
+- `filterOptions` (relationship/select filters)
+- `editor` (RichText config)
+- `custom`, `dbName`, `enumName`, `graphQL`
+- Admin properties: `condition`, `components` (converted separately)
+
+**What Gets Sent to Client:**
+
+- Field type, name, label (resolved if function)
+- Admin UI config (className, placeholder, description if not a function)
+- Validation constraints (minLength, maxLength, required) - values only, not functions
+- Options for select/radio (with labels resolved)
+- Nested field structures (recursively processed)
+
+**Key Files:**
+
+- [packages/payload/src/fields/config/client.ts](packages/payload/src/fields/config/client.ts) - `createClientField()`, `createClientFields()`, `createClientBlocks()`
+
+### Import Map System
+
+Payload uses an import map to handle component references across the server/client boundary.
+
+**User Configuration:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      admin: {
+        components: {
+          Label: './MyCustomLabel.tsx#MyCustomLabel',
+        },
+      },
+    },
+  ]
+}
 ```
+
+**Build & Resolution:**
+
+- Build process scans config for component references
+- Generates import map in `.next/server`
+- `getFromImportMap()` resolves string references to React components at runtime
+
+**RenderServerComponent vs RenderCustomComponent:**
+
+- **RenderServerComponent** - Server-side rendering, auto-detects RSC vs client components, passes server props (req, data, permissions) only to RSCs
+- **RenderCustomComponent** - Client-side rendering, simpler, `undefined` renders Fallback, `null` renders nothing
+
+**Key Files:**
+
+- [packages/ui/src/elements/RenderServerComponent/index.tsx](packages/ui/src/elements/RenderServerComponent/index.tsx)
+- [packages/payload/src/bin/generateImportMap/](packages/payload/src/bin/generateImportMap/)
+
+### Form State Generation
+
+When opening a document, `fieldSchemasToFormState()` transforms the database document into form state.
+
+**Process:**
+
+1. Collects field schemas, document data, permissions, preferences
+2. `iterateFields()` walks each field: calculates initial value, runs validation (server-side), checks read access, optionally renders RSC components, recursively processes nested fields
+3. Outputs `FormState` with structure: `{ fieldName: { value, initialValue, valid, errorMessage, passesReadAccess, customComponents } }`
+
+**Dual Schema Maps:**
+
+- **FieldSchemaMap** (server) - Full configs with functions, used during form state generation
+- **ClientFieldSchemaMap** (client) - Stripped configs with rendered RSC components
+- Both support path-based lookups: `schemaMap.get('arrayField.0.nestedField')`
+
+**Key Concepts:**
+
+- Server-side validation runs first, results included in form state
+- Custom RSC components pre-rendered on server, included in form state
+- Nested data maintains parent context through `fullData` vs `data` separation
+- Read access checked per-field, stored in `passesReadAccess`
+
+**Key Files:**
+
+- [packages/ui/src/forms/fieldSchemasToFormState/index.tsx](packages/ui/src/forms/fieldSchemasToFormState/index.tsx)
+- [packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts](packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts)
+- [packages/ui/src/utilities/buildClientFieldSchemaMap/index.ts](packages/ui/src/utilities/buildClientFieldSchemaMap/index.ts)
+
+### Client-Side Form Management
+
+Form state on the client is managed through a reducer pattern with performance optimizations.
+
+**Form Context:**
+
+- **FormProvider** - Wraps document edit views, holds form state in reducer
+- **use-context-selector** - Prevents unnecessary re-renders, components subscribe only to needed fields
+- **useField()** - Primary interface for field components
+
+**useField() Hook:**
+
+```ts
+const {
+  setValue, // Dispatch value updates (pass values, never events)
+  value, // Current field value
+  showError, // Should error be shown (true after touch/submit)
+  errorMessage, // Validation error
+  customComponents, // Pre-rendered RSC components (Label, Description, Error, etc.)
+  disabled, // Computed disabled state
+  path, // Resolved field path
+} = useField({
+  path: 'fieldName',
+  validate: memoizedValidate,
+})
+```
+
+**Reading Other Fields:**
+
+```ts
+// Use selector to avoid re-renders
+const email = useFormFields(([fields]) => fields.email?.value)
+const { title, status } = useFormFields(([fields]) => ({
+  title: fields.title?.value,
+  status: fields.status?.value,
+}))
+```
+
+**Form-Level Operations:**
+
+```ts
+const { submit, reset, getData, setModified, fields } = useForm()
+```
+
+**Critical:** Never use local `useState()` for field values. Form context is the single source of truth. Always use `useField()`.
+
+**Key Files:**
+
+- [packages/ui/src/forms/useField/index.tsx](packages/ui/src/forms/useField/index.tsx)
+- [packages/ui/src/forms/Form/index.tsx](packages/ui/src/forms/Form/index.tsx)
+
+### Field Component Implementation
+
+Field components follow a consistent two-layer pattern.
+
+**Server Config:**
+
+```ts
+// packages/payload/src/admin/fields/Text.ts
+export const textFieldConfig = {
+  Component: '@payloadcms/ui/fields/Text#TextField',
+}
+```
+
+**Client Component:**
+
+```ts
+// packages/ui/src/fields/Text/index.tsx
+'use client'
+
+const TextFieldComponent: TextFieldClientComponent = (props) => {
+  const { field, path: pathFromProps, readOnly, validate } = props
+
+  // 1. Memoize validation with field-specific rules
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, maxLength, minLength, required })
+      }
+    },
+    [validate, minLength, maxLength, required]
+  )
+
+  // 2. Connect to form state
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
+    setValue,
+    showError,
+    value,
+  } = useField({
+    potentiallyStalePath: pathFromProps,
+    validate: memoizedValidate
+  })
+
+  // 3. Render presentation component
+  return (
+    <TextInput
+      Label={Label}
+      value={value || ''}
+      onChange={(e) => setValue(e.target.value)}
+      readOnly={readOnly || disabled}
+      showError={showError}
+    />
+  )
+}
+
+// 4. Wrap with withCondition for conditional logic support
+export const TextField = withCondition(TextFieldComponent)
+```
+
+**Two-Component Pattern:**
+Many fields split into:
+
+- **index.tsx** - Smart component with `useField()`, validation memoization, form logic (`'use client'`)
+- **Input.tsx** - Presentation component, UI only, no form state dependency
+
+**Component Injection Points:**
+Fields support custom components at multiple points:
+
+- `Label`, `Description`, `Error` - Replace defaults
+- `BeforeInput`, `AfterInput` - Content around input
+
+**How Injection Works:**
+
+1. User defines in config: `admin: { components: { Label: './CustomLabel.tsx#CustomLabel' } }`
+2. Server renders as RSCs during form state generation with server props
+3. Client receives pre-rendered via `useField()` as `customComponents`
+4. Field renders with `RenderCustomComponent`
+
+**Critical Patterns:**
+
+**DO:**
+
+- Always use `'use client'` directive
+- Always wrap with `withCondition()`
+- Always memoize validation with `useCallback()` including all field config dependencies
+- Pass values to `setValue()`: `setValue(e.target.value)`
+- Use `useField()` for all field state management
+
+**DON'T:**
+
+- Pass events to `setValue()`: ~~`setValue(event)`~~
+- Use local `useState()` for field values
+- Forget field config in validation memoization deps
+- Use `useEffect` to watch value changes
+- Access form state directly without `useField()` or `useFormFields()`
+
+**Key Files:**
+
+- [packages/ui/src/fields/](packages/ui/src/fields/) - All field component implementations
+- [packages/payload/src/admin/fields/](packages/payload/src/admin/fields/) - Server-side field configs
+- [packages/ui/src/forms/withCondition/index.tsx](packages/ui/src/forms/withCondition/index.tsx) - Conditional logic wrapper
+
+### Architecture Summary
+
+**Key Insight:** Payload pre-processes everything on the server (validation, permissions, component rendering) and ships results to the client, keeping the client lightweight and performant.
+
+This architecture is crucial for:
+
+- Implementing new field types
+- Adding custom component support
+- Debugging form state issues
+- Understanding server vs client data availability
+- Building performant UI components
+
+## List View Architecture
+
+The List View is the main collection browsing interface, displaying documents in a table with sorting, filtering, searching, column management, and bulk operations. Built on a provider-based architecture with clear separation of concerns.
+
+### Core Components
+
+**DefaultListView** ([packages/ui/src/views/List/index.tsx](packages/ui/src/views/List/index.tsx))
+
+- Main client component orchestrating the entire list view
+- Manages layout: header → list controls → table → pagination
+- Wraps with three core providers: `TableColumnsProvider`, `SelectionProvider`, `RelationshipProvider`
+- Handles bulk upload, trash view, collection-specific configurations
+
+**Table** ([packages/ui/src/elements/Table/index.tsx](packages/ui/src/elements/Table/index.tsx))
+
+- Presentational component rendering HTML table
+- Receives pre-built `columns` with rendered cells
+- Filters to show only `active` columns
+- Maps through data; cells come pre-rendered from `column.renderedCells`
+
+**ListControls** ([packages/ui/src/elements/ListControls/index.tsx](packages/ui/src/elements/ListControls/index.tsx))
+
+- Toolbar above table with search, filters, column selector, sort, group-by
+- Integrates: SearchBar, WhereBuilder, ColumnSelector, GroupByBuilder
+- Dispatches changes through `ListQueryProvider` handlers
+
+### Provider System
+
+**ListQueryProvider** ([packages/ui/src/providers/ListQuery/index.tsx](packages/ui/src/providers/ListQuery/index.tsx))
+
+- Manages query state (page, limit, sort, where, search, groupBy, columns)
+- Key handlers: `handlePageChange`, `handlePerPageChange`, `handleSearchChange`, `handleSortChange`, `handleWhereChange`
+- Core method: `refineListData(incomingQuery)` merges incoming query with current state
+- Updates URL search params or calls `onQueryChange` callback
+- Use via `useListQuery()` hook
+
+**SelectionProvider** ([packages/ui/src/providers/Selection/index.tsx](packages/ui/src/providers/Selection/index.tsx))
+
+- Manages row selection state for bulk operations
+- Selection states: `None | AllInPage | AllAvailable | Some`
+- Key methods:
+  - `setSelection(id)` - toggles individual row
+  - `toggleAll(allAvailable?)` - selects all on page or across all pages
+  - `getQueryParams()` - generates query for bulk actions
+  - `getSelectedIds()` - returns array of selected IDs
+- Smart selection checks for locked documents
+- Resets on query change
+
+**TableColumnsProvider** ([packages/ui/src/providers/TableColumns/index.tsx](packages/ui/src/providers/TableColumns/index.tsx))
+
+- Manages visible columns and their order
+- Key methods:
+  - `toggleColumn(accessor)` - toggles column visibility
+  - `moveColumn({ fromIndex, toIndex })` - reorders columns
+  - `setActiveColumns(columnNames)` - batch activate columns
+  - `resetColumnsState()` - reverts to defaultColumns
+- Changes persist via `refineListData` → URL search params
+- Uses `React.useOptimistic` for instant UI feedback
+
+### Data Flow
+
+**Server → Client:**
+
+```
+1. Server computes: docs + columns (via buildColumnState) + permissions
+2. Passes to DefaultListView as props
+3. URL/query state passed as searchParams
+```
+
+**Client Rendering:**
+
+```
+1. parseSearchParams → ListQuery object
+2. ListQueryProvider initializes with query state
+3. TableColumnsProvider builds column metadata
+4. SelectionProvider initializes empty selection
+5. DefaultListView renders ListControls + Table
+6. Any handler (search, sort, filter) → refineListData
+   → mergeQuery → URL update → data re-fetch
+```
+
+**Example: User sorts by "Name"**
+
+```
+1. User clicks "Name" column heading (SortColumn)
+2. Calls handleSortChange("name")
+3. refineListData({ sort: "name" })
+4. URL updates: ?sort=name
+5. Server re-fetches docs sorted by "name"
+6. New Table rendered with updated data
+```
+
+### Table Implementation
+
+**Column Object Structure:**
+
+```ts
+type Column = {
+  accessor: string // field path ("name", "status")
+  active: boolean // whether column is visible
+  field: ClientField // field definition with type, label
+  CustomLabel?: React.Node // custom heading component
+  Heading: React.Node // heading with SortColumn wrapper
+  renderedCells: React.Node[] // pre-rendered cell JSX for each row
+}
+```
+
+**buildColumnState** ([packages/ui/src/providers/TableColumns/buildColumnState/index.tsx](packages/ui/src/providers/TableColumns/buildColumnState/index.tsx))
+
+- Server-side function constructing Column[] from collection config
+- Process:
+  1. Filters fields using permissions
+  2. Places `id` field first, then `useAsTitle` field
+  3. Sorts fields to match user's column preference
+  4. Determines if column is active via `isColumnActive()`
+  5. Renders all cells via `renderCell()` for active columns only
+- Returns Column[] with rendered cells pre-computed
+
+**renderCell** ([packages/ui/src/providers/TableColumns/buildColumnState/renderCell.tsx](packages/ui/src/providers/TableColumns/buildColumnState/renderCell.tsx))
+
+- Pre-renders all cells at build time
+- Cell priority:
+  1. Custom field Cell component (`serverField.admin.components.Cell`)
+  2. Field-specific cell (Array, Blocks, Date, Relationship, etc.)
+  3. DefaultCell for basic rendering
+- Linked column: First active column opens document on click
+  - Override with `LinkedCellOverride` prop
+  - Custom URLs via `formatDocURL()` hook
+
+### Column System
+
+**Configuration:**
+
+Collection-level:
+
+- `defaultColumns`: default visible columns (e.g., `['id', 'name', 'status']`)
+- `listSearchableFields`: fields searched in search bar
+- `enableQueryPresets`: save/load filter presets
+- `groupBy`: field to group results by
+
+Per-field:
+
+- `admin.components.Label`: custom heading component
+- `admin.components.Cell`: custom cell renderer
+- `admin.className`: CSS class on cell wrapper
+- `admin.disableListColumn`: hide field from column selector
+
+### Custom Cell Renderers
+
+**DefaultCell** ([packages/ui/src/elements/Table/DefaultCell/index.tsx](packages/ui/src/elements/Table/DefaultCell/index.tsx))
+
+- Renders cell based on field type
+- ID fields wrapped in CodeCell
+- Converts value to display format via `getDisplayedFieldValue()`
+- Wraps in Link (if linked column) or button (if onClick)
+- Special handling for select/radio fields (adds `selected--{value}` class)
+
+**Field-specific cells** ([packages/ui/src/elements/Table/DefaultCell/fields/](packages/ui/src/elements/Table/DefaultCell/fields/))
+
+- Array, Blocks, Checkbox, Code, Date, File, JSON, Relationship, Select, Textarea
+- Each renders preview/summary of field data
+
+**RenderDefaultCell** ([packages/ui/src/providers/TableColumns/RenderDefaultCell/index.tsx](packages/ui/src/providers/TableColumns/RenderDefaultCell/index.tsx))
+
+- Wrapper applying linked column behavior
+- Provides cell props context via `useCellProps()` hook
+- Enables custom cells to access column index, linked status
+
+**Creating custom cell renderer:**
+
+```ts
+// In collection config
+{
+  name: 'status',
+  type: 'select',
+  admin: {
+    components: {
+      Cell: './CustomStatusCell.tsx#CustomStatusCell'
+    }
+  }
+}
+
+// In CustomStatusCell.tsx
+export const CustomStatusCell: React.FC<DefaultCellComponentProps> = (props) => {
+  const { cellData, rowData, field, collectionSlug } = props
+  // Render custom cell JSX
+  return <div className="custom-status">{cellData}</div>
+}
+```
+
+### Bulk Operations
+
+**ListSelection** ([packages/ui/src/views/List/ListSelection/index.tsx](packages/ui/src/views/List/ListSelection/index.tsx))
+
+- Shows selection count and bulk action buttons
+- Actions: EditMany, PublishMany, UnpublishMany, DeleteMany, RestoreMany
+- "Select All" behavior:
+  - Page-level: `toggleAll()` selects current page (`SelectAllStatus.AllInPage`)
+  - Across pages: `toggleAll(true)` sets `SelectAllStatus.AllAvailable`
+  - Bulk actions use `getQueryParams()` to target selection
+
+### Key Patterns
+
+1. **Query as source of truth** - Column visibility, sort, filters, pagination all in URL query params
+2. **Pre-rendered cells** - Performance optimization; cells rendered once on server
+3. **Provider nesting** - ListQuery → SelectionProvider → TableColumnsProvider (order matters)
+4. **Optimistic updates** - Column changes use `React.useOptimistic` for instant feedback
+5. **Smart reset** - Page resets to 1 when search/filter changes; selection clears on query change
+6. **Linked column** - First visible column becomes clickable link to document
+7. **Lazy cell rendering** - Only rendered if column is active
+
+**Key Files:**
+
+- [packages/ui/src/views/List/](packages/ui/src/views/List/) - Main list view component
+- [packages/ui/src/elements/Table/](packages/ui/src/elements/Table/) - Table and cell components
+- [packages/ui/src/elements/ListControls/](packages/ui/src/elements/ListControls/) - List controls toolbar
+- [packages/ui/src/providers/ListQuery/](packages/ui/src/providers/ListQuery/) - Query state management
+- [packages/ui/src/providers/Selection/](packages/ui/src/providers/Selection/) - Selection management
+- [packages/ui/src/providers/TableColumns/](packages/ui/src/providers/TableColumns/) - Column management
