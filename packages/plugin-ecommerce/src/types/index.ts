@@ -982,6 +982,35 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Useful for disabling buttons and preventing race conditions.
    */
   isLoading: boolean
+  /**
+   * Merges items from a source cart into a target cart.
+   * Useful for merging a guest cart into a user's existing cart after login.
+   *
+   * @param targetCartID - The ID of the cart to merge items into
+   * @param sourceCartID - The ID of the cart to merge items from
+   * @param sourceSecret - The secret for the source cart (required for guest carts)
+   * @returns The merged cart
+   */
+  mergeCart: (
+    targetCartID: DefaultDocumentIDType,
+    sourceCartID: DefaultDocumentIDType,
+    sourceSecret?: string,
+  ) => Promise<T['carts'] | void>
+  /**
+   * Called after a successful login to handle cart state.
+   * If a guest cart exists, it will be merged with the user's existing cart
+   * or assigned to the user if they have no cart.
+   * Cart secrets are cleared as authenticated users don't need them.
+   *
+   * @returns Promise that resolves when cart state is properly set up for the user.
+   */
+  onLogin: () => Promise<void>
+  /**
+   * Called during logout to clear all ecommerce session data.
+   * Clears cart, addresses, user state, and localStorage cart data.
+   * This is an alias for clearSession() but named for semantic clarity.
+   */
+  onLogout: () => void
   paymentMethods: PaymentAdapterClient[]
   /**
    * Refresh the cart.

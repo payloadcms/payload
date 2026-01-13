@@ -49,6 +49,9 @@ const defaultContext: EcommerceContextType = {
   incrementItem: async () => {},
   initiatePayment: async () => {},
   isLoading: false,
+  mergeCart: async () => {},
+  onLogin: async () => {},
+  onLogout: () => {},
   paymentMethods: [],
   refreshCart: async () => {},
   removeItem: async () => {},
@@ -293,8 +296,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
             return
           }
 
-          // Use the cart returned from the endpoint directly
-          setCart(result.cart as CartsCollection)
+          // Refresh cart with proper depth/populate settings for UI
+          const refreshedCart = await getCart(cartID, { secret: cartSecret })
+          setCart(refreshedCart)
         } else {
           // If no cartID exists, create a new cart with the item
           const newCart = await createCart({ items: [{ ...item, quantity }] })
@@ -311,7 +315,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, createCart, debug],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, createCart, debug, getCart],
   )
 
   const removeItem: EcommerceContextType['removeItem'] = useCallback(
@@ -349,8 +353,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           return
         }
 
-        // Use the cart returned from the endpoint directly
-        setCart(result.cart as CartsCollection)
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(cartID, { secret: cartSecret })
+        setCart(refreshedCart)
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
@@ -360,7 +365,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const incrementItem: EcommerceContextType['incrementItem'] = useCallback(
@@ -399,8 +404,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           return
         }
 
-        // Use the cart returned from the endpoint directly
-        setCart(result.cart as CartsCollection)
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(cartID, { secret: cartSecret })
+        setCart(refreshedCart)
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
@@ -410,7 +416,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const decrementItem: EcommerceContextType['decrementItem'] = useCallback(
@@ -449,8 +455,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           return
         }
 
-        // Use the cart returned from the endpoint directly
-        setCart(result.cart as CartsCollection)
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(cartID, { secret: cartSecret })
+        setCart(refreshedCart)
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
@@ -460,7 +467,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug],
+    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
@@ -496,8 +503,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         return
       }
 
-      // Use the cart returned from the endpoint directly
-      setCart(result.cart as CartsCollection)
+      // Refresh cart with proper depth/populate settings for UI
+      const refreshedCart = await getCart(cartID, { secret: cartSecret })
+      setCart(refreshedCart)
     } catch (error) {
       if (debug) {
         // eslint-disable-next-line no-console
@@ -506,7 +514,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }, [baseAPIURL, cartID, cartSecret, cartsSlug, debug])
+  }, [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart])
 
   const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {
@@ -821,6 +829,170 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     }
   }, [localStorageConfig.key, syncLocalStorage])
 
+  /**
+   * Called during logout. Clears all session data.
+   */
+  const onLogout = useCallback(() => {
+    clearSession()
+  }, [clearSession])
+
+  /**
+   * Merges items from a source cart into a target cart.
+   * Useful for merging a guest cart into a user's existing cart after login.
+   *
+   * @param targetCartID - The ID of the cart to merge items into
+   * @param sourceCartID - The ID of the cart to merge items from
+   * @param sourceSecret - The secret for the source cart (required for guest carts)
+   * @returns The merged cart
+   */
+  const mergeCart = useCallback<EcommerceContextType['mergeCart']>(
+    async (targetCartID, sourceCartID, sourceSecret) => {
+      setIsLoading(true)
+      try {
+        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${targetCartID}/merge`, {
+          body: JSON.stringify({
+            sourceCartID,
+            sourceSecret,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to merge carts: ${errorText}`)
+        }
+
+        const result = await response.json()
+
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to merge carts')
+        }
+
+        // Refresh cart with proper depth/populate settings for UI
+        const refreshedCart = await getCart(targetCartID)
+        setCart(refreshedCart)
+        setCartID(targetCartID)
+
+        return refreshedCart
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error merging carts:', error)
+        }
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [baseAPIURL, cartsSlug, debug, getCart],
+  )
+
+  /**
+   * Called after login to properly set up cart state.
+   * Handles merging guest cart with user's existing cart if applicable.
+   */
+  const onLogin = useCallback(async () => {
+    // Store reference to any existing guest cart before fetching user
+    const guestCartID = cartID
+    const guestSecret = cartSecret
+
+    // Fetch fresh user data
+    const fetchedUser = await getUser()
+
+    if (!fetchedUser) {
+      // No user means login failed, keep current state
+      return
+    }
+
+    // Clear the guest cart secret - authenticated users don't need it
+    setCartSecret(undefined)
+    if (syncLocalStorage) {
+      localStorage.removeItem(`${localStorageConfig.key}_secret`)
+    }
+
+    // Check if user has an existing cart
+    const userCartID =
+      fetchedUser.cart?.docs && fetchedUser.cart.docs.length > 0
+        ? typeof fetchedUser.cart.docs[0] === 'object'
+          ? fetchedUser.cart.docs[0].id
+          : fetchedUser.cart.docs[0]
+        : undefined
+
+    if (guestCartID && guestSecret) {
+      // Guest had a cart - need to handle merge/transfer
+      if (userCartID) {
+        // User has existing cart - merge guest cart into user's cart
+        try {
+          await mergeCart(userCartID, guestCartID, guestSecret)
+        } catch (error) {
+          if (debug) {
+            // eslint-disable-next-line no-console
+            console.error('Error merging carts:', error)
+          }
+          // Fall back to user's cart
+          const userCart = await getCart(userCartID)
+          setCart(userCart)
+          setCartID(userCartID)
+        }
+      } else {
+        // User has no existing cart - transfer guest cart to user
+        try {
+          const response = await fetch(
+            `${baseAPIURL}/${cartsSlug}/${guestCartID}?secret=${guestSecret}`,
+            {
+              body: JSON.stringify({
+                customer: fetchedUser.id,
+                secret: null, // Clear the secret since it's now owned by user
+              }),
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              method: 'PATCH',
+            },
+          )
+
+          if (response.ok) {
+            // Fetch updated cart
+            const updatedCart = await getCart(guestCartID)
+            setCart(updatedCart)
+            setCartID(guestCartID)
+          }
+        } catch (error) {
+          if (debug) {
+            // eslint-disable-next-line no-console
+            console.error('Error transferring cart to user:', error)
+          }
+        }
+      }
+    } else if (userCartID) {
+      // No guest cart, but user has a cart - fetch it
+      const userCart = await getCart(userCartID)
+      setCart(userCart)
+      setCartID(userCartID)
+    }
+
+    // Update localStorage with user's cart ID (no secret needed)
+    if (syncLocalStorage && cartID) {
+      localStorage.setItem(localStorageConfig.key, cartID as string)
+    }
+  }, [
+    baseAPIURL,
+    cartID,
+    cartSecret,
+    cartsSlug,
+    debug,
+    getCart,
+    getUser,
+    localStorageConfig.key,
+    mergeCart,
+    syncLocalStorage,
+  ])
+
   // If localStorage is enabled, restore cart from storage
   useEffect(() => {
     if (!hasRendered.current) {
@@ -907,6 +1079,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         incrementItem,
         initiatePayment,
         isLoading,
+        mergeCart,
+        onLogin,
+        onLogout,
         paymentMethods,
         refreshCart,
         removeItem,

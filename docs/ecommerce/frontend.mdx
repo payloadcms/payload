@@ -319,24 +319,181 @@ const EcommerceComponent = () => {
 }
 ```
 
-### Session Management
+## Hooks
 
-The provider exposes a `clearSession` method that should be called when a user logs out. This clears all ecommerce session data including cart, addresses, user state, and localStorage cart data.
+The ecommerce provider exposes several hooks for handling authentication events, session management, and cart operations. These hooks are accessible via `useEcommerce()`.
+
+### onLogin
+
+Called after a successful login to properly set up cart state. This hook handles:
+
+- Fetching the authenticated user's data
+- Merging any guest cart items into the user's existing cart
+- Transferring a guest cart to the user if they don't have one
+- Clearing guest cart secrets (authenticated users don't need them)
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const LoginForm = () => {
+  const { onLogin } = useEcommerce()
+
+  const handleLogin = async (credentials) => {
+    // Perform your login logic
+    const response = await fetch('/api/users/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    })
+
+    if (response.ok) {
+      // Set up ecommerce state after successful login
+      await onLogin()
+    }
+  }
+
+  return <form onSubmit={handleLogin}>{/* form fields */}</form>
+}
+```
+
+### onLogout
+
+Called during logout to clear all ecommerce session data. Currently this is just an alias for `clearSession()` but named for semantic clarity when used in logout flows and it could change in the future.
 
 ```tsx
 import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
 
 const LogoutButton = () => {
-  const { clearSession } = useEcommerce()
+  const { onLogout } = useEcommerce()
 
   const handleLogout = async () => {
-    // Perform your logout logic (e.g., call auth API)
+    // Perform your logout logic
     await fetch('/api/users/logout', { method: 'POST' })
 
     // Clear ecommerce session data
-    clearSession()
+    onLogout()
   }
 
   return <button onClick={handleLogout}>Logout</button>
 }
 ```
+
+### clearSession
+
+Clears all ecommerce session data from state and localStorage. This includes:
+
+- Cart data and cart ID
+- Cart secret (for guest carts)
+- User addresses
+- User state
+
+Use this when you need to reset the ecommerce state, such as during logout or when switching users.
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const ResetButton = () => {
+  const { clearSession } = useEcommerce()
+
+  return <button onClick={clearSession}>Reset Session</button>
+}
+```
+
+### mergeCart
+
+Merges items from a source cart into a target cart. This is useful when you need to manually merge a guest cart into an authenticated user's cart, or when implementing custom cart merge logic.
+
+| Parameter      | Type     | Description                                               |
+| -------------- | -------- | --------------------------------------------------------- |
+| `targetCartID` | `string` | The ID of the cart to merge items into                    |
+| `sourceCartID` | `string` | The ID of the cart to merge items from                    |
+| `sourceSecret` | `string` | The secret for the source cart (required for guest carts) |
+
+When items are merged:
+
+- Matching items (same product and variant) have their quantities combined
+- Non-matching items are added to the target cart
+- The source cart is deleted after successful merge
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const MergeCartsButton = () => {
+  const { mergeCart, isLoading } = useEcommerce()
+
+  const handleMerge = async () => {
+    try {
+      const mergedCart = await mergeCart(
+        'user-cart-id',
+        'guest-cart-id',
+        'guest-cart-secret',
+      )
+      console.log('Merged cart:', mergedCart)
+    } catch (error) {
+      console.error('Failed to merge carts:', error)
+    }
+  }
+
+  return (
+    <button onClick={handleMerge} disabled={isLoading}>
+      Merge Carts
+    </button>
+  )
+}
+```
+
+### refreshCart
+
+Fetches the latest cart data from the server and updates the local state. Use this when you need to ensure the cart is in sync with the server, such as after external cart modifications.
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const RefreshCartButton = () => {
+  const { refreshCart, isLoading } = useEcommerce()
+
+  return (
+    <button onClick={refreshCart} disabled={isLoading}>
+      Refresh Cart
+    </button>
+  )
+}
+```
+
+## Session Management
+
+The provider includes built-in session management for handling user authentication flows. This ensures cart data, addresses, and user state are properly managed when users log in or out.
+
+### Handling Login
+
+When a user logs in, call `onLogin()` to set up the ecommerce state. This automatically:
+
+1. Fetches the authenticated user's data
+2. Merges any guest cart items into the user's existing cart (if both exist)
+3. Transfers the guest cart to the user (if they don't have an existing cart)
+4. Clears guest cart secrets (authenticated users don't need them)
+
+```tsx
+const handleLogin = async (credentials) => {
+  const response = await fetch('/api/users/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  })
+
+  if (response.ok) {
+    await onLogin() // Set up ecommerce state
+  }
+}
+```
+
+### Handling Logout
+
+When a user logs out, call `onLogout()` or `clearSession()` to clear all ecommerce data:
+
+```tsx
+const handleLogout = async () => {
+  await fetch('/api/users/logout', { method: 'POST' })
+  onLogout() // or clearSession()
+}
+```
+
+Both methods clear cart data, cart ID, cart secret, addresses, and user state from memory and localStorage.
