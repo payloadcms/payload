@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-r2",
-  "version": "3.71.0",
+  "version": "3.71.1",
   "description": "Payload storage adapter for Cloudflare R2",
   "homepage": "https://payloadcms.com",
   "repository": {
