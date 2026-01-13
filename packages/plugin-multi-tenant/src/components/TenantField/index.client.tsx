@@ -32,8 +32,9 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { setValue, showError, value } = useField<(number | string)[] | (number | string)>()
   const modified = useFormModified()
   const { isValid: isFormValid, setModified } = useForm()
-  const { id: docID } = useDocumentInfo()
-  const { openModal } = useModal()
+  const { id: docID, collectionSlug } = useDocumentInfo()
+  const { isModalOpen, openModal } = useModal()
+  const isEditManyModalOpen = collectionSlug ? isModalOpen(`edit-${collectionSlug}`) : false
   const isConfirmingRef = React.useRef<boolean>(false)
   const prevModified = React.useRef(modified)
   const prevValue = React.useRef<typeof value>(value)
@@ -124,22 +125,18 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (!unique) {
       /** Editing a non-global tenant document */
       return (
-        <AssignTenantFieldModal
-          afterModalClose={afterModalClose}
-          afterModalOpen={afterModalOpen}
-          onConfirm={onConfirm}
-        >
-          <TenantFieldInModal
-            debug={debug}
-            fieldArgs={{
-              ...fieldArgs,
-              field: {
-                ...fieldArgs.field,
-              },
-            }}
-            unique={unique}
-          />
-        </AssignTenantFieldModal>
+        <>
+          {isEditManyModalOpen ? (
+            <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
+          ) : null}
+          <AssignTenantFieldModal
+            afterModalClose={afterModalClose}
+            afterModalOpen={afterModalOpen}
+            onConfirm={onConfirm}
+          >
+            <TenantFieldInModal debug={debug} fieldArgs={fieldArgs} unique={unique} />
+          </AssignTenantFieldModal>
+        </>
       )
     }
 
@@ -147,6 +144,22 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   }
 
   return null
+}
+
+const TenantRelationshipField: React.FC<{
+  fieldArgs: RelationshipFieldClientProps
+  unique?: boolean
+}> = ({ fieldArgs, unique }) => {
+  return (
+    <RelationshipField
+      {...fieldArgs}
+      field={{
+        ...fieldArgs.field,
+        required: true,
+      }}
+      readOnly={fieldArgs.readOnly || fieldArgs.field.admin?.readOnly || unique}
+    />
+  )
 }
 
 const TenantFieldInModal: React.FC<{
@@ -162,14 +175,7 @@ const TenantFieldInModal: React.FC<{
             Multi-Tenant Debug Enabled
           </Pill>
         )}
-        <RelationshipField
-          {...fieldArgs}
-          field={{
-            ...fieldArgs.field,
-            required: true,
-          }}
-          readOnly={fieldArgs.readOnly || fieldArgs.field.admin?.readOnly || unique}
-        />
+        <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
       </div>
     </div>
   )
