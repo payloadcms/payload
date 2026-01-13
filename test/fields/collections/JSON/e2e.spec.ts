@@ -71,6 +71,49 @@ describe('JSON', () => {
     await expect(jsonCell).toHaveText(JSON.stringify(jsonDoc.json))
   })
 
+  test('should truncate long JSON values in list view', async () => {
+    // Create a document with long JSON (>100 chars)
+    const longJsonData = {
+      veryLongProperty:
+        'This is a very long string value that will definitely exceed the 100 character universal truth when stringified.',
+      anotherProperty: 'Additional data to ensure we exceed the limit',
+      nested: { deep: { value: 'More nested data' } },
+    }
+
+    const longDoc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: longJsonData },
+    })
+
+    // Create a document with short JSON (<100 chars)
+    const shortJsonData = { short: 'value' }
+
+    const shortDoc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: shortJsonData },
+    })
+
+    await page.goto(url.list)
+
+    // Verify long JSON is truncated with ellipsis
+    const longJsonCell = page.locator(`tr[data-id="${longDoc.id}"] .cell-json`)
+
+    await expect(async () => {
+      const longCellText = await longJsonCell.textContent()
+      expect(longCellText).toContain('…')
+      expect(longCellText?.length).toBeLessThanOrEqual(101) // 100 chars + ellipsis
+    }).toPass()
+
+    // Verify short JSON is displayed fully without truncation
+    const shortJsonCell = page.locator(`tr[data-id="${shortDoc.id}"] .cell-json`)
+
+    await expect(shortJsonCell).toHaveText(JSON.stringify(shortJsonData))
+    await expect(async () => {
+      const shortCellText = await shortJsonCell.textContent()
+      expect(shortCellText).not.toContain('…')
+    }).toPass()
+  })
+
   test('should create', async () => {
     const input = '{"foo": "bar"}'
     await page.goto(url.create)
