@@ -313,6 +313,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
         contextRef.current.fields,
+        {
+          excludeFiles: true,
+        },
       )
 
       // Execute server side validations
@@ -620,6 +623,8 @@ export const Form: React.FC<FormProps> = (props) => {
         nullsAsUndefineds: false,
       })
 
+      console.log(formData, dataToSerialize)
+
       return formData
     },
     [collectionSlug, docConfig, getUploadHandler],
@@ -833,7 +838,9 @@ export const Form: React.FC<FormProps> = (props) => {
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState),
+            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
+              excludeFiles: true,
+            }),
             submitted,
           })
         }
