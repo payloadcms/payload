@@ -242,6 +242,9 @@ export type FindArgs = {
   projection?: Record<string, unknown>
   req?: Partial<PayloadRequest>
   select?: SelectType
+  /**
+   * @deprecated This parameter is going to be removed in the next major version. Use page instead.
+   */
   skip?: number
   sort?: Sort
   versions?: boolean
@@ -277,6 +280,9 @@ type BaseVersionArgs = {
   pagination?: boolean
   req?: Partial<PayloadRequest>
   select?: SelectType
+  /**
+   * @deprecated This parameter is going to be removed in the next major version. Use page instead.
+   */
   skip?: number
   sort?: Sort
   versions?: boolean
