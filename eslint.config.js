@@ -61,6 +61,12 @@ export const rootEslintConfig = [
     },
   },
   {
+    files: ['packages/ui/**/*.ts'],
+    rules: {
+      'no-console': 'error',
+    },
+  },
+  {
     files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
