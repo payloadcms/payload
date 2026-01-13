@@ -623,8 +623,6 @@ export const Form: React.FC<FormProps> = (props) => {
         nullsAsUndefineds: false,
       })
 
-      console.log(formData, dataToSerialize)
-
       return formData
     },
     [collectionSlug, docConfig, getUploadHandler],
