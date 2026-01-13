@@ -23,7 +23,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
-import { addSessionToUser } from '../sessions.js'
+import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -247,6 +247,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
   // Authentication successful - start transaction for remaining operations
   const shouldCommit = await initTransaction(args.req)
+  let sid: string | undefined
 
   try {
     /*
@@ -279,12 +280,13 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       user,
     }
 
-    const { sid } = await addSessionToUser({
+    const session = await addSessionToUser({
       collectionConfig,
       payload,
       req,
       user,
     })
+    sid = session.sid
 
     if (sid) {
       fieldsToSignArgs.sid = sid
@@ -404,6 +406,15 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     return result
   } catch (error: unknown) {
+    if (sid) {
+      await revokeSession({
+        collectionConfig,
+        payload,
+        req,
+        sid,
+        user,
+      })
+    }
     await killTransaction(args.req)
     throw error
   }
