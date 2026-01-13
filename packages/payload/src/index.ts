@@ -1712,6 +1712,7 @@ export type {
 } from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
+  ConcurrencyConfig,
   JobLog,
   JobTaskStatus,
   RunningJob,

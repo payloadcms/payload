@@ -153,6 +153,46 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     and.push(whereFromProps)
   }
 
+  // Only enforce concurrency controls if the feature is enabled
+  if (jobsConfig.enableConcurrencyControl) {
+    // Find currently running jobs with concurrency keys to enforce exclusive concurrency
+    // Jobs with the same concurrencyKey should not run in parallel
+    const runningJobsWithConcurrency = await payload.db.find({
+      collection: jobsCollectionSlug,
+      limit: 0,
+      pagination: false,
+      req: { transactionID: undefined },
+      select: {
+        concurrencyKey: true,
+      },
+      where: {
+        and: [{ processing: { equals: true } }, { concurrencyKey: { exists: true } }],
+      },
+    })
+
+    const runningConcurrencyKeys = new Set<string>()
+    if (runningJobsWithConcurrency?.docs) {
+      for (const doc of runningJobsWithConcurrency.docs) {
+        const concurrencyKey = (doc as Job).concurrencyKey
+        if (concurrencyKey) {
+          runningConcurrencyKeys.add(concurrencyKey)
+        }
+      }
+    }
+
+    // Exclude jobs whose concurrencyKey is already running
+    if (runningConcurrencyKeys.size > 0) {
+      and.push({
+        or: [
+          // Jobs without a concurrency key can always run
+          { concurrencyKey: { exists: false } },
+          // Jobs with a concurrency key that is not currently running can run
+          { concurrencyKey: { not_in: [...runningConcurrencyKeys] } },
+        ],
+      })
+    }
+  }
+
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
   let jobs: Job[] = []
@@ -214,6 +254,51 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   if (!jobs.length) {
     return {
       noJobsRemaining: true,
+      remainingJobsFromQueried: 0,
+    }
+  }
+
+  // Only handle concurrency deduplication if the feature is enabled
+  if (jobsConfig.enableConcurrencyControl) {
+    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch
+    // We should only run one job per concurrencyKey, release the others back to pending
+    const seenConcurrencyKeys = new Set<string>()
+    const jobsToRun: Job[] = []
+    const jobsToRelease: Job[] = []
+
+    for (const job of jobs) {
+      if (job.concurrencyKey) {
+        if (seenConcurrencyKeys.has(job.concurrencyKey)) {
+          // This job has the same concurrencyKey as another job we're already running
+          jobsToRelease.push(job)
+        } else {
+          seenConcurrencyKeys.add(job.concurrencyKey)
+          jobsToRun.push(job)
+        }
+      } else {
+        jobsToRun.push(job)
+      }
+    }
+
+    // Release duplicate concurrencyKey jobs back to pending state
+    if (jobsToRelease.length > 0) {
+      const releaseIds = jobsToRelease.map((job) => job.id)
+      await updateJobs({
+        data: { processing: false },
+        disableTransaction: true,
+        req,
+        returning: false,
+        where: { id: { in: releaseIds } },
+      })
+    }
+
+    // Use only the filtered jobs going forward
+    jobs = jobsToRun
+  }
+
+  if (!jobs.length) {
+    return {
+      noJobsRemaining: false,
       remainingJobsFromQueried: 0,
     }
   }

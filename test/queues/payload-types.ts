@@ -138,6 +138,9 @@ export interface Config {
       subTaskFails: WorkflowSubTaskFails;
       longRunning: WorkflowLongRunning;
       parallelTask: WorkflowParallelTask;
+      exclusiveConcurrency: WorkflowExclusiveConcurrency;
+      noConcurrency: WorkflowNoConcurrency;
+      queueSpecificConcurrency: WorkflowQueueSpecificConcurrency;
     };
   };
 }
@@ -358,6 +361,9 @@ export interface PayloadJob {
         | 'subTaskFails'
         | 'longRunning'
         | 'parallelTask'
+        | 'exclusiveConcurrency'
+        | 'noConcurrency'
+        | 'queueSpecificConcurrency'
       )
     | null;
   taskSlug?:
@@ -380,6 +386,10 @@ export interface PayloadJob {
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -524,6 +534,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -878,6 +889,36 @@ export interface WorkflowLongRunning {
 export interface WorkflowParallelTask {
   input: {
     amount: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowExclusiveConcurrency".
+ */
+export interface WorkflowExclusiveConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowNoConcurrency".
+ */
+export interface WorkflowNoConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowQueueSpecificConcurrency".
+ */
+export interface WorkflowQueueSpecificConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
   };
 }
 /**
