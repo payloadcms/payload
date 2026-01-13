@@ -1899,7 +1899,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/enlarge\/file\/test-image-180x50\.jpg$/,
+        /\/api\/enlarge\/file\/test-image-180x50\.jpg(\?.*)?$/,
       )
     })
 
@@ -1911,7 +1911,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/focal-only\/file\/test-image-400x300\.jpg$/,
+        /\/api\/focal-only\/file\/test-image-400x300\.jpg(\?.*)?$/,
       )
     })
 
@@ -1921,7 +1921,7 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png$/)
+      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png(\?.*)?$/)
     })
   })
 
