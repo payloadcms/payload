@@ -50,17 +50,21 @@ export const importExportPlugin =
 
     collectionsToUpdate.forEach((collection) => {
       if (!collection.admin) {
-        collection.admin = { components: { listMenuItems: [] } }
+        collection.admin = { components: { views: { list: { actions: [] } } } }
       }
       const components = collection.admin.components || {}
-      if (!components.listMenuItems) {
-        components.listMenuItems = []
+      const views = components.views || {}
+      const list = views.list || {}
+      if (!list?.actions) {
+        list.actions = []
       }
-      components.listMenuItems.push({
+
+      list.actions.push({
         clientProps: {
+          collectionSlug: collection.slug,
           exportCollectionSlug: exportCollection.slug,
         },
-        path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
+        path: '@payloadcms/plugin-import-export/rsc#ExportAction',
       })
 
       // Find fields explicitly marked as disabled for import/export
@@ -76,6 +80,8 @@ export const importExportPlugin =
       }
 
       collection.admin.components = components
+      collection.admin.components.views = views
+      collection.admin.components.views.list = list
     })
 
     if (!config.i18n) {
