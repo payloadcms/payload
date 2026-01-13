@@ -22,7 +22,6 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     req = {},
     select,
-    skip,
     sort: sortArg,
     where = {},
   },
@@ -62,6 +61,8 @@ export const findVersions: FindVersions = async function findVersions(
   })
 
   const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
   const options: QueryOptions = {
     limit,
     session,

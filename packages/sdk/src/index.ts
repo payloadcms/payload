@@ -1,7 +1,12 @@
 import type {
   ApplyDisableErrors,
+  AuthCollectionSlug,
+  CollectionSlug,
   ErrorResult,
+  GlobalSlug,
   PaginatedDocs,
+  PayloadTypes,
+  PayloadTypesShape,
   SelectType,
   TypeWithVersion,
 } from 'payload'
@@ -25,13 +30,9 @@ import type { FindGlobalVersionsOptions } from './globals/findVersions.js'
 import type { RestoreGlobalVersionByIDOptions } from './globals/restoreVersion.js'
 import type { UpdateGlobalOptions } from './globals/update.js'
 import type {
-  AuthCollectionSlug,
   BulkOperationResult,
-  CollectionSlug,
   DataFromCollectionSlug,
   DataFromGlobalSlug,
-  GlobalSlug,
-  PayloadGeneratedTypes,
   SelectFromCollectionSlug,
   SelectFromGlobalSlug,
   TransformCollectionWithSelect,
@@ -131,7 +132,7 @@ type Args = {
 /**
  * @experimental
  */
-export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes> {
+export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
   baseInit: RequestInit
 
   baseURL: string

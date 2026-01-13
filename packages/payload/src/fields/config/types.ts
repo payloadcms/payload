@@ -152,6 +152,7 @@ import type {
   NumberFieldSingleValidation,
   RelationshipFieldManyValidation,
   RelationshipFieldSingleValidation,
+  RichTextFieldValidation,
   SelectFieldManyValidation,
   SelectFieldSingleValidation,
   TextFieldManyValidation,
@@ -1067,6 +1068,9 @@ export type PolymorphicUploadField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
 
@@ -1279,6 +1283,9 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 
@@ -1347,7 +1354,8 @@ export type RichTextField<
    */
   maxDepth?: number
   type: 'richText'
-} & FieldBase &
+  validate?: RichTextFieldValidation
+} & Omit<FieldBase, 'validate'> &
   TExtraProperties
 
 export type RichTextFieldClient<

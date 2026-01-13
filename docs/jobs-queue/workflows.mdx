@@ -426,7 +426,7 @@ The `concurrency` option accepts either a function (shorthand) or an object with
 **Shorthand (function only):**
 
 ```ts
-// Exclusive defaults to true, supersedes defaults to false
+// Exclusive concurrency is enabled by default
 concurrency: ({ input }) => `my-key:${input.resourceId}`
 ```
 
@@ -441,83 +441,42 @@ concurrency: {
   // Only one job with this key can run at a time
   // @default true
   exclusive: true,
-
-  // Delete older pending jobs when a new job is queued
-  // @default false
-  supersedes: false,
 }
 ```
 
-#### Common Patterns
+#### Use Cases
 
-**1. Exclusive only (preserve all jobs):**
+**1. Document processing (prevent race conditions):**
 
 ```ts
-concurrency: {
-  key: ({ input }) => `process:${input.documentId}`,
-  exclusive: true,
-  supersedes: false, // All jobs run, just not in parallel
-}
+concurrency: ({ input }) => `process:${input.documentId}`
 ```
 
-Use when every job represents unique work that must complete (e.g., processing distinct versions of a document).
+Multiple updates to the same document will be processed one at a time, in the order they were queued.
 
-**2. Exclusive + Supersedes (last queued wins):**
+**2. Per-user operations:**
 
 ```ts
-concurrency: {
-  key: ({ input }) => `generate:${input.documentId}`,
-  exclusive: true,
-  supersedes: true, // Only latest job runs
-}
+concurrency: ({ input }) => `user:${input.userId}`
 ```
 
-Use when only the latest state matters (e.g., regenerating embeddings after rapid edits - intermediate states can be skipped).
+Ensures only one job per user runs at a time, preventing conflicts when a user triggers multiple actions quickly.
 
-**3. Queue-specific concurrency:**
+**3. External API calls (respect rate limits):**
 
 ```ts
-concurrency: {
-  key: ({ input, queue }) => `${queue}:sync:${input.resourceId}`,
-}
+concurrency: ({ input }) => `api:${input.resourceId}`
 ```
 
-Include the queue name to allow the same resource to be processed concurrently in different queues.
+Prevents parallel API calls for the same resource, useful when external services don't handle concurrent updates well.
 
-#### Supersedes Behavior
-
-When `supersedes: true` is set, newly queued jobs will automatically delete older pending (not yet running) jobs with the same concurrency key:
-
-**Example scenario:**
-
-```
-1. Job A queued → pending
-2. Job B queued → A deleted, B pending
-3. Job C queued → B deleted, C pending
-4. Only Job C runs
-```
-
-**Configuration:**
+**4. Queue-specific concurrency:**
 
 ```ts
-concurrency: {
-  key: ({ input }) => `generate:${input.documentId}`,
-  exclusive: true,  // Still enforced
-  supersedes: true, // Delete older pending jobs
-}
+concurrency: ({ input, queue }) => `${queue}:process:${input.documentId}`
 ```
 
-**When to use:**
-
-- Data regeneration (embeddings, thumbnails) after rapid edits
-- Report generation where only the latest parameters matter
-- Any scenario where intermediate pending jobs are made obsolete by newer ones
-
-**Important notes:**
-
-- Only **pending** jobs (not yet running) are deleted
-- If a job is already **running**, it completes normally and the new job waits
-- Without `exclusive: true`, supersedes still deletes pending jobs but won't prevent parallel execution
+Include the queue name in the key to allow the same resource to be processed concurrently in different queues (e.g., `emails` queue vs `default` queue).
 
 #### Important Considerations
 

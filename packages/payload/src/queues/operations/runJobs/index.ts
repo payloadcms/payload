@@ -434,8 +434,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     } catch (error) {
       if (error instanceof JobCancelledError) {
         if (
-          // @ts-expect-error error is not typed
-          !job.error?.cancelled ||
+          !(job.error as Record<string, unknown> | undefined)?.cancelled ||
           !job.hasError ||
           job.processing ||
           job.completedAt ||

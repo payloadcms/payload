@@ -10,7 +10,13 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix, restrictedMediaSlug } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithPrefixSlug,
+  prefix,
+  restrictedMediaSlug,
+  testMetadataSlug,
+} from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -145,6 +151,107 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         )
 
         expect($metadata.httpStatusCode).toBe(200)
+      })
+    })
+  })
+
+  describe('External data persistence', () => {
+    const createdIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        try {
+          await payload.delete({ collection: testMetadataSlug, id })
+        } catch (e) {
+          // Ignore
+        }
+      }
+      createdIDs.length = 0
+    })
+
+    it('should automatically persist metadata returned by custom adapters', async () => {
+      const upload = await payload.create({
+        collection: testMetadataSlug,
+        data: {
+          testNote: 'Testing automatic metadata persistence',
+        },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      createdIDs.push(upload.id)
+
+      expect(upload.id).toBeTruthy()
+      expect(upload.filename).toBeTruthy()
+      expect(upload.testNote).toBe('Testing automatic metadata persistence')
+
+      // Our afterChange hook should automatically persist whatever metadata the adapter returns
+      expect(upload.customStorageId).toBeTruthy()
+      expect(upload.customStorageId).toContain('storage-')
+      expect(upload.uploadTimestamp).toBeTruthy()
+      expect(upload.storageProvider).toBe('test-adapter')
+      expect(upload.bucketName).toBe('test-bucket')
+      expect(upload.objectKey).toBe(upload.filename)
+      expect(upload.processingStatus).toBe('completed')
+      expect(upload.uploadVersion).toBe('1.0.0')
+
+      console.log('Test adapter metadata automatically persisted:', {
+        customStorageId: upload.customStorageId,
+        uploadTimestamp: upload.uploadTimestamp,
+        storageProvider: upload.storageProvider,
+        bucketName: upload.bucketName,
+        objectKey: upload.objectKey,
+        processingStatus: upload.processingStatus,
+        uploadVersion: upload.uploadVersion,
+      })
+    })
+
+    it('should persist metadata on update operations', async () => {
+      const upload = await payload.create({
+        collection: testMetadataSlug,
+        data: {
+          testNote: 'Testing update metadata persistence',
+        },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      createdIDs.push(upload.id)
+
+      const initialStorageId = upload.customStorageId
+      const initialTimestamp = upload.uploadTimestamp
+
+      const updatedUpload = await payload.update({
+        collection: testMetadataSlug,
+        id: upload.id,
+        data: {
+          testNote: 'Updated test note',
+        },
+        filePath: path.resolve(dirname, './image.png'),
+      })
+
+      expect(updatedUpload.testNote).toBe('Updated test note')
+
+      // Test that metadata persistence works on updates too
+      expect(updatedUpload.customStorageId).toBeTruthy()
+      expect(updatedUpload.uploadTimestamp).toBeTruthy()
+      expect(updatedUpload.storageProvider).toBe('test-adapter')
+      expect(updatedUpload.bucketName).toBe('test-bucket')
+      expect(updatedUpload.objectKey).toBe(updatedUpload.filename)
+      expect(updatedUpload.processingStatus).toBe('completed')
+      expect(updatedUpload.uploadVersion).toBe('1.0.0')
+
+      const filenamesAreDifferent = upload.filename !== updatedUpload.filename
+      const storageIdsAreDifferent = updatedUpload.customStorageId !== initialStorageId
+      const timestampsAreDifferent = updatedUpload.uploadTimestamp !== initialTimestamp
+
+      // If filename changed, storage ID and timestamp should also change (new upload)
+      expect(filenamesAreDifferent).toBe(storageIdsAreDifferent)
+      expect(filenamesAreDifferent).toBe(timestampsAreDifferent)
+
+      console.log('Update test adapter metadata persistence:', {
+        filenameChanged: filenamesAreDifferent,
+        storageIdChanged: storageIdsAreDifferent,
+        timestampChanged: timestampsAreDifferent,
+        newStorageId: updatedUpload.customStorageId,
       })
     })
   })
