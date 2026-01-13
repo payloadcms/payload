@@ -11,6 +11,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
+  mediaWithClientUploadsSlug,
   mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
@@ -185,6 +186,92 @@ describe('@payloadcms/storage-s3', () => {
 
   describe('R2', () => {
     it.todo('can upload')
+  })
+
+  describe('client uploads with size limits', () => {
+    const signedURLEndpoint = '/storage-s3-generate-signed-url'
+
+    it('should generate signed URL for file within size limit', async () => {
+      const filename = 'small-file.png'
+      const filesize = 500_000 // 500KB (within 1MB limit)
+      const mimeType = 'image/png'
+
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          collectionSlug: mediaWithClientUploadsSlug,
+          filename,
+          filesize,
+          mimeType,
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      const { url } = (await response.json()) as any
+      expect(url).toBeDefined()
+      expect(url).toContain(process.env.S3_BUCKET)
+      expect(url).toContain(filename)
+    })
+
+    it('should reject file exceeding size limit', async () => {
+      const filename = 'large-file.png'
+      const filesize = 2_000_000 // 2MB (exceeds 1MB limit)
+      const mimeType = 'image/png'
+
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          collectionSlug: mediaWithClientUploadsSlug,
+          filename,
+          filesize,
+          mimeType,
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = (await response.json()) as any
+      expect(errors).toBeDefined()
+      expect(errors[0].message).toContain('Exceeded file size limit')
+      expect(errors[0].message).toMatch(/Limit: 0\.9\dMB/) // 1,000,000 bytes ≈ 0.95MB
+      expect(errors[0].message).toMatch(/got: 1\.9\dMB/) // 2,000,000 bytes ≈ 1.91MB
+    })
+
+    it('should reject file exactly at limit boundary', async () => {
+      const filename = 'boundary-file.png'
+      const filesize = 1_000_001 // Just over 1MB limit
+      const mimeType = 'image/png'
+
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          collectionSlug: mediaWithClientUploadsSlug,
+          filename,
+          filesize,
+          mimeType,
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = (await response.json()) as any
+      expect(errors).toBeDefined()
+      expect(errors[0].message).toContain('Exceeded file size limit')
+    })
+
+    it('should accept file exactly at limit', async () => {
+      const filename = 'exact-limit.png'
+      const filesize = 1_000_000 // Exactly 1MB
+      const mimeType = 'image/png'
+
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          collectionSlug: mediaWithClientUploadsSlug,
+          filename,
+          filesize,
+          mimeType,
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      const { url } = (await response.json()) as any
+      expect(url).toBeDefined()
+    })
   })
 
   describe('prefix collision detection', () => {
