@@ -32,8 +32,8 @@
       "default": "./src/index.js"
     },
     "./withPayload": {
-      "import": "./src/withPayload/withPayload.ts",
-      "default": "./src/withPayload/withPayload.ts"
+      "import": "./src/withPayload/withPayload.js",
+      "default": "./src/withPayload/withPayload.js"
     },
     "./layouts": {
       "import": "./src/exports/layouts.ts",

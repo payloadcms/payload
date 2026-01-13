@@ -81,7 +81,7 @@ export const findByIDOperation = async <
       disableErrors,
       draft: replaceWithVersion = false,
       flattenLocales,
-      includeLockStatus,
+      includeLockStatus: includeLockStatusFromArgs,
       joins,
       overrideAccess = false,
       populate,
@@ -91,6 +91,9 @@ export const findByIDOperation = async <
       showHiddenFields,
       trash = false,
     } = args
+
+    const includeLockStatus =
+      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,

@@ -1314,6 +1314,181 @@ describe('Collections - Uploads', () => {
     })
   })
 
+  describe('serverURL handling', () => {
+    it('should store relative URLs in database even when serverURL is set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+        expect(mediaDoc.url).toBeDefined()
+
+        // payload.find should return full URLs with serverURL prefix (through afterRead hooks)
+        expect(mediaDoc.url).toContain('http://local-images:3000')
+        expect(mediaDoc.sizes?.tablet?.url).toContain('http://local-images:3000')
+        expect(mediaDoc.sizes?.icon?.url).toContain('http://local-images:3000')
+
+        // Direct database query should return relative URLs (no hooks applied)
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: mediaDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        expect(dbDoc.sizes?.icon?.url).toBeDefined()
+        expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+
+    it('should strip serverURL when duplicating an upload with serverURL set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'duplicate-serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+
+        // Duplicate the upload (this will pass full URLs from afterRead hooks)
+        const duplicatedDoc = (await payload.duplicate({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+        })) as unknown as Media
+
+        expect(duplicatedDoc).toBeDefined()
+        expect(duplicatedDoc.id).not.toEqual(mediaDoc.id)
+
+        // Check that the duplicated file exists
+        const expectedPath = path.join(dirname, './media')
+        expect(duplicatedDoc.filename).toBeDefined()
+        expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename!))).toBe(true)
+
+        // Direct database query on duplicated doc should return relative URLs
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: duplicatedDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+
+    it('should strip serverURL when updating an upload with serverURL set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'update-serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+
+        // Update the upload (changing focal point triggers a re-upload)
+        const updatedDoc = (await payload.update({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+          data: {
+            focalX: 75,
+            focalY: 25,
+          },
+        })) as unknown as Media
+
+        expect(updatedDoc).toBeDefined()
+        expect(updatedDoc.focalX).toEqual(75)
+        expect(updatedDoc.focalY).toEqual(25)
+
+        // Direct database query on updated doc should return relative URLs
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: updatedDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+  })
+
   describe('HTTP Range Requests', () => {
     let uploadedDoc: Media
     let uploadedFilename: string

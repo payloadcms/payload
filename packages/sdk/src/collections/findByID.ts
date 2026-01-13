@@ -1,17 +1,16 @@
-import type { ApplyDisableErrors, SelectType } from 'payload'
+import type {
+  ApplyDisableErrors,
+  CollectionSlug,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type {
-  CollectionSlug,
-  JoinQuery,
-  PayloadGeneratedTypes,
-  PopulateType,
-  TransformCollectionWithSelect,
-  TypedLocale,
-} from '../types.js'
+import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'
 
 export type FindByIDOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
@@ -61,7 +60,7 @@ export type FindByIDOptions<
 }
 
 export async function findByID<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
@@ -78,17 +77,13 @@ export async function findByID<
       path: `/${options.collection}/${options.id}`,
     })
 
-    if (response.ok) {
-      return response.json()
-    } else {
-      throw new Error()
-    }
-  } catch {
+    return response.json()
+  } catch (err) {
     if (options.disableErrors) {
       // @ts-expect-error generic nullable
       return null
     }
 
-    throw new Error(`Error retrieving the document ${options.collection}/${options.id}`)
+    throw err
   }
 }
