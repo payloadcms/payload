@@ -79,6 +79,11 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  dashboard: {
+    addWidget: 'Добави джаджа',
+    deleteWidget: 'Изтрийте джаджа {{id}}',
+    searchWidgets: 'Търсене на джаджи...',
+  },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',
     autosaving: 'Имаше проблем в автоматичното запазване на този документ.',
@@ -337,6 +342,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     loading: 'Зарежда се',
     locale: 'Локализация',
     locales: 'Локализации',
+    lock: 'Заключване',
     menu: 'Меню',
     moreOptions: 'Повече опции',
     move: 'Премести',
@@ -427,6 +433,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} преместени в кошчето.',
     true: 'Вярно',
     unauthorized: 'Неоторизиран',
+    unlock: 'Отключете',
     unsavedChanges: 'Имате незапазени промени. Запазете или отхвърлете преди да продължите.',
     unsavedChangesDuplicate: 'Имаш незапазени промени. Искаш ли да продължиш да дупликираш?',
     untitled: 'Неозаглавен',

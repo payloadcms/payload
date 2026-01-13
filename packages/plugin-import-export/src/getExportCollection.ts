@@ -74,7 +74,7 @@ export const getExportCollection = ({
       }
       const { user } = req
       const debug = pluginConfig.debug
-      await createExport({ input: { ...args.data, debug, user }, req })
+      await createExport({ input: { ...args.data, debug } as any, req, user })
     })
   } else {
     afterChange.push(async ({ doc, operation, req }) => {
@@ -86,7 +86,7 @@ export const getExportCollection = ({
         ...doc,
         exportsCollection: collection.slug,
         user: req?.user?.id || req?.user?.user?.id,
-        userCollection: 'users',
+        userCollection: req.payload.config.admin.user,
       }
       await req.payload.jobs.queue({
         input,

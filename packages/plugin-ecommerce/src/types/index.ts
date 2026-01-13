@@ -501,6 +501,12 @@ export type CustomersConfig = {
 }
 
 export type CartsConfig = {
+  /**
+   * Allow guest (unauthenticated) users to create carts.
+   * When enabled, guests can create carts without being logged in.
+   * Defaults to true.
+   */
+  allowGuestCarts?: boolean
   cartsCollectionOverride?: CollectionOverride
 }
 
@@ -569,50 +575,57 @@ export type CollectionSlugMap = {
 
 /**
  * Access control functions used throughout the Ecommerce plugin.
- * You must provide these when configuring the plugin.
+ * Provide atomic access functions that can be composed using or, and, conditional utilities.
  *
  * @example
- *
  * ```ts
  *  access: {
-      adminOnly,
-      adminOnlyFieldAccess,
-      adminOrCustomerOwner,
-      adminOrPublishedStatus,
-      customerOnlyFieldAccess,
-    }
-  ```
+ *    isAdmin: ({ req }) => checkRole(['admin'], req.user),
+ *    isAuthenticated: ({ req }) => !!req.user,
+ *    isDocumentOwner: ({ req }) => {
+ *      if (!req.user) return false
+ *      return { customer: { equals: req.user.id } }
+ *    },
+ *    adminOnlyFieldAccess: ({ req }) => checkRole(['admin'], req.user),
+ *    customerOnlyFieldAccess: ({ req }) => !!req.user,
+ *    adminOrPublishedStatus: ({ req }) => {
+ *      if (checkRole(['admin'], req.user)) return true
+ *      return { _status: { equals: 'published' } }
+ *    },
+ *  }
+ * ```
  */
 export type AccessConfig = {
-  /**
-   * Limited to only admin users.
-   */
-  adminOnly: Access
   /**
    * Limited to only admin users, specifically for Field level access control.
    */
   adminOnlyFieldAccess: FieldAccess
   /**
-   * Is the owner of the document via the `customer` field or is an admin.
-   */
-  adminOrCustomerOwner: Access
-  /**
    * The document status is published or user is admin.
    */
   adminOrPublishedStatus: Access
-  /**
-   * Authenticated users only. Defaults to the example function.
-   *
-   * @example
-   * anyUser: ({ req }) => !!req?.user
-   */
-  authenticatedOnly?: Access
   /**
    * Limited to customers only, specifically for Field level access control.
    */
   customerOnlyFieldAccess: FieldAccess
   /**
-   * Entirely public access. Defaults to the example function.
+   * Checks if the user is an admin.
+   * @returns true if admin, false otherwise
+   */
+  isAdmin: Access
+  /**
+   * Checks if the user is authenticated (any role).
+   * @returns true if authenticated, false otherwise
+   */
+  isAuthenticated?: Access
+  /**
+   * Checks if the user owns the document being accessed.
+   * Typically returns a Where query to filter by customer field.
+   * @returns true for full access, false for no access, or Where query for conditional access
+   */
+  isDocumentOwner: Access
+  /**
+   * Entirely public access. Defaults to returning true.
    *
    * @example
    * publicAccess: () => true
@@ -863,7 +876,16 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
     paymentMethodID: string,
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
+  /**
+   * Indicates whether any cart operation is currently in progress.
+   * Useful for disabling buttons and preventing race conditions.
+   */
+  isLoading: boolean
   paymentMethods: PaymentAdapterClient[]
+  /**
+   * Refresh the cart.
+   */
+  refreshCart: () => Promise<void>
   /**
    * Remove an item from the cart by its index ID.
    */

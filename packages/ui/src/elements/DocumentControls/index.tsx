@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -124,6 +124,7 @@ export const DocumentControls: React.FC<{
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -153,24 +154,19 @@ export const DocumentControls: React.FC<{
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
-  const collectionConfigDrafts = collectionConfig?.versions?.drafts
-  const globalConfigDrafts = globalConfig?.versions?.drafts
-
-  const autosaveEnabled =
-    (collectionConfigDrafts && collectionConfigDrafts?.autosave) ||
-    (globalConfigDrafts && globalConfigDrafts?.autosave)
-
-  const collectionAutosaveEnabled = collectionConfigDrafts && collectionConfigDrafts?.autosave
-  const globalAutosaveEnabled = globalConfigDrafts && globalConfigDrafts?.autosave
+  const globalHasDraftsEnabled = hasDraftsEnabled(globalConfig)
+  const collectionHasDraftsEnabled = hasDraftsEnabled(collectionConfig)
+  const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
+  const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
+  const autosaveEnabled = collectionAutosaveEnabled || globalAutosaveEnabled
 
   const showSaveDraftButton =
     (collectionAutosaveEnabled &&
-      collectionConfigDrafts.autosave !== false &&
-      collectionConfigDrafts.autosave.showSaveDraftButton === true) ||
+      collectionConfig.versions.drafts.autosave !== false &&
+      collectionConfig.versions.drafts.autosave.showSaveDraftButton === true) ||
     (globalAutosaveEnabled &&
-      globalConfigDrafts.autosave !== false &&
-      globalConfigDrafts.autosave.showSaveDraftButton === true)
-
+      globalConfig.versions.drafts.autosave !== false &&
+      globalConfig.versions.drafts.autosave.showSaveDraftButton === true)
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
   const showFolderMetaIcon = collectionConfig && collectionConfig.folders
@@ -206,7 +202,7 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-            {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
+            {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
               <Fragment>
                 {(globalConfig || (collectionConfig && isEditing)) && (
                   <li
@@ -271,7 +267,7 @@ export const DocumentControls: React.FC<{
             )}
             {hasSavePermission && !isTrashed && (
               <Fragment>
-                {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
+                {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
                   <Fragment>
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||

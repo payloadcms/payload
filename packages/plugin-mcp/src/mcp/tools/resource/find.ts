@@ -15,11 +15,14 @@ export const findResourceTool = (
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    id?: string,
+    id?: number | string,
     limit: number = 10,
     page: number = 1,
     sort?: string,
     where?: string,
+    locale?: string,
+    fallbackLocale?: string,
+    draft?: boolean,
   ): Promise<{
     content: Array<{
       text: string
@@ -30,7 +33,7 @@ export const findResourceTool = (
 
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}`,
+        `[payload-mcp] Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -67,6 +70,9 @@ export const findResourceTool = (
             overrideAccess: false,
             req,
             user,
+            ...(locale && { locale }),
+            ...(fallbackLocale && { fallbackLocale }),
+            ...(draft !== undefined && { draft }),
           })
 
           if (verboseLogs) {
@@ -120,6 +126,9 @@ ${JSON.stringify(doc, null, 2)}`,
         page,
         req,
         user,
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
+        ...(draft !== undefined && { draft }),
       }
 
       if (sort) {
@@ -190,8 +199,8 @@ Page: ${result.page} of ${result.totalPages}
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
       toolSchemas.findResources.parameters.shape,
-      async ({ id, limit, page, sort, where }) => {
-        return await tool(id, limit, page, sort, where)
+      async ({ id, draft, fallbackLocale, limit, locale, page, sort, where }) => {
+        return await tool(id, limit, page, sort, where, locale, fallbackLocale, draft)
       },
     )
   }

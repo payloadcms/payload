@@ -59,11 +59,11 @@ describe('lexicalBlocks', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
-    /*await throttleTest({
-      page,
-      context,
-      delay: 'Slow 4G',
-    })*/
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Slow 4G',
+    // })
     await reInitializeDB({
       serverURL,
       snapshotKey: 'lexicalTest',
@@ -101,20 +101,36 @@ describe('lexicalBlocks', () => {
     const editButton = newRSCBlock.locator('.LexicalEditorTheme__block__editButton').first()
     await editButton.click()
 
-    await wait(500)
     const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(editDrawer).toBeVisible()
-    await wait(500)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     await editDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
     await expect(editDrawer.locator('.rs__option').nth(1)).toBeVisible()
     await expect(editDrawer.locator('.rs__option').nth(1)).toContainText('value2')
-    await editDrawer.locator('.rs__option').nth(1).click()
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/lexical-fields',
+      async () => {
+        await editDrawer.locator('.rs__option').nth(1).click()
+      },
+      {
+        allowedNumberOfRequests: 2,
+      },
+    )
 
     // Click button with text Save changes
-    await editDrawer.locator('button').getByText('Save changes').click()
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/lexical-fields',
+      async () => {
+        await editDrawer.locator('button').getByText('Save changes').click()
+      },
+      {
+        allowedNumberOfRequests: 1,
+      },
+    )
     await expect(editDrawer).toBeHidden()
 
     await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
@@ -1068,12 +1084,16 @@ describe('lexicalBlocks', () => {
 
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
       await expect(
-        conditionalArrayBlock.locator('.array-field__draggable-rows #columns2-row-0'),
+        conditionalArrayBlock.locator(
+          '.array-field__draggable-rows #columns2-row-0 input[type="text"]',
+        ),
       ).toBeVisible()
 
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
       await expect(
-        conditionalArrayBlock.locator('.array-field__draggable-rows #columns2-row-1'),
+        conditionalArrayBlock.locator(
+          '.array-field__draggable-rows #columns2-row-1 input[type="text"]',
+        ),
       ).toBeVisible()
 
       await conditionalArrayBlock
@@ -1516,7 +1536,7 @@ async function navigateToLexicalFields(
   await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   const linkDocHref = await linkToDoc.getAttribute('href')
 
-  await linkToDoc.click()
+  await linkToDoc.click({ delay: 500 })
 
   await page.waitForURL(`**${linkDocHref}`)
 

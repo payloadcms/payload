@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -45,6 +44,7 @@ import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
   ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
   JsonObject,
   SelectType,
   TransformCollectionWithSelect,
@@ -119,6 +119,7 @@ import {
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
 export type * from './admin/types.js'
+export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -139,6 +140,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -162,8 +164,35 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
-export interface GeneratedTypes {
-  authUntyped: {
+
+/**
+ * Shape constraint for PayloadTypes.
+ * Matches the structure of generated Config types.
+ *
+ * By defining the actual shape, we can use simple property access (T['collections'])
+ * instead of conditional types throughout the codebase.
+ */
+export interface PayloadTypesShape {
+  auth: Record<string, unknown>
+  blocks: Record<string, unknown>
+  collections: Record<string, unknown>
+  collectionsJoins: Record<string, unknown>
+  collectionsSelect: Record<string, unknown>
+  db: { defaultIDType: unknown }
+  fallbackLocale: unknown
+  globals: Record<string, unknown>
+  globalsSelect: Record<string, unknown>
+  jobs: unknown
+  locale: unknown
+  user: unknown
+}
+
+/**
+ * Untyped fallback types. Uses the SAME property names as generated types.
+ * PayloadTypes merges GeneratedTypes with these fallbacks.
+ */
+export interface UntypedPayloadTypes {
+  auth: {
     [slug: string]: {
       forgotPassword: {
         email: string
@@ -181,33 +210,31 @@ export interface GeneratedTypes {
       }
     }
   }
-
-  blocksUntyped: {
+  blocks: {
     [slug: string]: JsonObject
   }
-  collectionsJoinsUntyped: {
-    [slug: string]: {
-      [schemaPath: string]: CollectionSlug
-    }
-  }
-  collectionsSelectUntyped: {
-    [slug: string]: SelectType
-  }
-
-  collectionsUntyped: {
+  collections: {
     [slug: string]: JsonObject & TypeWithID
   }
-  dbUntyped: {
-    defaultIDType: number | string
+  collectionsJoins: {
+    [slug: string]: {
+      [schemaPath: string]: string
+    }
   }
-  globalsSelectUntyped: {
+  collectionsSelect: {
     [slug: string]: SelectType
   }
-
-  globalsUntyped: {
+  db: {
+    defaultIDType: number | string
+  }
+  fallbackLocale: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
+  globals: {
     [slug: string]: JsonObject
   }
-  jobsUntyped: {
+  globalsSelect: {
+    [slug: string]: SelectType
+  }
+  jobs: {
     tasks: {
       [slug: string]: {
         input?: JsonObject
@@ -220,106 +247,89 @@ export interface GeneratedTypes {
       }
     }
   }
-  localeUntyped: null | string
-  userUntyped: UntypedUser
+  locale: null | string
+  user: UntypedUser
 }
 
-// Helper type to resolve the correct type using conditional types
-type ResolveCollectionType<T> = 'collections' extends keyof T
-  ? T['collections']
-  : // @ts-expect-error
-    T['collectionsUntyped']
+/**
+ * Interface to be module-augmented by the `payload-types.ts` file.
+ * When augmented, its properties take precedence over UntypedPayloadTypes.
+ */
+export interface GeneratedTypes {}
 
-type ResolveBlockType<T> = 'blocks' extends keyof T
-  ? T['blocks']
-  : // @ts-expect-error
-    T['blocksUntyped']
+/**
+ * Check if GeneratedTypes has been augmented (has any keys).
+ */
+type IsAugmented = keyof GeneratedTypes extends never ? false : true
 
-type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
-  ? T['collectionsSelect']
-  : // @ts-expect-error
-    T['collectionsSelectUntyped']
+/**
+ * PayloadTypes merges GeneratedTypes with UntypedPayloadTypes.
+ * - When augmented: uses augmented properties, fills gaps with untyped fallbacks
+ * - When not augmented: uses only UntypedPayloadTypes
+ */
+export type PayloadTypes = IsAugmented extends true
+  ? GeneratedTypes & Omit<UntypedPayloadTypes, keyof GeneratedTypes>
+  : UntypedPayloadTypes
 
-type ResolveCollectionJoinsType<T> = 'collectionsJoins' extends keyof T
-  ? T['collectionsJoins']
-  : // @ts-expect-error
-    T['collectionsJoinsUntyped']
+export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
 
-type ResolveGlobalType<T> = 'globals' extends keyof T
-  ? T['globals']
-  : // @ts-expect-error
-    T['globalsUntyped']
+export type TypedBlock = PayloadTypes['blocks']
 
-type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
-  ? T['globalsSelect']
-  : // @ts-expect-error
-    T['globalsSelectUntyped']
-
-// Applying helper types to GeneratedTypes
-export type TypedCollection = ResolveCollectionType<GeneratedTypes>
-
-export type TypedBlock = ResolveBlockType<GeneratedTypes>
-
-export type TypedUploadCollection = NonNever<{
-  [K in keyof TypedCollection]:
+export type TypedUploadCollection<T extends PayloadTypesShape = PayloadTypes> = NonNever<{
+  [TSlug in keyof T['collections']]:
     | 'filename'
     | 'filesize'
     | 'mimeType'
-    | 'url' extends keyof TypedCollection[K]
-    ? TypedCollection[K]
+    | 'url' extends keyof T['collections'][TSlug]
+    ? T['collections'][TSlug]
     : never
 }>
 
-export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
+export type TypedCollectionSelect<T extends PayloadTypesShape = PayloadTypes> =
+  T['collectionsSelect']
 
-export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
+export type TypedCollectionJoins<T extends PayloadTypesShape = PayloadTypes> = T['collectionsJoins']
 
-export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+export type TypedGlobal<T extends PayloadTypesShape = PayloadTypes> = T['globals']
 
-export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>
+export type TypedGlobalSelect<T extends PayloadTypesShape = PayloadTypes> = T['globalsSelect']
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug = StringKeyOf<TypedCollection>
+export type CollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  T['collections']
+>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
+export type UploadCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  TypedUploadCollection<T>
+>
 
-type ResolveDbType<T> = 'db' extends keyof T
-  ? T['db']
-  : // @ts-expect-error
-    T['dbUntyped']
+export type DefaultDocumentIDType = PayloadTypes['db']['defaultIDType']
 
-export type DefaultDocumentIDType = ResolveDbType<GeneratedTypes>['defaultIDType']
-export type GlobalSlug = StringKeyOf<TypedGlobal>
+export type GlobalSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['globals']>
 
-// now for locale and user
+export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale']
 
-// @ts-expect-error
-type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
-// @ts-expect-error
-type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
-
-export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
  * @todo rename to `User` in 4.0
  */
-export type TypedUser = ResolveUserType<GeneratedTypes>
+export type TypedUser = PayloadTypes['user']
 
-// @ts-expect-error
-type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
-export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
+export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-// @ts-expect-error
-type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
-export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
+export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
 
-type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
-  ? 'payload-jobs' extends keyof TypedCollection
+export type TypedJobs = PayloadTypes['jobs']
+
+// Check if payload-jobs exists in the AUGMENTED types (not the fallback with index signature)
+type HasPayloadJobsType = GeneratedTypes extends { collections: infer C }
+  ? 'payload-jobs' extends keyof C
     ? true
     : false
   : false
@@ -449,10 +459,22 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: FindOptions<TSlug, TSelect>,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
-    return findLocal<TSlug, TSelect>(this, options)
+  find = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDraft extends boolean = false,
+  >(
+    options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  ): Promise<
+    PaginatedDocs<
+      TDraft extends true
+        ? PayloadTypes extends { strictDraftTypes: true }
+          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+          : TransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>
+    >
+  > => {
+    return findLocal<TSlug, TSelect, TDraft>(this, options)
   }
 
   /**
@@ -540,9 +562,19 @@ export class BasePayload {
     return forgotPasswordLocal<TSlug>(this, options)
   }
 
-  getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
+  getAdminURL = (): string =>
+    formatAdminURL({
+      adminRoute: this.config.routes.admin,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
+  getAPIURL = (): string =>
+    formatAdminURL({
+      apiRoute: this.config.routes.api,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
   globals!: Globals
 
@@ -1127,12 +1159,12 @@ export const getPayload = async (
     return cached.payload
   }
 
-  if (!cached.promise) {
-    // no need to await options.config here, as it's already awaited in the BasePayload.init
-    cached.promise = new BasePayload().init(options)
-  }
-
   try {
+    if (!cached.promise) {
+      // no need to await options.config here, as it's already awaited in the BasePayload.init
+      cached.promise = new BasePayload().init(options)
+    }
+
     cached.payload = await cached.promise
 
     if (
@@ -1442,7 +1474,8 @@ export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
-export { slugField, type SlugFieldProps } from './fields/baseFields/slug/index.js'
+export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
+export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
   createClientField,
@@ -1451,9 +1484,17 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 
+export { sanitizeFields } from './fields/config/sanitize.js'
+
 export interface FieldCustom extends Record<string, any> {}
 
-export { sanitizeFields } from './fields/config/sanitize.js'
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
 
 export type {
   AdminClient,
@@ -1564,16 +1605,16 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
-export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
+export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
+
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
-export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
+export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1605,6 +1646,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export type { FolderSortKeys } from './folders/types.js'
 export { getFolderData } from './folders/utils/getFolderData.js'
 export {
@@ -1628,10 +1670,10 @@ export type {
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
@@ -1668,7 +1710,6 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
-
 export type {
   BaseJob,
   JobLog,
@@ -1679,20 +1720,22 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { JobCancelledError } from './queues/errors/index.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
 export type * from './uploads/types.js'
+
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'

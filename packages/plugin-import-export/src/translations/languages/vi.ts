@@ -2,24 +2,24 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const viTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
-    allLocales: 'Tất cả địa điểm',
+    allLocales: 'Tất cả ngôn ngữ',
     exportDocumentLabel: 'Xuất {{label}}',
     exportOptions: 'Tùy chọn xuất',
     'field-depth-label': 'Độ sâu',
     'field-drafts-label': 'Bao gồm bản thảo',
-    'field-fields-label': 'Cánh đồng',
-    'field-format-label': 'Định dạng Xuất khẩu',
+    'field-fields-label': 'Trường',
+    'field-format-label': 'Định dạng xuất',
     'field-limit-label': 'Giới hạn',
-    'field-locale-label': 'Địa phương',
+    'field-locale-label': 'Ngôn ngữ',
     'field-name-label': 'Tên tệp',
     'field-page-label': 'Trang',
-    'field-selectionToUse-label': 'Lựa chọn để sử dụng',
+    'field-selectionToUse-label': 'Chọn để sử dụng',
     'field-sort-label': 'Sắp xếp theo',
     'field-sort-order-label': 'Sắp xếp theo thứ tự',
-    'selectionToUse-allDocuments': 'Sử dụng tất cả các tài liệu',
-    'selectionToUse-currentFilters': 'Sử dụng bộ lọc hiện tại',
-    'selectionToUse-currentSelection': 'Sử dụng lựa chọn hiện tại',
-    totalDocumentsCount: '{{count}} tổng số tài liệu',
+    'selectionToUse-allDocuments': 'Dùng tất cả',
+    'selectionToUse-currentFilters': 'Dùng bộ lọc hiện tại',
+    'selectionToUse-currentSelection': 'Dùng đang chọn',
+    totalDocumentsCount: 'Tổng cộng {{count}} tài liệu',
   },
 }
 

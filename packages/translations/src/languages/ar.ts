@@ -79,6 +79,11 @@ export const arTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
+  dashboard: {
+    addWidget: 'أضف الواجهة البيانية',
+    deleteWidget: 'حذف الودجت {{id}}',
+    searchWidgets: 'ابحث عن الأدوات...',
+  },
   error: {
     accountAlreadyActivated: 'تم تفعيل هذا الحساب بالفعل.',
     autosaving: 'حدثت مشكلة أثناء حفظ هذا المستند تلقائيًا.',
@@ -328,6 +333,7 @@ export const arTranslations: DefaultTranslationsObject = {
     loading: 'يتمّ التّحميل',
     locale: 'اللّغة',
     locales: 'اللّغات',
+    lock: 'قفل',
     menu: 'قائمة',
     moreOptions: 'خيارات أكثر',
     move: 'تحرك',
@@ -418,6 +424,7 @@ export const arTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} تم نقلها إلى سلة المهملات.',
     true: 'صحيح',
     unauthorized: 'غير مصرح به',
+    unlock: 'افتح',
     unsavedChanges: 'لديك تغييرات غير محفوظة. قم بالحفظ أو التجاهل قبل المتابعة.',
     unsavedChangesDuplicate: 'لديك تغييرات لم يتم حفظها. هل تريد الاستمرار في الاستنساخ؟',
     untitled: 'بدون عنوان',

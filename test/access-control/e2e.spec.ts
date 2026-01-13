@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait  } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -17,6 +17,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { login } from '../helpers/e2e/auth/login.js'
 import { openListFilters } from '../helpers/e2e/filters/index.js'
 import { openGroupBy } from '../helpers/e2e/groupBy/index.js'
@@ -141,6 +142,87 @@ describe('Access Control', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
       await expect(page.locator('#field-roles')).toBeHidden()
+    })
+
+    test('ensure field with update access control is readOnly during both initial load and after saving', async () => {
+      async function waitForFormState(action: 'reload' | 'save') {
+        await assertNetworkRequests(
+          page,
+          '/admin/collections/field-restricted-update-based-on-data',
+          async () => {
+            if (action === 'save') {
+              await saveDocAndAssert(page)
+            } else {
+              await page.reload()
+            }
+          },
+          {
+            minimumNumberOfRequests: action === 'save' ? 2 : 1,
+            allowedNumberOfRequests: action === 'save' ? 2 : 1,
+          },
+        )
+      }
+      // Reproduces a bug where the shape of the `data` object passed to the field update access control function is incorrect
+      // after saving the document, and correct on initial load.
+
+      await payload.delete({
+        collection: 'field-restricted-update-based-on-data',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const collectionURL = new AdminUrlUtil(serverURL, 'field-restricted-update-based-on-data')
+
+      // Create document via UI, to test if the field's readOnly state is correct throughout the entire lifecycle of the document.
+
+      await page.goto(collectionURL.create)
+
+      const restrictedField = page.locator('#field-restricted')
+      const isRestrictedCheckbox = page.locator('#field-isRestricted')
+
+      await expect(restrictedField).toBeEnabled()
+
+      await isRestrictedCheckbox.check()
+      await expect(isRestrictedCheckbox).toBeChecked()
+
+      await waitForFormState('save')
+      await expect(restrictedField).toBeDisabled()
+
+      await waitForFormState('reload')
+      await expect(restrictedField).toBeDisabled()
+
+      await isRestrictedCheckbox.uncheck()
+      await expect(isRestrictedCheckbox).not.toBeChecked()
+
+      await waitForFormState('save')
+      await expect(restrictedField).toBeEnabled()
+
+      await isRestrictedCheckbox.check()
+      await expect(isRestrictedCheckbox).toBeChecked()
+
+      await waitForFormState('save')
+
+      // Important: keep all the wait's, so that tests don't accidentally pass due to flashing of the field's readOnly state.
+      // While the new results are still coming in.
+      // The issue starts here, where saving a document without reload does not update the field's state from enabled to disabled,
+      // because the data object passed to the update access control function is incorrect.
+      await expect(restrictedField).toBeDisabled()
+
+      await waitForFormState('reload')
+
+      await expect(restrictedField).toBeDisabled()
+
+      await payload.delete({
+        collection: 'field-restricted-update-based-on-data',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
     })
   })
 
@@ -539,7 +621,7 @@ describe('Access Control', () => {
       })
 
       test('should restrict access based on user settings', async () => {
-        const url = `${serverURL}/admin/globals/settings`
+        const url = formatAdminURL({ adminRoute: '/admin', path: '/globals/settings', serverURL })
         await page.goto(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()

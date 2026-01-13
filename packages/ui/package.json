@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.64.0",
+  "version": "3.70.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -122,23 +122,24 @@
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
+    "build:debug": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles && pnpm build:types",
     "build:esbuild": "node bundle.js",
     "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client && rm -rf dist/exports/shared && mv dist/exports/shared_optimized dist/exports/shared",
     "build:reactcompiler": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
+    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@date-fns/tz": "1.2.0",
-    "@dnd-kit/core": "6.0.8",
-    "@dnd-kit/sortable": "7.0.2",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@faceless-ui/modal": "3.0.0",
     "@faceless-ui/scroll-info": "2.0.0",
@@ -168,8 +169,8 @@
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.25.5",
@@ -177,10 +178,10 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.2.3",
+    "next": "^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

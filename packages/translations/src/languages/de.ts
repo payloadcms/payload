@@ -81,6 +81,11 @@ export const deTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail und dein Passwort bleibt unverändert.',
   },
+  dashboard: {
+    addWidget: 'Widget hinzufügen',
+    deleteWidget: 'Löschen Sie das Widget {{id}}',
+    searchWidgets: 'Suche Widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',
     autosaving: 'Es gab ein Problem bei der automatischen Speicherung für dieses Dokument',
@@ -347,6 +352,7 @@ export const deTranslations: DefaultTranslationsObject = {
     loading: 'Lädt',
     locale: 'Sprache',
     locales: 'Sprachen',
+    lock: 'Sperren',
     menu: 'Menü',
     moreOptions: 'Mehr Optionen',
     move: 'Bewegen',
@@ -438,6 +444,7 @@ export const deTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unlock: 'Entsperren',
     unsavedChanges:
       'Du hast ungespeicherte Änderungen. Speichern oder verwerfe sie, bevor du fortfahrst.',
     unsavedChangesDuplicate:

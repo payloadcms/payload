@@ -70,7 +70,7 @@ export type RunJobsArgs = {
 export type RunJobsResult = {
   jobStatus?: Record<string, RunJobResult>
   /**
-   * If this is false, there for sure are no jobs remaining, regardless of the limit
+   * If this is true, there for sure are no jobs remaining, regardless of the limit
    */
   noJobsRemaining?: boolean
   /**
@@ -211,6 +211,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
+  if (!jobs.length) {
+    return {
+      noJobsRemaining: true,
+      remainingJobsFromQueried: 0,
+    }
+  }
+
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
    * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
@@ -226,13 +233,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     },
     { existingJobs: [] as Job[], newJobs: [] as Job[] },
   )
-
-  if (!jobs.length) {
-    return {
-      noJobsRemaining: true,
-      remainingJobsFromQueried: 0,
-    }
-  }
 
   if (!silent || (typeof silent === 'object' && !silent.info)) {
     payload.logger.info({
@@ -348,6 +348,34 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     } catch (error) {
       if (error instanceof JobCancelledError) {
+        if (
+          !(job.error as Record<string, unknown> | undefined)?.cancelled ||
+          !job.hasError ||
+          job.processing ||
+          job.completedAt ||
+          job.waitUntil
+        ) {
+          // When using the local API to cancel jobs, the local API will update the job data for us to ensure the job is cancelled.
+          // But when throwing a JobCancelledError within a task or workflow handler, we are responsible for updating the job data ourselves.
+          await updateJob({
+            id: job.id,
+            data: {
+              completedAt: null,
+              error: {
+                cancelled: true,
+                message: error.message,
+              },
+              hasError: true,
+              processing: false,
+              waitUntil: null,
+            },
+            depth: 0,
+            disableTransaction: true,
+            req,
+            returning: false,
+          })
+        }
+
         return {
           id: job.id,
           result: {

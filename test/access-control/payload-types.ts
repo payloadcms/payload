@@ -97,6 +97,10 @@ export interface Config {
     hooks: Hook;
     'auth-collection': AuthCollection;
     'read-restricted': ReadRestricted;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDatum;
+    'where-cache-same': WhereCacheSame;
+    'where-cache-unique': WhereCacheUnique;
+    'async-parent': AsyncParent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -130,6 +134,10 @@ export interface Config {
     hooks: HooksSelect<false> | HooksSelect<true>;
     'auth-collection': AuthCollectionSelect<false> | AuthCollectionSelect<true>;
     'read-restricted': ReadRestrictedSelect<false> | ReadRestrictedSelect<true>;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDataSelect<false> | FieldRestrictedUpdateBasedOnDataSelect<true>;
+    'where-cache-same': WhereCacheSameSelect<false> | WhereCacheSameSelect<true>;
+    'where-cache-unique': WhereCacheUniqueSelect<false> | WhereCacheUniqueSelect<true>;
+    'async-parent': AsyncParentSelect<false> | AsyncParentSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -138,6 +146,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     settings: Setting;
     test: Test;
@@ -885,6 +894,60 @@ export interface ReadRestricted {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data".
+ */
+export interface FieldRestrictedUpdateBasedOnDatum {
+  id: string;
+  restricted?: string | null;
+  doesNothing?: boolean | null;
+  isRestricted?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-same".
+ */
+export interface WhereCacheSame {
+  id: string;
+  title: string;
+  userRole: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-unique".
+ */
+export interface WhereCacheUnique {
+  id: string;
+  title: string;
+  readRole: string;
+  updateRole: string;
+  deleteRole: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "async-parent".
+ */
+export interface AsyncParent {
+  id: string;
+  title: string;
+  parentField?: {
+    childField1?: string | null;
+    childField2?: string | null;
+    nestedGroup?: {
+      deepChild1?: string | null;
+      deepChild2?: number | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1010,6 +1073,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'read-restricted';
         value: string | ReadRestricted;
+      } | null)
+    | ({
+        relationTo: 'field-restricted-update-based-on-data';
+        value: string | FieldRestrictedUpdateBasedOnDatum;
+      } | null)
+    | ({
+        relationTo: 'where-cache-same';
+        value: string | WhereCacheSame;
+      } | null)
+    | ({
+        relationTo: 'where-cache-unique';
+        value: string | WhereCacheUnique;
+      } | null)
+    | ({
+        relationTo: 'async-parent';
+        value: string | AsyncParent;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1595,6 +1674,60 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data_select".
+ */
+export interface FieldRestrictedUpdateBasedOnDataSelect<T extends boolean = true> {
+  restricted?: T;
+  doesNothing?: T;
+  isRestricted?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-same_select".
+ */
+export interface WhereCacheSameSelect<T extends boolean = true> {
+  title?: T;
+  userRole?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-unique_select".
+ */
+export interface WhereCacheUniqueSelect<T extends boolean = true> {
+  title?: T;
+  readRole?: T;
+  updateRole?: T;
+  deleteRole?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "async-parent_select".
+ */
+export interface AsyncParentSelect<T extends boolean = true> {
+  title?: T;
+  parentField?:
+    | T
+    | {
+        childField1?: T;
+        childField2?: T;
+        nestedGroup?:
+          | T
+          | {
+              deepChild1?: T;
+              deepChild2?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1741,6 +1874,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

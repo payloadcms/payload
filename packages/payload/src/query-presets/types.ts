@@ -20,6 +20,7 @@ export type QueryPreset = {
     }
   }
   columns: CollectionPreferences['columns']
+  groupBy?: string
   id: number | string
   isShared: boolean
   relatedCollection: CollectionSlug

@@ -29,11 +29,13 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -77,18 +79,11 @@ export const createOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'create',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'create',
+    })
 
     if (args.publishSpecificLocale) {
       args.req.locale = args.publishSpecificLocale
@@ -120,7 +115,7 @@ export const createOperation = async <
 
     let { data } = args
 
-    const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig))
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -130,7 +125,6 @@ export const createOperation = async <
         id: duplicateFromID,
         collectionConfig,
         draftArg: isSavingDraft,
-        isSavingDraft,
         overrideAccess,
         req,
         selectedLocales,
@@ -232,10 +226,7 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess,
       req,
-      skipValidation:
-        isSavingDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////
@@ -296,6 +287,7 @@ export const createOperation = async <
         payload,
         publishSpecificLocale,
         req,
+        returning: false,
       })
     }
 

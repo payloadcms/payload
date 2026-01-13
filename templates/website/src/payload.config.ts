@@ -1,7 +1,5 @@
-// storage-adapter-import-placeholder
-import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
-
-import sharp from 'sharp' // sharp-import
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
@@ -59,18 +57,13 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  // database-adapter-config-start
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
   }),
-  // database-adapter-config-end
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
-  plugins: [
-    ...plugins,
-    // storage-adapter-placeholder
-  ],
+  plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

@@ -80,6 +80,11 @@ export const enTranslations = {
     youDidNotRequestPassword:
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
+  dashboard: {
+    addWidget: 'Add Widget',
+    deleteWidget: 'Delete widget {{id}}',
+    searchWidgets: 'Search widgets...',
+  },
   error: {
     accountAlreadyActivated: 'This account has already been activated.',
     autosaving: 'There was a problem while autosaving this document.',
@@ -339,6 +344,7 @@ export const enTranslations = {
     loading: 'Loading',
     locale: 'Locale',
     locales: 'Locales',
+    lock: 'Lock',
     menu: 'Menu',
     moreOptions: 'More options',
     move: 'Move',
@@ -429,6 +435,7 @@ export const enTranslations = {
     trashedCountSuccessfully: '{{count}} {{label}} moved to trash.',
     true: 'True',
     unauthorized: 'Unauthorized',
+    unlock: 'Unlock',
     unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',
     unsavedChangesDuplicate: 'You have unsaved changes. Would you like to continue to duplicate?',
     untitled: 'Untitled',

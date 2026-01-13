@@ -14,12 +14,14 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -61,18 +63,11 @@ export const restoreVersionOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'restoreVersion',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'restoreVersion',
+    })
 
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
@@ -244,8 +239,7 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req,
-      skipValidation:
-        draftArg && collectionConfig.versions.drafts && !collectionConfig.versions.drafts.validate,
+      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////
@@ -262,13 +256,15 @@ export const restoreVersionOperation = async <
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
     result._status = draftArg ? 'draft' : result._status
-    result = await req.payload.db.updateOne({
-      id: parentDocID,
-      collection: collectionConfig.slug,
-      data: result,
-      req,
-      select,
-    })
+    if (!draftArg) {
+      result = await req.payload.db.updateOne({
+        id: parentDocID,
+        collection: collectionConfig.slug,
+        data: result,
+        req,
+        select,
+      })
+    }
 
     // /////////////////////////////////////
     // Save restored doc as a new version

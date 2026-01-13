@@ -79,6 +79,11 @@ export const koTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
+  dashboard: {
+    addWidget: '위젯 추가',
+    deleteWidget: '위젯 {{id}} 삭제',
+    searchWidgets: '위젯 검색...',
+  },
   error: {
     accountAlreadyActivated: '이 계정은 이미 활성화되었습니다.',
     autosaving: '이 문서를 자동 저장하는 중에 문제가 발생했습니다.',
@@ -335,6 +340,7 @@ export const koTranslations: DefaultTranslationsObject = {
     loading: '불러오는 중',
     locale: 'locale',
     locales: 'locale',
+    lock: '잠금',
     menu: '메뉴',
     moreOptions: '더 많은 옵션',
     move: '움직이세요',
@@ -426,6 +432,7 @@ export const koTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}}가 휴지통으로 이동했습니다.',
     true: '참',
     unauthorized: '권한 없음',
+    unlock: '잠금 해제',
     unsavedChanges: '저장되지 않은 변경 사항이 있습니다. 계속하기 전에 저장하거나 무시하십시오.',
     unsavedChangesDuplicate: '저장되지 않은 변경 사항이 있습니다. 복제를 계속하시겠습니까?',
     untitled: '제목 없음',

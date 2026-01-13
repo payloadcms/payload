@@ -25,11 +25,12 @@ const config = buildConfig({
     ecommercePlugin({
       // You must add your access control functions here
       access: {
-        adminOnly,
         adminOnlyFieldAccess,
-        adminOrCustomerOwner,
         adminOrPublishedStatus,
         customerOnlyFieldAccess,
+        isAdmin,
+        isAuthenticated,
+        isDocumentOwner,
       },
       customers: { slug: 'users' },
     }),
@@ -59,11 +60,12 @@ Note that the fields in overrides take a function that receives the default fiel
 ```ts
 ecommercePlugin({
   access: {
-    adminOnly,
     adminOnlyFieldAccess,
-    adminOrCustomerOwner,
     adminOrPublishedStatus,
     customerOnlyFieldAccess,
+    isAdmin,
+    isAuthenticated,
+    isDocumentOwner,
   },
   customers: {
     slug: 'users',
@@ -88,51 +90,24 @@ ecommercePlugin({
 
 ## Access
 
-The plugin requires access control functions in order to restrict permissions to certain collections or fields. You can override these functions by providing your own in the `access` option.
+The plugin requires access control functions in order to restrict permissions to certain collections or fields. You must provide these functions in the `access` option.
 
 | Option                    | Type          | Description                                                               |
 | ------------------------- | ------------- | ------------------------------------------------------------------------- |
-| `authenticatedOnly`       | `Access`      | Authenticated access only, provided by default.                           |
-| `publicAccess`            | `Access`      | Public access, provided by default.                                       |
-| `adminOnly`               | `Access`      | Limited to only admin users.                                              |
 | `adminOnlyFieldAccess`    | `FieldAccess` | Limited to only admin users, specifically for Field level access control. |
-| `adminOrCustomerOwner`    | `Access`      | Is the owner of the document via the `customer` field or is an admin.     |
 | `adminOrPublishedStatus`  | `Access`      | The document is published or user is admin.                               |
 | `customerOnlyFieldAccess` | `FieldAccess` | Limited to customers only, specifically for Field level access control.   |
+| `isAdmin`                 | `Access`      | Checks if the user is an admin.                                           |
+| `isAuthenticated`         | `Access`      | Checks if the user is authenticated (any role).                           |
+| `isDocumentOwner`         | `Access`      | Checks if the user owns the document being accessed.                      |
+| `publicAccess`            | `Access`      | (Optional) Entirely public access. Defaults to returning true.            |
 
-The default access control functions are:
+The plugin provides default implementations for `publicAccess` only:
 
 ```ts
 access: {
-  authenticatedOnly: ({ req: { user } }) => Boolean(user),
   publicAccess: () => true,
 }
-```
-
-### authenticatedOnly
-
-Access control to check if the user is authenticated. By default the following is provided:
-
-```ts
-authenticatedOnly: ({ req: { user } }) => Boolean(user)
-```
-
-### publicAccess
-
-Access control to allow public access. By default the following is provided:
-
-```ts
-publicAccess: () => true
-```
-
-### adminOnly
-
-Access control to check if the user has `admin` permissions.
-
-Example:
-
-```ts
-adminOnly: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
 ```
 
 ### adminOnlyFieldAccess
@@ -144,30 +119,6 @@ Example:
 ```ts
 adminOnlyFieldAccess: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('admin'))
-```
-
-### adminOrCustomerOwner
-
-Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field.
-
-Example:
-
-```ts
-adminOrCustomerOwner: ({ req: { user } }) => {
-  if (user && Boolean(user?.roles?.includes('admin'))) {
-    return true
-  }
-
-  if (user?.id) {
-    return {
-      customer: {
-        equals: user.id,
-      },
-    }
-  }
-
-  return false
-}
 ```
 
 ### adminOrPublishedStatus
@@ -198,6 +149,58 @@ Example:
 ```ts
 customerOnlyFieldAccess: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('customer'))
+```
+
+### isAdmin
+
+Access control to check if the user has `admin` permissions.
+
+Example:
+
+```ts
+isAdmin: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+```
+
+### isAuthenticated
+
+Access control to check if the user is authenticated (any role).
+
+Example:
+
+```ts
+isAuthenticated: ({ req: { user } }) => Boolean(user)
+```
+
+### isDocumentOwner
+
+Access control to check if the user owns the document being accessed via the `customer` field. Returns a Where query to filter documents by the customer field.
+
+Example:
+
+```ts
+isDocumentOwner: ({ req: { user } }) => {
+  if (user && Boolean(user?.roles?.includes('admin'))) {
+    return true
+  }
+
+  if (user?.id) {
+    return {
+      customer: {
+        equals: user.id,
+      },
+    }
+  }
+
+  return false
+}
+```
+
+### publicAccess
+
+Access control to allow public access. By default the following is provided:
+
+```ts
+publicAccess: () => true
 ```
 
 ## Addresses
@@ -240,10 +243,11 @@ import { defaultCountries } from '@payloadcms/plugin-ecommerce/client/react'
 
 ## Carts
 
-The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields. It also takes an object:
+The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields and enable guest carts. It also takes an object:
 
 | Option                    | Type                 | Description                                                                                                                    |
 | ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `allowGuestCarts`         | `boolean`            | Allow unauthenticated users to create carts. Defaults to `true`.                                                               |
 | `cartsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `carts` with a function where you can access the `defaultCollection` as an argument. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
@@ -264,8 +268,21 @@ carts: {
 }
 ```
 
+### Guest Carts
+
+By default, guest carts are enabled (`allowGuestCarts: true`), allowing unauthenticated users to create and manage carts. This is useful for anonymous checkout flows where users can shop without logging in.
+
+To disable guest carts and require authentication:
+
+```ts
+carts: {
+  allowGuestCarts: false,
+}
+```
+
 Carts are created when a customer adds their first item to the cart. The cart is then updated as they add or remove items. The cart is linked to a _Customer_ via the `customer` field. If the user is authenticated, this will be set to their user ID. If the user is not authenticated, this will be `null`.
-If the user is not authenticated, the cart ID is stored in local storage and used to fetch the cart on subsequent requests. Access control by default works so that if the user is not authenticated then they can only access carts that have no customer linked to them.
+
+When guest carts are enabled and the user is not authenticated, the cart ID is stored in local storage and used to fetch the cart on subsequent requests. Access control by default works so that if the user is not authenticated then they can only access carts that have no customer linked to them.
 
 ## Customers
 

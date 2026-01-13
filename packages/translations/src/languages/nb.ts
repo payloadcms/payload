@@ -79,6 +79,11 @@ export const nbTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
+  dashboard: {
+    addWidget: 'Legg til widget',
+    deleteWidget: 'Slett widget {{id}}',
+    searchWidgets: 'Søk widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',
     autosaving: 'Det oppstod et problem under automatisk lagring av dokumentet.',
@@ -338,6 +343,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     loading: 'Laster',
     locale: 'Språk',
     locales: 'Språk',
+    lock: 'Lås',
     menu: 'Meny',
     moreOptions: 'Flere alternativer',
     move: 'Flytt',
@@ -429,6 +435,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til søppel.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
+    unlock: 'Lås opp',
     unsavedChanges: 'Du har ulagrede endringer. Lagre eller forkast før du fortsetter.',
     unsavedChangesDuplicate: 'Du har ulagrede endringer. Vil du fortsette å duplisere?',
     untitled: 'Uten tittel',

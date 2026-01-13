@@ -6,7 +6,8 @@ import type {
 import type { CollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import {
   AuthenticationError,
   LockedAuth,
@@ -81,18 +82,11 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection?.config,
-            context: args.req.context,
-            operation: 'login',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'login',
+    })
 
     const {
       collection: { config: collectionConfig },

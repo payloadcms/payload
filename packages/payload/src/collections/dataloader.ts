@@ -3,7 +3,7 @@ import type { BatchLoadFn } from 'dataloader'
 import DataLoader from 'dataloader'
 
 import type { FindArgs } from '../database/types.js'
-import type { Payload } from '../index.js'
+import type { Payload, TypedFallbackLocale } from '../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 import type { Options } from './operations/local/find.js'
@@ -225,7 +225,7 @@ type CreateCacheKeyArgs = {
   depth: number
   docID: number | string
   draft: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   locale: string | string[]
   overrideAccess: boolean
   populate?: PopulateType

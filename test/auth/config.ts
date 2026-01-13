@@ -7,12 +7,15 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
+
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
   admin: {
@@ -21,6 +24,7 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    autoRefresh: true,
     components: {
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
       beforeLogin: ['./BeforeLogin.js#BeforeLogin'],

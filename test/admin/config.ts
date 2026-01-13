@@ -21,6 +21,7 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
 import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
+import { Localized } from './collections/Localized.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { NoTimestampsCollection } from './collections/NoTimestamps.js'
 import { CollectionNotInView } from './collections/NotInView.js'
@@ -44,6 +45,7 @@ import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customNestedViewPath,
   customParamViewPath,
@@ -53,6 +55,7 @@ import {
   publicCustomViewPath,
 } from './shared.js'
 import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -199,6 +202,7 @@ export default buildConfigWithDefaults({
     ListViewSelectAPI,
     Virtuals,
     NoTimestampsCollection,
+    Localized,
   ],
   globals: [
     GlobalHidden,

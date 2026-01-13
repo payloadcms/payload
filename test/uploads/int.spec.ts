@@ -8,6 +8,7 @@ import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
@@ -151,6 +152,24 @@ describe('Collections - Uploads', () => {
         expect(doc.height).toBeDefined()
       })
 
+      it('should upload svg in an image mimetype restricted collection', async () => {
+        const filePath = path.join(dirname, './image.svg')
+        const formData = new FormData()
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/any-images`, {
+          body: formData,
+          file,
+        })
+
+        const { doc } = await response.json()
+        await handle.close()
+
+        expect(response.status).toBe(201)
+        expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
       it('should have valid image url', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.svg')
@@ -269,6 +288,21 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
+      it('should not allow html file to be uploaded to PDF only collection', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './test.html')
+        const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
+        formData.append('file', file)
+        formData.append('contentType', 'application/pdf')
+
+        const response = await restClient.POST(`/${pdfOnlySlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
       it('should not allow invalid mimeType to be created', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
@@ -278,6 +312,20 @@ describe('Collections - Uploads', () => {
         formData.append('contentType', 'image/png')
 
         const response = await restClient.POST(`/${restrictedMimeTypesSlug}`, {
+          body: formData,
+        })
+        await handle.close()
+
+        expect(response.status).toBe(400)
+      })
+
+      it('should not allow corrupted SVG to be created', async () => {
+        const formData = new FormData()
+        const filePath = path.join(dirname, './corrupt.svg')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${svgOnlySlug}`, {
           body: formData,
         })
         await handle.close()
@@ -721,7 +769,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
           collection: skipSafeFetchMediaSlug,
@@ -751,7 +799,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         // spin up a temporary server so fetch to the local doesn't fail
         const server = createServer((req, res) => {
@@ -795,7 +843,7 @@ describe('Collections - Uploads', () => {
           '; ',
         )
 
-        const fetchSpy = jest.spyOn(global, 'fetch')
+        const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
           collection: skipSafeFetchHeaderFilterSlug,
@@ -852,7 +900,6 @@ describe('Collections - Uploads', () => {
           const isIPV6 = hostname.includes('::')
 
           // Strip brackets from IPv6 addresses
-          // eslint-disable-next-line jest/no-conditional-in-test
           if (isIPV6) {
             hostname = hostname.slice(1, -1)
           }
@@ -861,7 +908,6 @@ describe('Collections - Uploads', () => {
           // we'd like to test for
           // @ts-expect-error this does not need to be mocked 100% correctly
           _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             callback(null, hostname as any, isIPV6 ? 6 : 4)
           }
 
@@ -1265,6 +1311,291 @@ describe('Collections - Uploads', () => {
       const expectedPath = path.join(dirname, './media')
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
+    })
+  })
+
+  describe('serverURL handling', () => {
+    it('should store relative URLs in database even when serverURL is set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+        expect(mediaDoc.url).toBeDefined()
+
+        // payload.find should return full URLs with serverURL prefix (through afterRead hooks)
+        expect(mediaDoc.url).toContain('http://local-images:3000')
+        expect(mediaDoc.sizes?.tablet?.url).toContain('http://local-images:3000')
+        expect(mediaDoc.sizes?.icon?.url).toContain('http://local-images:3000')
+
+        // Direct database query should return relative URLs (no hooks applied)
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: mediaDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        expect(dbDoc.sizes?.icon?.url).toBeDefined()
+        expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+
+    it('should strip serverURL when duplicating an upload with serverURL set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'duplicate-serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+
+        // Duplicate the upload (this will pass full URLs from afterRead hooks)
+        const duplicatedDoc = (await payload.duplicate({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+        })) as unknown as Media
+
+        expect(duplicatedDoc).toBeDefined()
+        expect(duplicatedDoc.id).not.toEqual(mediaDoc.id)
+
+        // Check that the duplicated file exists
+        const expectedPath = path.join(dirname, './media')
+        expect(duplicatedDoc.filename).toBeDefined()
+        expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename!))).toBe(true)
+
+        // Direct database query on duplicated doc should return relative URLs
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: duplicatedDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+
+    it('should strip serverURL when updating an upload with serverURL set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'update-serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+
+        // Update the upload (changing focal point triggers a re-upload)
+        const updatedDoc = (await payload.update({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+          data: {
+            focalX: 75,
+            focalY: 25,
+          },
+        })) as unknown as Media
+
+        expect(updatedDoc).toBeDefined()
+        expect(updatedDoc.focalX).toEqual(75)
+        expect(updatedDoc.focalY).toEqual(25)
+
+        // Direct database query on updated doc should return relative URLs
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: updatedDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+  })
+
+  describe('HTTP Range Requests', () => {
+    let uploadedDoc: Media
+    let uploadedFilename: string
+    let fileSize: number
+
+    beforeAll(async () => {
+      // Upload a test file for range request testing
+      const filePath = path.join(dirname, './audio.mp3')
+      const file = await getFileByPath(filePath)
+
+      uploadedDoc = (await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      uploadedFilename = uploadedDoc.filename
+      const stats = await stat(filePath)
+      fileSize = stats.size
+    })
+
+    it('should return Accept-Ranges header on full file request', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`)
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Accept-Ranges')).toBe('bytes')
+      expect(response.headers.get('Content-Length')).toBe(String(fileSize))
+    })
+
+    it('should handle range request with single byte range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=0-1023' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 0-1023/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe('1024')
+      expect(response.headers.get('Accept-Ranges')).toBe('bytes')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1024)
+    })
+
+    it('should handle range request with open-ended range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=1024-' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 1024-${fileSize - 1}/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe(String(fileSize - 1024))
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(fileSize - 1024)
+    })
+
+    it('should handle range request for suffix bytes', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=-512' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(
+        `bytes ${fileSize - 512}-${fileSize - 1}/${fileSize}`,
+      )
+      expect(response.headers.get('Content-Length')).toBe('512')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(512)
+    })
+
+    it('should return 416 for invalid range (start > file size)', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: `bytes=${fileSize + 1000}-` },
+      })
+
+      expect(response.status).toBe(416)
+      expect(response.headers.get('Content-Range')).toBe(`bytes */${fileSize}`)
+    })
+
+    it('should handle multi-range requests by returning first range', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: 'bytes=0-1023,2048-3071' },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(`bytes 0-1023/${fileSize}`)
+      expect(response.headers.get('Content-Length')).toBe('1024')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1024)
+    })
+
+    it('should handle range at end of file', async () => {
+      const lastByte = fileSize - 1
+      const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
+        headers: { Range: `bytes=${lastByte}-${lastByte}` },
+      })
+
+      expect(response.status).toBe(206)
+      expect(response.headers.get('Content-Range')).toBe(
+        `bytes ${lastByte}-${lastByte}/${fileSize}`,
+      )
+      expect(response.headers.get('Content-Length')).toBe('1')
+
+      const arrayBuffer = await response.arrayBuffer()
+      expect(arrayBuffer.byteLength).toBe(1)
     })
   })
 })

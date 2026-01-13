@@ -9,7 +9,6 @@ import { getTransaction } from './utilities/getTransaction.js'
 import { DistinctSymbol } from './utilities/rawConstraint.js'
 
 export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, args) {
-  const db = await getTransaction(this, args.req)
   const collectionConfig: SanitizedCollectionConfig =
     this.payload.collections[args.collection].config
   const page = args.page || 1
@@ -35,6 +34,8 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
   })
 
   orderBy.pop()
+
+  const db = await getTransaction(this, args.req)
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,

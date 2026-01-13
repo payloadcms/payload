@@ -24,6 +24,7 @@ import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -97,7 +98,7 @@ export const updateOperation = async <
     let { data } = args
 
     const isSavingDraft =
-      Boolean(draftArg && globalConfig.versions?.drafts) && data._status !== 'published'
+      Boolean(draftArg && hasDraftsEnabled(globalConfig)) && data._status !== 'published'
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -229,8 +230,7 @@ export const updateOperation = async <
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation:
-        isSavingDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)

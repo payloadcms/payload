@@ -122,6 +122,7 @@ export type SanitizedGlobalVersions = {
 export type TypeWithVersion<T> = {
   createdAt: string
   id: string
+  latest?: boolean
   parent: number | string
   publishedLocale?: string
   snapshot?: boolean

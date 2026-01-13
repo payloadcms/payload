@@ -47,6 +47,7 @@ test/media
 *payloadtests.db-shm
 *payloadtests.db-wal
 /versions
+no-restrict-file-*
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,webstorm,sublimetext,visualstudiocode
@@ -343,6 +344,8 @@ test/google-cloud-storage
 test/azurestoragedata/
 /media-without-delete-access
 /media-documents
+/media-with-always-insert-fields
+
 
 
 licenses.csv

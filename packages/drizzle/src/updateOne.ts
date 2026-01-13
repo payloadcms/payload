@@ -25,10 +25,11 @@ export const updateOne: UpdateOne = async function updateOne(
     where: whereArg,
   },
 ) {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   let idToUpdate = id
+
+  const db = await getTransaction(this, req)
 
   if (!idToUpdate) {
     const { joins, selectFields, where } = buildQuery({
@@ -77,6 +78,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const result = await upsertRow({
     id: idToUpdate,
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: collection.flattenedFields,

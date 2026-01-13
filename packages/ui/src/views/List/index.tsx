@@ -71,6 +71,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const {
     config: {
       routes: { admin: adminRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -140,7 +141,17 @@ export function DefaultListView(props: ListViewClientProps) {
 
       setStepNav(navItems)
     }
-  }, [adminRoute, setStepNav, labels, isInDrawer, isTrashEnabled, viewType, i18n, collectionSlug])
+  }, [
+    adminRoute,
+    setStepNav,
+    serverURL,
+    labels,
+    isInDrawer,
+    isTrashEnabled,
+    viewType,
+    i18n,
+    collectionSlug,
+  ])
 
   return (
     <Fragment>

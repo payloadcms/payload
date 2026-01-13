@@ -20,28 +20,35 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
       'X-Payload-HTTP-Method-Override',
     ]
 
-    headers.set('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS')
-
-    if (typeof cors === 'object' && 'headers' in cors) {
-      headers.set(
-        'Access-Control-Allow-Headers',
-        [...defaultAllowedHeaders, ...cors.headers].filter(Boolean).join(', '),
-      )
-    } else {
-      headers.set('Access-Control-Allow-Headers', defaultAllowedHeaders.join(', '))
+    // Only set default CORS headers if they haven't been set by custom handler
+    if (!headers.has('Access-Control-Allow-Methods')) {
+      headers.set('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS')
     }
 
-    if (cors === '*' || (typeof cors === 'object' && 'origins' in cors && cors.origins === '*')) {
-      headers.set('Access-Control-Allow-Origin', '*')
-    } else if (
-      (Array.isArray(cors) && cors.indexOf(requestOrigin!) > -1) ||
-      (!Array.isArray(cors) &&
-        typeof cors === 'object' &&
-        'origins' in cors &&
-        cors.origins.indexOf(requestOrigin!) > -1)
-    ) {
-      headers.set('Access-Control-Allow-Credentials', 'true')
-      headers.set('Access-Control-Allow-Origin', requestOrigin!)
+    if (!headers.has('Access-Control-Allow-Headers')) {
+      if (typeof cors === 'object' && 'headers' in cors) {
+        headers.set(
+          'Access-Control-Allow-Headers',
+          [...defaultAllowedHeaders, ...cors.headers].filter(Boolean).join(', '),
+        )
+      } else {
+        headers.set('Access-Control-Allow-Headers', defaultAllowedHeaders.join(', '))
+      }
+    }
+
+    if (!headers.has('Access-Control-Allow-Origin')) {
+      if (cors === '*' || (typeof cors === 'object' && 'origins' in cors && cors.origins === '*')) {
+        headers.set('Access-Control-Allow-Origin', '*')
+      } else if (
+        (Array.isArray(cors) && cors.indexOf(requestOrigin!) > -1) ||
+        (!Array.isArray(cors) &&
+          typeof cors === 'object' &&
+          'origins' in cors &&
+          cors.origins.indexOf(requestOrigin!) > -1)
+      ) {
+        headers.set('Access-Control-Allow-Credentials', 'true')
+        headers.set('Access-Control-Allow-Origin', requestOrigin!)
+      }
     }
   }
 

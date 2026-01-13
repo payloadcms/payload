@@ -7,9 +7,12 @@ import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } fro
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
+import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
 import { registerTool } from './registerTool.js'
 
 // Tools
+import { findGlobalTool } from './tools/global/find.js'
+import { updateGlobalTool } from './tools/global/update.js'
 import { createResourceTool } from './tools/resource/create.js'
 import { deleteResourceTool } from './tools/resource/delete.js'
 import { findResourceTool } from './tools/resource/find.js'
@@ -43,8 +46,29 @@ export const getMCPHandler = (
   const { payload } = req
   const configSchema = configToJSONSchema(payload.config)
 
+  // Handler wrapper that injects req before the _extra argument
+  const wrapHandler = (handler: (...args: any[]) => any) => {
+    return async (...args: any[]) => {
+      const _extra = args[args.length - 1]
+      const handlerArgs = args.slice(0, -1)
+      return await handler(...handlerArgs, req, _extra)
+    }
+  }
+
+  const payloadToolHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['tools']>[number]['handler'],
+  ) => wrapHandler(handler)
+
+  const payloadPromptHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['prompts']>[number]['handler'],
+  ) => wrapHandler(handler)
+
+  const payloadResourceHandler = (
+    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['resources']>[number]['handler'],
+  ) => wrapHandler(handler)
+
   // User
-  const user = mcpAccessSettings.user as TypedUser
+  const user = mcpAccessSettings.user
 
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
@@ -60,6 +84,7 @@ export const getMCPHandler = (
   const experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] =
     pluginOptions?.experimental?.tools || {}
   const collectionsPluginConfig = pluginOptions.collections || {}
+  const globalsPluginConfig = pluginOptions.globals || {}
   const collectionsDirPath =
     experimentalTools && experimentalTools.collections?.collectionsDirPath
       ? experimentalTools.collections.collectionsDirPath
@@ -76,32 +101,8 @@ export const getMCPHandler = (
   try {
     return createMcpHandler(
       (server) => {
-        const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
-          (collection) => {
-            const fullyEnabled =
-              typeof collectionsPluginConfig?.[collection]?.enabled === 'boolean' &&
-              collectionsPluginConfig?.[collection]?.enabled
-
-            if (fullyEnabled) {
-              return true
-            }
-
-            const partiallyEnabled =
-              typeof collectionsPluginConfig?.[collection]?.enabled !== 'boolean' &&
-              ((typeof collectionsPluginConfig?.[collection]?.enabled?.find === 'boolean' &&
-                collectionsPluginConfig?.[collection]?.enabled?.find === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.create === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.create === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.update === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.update === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.delete === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.delete === true))
-
-            if (partiallyEnabled) {
-              return true
-            }
-          },
-        )
+        // Get enabled collections
+        const enabledCollectionSlugs = getEnabledSlugs(collectionsPluginConfig, 'collection')
 
         // Collection Operation Tools
         enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
@@ -194,6 +195,62 @@ export const getMCPHandler = (
           }
         })
 
+        // Global Operation Tools
+        const enabledGlobalSlugs = getEnabledSlugs(globalsPluginConfig, 'global')
+
+        enabledGlobalSlugs.forEach((enabledGlobalSlug) => {
+          try {
+            const schema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+
+            const toolCapabilities = mcpAccessSettings?.[
+              `${toCamelCase(enabledGlobalSlug)}`
+            ] as Record<string, unknown>
+            const allowFind: boolean | undefined = toolCapabilities?.['find'] as boolean
+            const allowUpdate: boolean | undefined = toolCapabilities?.['update'] as boolean
+
+            if (allowFind) {
+              registerTool(
+                allowFind,
+                `Find ${enabledGlobalSlug}`,
+                () =>
+                  findGlobalTool(
+                    server,
+                    req,
+                    user,
+                    useVerboseLogs,
+                    enabledGlobalSlug,
+                    globalsPluginConfig,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+            if (allowUpdate) {
+              registerTool(
+                allowUpdate,
+                `Update ${enabledGlobalSlug}`,
+                () =>
+                  updateGlobalTool(
+                    server,
+                    req,
+                    user,
+                    useVerboseLogs,
+                    enabledGlobalSlug,
+                    globalsPluginConfig,
+                    schema,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+          } catch (error) {
+            throw new APIError(
+              `Error registering tools for global ${enabledGlobalSlug}: ${String(error)}`,
+              500,
+            )
+          }
+        })
+
         // Custom tools
         customMCPTools.forEach((tool) => {
           const camelCasedToolName = toCamelCase(tool.name)
@@ -202,7 +259,13 @@ export const getMCPHandler = (
           registerTool(
             isToolEnabled,
             tool.name,
-            () => server.tool(tool.name, tool.description, tool.parameters, tool.handler),
+            () =>
+              server.tool(
+                tool.name,
+                tool.description,
+                tool.parameters,
+                payloadToolHandler(tool.handler),
+              ),
             payload,
             useVerboseLogs,
           )
@@ -222,7 +285,7 @@ export const getMCPHandler = (
                 description: prompt.description,
                 title: prompt.title,
               },
-              prompt.handler,
+              payloadPromptHandler(prompt.handler),
             )
             if (useVerboseLogs) {
               payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
@@ -248,7 +311,7 @@ export const getMCPHandler = (
                 mimeType: resource.mimeType,
                 title: resource.title,
               },
-              resource.handler,
+              payloadResourceHandler(resource.handler),
             )
 
             if (useVerboseLogs) {

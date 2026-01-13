@@ -80,6 +80,11 @@ export const ukTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
+  dashboard: {
+    addWidget: 'Додати віджет',
+    deleteWidget: 'Видалити віджет {{id}}',
+    searchWidgets: 'Пошук віджетів...',
+  },
   error: {
     accountAlreadyActivated: 'Цей обліковий запис вже активований',
     autosaving: 'Виникла проблема під час автозбереження цього документа.',
@@ -337,6 +342,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     loading: 'Завантаження',
     locale: 'Локалізація',
     locales: 'Локалізації',
+    lock: 'Замок',
     menu: 'Меню',
     moreOptions: 'Додатково',
     move: 'Перемістити',
@@ -426,6 +432,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} перенесено в кошик.',
     true: 'Так',
     unauthorized: 'Немає доступу',
+    unlock: 'Розблокувати',
     unsavedChanges: 'У вас є незбережені зміни. Збережіть або скасуйте перед продовженням.',
     unsavedChangesDuplicate: 'Ви маєте незбережені зміни. Чи бажаєте ви продовжити дублювання?',
     untitled: 'Без назви',

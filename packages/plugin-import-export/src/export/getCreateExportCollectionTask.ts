@@ -1,16 +1,26 @@
-import type { Config, TaskConfig, TypedUser } from 'payload'
+import type { Config, PayloadRequest, TaskConfig, TypedUser } from 'payload'
 
 import type { ImportExportPluginConfig } from '../types.js'
-import type { CreateExportArgs, Export } from './createExport.js'
+import type { Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
+
+/**
+ * Export input type for job queue serialization.
+ * When exports are queued as jobs, the user must be serialized as an ID string or number
+ * along with the collection name so it can be rehydrated when the job runs.
+ */
+export type ExportJobInput = {
+  user: number | string
+  userCollection: string
+} & Export
 
 export const getCreateCollectionExportTask = (
   config: Config,
   pluginConfig?: ImportExportPluginConfig,
 ): TaskConfig<{
-  input: Export
+  input: ExportJobInput
   output: object
 }> => {
   const inputSchema = getFields(config, pluginConfig).concat(
@@ -30,7 +40,7 @@ export const getCreateCollectionExportTask = (
 
   return {
     slug: 'createCollectionExport',
-    handler: async ({ input, req }: CreateExportArgs) => {
+    handler: async ({ input, req }: { input: ExportJobInput; req: PayloadRequest }) => {
       let user: TypedUser | undefined
 
       if (input.userCollection && input.user) {
@@ -38,13 +48,18 @@ export const getCreateCollectionExportTask = (
           id: input.user,
           collection: input.userCollection,
         })) as TypedUser
+
+        req.user = user
       }
 
       if (!user) {
         throw new Error('User not found')
       }
 
-      await createExport({ input, req, user })
+      // Strip out user and userCollection from input - they're only needed for rehydration
+      const { user: _userId, userCollection: _userCollection, ...exportInput } = input
+
+      await createExport({ input: exportInput, req, user })
 
       return {
         output: {},

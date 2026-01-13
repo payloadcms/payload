@@ -78,6 +78,11 @@ export const heTranslations: DefaultTranslationsObject = {
       'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
+  dashboard: {
+    addWidget: "הוסף וידג'ט",
+    deleteWidget: "מחק וידג'ט {{id}}",
+    searchWidgets: "חפש ווידג'טים...",
+  },
   error: {
     accountAlreadyActivated: 'חשבון זה כבר הופעל.',
     autosaving: 'אירעה בעיה בזמן שמירה אוטומטית של מסמך זה.',
@@ -328,6 +333,7 @@ export const heTranslations: DefaultTranslationsObject = {
     loading: 'טוען',
     locale: 'שפה',
     locales: 'שפות',
+    lock: 'נעילה',
     menu: 'תפריט',
     moreOptions: 'אפשרויות נוספות',
     move: 'הזוז',
@@ -416,6 +422,7 @@ export const heTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} הועברו לפח.',
     true: 'True',
     unauthorized: 'אין הרשאה',
+    unlock: 'שחרר',
     unsavedChanges: 'יש לך שינויים שלא נשמרו. שמור או מחק לפני שתמשיך.',
     unsavedChangesDuplicate: 'יש לך שינויים שלא נשמרו. האם ברצונך להמשיך לשכפל?',
     untitled: 'ללא כותרת',

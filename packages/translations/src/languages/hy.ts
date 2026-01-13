@@ -79,6 +79,11 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  dashboard: {
+    addWidget: 'Ավելացնել վիճակագրություն',
+    deleteWidget: 'Ջնջել վիդջեթը {{id}}',
+    searchWidgets: 'Որոնել վիջեթներ...',
+  },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',
     autosaving: 'Այս փաստաթղթի ավտոմատ պահպանման ժամանակ խնդիր է առաջացել։',
@@ -339,6 +344,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     loading: 'Բեռնում',
     locale: 'Լոկալ',
     locales: 'Լոկալներ',
+    lock: 'Կողպել',
     menu: 'Մենյու',
     moreOptions: 'Լրացուցիչ ընտրանքներ',
     move: 'Տեղափոխվել',
@@ -430,6 +436,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
+    unlock: 'Բացարձակել',
     unsavedChanges:
       'Դուք ունեք չպահպանված փոփոխություններ։ Պահպանեք կամ հեռացեք նախքան շարունակելը։',
     unsavedChangesDuplicate:

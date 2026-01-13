@@ -8,10 +8,7 @@ import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeCh
 import { validateOptions } from './hooks/validateOptions.js'
 
 type Props = {
-  access: {
-    adminOnly: NonNullable<AccessConfig['adminOnly']>
-    adminOrPublishedStatus: NonNullable<AccessConfig['adminOrPublishedStatus']>
-  }
+  access: Pick<AccessConfig, 'adminOrPublishedStatus' | 'isAdmin'>
   currenciesConfig?: CurrenciesConfig
   /**
    * Enables inventory tracking for variants. Defaults to true.
@@ -29,7 +26,7 @@ type Props = {
 
 export const createVariantsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
-    access: { adminOnly, adminOrPublishedStatus },
+    access,
     currenciesConfig,
     inventory = true,
     productsSlug = 'products',
@@ -95,10 +92,10 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
   const baseConfig: CollectionConfig = {
     slug: 'variants',
     access: {
-      create: adminOnly,
-      delete: adminOnly,
-      read: adminOrPublishedStatus,
-      update: adminOnly,
+      create: access.isAdmin,
+      delete: access.isAdmin,
+      read: access.adminOrPublishedStatus,
+      update: access.isAdmin,
     },
     admin: {
       description: ({ t }) =>

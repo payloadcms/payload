@@ -1,0 +1,35 @@
+# Docker Compose for MongoDB Atlas Local
+# All-in-one container with Atlas Search and Vector Search built-in
+#
+# Usage:
+#   pnpm docker:mongodb-atlas:start    - Start MongoDB Atlas Local
+#   pnpm docker:mongodb-atlas:stop     - Stop
+#   pnpm docker:mongodb-atlas:restart:clean - Restart and remove all data
+#
+# For more information, see:
+# https://hub.docker.com/r/mongodb/mongodb-atlas-local
+# https://www.mongodb.com/docs/atlas/cli/current/atlas-cli-deploy-docker/
+
+services:
+  mongodb-atlas:
+    image: mongodb/mongodb-atlas-local:latest
+    container_name: mongodb-atlas-payload-test
+    hostname: mongodb-atlas-local # Sets a fixed replica set name (used in connection string replicaSet param)
+    ports:
+      - '27019:27017'
+    volumes:
+      - mongodb_atlas_data:/data/db
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=
+      - MONGODB_INITDB_ROOT_PASSWORD=
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  mongodb_atlas_data:
+    driver: local

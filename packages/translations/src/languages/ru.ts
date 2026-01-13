@@ -80,6 +80,11 @@ export const ruTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным.',
   },
+  dashboard: {
+    addWidget: 'Добавить виджет',
+    deleteWidget: 'Удалить виджет {{id}}',
+    searchWidgets: 'Поиск виджетов...',
+  },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',
     autosaving: 'При автосохранении этого документа возникла проблема.',
@@ -340,6 +345,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     loading: 'Загрузка',
     locale: 'Локаль',
     locales: 'Локали',
+    lock: 'Замок',
     menu: 'Меню',
     moreOptions: 'Больше вариантов',
     move: 'Переместить',
@@ -429,6 +435,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} перемещено в корзину.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
+    unlock: 'Разблокировать',
     unsavedChanges:
       'У вас есть несохраненные изменения. Сохраните или отмените их перед продолжением.',
     unsavedChangesDuplicate:

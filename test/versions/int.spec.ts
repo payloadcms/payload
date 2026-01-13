@@ -1,11 +1,12 @@
-import type { JsonObject, Payload } from 'payload'
+import type { JsonObject, Payload} from 'payload';
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import path from 'path'
-import { createLocalReq, ValidationError } from 'payload'
+import { createLocalReq, saveVersion, ValidationError  } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
@@ -428,6 +429,53 @@ describe('Versions', () => {
           where: { id: { equals: post.id } },
         })
         expect(await getVersionsCount()).toBe(2)
+      })
+
+      it('should return null when saving a version with returning:false', async () => {
+        const collection = autosaveCollectionSlug
+        const collectionConfig = payload.collections[autosaveCollectionSlug].config
+
+        const post = await payload.create({
+          collection,
+          data: { description: 'description' },
+          draft: true,
+        })
+
+        const result = await saveVersion({
+          id: post.id,
+          collection: collectionConfig,
+          docWithLocales: post,
+          operation: 'create',
+          payload,
+          returning: false,
+        })
+
+        expect(result).toBeNull()
+      })
+    })
+
+    describe('Duplicate', () => {
+      it('should duplicate a versioned document as a draft', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original description',
+            title: 'Original Title',
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        const duplicatedDoc = await payload.create({
+          duplicateFromID: originalDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        expect(duplicatedDoc._status).toBe('draft')
       })
     })
 

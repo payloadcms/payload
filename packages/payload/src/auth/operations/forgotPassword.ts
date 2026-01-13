@@ -9,7 +9,8 @@ import type {
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -64,19 +65,11 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
-
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection?.config,
-            context: args.req.context,
-            operation: 'forgotPassword',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'forgotPassword',
+    })
 
     const {
       collection: { config: collectionConfig },

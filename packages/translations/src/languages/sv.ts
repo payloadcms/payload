@@ -79,6 +79,11 @@ export const svTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
+  dashboard: {
+    addWidget: 'Lägg till Widget',
+    deleteWidget: 'Radera widget {{id}}',
+    searchWidgets: 'Sök widgetar...',
+  },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',
     autosaving: 'Det uppstod ett problem när det här dokumentet skulle sparas automatiskt.',
@@ -338,6 +343,7 @@ export const svTranslations: DefaultTranslationsObject = {
     loading: 'Laddar...',
     locale: 'Språk',
     locales: 'Språk',
+    lock: 'Lås',
     menu: 'Meny',
     moreOptions: 'Fler alternativ',
     move: 'Flytta',
@@ -429,6 +435,7 @@ export const svTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttades till papperskorgen.',
     true: 'Sann',
     unauthorized: 'Obehörig',
+    unlock: 'Lås upp',
     unsavedChanges: 'Du har osparade ändringar. Spara innan du fortsätter.',
     unsavedChangesDuplicate: 'Du har osparade ändringar. Vill du fortsätta att duplicera?',
     untitled: 'Namnlös',

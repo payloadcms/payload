@@ -12,6 +12,7 @@ import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { formatNames } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
+import { optionsAreEqual } from './optionsAreEqual.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -142,6 +143,30 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
     return {
       type: 'string',
       enum: locales,
+    }
+  }
+
+  return {
+    type: 'null',
+  }
+}
+
+function generateFallbackLocaleEntitySchemas(
+  localization: SanitizedConfig['localization'],
+): JSONSchema4 {
+  if (localization && 'localeCodes' in localization && localization?.localeCodes) {
+    const localeCodes = [...localization.localeCodes].map((localeCode) => {
+      return localeCode
+    }, [])
+
+    return {
+      oneOf: [
+        { type: 'string', enum: ['false', 'none', 'null'] },
+        { type: 'boolean', enum: [false] },
+        { type: 'null' },
+        { type: 'string', enum: localeCodes },
+        { type: 'array', items: { type: 'string', enum: localeCodes } },
+      ],
     }
   }
 
@@ -638,8 +663,15 @@ export function fieldsToJSONSchema(
             const isTimezoneField =
               previousField?.type === 'date' && previousField.timezone && field.name.includes('_tz')
 
+            // Check if the timezone field's options match the global config's supported timezones
+            const hasMatchingGlobalTimezones =
+              isTimezoneField &&
+              config &&
+              optionsAreEqual(field.options, config.admin?.timezones?.supportedTimezones)
+
             // Timezone selects should reference the supportedTimezones definition
-            if (isTimezoneField) {
+            // only if the field's options match the global config
+            if (isTimezoneField && hasMatchingGlobalTimezones) {
               fieldSchema = {
                 $ref: `#/definitions/supportedTimezones`,
               }
@@ -1241,18 +1273,29 @@ export function configToJSONSchema(
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
+      fallbackLocale: generateFallbackLocaleEntitySchemas(config.localization),
       globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
+      ...(config.typescript?.strictDraftTypes
+        ? {
+            strictDraftTypes: {
+              type: 'boolean',
+              const: true,
+            },
+          }
+        : {}),
       user: generateAuthEntitySchemas(config.collections),
     },
     required: [
       'user',
       'locale',
+      'fallbackLocale',
       'collections',
       'collectionsSelect',
       'collectionsJoins',
       'globalsSelect',
+      ...(config.typescript?.strictDraftTypes ? ['strictDraftTypes'] : []),
       'globals',
       'auth',
       'db',

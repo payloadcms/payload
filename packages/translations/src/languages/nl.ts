@@ -80,6 +80,11 @@ export const nlTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
+  dashboard: {
+    addWidget: 'Widget toevoegen',
+    deleteWidget: 'Verwijder widget {{id}}',
+    searchWidgets: 'Zoek widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',
     autosaving: 'Er is een probleem opgetreden bij het automatisch bewaren van dit document.',
@@ -345,6 +350,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     loading: 'Laden',
     locale: 'Taal',
     locales: 'Talen',
+    lock: 'Slot',
     menu: 'Menu',
     moreOptions: 'Meer opties',
     move: 'Verplaatsen',
@@ -436,6 +442,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} verplaatst naar prullenbak.',
     true: 'Waar',
     unauthorized: 'Onbevoegd',
+    unlock: 'Ontgrendelen',
     unsavedChanges: 'U heeft niet-opgeslagen wijzigingen. Sla op of verwijder voordat u doorgaat.',
     unsavedChangesDuplicate: 'U heeft onbewaarde wijzigingen. Wilt u doorgaan met dupliceren?',
     untitled: 'Zonder titel',

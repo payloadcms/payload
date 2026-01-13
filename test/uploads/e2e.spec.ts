@@ -44,8 +44,10 @@ import {
   mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
+  noFilesRequiredSlug,
   relationPreviewSlug,
   relationSlug,
+  relationToNoFilesRequiredSlug,
   svgOnlySlug,
   threeDimensionalSlug,
   withMetadataSlug,
@@ -95,6 +97,8 @@ let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
 let mediaWithImageSizeAdminPropsURL: AdminUrlUtil
+let noFilesRequiredURL: AdminUrlUtil
+let relationToNoFilesRequiredURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -137,6 +141,8 @@ describe('Uploads', () => {
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
     mediaWithImageSizeAdminPropsURL = new AdminUrlUtil(serverURL, mediaWithImageSizeAdminPropsSlug)
+    noFilesRequiredURL = new AdminUrlUtil(serverURL, noFilesRequiredSlug)
+    relationToNoFilesRequiredURL = new AdminUrlUtil(serverURL, relationToNoFilesRequiredSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -463,8 +469,10 @@ describe('Uploads', () => {
     // fill the title with 'draft'
     await page.locator('#field-title').fill('draft')
 
-    // save draft
-    await page.locator('#action-save-draft').click()
+    await saveDocAndAssert(
+      page,
+      '.payload__modal-item .collection-edit--versions button#action-save-draft',
+    )
 
     // close the drawer
     await page.locator('.doc-drawer__header-close').click()
@@ -855,10 +863,10 @@ describe('Uploads', () => {
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
-    // Ensure the URL starts correctly
+    // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -899,7 +907,7 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
@@ -1105,7 +1113,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
-      await expect(errorCount).toHaveText('3')
+      await expect(errorCount).toHaveText('2')
 
       await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
@@ -1268,6 +1276,287 @@ describe('Uploads', () => {
 
       // should show add files dropzone view
       await expect(fieldBulkUploadDrawer.locator('.bulk-upload--add-files')).toBeVisible()
+    })
+
+    test('should show error when bulk uploading files with missing filenames and allow retry after fixing', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
+
+      await bulkUploadModal
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-one')
+
+      // Clear the filename from the first file
+      await bulkUploadModal.locator('.file-field__filename').clear()
+
+      const nextImageChevronButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextImageChevronButton.click()
+
+      await bulkUploadModal
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-two')
+
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show error message for failed files
+      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 1 files')
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Successfully saved 1 files',
+      )
+
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
+      await expect(errorCount).toHaveText('1')
+
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Navigate back to first file to fix it
+      const prevImageChevronButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
+      )
+      await prevImageChevronButton.click()
+
+      // Should show "A file name is required" error message
+      await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
+
+      // Filename field should be empty (as we cleared it)
+      await expect(bulkUploadModal.locator('.file-field__filename')).toHaveValue('')
+
+      // Add the filename back
+      await bulkUploadModal.locator('.file-field__filename').fill('fixed-filename.png')
+
+      await saveButton.click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Successfully saved 1 files',
+      )
+
+      await expect(bulkUploadModal).toBeHidden()
+
+      const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
+      await expect(items).toHaveCount(2)
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should show correct error count when bulk uploading files with validation errors', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files - omit required field to trigger validation error
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+          path.resolve(dirname, './small.png'),
+        ])
+
+      // Do not fill in the required 'prefix' field for any of the uploads
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show error message for all failed files
+      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 3 files')
+
+      // Check that each file has exactly 1 error (the missing required field)
+      const errorCounts = await bulkUploadModal
+        .locator('.file-selections .file-selections__fileRow .error-pill__count')
+        .allTextContents()
+
+      // All 3 files should have error count of 1
+      expect(errorCounts).toEqual(['1', '1', '1'])
+    })
+
+    test('should maintain correct error counts when cycling through forms after submit with errors', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Upload 3 files
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+          path.resolve(dirname, './small.png'),
+        ])
+
+      // Form 1: Fill prefix but remove file (should have 1 error: missing file)
+      await bulkUploadModal.locator('#field-prefix').fill('prefix-one')
+      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+
+      // Form 2: Omit prefix and remove file (should have 2 errors: missing file + missing prefix)
+      const nextButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextButton.click()
+      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+
+      // Form 3: Fill prefix and keep file (should have 0 errors - will succeed)
+      await nextButton.click()
+      await bulkUploadModal.locator('#field-prefix').fill('prefix-three')
+
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show mixed results: 1 successful, 2 failed
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 2 files")'),
+      ).toBeVisible()
+
+      // After submission, the successful form (form 3) is removed from sidebar
+      // Only the 2 failed forms remain in the sidebar
+      const fileSelections = bulkUploadModal.locator('.file-selections__filesContainer')
+
+      // Wait for the successful form to be removed and only 2 forms to remain
+      const remainingRows = fileSelections.locator('button.file-selections__fileRow')
+      await expect(remainingRows).toHaveCount(2, { timeout: 5000 })
+
+      // The remaining forms are form 1 (index 0) and form 2 (index 1)
+      const form1Row = remainingRows.nth(0)
+      const form2Row = remainingRows.nth(1)
+
+      // Verify initial error counts in sidebar (re-query each time to avoid stale elements)
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1') // missing file
+      await expect(form2Row.locator('.error-pill__count')).toHaveText('2') // missing file + missing prefix
+
+      // Click on form 1 and verify count remains stable
+      await form1Row.click()
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1')
+
+      // Click on form 2 and verify count remains stable
+      await form2Row.click()
+      await expect(form2Row.locator('.error-pill__count')).toHaveText('2')
+
+      // Cycle through again to ensure counts remain stable
+      await form1Row.click()
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1')
+
+      await form2Row.click()
+      await expect(form2Row.locator('.error-pill__count')).toHaveText('2')
+
+      await form1Row.click()
+      await expect(form1Row.locator('.error-pill__count')).toHaveText('1')
+    })
+
+    test('should show correct error count when bulk uploading files that exceed size limit', async () => {
+      await page.goto(uploadsOne.create)
+
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files including one that exceeds the 2MB limit
+      await bulkUploadModal.locator('.dropzone input[type="file"]').setInputFiles([
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './2mb.jpg'), // This file exceeds the 2MB limit
+        path.resolve(dirname, './small.png'),
+      ])
+
+      // Fill in the required prefix field for all uploads
+      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+
+      // Navigate to second file
+      const nextButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextButton.click()
+      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+
+      // Navigate to third file
+      await nextButton.click()
+      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      // Should show mixed success/failure messages
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 2 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+      ).toBeVisible()
+
+      // The file that exceeded the size limit should have exactly 1 error
+      // Navigate back to check the second file (2mb.jpg)
+      const prevButton = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
+      )
+      await prevButton.click()
+
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
+      await expect(errorCount).toHaveText('1')
+
+      // Verify the error message indicates file size limit
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
+      ).toBeVisible()
     })
   })
 
@@ -1465,6 +1754,34 @@ describe('Uploads', () => {
       const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
       await expect(resizeOptionMedia).toContainText('200x200')
     })
+
+    test('should allow incrementing crop dimensions back to original maximum size', async () => {
+      await page.goto(mediaURL.create)
+
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+
+      await page.locator('.file-field__edit').click()
+
+      const widthInput = page.locator('.edit-upload__input input[name="Width (px)"]')
+      const heightInput = page.locator('.edit-upload__input input[name="Height (px)"]')
+
+      await expect(widthInput).toHaveValue('800')
+      await expect(heightInput).toHaveValue('800')
+
+      await widthInput.fill('799')
+      await expect(widthInput).toHaveValue('799')
+
+      // Increment back to original using arrow up
+      await widthInput.press('ArrowUp')
+      await expect(widthInput).toHaveValue('800')
+
+      await heightInput.fill('799')
+      await expect(heightInput).toHaveValue('799')
+
+      // Increment back to original using arrow up
+      await heightInput.press('ArrowUp')
+      await expect(heightInput).toHaveValue('800')
+    })
   })
 
   test('should see upload previews in relation list if allowed in config', async () => {
@@ -1556,7 +1873,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/enlarge\/file\/test-image-180x50\.jpg$/,
+      )
     })
 
     test('should select next smallest image outside of range but smaller than original', async () => {
@@ -1565,7 +1885,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/focal-only\/file\/test-image-400x300\.jpg$/,
+      )
     })
 
     test('should select original if smaller than next available size', async () => {
@@ -1574,7 +1897,7 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
+      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png$/)
     })
   })
 
@@ -1757,5 +2080,60 @@ describe('Uploads', () => {
     await expect(menuList.getByText('Sizes > four > MIME Type', { exact: true })).toHaveCount(1)
     await expect(menuList.getByText('Sizes > four > File Size', { exact: true })).toHaveCount(1)
     await expect(menuList.getByText('Sizes > four > File Name', { exact: true })).toHaveCount(1)
+  })
+
+  test('should allow saving other fields after changing file', async () => {
+    await page.goto(uploadsTwo.create)
+
+    // Upload initial file with required field
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('button[data-close-button="true"]').click()
+
+    // Change the file
+    await page.locator('.file-details__remove').click()
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.jpg'))
+    await saveDocAndAssert(page)
+
+    await page.locator('button[data-close-button="true"]').click()
+
+    // Modify another field and save - this should work without errors
+    await page.locator('#field-title').fill('updated title')
+    await saveDocAndAssert(page)
+
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toHaveValue('updated title')
+  })
+
+  test('should show data in drawer when editing relationship to upload collection with filesRequiredOnCreate: false', async () => {
+    const uploadDoc = await payload.create({
+      collection: noFilesRequiredSlug,
+      data: {
+        title: 'Upload without file',
+      },
+    })
+
+    const relationDoc = await payload.create({
+      collection: relationToNoFilesRequiredSlug,
+      data: {
+        title: 'Relation document',
+        uploadField: uploadDoc.id,
+      },
+    })
+
+    await page.goto(relationToNoFilesRequiredURL.edit(relationDoc.id))
+
+    await expect(page.locator('#field-uploadField')).toBeVisible()
+
+    await page.locator('#field-uploadField .upload-relationship-details__edit').click()
+
+    const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
+    await expect(drawer).toBeVisible()
+
+    const titleField = drawer.locator('#field-title')
+
+    await expect(titleField).toHaveValue('Upload without file')
   })
 })
