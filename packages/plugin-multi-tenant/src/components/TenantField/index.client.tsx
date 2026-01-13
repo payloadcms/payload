@@ -118,25 +118,20 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   }, [isFormValid, showError, showField, openModal, value, docID, selectedTenantID, unique])
 
   if (showField) {
-    if (debug) {
-      return <TenantFieldInModal debug={debug} fieldArgs={fieldArgs} unique={unique} />
+    if (debug || isEditManyModalOpen) {
+      return <TenantRelationshipField debug={debug} fieldArgs={fieldArgs} unique={unique} />
     }
 
     if (!unique) {
       /** Editing a non-global tenant document */
       return (
-        <>
-          {isEditManyModalOpen ? (
-            <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
-          ) : null}
-          <AssignTenantFieldModal
-            afterModalClose={afterModalClose}
-            afterModalOpen={afterModalOpen}
-            onConfirm={onConfirm}
-          >
-            <TenantFieldInModal debug={debug} fieldArgs={fieldArgs} unique={unique} />
-          </AssignTenantFieldModal>
-        </>
+        <AssignTenantFieldModal
+          afterModalClose={afterModalClose}
+          afterModalOpen={afterModalOpen}
+          onConfirm={onConfirm}
+        >
+          <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
+        </AssignTenantFieldModal>
       )
     }
 
@@ -147,22 +142,6 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
 }
 
 const TenantRelationshipField: React.FC<{
-  fieldArgs: RelationshipFieldClientProps
-  unique?: boolean
-}> = ({ fieldArgs, unique }) => {
-  return (
-    <RelationshipField
-      {...fieldArgs}
-      field={{
-        ...fieldArgs.field,
-        required: true,
-      }}
-      readOnly={fieldArgs.readOnly || fieldArgs.field.admin?.readOnly || unique}
-    />
-  )
-}
-
-const TenantFieldInModal: React.FC<{
   debug?: boolean
   fieldArgs: RelationshipFieldClientProps
   unique?: boolean
@@ -175,7 +154,14 @@ const TenantFieldInModal: React.FC<{
             Multi-Tenant Debug Enabled
           </Pill>
         )}
-        <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
+        <RelationshipField
+          {...fieldArgs}
+          field={{
+            ...fieldArgs.field,
+            required: true,
+          }}
+          readOnly={fieldArgs.readOnly || fieldArgs.field.admin?.readOnly || unique}
+        />
       </div>
     </div>
   )
