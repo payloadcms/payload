@@ -61,9 +61,12 @@ export const findVersions: FindVersions = async function findVersions(
   })
 
   const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
   const options: QueryOptions = {
     limit,
     session,
+    skip,
   }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
