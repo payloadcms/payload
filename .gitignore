@@ -46,6 +46,7 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
+*payload.db
 /versions
 no-restrict-file-*
 
