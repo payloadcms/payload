@@ -117,7 +117,7 @@ export const getFolderResultsComponentAndData = async ({
                 // if the folderType is not set, it means it accepts all collections and should appear in the results
                 {
                   folderType: {
-                    exists: false,
+                    equals: [],
                   },
                 },
               ],
