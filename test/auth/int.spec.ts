@@ -178,8 +178,10 @@ describe('Auth', () => {
       expect(userAfter.loginMetadata).toMatchObject(originalArrayData)
 
       // session should NOT have been added when using transactions
-      // skip CosmosDB and Firestore since they do not support transactions
-      if (!['cosmosdb', 'firestore'].includes(process.env.PAYLOAD_DATABASE!)) {
+      // skip SQLite, CosmosDB and Firestore since they do not have transactions enabled
+      if (
+        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE!)
+      ) {
         const sessionCountAfter = userAfter.sessions?.length || 0
         // eslint-disable-next-line vitest/no-conditional-expect
         expect(sessionCountAfter).toBe(sessionCountBefore)

@@ -113,8 +113,7 @@ export const allDatabaseAdapters = {
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
     },
-    autoIncrement: true,
-    transactionOptions: {}
+    autoIncrement: true
   })`,
   'sqlite-uuid': `
   import { sqliteAdapter } from '@payloadcms/db-sqlite'
@@ -123,8 +122,7 @@ export const allDatabaseAdapters = {
     idType: 'uuid',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
-    transactionOptions: {}
+    }
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
