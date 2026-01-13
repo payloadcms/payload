@@ -136,7 +136,7 @@ export type JobTaskStatus = {
  */
 export type ConcurrencyConfig<TInput = object> =
   | ((args: { input: TInput; queue: string }) => string)
-  // Shorthand: key function only, exclusive defaults to true
+  // Shorthand: key function only, exclusive defaults to true, supersedes defaults to false
   | {
       /**
        * Only one job with this key can run at a time.
@@ -150,6 +150,13 @@ export type ConcurrencyConfig<TInput = object> =
        * The queue name is provided to allow for queue-specific concurrency keys if needed.
        */
       key: (args: { input: TInput; queue: string }) => string
+      /**
+       * When a new job is queued, delete older pending (not yet running) jobs with the same key.
+       * Already-running jobs are not affected.
+       * Useful when only the latest state matters (e.g., regenerating data after multiple rapid edits).
+       * @default false
+       */
+      supersedes?: boolean
     }
 
 export type WorkflowConfig<

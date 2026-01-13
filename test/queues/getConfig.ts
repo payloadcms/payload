@@ -37,6 +37,7 @@ import { retriesWorkflowLevelTestWorkflow } from './workflows/retriesWorkflowLev
 import { selfCancelWorkflow } from './workflows/selfCancel.js'
 import { subTaskWorkflow } from './workflows/subTask.js'
 import { subTaskFailsWorkflow } from './workflows/subTaskFails.js'
+import { supersedesConcurrencyWorkflow } from './workflows/supersedesConcurrency.js'
 import { updatePostWorkflow } from './workflows/updatePost.js'
 import { updatePostJSONWorkflow } from './workflows/updatePostJSON.js'
 import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAndTasksRetriesUndefined.js'
@@ -177,6 +178,7 @@ export const getConfig: () => Partial<Config> = () => ({
       exclusiveConcurrencyWorkflow,
       noConcurrencyWorkflow,
       queueSpecificConcurrencyWorkflow,
+      supersedesConcurrencyWorkflow,
     ],
   },
   editor: lexicalEditor(),
