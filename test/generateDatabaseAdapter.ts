@@ -122,7 +122,7 @@ export const allDatabaseAdapters = {
     idType: 'uuid',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
+    }
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
