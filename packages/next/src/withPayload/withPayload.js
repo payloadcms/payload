@@ -208,6 +208,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   }
 
   if (nextConfig.basePath) {
+    process.env.NEXT_BASE_PATH = nextConfig.basePath
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 

@@ -383,14 +383,18 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     })
   }
 
-  configWithDefaults.collections!.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      getLockedDocumentsCollection(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
+  const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
+
+  if (lockedDocumentsCollection) {
+    configWithDefaults.collections!.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        lockedDocumentsCollection,
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
 
   configWithDefaults.collections!.push(
     await sanitizeCollection(

@@ -1,9 +1,9 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
-  GeneratedTypes,
   JoinQuery,
   Payload,
+  PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
@@ -146,7 +146,7 @@ export async function findLocal<
 ): Promise<
   PaginatedDocs<
     TDraft extends true
-      ? GeneratedTypes extends { strictDraftTypes: true }
+      ? PayloadTypes extends { strictDraftTypes: true }
         ? DraftTransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
       : TransformCollectionWithSelect<TSlug, TSelect>
