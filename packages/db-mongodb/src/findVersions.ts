@@ -7,15 +7,19 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
 import { transform } from './utilities/transform.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
   {
     collection: collectionSlug,
+    joins = false,
     limit = 0,
     locale,
     page,
@@ -121,7 +125,52 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result
+
+  // result = await Model.paginate(query, paginationOptions)
+
+  // if (false) {
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection: collectionSlug,
+    collectionConfig,
+    draftsEnabled: true,
+    joins,
+    locale,
+    query,
+    versions: true,
+  })
+
+  if (aggregate) {
+    result = await aggregatePaginate({
+      adapter: this,
+      collation: paginationOptions.collation,
+      joinAggregation: aggregate,
+      limit: paginationOptions.limit,
+      Model,
+      page: paginationOptions.page,
+      pagination: paginationOptions.pagination,
+      projection: paginationOptions.projection,
+      query,
+      session,
+      sort: paginationOptions.sort as object,
+
+      useEstimatedCount: paginationOptions.useEstimatedCount,
+    })
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
+  if (!this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: result.docs as Record<string, unknown>[],
+      joins,
+      locale,
+    })
+  }
+  // }
 
   transform({
     adapter: this,

@@ -277,6 +277,7 @@ type BaseVersionArgs = {
 
 export type FindVersionsArgs = {
   collection: CollectionSlug
+  joins?: JoinQuery
 } & BaseVersionArgs
 
 export type FindVersions = <T = JsonObject>(

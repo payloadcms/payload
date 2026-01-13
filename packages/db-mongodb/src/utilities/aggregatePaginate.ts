@@ -71,6 +71,12 @@ export const aggregatePaginate = async ({
 
   let countPromise: Promise<null | number> = Promise.resolve(null)
 
+  const sessionParams: { session?: ClientSession } = {}
+
+  if (session) {
+    sessionParams.session = session
+  }
+
   if (pagination !== false && limit) {
     if (useEstimatedCount) {
       countPromise = Model.estimatedDocumentCount(query)
@@ -78,14 +84,14 @@ export const aggregatePaginate = async ({
       const hint = adapter.disableIndexHints !== true ? { _id: 1 } : undefined
       countPromise = Model.countDocuments(query, {
         collation,
-        session,
         ...(hint ? { hint } : {}),
+        ...sessionParams,
       })
     }
   }
 
   const [docs, countResult] = await Promise.all([
-    Model.aggregate(aggregation, { collation, session }),
+    Model.aggregate(aggregation, { collation, ...sessionParams }),
     countPromise,
   ])
 
