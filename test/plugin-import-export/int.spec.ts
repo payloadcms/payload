@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -863,7 +863,6 @@ describe('@payloadcms/plugin-import-export', () => {
       const seenIds = new Set<string>()
       const duplicateIds: string[] = []
       for (const row of data) {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (seenIds.has(row.id)) {
           duplicateIds.push(row.id)
         } else {
@@ -1944,7 +1943,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Verify the import
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (importDoc.status !== 'completed') {
         console.log('Import did not complete (CSV test):', {
           status: importDoc.status,
@@ -2443,6 +2441,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(blocks?.[0]?.blockType).toBe('hero')
       const heroBlock = blocks?.[0]
       if (heroBlock?.blockType === 'hero') {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect((heroBlock as { blockType: 'hero'; title?: string })?.title).toBe('Hero Title 1')
       }
       expect(blocks?.[1]?.blockType).toBe('content')
@@ -2486,7 +2485,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Debug output if not completed
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (importDoc.status !== 'completed') {
         console.log('HasMany formats import failed:', {
           status: importDoc.status,
@@ -2520,10 +2518,12 @@ describe('@payloadcms/plugin-import-export', () => {
       const empty = importedPages.docs.find((d) => d?.title === 'HasMany Empty')
 
       // Mongo will have this field undefined but SQL will have it as an empty array
-      // eslint-disable-next-line jest/no-conditional-in-test
+
       if (empty?.hasManyNumber) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(empty?.hasManyNumber).toEqual([])
       } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(empty?.hasManyNumber).not.toBeTruthy()
       }
 
@@ -3105,7 +3105,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       // Debug logging if the test is failing
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (validPage1.docs.length !== 1 || validPage2.docs.length !== 1) {
         console.log('DEBUG: Partial import test failed')
         console.log('  Import summary:', importDoc.summary)
@@ -3245,7 +3244,6 @@ describe('@payloadcms/plugin-import-export', () => {
     it('should skip disabled fields during import', async () => {
       // Configure disabled fields for testing
       const pagesCollection = payload.config.collections.find((c) => c.slug === 'pages')
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (pagesCollection && pagesCollection.admin) {
         pagesCollection.admin.custom = {
           ...pagesCollection.admin.custom,
@@ -3308,7 +3306,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(page?.textFieldInCollapsible).not.toBeTruthy() // Should be excluded
 
       // Reset the config
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (pagesCollection && pagesCollection.admin && pagesCollection.admin.custom) {
         delete pagesCollection.admin.custom['plugin-import-export']
       }
@@ -3837,8 +3834,10 @@ describe('@payloadcms/plugin-import-export', () => {
 
         if (importDoc.summary?.issueDetails && Array.isArray(importDoc.summary.issueDetails)) {
           const issues = importDoc.summary.issueDetails as Array<{ error: string; row: number }>
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(issues).toHaveLength(1)
           // The issue should be for row 3 (1-indexed)
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(issues[0]?.row).toBe(3)
         }
 
@@ -6027,6 +6026,7 @@ describe('@payloadcms/plugin-import-export', () => {
       if (finalExport.filename) {
         const csvPath = path.join(dirname, './uploads', finalExport.filename)
         const exportedData = await readCSV(csvPath)
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(exportedData).toHaveLength(5)
       }
 
