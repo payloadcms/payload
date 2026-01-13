@@ -110,6 +110,7 @@ The following options are available:
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Collection. [More details](#description).                                                               |
+| `Status`                 | A component that represents the status of the current document. [More details](#status).                                     |
 | `Upload`                 | A file upload component. [More details](#upload).                                                                            |
 
 #### Globals
@@ -144,6 +145,7 @@ The following options are available:
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Global. [More details](#description).                                                                   |
+| `Status`                 | A component that represents the status of the global. [More details](#status).                                               |
 
 ### SaveButton
 
@@ -545,6 +547,29 @@ import type { ViewDescriptionClientProps } from 'payload'
 
 export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
   return <div>This is a custom description component (Client)</div>
+}
+```
+
+### Status
+
+The `Status` property allows you to render a component that represents the collection or global status in the Edit View.
+
+To add an `Status` component, use the `components.edit.Status` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        Status: '/path/to/MyStatusComponent',
+        // highlight-end
+      },
+    },
+  },
 }
 ```
 
