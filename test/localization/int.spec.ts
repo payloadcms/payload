@@ -3483,6 +3483,12 @@ describe('Localization', () => {
         expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
       })
     })
+
+    afterAll(() => {
+      if (payload.config.localization) {
+        payload.config.localization.fallback = true
+      }
+    })
   })
 
   describe('Localized data shape', () => {
