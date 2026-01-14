@@ -124,12 +124,11 @@ export const Status: React.FC = () => {
         } else if (json.error) {
           toast.error(json.error)
         } else {
-          // TODO: errors should say revert
-          toast.error(t('error:unPublishingDocument'))
+          toast.error(t('error:revertingDocument'))
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        toast.error(t('error:unPublishingDocument'))
+        toast.error(t('error:revertingDocument'))
       }
     }
   }, [

@@ -122,6 +122,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Возникла проблема при загрузке файла.',
     restoringTitle:
       'Произошла ошибка при восстановлении {{title}}. Пожалуйста, проверьте свое соединение и попробуйте снова.',
+    revertingDocument: 'Возникла проблема при возврате этого документа.',
     tokenInvalidOrExpired: 'Токен либо недействителен, либо срок его действия истек.',
     tokenNotProvided: 'Токен не предоставлен.',
     unableToCopy: 'Не удалось скопировать.',

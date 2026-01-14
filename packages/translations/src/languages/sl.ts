@@ -121,6 +121,7 @@ export const slTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nalaganju datoteke je prišlo do težave.',
     restoringTitle:
       'Pri obnavljanju {{title}} je prišlo do napake. Prosimo, preverite svojo povezavo in poskusite znova.',
+    revertingDocument: 'Pri vračanju tega dokumenta je prišlo do težave.',
     tokenInvalidOrExpired: 'Žeton je neveljaven ali je potekel.',
     tokenNotProvided: 'Žeton ni bil posredovan.',
     unableToCopy: 'Kopiranje ni mogoče.',

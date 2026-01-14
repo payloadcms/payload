@@ -122,6 +122,7 @@ export const skTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nahrávaní súboru došlo k chybe.',
     restoringTitle:
       'Pri obnovovaní {{title}} sa vyskytla chyba. Skontrolujte prosím svoje pripojenie a skúste to znova.',
+    revertingDocument: 'Pri obnovení tohto dokumentu sa vyskytol problém.',
     tokenInvalidOrExpired: 'Token je neplatný alebo vypršal.',
     tokenNotProvided: 'Token nie je poskytnutý.',
     unableToCopy: 'Kopírovanie nie je možné.',

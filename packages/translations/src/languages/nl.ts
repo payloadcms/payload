@@ -122,6 +122,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Er was een probleem bij het uploaden van het bestand.',
     restoringTitle:
       'Er is een fout opgetreden bij het herstellen van {{title}}. Controleer uw verbinding en probeer het opnieuw.',
+    revertingDocument: 'Er was een probleem bij het terugdraaien van dit document.',
     tokenInvalidOrExpired: 'Token is ongeldig of verlopen.',
     tokenNotProvided: 'Token niet verstrekt.',
     unableToCopy: 'Kan niet kopiëren.',

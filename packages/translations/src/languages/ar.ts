@@ -119,6 +119,7 @@ export const arTranslations: DefaultTranslationsObject = {
     previewing: 'حدث خطأ في اثناء معاينة هذا المستند.',
     problemUploadingFile: 'حدث خطأ اثناء رفع الملفّ.',
     restoringTitle: 'حدث خطأ أثناء استعادة {{title}}. يرجى التحقق من اتصالك وحاول مرة أخرى.',
+    revertingDocument: 'كان هناك مشكلة أثناء استعادة هذا الوثيقة.',
     tokenInvalidOrExpired: 'الرّمز إمّا غير صالح أو منتهي الصّلاحيّة.',
     tokenNotProvided: 'لم يتم تقديم الرمز.',
     unableToCopy: 'تعذر النسخ.',

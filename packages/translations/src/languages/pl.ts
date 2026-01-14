@@ -120,6 +120,7 @@ export const plTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Wystąpił problem podczas przesyłania pliku.',
     restoringTitle:
       'Wystąpił błąd podczas przywracania {{title}}. Sprawdź swoje połączenie i spróbuj ponownie.',
+    revertingDocument: 'Wystąpił problem podczas przywracania tego dokumentu.',
     tokenInvalidOrExpired: 'Token jest nieprawidłowy lub wygasł.',
     tokenNotProvided: 'Token nie został dostarczony.',
     unableToCopy: 'Nie można skopiować.',

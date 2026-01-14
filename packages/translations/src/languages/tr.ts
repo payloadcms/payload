@@ -122,6 +122,7 @@ export const trTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Dosya yüklenirken bir sorun oluştu.',
     restoringTitle:
       '{{title}} geri yüklenirken bir hata oluştu. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+    revertingDocument: 'Bu belge geri alınırken bir problem oluştu.',
     tokenInvalidOrExpired: 'Geçersiz veya süresi dolmuş token.',
     tokenNotProvided: 'Jeton sağlanmadı.',
     unableToCopy: 'Kopyalanamıyor.',

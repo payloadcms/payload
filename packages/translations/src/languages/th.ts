@@ -119,6 +119,7 @@ export const thTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'เกิดปัญหาระหว่างการอัปโหลดไฟล์',
     restoringTitle:
       'เกิดข้อผิดพลาดขณะกำลังคืนค่า {{title}} กรุณาตรวจสอบการเชื่อมต่อของคุณและลองอีกครั้ง',
+    revertingDocument: 'เกิดปัญหาขณะกลับไปยังเอกสารนี้',
     tokenInvalidOrExpired: 'Token ไม่ถูกต้องหรือหมดอายุ',
     tokenNotProvided: 'ไม่ได้รับโทเค็น',
     unableToCopy: 'ไม่สามารถคัดลอกได้',

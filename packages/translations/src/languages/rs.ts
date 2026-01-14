@@ -122,6 +122,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Постоји проблем при учитавању датотеке.',
     restoringTitle:
       'Došlo je do greške prilikom vraćanja {{title}}. Proverite svoju vezu i pokušajte ponovo.',
+    revertingDocument: 'Došlo je do problema prilikom vraćanja ovog dokumenta.',
     tokenInvalidOrExpired: 'Токен је невалидан или је истекао.',
     tokenNotProvided: 'Token nije dostavljen.',
     unableToCopy: 'Није могуће копирати.',

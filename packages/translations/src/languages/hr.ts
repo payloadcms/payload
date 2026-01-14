@@ -122,6 +122,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Došlo je do problema pri učitavanju datoteke.',
     restoringTitle:
       'Došlo je do pogreške prilikom vraćanja {{title}}. Provjerite svoju vezu i pokušajte ponovno.',
+    revertingDocument: 'Došlo je do problema prilikom vraćanja ovog dokumenta.',
     tokenInvalidOrExpired: 'Token je neispravan ili je istekao.',
     tokenNotProvided: 'Token nije pružen.',
     unableToCopy: 'Nije moguće kopirati.',

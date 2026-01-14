@@ -94,6 +94,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:usernameAlreadyRegistered',
   'error:tokenNotProvided',
   'error:unPublishingDocument',
+  'error:revertingDocument',
   'error:problemUploadingFile',
   'error:restoringTitle',
 

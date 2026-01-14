@@ -122,6 +122,7 @@ export const isTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Vandamál kom upp við að hlaða upp skránni.',
     restoringTitle:
       'Villa kom upp við að endurheimta {{title}}. Vinsamlegast athugaðu tenginguna þína og reyndu aftur.',
+    revertingDocument: 'Það kom upp vandamál við að endurheimta þetta skjal.',
     tokenInvalidOrExpired: 'Token er annað hvort ógilt eða útrunnið.',
     tokenNotProvided: 'Token var gefið upp.',
     unableToCopy: 'Ekki hægt að afrita.',

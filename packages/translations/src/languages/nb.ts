@@ -121,6 +121,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det oppstod et problem under opplasting av filen.',
     restoringTitle:
       'Det oppstod en feil under gjenoppretting av {{title}}. Vennligst sjekk din tilkobling og prøv igjen.',
+    revertingDocument: 'Det oppstod et problem under tilbakestillingen av dette dokumentet.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller har utløpt.',
     tokenNotProvided: 'Token ikke angitt.',
     unableToCopy: 'Kan ikke kopiere.',

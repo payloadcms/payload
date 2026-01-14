@@ -117,6 +117,7 @@ export const heTranslations: DefaultTranslationsObject = {
     previewing: 'אירעה בעיה בתצוגה מקדימה של מסמך זה.',
     problemUploadingFile: 'אירעה בעיה בזמן העלאת הקובץ.',
     restoringTitle: 'אירעה שגיאה בעת שחזור {{title}}. אנא בדוק את החיבור שלך ונסה שוב.',
+    revertingDocument: 'הייתה בעיה בעת החזרה של מסמך זה.',
     tokenInvalidOrExpired: 'הטוקן אינו תקין או שפג תוקפו.',
     tokenNotProvided: 'טוקן לא סופק.',
     unableToCopy: 'לא ניתן להעתיק.',

@@ -120,6 +120,7 @@ export const daTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Der opstod et problem under uploadingen af filen.',
     restoringTitle:
       'Der opstod en fejl under genoprettelsen af {{title}}. Kontroller venligst din forbindelse og prøv igen.',
+    revertingDocument: 'Der var et problem med at gendanne dette dokument.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller udløbet.',
     tokenNotProvided: 'Token ikke angivet.',
     unableToCopy: 'Kan ikke kopiere.',

@@ -121,6 +121,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Имаше проблем при качването на файла.',
     restoringTitle:
       'Възникна грешка при възстановяването на {{title}}. Моля, проверете връзката си и опитайте отново.',
+    revertingDocument: 'Възникна проблем при връщане на този документ.',
     tokenInvalidOrExpired: 'Ключът е невалиден или изтекъл.',
     tokenNotProvided: 'Токенът не е предоставен.',
     unableToCopy: 'Неуспешно копиране.',

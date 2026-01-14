@@ -124,6 +124,7 @@ export const frTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
     restoringTitle:
       'Il y a eu une erreur lors de la restauration de {{title}}. Veuillez vérifier votre connexion et réessayer.',
+    revertingDocument: 'Il y a eu un problème lors de la restauration de ce document.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
     unableToCopy: 'Impossible de copier.',

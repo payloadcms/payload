@@ -122,6 +122,7 @@ export const idTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Terjadi masalah saat mengunggah file.',
     restoringTitle:
       'Terjadi kesalahan saat memulihkan {{title}}. Harap periksa koneksi Anda dan coba lagi.',
+    revertingDocument: 'Ada masalah saat mengembalikan dokumen ini.',
     tokenInvalidOrExpired: 'Token tidak valid atau telah kedaluwarsa.',
     tokenNotProvided: 'Token tidak disediakan.',
     unableToCopy: 'Tidak dapat menyalin.',

@@ -121,6 +121,7 @@ export const csTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Při nahrávání souboru došlo k chybě.',
     restoringTitle:
       'Došlo k chybě při obnovování {{title}}. Zkontrolujte prosím své připojení a zkuste to znovu.',
+    revertingDocument: 'Došlo k problému při obnovení tohoto dokumentu.',
     tokenInvalidOrExpired: 'Token je neplatný nebo vypršel.',
     tokenNotProvided: 'Token není poskytnut.',
     unableToCopy: 'Nelze zkopírovat.',

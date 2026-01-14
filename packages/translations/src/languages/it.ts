@@ -123,6 +123,7 @@ export const itTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Si è verificato un problema durante il caricamento del file.',
     restoringTitle:
       'Si è verificato un errore durante il ripristino di {{title}}. Si prega di controllare la connessione e riprovare.',
+    revertingDocument: "C'è stato un problema durante il ripristino di questo documento.",
     tokenInvalidOrExpired: 'Il token non è valido o è scaduto.',
     tokenNotProvided: 'Token non fornito.',
     unableToCopy: 'Impossibile copiare.',

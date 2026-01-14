@@ -122,6 +122,7 @@ export const caTranslations: DefaultTranslationsObject = {
     problemUploadingFile: "Hi ha hagut un problema mentre es carregava l'arxiu.",
     restoringTitle:
       'Hi ha hagut un error en restaurar {{title}}. Si us plau, comproveu la vostra connexió i torneu-ho a provar.',
+    revertingDocument: 'Hi ha hagut un problema en revertir aquest document.',
     tokenInvalidOrExpired: 'El token és invàlid o ha caducat.',
     tokenNotProvided: "No s'ha proporcionat cap token.",
     unableToCopy: 'No es pot copiar.',

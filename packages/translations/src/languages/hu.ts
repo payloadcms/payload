@@ -123,6 +123,7 @@ export const huTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Hiba történt a fájl feltöltése közben.',
     restoringTitle:
       'Hiba történt a {{title}} visszaállítása közben. Kérjük, ellenőrizze az internetkapcsolatát, és próbálkozzon újra.',
+    revertingDocument: 'Probléma merült fel a dokumentum visszaállítása közben.',
     tokenInvalidOrExpired: 'A token érvénytelen vagy lejárt.',
     tokenNotProvided: 'Token nem biztosított.',
     unableToCopy: 'Másolás nem lehetséges.',

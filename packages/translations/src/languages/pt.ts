@@ -122,6 +122,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocorreu um problema ao carregar o arquivo.',
     restoringTitle:
       'Ocorreu um erro ao restaurar {{title}}. Por favor, verifique sua conexão e tente novamente.',
+    revertingDocument: 'Ocorreu um problema ao reverter este documento.',
     tokenInvalidOrExpired: 'Token expirado ou inválido.',
     tokenNotProvided: 'Token não fornecido.',
     unableToCopy: 'Não é possível copiar.',

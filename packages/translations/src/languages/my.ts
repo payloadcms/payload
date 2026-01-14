@@ -121,6 +121,7 @@ export const myTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ဖိုင်ကို အပ်လုဒ်တင်ရာတွင် ပြဿနာရှိနေသည်။',
     restoringTitle:
       'Terdapat ralat semasa memulihkan {{title}}. Sila semak sambungan anda dan cuba lagi.',
+    revertingDocument: 'Dalam proses memulihkan dokumen ini, terdapat masalah.',
     tokenInvalidOrExpired: 'တိုကင်သည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်သွားပါပြီ။',
     tokenNotProvided: 'Token မပေးထားပါ။',
     unableToCopy: 'ကူးရန်မဖြစ်နိုင်ပါ။',

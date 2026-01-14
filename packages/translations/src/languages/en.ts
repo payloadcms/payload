@@ -122,6 +122,7 @@ export const enTranslations = {
     problemUploadingFile: 'There was a problem while uploading the file.',
     restoringTitle:
       'There was an error while restoring {{title}}. Please check your connection and try again.',
+    revertingDocument: 'There was a problem while reverting this document.',
     tokenInvalidOrExpired: 'Token is either invalid or has expired.',
     tokenNotProvided: 'Token not provided.',
     unableToCopy: 'Unable to copy.',

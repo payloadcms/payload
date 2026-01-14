@@ -120,6 +120,7 @@ export const etTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faili üleslaadimisel tekkis probleem.',
     restoringTitle:
       'Ilmnes viga, kui {{title}} taastati. Kontrollige oma ühendust ja proovige uuesti.',
+    revertingDocument: 'Selle dokumendi taastamisel tekkis probleem.',
     tokenInvalidOrExpired: 'Võti on kas vigane või aegunud.',
     tokenNotProvided: 'Võtit ei esitatud.',
     unableToCopy: 'Kopeerimine ebaõnnestus.',

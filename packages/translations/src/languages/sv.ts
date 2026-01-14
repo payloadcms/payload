@@ -121,6 +121,7 @@ export const svTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det uppstod ett problem när filen laddades upp.',
     restoringTitle:
       'Det uppstod ett fel vid återställning av {{title}}. Vänligen kontrollera din anslutning och försök igen.',
+    revertingDocument: 'Det uppstod ett problem när detta dokument skulle återställas.',
     tokenInvalidOrExpired: 'Token är antingen ogiltig eller har löpt ut.',
     tokenNotProvided: 'Token inte tillhandahållet.',
     unableToCopy: 'Kan inte kopiera.',

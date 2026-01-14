@@ -121,6 +121,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Radās problēma, augšupielādējot failu.',
     restoringTitle:
       'Notika kļūda, atjaunojot {{title}}. Lūdzu, pārbaudiet savu savienojumu un mēģiniet vēlreiz.',
+    revertingDocument: 'Radās problēma, atjaunojot šo dokumentu.',
     tokenInvalidOrExpired: 'Tokens ir nederīgs vai beidzies.',
     tokenNotProvided: 'Tokens nav norādīts.',
     unableToCopy: 'Neizdevās kopēt.',

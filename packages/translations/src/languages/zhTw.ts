@@ -114,6 +114,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     previewing: '預覽文件時發生問題。',
     problemUploadingFile: '上傳檔案時發生問題。',
     restoringTitle: '還原 {{title}} 時發生錯誤。請檢查連線並再試一次。',
+    revertingDocument: '在還原此文件時出現了問題。',
     tokenInvalidOrExpired: '憑證無效或已過期。',
     tokenNotProvided: '未提供憑證。',
     unableToCopy: '無法複製。',

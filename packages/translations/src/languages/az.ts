@@ -121,6 +121,7 @@ export const azTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faylın yüklənməsi zamanı problem yarandı.',
     restoringTitle:
       '{{title}} bərpa olunarkən xəta baş verdi. Zəhmət olmasa, internet bağlantınızı yoxlayın və yenidən cəhd edin.',
+    revertingDocument: 'Bu sənədi qaytarmaq zamanı problem yarandı.',
     tokenInvalidOrExpired: 'Token ya yanlışdır və ya müddəti bitib.',
     tokenNotProvided: 'Token təqdim edilməyib.',
     unableToCopy: 'Kopyalama mümkün deyil.',

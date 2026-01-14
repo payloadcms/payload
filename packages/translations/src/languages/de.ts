@@ -123,6 +123,7 @@ export const deTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Beim Hochladen der Datei ist ein Fehler aufgetreten.',
     restoringTitle:
       'Es gab einen Fehler beim Wiederherstellen von {{title}}. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
+    revertingDocument: 'Es gab ein Problem beim Zurücksetzen dieses Dokuments.',
     tokenInvalidOrExpired: 'Token ist entweder ungültig oder abgelaufen.',
     tokenNotProvided: 'Token nicht bereitgestellt.',
     unableToCopy: 'Kopieren nicht möglich.',

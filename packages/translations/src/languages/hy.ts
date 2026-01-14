@@ -121,6 +121,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ֆայլը վերբեռնելու ժամանակ խնդիր է առաջացել։',
     restoringTitle:
       'Սխալ է տեղի ունեցել {{title}}-ի վերականգնելիս: Խնդրում ենք ստուգել ձեր կապը և կրկին փորձել:',
+    revertingDocument: 'Այս փաստաթղթի վերականգնման ընթացքում խնդիր է առաջացել:',
     tokenInvalidOrExpired: 'Թոքենն անվավեր է կամ ժամկետանց։',
     tokenNotProvided: 'Թոքենը տրամադրված չէ։',
     unableToCopy: 'Չհաջողվեց պատճենել։',

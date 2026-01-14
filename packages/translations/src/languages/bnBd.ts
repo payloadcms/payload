@@ -121,6 +121,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
     restoringTitle:
       '{{title}} পুনরুদ্ধার করার সময় একটি ত্রুটি ঘটেছে। দয়া করে আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    revertingDocument: 'এই ডকুমেন্টটি ফিরে আনার সময় একটি সমস্যা হয়েছিল।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
     unableToCopy: 'কপি করা সম্ভব নয়।',

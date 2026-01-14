@@ -122,6 +122,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ファイルのアップロード中に問題が発生しました。',
     restoringTitle:
       '{{title}}の復元中にエラーが発生しました。接続を確認して、もう一度お試しください。',
+    revertingDocument: 'このドキュメントを元に戻す際に問題が発生しました。',
     tokenInvalidOrExpired: 'トークンが無効、または、有効期限が切れています。',
     tokenNotProvided: 'トークンが提供されていません。',
     unableToCopy: 'コピーできません。',

@@ -120,6 +120,7 @@ export const taTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'கோப்பைப் பதிவேற்றும்போது பிரச்சனை ஏற்பட்டது.',
     restoringTitle:
       '{{title}}-ஐ மீட்டமைக்கும் போது பிழை ஏற்பட்டது. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.',
+    revertingDocument: 'இந்த ஆவணத்தை மீளமைக்கும் போது ஏதோ ஒரு பிரச்சனை ஏற்பட்டுள்ளது.',
     tokenInvalidOrExpired: 'டோக்கன் தவறானது அல்லது காலாவதியானது.',
     tokenNotProvided: 'டோக்கன் வழங்கப்படவில்லை.',
     unableToCopy: 'நகலெடுக்க முடியவில்லை.',

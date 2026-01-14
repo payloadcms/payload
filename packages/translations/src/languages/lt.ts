@@ -122,6 +122,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Failo įkelti nepavyko dėl problemos.',
     restoringTitle:
       'Įvyko klaida atkuriant {{title}}. Prašome patikrinti savo ryšį ir bandyti dar kartą.',
+    revertingDocument: 'Šio dokumento grąžinimo metu kilo problema.',
     tokenInvalidOrExpired: 'Žetonas yra neteisingas arba jo galiojimas pasibaigė.',
     tokenNotProvided: 'Žetonas nesuteiktas.',
     unableToCopy: 'Nepavyko nukopijuoti.',

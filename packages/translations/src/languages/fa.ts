@@ -119,6 +119,7 @@ export const faTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'هنگام آپلود فایل خطایی رخ داد.',
     restoringTitle:
       'در بازیابی "{{title}}" خطایی رخ داد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.',
+    revertingDocument: 'هنگام بازگرداندن این سند مشکلی پیش آمد.',
     tokenInvalidOrExpired: 'توکن شما نامعتبر یا منقضی شده است.',
     tokenNotProvided: 'توکن ارسال نشده است.',
     unableToCopy: 'امکان کپی کردن وجود ندارد.',

@@ -121,6 +121,7 @@ export const esTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocurrió un problema al subir el archivo.',
     restoringTitle:
       'Hubo un error al restaurar {{title}}. Por favor, verifique su conexión e intente nuevamente.',
+    revertingDocument: 'Hubo un problema al revertir este documento.',
     tokenInvalidOrExpired: 'El token es inválido o ya expiró.',
     tokenNotProvided: 'Token no proporcionado.',
     unableToCopy: 'No se puede copiar.',

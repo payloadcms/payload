@@ -121,6 +121,7 @@ export const viTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Lỗi - Đã xảy ra vấn để khi tải lên file sau.',
     restoringTitle:
       'Đã xảy ra lỗi trong quá trình khôi phục {{title}}. Vui lòng kiểm tra kết nối của bạn và thử lại.',
+    revertingDocument: 'Đã có vấn đề khi hoàn tác tài liệu này.',
     tokenInvalidOrExpired: 'Lỗi - Token không hợp lệ hoặc đã hết hạn.',
     tokenNotProvided: 'Không có token được cung cấp.',
     unableToCopy: 'Không thể sao chép.',

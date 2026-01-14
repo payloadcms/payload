@@ -123,6 +123,7 @@ export const roTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'A existat o problemă în timpul încărcării fișierului.',
     restoringTitle:
       'A survenit o eroare în timpul restaurării {{title}}. Verificați conexiunea și încercați din nou.',
+    revertingDocument: 'A apărut o problemă în timp ce se revenea la acest document.',
     tokenInvalidOrExpired: 'Tokenul este invalid sau a expirat.',
     tokenNotProvided: 'Tokenul nu a fost furnizat.',
     unableToCopy: 'Imposibil de copiat.',

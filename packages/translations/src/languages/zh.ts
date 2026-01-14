@@ -116,6 +116,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     previewing: '预览该文档时出现了问题。',
     problemUploadingFile: '上传文件时出现了问题。',
     restoringTitle: '恢复 {{title}} 时出现错误。请检查您的连接并重试。',
+    revertingDocument: '在还原此文档时出现了问题。',
     tokenInvalidOrExpired: '令牌无效或已过期。',
     tokenNotProvided: '未提供令牌。',
     unableToCopy: '无法复制。',

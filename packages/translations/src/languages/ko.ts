@@ -121,6 +121,7 @@ export const koTranslations: DefaultTranslationsObject = {
     problemUploadingFile: '파일 업로드 중에 문제가 발생했습니다.',
     restoringTitle:
       '{{title}} 복원 중 오류가 발생했습니다. 연결 상태를 확인하고 다시 시도해 주세요.',
+    revertingDocument: '이 문서를 되돌리는 동안 문제가 발생했습니다.',
     tokenInvalidOrExpired: '토큰이 유효하지 않거나 만료되었습니다.',
     tokenNotProvided: '토큰이 제공되지 않았습니다.',
     unableToCopy: '복사할 수 없습니다.',
