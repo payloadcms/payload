@@ -18,7 +18,7 @@ export default buildConfig({
   kv: redisKVAdapter({
     // Redis connection URL. Defaults to process.env.REDIS_URL
     redisURL: 'redis://localhost:6379',
-    // Optional prefix for Redis keys to isolate the store. Defaults to 'payload-kv'
+    // Optional prefix for Redis keys to isolate the store. Defaults to 'payload-kv:'
     keyPrefix: 'kv-storage',
     // Optional TTL configuration for automatic expiration by key prefix
     ttl: [
