@@ -82,6 +82,12 @@ export default buildConfigWithDefaults({
       file,
     })
 
+    const videoDoc = await payload.create({
+      collection: 'media',
+      data: {},
+      file: await getFileByPath(path.resolve(dirname, '../uploads/flower.mp4')),
+    })
+
     await payload.create({
       collection: 'payload-contractor-app-content',
       data: {
@@ -108,7 +114,7 @@ export default buildConfigWithDefaults({
         section2: {
           heading: 'Features',
           description: richTextData,
-          // media: mediaDoc.id, // this is a video
+          media: videoDoc.id,
           howItWorksUrl: 'https://example.com/how-it-works',
         },
         section3: {
