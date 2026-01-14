@@ -45,10 +45,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Github Releases To Discord
+
+      - name: Announce Release - Releases Channel
         uses: SethCohen/github-releases-to-discord@v1.19.0
         with:
           webhook_url: ${{ secrets.DISCORD_RELEASES_WEBHOOK_URL }}
+          color: '16777215'
+          username: 'Payload Releases'
+          avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
+
+      - name: Announce Release - General Channel
+        uses: SethCohen/github-releases-to-discord@v1.19.0
+        with:
+          webhook_url: ${{ secrets.DISCORD_GENERAL_WEBHOOK_URL }}
           color: '16777215'
           username: 'Payload Releases'
           avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
