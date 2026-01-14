@@ -2,11 +2,28 @@ import type { KVAdapter, KVAdapterResult, KVStoreValue } from 'payload'
 
 import { Redis } from 'ioredis'
 
+/**
+ * Configuration rule for automatic TTL-based cache invalidation.
+ */
 export type TTLRule = {
+  /**
+   * Key prefix to match against (e.g., 'session:', 'cache:').
+   *
+   * This prefix is checked against the full Redis key (including any adapter-level
+   * `keyPrefix`) before that `keyPrefix` is applied to the user-provided key.
+   */
   prefix: string
+  /**
+   * Time-to-live in seconds for keys matching this rule.
+   *
+   * Must be a positive integer; non-positive values disable TTL for the matching keys.
+   */
   ttl: number
 }
 
+/**
+ * Collection of TTL rules mapping Redis key prefixes to their respective TTLs.
+ */
 export type TTLConfig = TTLRule[]
 
 export class RedisKVAdapter implements KVAdapter {
