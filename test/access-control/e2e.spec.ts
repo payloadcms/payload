@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { formatAdminURL, wait  } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -30,6 +30,7 @@ import {
   authSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
+  differentiatedTrashSlug,
   disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
@@ -39,6 +40,8 @@ import {
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
+  regularUserEmail,
+  restrictedTrashSlug,
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   slug,
@@ -57,7 +60,8 @@ const dirname = path.dirname(filename)
  * Repeat all above for globals
  */
 
-const { beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe, afterEach, afterAll } = test
+
 let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
   let page: Page
@@ -77,6 +81,8 @@ describe('Access Control', () => {
   let context: BrowserContext
   let authFields: AdminUrlUtil
   let blocksFieldAccessUrl: AdminUrlUtil
+  let differentiatedTrashUrl: AdminUrlUtil
+  let restrictedTrashUrl: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -96,6 +102,8 @@ describe('Access Control', () => {
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
     authFields = new AdminUrlUtil(serverURL, authSlug)
     blocksFieldAccessUrl = new AdminUrlUtil(serverURL, blocksFieldAccessSlug)
+    differentiatedTrashUrl = new AdminUrlUtil(serverURL, differentiatedTrashSlug)
+    restrictedTrashUrl = new AdminUrlUtil(serverURL, restrictedTrashSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -1799,6 +1807,297 @@ describe('Access Control', () => {
       await expect(
         page.locator('#field-tabReadOnlyTest__tabReadOnlyBlockRefs__0__title'),
       ).toBeDisabled()
+    })
+  })
+
+  describe('trash access control', () => {
+    describe('differentiated trash collection - regular users can trash but not permanently delete', () => {
+      const createdDocIds: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdDocIds) {
+          await payload.delete({
+            collection: differentiatedTrashSlug,
+            id,
+            trash: true,
+          })
+        }
+        createdDocIds.length = 0
+      })
+
+      describe('as admin user', () => {
+        beforeAll(async () => {
+          await login({
+            data: {
+              email: devUser.email,
+              password: devUser.password,
+            },
+            page,
+            serverURL,
+          })
+        })
+
+        test('should show delete button in doc controls dropdown', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await expect(page.locator('.popup__content #action-delete')).toBeVisible()
+        })
+
+        test('should show delete forever checkbox in delete modal', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await expect(page.locator('#delete-forever')).toBeVisible()
+        })
+
+        test('should allow permanently deleting a doc', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+          })
+          // Don't add to createdDocIds since we're permanently deleting it
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('#delete-forever').check()
+          await page.locator('.delete-document #confirm-action').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Test Doc For Perma Delete" successfully deleted.`,
+          )
+        })
+      })
+
+      describe('as regular user', () => {
+        beforeAll(async () => {
+          await login({
+            page,
+            serverURL,
+            data: {
+              email: regularUserEmail,
+              password: 'test',
+            },
+          })
+        })
+
+        afterAll(async () => {
+          // Log back in as admin for other tests
+          await login({ page, serverURL })
+        })
+
+        test('should show delete button in doc controls dropdown', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await expect(page.locator('.popup__content #action-delete')).toBeVisible()
+        })
+
+        test('should hide delete forever checkbox in delete modal since user cannot permanently delete', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          // The checkbox should be hidden for regular users
+          // because they can trash but not permanently delete
+          await expect(page.locator('#delete-forever')).toBeHidden()
+        })
+
+        test('should allow trashing a doc', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc For Trash', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('.delete-document #confirm-action').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Test Doc For Trash" moved to trash.`,
+          )
+        })
+      })
+    })
+
+    describe('restricted trash collection - only admins can delete', () => {
+      const createdDocIds: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdDocIds) {
+          await payload.delete({
+            collection: restrictedTrashSlug,
+            id,
+            trash: true,
+          })
+        }
+        createdDocIds.length = 0
+      })
+
+      describe('as admin user', () => {
+        beforeAll(async () => {
+          await login({ page, serverURL })
+        })
+
+        test('should show delete button in doc controls dropdown', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await expect(page.locator('.popup__content #action-delete')).toBeVisible()
+        })
+
+        test('should show delete forever checkbox in delete modal', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await expect(page.locator('#delete-forever')).toBeVisible()
+        })
+
+        test('should allow trashing a doc', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc For Trash', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('.delete-document #confirm-action').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Restricted Trash "Test Doc For Trash" moved to trash.`,
+          )
+        })
+
+        test('should allow permanently deleting a doc', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+          })
+          // Don't add to createdDocIds since we're permanently deleting it
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('#delete-forever').check()
+          await page.locator('.delete-document #confirm-action').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Restricted Trash "Test Doc For Perma Delete" successfully deleted.`,
+          )
+        })
+      })
+
+      describe('as regular user', () => {
+        beforeAll(async () => {
+          await login({
+            page,
+            serverURL,
+            data: {
+              email: regularUserEmail,
+              password: 'test',
+            },
+          })
+        })
+
+        afterAll(async () => {
+          // Log back in as admin for other tests
+          await login({ page, serverURL })
+        })
+
+        test('should not show doc controls popup when user has no delete access', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          const deleteButton = page.locator('.popup__content #action-delete')
+          await expect(deleteButton).toBeHidden()
+        })
+      })
     })
   })
 })
