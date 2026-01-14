@@ -3576,6 +3576,199 @@ describe('Fields', () => {
 
       expect(query.docs).toBeDefined()
     })
+
+    describe('querying', () => {
+      if (payload.db.name !== 'mongoose') {
+        return
+      }
+
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ collection: 'relationship-fields', id })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should query non-polymorphic hasMany - equals', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+      })
+
+      it('should query polymorphic hasMany - equals', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+      })
+
+      it('should query non-polymorphic hasMany - not_equals', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const text3 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 3' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text3.id],
+            relationship: { relationTo: 'text-fields', value: text3.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+      })
+
+      it('should query polymorphic hasMany - not_equals', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: text2.id }],
+            relationship: { relationTo: 'text-fields', value: text2.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+      })
+    })
   })
 
   describe('clearable fields - exists', () => {
