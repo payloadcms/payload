@@ -81,8 +81,18 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
   dashboard: {
+    addButton: 'Adicionar +',
     addWidget: 'Adicionar Widget',
     deleteWidget: 'Excluir widget {{id}}',
+    discardConfirmLabel: 'Descartar',
+    discardMessage:
+      'Você tem alterações não salvas no layout do seu painel. Tem certeza de que deseja descartá-las?',
+    discardTitle: 'Descartar alterações?',
+    editDashboard: 'Editar Painel',
+    editingDashboard: 'Edição do Painel',
+    noItems:
+      'Não existem widgets no seu painel. Você pode adicioná-los a partir do menu "Painel", localizado na barra superior.',
+    resetLayout: 'Redefinir Layout',
     searchWidgets: 'Pesquisar widgets...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'O documento com o ID {{id}} não pôde ser encontrado. Ele pode ter sido deletado ou nunca ter existido, ou você pode não ter acesso a ele.',
     emailOrPasswordIncorrect: 'O email ou senha fornecido está incorreto.',
+    failedToResetLayout: 'Falha ao redefinir layout.',
+    failedToSaveLayout: 'Falha ao salvar o layout.',
     followingFieldsInvalid_one: 'O campo a seguir está inválido:',
     followingFieldsInvalid_other: 'Os campos a seguir estão inválidos:',
     incorrectCollection: 'Coleção Incorreta',
