@@ -154,12 +154,13 @@ describe('Localization', () => {
           locale: spanishLocale,
         })
 
-        const retrievedInEnglish = await payload.findByID({
+        const retrievedInSpanish = await payload.findByID({
           id: post1.id,
           collection,
+          locale: spanishLocale,
         })
 
-        expect(retrievedInEnglish.title).toEqual(englishTitle)
+        expect(retrievedInSpanish.title).toEqual(englishTitle)
 
         const localizedFallback: any = await payload.findByID({
           id: post1.id,
@@ -4142,6 +4143,68 @@ describe('Localization', () => {
           expect(unpublishedDocument._status!.en).toBe('draft')
           expect(unpublishedDocument._status!.es).toBe('draft')
         })
+      })
+    })
+
+    describe('fallback behavior', () => {
+      let allFieldsPostWithLocalizedData: any
+
+      beforeAll(async () => {
+        allFieldsPostWithLocalizedData = await payload.create({
+          collection: allFieldsLocalizedSlug,
+          data: {
+            text: englishTitle,
+          },
+          locale: englishLocale,
+        })
+
+        await payload.update({
+          id: allFieldsPostWithLocalizedData.id,
+          collection: allFieldsLocalizedSlug,
+          data: {
+            text: spanishTitle,
+          },
+          locale: spanishLocale,
+        })
+      })
+
+      it('should fallback to english translation when empty', async () => {
+        await payload.update({
+          id: allFieldsPostWithLocalizedData.id,
+          collection: allFieldsLocalizedSlug,
+          data: {
+            text: '',
+          },
+          locale: spanishLocale,
+        })
+
+        const localizedFallback: any = await payload.findByID({
+          id: allFieldsPostWithLocalizedData.id,
+          collection: allFieldsLocalizedSlug,
+          locale: 'all',
+        })
+
+        expect(localizedFallback.text.en).toEqual(englishTitle)
+        expect(localizedFallback.text.es).toEqual('')
+
+        const retrievedInSpanish = await payload.findByID({
+          id: allFieldsPostWithLocalizedData.id,
+          collection: allFieldsLocalizedSlug,
+          locale: spanishLocale,
+        })
+
+        expect(retrievedInSpanish.text).toEqual(englishTitle)
+      })
+
+      it('should respect fallback none', async () => {
+        const localizedFallback: any = await payload.findByID({
+          id: allFieldsPostWithLocalizedData.id,
+          collection: allFieldsLocalizedSlug,
+          locale: portugueseLocale,
+          fallbackLocale: 'none',
+        })
+
+        expect(localizedFallback.text).not.toBeDefined()
       })
     })
   })
