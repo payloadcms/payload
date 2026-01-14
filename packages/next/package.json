@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.70.0",
+  "version": "3.71.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -32,8 +32,8 @@
       "default": "./src/index.js"
     },
     "./withPayload": {
-      "import": "./src/withPayload/withPayload.ts",
-      "default": "./src/withPayload/withPayload.ts"
+      "import": "./src/withPayload/withPayload.js",
+      "default": "./src/withPayload/withPayload.js"
     },
     "./layouts": {
       "import": "./src/exports/layouts.ts",

@@ -328,6 +328,7 @@ export const createOperation = async <
         payload,
         publishSpecificLocale,
         req,
+        returning: false,
       })
     }
 

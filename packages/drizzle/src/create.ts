@@ -19,6 +19,7 @@ export const create: Create = async function create(
 
   const result = await upsertRow({
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: collection.flattenedFields,
