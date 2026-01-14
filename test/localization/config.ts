@@ -406,9 +406,6 @@ export default buildConfigWithDefaults({
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
   ],
-  experimental: {
-    localizeStatus: true,
-  },
   globals: [
     {
       fields: [
