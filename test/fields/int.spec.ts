@@ -3578,10 +3578,6 @@ describe('Fields', () => {
     })
 
     describe('querying', () => {
-      if (payload.db.name !== 'mongoose') {
-        return
-      }
-
       const createdIDs: (number | string)[] = []
 
       afterEach(async () => {
@@ -3592,6 +3588,10 @@ describe('Fields', () => {
       })
 
       it('should query non-polymorphic hasMany - equals', async () => {
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
@@ -3625,6 +3625,10 @@ describe('Fields', () => {
       })
 
       it('should query polymorphic hasMany - equals', async () => {
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
@@ -3665,6 +3669,10 @@ describe('Fields', () => {
       })
 
       it('should query non-polymorphic hasMany - not_equals', async () => {
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
@@ -3714,6 +3722,10 @@ describe('Fields', () => {
       })
 
       it('should query polymorphic hasMany - not_equals', async () => {
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
