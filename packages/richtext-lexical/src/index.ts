@@ -1,6 +1,7 @@
 import type { GenericLanguages, GenericTranslationsObject } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
+import type { FieldHookArgs } from 'payload'
 
 import {
   afterChangeTraverseFields,
@@ -9,7 +10,6 @@ import {
   beforeValidateTraverseFields,
   checkDependencies,
   deepMergeSimple,
-  type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -611,6 +611,117 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             return value
           },
         ],
+        beforeDuplicate: [
+          async (args: FieldHookArgs) => {
+            const {
+              collection,
+              context: _context,
+              data,
+              global,
+              indexPath,
+              path,
+              req,
+              schemaPath,
+            } = args
+
+            const { value } = args
+
+            if (
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeDuplicate?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
+            ) {
+              return value
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const context: any = _context
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            if (!value) {
+              return value
+            }
+
+            recurseNodeTree({
+              nodeIDMap,
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const beforeDuplicateHooks =
+                finalSanitizedEditorConfig.features.nodeHooks?.beforeDuplicate
+              const beforeDuplicateHooksForNode = beforeDuplicateHooks?.get(node.type)
+              if (beforeDuplicateHooksForNode) {
+                for (const hook of beforeDuplicateHooksForNode) {
+                  const originalNode = node
+                  node = await hook({
+                    context,
+                    node,
+                    originalNode,
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
+                    req,
+                  })
+                  nodeIDMap[id] = node
+                }
+              }
+
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields?.get(node.type)
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, req })
+                if (subFields?.length) {
+                  const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData?.get(
+                    node.type,
+                  )
+                  const nodeSiblingData = subFieldDataFn?.({ node, req }) ?? {}
+
+                  for (const subField of subFields) {
+                    if (
+                      'name' in subField &&
+                      subField.name &&
+                      'hooks' in subField &&
+                      subField.hooks?.beforeDuplicate?.length
+                    ) {
+                      const fieldValue = nodeSiblingData[subField.name]
+                      const hookArgs: FieldHookArgs = {
+                        blockData: nodeSiblingData,
+                        collection,
+                        context,
+                        data: data ?? {},
+                        field: subField,
+                        global,
+                        indexPath,
+                        path,
+                        previousSiblingDoc: nodeSiblingData,
+                        previousValue: fieldValue,
+                        req,
+                        schemaPath,
+                        siblingData: nodeSiblingData,
+                        siblingDocWithLocales: nodeSiblingData,
+                        siblingFields: subFields,
+                        value: fieldValue,
+                      }
+
+                      let hookResult = fieldValue
+                      for (const hook of subField.hooks.beforeDuplicate) {
+                        hookResult = await hook(hookArgs)
+                      }
+
+                      if (typeof hookResult !== 'undefined') {
+                        nodeSiblingData[subField.name] = hookResult
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            return value
+          },
+        ],
         beforeValidate: [
           async (args) => {
             const {
@@ -694,7 +805,10 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             /**
              * Now that the maps for all hooks are set up, we can run the validate hook
              */
-            if (!finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size) {
+            if (
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
+            ) {
               return value
             }
             const nodeIDMap: {
@@ -709,7 +823,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
               const beforeValidateHooks =
-                finalSanitizedEditorConfig.features.nodeHooks.beforeValidate
+                finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate
               const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
               if (beforeValidateHooksForNode) {
                 for (const hook of beforeValidateHooksForNode) {
@@ -745,7 +859,9 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
 
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
+                // Use the current node data as siblingDoc, since beforeValidate hooks may need
+                // to access current field values (e.g., for tabs fields that have been edited)
+                const nodeSiblingDoc = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
