@@ -122,7 +122,7 @@ export const allDatabaseAdapters = {
     idType: 'uuid',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
+    }
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -159,4 +159,14 @@ export function generateDatabaseAdapter(dbAdapter: keyof typeof allDatabaseAdapt
 
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
+}
+
+export type DatabaseAdapterType = keyof typeof allDatabaseAdapters
+
+export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
+  const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
+  if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
+    return dbAdapter
+  }
+  return 'mongodb'
 }

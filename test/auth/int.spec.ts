@@ -118,6 +118,75 @@ describe('Auth', () => {
       expect(data.token).toBeDefined()
     })
 
+    it('should not lose data if login throws', async () => {
+      const testEmail = 'transaction-rollback-test@example.com'
+      const testPassword = 'test123'
+      const originalArrayData = [{ info: 'original-value-1' }, { info: 'original-value-2' }]
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          roles: ['user'],
+          email: testEmail,
+          password: testPassword,
+          loginMetadata: originalArrayData,
+        },
+      })
+
+      const userBefore: any = await payload.findByID({
+        collection: slug,
+        id: testUser.id,
+      })
+      const sessionCountBefore = userBefore.sessions?.length || 0
+
+      const originalHooks = payload.config.collections.find((c) => c.slug === slug)?.hooks
+        ?.beforeLogin
+      const throwingHook = () => {
+        throw new Error('Simulated failure after session added')
+      }
+
+      const collection = payload.config.collections.find((c) => c.slug === slug)
+      if (collection) {
+        collection.hooks = collection.hooks || {}
+        collection.hooks.beforeLogin = [throwingHook]
+      }
+
+      const res = await restClient.POST(`/${slug}/login`, {
+        body: JSON.stringify({
+          email: testEmail,
+          password: testPassword,
+        }),
+      })
+      const data: any = await res.json()
+      expect(data.errors).toHaveLength(1)
+
+      // Restore original hooks
+      if (collection) {
+        if (originalHooks) {
+          collection.hooks.beforeLogin = originalHooks
+        } else if (collection.hooks) {
+          collection.hooks.beforeLogin = []
+        }
+      }
+
+      const userAfter: any = await payload.findByID({
+        collection: slug,
+        id: testUser.id,
+      })
+
+      expect(userAfter.loginMetadata).toHaveLength(2)
+      expect(userAfter.loginMetadata).toMatchObject(originalArrayData)
+
+      const sessionCountAfter = userAfter.sessions?.length || 0
+      expect(sessionCountAfter).toBe(sessionCountBefore)
+
+      // Clean up
+      await payload.delete({
+        collection: slug,
+        id: testUser.id,
+      })
+    })
+
     describe('logged in', () => {
       let token: string | undefined
       let loggedInUser: undefined | User
@@ -924,15 +993,15 @@ describe('Auth', () => {
         },
       })
 
-      await expect(async () => {
-        await payload.login({
+      await expect(
+        payload.login({
           collection: partialDisableLocalStrategiesSlug,
           data: {
             email: devUser.email,
             password: devUser.password,
           },
-        })
-      }).rejects.toThrow('You are not allowed to perform this action.')
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
     it('rest - should prevent login', async () => {
@@ -1199,6 +1268,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1211,6 +1281,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1236,6 +1307,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1244,6 +1316,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1252,6 +1325,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe(
             'This user is locked due to having too many failed login attempts.',
           )
@@ -1270,15 +1344,11 @@ describe('Auth', () => {
 
         expect(userQuery.docs[0]).toBeDefined()
 
-        if (userQuery.docs[0]) {
-          const user = userQuery.docs[0]
-          expect(user.loginAttempts).toBe(2)
-          expect(user.lockUntil).toBeDefined()
-          expect(typeof user.lockUntil).toBe('string')
-          if (typeof user.lockUntil === 'string') {
-            expect(new Date(user.lockUntil).getTime()).toBeGreaterThan(now.getTime())
-          }
-        }
+        const user = userQuery.docs[0]
+        expect(user!.loginAttempts).toBe(2)
+        expect(user!.lockUntil).toBeDefined()
+        expect(typeof user!.lockUntil).toBe('string')
+        expect(new Date(user!.lockUntil!).getTime()).toBeGreaterThan(now.getTime())
       })
 
       it('should allow force unlocking of a user', async () => {
@@ -1303,11 +1373,9 @@ describe('Auth', () => {
 
         expect(userQuery.docs[0]).toBeDefined()
 
-        if (userQuery.docs[0]) {
-          const user = userQuery.docs[0]
-          expect(user.loginAttempts).toBe(0)
-          expect(user.lockUntil).toBeNull()
-        }
+        const user = userQuery.docs[0]
+        expect(user!.loginAttempts).toBe(0)
+        expect(user!.lockUntil).toBeNull()
       })
     })
   })

@@ -769,6 +769,108 @@ describe('@payloadcms/plugin-mcp', () => {
     )
   })
 
+  describe('Drafts', () => {
+    it('should include draft parameter in find tool schema', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+      const findTool = json.result.tools.find((t: any) => t.name === 'findPosts')
+
+      expect(findTool).toBeDefined()
+      expect(findTool.inputSchema.properties.draft).toBeDefined()
+      expect(findTool.inputSchema.properties.draft.type).toBe('boolean')
+      expect(findTool.inputSchema.properties.draft.description).toContain('versions')
+    })
+
+    it('should find draft documents when draft is true', async () => {
+      // Create a published post
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Published Title',
+          content: 'Published Content',
+        },
+      })
+
+      // Update with draft content (not published)
+      await payload.update({
+        id: post.id,
+        collection: 'posts',
+        data: {
+          title: 'Draft Title',
+          content: 'Draft Content',
+        },
+        draft: true,
+      })
+
+      const apiKey = await getApiKey()
+
+      // Find without draft flag - should get published version
+      const publishedResponse = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+            },
+          },
+        }),
+      })
+
+      const publishedJson = await parseStreamResponse(publishedResponse)
+      expect(publishedJson.result.content[0].text).toContain(
+        '"title": "Published Title (MCP Hook Override)"',
+      )
+
+      // Find with draft: true - should get draft version
+      const draftResponse = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: post.id,
+              draft: true,
+            },
+          },
+        }),
+      })
+
+      const draftJson = await parseStreamResponse(draftResponse)
+      expect(draftJson.result.content[0].text).toContain(
+        '"title": "Draft Title (MCP Hook Override)"',
+      )
+    })
+  })
+
   it('should find site-settings global', async () => {
     const apiKey = await getApiKey(false, false, true)
     const response = await restClient.POST('/mcp', {

@@ -6,7 +6,9 @@ import type { DrizzleAdapter } from '../types.js'
 
 type HandleUpsertErrorArgs = {
   adapter: DrizzleAdapter
+  collectionSlug?: string
   error: unknown
+  globalSlug?: string
   id?: number | string
   req?: Partial<PayloadRequest>
   tableName: string
@@ -20,7 +22,9 @@ type HandleUpsertErrorArgs = {
 export const handleUpsertError = ({
   id,
   adapter,
+  collectionSlug,
   error: caughtError,
+  globalSlug,
   req,
   tableName,
 }: HandleUpsertErrorArgs): never => {
@@ -72,12 +76,14 @@ export const handleUpsertError = ({
     throw new ValidationError(
       {
         id,
+        collection: collectionSlug,
         errors: [
           {
             message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
             path: fieldName,
           },
         ],
+        global: globalSlug,
         req,
       },
       req?.t,
