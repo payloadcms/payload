@@ -1,7 +1,9 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { Config, Endpoint } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types/index.js'
 
 import { createAddressesCollection } from './collections/addresses/createAddressesCollection.js'
@@ -315,6 +317,33 @@ export const ecommercePlugin =
       translations,
       incomingConfig.i18n?.translations,
     )
+
+    /**
+     * Merge plugin translations
+     */
+    if (!incomingConfig.i18n) {
+      incomingConfig.i18n = {}
+    }
+    Object.entries(translations).forEach(([locale, pluginI18nObject]) => {
+      const typedLocale = locale as AcceptedLanguages
+      if (!incomingConfig.i18n!.translations) {
+        incomingConfig.i18n!.translations = {}
+      }
+      if (!(typedLocale in incomingConfig.i18n!.translations)) {
+        incomingConfig.i18n!.translations[typedLocale] = {}
+      }
+      if (!('plugin-ecommerce' in incomingConfig.i18n!.translations[typedLocale]!)) {
+        ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+          'plugin-ecommerce'
+        ] = {} as PluginDefaultTranslationsObject['plugin-ecommerce']
+      }
+
+      ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+        'plugin-ecommerce'
+      ] = {
+        ...pluginI18nObject.translations['plugin-ecommerce'],
+      }
+    })
 
     if (!incomingConfig.typescript) {
       incomingConfig.typescript = {}
