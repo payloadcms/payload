@@ -1,38 +1,10 @@
 import type { CollectionConfig, FilterOptions } from 'payload'
 
-type MediaFilterOption = {
-  field: string
-  mimeType: string
-  type: 'block' | 'collection'
-}
-
-export const mediaFilterOptions = ({ mimeType, field, type }: MediaFilterOption): FilterOptions => {
-  return async ({ blockData, data, relationTo, req }) => {
-    let media
-
-    if (
-      (type === 'collection' && data?.[`${field}`] && typeof data?.[`${field}`] === 'string') ||
-      (type === 'block' && blockData?.[`${field}`] && typeof blockData?.[`${field}`] === 'string')
-    ) {
-      const result = await req.payload.findByID({
-        collection: 'media',
-        id: type === 'collection' ? data[`${field}`] : blockData[`${field}`],
-      })
-      media = result
-    }
-
-    if (media?.mimeType?.includes(mimeType)) {
-      return true
-    }
-
-    if (relationTo === 'media') {
-      return {
-        mimeType: {
-          contains: mimeType,
-        },
-      }
-    }
-    return false
+export const filterByMimeType = (mimeType: string): FilterOptions => {
+  return {
+    mimeType: {
+      contains: mimeType,
+    },
   }
 }
 
@@ -93,11 +65,7 @@ export const ContractorAppContent: CollectionConfig = {
           type: 'upload',
           relationTo: 'media',
           required: true,
-          filterOptions: mediaFilterOptions({
-            mimeType: 'image',
-            field: 'image',
-            type: 'collection',
-          }),
+          filterOptions: filterByMimeType('image'),
         },
         // {
         //   name: 'action',
@@ -136,11 +104,7 @@ export const ContractorAppContent: CollectionConfig = {
               relationTo: 'media',
               required: true,
               hasMany: false,
-              filterOptions: mediaFilterOptions({
-                mimeType: 'image',
-                field: 'brandImage',
-                type: 'collection',
-              }),
+              filterOptions: filterByMimeType('image'),
             },
           ],
         },
@@ -170,11 +134,7 @@ export const ContractorAppContent: CollectionConfig = {
           type: 'upload',
           relationTo: 'media',
           required: false,
-          filterOptions: mediaFilterOptions({
-            mimeType: 'video',
-            field: 'image',
-            type: 'collection',
-          }),
+          filterOptions: filterByMimeType('video/mp4'),
         },
         {
           name: 'howItWorksUrl',
@@ -219,11 +179,7 @@ export const ContractorAppContent: CollectionConfig = {
           type: 'upload',
           relationTo: 'media',
           required: true,
-          filterOptions: mediaFilterOptions({
-            mimeType: 'image',
-            field: 'image',
-            type: 'collection',
-          }),
+          filterOptions: filterByMimeType('image'),
         },
       ],
     },
@@ -259,11 +215,7 @@ export const ContractorAppContent: CollectionConfig = {
               type: 'upload',
               relationTo: 'media',
               required: true,
-              filterOptions: mediaFilterOptions({
-                mimeType: 'image',
-                field: 'testimonialImage',
-                type: 'collection',
-              }),
+              filterOptions: filterByMimeType('image'),
             },
           ],
         },
@@ -314,11 +266,7 @@ export const ContractorAppContent: CollectionConfig = {
               type: 'upload',
               relationTo: 'media',
               required: true,
-              filterOptions: mediaFilterOptions({
-                mimeType: 'image',
-                field: 'stepImage',
-                type: 'collection',
-              }),
+              filterOptions: filterByMimeType('image'),
             },
           ],
         },
@@ -370,11 +318,7 @@ export const ContractorAppContent: CollectionConfig = {
               type: 'upload',
               relationTo: 'media',
               required: true,
-              filterOptions: mediaFilterOptions({
-                mimeType: 'image',
-                field: 'teamMemberImage',
-                type: 'collection',
-              }),
+              filterOptions: filterByMimeType('image'),
             },
             {
               name: 'teamMemberAddress',
