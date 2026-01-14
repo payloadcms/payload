@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     media: Media;
+    'payload-contractor-app-content': PayloadContractorAppContent;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'payload-contractor-app-content': PayloadContractorAppContentSelect<false> | PayloadContractorAppContentSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -86,7 +88,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {
@@ -127,7 +129,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
   content?: {
     root: {
@@ -152,7 +154,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -193,10 +195,158 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-contractor-app-content".
+ */
+export interface PayloadContractorAppContent {
+  id: string;
+  title: string;
+  heroBanner: {
+    heading: string;
+    description: string;
+    image: string | Media;
+  };
+  section1: {
+    heading: string;
+    brands: {
+      brandImage: string | Media;
+      id?: string | null;
+    }[];
+  };
+  section2: {
+    heading: string;
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    media?: (string | null) | Media;
+    howItWorksUrl?: string | null;
+  };
+  section3: {
+    heading: string;
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    media: string | Media;
+  };
+  section4: {
+    testimonials: {
+      testimonialTitle: string;
+      testimonialDescription: {
+        root: {
+          type: string;
+          children: {
+            type: any;
+            version: number;
+            [k: string]: unknown;
+          }[];
+          direction: ('ltr' | 'rtl') | null;
+          format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+          indent: number;
+          version: number;
+        };
+        [k: string]: unknown;
+      };
+      testimonialImage: string | Media;
+      id?: string | null;
+    }[];
+  };
+  section5: {
+    heading: string;
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    steps: {
+      stepTitle: string;
+      stepDescription: {
+        root: {
+          type: string;
+          children: {
+            type: any;
+            version: number;
+            [k: string]: unknown;
+          }[];
+          direction: ('ltr' | 'rtl') | null;
+          format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+          indent: number;
+          version: number;
+        };
+        [k: string]: unknown;
+      };
+      stepImage: string | Media;
+      id?: string | null;
+    }[];
+  };
+  section6: {
+    heading: string;
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    team: {
+      teamMemberName: string;
+      teamMemberPosition: string;
+      teamMemberImage: string | Media;
+      teamMemberAddress: string;
+      teamMemberPhone: string;
+      teamMemberEmail: string;
+      id?: string | null;
+    }[];
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -213,7 +363,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -237,24 +387,28 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'payload-contractor-app-content';
+        value: string | PayloadContractorAppContent;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -264,10 +418,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -287,7 +441,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -356,6 +510,91 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-contractor-app-content_select".
+ */
+export interface PayloadContractorAppContentSelect<T extends boolean = true> {
+  title?: T;
+  heroBanner?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        image?: T;
+      };
+  section1?:
+    | T
+    | {
+        heading?: T;
+        brands?:
+          | T
+          | {
+              brandImage?: T;
+              id?: T;
+            };
+      };
+  section2?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        media?: T;
+        howItWorksUrl?: T;
+      };
+  section3?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        media?: T;
+      };
+  section4?:
+    | T
+    | {
+        testimonials?:
+          | T
+          | {
+              testimonialTitle?: T;
+              testimonialDescription?: T;
+              testimonialImage?: T;
+              id?: T;
+            };
+      };
+  section5?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        steps?:
+          | T
+          | {
+              stepTitle?: T;
+              stepDescription?: T;
+              stepImage?: T;
+              id?: T;
+            };
+      };
+  section6?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        team?:
+          | T
+          | {
+              teamMemberName?: T;
+              teamMemberPosition?: T;
+              teamMemberImage?: T;
+              teamMemberAddress?: T;
+              teamMemberPhone?: T;
+              teamMemberEmail?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -421,7 +660,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: number;
+  id: string;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -446,6 +685,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
