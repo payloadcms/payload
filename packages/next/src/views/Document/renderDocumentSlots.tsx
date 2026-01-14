@@ -211,7 +211,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     collectionConfig,
     data: {},
     req,
-  })
+  }) // Note: hasTrashPermission and hasDeletePermission not needed here
 
   return renderDocumentSlots({
     id,

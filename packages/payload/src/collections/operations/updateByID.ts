@@ -133,7 +133,8 @@ export const updateByIDOperation = async <
       data.deletedAt != null
 
     if (isTrashAttempt && !overrideAccess) {
-      const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      // Pass data so access function can check data.deletedAt to know it's a trash attempt
+      const deleteAccessResult = await executeAccess({ data, req }, collectionConfig.access.delete)
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 

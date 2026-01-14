@@ -13,6 +13,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -55,6 +56,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
+  const { hasDeletePermission, hasTrashPermission } = useDocumentInfo()
   const { setModified } = useForm()
   const router = useRouter()
   const { i18n, t } = useTranslation()
@@ -73,42 +75,43 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const handleDelete = useCallback(async () => {
     setModified(false)
 
+    // Determine whether to permanently delete or trash based on permissions:
+    // - If trash is disabled, always permanently delete
+    // - If user only has trash permission (no delete), always trash
+    // - If user has delete permission, respect the deletePermanently checkbox
+    const shouldPermanentlyDelete =
+      !collectionConfig.trash || !hasTrashPermission || (hasDeletePermission && deletePermanently)
+
     try {
       const url = formatAdminURL({
         apiRoute: api,
         path: `/${collectionSlug}/${id}`,
       })
-      const res =
-        deletePermanently || !collectionConfig.trash
-          ? await requests.delete(url, {
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
-            })
-          : await requests.patch(url, {
-              body: JSON.stringify({
-                deletedAt: new Date().toISOString(),
-              }),
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
-            })
+      const res = shouldPermanentlyDelete
+        ? await requests.delete(url, {
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
+        : await requests.patch(url, {
+            body: JSON.stringify({
+              deletedAt: new Date().toISOString(),
+            }),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
 
       const json = await res.json()
 
       if (res.status < 400) {
         toast.success(
-          t(
-            deletePermanently || !collectionConfig.trash
-              ? 'general:titleDeleted'
-              : 'general:titleTrashed',
-            {
-              label: getTranslation(singularLabel, i18n),
-              title,
-            },
-          ) || json.message,
+          t(shouldPermanentlyDelete ? 'general:titleDeleted' : 'general:titleTrashed', {
+            label: getTranslation(singularLabel, i18n),
+            title,
+          }) || json.message,
         )
 
         if (redirectAfterDelete) {
@@ -137,7 +140,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   }, [
     deletePermanently,
     setModified,
-
+    hasDeletePermission,
+    hasTrashPermission,
     api,
     collectionSlug,
     id,
@@ -172,14 +176,18 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 elements={{
                   '1': ({ children }) => <strong>{children}</strong>,
                 }}
-                i18nKey={collectionConfig.trash ? 'general:aboutToTrash' : 'general:aboutToDelete'}
+                i18nKey={
+                  collectionConfig.trash && hasTrashPermission
+                    ? 'general:aboutToTrash'
+                    : 'general:aboutToDelete'
+                }
                 t={t}
                 variables={{
                   label: getTranslation(singularLabel, i18n),
                   title: titleFromProps || title || id,
                 }}
               />
-              {collectionConfig.trash && (
+              {collectionConfig.trash && hasTrashPermission && hasDeletePermission && (
                 <div className={`${baseClass}__checkbox`}>
                   <CheckboxInput
                     checked={deletePermanently}

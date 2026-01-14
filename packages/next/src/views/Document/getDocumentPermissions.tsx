@@ -24,13 +24,17 @@ export const getDocumentPermissions = async (args: {
   req: PayloadRequest
 }): Promise<{
   docPermissions: SanitizedDocumentPermissions
+  hasDeletePermission: boolean
   hasPublishPermission: boolean
   hasSavePermission: boolean
+  hasTrashPermission: boolean
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
   let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
+  let hasTrashPermission = false
+  let hasDeletePermission = false
 
   if (collectionConfig) {
     try {
@@ -61,6 +65,47 @@ export const getDocumentPermissions = async (args: {
           })
         ).update
       }
+
+      // When trash is enabled, compute separate permissions for trashing vs permanently deleting
+      // This follows the same pattern as publish permission:
+      // - hasPublishPermission checks UPDATE access with data._status: 'published'
+      // - hasTrashPermission checks DELETE access with data.deletedAt set (trash attempt)
+      // - hasDeletePermission checks DELETE access without data.deletedAt (permanent delete)
+      if (collectionConfig.trash) {
+        // Check if user can trash (soft delete) - simulates a trash attempt by passing deletedAt
+        hasTrashPermission = (
+          await docAccessOperation({
+            id,
+            collection: {
+              config: collectionConfig,
+            },
+            data: {
+              ...data,
+              deletedAt: new Date().toISOString(),
+            },
+            req,
+          })
+        ).delete
+
+        // Check if user can permanently delete - simulates permanent delete (no deletedAt in data)
+        hasDeletePermission = (
+          await docAccessOperation({
+            id,
+            collection: {
+              config: collectionConfig,
+            },
+            data: {
+              ...data,
+              deletedAt: undefined,
+            },
+            req,
+          })
+        ).delete
+      } else {
+        // When trash is not enabled, delete permission is straightforward
+        hasDeletePermission = 'delete' in docPermissions ? Boolean(docPermissions.delete) : false
+        hasTrashPermission = false
+      }
     } catch (err) {
       logError({ err, payload: req.payload })
     }
@@ -86,6 +131,10 @@ export const getDocumentPermissions = async (args: {
           })
         ).update
       }
+
+      // Globals don't support trash
+      hasDeletePermission = false
+      hasTrashPermission = false
     } catch (err) {
       logError({ err, payload: req.payload })
     }
@@ -104,7 +153,9 @@ export const getDocumentPermissions = async (args: {
 
   return {
     docPermissions,
+    hasDeletePermission,
     hasPublishPermission,
     hasSavePermission,
+    hasTrashPermission,
   }
 }
