@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-vue",
-  "version": "3.70.0",
+  "version": "3.71.1",
   "description": "The official Vue SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {

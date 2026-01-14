@@ -138,6 +138,10 @@ export interface Config {
       subTaskFails: WorkflowSubTaskFails;
       longRunning: WorkflowLongRunning;
       parallelTask: WorkflowParallelTask;
+      exclusiveConcurrency: WorkflowExclusiveConcurrency;
+      noConcurrency: WorkflowNoConcurrency;
+      queueSpecificConcurrency: WorkflowQueueSpecificConcurrency;
+      supersedesConcurrency: WorkflowSupersedesConcurrency;
     };
   };
 }
@@ -358,6 +362,10 @@ export interface PayloadJob {
         | 'subTaskFails'
         | 'longRunning'
         | 'parallelTask'
+        | 'exclusiveConcurrency'
+        | 'noConcurrency'
+        | 'queueSpecificConcurrency'
+        | 'supersedesConcurrency'
       )
     | null;
   taskSlug?:
@@ -380,6 +388,10 @@ export interface PayloadJob {
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -524,6 +536,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -882,6 +895,46 @@ export interface WorkflowParallelTask {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowExclusiveConcurrency".
+ */
+export interface WorkflowExclusiveConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowNoConcurrency".
+ */
+export interface WorkflowNoConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowQueueSpecificConcurrency".
+ */
+export interface WorkflowQueueSpecificConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSupersedesConcurrency".
+ */
+export interface WorkflowSupersedesConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -890,6 +943,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

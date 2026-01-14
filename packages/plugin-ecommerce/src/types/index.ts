@@ -1,6 +1,7 @@
 import type {
   Access,
   CollectionConfig,
+  CollectionSlug,
   DefaultDocumentIDType,
   Endpoint,
   Field,
@@ -10,6 +11,7 @@ import type {
   PopulateType,
   SelectType,
   TypedCollection,
+  TypedUser,
   Where,
 } from 'payload'
 import type React from 'react'
@@ -23,7 +25,11 @@ export type CollectionOverride = (args: {
 }) => CollectionConfig | Promise<CollectionConfig>
 
 export type CartItem = {
-  id: DefaultDocumentIDType
+  /**
+   * The ID of the cart item. Array item IDs are always strings in Payload,
+   * regardless of the database adapter's default ID type.
+   */
+  id: string
   product: DefaultDocumentIDType | TypedCollection['products']
   quantity: number
   variant?: DefaultDocumentIDType | TypedCollection['variants']
@@ -500,6 +506,37 @@ export type CustomersConfig = {
   slug: string
 }
 
+/**
+ * Arguments for the cart item matcher function.
+ */
+export type CartItemMatcherArgs = {
+  /** The existing cart item to compare against */
+  existingItem: {
+    [key: string]: unknown
+    /**
+     * The ID of the cart item. Array item IDs are always strings in Payload,
+     * regardless of the database adapter's default ID type.
+     */
+    id?: string
+    product: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+    quantity: number
+    variant?: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+  }
+  /** The new item being added */
+  newItem: {
+    [key: string]: unknown
+    product: DefaultDocumentIDType
+    quantity?: number
+    variant?: DefaultDocumentIDType
+  }
+}
+
+/**
+ * Function to determine if two cart items should be considered the same.
+ * When items match, their quantities are combined instead of creating separate entries.
+ */
+export type CartItemMatcher = (args: CartItemMatcherArgs) => boolean
+
 export type CartsConfig = {
   /**
    * Allow guest (unauthenticated) users to create carts.
@@ -507,6 +544,26 @@ export type CartsConfig = {
    * Defaults to true.
    */
   allowGuestCarts?: boolean
+  /**
+   * Custom function to determine if two cart items should be considered the same.
+   * When items match, their quantities are combined instead of creating separate entries.
+   *
+   * Use this to add custom uniqueness criteria beyond product and variant IDs.
+   *
+   * @default defaultCartItemMatcher (matches by product and variant ID only)
+   *
+   * @example
+   * ```ts
+   * cartItemMatcher: ({ existingItem, newItem }) => {
+   *   // Match by product, variant, AND custom delivery option
+   *   const productMatch = existingItem.product === newItem.product
+   *   const variantMatch = existingItem.variant === newItem.variant
+   *   const deliveryMatch = existingItem.deliveryOption === newItem.deliveryOption
+   *   return productMatch && variantMatch && deliveryMatch
+   * }
+   * ```
+   */
+  cartItemMatcher?: CartItemMatcher
   cartsCollectionOverride?: CollectionOverride
 }
 
@@ -582,12 +639,12 @@ export type CollectionSlugMap = {
  *  access: {
  *    isAdmin: ({ req }) => checkRole(['admin'], req.user),
  *    isAuthenticated: ({ req }) => !!req.user,
+ *    isCustomer: ({ req }) => req.user && !checkRole(['admin'], req.user),
  *    isDocumentOwner: ({ req }) => {
  *      if (!req.user) return false
  *      return { customer: { equals: req.user.id } }
  *    },
  *    adminOnlyFieldAccess: ({ req }) => checkRole(['admin'], req.user),
- *    customerOnlyFieldAccess: ({ req }) => !!req.user,
  *    adminOrPublishedStatus: ({ req }) => {
  *      if (checkRole(['admin'], req.user)) return true
  *      return { _status: { equals: 'published' } }
@@ -605,9 +662,10 @@ export type AccessConfig = {
    */
   adminOrPublishedStatus: Access
   /**
+   * @deprecated Will be removed in v4. Use `isCustomer` instead.
    * Limited to customers only, specifically for Field level access control.
    */
-  customerOnlyFieldAccess: FieldAccess
+  customerOnlyFieldAccess?: FieldAccess
   /**
    * Checks if the user is an admin.
    * @returns true if admin, false otherwise
@@ -618,6 +676,15 @@ export type AccessConfig = {
    * @returns true if authenticated, false otherwise
    */
   isAuthenticated?: Access
+  /**
+   * Checks if the user is a customer (authenticated but not an admin).
+   * Used internally to auto-assign customer ID when creating addresses.
+   * @returns true if user is a non-admin customer, false otherwise
+   *
+   * @example
+   * isCustomer: ({ req }) => req.user && !checkRole(['admin'], req.user)
+   */
+  isCustomer?: FieldAccess
   /**
    * Checks if the user owns the document being accessed.
    * Typically returns a Where query to filter by customer field.
@@ -706,8 +773,11 @@ export type EcommercePluginConfig = {
   transactions?: boolean | TransactionsConfig
 }
 
+export type SanitizedAccessConfig = Pick<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'> &
+  Required<Omit<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'>>
+
 export type SanitizedEcommercePluginConfig = {
-  access: Required<AccessConfig>
+  access: SanitizedAccessConfig
   addresses: { addressFields: Field[] } & Omit<AddressesConfig, 'addressFields'>
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
@@ -753,20 +823,48 @@ type APIProps = {
   serverURL?: string
 }
 
+/**
+ * Memoized configuration object exposed via the useEcommerce hook.
+ * Contains collection slugs and API settings for building URLs and queries.
+ */
+export type EcommerceConfig = {
+  /**
+   * The slug for the addresses collection.
+   */
+  addressesSlug: CollectionSlug
+  /**
+   * API configuration including the base route.
+   */
+  api: {
+    /**
+     * The base API route, e.g. '/api'.
+     */
+    apiRoute: string
+  }
+  /**
+   * The slug for the carts collection.
+   */
+  cartsSlug: CollectionSlug
+  /**
+   * The slug for the customers collection.
+   */
+  customersSlug: CollectionSlug
+}
+
 export type ContextProps = {
   /**
    * The slug for the addresses collection.
    *
    * Defaults to 'addresses'.
    */
-  addressesSlug?: string
+  addressesSlug?: CollectionSlug
   api?: APIProps
   /**
    * The slug for the carts collection.
    *
    * Defaults to 'carts'.
    */
-  cartsSlug?: string
+  cartsSlug?: CollectionSlug
   children?: React.ReactNode
   /**
    * The configuration for currencies used in the ecommerce context.
@@ -778,7 +876,7 @@ export type ContextProps = {
    *
    * Defaults to 'users'.
    */
-  customersSlug?: string
+  customersSlug?: CollectionSlug
   /**
    * Enable debug mode for the ecommerce context. This will log additional information to the console.
    * Defaults to false.
@@ -838,6 +936,17 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    */
   clearCart: () => Promise<void>
   /**
+   * Clears all ecommerce session data including cart, addresses, and user state.
+   * Should be called when a user logs out.
+   * This also clears localStorage cart data when syncLocalStorage is enabled.
+   */
+  clearSession: () => void
+  /**
+   * Memoized configuration object containing collection slugs and API settings.
+   * Use this to build URLs and queries with the correct collection slugs.
+   */
+  config: EcommerceConfig
+  /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.
    * It requires the payment method ID and any necessary payment data.
@@ -859,14 +968,16 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    */
   currency: Currency
   /**
-   * Decrement an item in the cart by its index ID.
+   * Decrement an item in the cart by its array item ID.
    * If quantity reaches 0, the item will be removed from the cart.
+   * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  decrementItem: (item: DefaultDocumentIDType) => Promise<void>
+  decrementItem: (item: string) => Promise<void>
   /**
-   * Increment an item in the cart by its index ID.
+   * Increment an item in the cart by its array item ID.
+   * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  incrementItem: (item: DefaultDocumentIDType) => Promise<void>
+  incrementItem: (item: string) => Promise<void>
   /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.
@@ -881,11 +992,45 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Useful for disabling buttons and preventing race conditions.
    */
   isLoading: boolean
+  /**
+   * Merges items from a source cart into a target cart.
+   * Useful for merging a guest cart into a user's existing cart after login.
+   *
+   * @param targetCartID - The ID of the cart to merge items into
+   * @param sourceCartID - The ID of the cart to merge items from
+   * @param sourceSecret - The secret for the source cart (required for guest carts)
+   * @returns The merged cart
+   */
+  mergeCart: (
+    targetCartID: DefaultDocumentIDType,
+    sourceCartID: DefaultDocumentIDType,
+    sourceSecret?: string,
+  ) => Promise<T['carts'] | void>
+  /**
+   * Called after a successful login to handle cart state.
+   * If a guest cart exists, it will be merged with the user's existing cart
+   * or assigned to the user if they have no cart.
+   * Cart secrets are cleared as authenticated users don't need them.
+   *
+   * @returns Promise that resolves when cart state is properly set up for the user.
+   */
+  onLogin: () => Promise<void>
+  /**
+   * Called during logout to clear all ecommerce session data.
+   * Clears cart, addresses, user state, and localStorage cart data.
+   * This is an alias for clearSession() but named for semantic clarity.
+   */
+  onLogout: () => void
   paymentMethods: PaymentAdapterClient[]
   /**
-   * Remove an item from the cart by its index ID.
+   * Refresh the cart.
    */
-  removeItem: (item: DefaultDocumentIDType) => Promise<void>
+  refreshCart: () => Promise<void>
+  /**
+   * Remove an item from the cart by its array item ID.
+   * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
+   */
+  removeItem: (item: string) => Promise<void>
   /**
    * The name of the currently selected payment method.
    * This is used to determine which payment method to use when initiating a payment.
@@ -900,4 +1045,8 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Update an address by providing the data and the ID.
    */
   updateAddress: (addressID: DefaultDocumentIDType, data: Partial<T['addresses']>) => Promise<void>
+  /**
+   * The current authenticated user, or null if not logged in.
+   */
+  user: null | TypedUser
 }

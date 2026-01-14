@@ -92,6 +92,7 @@ export const ecommercePlugin =
           inventory: sanitizedPluginConfig.inventory,
           productsSlug: collectionSlugMap.products,
           variantOptionsSlug: collectionSlugMap.variantOptions,
+          variantTypesSlug: collectionSlugMap.variantTypes,
         })
 
         const variants =
@@ -164,6 +165,7 @@ export const ecommercePlugin =
         const defaultCartsCollection = createCartsCollection({
           access: accessConfig,
           allowGuestCarts: cartsConfig.allowGuestCarts,
+          cartItemMatcher: cartsConfig.cartItemMatcher,
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
           enableVariants: Boolean(productsConfig.variants),
@@ -344,6 +346,25 @@ export {
   createVariantTypesCollection,
 }
 
+export { addItem } from './collections/carts/operations/addItem.js'
+export { clearCart } from './collections/carts/operations/clearCart.js'
+export { defaultCartItemMatcher } from './collections/carts/operations/defaultCartItemMatcher.js'
+export { removeItem } from './collections/carts/operations/removeItem.js'
+export { isNumericOperator } from './collections/carts/operations/types.js'
+export type {
+  AddItemArgs,
+  CartItemData,
+  CartItemMatcher,
+  CartItemMatcherArgs,
+  CartOperationResult,
+  ClearCartArgs,
+  FieldWithOperator,
+  NewCartItem,
+  NumericOperator,
+  RemoveItemArgs,
+  UpdateItemArgs,
+} from './collections/carts/operations/types.js'
+export { updateItem } from './collections/carts/operations/updateItem.js'
 export { EUR, GBP, USD } from './currencies/index.js'
 export { amountField } from './fields/amountField.js'
 export { currencyField } from './fields/currencyField.js'
